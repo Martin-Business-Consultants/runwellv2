@@ -1,0 +1,19 @@
+<% @page_title = "Advertising" %>
+
+<% content_for :header do %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title">Advertising</h1>
+    <% if @links.size > 1 %>
+      <div class="filters">
+        <%= render "layouts/shared/quick_filter", title: "Account…", param: :account, current: @link.customer_id,
+              options: @links.map { [ it.label, it.customer_id ] } %>
+      </div>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none"><%= @link.label %> · <%= @link.formatted_customer_id %></p>
+    <% end %>
+    <%= render "google_ads/reports/report", report: @report %>
+  </div>
+</section>

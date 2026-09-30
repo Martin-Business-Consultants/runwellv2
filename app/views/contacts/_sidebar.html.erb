@@ -1,0 +1,36 @@
+<%# locals: (client:, contact:) %>
+<%# Beside a contact's form: who else is at the client, and what the two switches allow. %>
+<% others = client.contacts.active.ordered.where.not(id: contact.id).to_a %>
+<section class="settings__section">
+  <header>
+    <h2 class="divider">At <%= client.name %> <span class="txt-subtle"><%= others.size %></span></h2>
+  </header>
+  <ul class="settings__scrollable-list">
+    <% others.each do |other| %>
+      <%# herb:key other.id %>
+      <li class="flex align-center gap-half txt-small" data-filter-target="item">
+        <%= link_to other.name, edit_contact_path(other), class: "txt-ink overflow-ellipsis min-width" %>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <% if other.portal? %>
+          <%= status_tag "Portal" %>
+        <% end %>
+        <% if other.can_approve? %>
+          <%= status_tag "Can approve", highlight: true %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  <% if others.empty? %>
+    <p class="txt-subtle txt-small margin-none">No one else yet.</p>
+  <% end %>
+</section>
+
+<section class="settings__section">
+  <header>
+    <h2 class="divider">The two switches</h2>
+  </header>
+  <dl class="record-facts">
+    <dt>Portal</dt><dd>Signs in with an emailed link; sees the client’s shared work and documents, and sends requests.</dd>
+    <dt>Approve</dt><dd>Decides on agreements, in the portal or from an emailed approval link.</dd>
+  </dl>
+</section>

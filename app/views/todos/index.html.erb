@@ -1,0 +1,72 @@
+<% @page_title = term(:work) %>
+<% listed = CustomField.for("Todo").listed.to_a %>
+<% @body_class = "contained-scrolling" if @view == "board" %>
+
+<% content_for :index_filters do %>
+  <% unless @view == "board" %>
+    <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
+          options: [ [ "Open work", "open" ], [ "All work", "all" ] ] %>
+  <% end %>
+  <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
+        options: [ [ "Anyone", "any" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
+  <%= render "layouts/shared/quick_filter", title: "Engagement…", param: :engagement, current: @engagement,
+        options: [ [ "All engagements", "all" ] ] + Engagement.open.order(:ref).map { |engagement| [ "#{engagement.ref} #{engagement.title}", engagement.ref ] } %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view, extra_views: [ [ "board", "Board", "board" ] ] %>
+
+<% if @view == "board" %>
+  <%= render "todos/board/columns", board: @board %>
+<% elsif @view == "cards" %>
+  <section class="cards cards--grid">
+    <div class="cards__list">
+      <%= with_automatic_pagination :todos_cards, @page do %>
+        <% @todos.each do |todo| %>
+          <%# herb:key todo.id %>
+          <% overdue = todo.status != "done" && todo.due_on&.past? %>
+          <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo.engagement.ref,
+                context: todo.engagement.client.name,
+                meta: [ person_tag(todo.owner, fallback: "Unassigned"), ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
+                status: overdue ? "Overdue" : todo.status.humanize, highlight: todo.status == "done" %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+  <% if @todos.none? %>
+    <%= render "todos/blank" %>
+  <% end %>
+<% else %>
+  <section class="panel shadow center index-table">
+    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+      <thead>
+        <tr><th><%= term(:work) %></th><th><%= term(:engagement) %></th><th><%= term(:client) %></th><th>Owner</th><th>Due</th><th class="txt-align-center">Status</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+      </thead>
+      <tbody id="<%= pagination_frame_id_for(:todos_rows, @page.number) %>">
+        <% @todos.each do |todo| %>
+          <%# herb:key todo.id %>
+          <tr data-filter-target="item">
+            <td><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
+            <td class="txt-nowrap"><%= link_to todo.engagement.ref, todo.engagement, class: "txt-ink" %></td>
+            <td class="txt-subtle"><%= todo.engagement.client.name %></td>
+            <td class="txt-subtle"><%= render "todos/owner_picker", todo: todo %></td>
+            <td class="txt-nowrap">
+              <%= l(todo.due_on, format: :short) if todo.due_on %>
+              <% if todo.status != "done" && todo.due_on&.past? %>
+                <%= status_tag "Overdue" %>
+              <% end %>
+            </td>
+            <td class="txt-align-center"><%= render "todos/status_dot", todo: todo %></td>
+            <% listed.each do |field| %>
+              <%# herb:key field.id %>
+              <td class="txt-subtle"><%= custom_field_text(field, todo.custom_value(field)) %></td>
+            <% end %>
+            <%= render "layouts/shared/row_actions", name: todo.title, edit_path: edit_todo_path(todo), delete_path: todo_path(todo), todo: todo %>
+          </tr>
+        <% end %>
+        <%= table_next_page_row :todos_rows, @page, columns: 7 + listed.size %>
+      </tbody>
+    </table>
+    <% if @todos.none? %>
+      <%= render "todos/blank" %>
+    <% end %>
+  </section>
+<% end %>

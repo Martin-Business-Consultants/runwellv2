@@ -1,0 +1,41 @@
+/* The help page's hierarchy tree. Fizzy has none. */
+@layer components {
+  .help-tree,
+  .help-tree ul {
+    list-style: none;
+    margin: 0;
+    padding-inline-start: 0;
+  }
+
+  .help-tree ul {
+    border-inline-start: 1px solid var(--color-ink-lighter);
+    margin-inline-start: 0.6ch;
+    padding-inline-start: 2ch;
+  }
+
+  .help-tree li {
+    padding-block: 0.3em;
+  }
+
+  .help-steps {
+    counter-reset: step;
+    list-style: none;
+    margin: 0;
+    padding-inline-start: 0;
+
+    li {
+      counter-increment: step;
+      padding-block: 0.4em;
+      padding-inline-start: 2.2em;
+      position: relative;
+
+      &::before {
+        color: var(--color-ink-medium);
+        content: counter(step);
+        font-weight: 900;
+        inset-inline-start: 0;
+        position: absolute;
+      }
+    }
+  }
+}

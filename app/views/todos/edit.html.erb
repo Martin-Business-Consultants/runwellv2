@@ -1,0 +1,90 @@
+<% @page_title = "Edit #{@todo.title_was}" %>
+
+<% content_for :header do %>
+  <%= parent_page @todo.title_was, @todo %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "layouts/shared/errors", record: @todo %>
+
+    <%= form_with model: @todo, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+      <%= hidden_field_tag :from_edit, "1" %>
+
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">Title</span>
+        <%= form.text_field :title, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
+      </label>
+
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">Description</span>
+        <%= rich_text_field form, :description, staff: true %>
+      </label>
+
+      <div class="flex gap">
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Status</span>
+          <%= form.select :status, todo_status_options, {}, class: "input input--select full-width" %>
+        </label>
+
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Due</span>
+          <%= date_input form, :due_on, class: "input full-width" %>
+        </label>
+      </div>
+
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">Owner</span>
+        <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, class: "input input--select full-width" %>
+      </label>
+
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">Scope item</span>
+        <%= form.select :scope_item_id, @todo.engagement.agreed_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, class: "input input--select full-width" %>
+      </label>
+
+      <div class="flex align-center gap-half txt-align-start">
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :client_visible, class: "switch__input" %>
+          <span class="switch__btn"></span>
+        </label>
+        <%= form.label :client_visible, "Visible to the client in the portal", class: "txt-small" %>
+      </div>
+
+      <%= custom_field_inputs form, @todo %>
+
+      <button type="submit" class="btn btn--link center" data-form-target="submit">
+        <span>Save changes</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+
+      <%= link_to "Cancel and go back", todo_path(@todo), data: { form_target: "cancel" }, hidden: true %>
+    <% end %>
+
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @todo.engagement.client.name, @todo.engagement.client, class: "txt-link" %></dd>
+        <dt>Added</dt><dd><%= l @todo.created_at.to_date, format: :long %><%= " by #{@todo.created_by.display_name}" if @todo.created_by %></dd>
+        <% if @todo.completed_at %>
+          <dt>Done</dt><dd><%= l @todo.completed_at.to_date, format: :long %></dd>
+        <% end %>
+      </dl>
+    </section>
+
+    <% if can?(:delete_records) %>
+      <%= render "layouts/shared/confirm", trigger: "Remove this work", title: "Remove #{@todo.title_was}?",
+            body: "It comes off the engagement and the client’s portal. Its history stays.",
+            button: "Remove", path: todo_path(@todo) %>
+    <% end %>
+  </aside>
+</section>

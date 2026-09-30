@@ -1,0 +1,68 @@
+<% @page_title = "Appearance" %>
+<%= render "settings/header", current: :appearance %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <%= form_with model: @setting, url: settings_appearance_path, method: :patch, class: "flex flex-column gap", data: { controller: "appearance" } do |form| %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Theme</h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none">Where everyone starts. Anyone can still flip it with the sun and moon in the header; picking one here also resets yours.</p>
+        <%= render "settings/appearances/choices", form: form, attribute: :theme, choices: Setting::THEMES, current: @setting.theme,
+              icons: { "system" => "monitor", "light" => "sun", "dark" => "moon" } %>
+      </section>
+
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Colors</h2>
+        </header>
+        <%= render "settings/appearances/choices", form: form, attribute: :scheme, choices: Setting::SCHEMES, current: @setting.scheme, sample_class: "appearance-swatch" %>
+      </section>
+
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Corners</h2>
+        </header>
+        <%= render "settings/appearances/choices", form: form, attribute: :radius, choices: Setting::RADII, current: @setting.radius, sample_class: "appearance-corner" %>
+      </section>
+
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Font</h2>
+        </header>
+        <%= render "settings/appearances/choices", form: form, attribute: :font, choices: Setting::FONTS, current: @setting.font, sample_class: "appearance-font" %>
+      </section>
+    <% end %>
+  </div>
+
+  <div class="settings__panel panel shadow txt-align-start">
+    <% [ [ :logo, "Logo", "Shown in the header in place of the Runwell name. A wide PNG or SVG works best." ],
+         [ :favicon, "Favicon", "The icon in the browser tab. A square PNG, at least 64 pixels." ] ].each do |attribute, title, hint| %>
+      <%# herb:key attribute %>
+      <% file = @setting.public_send(attribute) %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider"><%= title %></h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none"><%= hint %></p>
+
+        <% if file.attached? %>
+          <div class="flex align-center gap">
+            <% upload_class = "appearance-upload appearance-upload--" + attribute.to_s %>
+            <%= image_tag rails_blob_path(file, disposition: :inline), alt: title, class: upload_class %>
+            <%= button_to "Remove", settings_appearance_path, method: :patch, params: { remove: attribute }, class: "btn txt-small txt-negative" %>
+          </div>
+        <% end %>
+
+        <%= form_with model: @setting, url: settings_appearance_path, method: :patch, multipart: true, data: { controller: "form" } do |form| %>
+          <label class="btn input--upload full-width txt-small">
+            <%= icon_tag "picture-add" %>
+            <span><%= file.attached? ? "Replace" : "Drop an image here or choose…" %></span>
+            <%= form.file_field attribute, accept: "image/png, image/svg+xml, image/jpeg, image/webp, image/x-icon", data: { action: "change->form#submit" } %>
+          </label>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</section>

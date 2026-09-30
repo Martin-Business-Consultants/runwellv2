@@ -1,0 +1,13 @@
+<% @page_title = @query ? "Search results for \"#{@query}\"" : "Search" %>
+
+<% content_for :header do %>
+  <%= parent_page "Home", root_path %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<div class="search-perma margin-block-start">
+  <%= render "searches/form", query_terms: @query, turbo_action: "advance", target_turbo_frame: "bar_content", cancel_path: root_path %>
+  <%= turbo_frame_tag "bar_content" do %>
+    <%= render "searches/results", results: @search.results, query: @query %>
+  <% end %>
+</div>

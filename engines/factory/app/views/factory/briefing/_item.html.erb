@@ -1,0 +1,18 @@
+<%# locals: (item:) %>
+<%= link_to todo_path(item.todo), class: "txt-ink txt-align-start flex align-center gap-half" do %>
+  <div class="min-width flex-item-grow">
+    <strong><%= item.todo.title %></strong>
+    <div class="txt-x-small txt-subtle">
+      <%= item.todo.engagement.ref %> · <%= item.todo.engagement.client.name %> ·
+      <% case item.state %>
+      <% when "failed" %>
+        every agent attempt failed<%= ": " + item.last_run.error.to_s.truncate(90) if item.last_run&.error.present? %>
+      <% when "review" %>
+        an agent finished; check it and mark it done
+      <% when "blocked" %>
+        queued for agents, but <%= item.readiness.problems.first.to_s.downcase_first %>
+      <% end %>
+    </div>
+  </div>
+  <%= factory_status_tag item.state %>
+<% end %>

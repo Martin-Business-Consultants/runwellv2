@@ -1,0 +1,16 @@
+@layer components {
+  /* Settings > Updates: a release's notes, and why an update failed. */
+  .release-notes {
+    max-block-size: 20rem;
+    overflow-y: auto;
+
+    p { margin-block: 0 0.5em; }
+  }
+
+  .upgrade-message {
+    color: var(--color-negative);
+    margin-block-start: 0.25em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+}

@@ -1,0 +1,101 @@
+#!/usr/bin/env ruby
+# A plain production install, no Docker: bundles, writes .env with fresh secrets, prepares the
+# database and assets. Run it once from a checkout of a release (docs/install.md).
+#
+#   bin/install --host runwell.example [--data-dir /var/lib/runwell] [--port 3000]
+#
+# Afterwards: bin/thrust bin/rails server (or the systemd unit in config/runwell.service),
+# then sign up at /signup. bin/update brings an install to a newer release.
+require "fileutils"
+require "securerandom"
+require "optparse"
+
+APP_ROOT = File.expand_path("..", __dir__)
+options = { host: nil, data_dir: "storage", port: "3000" }
+OptionParser.new do |parser|
+  parser.banner = "Usage: bin/install --host runwell.example [--data-dir DIR] [--port PORT]"
+  parser.on("--host HOST", "The address people will use (for links in email)") { options[:host] = it }
+  parser.on("--data-dir DIR", "Where the databases and files live (default: storage/ in the app)") { options[:data_dir] = it }
+  parser.on("--port PORT", "The port Puma listens on (default: 3000)") { options[:port] = it }
+end.parse!
+abort "Say where this install lives: bin/install --host runwell.example" if options[:host].to_s.empty?
+
+def system!(*args) = system(*args, exception: true)
+def step(title) = puts("\n== #{title} ==")
+
+FileUtils.chdir APP_ROOT do
+  env_file = File.join(APP_ROOT, ".env")
+
+  step "Checking Ruby"
+  wanted = File.read(".ruby-version").strip
+  puts "Ruby #{RUBY_VERSION} (this release was built with #{wanted})"
+
+  step "Installing gems (production only)"
+  system! "bundle", "config", "set", "--local", "deployment", "true"
+  system! "bundle", "config", "set", "--local", "without", "development test"
+  system! "bundle", "install"
+
+  if File.exist?(env_file)
+    step "Keeping the existing .env"
+  else
+    step "Writing .env with fresh secrets"
+    data_dir = File.expand_path(options[:data_dir], APP_ROOT)
+    File.write env_file, <<~ENV
+      # Runwell's settings for this install. Loaded by the systemd unit (EnvironmentFile) and by
+      # bin/update; for a one-off command: set -a; . ./.env; set +a; bin/rails ...
+      RAILS_ENV=production
+      APP_HOST=#{options[:host]}
+      PORT=#{options[:port]}
+      SOLID_QUEUE_IN_PUMA=true
+
+      # Databases and uploaded files, together.
+      RUNWELL_DATA_DIR=#{data_dir}
+
+      # Secrets. Losing these loses the sessions and every encrypted value (API keys); back them up.
+      SECRET_KEY_BASE=#{SecureRandom.hex(64)}
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=#{SecureRandom.alphanumeric(32)}
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=#{SecureRandom.alphanumeric(32)}
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=#{SecureRandom.alphanumeric(32)}
+
+      # Outbound mail: any SMTP server. Without SMTP_ADDRESS no mail is sent. (Or switch on the
+      # Outsend plugin in Settings and paste its key there instead.)
+      #SMTP_ADDRESS=smtp.example.com
+      #SMTP_PORT=587
+      #SMTP_USERNAME=
+      #SMTP_PASSWORD=
+      #MAIL_FROM=Runwell <no-reply@#{options[:host]}>
+
+      # Behind a proxy that terminates TLS (or with the Cloudflare plugin, nothing): ASSUME_SSL=true.
+      # For plain http on a private network: FORCE_SSL=false and APP_PROTOCOL=http.
+      #ASSUME_SSL=true
+      #FORCE_SSL=false
+      #APP_PROTOCOL=http
+
+      # Thruster can serve https itself when it can reach ports 80 and 443: set TLS_DOMAIN.
+      #TLS_DOMAIN=#{options[:host]}
+      #HTTP_PORT=80
+    ENV
+    File.chmod 0o600, env_file
+    FileUtils.mkdir_p data_dir
+  end
+
+  # The rest runs with the install's settings.
+  File.readlines(env_file).each do |line|
+    next if line.strip.empty? || line.start_with?("#")
+    key, value = line.strip.split("=", 2)
+    ENV[key] = value
+  end
+
+  step "Preparing the database"
+  system! "bin/rails", "db:prepare"
+
+  step "Compiling assets"
+  system! "bin/rails", "assets:precompile"
+
+  step "Done"
+  puts <<~TEXT
+    Start it:      set -a; . ./.env; set +a; bin/thrust bin/rails server
+    As a service:  copy config/runwell.service to /etc/systemd/system/ and edit the paths and user
+    Then open http://#{options[:host]}:#{options[:port]}/signup to make the first owner.
+  TEXT
+end

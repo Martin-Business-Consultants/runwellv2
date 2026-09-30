@@ -1,0 +1,92 @@
+<% @page_title = "#{@engagement.ref} #{@engagement.title}" %>
+<% tabs = [
+     record_tab("agreement", "Agreement", count: @engagement.agreement_versions.count),
+     record_tab("work", term(:work), count: @engagement.todos.open.count),
+     record_tab("commitments", "Commitments", count: @engagement.commitments.open.count),
+     record_tab("notes", "Notes", count: @engagement.notes.count),
+     record_tab("documents", "Documents", count: @engagement.documents.count)
+   ] + plugin_record_tabs(:engagement_panel) %>
+<% tab = current_record_tab(tabs, @engagement.agreed_items.any? ? "work" : "agreement") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+
+<% content_for :header do %>
+  <%= parent_page term(:engagement, count: 2), engagements_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions">
+        <%= link_to edit_engagement_path(@engagement), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+          <%= icon_tag "pencil" %>
+          <span>Edit</span>
+          <kbd class="hide-on-touch">E</kbd>
+        <% end %>
+      </div>
+    </div>
+    <section class="settings__section">
+      <% if (next_step = engagement_next_step(@engagement)) %>
+        <p class="engagement-next-step txt-small margin-none"><%= next_step %></p>
+      <% end %>
+
+      <% if @engagement.description.present? %>
+        <div class="txt-small"><%= rich_text @engagement.description %></div>
+      <% end %>
+
+      <% if @engagement.estimate_notes.present? %>
+        <div class="txt-small txt-subtle"><strong>Estimate notes (internal):</strong> <%= rich_text @engagement.estimate_notes %></div>
+      <% end %>
+    </section>
+
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "agreement" %>
+            <%= render "agreement_versions/section", engagement: @engagement %>
+          <% when "work" %>
+            <%= render "todos/section", engagement: @engagement, state: @work_state %>
+          <% when "commitments" %>
+            <%= render "commitments/section", subject: @engagement %>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @engagement %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @engagement %>
+          <% end %>
+          <% if plugin_partial %>
+            <%= render plugin_partial, engagement: @engagement %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.state == "approved" %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
+        <dt>Type</dt><dd><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></dd>
+        <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
+        <% if @engagement.closed? %>
+          <dt>Closed</dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>
+        <% end %>
+      </dl>
+      <%= render "custom_fields/values", record: @engagement %>
+    </section>
+
+    <%= render "events/timeline", subject: @engagement %>
+
+    <% if !@engagement.closed? && can?(:close_engagements) %>
+      <%= render "engagements/close", engagement: @engagement %>
+    <% end %>
+
+  </aside>
+</section>

@@ -1,0 +1,78 @@
+<%# locals: (report:) %>
+<%# The monthly advertising report, the same for staff and in the client portal. %>
+<% totals = report.totals %>
+<section class="settings__section flex flex-column gap">
+  <div class="filters flex flex-wrap align-center gap-half">
+    <%= render "layouts/shared/quick_filter", title: "Month…", param: :month, current: report.month.strftime("%Y-%m"),
+          options: report.available_months.map { |month| [ month == Date.current.beginning_of_month ? month.strftime("%B") + " so far" : month.strftime("%B %Y"), month.strftime("%Y-%m") ] } %>
+    <% if report.account&.blocked? %>
+      <%= status_tag "Stopped" %>
+      <span class="txt-small txt-negative"><%= report.account.explanation %></span>
+    <% end %>
+  </div>
+
+  <% if report.any? %>
+    <div class="ads-stats">
+      <% [ [ "Spend", :cost_cents, :money, true ], [ "Leads", :conversions, :decimal, false ], [ "Cost per lead", :cost_per_conversion_cents, :money, true ] ].each do |label, key, format, lower| %>
+        <%# herb:key key %>
+        <div class="ads-stat ads-stat--lead">
+          <span class="txt-small txt-subtle"><%= label %></span>
+          <span class="ads-stat__value"><%= ads_figure totals[key], format %></span>
+          <%= ads_change report, key, lower_is_better: lower, neutral: key == :cost_cents %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="ads-stats">
+      <% [ [ "Clicks", :clicks, :number, false ], [ "Impressions", :impressions, :number, false ], [ "Click-through rate", :click_through_rate, :percent, false ],
+           [ "Cost per click", :cost_per_click_cents, :money, true ], [ "Conversion rate", :conversion_rate, :percent, false ], [ "Impression share", :search_impression_share, :percent, false ] ].each do |label, key, format, lower| %>
+        <%# herb:key key %>
+        <div class="ads-stat">
+          <span class="txt-x-small txt-subtle"><%= label %></span>
+          <strong class="txt-large"><%= ads_figure totals[key], format %></strong>
+          <%= ads_change report, key, lower_is_better: lower %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="ads-charts">
+      <figure class="margin-none flex flex-column gap-half">
+        <figcaption><strong>What you spent</strong> <span class="txt-small txt-subtle">day by day, <%= report.month_name %></span></figcaption>
+        <%= ads_bar_chart report.series, value: :cost_cents, format: :money, name: "Spend by day" %>
+      </figure>
+      <figure class="margin-none flex flex-column gap-half">
+        <figcaption><strong>What it produced</strong> <span class="txt-small txt-subtle">leads, day by day</span></figcaption>
+        <%= ads_bar_chart report.series, value: :conversions, format: :decimal, name: "Leads by day" %>
+      </figure>
+      <figure class="margin-none flex flex-column gap-half">
+        <figcaption>
+          <strong>How the ads performed</strong>
+          <span class="ads-legend txt-x-small txt-subtle">
+            <span><span class="ads-legend__swatch ads-legend__swatch--primary"></span>Click-through rate</span>
+            <span><span class="ads-legend__swatch ads-legend__swatch--secondary"></span>Conversion rate</span>
+          </span>
+        </figcaption>
+        <%= ads_line_chart report.series, series: [ [ :click_through_rate, "primary" ], [ :conversion_rate, "secondary" ] ], name: "Click-through and conversion rate by day" %>
+      </figure>
+      <figure class="margin-none flex flex-column gap-half">
+        <figcaption><strong>How much of your market you reached</strong> <span class="txt-small txt-subtle">search impression share</span></figcaption>
+        <%= ads_line_chart report.series, series: [ [ :search_impression_share, "primary" ] ], name: "Impression share by day" %>
+      </figure>
+      <% trend = report.monthly_trend %>
+      <% if trend.size > 1 %>
+        <figure class="margin-none flex flex-column gap-half">
+          <figcaption><strong>Spend by month</strong></figcaption>
+          <%= ads_bar_chart trend, value: :cost_cents, format: :money, name: "Spend by month" %>
+        </figure>
+        <figure class="margin-none flex flex-column gap-half">
+          <figcaption><strong>Leads by month</strong></figcaption>
+          <%= ads_bar_chart trend, value: :conversions, format: :decimal, name: "Leads by month" %>
+        </figure>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="txt-subtle margin-none">No figures for <%= report.month_name %> yet. They arrive from Google overnight.</p>
+  <% end %>
+
+  <p class="txt-x-small txt-subtle margin-none">From Google Ads, updated nightly. Ad spend is paid to Google directly. A figure shown as “—” can’t be worked out, like cost per lead in a month without leads.</p>
+</section>

@@ -1,0 +1,154 @@
+<% @page_title = "How Runwell works" %>
+<% client, clients = term(:client).downcase, term(:client, count: 2).downcase %>
+<% engagement, engagements = term(:engagement).downcase, term(:engagement, count: 2).downcase %>
+<% scope_item, scope_items = term(:scope_item).downcase, term(:scope_item, count: 2).downcase %>
+<% work = term(:work).downcase %>
+<% types = Setting.current.enabled_labels.map { label_term(it).downcase.then { |name| (name.match?(/\A[aeiou]/) ? "an " : "a ") + name } }.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>
+
+<%= render "settings/header", current: :help %>
+
+<div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">What it is</h2>
+    </header>
+    <p class="txt-small txt-subtle">
+      This is Runwell <%= Runwell::VERSION %>.
+      <% if can?(:manage_settings) %>
+        <%= link_to "Updates", settings_updates_path, class: "txt-link" %>
+      <% end %>
+    </p>
+    <p>Runwell is the core of the agency’s project management. It answers five questions and nothing else:</p>
+    <ol>
+      <li><strong>Who do we work for, and who can say yes?</strong> <%= clients.upcase_first %> and their contacts.</li>
+      <li><strong>What did we agree?</strong> <%= engagements.upcase_first %> and their agreements.</li>
+      <li><strong>What is happening against it?</strong> Work, commitments, notes and history.</li>
+      <li><strong>What came in?</strong> Requests.</li>
+      <li><strong>What needs a person now?</strong> The home page.</li>
+    </ol>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">The hierarchy</h2>
+    </header>
+    <ul class="help-tree">
+      <li>
+        <strong><%= term(:client) %></strong> <span class="txt-subtle">who we work for</span>
+        <ul>
+          <li><strong>Contacts</strong> <span class="txt-subtle">the people there; some <em>can approve</em> agreements</span></li>
+          <li>
+            <strong><%= term(:engagement) %></strong> <span class="txt-subtle">what we agreed to do: <%= Setting.current.enabled_labels.map { "a " + label_term(it).downcase + " (" + Setting.current.label_prefix(it) + "-3)" }.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>, fixed scope or recurring</span>
+            <ul>
+              <li>
+                <strong>Agreement versions</strong> <span class="txt-subtle">the initial agreement, then change orders, revisions or add-ons</span>
+                <ul>
+                  <li>
+                    <strong><%= term(:scope_item, count: 2) %></strong> <span class="txt-subtle">each line the <%= client %> agrees to, with a price and a staff-only estimate</span>
+                    <ul>
+                      <li><strong><%= term(:work) %></strong> <span class="txt-subtle">approving adds one <%= work %> item per <%= scope_item %>; add more under it as you go. Each has an owner, a status and a due date</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li><strong>Other <%= term(:work).downcase %></strong> <span class="txt-subtle"><%= work.upcase_first %> on the <%= term(:engagement).downcase %> that isn’t one <%= scope_item %>, such as a quick fix or a request made into work</span></li>
+              <li><strong>Commitments</strong> <span class="txt-subtle">dated promises, ours or the <%= client %>’s</span></li>
+            </ul>
+          </li>
+          <li><strong>Commitments</strong> <span class="txt-subtle">promises that belong to the <%= client %> rather than one <%= engagement %></span></li>
+        </ul>
+      </li>
+      <li><strong>Requests</strong> <span class="txt-subtle">asks that come in from a <%= client %>, the portal, email or a call, before they are anything else</span></li>
+    </ul>
+    <p class="txt-small txt-subtle">Notes, documents and history hang off every level: <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:scope_item, count: 2).downcase %>, <%= term(:work).downcase %> and requests. Each page links up a level, and <kbd>Esc</kbd> takes you there.</p>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">How work flows</h2>
+    </header>
+    <ol class="help-steps">
+      <li><strong>A request comes in.</strong> A contact sends it from the portal, or you log it from an email or a call.</li>
+      <li><strong>You triage it.</strong> It becomes a new <%= engagement %>, a <%= scope_item %> on an open draft, a piece of work or a commitment, or it is dismissed with a reason.</li>
+      <li><strong>You draft the agreement.</strong> <%= scope_items.upcase_first %>, prices and the summary the <%= client %> will read.</li>
+      <li><strong>You send it.</strong> Sending takes a snapshot, fingerprints it and freezes it. Nothing sent ever changes.</li>
+      <li><strong>The <%= client %> decides.</strong> They approve or ask for changes from an emailed link, or you record their decision with evidence such as a forwarded email.</li>
+      <li><strong>Approval creates the work.</strong> Every approved <%= scope_item %> becomes <%= work %>, tracked on the <%= term(:work) %> table or board.</li>
+      <li><strong>Work moves through its statuses.</strong> Planned, In progress, In review, Blocked, Done. Click the colored circle on any row to change it, or the avatar to reassign. An AI assistant finishes into In review, and a person checks it and marks it Done.</li>
+      <li><strong>Changes are new versions.</strong> A change order (fixed scope) or a revision or add-on (recurring) goes through the same send and approve steps.</li>
+      <li><strong>You close the <%= engagement %></strong> when it’s done. Its agreement and history stay.</li>
+    </ol>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">How it’s different</h2>
+    </header>
+    <ul>
+      <li><strong>No invoicing, no timesheets.</strong> <%= scope_items.upcase_first %> carry the price the <%= client %> agrees to, but nothing is “billable”: everything is <%= types %>. Plugins add time tracking and invoicing (Settings → Plugins) for teams that want them.</li>
+      <li><strong>Agreements are frozen once sent.</strong> Nobody can edit what a <%= client %> saw. A change is a new version the <%= client %> approves again.</li>
+      <li><strong>State is derived, never typed in.</strong> Each <%= engagement %> is Draft, Sent, Changes requested, Approved or Closed because of what happened to its versions, not because someone picked it from a list.</li>
+      <li><strong>History is append-only.</strong> Every change of consequence is recorded with who did it and where it came from (the app, the portal, an email). Corrections are new entries.</li>
+      <li><strong><%= clients.upcase_first %> never have passwords.</strong> They sign in to the portal and approve agreements from signed links that expire.</li>
+      <li><strong>Internal estimates stay internal.</strong> <%= clients.upcase_first %> see the frozen snapshot they approved, never estimates or estimate notes.</li>
+      <li><strong>@mention a teammate</strong> in any note, description or request by typing <kbd>@</kbd>. They get it in Notifications (bottom left) and by email.</li>
+      <li><strong>Home is what needs you.</strong> Questions for you, requests to triage, agreements waiting on a <%= client %>, drafts ready to send, overdue and upcoming commitments, and blocked or overdue work.</li>
+    </ul>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Where things are</h2>
+    </header>
+    <ul>
+      <li><strong>Runwell</strong> (the logo) is home: what needs a person now.</li>
+      <li><strong><%= term(:client, count: 2) %></strong>, then each one’s contacts, <%= term(:engagement, count: 2).downcase %>, commitments, notes and history.</li>
+      <li><strong><%= term(:engagement, count: 2) %></strong>, showing approved, open ones by default. Switch the filter to see drafts, sent, changes requested or closed. Each one holds its agreement, scope, work and commitments.</li>
+      <li><strong><%= term(:work) %></strong>, as a table or a board, across every <%= term(:engagement).downcase %>.</li>
+      <li><strong>Commitments</strong>, open or resolved, ours or the <%= client %>’s.</li>
+      <li><strong>Requests</strong>, everything that came in and what it became.</li>
+      <li><strong>Search</strong> at the bottom of every page (<kbd>s</kbd>) finds <%= clients %>, contacts, <%= engagements %>, requests, work, commitments and notes. <kbd>/</kbd> in the top bar filters just the page you’re on.</li>
+      <li><strong>Add</strong> at the bottom right (<kbd>a</kbd>) is where notes and documents are added, to the record on screen or any other.</li>
+    </ul>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">What your <%= clients %> see</h2>
+    </header>
+    <ul>
+      <li><strong>Contacts with portal access</strong> sign in from an emailed link, with no password. They see the agreements they were sent, the <%= term(:work).downcase %> and documents you mark visible to the <%= client %>, and can send you requests.</li>
+      <li><strong>Contacts who can approve</strong> get the approve or request-changes link when you send an agreement.</li>
+      <li><strong>Everything else stays internal</strong>: notes, estimates, history, and any <%= term(:work).downcase %> or document not switched to visible.</li>
+    </ul>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Your AI assistant</h2>
+    </header>
+    <p class="txt-small">
+      Connect Claude or any MCP app (Settings → Connected apps), or install the command line with
+      <code class="txt-x-small">curl -fsSL <%= cli_install_url %> | sh</code> and <code class="txt-x-small">runwell login</code>.
+      It works as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with your role, and asks before anything reaches a <%= client %>.
+      On any piece of work, <kbd>c</kbd> or the ✦ button copies a brief your AI can work from.
+    </p>
+    <p class="txt-small margin-none">Routines to hand it, word for word:</p>
+    <ul class="help-tree txt-small">
+      <li>“Every morning, go through my Runwell briefing and tell me what needs me, most urgent first.”</li>
+      <li>“Triage the open requests: for each, suggest what it should become, and ask me before promoting any.”</li>
+      <li>“Find overdue work and commitments, and draft a note to each owner.”</li>
+      <li>“Before my call with <em><%= client %></em>, summarise everything that happened on their account since last week.”</li>
+      <li>“Check my in-progress work against the code and move what’s actually finished to In review, with a note saying how you know.”</li>
+      <li>“Read this email and log it as a request for the right <%= client %>.”</li>
+    </ul>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Keyboard shortcuts</h2>
+    </header>
+    <p class="txt-small txt-subtle">Press <kbd>?</kbd> anywhere for this list. Keys work when you’re not typing in a field; a pair like <kbd>g</kbd><kbd>c</kbd> is pressed one after the other.</p>
+    <%= render "layouts/shared/shortcut_list" %>
+  </section>
+</div>

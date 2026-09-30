@@ -1,0 +1,52 @@
+<%# locals: (todo:, draggable: nil) %>
+<%= todo_article_tag todo, class: "card", draggable: draggable ? "true" : nil, tabindex: 0, data: {
+      id: todo.id,
+      drag_and_drop_target: "item",
+      navigable_list_target: "item",
+      css_variable_counter_target: "item",
+      filter_target: "item",
+      action: "mouseenter->navigable-list#hoverSelect" } do %>
+  <div class="flex flex-column flex-item-grow max-inline-size">
+    <%= link_to todo_path(todo), draggable: false, class: "card__link", title: todo.title, data: { turbo_frame: "_top" } do %>
+      <span class="for-screen-reader"><%= todo.title %></span>
+    <% end %>
+
+    <header class="card__header">
+      <div class="card__board">
+        <div class="card__id">
+          <span class="for-screen-reader">Engagement</span>
+          <%= todo.engagement.ref %>
+        </div>
+        <div class="card__board-name">
+          <span class="overflow-ellipsis"><%= todo.engagement.client.name %></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="card__body justify-space-between">
+      <div class="card__content">
+        <h3 class="card__title overflow-line-clamp"><%= todo.title %></h3>
+      </div>
+
+      <% if todo.status == "done" && todo.completed_at %>
+        <div class="card__closed">
+          <span class="card__closed-title" data-text="Done">Done</span>
+          <strong class="card__closed-date"><%= todo.completed_at.strftime("%b %d, %Y") %></strong>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <footer class="card__footer flex gap-half">
+    <div class="card__meta">
+      <% if todo.due_on %>
+        <span class="card__meta-text card__meta-text--added">Due <%= l todo.due_on, format: :short %></span>
+      <% end %>
+      <% if todo.owner %>
+        <span class="card__meta-text card__meta-text--assignees overflow-ellipsis">
+          <%= person_tag todo.owner %>
+        </span>
+      <% end %>
+    </div>
+  </footer>
+<% end %>

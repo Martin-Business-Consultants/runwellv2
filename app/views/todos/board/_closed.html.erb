@@ -1,0 +1,14 @@
+<%# locals: (count:) %>
+<%= column_tag id: "done-todos", name: "Done", drop_url: columns_todo_drops_closure_path("__id__", todo_board_filters), class: "cards--closed",
+  card_color: "var(--color-card-complete)",
+  data: {
+    drag_and_strum_target: "container",
+    collapsible_columns_target: "column",
+    action: "focus->collapsible-columns#focusOnColumn"
+  } do %>
+  <header class="cards__header">
+    <%= render "todos/board/expander", title: "Done", count: count, column_id: "done-todos" %>
+    <%= render "todos/board/maximize", column_path: todos_column_path("done", todo_board_filters) %>
+  </header>
+  <%= column_frame_tag "done_cards", src: todos_column_path("done", todo_board_filters) %>
+<% end %>

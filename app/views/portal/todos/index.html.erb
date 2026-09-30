@@ -1,0 +1,34 @@
+<% @page_title = term(:work) %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<% if @todos.any? %>
+  <section class="settings">
+    <div class="settings__panel panel shadow">
+      <section class="settings__section">
+        <p class="txt-small txt-subtle margin-none">What we are working on for you across every agreement.</p>
+        <ul class="settings__scrollable-list">
+          <% @todos.each do |todo| %>
+            <%# herb:key todo.id %>
+            <li class="flex align-center gap-half">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= todo.title %></strong>
+                <div class="txt-x-small txt-subtle">
+                  <%= todo.engagement.ref %> <%= todo.engagement.title %><% if todo.due_on %> · due <%= l todo.due_on, format: :short %><% end %>
+                </div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <%= status_tag todo.status.humanize, highlight: todo.status == "done" %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    </div>
+  </section>
+<% else %>
+  <div class="panel panel--centered">
+    <div class="blank-slate">No work to show yet.</div>
+  </div>
+<% end %>

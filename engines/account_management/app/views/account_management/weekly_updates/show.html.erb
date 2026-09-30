@@ -1,0 +1,32 @@
+<% @page_title = "#{@update.user.display_name}: #{@update.label.downcase_first}" %>
+
+<% content_for :header do %>
+  <%= parent_page "Weekly updates", account_management_weekly_updates_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+    </div>
+    <div class="flex flex-wrap align-center gap-half txt-small">
+      <%= account_status_tag @update.sent? ? (@update.on_time? ? "on_time" : "late") : "draft" %>
+      <span class="txt-subtle"><%= @update.sent? ? "Sent #{l @update.sent_at, format: :short}" : "Due #{l @update.due_at, format: :short}" %></span>
+      <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+      <%= person_tag @update.user %>
+    </div>
+    <section class="settings__section">
+      <div class="txt-small"><%= rich_text @update.body %></div>
+    </section>
+  </div>
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <%= render "account_management/weekly_updates/sidebar", update: @update %>
+    <% if !@update.sent? && @update.user == Current.user %>
+      <section class="settings__section">
+        <%= link_to "Finish and send it", edit_account_management_weekly_update_path(@update), class: "btn btn--link txt-small center" %>
+      </section>
+    <% end %>
+    <%= render "events/timeline", subject: @update %>
+  </aside>
+</section>

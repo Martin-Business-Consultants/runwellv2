@@ -1,0 +1,12 @@
+<%# locals: (issue:) %>
+<li class="flex align-center gap-half" data-filter-target="item">
+  <%= link_to qa_issue_path(issue), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+    <strong><%= issue.title %></strong>
+    <div class="txt-x-small txt-subtle"><%= [ issue.client.name, ("found live" if issue.found_live), "#{time_ago_in_words(issue.created_at)} ago" ].compact.join(" · ") %></div>
+  <% end %>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <% if issue.assignee %>
+    <%= person_tag issue.assignee %>
+  <% end %>
+  <%= qa_status_tag issue.state %>
+</li>

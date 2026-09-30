@@ -1,0 +1,29 @@
+# The words the app uses for its core things. Settings > Names overrides any of them for
+# this install; the keys never change.
+en:
+  terms:
+    client:
+      one: "Client"
+      other: "Clients"
+    engagement:
+      one: "Engagement"
+      other: "Engagements"
+    scope_item:
+      one: "Scope item"
+      other: "Scope items"
+    work:
+      one: "Work"
+      other: "Work"
+    labels:
+      project:
+        one: "Project"
+        other: "Projects"
+        prefix: "P"
+      work_order:
+        one: "Work order"
+        other: "Work orders"
+        prefix: "WO"
+      service:
+        one: "Service"
+        other: "Services"
+        prefix: "S"

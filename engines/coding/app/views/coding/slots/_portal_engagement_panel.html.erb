@@ -1,0 +1,28 @@
+<%# locals: (engagement:) %>
+<%# What shipped: successful production deploys of repos the agency chose to share. %>
+<% repositories = Coding::Repository.for(engagement).select(&:share_deploys) %>
+<% deploys = Coding::Deploy.where(repository: repositories).succeeded.production.recent.limit(10).to_a.uniq(&:sha) %>
+<% if deploys.any? %>
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Shipped</h2>
+    </header>
+    <ul class="settings__scrollable-list">
+      <% deploys.each do |deploy| %>
+        <%# herb:key deploy.id %>
+        <li class="flex align-center gap-half txt-small">
+          <div class="txt-align-start overflow-ellipsis min-width">
+            <strong><%= l deploy.deployed_at.to_date, format: :long %></strong>
+            <% if deploy.description.present? %>
+              <div class="txt-x-small txt-subtle"><%= deploy.description %></div>
+            <% end %>
+          </div>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <% if deploy.url.present? %>
+            <%= link_to "View", deploy.url, class: "btn txt-x-small", target: "_blank", rel: "noopener" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

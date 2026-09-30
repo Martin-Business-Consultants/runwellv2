@@ -1,0 +1,512 @@
+#!/usr/bin/env ruby
+# runwell: Runwell from the command line, for people and for AI harnesses.
+#
+# Every command is a tool from the server (runwell tools), so this file never needs to change
+# when Runwell grows: `runwell list_clients`, `runwell create_work --engagement_ref P-3
+# --todo.title "Draft the sitemap"`. One file, the Ruby standard library only.
+#
+#   runwell login [URL]          sign in through the browser (--token rw_… for a personal token,
+#                                --read-only for access that can't change anything)
+#   runwell tools                what you can do, for your role
+#   runwell help <tool>          a tool's description and inputs (runwell help exit-codes)
+#   runwell <tool> [--key value] run one; dotted keys nest (--client.name Acme); @path reads a file
+#       --json | --human         JSON is the default when piped; --human forces text
+#       --ids-only | --count     just the records' ids, or how many there are
+#       --field a.b.c            one value (a.*.b maps over a list)
+#       --yes                    confirm something that reaches a client (after the person agrees)
+#   runwell doctor [--brief]     check the install, sign-in, identity and agent setup
+#   runwell update               get the latest CLI from this Runwell (and refresh the skill)
+#   runwell mcp [--read-only]    a stdio MCP server for desktop apps, forwarding to Runwell
+#   runwell agent setup          teach Claude Code (a skill and a startup check); print MCP setup
+#   runwell logout
+require "json"
+require "net/http"
+require "uri"
+require "securerandom"
+require "digest"
+require "base64"
+require "socket"
+require "fileutils"
+
+DEFAULT_URL = "__RUNWELL_URL__"
+CONFIG = File.join(ENV.fetch("XDG_CONFIG_HOME", File.join(Dir.home, ".config")), "runwell", "config.json")
+SKILL_PATH = File.join(Dir.home, ".claude", "skills", "runwell", "SKILL.md")
+CLAUDE_SETTINGS = File.join(Dir.home, ".claude", "settings.json")
+SKILL_MARKER = "<!-- managed by the runwell CLI: `runwell agent setup` rewrites this file; remove this line to keep your own edits -->"
+
+# Stable exit statuses, one per error code the server sends (see `runwell help exit-codes`).
+EXIT_CODES = { "failed" => 1, "usage" => 2, "not_found" => 3, "auth" => 4, "forbidden" => 5, "refused" => 5,
+               "invalid" => 6, "read_only" => 7, "network" => 8, "needs_confirmation" => 9 }.freeze
+EXIT_HELP = <<~TEXT
+  Exit statuses (the `code` in a JSON error has the same name):
+    0  ok
+    1  failed              something went wrong; try once more
+    2  usage               wrong or missing inputs: runwell help <tool>
+    3  not_found           no such record: check the id or ref
+    4  auth                not signed in, or the token was revoked: runwell login (in a terminal)
+    5  forbidden, refused  the role can't, or Runwell refused it as things stand (the summary says why)
+    6  invalid             fix the fields named in errors
+    7  read_only           this sign-in is read-only
+    8  network             can't reach Runwell
+    9  needs_confirmation  it reaches a client: show the person, then run again with --yes
+TEXT
+
+def config = File.exist?(CONFIG) ? JSON.parse(File.read(CONFIG)) : {}
+
+def save_config(data)
+  FileUtils.mkdir_p(File.dirname(CONFIG))
+  File.write(CONFIG, JSON.pretty_generate(data))
+  File.chmod(0o600, CONFIG)
+end
+
+def die(message, code: "failed", hint: nil)
+  if $json_errors
+    puts JSON.generate({ "status" => "error", "code" => code, "summary" => message, "hint" => hint }.compact)
+  else
+    warn "runwell: #{message}"
+    warn "hint: #{hint}" if hint
+  end
+  exit EXIT_CODES.fetch(code, 1)
+end
+
+def base_url = (ENV["RUNWELL_URL"] || config["url"] || DEFAULT_URL).sub(%r{/+\z}, "")
+
+def http(method, url, body: nil, form: nil, token: nil, accept: "application/json")
+  uri = URI(url)
+  request = (method == :get ? Net::HTTP::Get : Net::HTTP::Post).new(uri)
+  request["Accept"] = accept
+  request["Authorization"] = "Bearer #{token}" if token
+  if form
+    request.set_form_data(form)
+  elsif body
+    request["Content-Type"] = "application/json"
+    request.body = JSON.generate(body)
+  end
+  Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 120) { it.request(request) }
+rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => e
+  die "can't reach #{uri.host}: #{e.message}", code: "network", hint: "Check the address (#{base_url}) and your connection."
+end
+
+# --- signing in ---------------------------------------------------------------------------
+
+def login(args)
+  args = args.dup
+  token = (index = args.index("--token")) && args.slice!(index, 2).last
+  die "--token needs a value", code: "usage" if index && token.nil?
+  read_only = !args.delete("--read-only").nil?
+  url = (args.find { !it.start_with?("--") } || base_url).sub(%r{/+\z}, "")
+  die "give Runwell's address: runwell login https://runwell.example.com", code: "usage" unless url.match?(%r{\Ahttps?://})
+
+  if token
+    save_config("url" => url, "token" => token)
+    return puts("Signed in to #{url} with a personal token.")
+  end
+  unless $stdin.tty? && $stdout.tty?
+    die "signing in needs a browser and a person", code: "auth", hint: "Ask the person to run `runwell login #{url}` in a terminal, or use --token."
+  end
+
+  server = TCPServer.new("127.0.0.1", 0)
+  redirect = "http://127.0.0.1:#{server.addr[1]}/callback"
+  meta = JSON.parse(http(:get, "#{url}/.well-known/oauth-authorization-server").body)
+  client = JSON.parse(http(:post, meta["registration_endpoint"], body: { client_name: "runwell CLI (#{Socket.gethostname})", redirect_uris: [ redirect ] }).body)
+  verifier = SecureRandom.urlsafe_base64(48)
+  challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false)
+  state = SecureRandom.hex(16)
+  authorize = "#{meta["authorization_endpoint"]}?" + URI.encode_www_form(response_type: "code", client_id: client["client_id"],
+    redirect_uri: redirect, code_challenge: challenge, code_challenge_method: "S256", state: state, scope: read_only ? "runwell:read" : "runwell")
+
+  puts "Opening your browser to approve the CLI#{" (read only)" if read_only}. If it doesn't open, visit:\n  #{authorize}"
+  system(RUBY_PLATFORM.include?("darwin") ? "open" : "xdg-open", authorize, out: File::NULL, err: File::NULL)
+
+  socket = server.accept
+  line = socket.gets.to_s
+  query = URI.decode_www_form(URI(line.split[1].to_s).query.to_s).to_h
+  socket.print "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<p>#{query["code"] ? "Signed in. You can close this tab." : "Not signed in."}</p>"
+  socket.close
+  die "sign-in was cancelled (#{query["error"]})", code: "auth" unless query["code"] && query["state"] == state
+
+  tokens = JSON.parse(http(:post, meta["token_endpoint"], form: { grant_type: "authorization_code", client_id: client["client_id"],
+    code: query["code"], redirect_uri: redirect, code_verifier: verifier }).body)
+  die "sign-in failed: #{tokens["error"]}", code: "auth" unless tokens["access_token"]
+
+  save_config("url" => url, "token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"],
+    "client_id" => client["client_id"], "token_endpoint" => meta["token_endpoint"])
+  me = call_tool("me", {})
+  puts "Signed in to #{url} as #{me.dig("me", "name")} (#{me.dig("me", "role")})#{", read only" if me["read_only"]}."
+end
+
+def refresh!
+  c = config
+  return false unless c["refresh_token"]
+
+  tokens = JSON.parse(http(:post, c["token_endpoint"], form: { grant_type: "refresh_token", client_id: c["client_id"], refresh_token: c["refresh_token"] }).body)
+  return false unless tokens["access_token"]
+
+  save_config(c.merge("token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"]))
+  true
+end
+
+# --- talking to the MCP endpoint ------------------------------------------------------------
+
+def rpc(method, params = nil, retried: false)
+  token = config["token"] or die("not signed in", code: "auth", hint: "The person runs `runwell login` in a terminal.")
+  response = http(:post, "#{base_url}/mcp", token: token, body: { jsonrpc: "2.0", id: 1, method: method, params: params }.compact)
+  return rpc(method, params, retried: true) if response.code == "401" && !retried && refresh!
+  die "not signed in, or the token was revoked", code: "auth", hint: "The person runs `runwell login` in a terminal." if response.code == "401"
+
+  body = JSON.parse(response.body)
+  die body.dig("error", "message"), code: "failed" if body["error"]
+  body["result"]
+rescue JSON::ParserError
+  die "Runwell answered with something that isn't JSON (#{response&.code})", code: "failed"
+end
+
+def tools = @tools ||= rpc("tools/list")["tools"]
+
+def find_tool(name) = tools.find { it["name"] == name } || die("no tool called #{name}", code: "usage", hint: "`runwell tools` lists them.")
+
+# The tool's answer. When MCP itself rejects the call (a missing required input, say), there is
+# no structured answer, only text: that becomes a usage error.
+def call_tool(name, arguments)
+  result = rpc("tools/call", { name: name, arguments: arguments })
+  return result["structuredContent"] if result["structuredContent"]
+
+  text = Array(result["content"]).map { it["text"] }.compact.join(" ").strip
+  { "status" => "error", "code" => "usage", "summary" => text.empty? ? "#{name} didn't answer" : text,
+    "hint" => "Check the inputs: `runwell help #{name}`." }
+end
+
+# --flag value pairs into nested arguments, typed by the tool's schema.
+def arguments_for(tool, args)
+  result = {}
+  until args.empty?
+    flag = args.shift
+    die "expected --name value, got #{flag}", code: "usage" unless flag.start_with?("--")
+    key = flag.delete_prefix("--")
+    next result["confirm"] = true if key == "yes"
+
+    raw = args.first.nil? || args.first.start_with?("--") ? "true" : args.shift
+    path = key.split(".")
+    schema = path.reduce(tool["inputSchema"]) { |s, part| s&.dig("properties", part) }
+    value = coerce(raw, schema)
+    target = path[0..-2].reduce(result) { |h, part| h[part] ||= {} }
+    target[path.last] = value
+  end
+  result
+end
+
+def coerce(raw, schema)
+  type = schema&.dig("type")
+  return file_argument(raw.delete_prefix("@")) if type == "object" && raw.start_with?("@")
+  return JSON.parse(raw) if type == "object" || type == "array"
+  return raw.to_i if type == "integer"
+  return raw.to_f if type == "number"
+  return %w[true yes 1].include?(raw.downcase) if type == "boolean"
+
+  raw.start_with?("@") && File.exist?(raw.delete_prefix("@")) ? File.read(raw.delete_prefix("@")) : raw
+rescue JSON::ParserError
+  die "#{raw.inspect} isn't valid JSON", code: "usage"
+end
+
+def file_argument(path)
+  die "no file at #{path}", code: "usage" unless File.exist?(path)
+  { "filename" => File.basename(path), "content_base64" => Base64.strict_encode64(File.binread(path)) }
+end
+
+# --- output -------------------------------------------------------------------------------
+
+OUTPUT_FLAGS = %w[--json --human --ids-only --count].freeze
+
+def take_output_options(args)
+  options = OUTPUT_FLAGS.to_h { [ it.delete_prefix("--").tr("-", "_").to_sym, !args.delete(it).nil? ] }
+  if (index = args.index("--field"))
+    options[:field] = args.slice!(index, 2).last or die("--field needs a path, like data.todo.status", code: "usage")
+  end
+  options[:json] = true if !options[:human] && !$stdout.tty? && !options[:ids_only] && !options[:count] && !options[:field]
+  options
+end
+
+# Every record in an answer: hashes with an id, anywhere in it.
+def records_in(value)
+  case value
+  when Hash then (value.key?("id") && value.key?("record") ? [ value ] : []) + value.values.flat_map { records_in(it) }
+  when Array then value.flat_map { records_in(it) }
+  else []
+  end
+end
+
+def dig_path(value, path)
+  path.split(".").reduce([ value ]) do |values, part|
+    values.flat_map do |v|
+      if part == "*" then v.is_a?(Array) ? v : (v.is_a?(Hash) ? v.values : [])
+      elsif v.is_a?(Array) && part.match?(/\A\d+\z/) then [ v[part.to_i] ]
+      elsif v.is_a?(Hash) then [ v[part] ]
+      else []
+      end
+    end.compact
+  end
+end
+
+def print_result(result, options)
+  if options[:ids_only]
+    records_in(result.except("next", "next_tools")).map { it["id"] }.uniq.each { puts it }
+  elsif options[:count]
+    lists = result.values.grep(Array)
+    puts(lists.any? ? lists.max_by(&:size).size : records_in(result).size)
+  elsif options[:field]
+    values = dig_path(result, options[:field])
+    values.each { puts(it.is_a?(String) ? it : JSON.generate(it)) }
+  elsif options[:json]
+    puts JSON.pretty_generate(result)
+  else
+    puts result["summary"] if result["summary"]
+    rest = result.except("summary", "status", "next", "next_tools", "code", "hint")
+    puts JSON.pretty_generate(rest) unless rest.empty?
+    if result["next"]&.any?
+      puts "\nNext:"
+      result["next"].each { puts "  #{it["command"]}    # #{it["title"]}" }
+    end
+    $stdout.flush
+    warn "hint: #{result["hint"]}" if result["status"] == "error" && result["hint"]
+  end
+end
+
+def run_tool(name, args)
+  options = take_output_options(args)
+  $json_errors = options[:json]
+  tool = find_tool(name)
+  arguments = arguments_for(tool, args)
+  result = call_tool(name, arguments)
+
+  if result["status"] == "needs_confirmation"
+    if $stdin.tty? && $stdout.tty? && !options[:json]
+      puts result["summary"]
+      Array(result["about"]).each { puts "  • #{it}" }
+      print "Go ahead? [y/N] "
+      return puts("Not done.") unless $stdin.gets.to_s.strip.downcase.start_with?("y")
+      result = call_tool(name, arguments.merge("confirm" => true))
+    else
+      print_result(result.merge("hint" => "Show the person, then run again with --yes once they agree."), options.merge(json: options[:json] || !$stdout.tty?))
+      exit EXIT_CODES["needs_confirmation"]
+    end
+  end
+
+  print_result(result, options)
+  exit EXIT_CODES.fetch(result["code"].to_s, 1) if result["status"] == "error"
+end
+
+# --- tools and help -----------------------------------------------------------------------
+
+def list_tools
+  width = tools.map { it["name"].length }.max
+  tools.sort_by { it["name"] }.each { puts "#{it["name"].ljust(width)}  #{it["title"]}" }
+  puts "\n`runwell help <tool>` for its inputs."
+end
+
+def help_tool(name)
+  return puts(EXIT_HELP) if name == "exit-codes"
+
+  tool = find_tool(name)
+  puts "#{tool["name"]}: #{tool["title"]}\n\n#{tool["description"]}\n\nInputs:"
+  print_properties(tool["inputSchema"], tool["inputSchema"]["required"] || [], "")
+end
+
+def print_properties(schema, required, prefix)
+  (schema["properties"] || {}).each do |key, spec|
+    name = "#{prefix}#{key}"
+    if spec["type"] == "object" && spec["properties"] && !spec["properties"].key?("content_base64")
+      print_properties(spec, spec["required"] || [], "#{name}.")
+    else
+      kind = spec["enum"] ? spec["enum"].join("|") : (spec.dig("properties", "content_base64") ? "@file" : spec["type"])
+      puts "  --#{name} <#{kind}>#{" (required)" if required.include?(key)}#{"  #{spec["description"]}" if spec["description"]}"
+    end
+  end
+end
+
+# --- MCP over stdio, for desktop apps -------------------------------------------------------
+
+def mcp_bridge(args)
+  read_only = args.include?("--read-only")
+  $stdout.sync = true
+  read_tools = nil
+  $stdin.each_line do |line|
+    next if line.strip.empty?
+    message = JSON.parse(line)
+    name = message.dig("params", "name")
+    if read_only && message["method"] == "tools/call" && read_tools && !read_tools.include?(name)
+      $stdout.puts(JSON.generate(jsonrpc: "2.0", id: message["id"], error: { code: -32000, message: "runwell: #{name} changes things, and this connection is read-only" }))
+      next
+    end
+
+    response = http(:post, "#{base_url}/mcp", token: config["token"], body: message)
+    if response.code == "401" && refresh!
+      response = http(:post, "#{base_url}/mcp", token: config["token"], body: message)
+    end
+    body = response.body.to_s
+    if read_only && message["method"] == "tools/list" && (parsed = JSON.parse(body) rescue nil)&.dig("result", "tools")
+      parsed["result"]["tools"].select! { it.dig("annotations", "readOnlyHint") }
+      read_tools = parsed["result"]["tools"].map { it["name"] }
+      body = JSON.generate(parsed)
+    end
+    $stdout.puts(body) if message.key?("id") && body.strip != ""
+  rescue JSON::ParserError => e
+    $stdout.puts(JSON.generate(jsonrpc: "2.0", id: message&.dig("id"), error: { code: -32000, message: "runwell: #{e.message}" })) if message&.key?("id")
+  end
+end
+
+# --- checking and updating ------------------------------------------------------------------
+
+def served_script = http(:get, "#{base_url}/install/runwell", accept: "text/x-ruby")
+
+def doctor(args)
+  brief = args.include?("--brief")
+  json = args.include?("--json") || (!$stdout.tty? && !brief && !args.include?("--human"))
+  checks = []
+  check = ->(name, ok, detail) { checks << { "check" => name, "ok" => ok, "detail" => detail } }
+
+  check.("config", File.exist?(CONFIG), File.exist?(CONFIG) ? CONFIG : "no config yet: run `runwell login`")
+  up = (http(:get, "#{base_url}/up", accept: "text/html").code == "200" rescue false)
+  check.("reachable", up, up ? base_url : "can't reach #{base_url}")
+
+  me = nil
+  if up && config["token"]
+    response = http(:post, "#{base_url}/mcp", token: config["token"], body: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "me", arguments: {} } })
+    response = http(:post, "#{base_url}/mcp", token: config["token"], body: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "me", arguments: {} } }) if response.code == "401" && refresh!
+    me = (JSON.parse(response.body).dig("result", "structuredContent") rescue nil) if response.code == "200"
+  end
+  signed_in = me && me["status"] != "error"
+  check.("signed in", !!signed_in, signed_in ? "#{me.dig("me", "name")}#{", acting for #{me.dig("me", "acting_for", "name")}" if me.dig("me", "acting_for")} (#{me.dig("me", "role")})#{", read only" if me["read_only"]}" : "not signed in: the person runs `runwell login` in a terminal")
+
+  if up
+    latest = served_script.body.to_s
+    current = File.read(File.realpath($PROGRAM_NAME)) rescue ""
+    same = Digest::SHA256.hexdigest(latest) == Digest::SHA256.hexdigest(current)
+    check.("cli up to date", same, same ? "matches #{base_url}" : "a newer runwell is available: run `runwell update`")
+  end
+
+  if File.directory?(File.join(Dir.home, ".claude"))
+    skill = File.exist?(SKILL_PATH) ? File.read(SKILL_PATH) : nil
+    state = if skill.nil? then [ false, "no Claude Code skill: run `runwell agent setup`" ]
+    elsif !skill.include?(SKILL_MARKER) then [ true, "#{SKILL_PATH} (your own version, left alone)" ]
+    elsif skill.strip != skill_text.strip then [ false, "the skill is out of date: run `runwell agent setup`" ]
+    else [ true, SKILL_PATH ]
+    end
+    check.("claude code skill", *state)
+  end
+
+  failing = checks.reject { it["ok"] }
+  if brief
+    puts(signed_in ? "Runwell: signed in to #{base_url} as #{me.dig("me", "name")}#{" (read only)" if me["read_only"]}. #{failing.empty? ? "Ready." : failing.map { it["detail"] }.join("; ")}" :
+                     "Runwell: not signed in to #{base_url}. Don't run `runwell login` yourself: ask the person to run it in a terminal.")
+  elsif json
+    puts JSON.pretty_generate("status" => failing.empty? ? "ok" : "error", "checks" => checks)
+  else
+    checks.each { puts "#{it["ok"] ? "✓" : "✗"} #{it["check"].ljust(18)} #{it["detail"]}" }
+  end
+  exit(signed_in ? (failing.empty? ? 0 : 1) : EXIT_CODES["auth"]) unless brief
+end
+
+def update
+  path = File.realpath($PROGRAM_NAME)
+  response = served_script
+  die "couldn't download the CLI (#{response.code})", code: "failed" unless response.code == "200" && response.body.start_with?("#!")
+
+  if Digest::SHA256.hexdigest(response.body) == Digest::SHA256.hexdigest(File.read(path))
+    puts "runwell is up to date."
+  else
+    File.write(path, response.body)
+    File.chmod(0o755, path)
+    puts "Updated #{path} from #{base_url}."
+  end
+  exec(path, "agent", "setup", "--quiet") if File.exist?(SKILL_PATH) && File.read(SKILL_PATH).include?(SKILL_MARKER)
+end
+
+# --- teaching agents ----------------------------------------------------------------------
+
+def skill_text = <<~MARKDOWN
+  ---
+  name: runwell
+  description: Use Runwell, the agency's project management, from the shell with the `runwell` CLI. Use for anything about clients, engagements, agreements, work (todos), commitments, requests, notes, documents or time, and when given a Runwell work brief.
+  ---
+  #{SKILL_MARKER}
+
+  # Runwell
+
+  `runwell` runs any Runwell tool: `runwell tools` lists them for your role, `runwell help <tool>` shows inputs.
+  You act as the person's agent ("Ted's agent via Claude Code"), with exactly their role.
+
+  - Start with `runwell briefing` (what needs a person now); find anything with `runwell search --q "…"`.
+  - Engagements go by ref (`--ref P-3`, `--engagement_ref WO-12`). Tools taking `--record` want "Type:id" (`Todo:12`), as each result's `record` shows.
+  - Nested inputs use dots: `runwell create_work --engagement_ref P-3 --todo.title "Draft the sitemap" --todo.due_on 2026-10-02`.
+  - Output is JSON when piped. `--ids-only`, `--count` and `--field data.todo.status` keep answers small. Files: `--document.files @brief.pdf`.
+  - A success may list `next`: the commands to run next, with what's known filled in.
+  - Errors carry a `code` and a `hint`; exit statuses match (`runwell help exit-codes`). Branch on the code: `invalid` means fix the named fields; `refused` means Runwell said no as things stand; `auth` means ask the person to sign in.
+  - Anything that reaches a client answers `needs_confirmation` (exit 9). Show the person; only after they agree, run it again with `--yes`.
+  - Never run `runwell login` yourself: it needs a person at a browser. If you're not signed in, ask them. `runwell doctor` checks everything.
+
+  ## Working a todo
+
+  1. `runwell brief_work --id <id> --field brief` for the work, agreed scope, notes and repos (or use the brief the person pasted).
+  2. `runwell update_work --id <id> --todo.status in_progress`, then leave a note when you decide something: `runwell add_note --record Todo:<id> --note.body "…"`.
+  3. Stay within the agreed scope; if it needs more, stop and say so in a note.
+  4. Finish with `--todo.status in_review` (or `finish_work` when the Code plugin is on) and a closing note. A person checks it and marks it done; don't mark your own work done.
+
+  ## Routines people ask for
+
+  - "Every morning, go through `runwell briefing` and tell me what needs me, most urgent first."
+  - "Triage the open requests: for each, suggest what it should become, and ask before promoting."
+  - "Find overdue work and commitments, and draft a note to each owner."
+  - "Before a client call, summarise everything on <client> since last week."
+  - "Check my in-progress work against the repos and mark what's actually done, with a note."
+MARKDOWN
+
+def install_session_hook
+  settings = File.exist?(CLAUDE_SETTINGS) ? (JSON.parse(File.read(CLAUDE_SETTINGS)) rescue nil) : {}
+  return "left #{CLAUDE_SETTINGS} alone: it isn't valid JSON" if settings.nil?
+
+  command = "#{File.realpath($PROGRAM_NAME)} doctor --brief"
+  hooks = (settings["hooks"] ||= {})["SessionStart"] ||= []
+  return "the startup check was already there" if hooks.any? { |h| Array(h["hooks"]).any? { it["command"].to_s.include?("doctor --brief") } }
+
+  hooks << { "hooks" => [ { "type" => "command", "command" => command } ] }
+  FileUtils.mkdir_p(File.dirname(CLAUDE_SETTINGS))
+  File.write(CLAUDE_SETTINGS, JSON.pretty_generate(settings))
+  "added a startup check to #{CLAUDE_SETTINGS}: each session starts knowing whether Runwell is signed in"
+end
+
+def agent_setup(args)
+  quiet = args.include?("--quiet")
+  existing = File.exist?(SKILL_PATH) ? File.read(SKILL_PATH) : nil
+  if existing && !existing.include?(SKILL_MARKER) && !args.include?("--force")
+    puts "Left your own #{SKILL_PATH} alone (run with --force to replace it)." unless quiet
+  else
+    FileUtils.mkdir_p(File.dirname(SKILL_PATH))
+    File.write(SKILL_PATH, skill_text)
+    puts "Wrote the Claude Code skill to #{SKILL_PATH}."
+  end
+  hook = install_session_hook
+  return if quiet
+
+  puts "And #{hook}."
+  puts "\nTo use Runwell over MCP instead:"
+  puts "  Claude Code:     claude mcp add --transport http runwell #{base_url}/mcp"
+  puts "  Claude/ChatGPT:  add a custom connector with #{base_url}/mcp"
+  puts "  Desktop apps:    { \"mcpServers\": { \"runwell\": { \"command\": \"#{File.expand_path($PROGRAM_NAME)}\", \"args\": [\"mcp\"] } } }"
+  puts "  Read only:       add \"--read-only\" to those args, or sign in with `runwell login --read-only`"
+end
+
+# --- main ---------------------------------------------------------------------------------
+
+command, *rest = ARGV
+case command
+when nil, "-h", "--help" then puts File.read(__FILE__).lines.drop(1).take_while { it.start_with?("#") }.map { it.sub(/^# ?/, "") }.join
+when "login" then login(rest)
+when "logout" then File.delete(CONFIG) if File.exist?(CONFIG); puts "Signed out."
+when "tools" then list_tools
+when "help" then rest.first ? help_tool(rest.first) : list_tools
+when "doctor" then doctor(rest)
+when "update" then update
+when "mcp" then mcp_bridge(rest)
+when "agent" then rest.first == "setup" ? agent_setup(rest.drop(1)) : die("try `runwell agent setup`", code: "usage")
+else run_tool(command, rest)
+end

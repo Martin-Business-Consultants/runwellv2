@@ -1,0 +1,17 @@
+<%# locals: (engagement:) %>
+<% invoices = engagement.quickbooks_invoices.live.recent.to_a %>
+<% if invoices.any? %>
+  <section class="settings__section flex flex-column gap-half">
+    <header>
+      <h2 class="divider">Invoices</h2>
+    </header>
+    <ul class="settings__scrollable-list">
+      <% invoices.each do |invoice| %>
+        <%# herb:key invoice.id %>
+        <li>
+          <%= render "quickbooks/invoice", invoice: invoice, pay: true %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

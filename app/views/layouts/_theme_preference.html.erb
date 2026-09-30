@@ -1,0 +1,16 @@
+<%# locals: () %>
+<%= javascript_tag nonce: true do %>
+  {
+    const root = document.documentElement
+    const stored = localStorage.getItem("theme")
+    const theme = stored && stored !== "auto" ? stored : (stored === "auto" ? null : root.dataset.defaultTheme)
+    if (theme === "light" || theme === "dark") {
+      root.dataset.theme = theme
+    }
+
+    // Collapsed nav and details sidebar (panes controller), set before the first paint.
+    for (const pane of [ "sidenav", "sidebar" ]) {
+      try { if (localStorage.getItem(pane) === "collapsed") root.dataset[pane] = "collapsed" } catch {}
+    }
+  }
+<% end %>

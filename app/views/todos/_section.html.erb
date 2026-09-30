@@ -1,0 +1,77 @@
+<%# locals: (engagement:, state: nil) %>
+<%# An engagement's work by scope item. Open work by default; the filter shows done or all.
+    Each scope item's "done of total" always counts all of its work. %>
+<% state ||= "open" %>
+<section class="settings__section" id="work">
+  <header>
+    <h2 class="divider"><%= term(:work) %></h2>
+    <div class="filters">
+      <%= render "layouts/shared/quick_filter", title: "Show…", param: :work, current: state,
+            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+    </div>
+  </header>
+
+  <% todos = engagement.todos.includes(:owner, :scope_item, engagement: :client).order(:due_on, :position) %>
+  <% all_groups = todos.group_by(&:scope_item) %>
+  <% shown = todos.select { |todo| state == "all" || (state == "done") == (todo.status == "done") } %>
+  <% groups = shown.group_by(&:scope_item) %>
+  <% items = (engagement.agreed_items + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
+
+  <%# One list of groups, tight together. A scope item whose only work is named the same (the usual
+      case: approval makes one todo per scope item) shows just that row, not the name twice. %>
+  <div class="work-groups">
+  <% items.each do |item| %>
+    <%# herb:key item.id %>
+    <% group = groups.fetch(item, []) %>
+    <% everything = all_groups.fetch(item, []) %>
+    <% single = everything.size == 1 && group.size == 1 && group.first.title.strip.casecmp?(item.description.strip) %>
+    <div class="work-group">
+      <% unless single %>
+        <div class="flex align-center gap-half txt-small">
+          <%= link_to item.description, item, class: "txt-ink font-weight-bold overflow-ellipsis" %>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <span class="txt-subtle txt-nowrap"><%= everything.count { |todo| todo.status == "done" } %> of <%= everything.size %></span>
+          <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+        </div>
+      <% end %>
+      <ul class="settings__scrollable-list">
+        <% group.each do |todo| %>
+          <%# herb:key todo.id %>
+          <%= render "todos/todo", todo: todo %>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% other = groups.fetch(nil, []) %>
+  <% other_all = all_groups.fetch(nil, []) %>
+  <% if other.any? %>
+    <div class="work-group">
+      <div class="flex align-center gap-half txt-small">
+        <span class="font-weight-bold">Other work</span>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <span class="txt-subtle txt-nowrap"><%= other_all.count { |todo| todo.status == "done" } %> of <%= other_all.size %></span>
+      </div>
+      <ul class="settings__scrollable-list">
+        <% other.each do |todo| %>
+          <%# herb:key todo.id %>
+          <%= render "todos/todo", todo: todo %>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  </div>
+
+  <% if todos.none? %>
+    <p class="txt-subtle txt-small margin-none">No work yet. Approving the agreement adds a todo per scope item.</p>
+  <% elsif shown.none? %>
+    <p class="txt-subtle txt-small margin-none">
+      <%= state == "open" ? "Nothing open: all #{todos.size} done." : "Nothing done yet." %>
+      <%= link_to "Show all", engagement_path(engagement, work: "all", anchor: "work"), class: "txt-link" %>
+    </p>
+  <% end %>
+
+  <% unless engagement.closed? %>
+    <%= render "todos/add", engagement: engagement %>
+  <% end %>
+</section>

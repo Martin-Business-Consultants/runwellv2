@@ -1,0 +1,23 @@
+landing:
+  client: acme
+  ref: WO-1
+  label: work_order
+  shape: fixed
+  title: Spring landing page
+  created_by: ted
+
+retainer:
+  client: acme
+  ref: S-1
+  label: service
+  shape: recurring
+  title: Monthly site care
+  created_by: ted
+
+globex_site:
+  client: globex
+  ref: P-1
+  label: project
+  shape: fixed
+  title: Globex website
+  created_by: ted

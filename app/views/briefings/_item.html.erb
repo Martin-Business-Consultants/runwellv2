@@ -1,0 +1,40 @@
+<%# locals: (key:, item:) %>
+<% case key %>
+<% when "questions" %>
+  <%= render "questions/question", question: item %>
+<% when "requests" %>
+  <%= link_to item, class: "txt-ink txt-align-start" do %>
+    <strong><%= item.subject %></strong>
+    <div class="txt-x-small txt-subtle"><%= request_summary(item) %></div>
+  <% end %>
+<% when "awaiting_client", "drafts" %>
+  <%= link_to engagement_path(item.engagement), class: "txt-ink txt-align-start" do %>
+    <strong><%= item.engagement.ref %> <%= item.engagement.title %></strong> <span class="txt-subtle">· <%= item.label %></span>
+    <div class="txt-x-small txt-subtle">
+      <%= item.engagement.client.name %> · <%= money key == "drafts" ? item.items_total_cents : item.amount_cents %><%= " · sent #{time_ago_in_words(item.sent_at)} ago" if item.sent_at %>
+    </div>
+  <% end %>
+<% when "overdue_commitments", "due_soon" %>
+  <div class="flex flex-wrap align-center gap-half">
+    <div class="txt-align-start min-width flex-item-grow">
+      <strong><%= item.description %></strong>
+      <div class="txt-x-small txt-subtle">
+        <%= commitment_owner item %> · <%= item.client.name %><%= " · #{item.engagement.ref}" if item.engagement %> · due <%= l item.due_on, format: :short %>
+      </div>
+    </div>
+    <% if item.overdue? %>
+      <%= status_tag "Overdue", highlight: true %>
+    <% end %>
+    <% Commitment::RESOLUTIONS.each do |resolution| %>
+      <%# herb:key resolution %>
+      <%= button_to resolution.humanize, resolve_commitment_path(item), params: { resolution: resolution }, class: "btn txt-x-small" %>
+    <% end %>
+  </div>
+<% when "review", "blocked", "overdue_todos" %>
+  <%= link_to engagement_path(item.engagement), class: "txt-ink txt-align-start" do %>
+    <strong><%= item.title %></strong>
+    <div class="txt-x-small txt-subtle">
+      <%= item.engagement.ref %> <%= item.engagement.title %> · <%= person_tag item.owner, fallback: "unowned" %><%= " · due #{l(item.due_on, format: :short)}" if item.due_on %> · <%= item.status.humanize %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,20 @@
+<% @page_title = "Column: #{@status.humanize}" %>
+
+<% content_for :header do %>
+  <%= parent_page "Work", todos_path(todo_board_filters.merge(view: "board")) %>
+  <h1 class="header__title divider divider--fade full-width">
+    <span class="overflow-ellipsis"><%= @page_title %></span>
+  </h1>
+<% end %>
+
+<section class="cards cards--grid">
+  <turbo-frame id="<%= @status %>_cards">
+    <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
+      <% if @todos.any? %>
+        <%= render "todos/display/previews", todos: @todos, draggable: true %>
+      <% else %>
+        <%= render "todos/columns/empty_placeholder" %>
+      <% end %>
+    </div>
+  </turbo-frame>
+</section>

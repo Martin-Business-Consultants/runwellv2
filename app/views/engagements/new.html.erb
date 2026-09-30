@@ -1,0 +1,56 @@
+<% @page_title = "New " + term(:engagement).downcase %>
+<% client = @engagement.client %>
+<% existing = client ? client.engagements.order(created_at: :desc).limit(8).to_a : [] %>
+
+<% content_for :header do %>
+  <%= parent_page term(:engagement, count: 2), engagements_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="flex flex-column gap-half">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="txt-small txt-subtle margin-none">Scope and price go on the agreement draft next.</p>
+    </div>
+    <%= render "engagements/form", engagement: @engagement %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">How it goes</h2>
+      </header>
+      <ol class="record-steps txt-small">
+        <li>Add scope items and prices to the draft agreement.</li>
+        <li>Send it: the version is frozen and the client decides by link.</li>
+        <li>Approval creates one piece of <%= term(:work).downcase %> per scope item.</li>
+        <li>Changes later are change orders or revisions, each approved the same way.</li>
+      </ol>
+    </section>
+
+    <% if client %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider"><%= client.name %>’s <%= term(:engagement, count: 2).downcase %> <span class="txt-subtle"><%= existing.size %></span></h2>
+        </header>
+        <ul class="settings__scrollable-list">
+          <% existing.each do |engagement| %>
+            <%# herb:key engagement.id %>
+            <li class="flex align-center gap-half txt-small" data-filter-target="item">
+              <%= link_to engagement, class: "txt-ink overflow-ellipsis min-width" do %>
+                <strong><%= engagement.ref %></strong> <%= engagement.title %>
+              <% end %>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+            </li>
+          <% end %>
+        </ul>
+        <% if existing.empty? %>
+          <p class="txt-subtle txt-small margin-none">This is their first.</p>
+        <% end %>
+      </section>
+    <% end %>
+  </aside>
+</section>

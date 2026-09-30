@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+# Brings a plain install up to date: optionally checks out a release, then bundles, migrates
+# (backing up the databases first, lib/tasks/backup.rake), compiles assets and asks Puma to
+# restart (docs/install.md). Settings > Updates runs it too (Upgrade::Local).
+#
+#   bin/update            # apply the code that is checked out (after your own git pull)
+#   bin/update v2.1.0     # fetch and check out that release first
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+release = ARGV.first
+
+def system!(*args) = system(*args, exception: true)
+def step(title) = puts("\n== #{title} ==")
+
+FileUtils.chdir APP_ROOT do
+  env_file = File.join(APP_ROOT, ".env")
+  abort "No .env here. Run bin/install first." unless File.exist?(env_file)
+  File.readlines(env_file).each do |line|
+    next if line.strip.empty? || line.start_with?("#")
+    key, value = line.strip.split("=", 2)
+    ENV[key] = value
+  end
+
+  if release
+    step "Checking out #{release}"
+    system! "git", "fetch", "--tags", "--quiet"
+    system! "git", "checkout", "--quiet", release
+  end
+
+  step "Installing gems"
+  system! "bundle", "install"
+
+  step "Backing up and migrating the databases"
+  system! "bin/rails", "db:migrate"
+
+  step "Compiling assets"
+  system! "bin/rails", "assets:precompile"
+
+  step "Restarting"
+  FileUtils.touch File.join(APP_ROOT, "tmp/restart.txt")
+  puts "Asked Puma to restart (tmp/restart.txt). Under systemd: sudo systemctl restart runwell"
+  puts "Now running Runwell #{File.read('VERSION').strip}"
+end

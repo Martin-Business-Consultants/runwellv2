@@ -1,0 +1,15 @@
+<%# locals: (client:) %>
+<li data-filter-target="item" class="flex align-center gap-half">
+  <%= link_to client, class: "txt-ink flex gap-half align-center min-width" do %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong><%= client.name %></strong>
+      <div class="txt-x-small txt-subtle">
+        <%= pluralize client.contacts.count { |contact| !contact.archived? }, "contact" %>
+      </div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+
+  <%= status_tag client.status, highlight: client.status == "active" %>
+</li>

@@ -1,0 +1,83 @@
+<%# locals: (version:, contacts:) %>
+<%# herb:slots server %>
+<%# herb:state (sending: false) %>
+<% engagement = version.engagement %>
+<% revision = version.kind == "revision" %>
+<header class="flex align-center gap-half">
+  <strong><%= version.label %></strong>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <%= status_tag "Draft" %>
+</header>
+
+<%= form_with model: version, class: "flex flex-column gap-half", namespace: dom_id(version) do |form| %>
+  <label class="flex flex-column gap-half">
+    <span class="txt-x-small font-weight-bold">Summary</span>
+    <%= form.text_field :summary, class: "input full-width txt-small", autocomplete: "off", placeholder: "What this version covers" %>
+  </label>
+
+  <% unless version.initial? %>
+    <label class="flex flex-column gap-half">
+      <span class="txt-x-small font-weight-bold">Reason</span>
+      <%= rich_text_field form, :reason, staff: true %>
+    </label>
+  <% end %>
+
+  <% if engagement.recurring? %>
+    <div class="flex gap-half">
+      <label class="flex flex-column gap-half flex-item-grow">
+        <span class="txt-x-small font-weight-bold">Cadence</span>
+        <%= form.select :cadence, AgreementVersion::CADENCES.map { |cadence| [ cadence.humanize, cadence ] }, {}, class: "input input--select full-width txt-small" %>
+      </label>
+      <% if revision || version.initial? %>
+        <label class="flex flex-column gap-half flex-item-grow">
+          <span class="txt-x-small font-weight-bold"><%= revision ? "New price per period" : "Price per period" %></span>
+          <%= money_field form, :amount_cents, class: "input full-width txt-small", placeholder: "1,500.00" %>
+        </label>
+      <% end %>
+    </div>
+  <% end %>
+
+  <button type="submit" class="btn txt-small center">Save details</button>
+<% end %>
+
+<% unless revision %>
+  <ul class="settings__scrollable-list flex flex-column gap-half">
+    <% version.scope_items.each do |item| %>
+      <%# herb:key item.id %>
+      <li>
+        <%= render "scope_items/item", item: item %>
+      </li>
+    <% end %>
+    <li>
+      <%= render "scope_items/new", version: version %>
+    </li>
+  </ul>
+<% end %>
+
+<footer class="flex flex-wrap align-center justify-center gap-half">
+  <% if can?(:send_agreements) %>
+    <% if sending %>
+      <%= form_with url: send_out_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap full-width txt-align-start", data: { turbo_action: "advance" } do |form| %>
+        <h3 class="txt-medium font-weight-bold margin-none">Send <%= version.label %>?</h3>
+        <p class="txt-small margin-none">Sending freezes this version. Choose a contact to email them an approval link, or mark it sent and record their decision yourself.</p>
+        <%= form.select :contact_id, contact_options(contacts, email_only: true), { include_blank: "Don’t email anyone", selected: default_approver(contacts) }, class: "input input--select full-width txt-small" %>
+        <div class="flex gap-half justify-center">
+          <button type="button" class="btn" data-herb-reset="sending">Cancel</button>
+          <button type="submit" class="btn btn--link">Send</button>
+        </div>
+      <% end %>
+    <% else %>
+      <button type="button" class="btn btn--link txt-small" data-herb-toggle="sending">
+        <%= icon_tag "email" %>
+        <span>Send to client</span>
+      </button>
+    <% end %>
+  <% else %>
+    <p class="txt-small txt-subtle margin-none">A manager or owner sends this to the client.</p>
+  <% end %>
+</footer>
+
+<%= render "layouts/shared/confirm", trigger: "Discard this draft", title: "Discard #{version.label}?",
+      body: "The draft and its items are deleted. Nothing has been sent, so the client never saw it.",
+      button: "Discard draft", path: agreement_version_path(version) %>

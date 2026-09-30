@@ -1,0 +1,24 @@
+<% @page_title = "Edit #{@contact.name_was}" %>
+
+<% content_for :header do %>
+  <%= parent_page @contact.client.name, @contact.client %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "contacts/form", contact: @contact %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <%= render "contacts/sidebar", client: @contact.client, contact: @contact %>
+
+    <% if can?(:delete_records) %>
+      <%= render "layouts/shared/confirm", trigger: "Archive this contact", title: "Archive #{@contact.name_was}?",
+            body: "They drop off the client’s contacts and can no longer sign in to the portal or approve. Their past approvals and requests stay.",
+            button: "Archive contact", path: contact_path(@contact), icon: "remove" %>
+    <% end %>
+  </aside>
+</section>

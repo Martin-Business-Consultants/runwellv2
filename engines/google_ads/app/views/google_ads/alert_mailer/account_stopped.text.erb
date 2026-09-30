@@ -1,0 +1,20 @@
+<%= @account.label %> has stopped running ads.
+
+Google reports the account as <%= @account.status.to_s.downcase %>.
+<%= @account.explanation %>
+
+Google doesn't tell us why an account stopped, only that it has. Open
+Google Ads -> Billing on <%= @account.formatted_customer_id %> to see the reason.
+
+<% if @engagements.any? -%>
+Who this affects:
+<% @engagements.each do |engagement| -%>
+- <%= engagement.client.name %>: <%= engagement.ref %> <%= engagement.title %> (<%= engagement_url(engagement) %>)
+<% end -%>
+<% end -%>
+<% if @last_month -%>
+
+For scale: this account spent <%= Money.format(@last_month.cost_cents) %> in <%= @last_month.month.strftime("%B") %>.
+<% end -%>
+
+Google Ads settings: <%= google_ads_settings_url %>

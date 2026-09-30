@@ -1,0 +1,18 @@
+<%# locals: () %>
+<%# The ? sheet: a button in the nav opening a modal listing every key. %>
+<div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn btn--plain" title="Help and keyboard shortcuts" data-keys="?" data-action="dialog#open">
+    <kbd class="txt-x-small">?</kbd>
+    <span class="for-screen-reader">Keyboard shortcuts</span>
+  </button>
+  <dialog class="dialog shortcuts panel fill-white shadow" data-dialog-target="dialog" aria-label="Keyboard shortcuts">
+    <header class="flex align-center justify-space-between gap">
+      <h2 class="txt-large font-weight-bold margin-none">Keyboard shortcuts</h2>
+      <button type="button" class="btn txt-small" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+    </header>
+    <p class="txt-small margin-none txt-align-start">
+      New here? <%= link_to "How Runwell works", settings_help_path, class: "txt-link", data: { action: "dialog#close" } %> explains the pieces and how work flows through them.
+    </p>
+    <%= render "layouts/shared/shortcut_list" %>
+  </dialog>
+</div>

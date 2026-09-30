@@ -1,0 +1,30 @@
+<%# locals: (query_terms:, target_turbo_frame:, turbo_action: nil, cancel_path: nil) %>
+<%= form_with url: search_path, method: :get,
+  class: "search__form flex align-center justify-center gap-half",
+  data: {
+    controller: class_names("search-form", form: cancel_path),
+    action: class_names("search-form:reset->bar#reset", "keydown.esc->form#cancel": cancel_path),
+    bar_target: "form",
+    turbo_action: turbo_action,
+    turbo_frame: target_turbo_frame } do |form| %>
+  <%= form.label :q, "Search Runwell", class: "font-weight-black txt-nowrap" %>
+  <%= text_field_tag :q, query_terms,
+        class: "search__input input",
+        type: "search",
+        placeholder: "Find something…",
+        autocomplete: "off",
+        autofocus: true,
+        data: {
+          search_form_target: "searchInput",
+          bar_target: "searchInput",
+          action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
+  <button hidden>Search</button>
+  <button type="button" class="search__reset btn btn--circle borderless" data-action="search-form#clearInput">
+    <%= icon_tag "close" %>
+    <span class="for-screen-reader">Close search</span>
+  </button>
+
+  <% if cancel_path %>
+    <%= link_to "Cancel and go back", cancel_path, data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+<% end %>

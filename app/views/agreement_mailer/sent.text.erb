@@ -1,0 +1,6 @@
+Hi <%= @link.contact.name %>,
+
+Please review <%= @engagement.title %> (<%= @engagement.ref %>) and let us know your decision:
+<%= approval_url(@link.token) %>
+
+The link expires on <%= l @link.expires_at.in_time_zone.to_date, format: :long %>.

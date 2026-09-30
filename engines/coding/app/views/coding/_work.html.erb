@@ -1,0 +1,47 @@
+<%# locals: (todo:) %>
+<%# Starting a todo on your own machine, and where its code is now. %>
+<% workspace = Coding::Workspace.new(todo) %>
+<% if workspace.repositories.any? %>
+  <section class="settings__section flex flex-column gap-half" id="code_work">
+    <header>
+      <h2 class="divider">Work on it</h2>
+    </header>
+
+    <div class="copy-row">
+      <code class="input full-width txt-x-small overflow-ellipsis">runwell checkout_work --todo_id <%= todo.id %></code>
+      <button type="button" class="btn txt-x-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="runwell checkout_work --todo_id <%= todo.id %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
+    </div>
+    <p class="txt-x-small txt-subtle margin-none">Or ask your agent to “work on Todo:<%= todo.id %>”. <%= link_to "Clone commands and context", coding_todo_checkout_path(todo), class: "txt-link" %></p>
+
+    <% todo.coding_branches.includes(:repository).each do |branch| %>
+      <%# herb:key branch.id %>
+      <div class="flex align-center gap-half txt-small">
+        <div class="txt-align-start overflow-ellipsis min-width">
+          <strong><%= branch.name %></strong>
+          <div class="txt-x-small txt-subtle"><%= branch.repository.name %> · <%= branch.pr_label %><%= " · review requested" if branch.review_requested %></div>
+        </div>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <% if branch.checks_state == "failure" %>
+          <%= status_tag "Blocked" %>
+        <% end %>
+        <% if branch.pr_url %>
+          <%= link_to "Pull request", branch.pr_url, class: "btn txt-x-small", target: "_blank", rel: "noopener" %>
+        <% elsif branch.compare_url %>
+          <%= link_to "Open a pull request", branch.compare_url, class: "btn txt-x-small", target: "_blank", rel: "noopener" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% suggestions = Coding::TimeSuggestion.for(Current.user).select { it.todo == todo } %>
+    <% suggestions.each do |suggestion| %>
+      <%# herb:key suggestion.id %>
+      <div class="flex align-center gap-half txt-small">
+        <div class="txt-align-start overflow-ellipsis min-width">
+          <strong><%= code_duration suggestion.minutes %></strong> <span class="txt-subtle">suggested from your commits on <%= l suggestion.date, format: :short %></span>
+        </div>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <%= link_to "Review", coding_time_suggestions_path, class: "btn txt-x-small" %>
+      </div>
+    <% end %>
+  </section>
+<% end %>

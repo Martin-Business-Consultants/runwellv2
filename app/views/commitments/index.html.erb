@@ -1,0 +1,72 @@
+<% @page_title = "Commitments" %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
+        options: [ [ "Open", "open" ], [ "Resolved", "resolved" ] ] %>
+  <%= render "layouts/shared/quick_filter", title: "Whose…", param: :owner_kind, current: @owner_kind,
+        options: [ [ "Ours and theirs", "all" ], [ "Ours", "us" ], [ "Theirs", "client" ] ] %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view %>
+
+<% if @view == "cards" %>
+  <section class="cards cards--grid">
+    <div class="cards__list">
+      <%= with_automatic_pagination :commitments_cards, @page do %>
+        <% @commitments.each do |commitment| %>
+          <%# herb:key commitment.id %>
+          <% status = commitment.overdue? ? "Overdue" : (commitment.resolution&.humanize || "Open") %>
+          <%= render "layouts/shared/card", path: commitment.engagement ? engagement_path(commitment.engagement) : client_path(commitment.client),
+                title: commitment.description, id_label: commitment.engagement&.ref, context: commitment.client.name,
+                meta: [ safe_join([ commitment.owner_kind == "us" ? "Ours: " : "Theirs: ", commitment_owner(commitment) ]), "Due " + l(commitment.due_on, format: :short) ],
+                status: status, highlight: commitment.resolution == "done" %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% else %>
+  <section class="panel shadow center index-table">
+    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+      <thead>
+        <tr><th>Commitment</th><th>Whose</th><th>Due</th><th><%= term(:client) %></th><th>Status</th><th></th><th></th></tr>
+      </thead>
+      <tbody id="<%= pagination_frame_id_for(:commitments_rows, @page.number) %>">
+        <% @commitments.each do |commitment| %>
+          <%# herb:key commitment.id %>
+          <tr data-filter-target="item">
+            <td class="font-weight-bold"><%= commitment.description %></td>
+            <td class="txt-subtle"><%= commitment.owner_kind == "us" ? "Ours" : "Theirs" %>: <%= commitment_owner commitment %></td>
+            <td class="txt-nowrap"><%= l commitment.due_on, format: :short %></td>
+            <td class="txt-subtle">
+              <%= link_to commitment.client.name, commitment.client, class: "txt-ink" %><% if commitment.engagement %> · <%= link_to commitment.engagement.ref, commitment.engagement, class: "txt-ink" %><% end %>
+            </td>
+            <td><%= status_tag(commitment.overdue? ? "Overdue" : (commitment.resolution&.humanize || "Open"), highlight: commitment.resolution == "done") %></td>
+            <td>
+              <% if commitment.open? %>
+                <details>
+                  <summary class="btn txt-x-small">Resolve</summary>
+                  <%= form_with url: resolve_commitment_path(commitment), class: "flex flex-wrap align-center gap-half txt-small margin-block-start-half", data: { controller: "form" } do |form| %>
+                    <%= form.text_field :note, class: "input", autocomplete: "off", placeholder: "Note (optional)" %>
+                    <button type="submit" name="resolution" value="done" class="btn btn--link">Done</button>
+                    <button type="submit" name="resolution" value="missed" class="btn">Missed</button>
+                    <button type="submit" name="resolution" value="dropped" class="btn">Dropped</button>
+                  <% end %>
+                </details>
+              <% end %>
+            </td>
+            <%= render "layouts/shared/row_actions", name: "this commitment", edit_path: (edit_commitment_path(commitment) if commitment.open?), delete_path: (commitment_path(commitment) if commitment.open?) %>
+          </tr>
+        <% end %>
+        <%= table_next_page_row :commitments_rows, @page, columns: 7 %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
+
+<% if @commitments.none? %>
+  <div class="blank-slate">
+    <%= @state == "open" ? "No open commitments." : "Nothing resolved yet." %>
+    <% if Commitment.none? %>
+      A commitment is a dated promise, ours or the client’s. Add one from a <%= term(:client).downcase %> or <%= term(:engagement).downcase %> page, or triage a request into one.
+    <% end %>
+  </div>
+<% end %>

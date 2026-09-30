@@ -1,0 +1,31 @@
+<% @page_title = "Connect " + @client.name %>
+
+<div class="panel panel--centered flex flex-column gap">
+  <h1 class="txt-x-large font-weight-black margin-none">Connect <%= @client.name %>?</h1>
+  <p class="txt-medium margin-none">
+    <strong><%= @client.name %></strong> will act as your agent, <strong><%= Current.user.agent&.display_name || Current.user.display_name %></strong>, in Runwell:
+    everything your role (<%= Current.user.role %>) allows, from reading clients and engagements to adding work and notes.
+  </p>
+  <p class="txt-small txt-subtle margin-none">
+    It asks you before anything reaches a client, and what it does is marked as your agent “via <%= @client.name %>”. You can disconnect it any time in Settings → Connected apps.
+  </p>
+  <p class="txt-x-small txt-subtle margin-none">Returning to <%= URI(@redirect_uri).host %></p>
+
+  <%= form_with url: oauth_authorization_path, method: :post, class: "flex flex-column gap align-center", data: { turbo: false } do %>
+    <label class="flex align-center gap-half txt-small">
+      <%= check_box_tag :read_only, "1", params[:scope].to_s.split.include?("runwell:read"), id: "read_only" %>
+      <span>Read only: it can look at everything you can, and change nothing</span>
+    </label>
+    <% %w[client_id redirect_uri response_type code_challenge code_challenge_method state scope resource].each do |key| %>
+      <%# herb:key key %>
+      <input type="hidden" name="<%= key %>" value="<%= params[key] %>">
+    <% end %>
+    <div class="flex gap-half justify-center">
+      <button type="submit" name="approve" value="0" class="btn">Cancel</button>
+      <button type="submit" name="approve" value="1" class="btn btn--link">
+        <span>Connect</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+    </div>
+  <% end %>
+</div>

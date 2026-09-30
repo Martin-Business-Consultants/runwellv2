@@ -1,0 +1,23 @@
+<% @page_title = "Invoices" %>
+<%= render "settings/header", current: :quickbooks %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <div class="filters margin-block-end">
+        <%= render "layouts/shared/quick_filter", title: "Status", param: :status, options: [ [ "Open", "open" ], [ "Overdue", "overdue" ], [ "All", "all" ] ], current: @status %>
+      </div>
+      <ul class="settings__scrollable-list">
+        <% @invoices.each do |invoice| %>
+          <%# herb:key invoice.id %>
+          <li data-filter-target="item">
+            <%= render "quickbooks/invoice", invoice: invoice %>
+          </li>
+        <% end %>
+      </ul>
+      <% if @invoices.empty? %>
+        <p class="txt-small txt-subtle margin-none">No invoices here.</p>
+      <% end %>
+    </section>
+  </div>
+</section>

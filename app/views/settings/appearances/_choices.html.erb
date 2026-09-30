@@ -1,0 +1,15 @@
+<%# locals: (form:, attribute:, choices:, current:, icons: nil, sample_class: nil) %>
+<div class="theme-switcher appearance-choices flex flex-wrap gap max-width justify-center txt-small">
+  <% choices.each do |value, label| %>
+    <%# herb:key value %>
+    <label class="btn theme-switcher__btn">
+      <% if icons %>
+        <%= icon_tag icons.fetch(value) %>
+      <% elsif sample_class %>
+        <span class="appearance-sample <%= sample_class %>--<%= value %>" aria-hidden="true">Aa</span>
+      <% end %>
+      <span class="overflow-ellipsis"><%= label %></span>
+      <%= form.radio_button attribute, value, checked: value == current, data: { action: "click->appearance#preview" } %>
+    </label>
+  <% end %>
+</div>

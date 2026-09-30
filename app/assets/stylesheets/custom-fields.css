@@ -1,0 +1,21 @@
+/* A record's custom fields: label beside value, wrapping to stacked on narrow screens. */
+@layer components {
+  .custom-fields {
+    display: grid;
+    gap: var(--block-space-half) var(--inline-space);
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    margin: 0;
+  }
+
+  .custom-fields__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    min-inline-size: 0;
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+}

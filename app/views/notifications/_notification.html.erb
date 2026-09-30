@@ -1,0 +1,5 @@
+<%# locals: (notification:) %>
+<%= notification_tag notification do %>
+  <%= render "notifications/notification/header", notification: notification %>
+  <%= render "notifications/notification/body", notification: notification %>
+<% end %>

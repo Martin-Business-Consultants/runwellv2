@@ -1,0 +1,94 @@
+<% @page_title = "QuickBooks" %>
+<%= render "settings/header", current: :quickbooks %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Connection</h2>
+      </header>
+
+      <% if @connection.connected? %>
+        <p class="txt-small margin-none">
+          <%= status_tag "Active" %>
+          Connected to <strong><%= @connection.company_name || "QuickBooks" %></strong><%= " (sandbox)" if @connection.sandbox? %><%= " since " + l(@connection.connected_at.to_date, format: :long) if @connection.connected_at %>.
+        </p>
+      <% else %>
+        <p class="txt-small margin-none"><%= status_tag "Dormant" %> Not connected: <%= @connection.blocker %>.</p>
+      <% end %>
+      <% if @connection.connected? && @connection.blocker %>
+        <p class="txt-small txt-negative margin-none">Can’t invoice yet: <%= @connection.blocker %>.</p>
+      <% end %>
+      <% if @connection.last_error.present? %>
+        <p class="txt-small txt-negative margin-none"><%= @connection.last_error %></p>
+      <% end %>
+
+      <% summary = @connection.last_sync_summary %>
+      <% if summary.present? %>
+        <p class="txt-small txt-subtle margin-none">
+          Last sync <%= time_ago_in_words(@connection.last_synced_at) %> ago: <%= pluralize(summary["invoices"].to_i, "invoice") %>, <%= pluralize(summary["payments"].to_i, "payment") %>, <%= pluralize(summary["recurring"].to_i, "recurring invoice") %> checked<%= ", #{summary["customers"]} clients linked by name" if summary["customers"].to_i.positive? %>.
+        </p>
+        <% Array(summary["errors"]).each do |error| %>
+          <%# herb:key error %>
+          <p class="txt-x-small txt-negative margin-none"><%= error %></p>
+        <% end %>
+      <% end %>
+      <p class="txt-small txt-subtle margin-none"><%= pluralize(@customers, "client") %> linked to customers, <%= pluralize(@recurring, "service") %> with a recurring invoice.</p>
+
+      <div class="flex flex-wrap gap-half justify-center">
+        <% if @connection.configured? %>
+          <%= button_to quickbooks_authorization_path, class: "btn btn--link txt-small", form: { data: { turbo: false } } do %>
+            <%= icon_tag "globe" %>
+            <span><%= @connection.connected? ? "Reconnect QuickBooks" : "Connect to QuickBooks" %></span>
+          <% end %>
+        <% end %>
+        <% if @connection.connected? %>
+          <%= button_to quickbooks_sync_path, class: "btn txt-small" do %>
+            <%= icon_tag "refresh" %>
+            <span>Sync now</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @connection.connected? %>
+        <%= render "layouts/shared/confirm", trigger: "Disconnect", title: "Disconnect QuickBooks?",
+              body: "Runwell stops invoicing and syncing, and gives up its access at Intuit. Invoices already mirrored stay; nothing changes in QuickBooks.",
+              button: "Disconnect", path: quickbooks_settings_path, icon: "remove" %>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Credentials and invoice lines</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Your own Intuit app (developer.intuit.com &gt; your app &gt; Keys and credentials). Add this redirect URI to it:
+        <code class="txt-small"><%= quickbooks_authorization_url %></code>
+      </p>
+      <%= form_with model: @connection, url: quickbooks_settings_path, method: :patch, scope: :connection, class: "flex flex-column gap txt-small" do |form| %>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Client id</span>
+          <%= form.text_field :client_id, class: "input full-width", autocomplete: "off" %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Client secret</span>
+          <%= secret_field form, :client_secret %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Environment</span>
+          <%= form.select :environment, Quickbooks::Connection::ENVIRONMENTS.map { [ it.humanize, it ] }, {}, class: "input input--select full-width" %>
+        </label>
+        <% if @items.any? %>
+          <label class="flex flex-column gap-half">
+            <span class="font-weight-bold">Product or service for invoice lines</span>
+            <%= form.select :default_item_id, @items.map { [ it["Name"], it["Id"] ] }, { include_blank: "Choose one", selected: @connection.default_item_id }, class: "input input--select full-width" %>
+            <span class="txt-x-small txt-subtle">QuickBooks needs one on every line. Each line keeps Runwell’s own wording.</span>
+          </label>
+        <% elsif @connection.default_item_name %>
+          <p class="txt-small margin-none">Invoice lines use <strong><%= @connection.default_item_name %></strong>.</p>
+        <% end %>
+        <button type="submit" class="btn btn--link center">Save</button>
+      <% end %>
+    </section>
+  </div>
+</section>

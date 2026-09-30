@@ -1,0 +1,52 @@
+<%# locals: (version:, compact: nil) %>
+<%# A sent agreement version exactly as the client saw it. Shared by the emailed approval page and the portal. %>
+<% snapshot = agreement_snapshot(version) %>
+<% change = !version.initial? %>
+<div class="flex flex-column gap-half txt-align-start">
+  <% unless compact %>
+    <header>
+      <div class="txt-x-small txt-subtle txt-uppercase font-weight-bold"><%= snapshot["client"] %></div>
+      <h2 class="txt-large font-weight-black margin-none"><%= snapshot.dig("engagement", "ref") %> · <%= snapshot.dig("engagement", "title") %></h2>
+      <div class="txt-small txt-subtle">
+        <%= version.label %><% if version.sent_at %> · sent <%= l version.sent_at, format: :long %><% end %>
+      </div>
+    </header>
+  <% end %>
+
+  <% if version.summary.present? %>
+    <p class="txt-medium font-weight-bold margin-none"><%= version.summary %></p>
+  <% end %>
+  <% if version.reason.present? %>
+    <div class="txt-small"><%= rich_text version.reason %></div>
+  <% end %>
+  <% if snapshot["description"].present? && !change %>
+    <div class="txt-small txt-subtle"><%= rich_text snapshot["description"] %></div>
+  <% end %>
+
+  <% items = snapshot["items"].to_a %>
+  <% if items.any? %>
+    <ul class="settings__scrollable-list">
+      <% items.each_with_index do |item, index| %>
+        <%# herb:key index %>
+        <li class="flex align-center gap-half">
+          <div class="txt-align-start min-width"><%= item["description"] %></div>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <span class="txt-small txt-nowrap"><%= money item["price_cents"] %></span>
+        </li>
+      <% end %>
+      <li class="flex align-center gap-half">
+        <strong class="txt-align-start">
+          <%= change && version.kind != "revision" ? "Change to price" : "Total" %><% if version.cadence.present? %> (<%= version.cadence.humanize.downcase %>)<% end %>
+        </strong>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <strong class="txt-nowrap"><%= money agreement_total_cents(version) %></strong>
+      </li>
+    </ul>
+  <% elsif version.cadence.present? %>
+    <p class="txt-small margin-none">New price: <strong><%= money agreement_total_cents(version) %></strong> <%= version.cadence.humanize.downcase %></p>
+  <% end %>
+
+  <% if version.content_hash.present? %>
+    <div class="txt-x-small txt-subtle">ref <%= version.content_hash.first(16) %></div>
+  <% end %>
+</div>

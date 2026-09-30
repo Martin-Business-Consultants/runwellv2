@@ -1,0 +1,53 @@
+<%# locals: (engagement:) %>
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Agreement</h2>
+  </header>
+
+  <% versions = engagement.agreement_versions.includes(:approval, :scope_items, :sent_by, approval_links: :contact) %>
+  <% contacts = engagement.client.contacts.active.ordered.to_a %>
+  <% if versions.any? %>
+    <div class="flex flex-column gap">
+      <% versions.each do |version| %>
+        <%# herb:key version.id %>
+        <article class="agreement-version flex flex-column gap-half">
+          <% if version.draft? %>
+            <%= render "agreement_versions/draft", version: version, contacts: contacts %>
+          <% else %>
+            <%= render "agreement_versions/sent", version: version, contacts: contacts %>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="txt-subtle txt-small margin-none">No agreement yet.</p>
+  <% end %>
+
+  <%# Always rendered while open, so its state is wired even when a draft appears or goes away by a
+      morph refresh (idiomorph doesn't update ReActionView's manifests). It hides itself during a draft. %>
+  <% unless engagement.closed? %>
+    <%= render "agreement_versions/new", engagement: engagement %>
+  <% end %>
+</section>
+
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Scope in force</h2>
+  </header>
+
+  <% items = engagement.agreed_items %>
+  <% if items.any? %>
+    <ul class="settings__scrollable-list">
+      <% items.each do |item| %>
+        <%# herb:key item.id %>
+        <li data-filter-target="item" class="flex align-center gap-half">
+          <%= link_to item.description, item, class: "txt-ink txt-align-start overflow-ellipsis min-width" %>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="txt-subtle txt-small margin-none">Nothing approved yet.</p>
+  <% end %>
+</section>

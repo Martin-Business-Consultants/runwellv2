@@ -1,0 +1,70 @@
+<% @page_title = "Work on " + @todo.title %>
+<% workspace = @workspace %>
+
+<% content_for :header do %>
+  <%= parent_page @todo.title, todo_path(@todo) %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Clone and start</h2>
+      </header>
+      <% if workspace.repositories.any? %>
+        <% workspace.repositories.each do |repository| %>
+          <%# herb:key repository.id %>
+          <% commands = workspace.clone_commands(repository).join("\n") %>
+          <div class="flex flex-column gap-half txt-small">
+            <strong><%= repository.name %></strong>
+            <pre class="input full-width txt-x-small overflow-ellipsis"><%= commands %></pre>
+            <button type="button" class="btn txt-x-small center" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= commands %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy commands</button>
+            <% if repository.setup_notes.present? %>
+              <div class="txt-small"><%= rich_text repository.setup_notes %></div>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">No repository on this todo, its engagement or its client yet. Link one from the quick actions (A).</p>
+      <% end %>
+    </section>
+  </div>
+
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">What was agreed</h2>
+      </header>
+      <% items = workspace.agreed_items %>
+      <% if items.any? %>
+        <ul class="txt-small margin-none">
+          <% items.each do |item| %>
+            <%# herb:key item.id %>
+            <li><%= item.description %><%= " (this todo)" if item == @todo.scope_item %></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Nothing approved yet<%= ", so the draft may still change" if workspace.draft %>.</p>
+      <% end %>
+      <% if @todo.description.present? %>
+        <div class="txt-small"><%= rich_text @todo.description %></div>
+      <% end %>
+    </section>
+
+    <% commitments = workspace.commitments.to_a %>
+    <% if commitments.any? %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Open commitments</h2>
+        </header>
+        <ul class="txt-small margin-none">
+          <% commitments.each do |commitment| %>
+            <%# herb:key commitment.id %>
+            <li><%= commitment.description %> <span class="txt-subtle">· <%= commitment_owner commitment %> · due <%= l commitment.due_on, format: :short %></span></li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </div>
+</section>

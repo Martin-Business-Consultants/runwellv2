@@ -1,0 +1,5 @@
+<%# locals: (todos:, draggable: nil) %>
+<% todos.each do |todo| %>
+  <%# herb:key todo.id %>
+  <%= render "todos/display/preview", todo: todo, draggable: draggable %>
+<% end %>

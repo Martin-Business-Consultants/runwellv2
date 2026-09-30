@@ -1,0 +1,96 @@
+<% @page_title = "QA" %>
+<% clients = Qa::Check.active.includes(:client).map(&:client).uniq.sort_by(&:name) %>
+
+<section class="qa-metrics">
+  <%= link_to qa_root_path(state: "failing"), class: "qa-metric panel shadow txt-ink" do %>
+    <span class="qa-metric__label">Failing now</span>
+    <strong class="qa-metric__value <%= "txt-negative" if @stats.failing.positive? %>"><%= @stats.failing %></strong>
+    <span class="qa-metric__note"><%= @stats.due %> due for a test · <%= @stats.passing %> passing</span>
+  <% end %>
+  <%= link_to qa_issues_path(state: "all", found: "live"), class: "qa-metric panel shadow txt-ink" do %>
+    <span class="qa-metric__label">Escapes, last <%= @stats.days %> days</span>
+    <strong class="qa-metric__value <%= "txt-negative" if @stats.escapes.positive? %>"><%= @stats.escapes %></strong>
+    <span class="qa-metric__note"><%= pluralize @stats.opened, "issue" %> found, <%= @stats.caught %> before live · <%= pluralize @stats.tests, "test" %>, <%= qa_percent @stats.pass_rate %> passed</span>
+  <% end %>
+  <%= link_to qa_issues_path, class: "qa-metric panel shadow txt-ink" do %>
+    <span class="qa-metric__label">Open issues</span>
+    <strong class="qa-metric__value"><%= @stats.open_now %></strong>
+    <span class="qa-metric__note"><%= @stats.awaiting_verification %> to verify · median fix <%= qa_hours @stats.median_hours_to_fix %></span>
+  <% end %>
+</section>
+
+<% if @expiring.any? %>
+  <p class="qa-notice txt-small">
+    <strong>Ending soon:</strong>
+    <% @expiring.each_with_index do |expectation, index| %>
+      <%# herb:key expectation.id %>
+      <%= ", " if index.positive? %><%= link_to "#{expectation.label} on #{expectation.check.name} (#{expectation.check.client.name})", qa_check_path(expectation.check), class: "txt-link" %>
+      <span class="<%= "txt-negative" if expectation.expiring?(within: 7.days) %>"><%= expectation.expired? ? "ended" : "ends" %> <%= l expectation.expires_on, format: :short %></span>
+    <% end %>
+  </p>
+<% end %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
+        options: [ [ "Every check", "all" ], [ "Failing", "failing" ], [ "Due for a test", "due" ], [ "Passing", "passing" ] ] %>
+  <% if clients.size > 1 %>
+    <%= render "layouts/shared/quick_filter", title: "#{term(:client)}…", param: :client_id, current: params[:client_id].to_s,
+          options: [ [ "Every #{term(:client).downcase}", "" ] ] + clients.map { [ it.name, it.id.to_s ] } %>
+  <% end %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", new_text: ("Add a check" if can?(:manage_qa)), new_path: (new_qa_check_path(client_id: params[:client_id].presence) if can?(:manage_qa)) %>
+
+<section class="panel shadow center index-table">
+  <table class="data-table">
+    <thead>
+      <tr><th>Check</th><th><%= term(:client) %></th><th>Kind</th><th>Owner</th><th class="data-table__number">Facts</th><th>Last tested</th><th>Next due</th><th>Open issues</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% @checks.each do |check| %>
+        <%# herb:key check.id %>
+        <% last = check.latest_results.values.max_by(&:created_at) %>
+        <% tally = check.tally %>
+        <% open_issues = check.issues.unverified.size %>
+        <tr data-filter-target="item">
+          <td class="font-weight-bold">
+            <%= link_to check.name, qa_check_path(check), class: "txt-ink" %>
+            <% if check.live %>
+              <span class="txt-x-small txt-subtle">live</span>
+            <% end %>
+          </td>
+          <td class="txt-subtle"><%= link_to check.client.name, client_path(check.client), class: "txt-ink" %><% if check.engagement %> · <%= link_to check.engagement.ref, engagement_path(check.engagement), class: "txt-ink" %><% end %></td>
+          <td class="txt-subtle"><%= check.kind.humanize %></td>
+          <td>
+            <% if check.owner %>
+              <%= person_tag check.owner %>
+            <% else %>
+              <span class="txt-subtle">—</span>
+            <% end %>
+          </td>
+          <td class="data-table__number" title="<%= tally.fetch("passed", 0) %> passing, <%= tally.fetch("failed", 0) %> failing, <%= tally.fetch("untested", 0) %> not tested">
+            <%= check.expectations.size %><% if tally["failed"] %> <span class="txt-negative">· <%= tally["failed"] %> failing</span><% end %>
+          </td>
+          <td class="txt-subtle txt-nowrap"><%= last ? "#{time_ago_in_words(last.created_at)} ago" : "Never" %></td>
+          <td class="txt-nowrap <%= "txt-negative" if check.failing? %>"><%= check.failing? || check.due? ? "Now" : l(check.next_test_at.to_date, format: :short) %></td>
+          <td class="data-table__number"><%= open_issues.positive? ? link_to(open_issues, qa_issues_path(client_id: check.client_id), class: "txt-link") : "—" %></td>
+          <td><%= qa_status_tag check.state %></td>
+          <%= render "layouts/shared/row_actions", name: check.name, edit_path: (edit_qa_check_path(check) if can_edit_check?(check)) %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>
+
+<% if @total.to_i.positive? %>
+  <%= render "qa/pager", page: @page_number, pages: @pages, total: @total %>
+<% end %>
+
+<% if @checks.empty? %>
+  <div class="blank-slate">
+    <% if Qa::Check.none? %>
+      Nothing is checked yet. On a <%= term(:client).downcase %>’s page, add a check for each thing customers see (the quote email, the office’s lead alert, the thank-you page, the webhook into the CRM), then fill in what’s agreed on each. That’s the source of truth every test is compared with.
+    <% else %>
+      No check is <%= @state == "due" ? "due for a test" : @state %>.
+    <% end %>
+  </div>
+<% end %>

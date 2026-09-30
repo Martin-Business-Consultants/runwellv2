@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<% appearance = appearance_data %>
+<html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-default-theme="<%= appearance[:default_theme] %>">
+  <%= render "layouts/shared/head" %>
+
+  <body class="<%= class_names(@body_class, "with-sidenav": authenticated?) %>" data-controller="keyboard panes">
+    <div id="global-container" data-controller="filter">
+      <% if authenticated? %>
+        <%= render "layouts/shared/sidenav" %>
+      <% end %>
+      <header class="header" id="header">
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <% unless authenticated? %>
+          <%= link_to root_path, class: "header__logo txt-large font-weight-black txt-current", title: "Home" do %>
+            <%= render "layouts/shared/logo" %>
+          <% end %>
+        <% end %>
+
+        <%= yield :header %>
+      </header>
+
+      <%= render "layouts/shared/flash" %>
+
+      <main id="main">
+        <% if content_for?(:settings_nav) %>
+          <div class="settings-layout">
+            <%= yield :settings_nav %>
+            <div class="settings-layout__page"><%= yield %></div>
+          </div>
+        <% else %>
+          <%= yield %>
+        <% end %>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <%= yield :footer %>
+
+      <% if authenticated? && !@hide_footer_frames %>
+        <div id="footer_frames" data-turbo-permanent>
+          <%= render "bar/bar" %>
+          <%= render "notifications/tray" %>
+        </div>
+        <%= render "quick_actions/tray" %>
+      <% end %>
+    </footer>
+  </body>
+</html>

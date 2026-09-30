@@ -1,0 +1,59 @@
+<% @page_title = "Outsend" %>
+<%= render "settings/header", current: :outsend %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Mail through Outsend</h2>
+      </header>
+
+      <% source = Outsend::Connection.key_source %>
+      <% if source %>
+        <p class="txt-small margin-none">
+          <%= status_tag "Active" %>
+          Every email Runwell sends goes out through Outsend<%= { "environment" => ", with the key from the server’s environment (OUTSEND_API_KEY)", "credentials" => ", with the key from the encrypted credentials (outsend.api_key)" }[source] %>.
+        </p>
+      <% else %>
+        <p class="txt-small margin-none"><%= status_tag "Dormant" %> No key yet: mail uses the server’s own SMTP settings, if any.</p>
+      <% end %>
+
+      <% if @connection.last_delivered_at %>
+        <p class="txt-small txt-subtle margin-none">Last sent <%= time_ago_in_words(@connection.last_delivered_at) %> ago · <%= pluralize @connection.delivered_count, "message" %> so far.</p>
+      <% end %>
+      <% if @connection.last_error.present? %>
+        <p class="txt-small txt-negative margin-none">Last failure<%= " " + time_ago_in_words(@connection.last_error_at) + " ago" if @connection.last_error_at %>: <%= @connection.last_error %></p>
+      <% end %>
+
+      <% if source %>
+        <%= form_with url: outsend_test_message_path, class: "flex flex-wrap align-center gap-half txt-small" do |form| %>
+          <%= form.email_field :to, value: Current.user.email_address, class: "input", autocomplete: "off", placeholder: "you@agency.example" %>
+          <button type="submit" class="btn">
+            <%= icon_tag "paper-plane" %>
+            <span>Send a test email</span>
+          </button>
+        <% end %>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">API key</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">The key is from your Outsend account. It’s stored encrypted, and hidden here until you click the eye.</p>
+      <p class="txt-small txt-subtle margin-none">Mail comes from <%= Setting.current.mail_sender %>, which needs to be on a domain Outsend can send for. <%= link_to "Change the sender", settings_email_path, class: "txt-link" %>.</p>
+      <%= form_with model: @connection, url: outsend_settings_path, method: :patch, scope: :connection, class: "flex flex-column gap txt-small" do |form| %>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">API key</span>
+          <%= secret_field form, :api_key, placeholder: (source && source != "settings" ? "Using the key from the #{source == "credentials" ? "encrypted credentials" : "server’s environment"}. Paste one to use it instead" : "Paste the API key") %>
+        </label>
+        <button type="submit" class="btn btn--link center">Save</button>
+      <% end %>
+
+      <% if @connection.api_key.present? %>
+        <%= render "layouts/shared/confirm", trigger: "Forget the key", title: "Forget the Outsend key?",
+              body: "Mail goes back to the server’s own SMTP settings, if any.", button: "Forget it", path: outsend_settings_path, icon: "remove" %>
+      <% end %>
+    </section>
+  </div>
+</section>

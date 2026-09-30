@@ -1,0 +1,49 @@
+<%# locals: (contact:) %>
+<%= render "layouts/shared/errors", record: contact %>
+
+<%= form_with model: contact, url: contact.new_record? ? client_contacts_path(contact.client) : contact_path(contact),
+      class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Name</span>
+    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Role</span>
+    <%= form.text_field :role, class: "input full-width", autocomplete: "off", placeholder: "Marketing lead" %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Email</span>
+    <%= form.email_field :email, class: "input full-width", autocomplete: "off", placeholder: "ann@acme.example" %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Phone</span>
+    <%= form.telephone_field :phone, class: "input full-width", autocomplete: "off" %>
+  </label>
+
+  <div class="flex align-center gap-half txt-align-start">
+    <label class="switch flex-item-no-shrink">
+      <%= form.check_box :portal_access, class: "switch__input" %>
+      <span class="switch__btn"></span>
+    </label>
+    <%= form.label :portal_access, "Can sign in to the client portal", class: "txt-small" %>
+  </div>
+
+  <div class="flex align-center gap-half txt-align-start">
+    <label class="switch flex-item-no-shrink">
+      <%= form.check_box :can_approve, class: "switch__input" %>
+      <span class="switch__btn"></span>
+    </label>
+    <%= form.label :can_approve, "Can approve agreements", class: "txt-small" %>
+  </div>
+  <p class="txt-x-small txt-subtle txt-align-start margin-none">Portal contacts sign in with an emailed link, see this client’s shared work and documents, and send requests. Approvers also decide on agreements, in the portal or from an emailed approval link.</p>
+
+  <button type="submit" class="btn btn--link center" data-form-target="submit">
+    <span><%= contact.new_record? ? "Add contact" : "Save changes" %></span>
+    <%= icon_tag "arrow-right" %>
+  </button>
+
+  <%= link_to "Cancel and go back", client_path(contact.client), data: { form_target: "cancel" }, hidden: true %>
+<% end %>

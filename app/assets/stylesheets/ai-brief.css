@@ -1,0 +1,28 @@
+/* The AI button on work (todos/_ai_brief): copies a brief for a local AI. It says so once it has. */
+@layer components {
+  .ai-brief {
+    color: var(--color-link);
+    position: relative;
+  }
+
+  .ai-brief--copied::after {
+    animation: ai-brief-copied 1.6s ease forwards;
+    background: var(--color-ink);
+    border-radius: var(--radius-control);
+    color: var(--color-ink-inverted);
+    content: "Copied";
+    font-size: var(--text-x-small);
+    inset-block-end: calc(100% + 0.35em);
+    inset-inline-start: 50%;
+    padding: 0.2em 0.6em;
+    pointer-events: none;
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  @keyframes ai-brief-copied {
+    0%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}

@@ -1,0 +1,38 @@
+<%# locals: (setup:) %>
+<%# The first-run checklist, above what needs you. Each step checks itself off from what
+    exists; it goes away once the required ones are done, or when hidden. %>
+<section class="panel panel--wide shadow txt-align-start settings__section setup">
+  <header>
+    <h2 class="divider">Get set up <span class="txt-subtle"><%= setup.done_count %> of <%= setup.steps.size %></span></h2>
+  </header>
+
+  <ol class="setup__steps">
+    <% setup.steps.each do |step| %>
+      <%# herb:key step.key %>
+      <li class="setup__step flex align-start gap-half">
+        <% if step.done %>
+          <span class="setup__check setup__check--done" aria-hidden="true"><%= icon_tag "check" %></span>
+        <% else %>
+          <span class="setup__check" aria-hidden="true"></span>
+        <% end %>
+        <div class="min-width flex-item-grow">
+          <% if step.done %>
+            <span class="txt-subtle setup__title--done"><%= step.title %></span>
+            <span class="for-screen-reader">(done)</span>
+          <% else %>
+            <%= link_to step.title, step.path, class: "setup__link font-weight-bold" %>
+            <% if step.optional %>
+              <span class="txt-x-small txt-subtle">optional</span>
+            <% end %>
+            <div class="txt-x-small txt-subtle"><%= step.text %></div>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+
+  <div class="setup__footer flex align-center justify-space-between gap txt-small">
+    <%= link_to "How Runwell works", settings_help_path, class: "txt-link" %>
+    <%= button_to "Hide this", setup_path, method: :delete, class: "btn btn--plain txt-link txt-small" %>
+  </div>
+</section>

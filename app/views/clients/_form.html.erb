@@ -1,0 +1,29 @@
+<%# locals: (client:) %>
+<%= render "layouts/shared/errors", record: client %>
+
+<%= form_with model: client, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Name</span>
+    <%= form.text_field :name, required: true, class: "input full-width", autofocus: client.new_record?, autocomplete: "off", placeholder: "Acme Inc." %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Status</span>
+    <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, class: "input input--select full-width" %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Time zone</span>
+    <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Time.zone_default.name})" }, class: "input input--select full-width" %>
+    <span class="txt-x-small txt-subtle">Their portal, approval pages and emails show times in it.</span>
+  </label>
+
+  <%= custom_field_inputs form, client %>
+
+  <button type="submit" class="btn btn--link center" data-form-target="submit">
+    <span><%= client.new_record? ? "Add client" : "Save changes" %></span>
+    <%= icon_tag "arrow-right" %>
+  </button>
+
+  <%= link_to "Cancel and go back", client.new_record? ? clients_path : client_path(client), data: { form_target: "cancel" }, hidden: true %>
+<% end %>

@@ -1,0 +1,131 @@
+<% @page_title = "Google Ads" %>
+<%= render "settings/header", current: :google_ads %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Connection</h2>
+      </header>
+
+      <% if @connection.connected? %>
+        <p class="txt-small margin-none">
+          <%= status_tag "Active" %>
+          Connected<%= " since " + l(@connection.connected_at.to_date, format: :long) if @connection.connected_at %>.
+          Read-only: Runwell only ever asks Google what an account spent and what it produced.
+        </p>
+      <% else %>
+        <p class="txt-small margin-none"><%= status_tag "Dormant" %> Not connected: <%= @connection.blocker %>.</p>
+      <% end %>
+
+      <% if @connection.last_error.present? %>
+        <p class="txt-small txt-negative margin-none"><%= @connection.last_error %></p>
+      <% end %>
+
+      <% summary = @connection.last_sync_summary %>
+      <% if summary.present? %>
+        <p class="txt-small txt-subtle margin-none">
+          Last sync <%= time_ago_in_words(@connection.last_synced_at) %> ago: <%= pluralize(summary["accounts"].to_i, "account") %>, <%= pluralize(summary["months"].to_i, "month") %><%= ", #{summary["failed"]} failed" if summary["failed"].to_i.positive? %>.
+        </p>
+        <% Array(summary["errors"]).each do |error| %>
+          <%# herb:key error %>
+          <p class="txt-x-small txt-negative margin-none"><%= error %></p>
+        <% end %>
+      <% end %>
+
+      <div class="flex flex-wrap gap-half justify-center">
+        <% if @connection.configured? %>
+          <%= button_to google_ads_authorization_path, class: "btn btn--link txt-small", form: { data: { turbo: false } } do %>
+            <%= icon_tag "globe" %>
+            <span><%= @connection.connected? ? "Reconnect with Google" : "Sign in with Google" %></span>
+          <% end %>
+        <% end %>
+        <% if @connection.connected? %>
+          <%= button_to google_ads_sync_path, class: "btn txt-small" do %>
+            <%= icon_tag "refresh" %>
+            <span>Sync now</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @connection.connected? %>
+        <%= render "layouts/shared/confirm", trigger: "Disconnect", title: "Disconnect Google Ads?",
+              body: "Runwell stops copying figures and gives up its access at Google. Reports keep what was already copied.",
+              button: "Disconnect", path: google_ads_settings_path, icon: "remove" %>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Credentials</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Your own Google Cloud OAuth client, a Google Ads developer token (from the API Center in your manager account) and that manager account’s id.
+        Register this redirect URI on the OAuth client: <code class="txt-small"><%= google_ads_authorization_url %></code>
+      </p>
+      <%= form_with model: @connection, url: google_ads_settings_path, method: :patch, scope: :connection, class: "flex flex-column gap txt-small" do |form| %>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">OAuth client id</span>
+          <%= form.text_field :client_id, class: "input full-width", autocomplete: "off" %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">OAuth client secret</span>
+          <%= secret_field form, :client_secret %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Developer token</span>
+          <%= secret_field form, :developer_token %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Manager account id</span>
+          <%= form.text_field :login_customer_id, value: GoogleAds::Client.format_customer_id(@connection.login_customer_id).presence, class: "input full-width", autocomplete: "off", placeholder: "123-456-7890" %>
+        </label>
+        <label class="flex flex-column gap-half">
+          <span class="font-weight-bold">Email when an account stops serving</span>
+          <%= form.text_field :alert_recipients, value: @connection.alert_recipient_list.join(", "), class: "input full-width", autocomplete: "off", placeholder: "billing@agency.example, ann@agency.example" %>
+          <span class="txt-x-small txt-subtle">Anyone, with or without a login. Staff also see stopped accounts on their home page.</span>
+        </label>
+        <button type="submit" class="btn btn--link center">Save</button>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Linked accounts</h2>
+      </header>
+      <% if @links.any? %>
+        <ul class="settings__scrollable-list">
+          <% @links.each do |link| %>
+            <%# herb:key link.id %>
+            <% month = @latest[link.customer_id] %>
+            <li class="flex align-center gap-half txt-small" data-filter-target="item">
+              <%= link_to google_ads_engagement_report_path(link.engagement), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+                <strong><%= link.engagement.client.name %> · <%= link.engagement.ref %></strong>
+                <div class="txt-x-small txt-subtle"><%= link.label %> · <%= link.formatted_customer_id %></div>
+              <% end %>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <% if link.account&.blocked? %>
+                <%= status_tag "Stopped" %>
+              <% end %>
+              <span class="txt-nowrap"><%= month ? month.label + " " + money(month.cost_cents) : "Not synced yet" %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">No engagement is linked yet. Link one from its page (the Google Ads section).</p>
+      <% end %>
+
+      <% if @accessible.any? %>
+        <details>
+          <summary class="btn btn--link txt-small center">Accounts this login can reach (<%= @accessible.size %>)</summary>
+          <ul class="settings__scrollable-list txt-small">
+            <% @accessible.each do |label, id| %>
+              <%# herb:key id %>
+              <li><%= label %></li>
+            <% end %>
+          </ul>
+        </details>
+      <% end %>
+    </section>
+  </div>
+</section>

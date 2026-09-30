@@ -1,0 +1,122 @@
+<% @page_title = @issue.title %>
+
+<% content_for :header do %>
+  <%= parent_page "QA issues", qa_issues_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <% if @issue.fillable_by?(Current.user) %>
+        <div class="page-heading__actions">
+          <%= link_to edit_qa_issue_path(@issue), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+            <%= icon_tag "pencil" %>
+            <span>Edit</span>
+            <kbd class="hide-on-touch">E</kbd>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <section class="settings__section flex flex-column gap-half">
+      <div class="flex flex-wrap align-center gap-half txt-small">
+        <%= qa_status_tag @issue.state %>
+        <% if @issue.found_live %>
+          <%= status_tag "Found live" %>
+        <% end %>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <%= person_tag @issue.assignee, fallback: "Unassigned" %>
+      </div>
+      <dl class="qa-facts txt-small">
+        <dt><%= term(:client) %></dt>
+        <dd>
+          <%= link_to @issue.client.name, client_path(@issue.client), class: "txt-link" %>
+          <% if @issue.engagement %> · <%= link_to @issue.engagement.ref, engagement_path(@issue.engagement), class: "txt-link" %><% end %>
+          <% if @issue.todo %> · <%= link_to @issue.todo.title, todo_path(@issue.todo), class: "txt-link" %><% end %>
+        </dd>
+        <% if @issue.check %>
+          <dt>Check</dt><dd><%= link_to @issue.check.name, qa_check_path(@issue.check), class: "txt-link" %><% if @issue.run %> · <%= link_to "the test that found it", qa_run_path(@issue.run), class: "txt-link" %><% end %></dd>
+        <% end %>
+        <% if @issue.url %>
+          <dt>Where</dt><dd><%= link_to @issue.url, @issue.url, class: "txt-link", target: "_blank", rel: "noopener" %></dd>
+        <% end %>
+        <% if @issue.environment.present? %>
+          <dt>Seen on</dt><dd><%= @issue.environment %></dd>
+        <% end %>
+        <dt>Opened</dt><dd><%= l @issue.created_at, format: :short %> by <%= @issue.opened_by&.display_name || @issue.run&.tester_label || @issue.source %></dd>
+        <% if @issue.fixed_at %>
+          <dt>Fixed</dt><dd><%= l @issue.fixed_at, format: :short %><%= " by " + @issue.fixed_by.display_name if @issue.fixed_by %>, after <%= qa_hours @issue.hours_to_fix %></dd>
+          <dt>Root cause</dt><dd><%= @issue.root_cause_label || "—" %></dd>
+        <% end %>
+        <% if @issue.verified_at %>
+          <dt>Verified</dt><dd><%= l @issue.verified_at, format: :short %> by <%= @issue.verified_by_run ? link_to(@issue.verified_by_run.tester_label, qa_run_path(@issue.verified_by_run), class: "txt-link") : @issue.verified_by&.display_name %></dd>
+        <% end %>
+      </dl>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">How to see it</h2>
+      </header>
+      <div class="txt-small"><%= rich_text @issue.steps %></div>
+    </section>
+
+    <section class="settings__section">
+      <div class="qa-compare txt-small">
+        <span class="txt-subtle">Expected</span><div class="qa-fact__value"><%= rich_text @issue.expected %></div>
+        <span class="txt-subtle">Actual</span><div class="qa-fact__value txt-negative"><%= rich_text @issue.actual %></div>
+      </div>
+    </section>
+
+    <% if @issue.fix_note.present? %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider">The fix</h2>
+        </header>
+        <div class="txt-small"><%= rich_text @issue.fix_note %></div>
+      </section>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Next</h2>
+      </header>
+      <% case @issue.state %>
+      <% when "open" %>
+        <p class="txt-small margin-none"><%= @issue.assignee ? "#{@issue.assignee.display_name} fixes it" : "Assign it to whoever fixes it" %>, then marks it fixed with what caused it.</p>
+        <details>
+          <summary class="btn btn--link txt-small">Mark fixed</summary>
+          <%= form_with url: fix_qa_issue_path(@issue), class: "flex flex-column gap-half txt-small margin-block-start-half", data: { turbo_action: "advance" } do |form| %>
+            <%= form.select :root_cause, Qa::Issue::ROOT_CAUSES.map { |key, words| [ words, key ] }, { include_blank: "What caused it?" }, required: true, class: "input input--select full-width", aria: { label: "Root cause" } %>
+            <%= rich_text_field form, :note, placeholder: "What was changed, and where (optional)" %>
+            <button type="submit" class="btn btn--link txt-small center">Mark fixed</button>
+          <% end %>
+        </details>
+      <% when "fixed" %>
+        <p class="txt-small margin-none">
+          Fixed, waiting to be verified<%= @issue.check ? ": the next passing test of #{@issue.check.name} does it, or" : " by" %> someone other than <%= @issue.fixed_by&.display_name || "whoever fixed it" %>.
+        </p>
+        <% if Qa::Attention.verifiable_by?(Current.user, @issue) %>
+          <%= button_to "Verify the fix", verify_qa_issue_path(@issue), class: "btn btn--link txt-small center" %>
+        <% end %>
+      <% when "verified" %>
+        <p class="txt-small margin-none">Fixed and verified.</p>
+      <% end %>
+      <% unless @issue.open? %>
+        <details>
+          <summary class="btn txt-small">Reopen</summary>
+          <%= form_with url: reopen_qa_issue_path(@issue), class: "flex flex-column gap-half txt-small margin-block-start-half", data: { turbo_action: "advance" } do |form| %>
+            <%= form.text_field :note, class: "input full-width", autocomplete: "off", placeholder: "Why it isn’t fixed", aria: { label: "Why" } %>
+            <button type="submit" class="btn txt-small center">Reopen</button>
+          <% end %>
+        </details>
+      <% end %>
+    </section>
+
+    <%= render "events/timeline", subject: @issue %>
+  </aside>
+</section>

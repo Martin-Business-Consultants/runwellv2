@@ -1,0 +1,32 @@
+<%# locals: (record:) %>
+<%# The repositories a client, engagement or todo works in: its own, or the ones it inherits
+    from above (a todo from its engagement, an engagement from its client). %>
+<% own = record.coding_repositories.ordered.includes(:added_by).to_a %>
+<% inherited = own.empty? ? Coding::Repository.for(record) : [] %>
+<section class="settings__section" id="code">
+  <header>
+    <h2 class="divider">Code</h2>
+  </header>
+
+  <ul class="settings__scrollable-list flex flex-column gap">
+    <% own.each do |repository| %>
+      <%# herb:key repository.id %>
+      <li data-filter-target="item">
+        <%= render "coding/repository", repository: repository %>
+      </li>
+    <% end %>
+    <% inherited.each do |repository| %>
+      <%# herb:key repository.id %>
+      <li class="flex align-center gap-half txt-small" data-filter-target="item">
+        <%= link_to repository.web_url, class: "txt-ink txt-align-start overflow-ellipsis min-width", target: "_blank", rel: "noopener" do %>
+          <strong><%= repository.name %></strong>
+          <div class="txt-x-small txt-subtle">From <%= repository.linked_label %> · <%= repository.default_branch %></div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if own.empty? && inherited.empty? %>
+    <p class="txt-subtle txt-small margin-none">No repository yet. Link one from the quick actions (A), under Repository.</p>
+  <% end %>
+</section>

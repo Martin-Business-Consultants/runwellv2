@@ -1,0 +1,21 @@
+<p><strong><%= @account.label %></strong> has stopped running ads.</p>
+
+<p>Google reports the account as <%= @account.status.to_s.downcase %>. <%= @account.explanation %></p>
+
+<p>Google doesn’t tell us why an account stopped, only that it has. Open Google Ads → Billing on <%= @account.formatted_customer_id %> to see the reason.</p>
+
+<% if @engagements.any? %>
+  <p>Who this affects:</p>
+  <ul>
+    <% @engagements.each do |engagement| %>
+      <%# herb:key engagement.id %>
+      <li><%= engagement.client.name %>: <%= link_to "#{engagement.ref} #{engagement.title}", engagement_url(engagement) %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if @last_month %>
+  <p>For scale: this account spent <%= Money.format(@last_month.cost_cents) %> in <%= @last_month.month.strftime("%B") %>.</p>
+<% end %>
+
+<p><%= link_to "Google Ads settings", google_ads_settings_url %></p>

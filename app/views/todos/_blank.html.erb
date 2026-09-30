@@ -1,0 +1,10 @@
+<%# locals: () %>
+<%# What an empty Work list says: work is never added here, so say where it comes from. %>
+<div class="blank-slate">
+  <% if Todo.exists? %>
+    No <%= term(:work).downcase %> matches these filters.
+  <% else %>
+    No <%= term(:work).downcase %> yet. It lives on <%= term(:engagement, count: 2).downcase %>: approving an agreement adds one per <%= term(:scope_item).downcase %>, and you can add more there.
+    <%= link_to "Go to #{term(:engagement, count: 2).downcase}", engagements_path(state: "open"), class: "txt-link" %>
+  <% end %>
+</div>

@@ -1,0 +1,42 @@
+<% @page_title = "Weekly updates" %>
+<% owed = AccountManagement::WeeklyUpdate.owed_by?(Current.user) %>
+
+<%= render "account_management/links" %>
+
+<%= render "layouts/shared/index_toolbar", new_text: (@this_week ? nil : "Write this week’s"), new_path: (@this_week ? nil : new_account_management_weekly_update_path) %>
+
+<% if @this_week && !@this_week.sent? %>
+  <p class="accounts-notice txt-small">
+    This week’s update is a draft, due <%= l @this_week.due_at, format: :short %>. <%= link_to "Finish and send it", edit_account_management_weekly_update_path(@this_week), class: "txt-link" %>.
+  </p>
+<% end %>
+
+<% if @updates.any? %>
+  <section class="panel shadow center index-table">
+    <table class="data-table">
+      <thead>
+        <tr><th>Week</th><th>From</th><th>Due</th><th>Sent</th><th>State</th></tr>
+      </thead>
+      <tbody>
+        <% @updates.each do |update| %>
+          <%# herb:key update.id %>
+          <tr data-filter-target="item">
+            <td class="font-weight-bold"><%= link_to update.label, (update.sent? ? account_management_weekly_update_path(update) : edit_account_management_weekly_update_path(update)), class: "txt-ink" %></td>
+            <td><%= person_tag update.user %></td>
+            <td class="txt-nowrap txt-subtle"><%= l update.due_at, format: :short %></td>
+            <td class="txt-nowrap <%= "txt-negative" if update.late? %>"><%= update.sent? ? l(update.sent_at, format: :short) : "—" %></td>
+            <td><%= account_status_tag update.sent? ? (update.on_time? ? "on_time" : "late") : (update.late? ? "late" : "draft") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% else %>
+  <div class="blank-slate">
+    <% if owed %>
+      No updates yet. Each week, by the end of Friday, write how every <%= term(:client).downcase %> you lead is doing. It starts from a draft built from the week’s meetings, finished work, commitments and accounts.
+    <% else %>
+      No updates yet. Whoever leads a <%= term(:client).downcase %> writes one each week, due by the end of Friday.
+    <% end %>
+  </div>
+<% end %>

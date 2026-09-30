@@ -1,0 +1,28 @@
+<% @page_title = "Edit request" %>
+
+<% content_for :header do %>
+  <%= parent_page "Request", request_path(@request_record) %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "requests/form", request_record: @request_record %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @request_record.status.humanize, highlight: @request_record.open? %></dd>
+        <dt><%= term(:client) %></dt><dd><%= @request_record.client ? link_to(@request_record.client.name, @request_record.client, class: "txt-link") : "No client matched" %></dd>
+        <dt>Source</dt><dd><%= @request_record.source %></dd>
+        <dt>Received</dt><dd><%= l @request_record.received_at, format: :short %></dd>
+      </dl>
+    </section>
+  </aside>
+</section>

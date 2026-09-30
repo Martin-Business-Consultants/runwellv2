@@ -1,0 +1,58 @@
+<% @page_title = term(:engagement, count: 2) %>
+<% listed = CustomField.for("Engagement").listed.to_a %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
+        options: Engagement.filter_options(Engagement.filter_counts(label: @label)) %>
+  <%= render "layouts/shared/quick_filter", title: "Type…", param: :label, current: @label,
+        options: [ [ "All types", "all" ] ] + Setting.current.enabled_labels.map { [ label_term(it, count: 2), it ] } %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:engagement).downcase, new_path: new_engagement_path %>
+
+<% if @view == "cards" %>
+  <section class="cards cards--grid">
+    <div class="cards__list">
+      <%= with_automatic_pagination :engagements_cards, @page do %>
+        <% @engagements.each do |engagement| %>
+          <%# herb:key engagement.id %>
+          <%= render "layouts/shared/card", path: engagement_path(engagement), title: engagement.title, id_label: engagement.ref,
+                context: engagement.client.name,
+                meta: [ engagement.label_name, money(engagement.agreed_amount_cents) + (engagement.recurring? ? " / period" : "") ],
+                status: engagement.state.humanize, highlight: engagement.state == "approved" %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% elsif @engagements.any? %>
+  <section class="panel shadow center index-table">
+    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+      <thead>
+        <tr><th>Ref</th><th>Title</th><th><%= term(:client) %></th><th>Type</th><th class="data-table__number">Agreed</th><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+      </thead>
+      <tbody id="<%= pagination_frame_id_for(:engagements_rows, @page.number) %>">
+        <% @engagements.each do |engagement| %>
+          <%# herb:key engagement.id %>
+          <tr data-filter-target="item">
+            <td class="txt-nowrap"><%= link_to engagement.ref, engagement, class: "txt-ink font-weight-bold" %></td>
+            <td><%= link_to engagement.title, engagement, class: "txt-ink" %></td>
+            <td><%= link_to engagement.client.name, engagement.client, class: "txt-ink txt-subtle" %></td>
+            <td class="txt-subtle"><%= engagement.label_name %></td>
+            <td class="data-table__number"><%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></td>
+            <td><%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %></td>
+            <% listed.each do |field| %>
+              <%# herb:key field.id %>
+              <td class="txt-subtle"><%= custom_field_text(field, engagement.custom_value(field)) %></td>
+            <% end %>
+            <%= render "layouts/shared/row_actions", name: engagement.ref, edit_path: edit_engagement_path(engagement), delete_path: (engagement_path(engagement) if engagement.deletable?),
+                  delete_message: "It was never sent, so its draft agreement, work and notes go with it." %>
+          </tr>
+        <% end %>
+        <%= table_next_page_row :engagements_rows, @page, columns: 7 + listed.size %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
+
+<% if @engagements.none? %>
+  <div class="blank-slate">No <%= term(:engagement, count: 2).downcase %> match.</div>
+<% end %>

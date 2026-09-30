@@ -1,0 +1,27 @@
+<% @page_title = "Join Runwell" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if @user.errors.any? %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Join Runwell</h1>
+  <p class="txt-medium margin-none"><%= @invitation.invited_by.display_name %> invited <strong><%= @invitation.email_address %></strong> as <%= @invitation.role == "owner" ? "an owner" : "a " + @invitation.role %>.</p>
+
+  <%= form_with model: @user, url: invitation_path(params[:token]), method: :patch, scope: :user, class: "flex flex-column gap txt-medium margin-block-start", data: { controller: "form" } do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.text_field :name, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "name", placeholder: "Enter your full name…", maxlength: 240 %>
+    </label>
+
+    <label class="flex align-center gap input input--actor">
+      <%= form.password_field :password, required: true, class: "input txt-large full-width", autocomplete: "new-password", placeholder: "Choose a password…", maxlength: 72 %>
+    </label>
+
+    <%= render "layouts/shared/errors", record: @user %>
+
+    <button type="submit" class="btn btn--link center txt-medium" data-form-target="submit">
+      <span>Join</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

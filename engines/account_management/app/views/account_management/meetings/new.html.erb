@@ -1,0 +1,18 @@
+<% @page_title = "Plan a meeting" %>
+
+<% content_for :header do %>
+  <%= parent_page @meeting.client ? @meeting.client.name : "Meetings", @meeting.client ? client_path(@meeting.client, tab: "plugin-account_management") : account_management_meetings_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "layouts/shared/errors", record: @meeting %>
+    <%= render "account_management/meetings/form", meeting: @meeting %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <%= render "account_management/meetings/sidebar" %>
+  </aside>
+</section>

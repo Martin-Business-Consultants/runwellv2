@@ -1,0 +1,16 @@
+<%# locals: (item:) %>
+<div class="scope-item-fields txt-small">
+  <%= form_with model: item, namespace: dom_id(item) do |form| %>
+    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", aria: { label: "Description" } %>
+    <%= money_field form, :price_cents, class: "input", placeholder: "Price", aria: { label: "Price" } %>
+    <%= form.text_field :internal_estimate, class: "input", autocomplete: "off", placeholder: "Internal est.", aria: { label: "Internal estimate" } %>
+    <button type="submit" class="btn btn--circle" title="Save item">
+      <%= icon_tag "check" %>
+      <span class="for-screen-reader">Save item</span>
+    </button>
+  <% end %>
+  <%= button_to scope_item_path(item), method: :delete, class: "btn btn--circle txt-negative", title: "Remove item" do %>
+    <%= icon_tag "minus" %>
+    <span class="for-screen-reader">Remove item</span>
+  <% end %>
+</div>

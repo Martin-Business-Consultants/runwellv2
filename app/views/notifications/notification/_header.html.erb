@@ -1,0 +1,22 @@
+<%# locals: (notification:) %>
+<% ref, name = notification_target_label(notification.notifiable_target) %>
+<header class="card__header">
+  <div class="card__board">
+    <span class="card__id"><%= ref %></span>
+    <span class="card__board-name">
+      <span class="overflow-ellipsis"><%= name %></span>
+    </span>
+  </div>
+
+  <div class="card__notification-meta overflow-ellipsis flex-item-grow flex-item-no-shrink txt-align-end">
+    <span class="card__creator"><%= notification.creator.familiar_name %></span>
+  </div>
+
+  <div class="card__notification-meta overflow-ellipsis flex-item-no-shrink">
+    <span class="card__timestamp"><%= time_ago_in_words(notification.created_at) %> ago</span>
+  </div>
+
+  <div class="card__notification-meta flex-item-no-shrink">
+    <%= notification_toggle_read_button(notification, url: notification_reading_path(notification)) %>
+  </div>
+</header>

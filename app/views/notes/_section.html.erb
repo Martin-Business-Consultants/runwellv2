@@ -1,0 +1,27 @@
+<%# locals: (subject:) %>
+<section class="settings__section" id="notes">
+  <header>
+    <h2 class="divider">Notes</h2>
+  </header>
+
+  <% notes = subject.notes.recent.includes(:author) %>
+  <ul class="settings__scrollable-list">
+    <% notes.each do |note| %>
+      <%# herb:key note.id %>
+      <li data-filter-target="item" class="flex flex-column txt-align-start">
+        <div class="flex align-center gap-half txt-x-small txt-subtle">
+          <%= person_tag note.author %>
+          <span class="flex-item-grow"><%= [ note.kind.humanize, l(note.occurred_at, format: :short), note.source ].compact_blank.join(" · ") %></span>
+          <% if note.deletable_by?(Current.user) %>
+            <%= render "layouts/shared/delete_dialog", name: "this note", path: note_path(note), trigger_class: "txt-x-small" %>
+          <% end %>
+        </div>
+        <div class="txt-small"><%= rich_text note.body %></div>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if notes.none? %>
+    <p class="txt-subtle txt-small margin-none">No notes yet.</p>
+  <% end %>
+</section>

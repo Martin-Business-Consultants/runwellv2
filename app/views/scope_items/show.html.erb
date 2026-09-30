@@ -1,0 +1,77 @@
+<% @page_title = @item.description %>
+<% done, total = @item.progress %>
+<% tabs = [
+     record_tab("work", term(:work), count: @todos.size),
+     record_tab("notes", "Notes", count: @item.notes.count),
+     record_tab("documents", "Documents", count: @item.documents.count)
+   ] %>
+<% tab = current_record_tab(tabs, "work") %>
+
+<% content_for :header do %>
+  <%= parent_page @engagement.ref, @engagement %>
+
+  <div class="header__actions header__actions--end">
+  </div>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "work" %>
+        <section class="settings__section">
+          <header>
+            <h2 class="divider"><%= term(:work) %></h2>
+          </header>
+
+          <ul class="settings__scrollable-list">
+            <% @todos.each do |todo| %>
+              <%# herb:key todo.id %>
+              <%= render "todos/todo", todo: todo %>
+            <% end %>
+          </ul>
+
+          <% if @todos.none? %>
+            <p class="txt-subtle txt-small margin-none">No work under this yet.</p>
+          <% end %>
+
+          <% unless @engagement.closed? %>
+            <%= render "todos/add", engagement: @engagement, scope_item: @item %>
+          <% end %>
+        </section>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @item %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @item %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Delivery</dt><dd><%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %></dd>
+        <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
+        <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement, class: "txt-link" %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
+        <dt>Agreement</dt><dd><%= @item.agreement_version.label %> (<%= @item.agreement_version.status.humanize.downcase %>)</dd>
+        <dt>Price</dt><dd><%= money @item.price_cents %></dd>
+        <% if @item.internal_estimate.present? %>
+          <dt>Estimate</dt><dd><%= @item.internal_estimate %> <span class="txt-subtle">(internal)</span></dd>
+        <% end %>
+      </dl>
+    </section>
+
+  </aside>
+</section>

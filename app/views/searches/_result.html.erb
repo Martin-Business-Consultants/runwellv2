@@ -1,0 +1,18 @@
+<%# locals: (result:) %>
+<%# Records must come from a search: ActiveSearch sets #hit only on ones it hydrated. %>
+<li>
+  <%= link_to search_result_path(result), class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
+    <div>
+      <h3 class="search__title txt--medium margin-none">
+        <%= result.hit.highlight(:title) || result.search_title %>
+      </h3>
+
+      <% if content = result.hit.highlight(:content) || result.search_content.presence %>
+        <div class="search__excerpt"><%= content.html_safe? ? content : content.truncate(200) %></div>
+      <% end %>
+    </div>
+    <div class="overflow-ellipsis translucent txt-ink">
+      <%= search_result_context(result) %>
+    </div>
+  <% end %>
+</li>

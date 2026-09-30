@@ -1,0 +1,28 @@
+<% @page_title = "Ask for something" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+  <p class="txt-small txt-subtle margin-none">A change, a question, something new. We’ll get back to you.</p>
+
+  <%= render "layouts/shared/errors", record: @request_record %>
+
+  <%= form_with model: @request_record, scope: :request, url: portal_requests_path, class: "flex flex-column gap txt-medium",
+        data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+    <label class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold">Subject</span>
+      <%= form.text_field :subject, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
+    </label>
+
+    <label class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold">Details</span>
+      <%= rich_text_field form, :body %>
+    </label>
+
+    <button type="submit" class="btn btn--link center" data-form-target="submit">
+      <span>Send request</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+
+    <%= link_to "Cancel and go back", portal_root_path, data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</div>

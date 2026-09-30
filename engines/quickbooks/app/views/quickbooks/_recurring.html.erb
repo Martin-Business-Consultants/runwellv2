@@ -1,0 +1,54 @@
+<%# locals: (engagement:) %>
+<% billing = Quickbooks::RecurringBilling.new(engagement) %>
+<% link = billing.link %>
+<% blocker = link ? nil : billing.blocker %>
+<% if link %>
+  <div class="flex align-center gap-half txt-small">
+    <div class="txt-align-start overflow-ellipsis min-width">
+      <strong><%= link.name %></strong>
+      <div class="txt-x-small txt-subtle"><%= money link.amount_cents %> <%= link.schedule_label %><%= " · next " + l(link.next_on, format: :short) if link.next_on && link.active %><%= " · to " + link.contact.name if link.contact %><%= " · checked " + time_ago_in_words(link.synced_at) + " ago" if link.synced_at %></div>
+    </div>
+    <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+    <% if link.in_sync? %>
+      <%= status_tag link.active ? "Active" : "Closed" %>
+    <% else %>
+      <%= status_tag "Blocked" %>
+    <% end %>
+  </div>
+  <% unless link.in_sync? %>
+    <p class="txt-small txt-negative margin-none"><%= link.drift %>.</p>
+  <% end %>
+  <div class="flex flex-wrap gap-half justify-center">
+    <%= button_to "Match QuickBooks to the agreement", quickbooks_engagement_recurring_path(engagement), method: :patch, class: "btn txt-x-small" %>
+    <%= render "layouts/shared/delete_dialog", name: "the link to " + link.name.to_s, path: quickbooks_engagement_recurring_path(engagement), trigger_class: "txt-small",
+          message: "Only unlinks it here. QuickBooks keeps billing until it’s stopped there." %>
+  </div>
+<% elsif blocker %>
+  <p class="txt-small txt-subtle margin-none"><%= blocker %></p>
+<% else %>
+  <% contacts = engagement.client.contacts.where(archived_at: nil).where.not(email: [ nil, "" ]).order(:name) %>
+  <% version = engagement.current_version %>
+  <p class="txt-small margin-none">Approved: <strong><%= money version.amount_cents %></strong> <%= version.cadence %>. Not billed through QuickBooks yet.</p>
+  <details>
+    <summary class="btn btn--link center txt-small"><%= icon_tag "add" %> Create the recurring invoice</summary>
+    <%= form_with url: quickbooks_engagement_recurring_path(engagement), scope: :recurring, namespace: "qbo_new_recurring", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+      <label class="flex flex-column gap-half">
+        <span class="font-weight-bold">First invoice on</span>
+        <%= date_input form, :start_on, value: Date.current.next_month.beginning_of_month, class: "input full-width", required: true %>
+      </label>
+      <label class="flex flex-column gap-half">
+        <span class="font-weight-bold">Email each invoice to</span>
+        <%= form.select :contact_id, contact_options(contacts, email_only: true), { selected: default_approver(contacts) }, class: "input input--select full-width", required: true %>
+      </label>
+      <p class="txt-x-small txt-subtle margin-none">QuickBooks bills <%= money version.amount_cents %> <%= version.cadence %> and emails it with a pay link. Approved revisions change it; closing the service stops it.</p>
+      <button type="submit" class="btn btn--link center">Create in QuickBooks</button>
+    <% end %>
+  </details>
+  <details>
+    <summary class="btn center txt-small">Link an existing recurring invoice</summary>
+    <%= form_with url: quickbooks_engagement_recurring_path(engagement), scope: :recurring, namespace: "qbo_link_recurring", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+      <%= form.text_field :qbo_id, required: true, class: "input full-width", autocomplete: "off", placeholder: "Recurring invoice id in QuickBooks", aria: { label: "Recurring invoice id" } %>
+      <button type="submit" class="btn btn--link center">Link</button>
+    <% end %>
+  </details>
+<% end %>

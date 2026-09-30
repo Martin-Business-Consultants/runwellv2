@@ -1,0 +1,23 @@
+# A systemd unit for a plain install (docs/install.md). Copy to /etc/systemd/system/runwell.service,
+# set the paths and user, then: sudo systemctl enable --now runwell
+#
+# Thruster fronts Puma (gzip, asset caching, and https itself when TLS_DOMAIN is set in .env).
+# It listens on HTTP_PORT (default 80), which a non-root user may bind thanks to the capability
+# below; drop that line and set HTTP_PORT=8080 in .env to sit behind your own proxy instead.
+[Unit]
+Description=Runwell
+After=network.target
+
+[Service]
+Type=simple
+User=runwell
+Group=runwell
+WorkingDirectory=/opt/runwell
+EnvironmentFile=/opt/runwell/.env
+ExecStart=/opt/runwell/bin/thrust /opt/runwell/bin/rails server
+Restart=always
+RestartSec=3
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

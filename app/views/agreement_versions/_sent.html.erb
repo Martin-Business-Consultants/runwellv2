@@ -1,0 +1,101 @@
+<%# locals: (version:, contacts:) %>
+<%# herb:slots server %>
+<%# herb:state (linking: false, deciding: false) %>
+<header class="flex align-center gap-half">
+  <strong><%= version.label %></strong>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <%= status_tag version.status.humanize, highlight: version.approved? %>
+</header>
+
+<p class="txt-x-small txt-subtle margin-none">
+  Sent <%= l version.sent_at, format: :short %><% if version.sent_by %> by <%= person_tag version.sent_by %><% end %>
+  · <span title="<%= version.content_hash %>">#<%= version.content_hash.to_s.first(8) %></span>
+</p>
+
+<% if version.summary.present? %>
+  <p class="txt-small margin-none"><%= version.summary %></p>
+<% end %>
+
+<% if version.reason.present? %>
+  <div class="txt-small txt-subtle"><%= rich_text version.reason %></div>
+<% end %>
+
+<% if version.scope_items.any? %>
+  <ul class="settings__scrollable-list">
+    <% version.scope_items.each do |item| %>
+      <%# herb:key item.id %>
+      <li data-filter-target="item" class="flex align-center gap-half txt-small">
+        <%= link_to item.description, item, class: "txt-ink txt-align-start overflow-ellipsis min-width" %>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <span class="txt-nowrap"><%= money item.price_cents %></span>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if (approval = version.approval) %>
+  <div class="fill-shade border-radius pad txt-small">
+    <strong><%= approval.decision.humanize %></strong> by <%= approval.approver_name.presence || "unknown" %>
+    <%= "(#{approval.approver_email})" if approval.approver_email.present? %>
+    · <% if approval.method == "link" %>by link<% else %>recorded by <%= person_tag approval.recorded_by, fallback: "someone" %><% end %>
+    · <%= l approval.decided_at, format: :short %>
+    <% if approval.evidence.present? %>
+      <div class="txt-subtle">Evidence: <%= approval.evidence %></div>
+    <% end %>
+    <% if approval.comment.present? %>
+      <div class="txt-subtle">Comment: <%= rich_text approval.comment %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if version.approval_links.any? %>
+  <ul class="settings__scrollable-list txt-x-small txt-subtle">
+    <% version.approval_links.each do |link| %>
+      <%# herb:key link.id %>
+      <li>
+        Link emailed to <%= link.contact.name %> · expires <%= l link.expires_at.to_date, format: :short %>
+        · <%= link.opened_at ? "opened #{l link.opened_at, format: :short}" : "not opened" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if version.awaiting_decision? && can?(:send_agreements) %>
+  <% if linking %>
+    <%= form_with url: issue_link_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
+      <h3 class="txt-medium font-weight-bold margin-none">Email an approval link</h3>
+      <p class="txt-small margin-none">The contact gets a signed link to review this exact version and approve it or ask for changes.</p>
+      <%= form.select :contact_id, contact_options(contacts, email_only: true), { selected: default_approver(contacts) }, required: true, class: "input input--select full-width txt-small" %>
+      <div class="flex gap-half justify-center">
+        <button type="button" class="btn" data-herb-reset="linking">Cancel</button>
+        <button type="submit" class="btn btn--link">Email link</button>
+      </div>
+    <% end %>
+  <% elsif deciding %>
+    <%= form_with url: record_decision_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
+      <h3 class="txt-medium font-weight-bold margin-none">Record the client’s decision</h3>
+      <p class="txt-small margin-none">For a decision that came by email, call or meeting. Say where it came from: the evidence is kept with the approval.</p>
+      <%= form.select :decision, Approval::DECISIONS.map { |decision| [ decision.humanize, decision ] }, {}, class: "input input--select full-width txt-small" %>
+      <%= form.select :contact_id, contact_options(contacts), { include_blank: "Someone else", selected: default_approver(contacts) }, class: "input input--select full-width txt-small" %>
+      <%= form.text_field :approver_name, class: "input full-width txt-small", autocomplete: "off", placeholder: "Their name, if not a contact" %>
+      <%= form.text_field :evidence, required: true, class: "input full-width txt-small", autocomplete: "off", placeholder: "Evidence: “Email from Ann, 3 March”" %>
+      <%= rich_text_field form, :comment, placeholder: "Their comment (optional)" %>
+      <div class="flex gap-half justify-center">
+        <button type="button" class="btn" data-herb-reset="deciding">Cancel</button>
+        <button type="submit" class="btn btn--link">Record decision</button>
+      </div>
+    <% end %>
+  <% else %>
+    <footer class="flex flex-wrap align-center justify-center gap-half">
+      <button type="button" class="btn txt-small" data-herb-toggle="linking">
+        <%= icon_tag "email" %>
+        <span>Email approval link</span>
+      </button>
+      <button type="button" class="btn btn--link txt-small" data-herb-toggle="deciding">
+        <%= icon_tag "check" %>
+        <span>Record decision</span>
+      </button>
+    </footer>
+  <% end %>
+<% end %>

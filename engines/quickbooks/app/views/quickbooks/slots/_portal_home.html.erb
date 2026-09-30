@@ -1,0 +1,18 @@
+<%# locals: (client:) %>
+<%# The client's open invoices, each with QuickBooks' pay page. %>
+<% invoices = client.quickbooks_invoices.open.includes(:engagement).order(:due_on).to_a %>
+<% if invoices.any? %>
+  <section class="settings__section flex flex-column gap-half">
+    <header>
+      <h2 class="divider">To pay</h2>
+    </header>
+    <ul class="settings__scrollable-list">
+      <% invoices.each do |invoice| %>
+        <%# herb:key invoice.id %>
+        <li>
+          <%= render "quickbooks/invoice", invoice: invoice, pay: true %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

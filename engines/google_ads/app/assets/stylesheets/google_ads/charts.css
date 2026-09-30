@@ -1,0 +1,113 @@
+/* The Google Ads plugin's report: figures and SVG charts */
+@layer components {
+  .ads-stats {
+    display: grid;
+    gap: var(--block-space) var(--inline-space);
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  }
+
+  .ads-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+  }
+
+  .ads-stat__value {
+    font-size: var(--text-x-large);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .ads-stat--lead .ads-stat__value {
+    font-size: var(--text-xx-large);
+  }
+
+  .ads-charts {
+    display: grid;
+    gap: var(--block-space-double) var(--inline-space-double);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  }
+
+  .ads-chart {
+    block-size: auto;
+    color: var(--color-ink);
+    inline-size: 100%;
+    overflow: visible;
+  }
+
+  .ads-chart__bar {
+    fill: var(--color-link);
+    opacity: 0.85;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .ads-chart__bar--current {
+    opacity: 0.45;
+  }
+
+  .ads-chart__line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.5;
+  }
+
+  .ads-chart__line--primary,
+  .ads-chart__dot--primary {
+    fill: var(--color-link);
+    stroke: var(--color-link);
+  }
+
+  .ads-chart__line--primary {
+    fill: none;
+  }
+
+  .ads-chart__line--secondary,
+  .ads-chart__dot--secondary {
+    fill: var(--color-positive);
+    stroke: var(--color-positive);
+  }
+
+  .ads-chart__line--secondary {
+    fill: none;
+  }
+
+  .ads-chart__grid,
+  .ads-chart__axis {
+    stroke: var(--color-ink-lighter);
+    stroke-width: 1;
+  }
+
+  .ads-chart__grid {
+    stroke-dasharray: 3 4;
+  }
+
+  .ads-chart__label {
+    fill: var(--color-ink-medium);
+    font-size: 11px;
+    text-anchor: middle;
+  }
+
+  .ads-chart__label--start {
+    text-anchor: start;
+  }
+
+  .ads-legend {
+    display: inline-flex;
+    gap: var(--inline-space);
+  }
+
+  .ads-legend__swatch {
+    block-size: 0.6em;
+    border-radius: 50%;
+    display: inline-block;
+    inline-size: 0.6em;
+    margin-inline-end: 0.35em;
+  }
+
+  .ads-legend__swatch--primary { background-color: var(--color-link); }
+  .ads-legend__swatch--secondary { background-color: var(--color-positive); }
+}

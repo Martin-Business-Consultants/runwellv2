@@ -1,0 +1,155 @@
+<% @page_title = @meeting.title %>
+
+<% content_for :header do %>
+  <%= parent_page @meeting.client.name, client_path(@meeting.client, tab: "plugin-account_management") %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <% unless @meeting.cancelled? || @meeting.recap_sent? %>
+        <div class="page-heading__actions">
+          <%= link_to edit_account_management_meeting_path(@meeting), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+            <%= icon_tag "pencil" %>
+            <span>Edit</span>
+            <kbd class="hide-on-touch">E</kbd>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="flex flex-wrap align-center gap-half txt-small">
+      <%= account_meeting_tag @meeting %>
+      <span class="txt-subtle"><%= account_meeting_time @meeting %></span>
+      <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+      <%= person_tag @meeting.owner, fallback: "Nobody runs it" %>
+    </div>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Agenda <span class="txt-subtle <%= "txt-negative" if @meeting.agenda_late? %>"><%= account_paper_line @meeting, :agenda %></span></h2>
+      </header>
+      <% if @meeting.agenda.present? %>
+        <div class="txt-small accounts-paper"><%= rich_text @meeting.agenda %></div>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Not written yet. It should answer what was left open last time, so nothing is researched in the meeting itself. <%= link_to "Write it", edit_account_management_meeting_path(@meeting), class: "txt-link" %>.</p>
+      <% end %>
+      <% if @meeting.agenda_sent? %>
+        <p class="txt-x-small txt-subtle margin-block-start-half">Sent by <%= @meeting.agenda_sent_via %>.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Recap <span class="txt-subtle <%= "txt-negative" if @meeting.started? && @meeting.recap_late? %>"><%= @meeting.started? || @meeting.recap_sent? ? account_paper_line(@meeting, :recap) : "after the meeting" %></span></h2>
+      </header>
+      <% if @meeting.recap.present? %>
+        <div class="txt-small accounts-paper"><%= rich_text @meeting.recap %></div>
+      <% elsif !@meeting.cancelled? %>
+        <p class="txt-small txt-subtle margin-none">Decisions, in plain words. <%= link_to "Write it", edit_account_management_meeting_path(@meeting), class: "txt-link" %> after the meeting, and add each action item below with an owner and a date.</p>
+      <% end %>
+      <% if @meeting.recap_sent? %>
+        <p class="txt-x-small txt-subtle margin-block-start-half">Sent by <%= @meeting.recap_sent_via %>.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Action items <span class="txt-subtle"><%= @meeting.commitments.size.nonzero? %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% @meeting.commitments.includes(:user, :contact).order(:due_on).each do |commitment| %>
+          <%# herb:key commitment.id %>
+          <li class="flex align-center gap-half">
+            <div class="txt-align-start min-width">
+              <strong><%= commitment.description %></strong>
+              <div class="txt-x-small txt-subtle"><%= commitment.owner_name %> · by <%= l commitment.due_on, format: :short %></div>
+            </div>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <%= status_tag commitment.open? ? (commitment.overdue? ? "Overdue" : "Open") : commitment.resolution.humanize %>
+          </li>
+        <% end %>
+      </ul>
+      <% if @meeting.commitments.empty? %>
+        <p class="txt-small txt-subtle margin-none">None yet. Each one becomes a commitment on the <%= term(:client).downcase %>, with an owner and a date, and is listed in the recap.</p>
+      <% end %>
+      <% unless @meeting.recap_sent? || @meeting.cancelled? %>
+        <div class="section-actions">
+          <details>
+            <summary class="btn txt-small"><%= icon_tag "add" %><span>Add an action item</span></summary>
+            <%= form_with url: account_management_meeting_action_items_path(@meeting), scope: :action_item, class: "flex flex-column gap-half txt-small margin-block-start-half" do |form| %>
+              <%= form.text_field :description, required: true, class: "input full-width", autocomplete: "off", placeholder: "What will be done", aria: { label: "What will be done" } %>
+              <div class="flex flex-wrap gap-half">
+                <%= form.select :owner, grouped_options_for_select(commitment_owner_options(@meeting.client), @meeting.owner ? "user:#{@meeting.owner.id}" : "us"), {}, class: "input input--select flex-item-grow", aria: { label: "Whose" } %>
+                <%= date_input form, :due_on, required: true, value: Date.current + 7, class: "input flex-item-grow", aria: { label: "By" } %>
+              </div>
+              <button type="submit" class="btn btn--link txt-small center">Add action item</button>
+            <% end %>
+          </details>
+        </div>
+      <% end %>
+    </section>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt><%= term(:client) %></dt><dd><%= link_to @meeting.client.name, client_path(@meeting.client), class: "txt-link" %></dd>
+        <% if @meeting.engagement %>
+          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@meeting.engagement.ref} #{@meeting.engagement.title}", engagement_path(@meeting.engagement), class: "txt-link" %></dd>
+        <% end %>
+        <dt>Starts</dt><dd><%= account_meeting_time @meeting, format: :short %></dd>
+        <dt>Agenda by</dt><dd><%= l @meeting.agenda_due_at, format: :short %></dd>
+        <dt>Recap by</dt><dd><%= l @meeting.recap_due_at, format: :short %></dd>
+        <dt>Runs it</dt><dd><%= @meeting.owner&.display_name || "Nobody" %></dd>
+      </dl>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Next</h2>
+      </header>
+      <% case @meeting.state %>
+      <% when "planned", "agenda_due" %>
+        <% if @meeting.agenda_sent? %>
+          <p class="txt-small margin-none">The agenda is out. After the meeting, write the recap and add its action items.</p>
+        <% elsif @meeting.agenda.blank? %>
+          <p class="txt-small margin-none">Write the agenda, then send it by <%= l @meeting.agenda_due_at, format: :short %>.</p>
+          <%= link_to "Write the agenda", edit_account_management_meeting_path(@meeting), class: "btn btn--link txt-small center" %>
+        <% else %>
+          <p class="txt-small margin-none">Send the agenda by <%= l @meeting.agenda_due_at, format: :short %>.<%= " It’s already late." if @meeting.agenda_late? %></p>
+          <%= render "account_management/meetings/send", meeting: @meeting, paper: :agenda %>
+        <% end %>
+      <% when "recap_due" %>
+        <% if @meeting.recap.blank? %>
+          <p class="txt-small margin-none">Write the recap and add the action items, then send it by <%= l @meeting.recap_due_at, format: :short %>.</p>
+          <%= link_to "Write the recap", edit_account_management_meeting_path(@meeting), class: "btn btn--link txt-small center" %>
+        <% else %>
+          <p class="txt-small margin-none">Send the recap by <%= l @meeting.recap_due_at, format: :short %>. It lists the action items.</p>
+          <%= render "account_management/meetings/send", meeting: @meeting, paper: :recap %>
+        <% end %>
+      <% when "done" %>
+        <p class="txt-small margin-none">Done. Its action items are commitments now: they show on the <%= term(:client).downcase %> and on home as they come due.</p>
+      <% when "cancelled" %>
+        <p class="txt-small margin-none">Cancelled <%= l @meeting.cancelled_at, format: :short %>.</p>
+      <% end %>
+    </section>
+
+    <% unless @meeting.cancelled? || @meeting.recap_sent? %>
+      <section class="settings__section">
+        <% if @meeting.agenda_sent? %>
+          <%= render "layouts/shared/confirm", trigger: "Cancel the meeting", title: "Cancel #{@meeting.title}?", body: "Its agenda is out, so it stays on the record as cancelled.", button: "Cancel it", path: cancel_account_management_meeting_path(@meeting), method: :post, icon: "close" %>
+        <% elsif can?(:delete_records) %>
+          <%= render "layouts/shared/confirm", trigger: "Delete the meeting", title: "Delete #{@meeting.title}?", body: "Nothing went out yet, so it goes for good. Its action items stay as commitments.", button: "Delete it", path: account_management_meeting_path(@meeting) %>
+        <% end %>
+      </section>
+    <% end %>
+
+    <%= render "events/timeline", subject: @meeting %>
+  </aside>
+</section>

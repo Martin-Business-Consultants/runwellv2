@@ -1,0 +1,15 @@
+<%# locals: (current:) %>
+<%# Every settings page starts with this: the header's title, and the Settings sidebar
+    (settings/nav), which the application layout sets beside the page. A plugin's page (its
+    settings or its details) is nested under Plugins, and Esc goes back to the list of plugins. %>
+<% plugin_page = Runwell::Plugins.manifests.key?(current.to_s.to_sym) %>
+<% content_for :header do %>
+  <% if plugin_page %>
+    <%= parent_page "Plugins", settings_plugins_path %>
+  <% end %>
+  <h1 class="header__title">Settings</h1>
+<% end %>
+
+<% content_for :settings_nav do %>
+  <%= render "settings/nav", current: current.to_s.to_sym %>
+<% end %>

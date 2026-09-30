@@ -1,0 +1,34 @@
+<%# locals: (page:, pages:, total:) %>
+<%# Back, the page numbers, forward: each a link keeping the page's filters. A long run of pages
+    shows the first, the last and the two either side of the current one. %>
+<% shown = (1..pages).select { |number| number == 1 || number == pages || (number - page).abs <= 2 } %>
+<nav class="qa-pager txt-small" aria-label="Pages">
+  <% if page > 1 %>
+    <%= link_to "‹ Back", url_for(request.query_parameters.merge(page: page - 1)), class: "btn txt-small", rel: "prev" %>
+  <% else %>
+    <span class="btn txt-small qa-pager__off" aria-disabled="true">‹ Back</span>
+  <% end %>
+
+  <ol class="qa-pager__numbers">
+    <% shown.each_with_index do |number, index| %>
+      <%# herb:key number %>
+      <% if index.positive? && number - shown[index - 1] > 1 %>
+        <li class="txt-subtle" aria-hidden="true">…</li>
+      <% end %>
+      <li>
+        <% if number == page %>
+          <span class="qa-pager__number qa-pager__number--current" aria-current="page"><%= number %></span>
+        <% else %>
+          <%= link_to number, url_for(request.query_parameters.merge(page: number)), class: "qa-pager__number", aria: { label: "Page #{number}" } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
+  <% if page < pages %>
+    <%= link_to "Forward ›", url_for(request.query_parameters.merge(page: page + 1)), class: "btn txt-small", rel: "next" %>
+  <% else %>
+    <span class="btn txt-small qa-pager__off" aria-disabled="true">Forward ›</span>
+  <% end %>
+</nav>
+<p class="qa-pager__count txt-x-small txt-subtle"><%= pluralize total, "check" %><% if pages > 1 %> · page <%= page %> of <%= pages %><% end %></p>

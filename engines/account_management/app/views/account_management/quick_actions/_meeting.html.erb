@@ -1,0 +1,13 @@
+<%# locals: (form_id:) %>
+<%= form_with url: account_management_meetings_path, scope: :meeting, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What it’s for: Meta check-in, monthly review…", aria: { label: "What it’s for" } %>
+  <div class="flex flex-wrap gap-half">
+    <%= date_input form, :starts_on, value: Date.tomorrow, required: true, class: "input flex-item-grow", aria: { label: "Day" } %>
+    <%= form.time_field :starts_at_time, value: "10:00", required: true, class: "input flex-item-grow", aria: { label: "Starts" } %>
+  </div>
+  <%= form.select :owner_id, account_people_options, { include_blank: "Run by the lead" }, class: "input input--select full-width", aria: { label: "Runs it" } %>
+  <%= rich_text_field form, :agenda, placeholder: "Agenda (now or later; it’s due a day ahead)", staff: true %>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Plan meeting</button>
+  </div>
+<% end %>

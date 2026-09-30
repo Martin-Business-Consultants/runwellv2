@@ -1,0 +1,46 @@
+<% @page_title = "New " + term(:client).downcase %>
+<% recent = Client.order(created_at: :desc).limit(6).to_a %>
+
+<% content_for :header do %>
+  <%= parent_page term(:client, count: 2), clients_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "clients/form", client: @client %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">What comes next</h2>
+      </header>
+      <ol class="record-steps txt-small">
+        <li>Add the people you deal with as contacts. Switch on portal access or approval for those who need it.</li>
+        <li>Start a <%= term(:engagement).downcase %>: what you agreed, with its scope and price on a draft.</li>
+        <li>Send the agreement. Approving it creates the <%= term(:work).downcase %>.</li>
+      </ol>
+    </section>
+
+    <% if recent.any? %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider">Recently added</h2>
+        </header>
+        <ul class="settings__scrollable-list">
+          <% recent.each do |client| %>
+            <%# herb:key client.id %>
+            <li class="flex align-center gap-half txt-small" data-filter-target="item">
+              <%= link_to client.name, client, class: "txt-ink overflow-ellipsis min-width" %>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <span class="txt-subtle txt-nowrap"><%= l client.created_at.to_date, format: :short %></span>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </aside>
+</section>

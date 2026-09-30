@@ -1,0 +1,227 @@
+<% @page_title = @check.name %>
+<% editable = can_edit_check?(@check) %>
+<% latest = @check.latest_results %>
+<% expectations = @check.expectations.to_a %>
+<% tally = @check.tally %>
+<% last = latest.values.max_by(&:created_at) %>
+
+<% content_for :header do %>
+  <%= parent_page @check.client.name, client_path(@check.client) %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="flex flex-column gap-half">
+      <div class="page-heading">
+        <h1 class="page-title"><%= @page_title %></h1>
+        <% if editable %>
+          <div class="page-heading__actions">
+            <%= link_to edit_qa_check_path(@check), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+              <%= icon_tag "pencil" %>
+              <span>Edit</span>
+              <kbd class="hide-on-touch">E</kbd>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex flex-wrap align-center gap-half txt-small">
+        <%= qa_status_tag @check.archived? ? "archived" : @check.state %>
+        <% if @check.live %>
+          <%= status_tag "Live", highlight: true %>
+        <% end %>
+        <span class="txt-subtle">
+          <%= [ @check.kind.humanize, @check.client.name, @check.engagement&.ref ].compact.join(" · ") %>
+          · <%= tally.fetch("passed", 0) %> passing, <%= tally.fetch("failed", 0) %> failing, <%= tally.fetch("untested", 0) %> not tested
+        </span>
+      </div>
+    </div>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Source of truth <span class="txt-subtle"><%= expectations.size %></span></h2>
+      </header>
+
+      <% if expectations.any? %>
+        <p class="txt-x-small txt-subtle margin-none">Click a fact for its details. To record a test, mark each item ✓ or ✗, or type what you saw and it’s compared for you; leave out what you didn’t test.</p>
+        <div class="qa-table-wrap">
+          <table class="data-table qa-truth">
+            <thead>
+              <tr><th>Fact</th><th>Agreed</th><th>Last result</th><th>This test</th></tr>
+            </thead>
+            <tbody>
+              <% expectations.each do |expectation| %>
+                <%# herb:key expectation.id %>
+                <% result = latest[expectation.id] %>
+                <tr data-filter-target="item" class="<%= class_names("qa-truth__row--failed": result && !result.passed, "qa-truth__row--open": @fact == expectation) %>">
+                  <td class="qa-truth__fact">
+                    <%= link_to expectation.label, qa_check_path(@check, fact: expectation.id), class: "qa-truth__link txt-ink font-weight-bold", title: expectation.label,
+                          data: { turbo_frame: "fact_sheet", turbo_action: "advance" } %>
+                  </td>
+                  <td class="qa-truth__agreed" title="<%= expectation.rule %>">
+                    <% if expectation.value? %>
+                      <span class="qa-fact__value"><%= expectation.expected %></span>
+                      <span class="txt-x-small txt-subtle"><%= Qa::Matcher::MATCHES.fetch(expectation.match).sub("is exactly", "") %></span>
+                    <% else %>
+                      <span class="txt-subtle">Step</span>
+                    <% end %>
+                    <% if expectation.expires_on %>
+                      <span class="txt-x-small <%= expectation.expiring?(within: 7.days) ? "txt-negative" : "txt-subtle" %>">· <%= expectation.expired? ? "ended" : "ends" %> <%= l expectation.expires_on, format: :short %></span>
+                    <% end %>
+                  </td>
+                  <td class="qa-truth__result" title="<%= result ? "#{result.run.tester_label}, #{time_ago_in_words(result.created_at)} ago" : "Never tested" %>">
+                    <% if result %>
+                      <%= qa_status_tag result.passed ? "passed" : "failed" %>
+                      <span class="txt-x-small txt-subtle"><%= time_ago_in_words(result.created_at).sub("about ", "") %></span>
+                    <% else %>
+                      <span class="txt-x-small txt-subtle">Never</span>
+                    <% end %>
+                  </td>
+                  <td class="qa-truth__test">
+                    <label class="qa-test__choice qa-test__choice--pass" title="Right"><%= radio_button_tag "run[results][#{expectation.key}][verdict]", "pass", false, id: "verdict_#{expectation.id}_pass", form: "qa-test-form" %><span aria-hidden="true">✓</span><span class="for-screen-reader">Right</span></label>
+                    <label class="qa-test__choice qa-test__choice--fail" title="Wrong"><%= radio_button_tag "run[results][#{expectation.key}][verdict]", "fail", false, id: "verdict_#{expectation.id}_fail", form: "qa-test-form" %><span aria-hidden="true">✗</span><span class="for-screen-reader">Wrong</span></label>
+                    <%= text_field_tag "run[results][#{expectation.key}][actual]", nil, id: "actual_#{expectation.id}", form: "qa-test-form", class: "input qa-test__actual txt-x-small", autocomplete: "off",
+                          placeholder: expectation.value? ? "What you saw" : "What happened, if wrong", aria: { label: "What you saw for #{expectation.label}" } %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <%= form_with url: qa_check_runs_path(@check), scope: :run, id: "qa-test-form", class: "qa-test-submit txt-small", data: { controller: "form" } do |form| %>
+          <%= form.url_field :evidence_url, class: "input", autocomplete: "off", placeholder: "Link to proof: screenshot, test email, render report", aria: { label: "Evidence link" } %>
+          <%= form.text_field :notes, class: "input", autocomplete: "off", placeholder: "Test record, browser and device, anything odd", aria: { label: "Notes" } %>
+          <button type="submit" class="btn btn--link" data-form-target="submit">Record the test</button>
+        <% end %>
+      <% else %>
+        <p class="txt-subtle txt-small margin-none">Nothing agreed yet. Add each value that has to be right (the From address, the recipients, the phone number, the price) and each step that has to be done.</p>
+      <% end %>
+
+      <% if editable %>
+        <details class="margin-block-start-half">
+          <summary class="btn txt-small">Add a value or a step</summary>
+          <%= form_with url: qa_check_expectations_path(@check), scope: :expectation, namespace: "new_expectation", class: "qa-add-fact txt-small margin-block-start-half", data: { turbo_action: "advance" } do |form| %>
+            <%= form.text_field :label, required: true, class: "input", autocomplete: "off", placeholder: "Label: From address, To, Promo line…", aria: { label: "Label" } %>
+            <%= form.text_field :expected, class: "input", autocomplete: "off", placeholder: "Agreed value; a list comma separated (blank for a step)", aria: { label: "Expected value" } %>
+            <%= form.select :match, Qa::Matcher::MATCHES.map { |key, words| [ words.capitalize, key ] }, {}, class: "input input--select", aria: { label: "Match" } %>
+            <%= date_input form, :expires_on, class: "input", aria: { label: "Ends on (a promo or offer)" } %>
+            <%= form.text_field :note, class: "input", autocomplete: "off", placeholder: "Where it comes from (approved by, source doc…)", aria: { label: "Note" } %>
+            <button type="submit" class="btn btn--link txt-small">Add</button>
+          <% end %>
+          <p class="txt-x-small txt-subtle margin-none">“Appears on it” and “never appears on it” are checked against the page every night. A phone number matches in any format.</p>
+        </details>
+      <% end %>
+    </section>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="qa-facts txt-small">
+        <dt>Owner</dt><dd><% if @check.owner %><%= person_tag @check.owner %> <%= @check.owner.display_name %><% else %><span class="txt-subtle">Nobody (managers)</span><% end %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @check.client.name, client_path(@check.client), class: "txt-link" %></dd>
+        <% if @check.engagement %>
+          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@check.engagement.ref} #{@check.engagement.title}", engagement_path(@check.engagement), class: "txt-link" %></dd>
+        <% end %>
+        <dt>Kind</dt><dd><%= @check.kind.humanize %><%= " · live" if @check.live %></dd>
+        <% if @check.url %>
+          <dt>URL</dt><dd><%= link_to @check.url.sub(%r{\Ahttps?://}, ""), @check.url, class: "txt-link", target: "_blank", rel: "noopener" %></dd>
+        <% end %>
+        <dt>Every</dt><dd><%= pluralize @check.every_days, "day" %></dd>
+        <dt>Last test</dt><dd><%= last ? "#{time_ago_in_words(last.created_at)} ago · #{last.run.tester_label}" : "Never" %></dd>
+        <dt>Next due</dt>
+        <dd class="<%= "txt-negative" if @check.failing? %>">
+          <% if @check.failing? %>Now, it’s failing<% elsif @check.due? %>Now<% else %><%= l @check.next_test_at.to_date, format: :short %><% end %>
+        </dd>
+        <% if @check.retest_after && @check.due? %>
+          <dt>Retest</dt><dd>Asked <%= time_ago_in_words(@check.retest_after) %> ago (a deploy, a fix or a changed value)</dd>
+        <% end %>
+      </dl>
+      <% if @check.fetchable? %>
+        <%= button_to "Check the page now", qa_check_fetch_path(@check), class: "btn txt-small", title: "Fetch #{@check.url} and check what appears, and what never should" %>
+      <% end %>
+    </section>
+
+    <% if @check.instructions.present? %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider">How to test</h2>
+        </header>
+        <div class="txt-small"><%= rich_text @check.instructions %></div>
+      </section>
+    <% end %>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Open issues <span class="txt-subtle"><%= @issues.size %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% @issues.each do |issue| %>
+          <%# herb:key issue.id %>
+          <%= render "qa/issues/row", issue: issue %>
+        <% end %>
+      </ul>
+      <% if @issues.empty? %>
+        <p class="txt-subtle txt-small margin-none">None.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Tests</h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% @runs.each do |run| %>
+          <%# herb:key run.id %>
+          <%= render "qa/runs/row", run: run %>
+        <% end %>
+      </ul>
+      <% if @runs.empty? %>
+        <p class="txt-subtle txt-small margin-none">Never tested.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Report URL</h2>
+      </header>
+      <p class="txt-x-small txt-subtle margin-none">The site posts its own test here (its daily canary, or after a deploy), keyed as in the table.</p>
+      <div class="qa-report flex align-center gap-half">
+        <code class="qa-report__url txt-x-small overflow-ellipsis" title="<%= qa_report_address(@check) %>"><%= qa_report_address(@check) %></code>
+        <button type="button" class="btn btn--circle txt-x-small" title="Copy the report URL" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= qa_report_address(@check) %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">
+          <%= icon_tag "clipboard" %>
+          <span class="for-screen-reader">Copy the report URL</span>
+        </button>
+        <% if editable %>
+          <%= button_to qa_check_token_path(@check), class: "btn btn--circle txt-x-small", title: "Make a new report URL (the old one stops working)" do %>
+            <%= icon_tag "refresh" %>
+            <span class="for-screen-reader">Make a new report URL</span>
+          <% end %>
+        <% end %>
+      </div>
+      <% if expectations.any? %>
+        <details>
+          <summary class="txt-x-small txt-subtle">What to post</summary>
+          <pre class="qa-code txt-x-small">POST <%= qa_report_address(@check) %>
+{ "reporter": "<%= @check.client.name.parameterize %> canary",
+  "results": { <%= safe_join(expectations.first(3).map { |it| %("#{it.key}": #{it.value? ? %("…what it sent…") : "true"}) }, ",\n               ") %> } }</pre>
+        </details>
+      <% end %>
+    </section>
+
+    <% if editable %>
+      <%= render "layouts/shared/confirm", trigger: "Archive this check", title: "Archive #{@check.name}?",
+            body: "It stops being tested and leaves home. Its tests and issues are kept.", button: "Archive", path: qa_check_path(@check), method: :delete %>
+    <% end %>
+  </aside>
+</section>
+
+<turbo-frame id="fact_sheet" target="_top">
+  <% if @fact %>
+    <%= render "qa/expectations/sheet", check: @check, expectation: @fact %>
+  <% end %>
+</turbo-frame>

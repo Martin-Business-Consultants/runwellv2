@@ -1,0 +1,12 @@
+<%# locals: (version:) %>
+<div class="scope-item-fields txt-small">
+  <%= form_with model: [ version, ScopeItem.new ], namespace: dom_id(version, :new_item) do |form| %>
+    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", placeholder: "New item", aria: { label: "New item" } %>
+    <%= money_field form, :price_cents, value: 0, class: "input", placeholder: "Price", aria: { label: "Price" } %>
+    <%= form.text_field :internal_estimate, class: "input", autocomplete: "off", placeholder: "Internal est.", aria: { label: "Internal estimate" } %>
+    <button type="submit" class="btn btn--link scope-item-fields__add" title="Add item">
+      <span>Add</span>
+      <%= icon_tag "add" %>
+    </button>
+  <% end %>
+</div>

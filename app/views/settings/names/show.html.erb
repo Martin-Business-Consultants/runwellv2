@@ -1,0 +1,50 @@
+<% @page_title = "Names" %>
+<%= render "settings/header", current: :names %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">What things are called</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">Use your own words for the core things. Leave a field blank to keep the default.</p>
+
+      <%= form_with url: settings_names_path, method: :patch, class: "flex flex-column gap txt-small", data: { controller: "form" } do %>
+        <% Setting::TERMS.each do |key| %>
+          <%# herb:key key %>
+          <% field = "terminology[" + key + "]" %>
+          <div class="flex flex-column gap-half">
+            <span class="font-weight-bold"><%= t("terms.#{key}.one") %></span>
+            <div class="flex gap-half">
+              <%= text_field_tag field + "[one]", @setting.terminology.dig(key, "one"), id: nil, placeholder: t("terms.#{key}.one"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Singular" } %>
+              <%= text_field_tag field + "[other]", @setting.terminology.dig(key, "other"), id: nil, placeholder: t("terms.#{key}.other"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Plural" } %>
+            </div>
+          </div>
+        <% end %>
+
+        <header>
+          <h2 class="divider"><%= term(:engagement) %> types</h2>
+        </header>
+        <p class="txt-subtle margin-none">Each type has its own name and ref prefix. A new prefix applies to new refs only; existing refs keep theirs.</p>
+
+        <% Engagement::LABELS.each do |label| %>
+          <%# herb:key label %>
+          <% field = "terminology[labels][" + label + "]" %>
+          <div class="flex align-center gap-half">
+            <label class="switch flex-item-no-shrink" title="Use this type">
+              <%= hidden_field_tag field + "[enabled]", "0", id: nil %>
+              <%= check_box_tag field + "[enabled]", "1", @setting.label_enabled?(label), class: "switch__input", id: nil %>
+              <span class="switch__btn"></span>
+              <span class="for-screen-reader">Use <%= t("terms.labels.#{label}.one") %></span>
+            </label>
+            <%= text_field_tag field + "[one]", @setting.terminology.dig("labels", label, "one"), id: nil, placeholder: t("terms.labels.#{label}.one"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Singular" } %>
+            <%= text_field_tag field + "[other]", @setting.terminology.dig("labels", label, "other"), id: nil, placeholder: t("terms.labels.#{label}.other"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Plural" } %>
+            <%= text_field_tag field + "[prefix]", @setting.terminology.dig("labels", label, "prefix"), id: nil, placeholder: t("terms.labels.#{label}.prefix"), class: "input names-prefix", autocomplete: "off", maxlength: 4, aria: { label: "Ref prefix" } %>
+          </div>
+        <% end %>
+
+        <button type="submit" class="btn btn--link center" data-form-target="submit">Save names</button>
+      <% end %>
+    </section>
+  </div>
+</section>

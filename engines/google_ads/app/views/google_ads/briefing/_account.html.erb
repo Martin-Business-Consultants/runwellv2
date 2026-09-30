@@ -1,0 +1,14 @@
+<%# locals: (item:) %>
+<% engagements = item.engagements.to_a %>
+<div class="flex flex-column gap-half txt-align-start">
+  <strong><%= item.label %> <span class="txt-subtle txt-small"><%= item.formatted_customer_id %></span></strong>
+  <div class="txt-x-small txt-subtle">
+    Stopped<%= " " + time_ago_in_words(item.status_changed_at) + " ago" if item.status_changed_at %> · <%= item.explanation %>
+  </div>
+  <div class="flex flex-wrap gap-half txt-small">
+    <% engagements.each do |engagement| %>
+      <%# herb:key engagement.id %>
+      <%= link_to engagement.client.name + " · " + engagement.ref, engagement_path(engagement), class: "txt-link" %>
+    <% end %>
+  </div>
+</div>

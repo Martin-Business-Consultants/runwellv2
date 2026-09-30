@@ -1,0 +1,21 @@
+<%# locals: (update:) %>
+<section class="settings__section flex flex-column gap-half">
+  <header>
+    <h2 class="divider">Details</h2>
+  </header>
+  <dl class="record-facts">
+    <dt>Week</dt><dd><%= l update.week_of, format: :long %></dd>
+    <dt>Due</dt><dd class="<%= "txt-negative" if update.late? %>"><%= l update.due_at, format: :short %></dd>
+    <dt>Covers</dt><dd><%= AccountManagement::Lead.clients_for(update.user).ordered.map(&:name).to_sentence.presence || "—" %></dd>
+  </dl>
+</section>
+<section class="settings__section">
+  <header>
+    <h2 class="divider">A good update</h2>
+  </header>
+  <ul class="record-steps txt-small">
+    <li>The draft is what the records say. Correct it, and add what they can’t: how the <%= term(:client).downcase %> feels, blockers, risks.</li>
+    <li>Say what you need from whom, by when.</li>
+    <li>Final once sent.</li>
+  </ul>
+</section>

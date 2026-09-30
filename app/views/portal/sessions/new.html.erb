@@ -1,0 +1,18 @@
+<% @page_title = "Client sign in" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Client sign in</h1>
+
+  <%= form_with url: portal_session_path, class: "flex flex-column gap txt-medium" do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.email_field :email, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "email", placeholder: "Enter your email address…" %>
+    </label>
+
+    <p>Enter the email we have on file and we’ll send you a sign-in link. No password needed.</p>
+
+    <button type="submit" class="btn btn--link center txt-medium">
+      <span>Email me a link</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+</div>

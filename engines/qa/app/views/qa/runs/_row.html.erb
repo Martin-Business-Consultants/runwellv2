@@ -1,0 +1,9 @@
+<%# locals: (run:, with_check: nil) %>
+<li class="flex align-center gap-half" data-filter-target="item">
+  <%= link_to qa_run_path(run), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+    <strong><%= with_check ? run.check.name : run.summary %></strong>
+    <div class="txt-x-small txt-subtle"><%= [ (run.summary if with_check), run.tester_label, "#{time_ago_in_words(run.created_at)} ago" ].compact.join(" · ") %></div>
+  <% end %>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <%= qa_status_tag run.status %>
+</li>

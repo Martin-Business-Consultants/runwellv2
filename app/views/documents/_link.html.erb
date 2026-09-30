@@ -1,0 +1,30 @@
+<%# locals: (document:, meta:) %>
+<%# A document's name as the thing to click: an image opens in a preview dialog (with open
+    and download links), a PDF opens in a new tab, anything else downloads. %>
+<% kind = document_preview_kind(document) %>
+<% if kind == :image %>
+  <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+    <button type="button" class="document-link txt-ink flex gap-half align-center min-width" title="Preview <%= document.filename %>" data-action="dialog#open">
+      <%= render "documents/file", document: document, meta: meta %>
+    </button>
+    <dialog class="dialog document-preview panel fill-white shadow" data-dialog-target="dialog" aria-label="<%= document.filename %>">
+      <img class="document-preview__image" src="<%= rails_blob_path(document.file, disposition: :inline) %>" alt="<%= document.filename %>" loading="lazy">
+      <footer class="flex align-center justify-space-between gap flex-wrap">
+        <strong class="txt-small overflow-ellipsis"><%= document.filename %></strong>
+        <div class="flex align-center gap-half">
+          <%= link_to "Open", rails_blob_path(document.file, disposition: :inline), class: "btn txt-small", target: "_blank", rel: "noopener" %>
+          <%= link_to "Download", rails_blob_path(document.file, disposition: :attachment), class: "btn txt-small", download: document.filename.to_s %>
+          <button type="button" class="btn txt-small" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+        </div>
+      </footer>
+    </dialog>
+  </div>
+<% elsif kind == :tab %>
+  <%= link_to rails_blob_path(document.file, disposition: :inline), class: "txt-ink flex gap-half align-center min-width", title: "Open #{document.filename} in a new tab", target: "_blank", rel: "noopener" do %>
+    <%= render "documents/file", document: document, meta: meta %>
+  <% end %>
+<% else %>
+  <%= link_to rails_blob_path(document.file, disposition: :attachment), class: "txt-ink flex gap-half align-center min-width", title: "Download #{document.filename}", download: document.filename.to_s do %>
+    <%= render "documents/file", document: document, meta: meta %>
+  <% end %>
+<% end %>

@@ -1,0 +1,78 @@
+<% @page_title = "Account management playbook" %>
+<% targets = AccountManagement::Playbook::TARGETS %>
+<% ahead = (AccountManagement::Playbook::AGENDA_AHEAD / 1.hour).round %>
+<% within = (AccountManagement::Playbook::RECAP_WITHIN / 1.hour).round %>
+
+<%= render "account_management/links" %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start accounts-playbook">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <p>Whoever leads a <%= term(:client).downcase %> owns the relationship and the delivery process from end to end. The <%= term(:client).downcase %> always knows what’s happening, what’s next and when it will be done. The team always has clear, accurate instructions before work starts. Nothing reaches a <%= term(:client).downcase %> until it has been checked.</p>
+
+    <h2 class="divider">What a lead owns</h2>
+    <p><strong>1. The relationship.</strong></p>
+    <ul>
+      <li>The main day-to-day contact for each <%= term(:client).downcase %> they lead.</li>
+      <li>An agenda for every <%= term(:client).downcase %> meeting, sent at least <%= ahead %> hours ahead, with research or answers for what was left open last time.</li>
+      <li>A recap within <%= within %> hours: decisions, then action items with owners and dates. Action items become commitments.</li>
+      <li>Every commitment they own closed by its date, or raised before it slips.</li>
+    </ul>
+    <p><strong>2. Scope and planning.</strong></p>
+    <ul>
+      <li>Nothing starts without an agreed <%= term(:engagement).downcase %>: goals, scope, deliverables, owners, dates and what “done” means.</li>
+      <li>Approved scope becomes <%= term(:work).downcase %> with owners and dates; the lead keeps it current.</li>
+      <li><%= term(:client) %> content and approvals are collected in writing before the work that needs them.</li>
+    </ul>
+    <p><strong>3. Quality.</strong></p>
+    <ul>
+      <li>Nothing ships or goes live until it has been checked against the <%= term(:client).downcase %>’s source of truth: copy, contact details, links, forms, tracking, mobile and spelling.</li>
+      <li>When a mistake gets through: fix it, find the root cause, and change the checklist so it can’t happen again.</li>
+    </ul>
+    <p><strong>4. Accounts and access.</strong></p>
+    <ul>
+      <li>Every outside account the work depends on is in the access register: who owns it, what access we hold, where the login lives and when its token expires.</li>
+      <li>Ownership comes before removal: confirm the <%= term(:client).downcase %> owns an asset before any agency or person is removed from it.</li>
+      <li>Nothing that belongs to the <%= term(:client).downcase %> stays owned by a third party, and no token is allowed to expire unnoticed.</li>
+    </ul>
+    <p><strong>5. Coordination and reporting.</strong></p>
+    <ul>
+      <li>Nobody on the team is blocked waiting on <%= term(:client).downcase %> information.</li>
+      <li>Risks to scope, dates or the relationship are raised early.</li>
+      <li>A written weekly update by the end of Friday: per <%= term(:client).downcase %>, status, what shipped, what’s next, blockers, risks and open items.</li>
+    </ul>
+
+    <h2 class="divider">First 90 days</h2>
+    <ul>
+      <li><strong>Days 1–30:</strong> every active <%= term(:client).downcase %> has a lead, its accounts are in the register, and every open item has an owner and a date.</li>
+      <li><strong>Days 31–60:</strong> every meeting has an agenda and a recap; the backlog of known errors is cleared.</li>
+      <li><strong>Days 61–90:</strong> the scorecard meets its targets week after week.</li>
+    </ul>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">The scorecard</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Agendas <%= ahead %>h ahead</dt><dd><%= targets[:agendas] %>%</dd>
+        <dt>Recaps within <%= within %>h</dt><dd><%= targets[:recaps] %>%</dd>
+        <dt>Commitments by their date</dt><dd><%= targets[:commitments] %>% or more</dd>
+        <dt>Weekly update by Friday</dt><dd><%= targets[:updates] %>%</dd>
+      </dl>
+      <p class="txt-x-small txt-subtle margin-none">Counted from what was actually sent and resolved, over the last 30 days. <%= link_to "Your scorecard", account_management_scorecard_path(Current.user), class: "txt-link" %>.</p>
+    </section>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Home warns you</h2>
+      </header>
+      <ul class="record-steps txt-small">
+        <li>A day before an agenda is due, and until a recap is out.</li>
+        <li>On Friday, until the weekly update is sent.</li>
+        <li>When an account is owned by someone else, we can’t get in, or a token expires within <%= (AccountManagement::Playbook::TOKEN_WARNING / 1.day).round %> days.</li>
+      </ul>
+    </section>
+  </aside>
+</section>

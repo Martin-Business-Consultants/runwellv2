@@ -1,0 +1,91 @@
+<% @page_title = "Fields" %>
+<%= render "settings/header", current: :fields %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <p class="txt-small txt-subtle margin-none">What you record beyond the basics, like a property address or a matter number. Fields are information only: nothing in Runwell acts on them. Every field is optional. Archiving one hides it and keeps its values.</p>
+    </section>
+
+    <% CustomField::MODELS.each do |model| %>
+      <%# herb:key model %>
+      <% fields = @fields.fetch(model, []) %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider"><%= custom_field_model_name(model, count: 2) %></h2>
+        </header>
+
+        <ul class="settings__scrollable-list flex flex-column gap-half">
+          <% fields.each do |field| %>
+            <%# herb:key field.id %>
+            <li class="flex flex-column gap-half" data-filter-target="item">
+              <div class="flex align-center gap-half txt-small">
+                <div class="txt-align-start overflow-ellipsis min-width">
+                  <strong><%= field.label %></strong>
+                  <span class="txt-x-small txt-subtle"><%= field.kind_label %> · <%= field.key %><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to clients" if field.client_visible %></span>
+                </div>
+                <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                <% if field.archived? %>
+                  <%= status_tag "Closed" %>
+                  <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "btn txt-x-small" %>
+                <% else %>
+                  <%= button_to settings_field_path(field), method: :patch, params: { field: { position: field.position - 1 } }, class: "btn btn--circle txt-x-small", title: "Move up", disabled: field == fields.first do %>
+                    <%= icon_tag "arrow-up" %>
+                    <span class="for-screen-reader">Move <%= field.label %> up</span>
+                  <% end %>
+                  <%= render "layouts/shared/delete_dialog", name: field.label, path: settings_field_path(field), trigger_class: "txt-small",
+                        message: "It’s archived: hidden from forms, pages and agents, with its values kept. You can restore it." %>
+                <% end %>
+              </div>
+              <% unless field.archived? %>
+                <details>
+                  <summary class="btn btn--link txt-x-small center">Change</summary>
+                  <%= form_with model: field, url: settings_field_path(field), method: :patch, scope: :field, namespace: dom_id(field), class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+                    <%= form.text_field :label, required: true, class: "input full-width", autocomplete: "off", aria: { label: "Label" } %>
+                    <% if field.kind == "choice" %>
+                      <%= form.text_field :choices, value: field.choices.join(", "), class: "input full-width", autocomplete: "off", aria: { label: "Choices, separated by commas" } %>
+                    <% end %>
+                    <label class="flex align-center gap-half">
+                      <%= form.check_box :listed %>
+                      <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
+                    </label>
+                    <label class="flex align-center gap-half">
+                      <%= form.check_box :client_visible %>
+                      <span>Shown to the client in the portal</span>
+                    </label>
+                    <button type="submit" class="btn btn--link center">Save</button>
+                  <% end %>
+                </details>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+        <% if fields.empty? %>
+          <p class="txt-small txt-subtle margin-none">No fields yet.</p>
+        <% end %>
+
+        <details>
+          <summary class="btn btn--link txt-small center"><%= icon_tag "add" %> Add a field</summary>
+          <%= form_with url: settings_fields_path, scope: :field, namespace: "new_#{model.downcase}", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+            <%= form.hidden_field :model_type, value: model %>
+            <div class="flex flex-wrap gap-half">
+              <%= form.text_field :label, required: true, class: "input flex-item-grow", autocomplete: "off", placeholder: "Label", aria: { label: "Label" } %>
+              <%= form.select :kind, CustomField::KINDS.map { [ CustomField::KIND_LABELS[it], it ] }, {}, class: "input input--select flex-item-grow", aria: { label: "Kind" } %>
+            </div>
+            <%= form.text_field :choices, class: "input full-width", autocomplete: "off", placeholder: "Choices, for a choice field: Small, Medium, Large", aria: { label: "Choices" } %>
+            <label class="flex align-center gap-half">
+              <%= form.check_box :listed %>
+              <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
+            </label>
+            <label class="flex align-center gap-half">
+              <%= form.check_box :client_visible %>
+              <span>Shown to the client in the portal</span>
+            </label>
+            <p class="txt-x-small txt-subtle margin-none">The kind can’t change once the field has values.</p>
+            <button type="submit" class="btn btn--link center">Add field</button>
+          <% end %>
+        </details>
+      </section>
+    <% end %>
+  </div>
+</section>

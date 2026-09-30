@@ -1,0 +1,34 @@
+<% @page_title = "Edit #{@client.name_was}" %>
+
+<% content_for :header do %>
+  <%= parent_page @client.name_was, @client %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "clients/form", client: @client %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @client.status_was, highlight: @client.status_was == "active" %></dd>
+        <dt>Contacts</dt><dd><%= @client.contacts.active.count %></dd>
+        <dt><%= term(:engagement, count: 2) %></dt><dd><%= @client.engagements.count %></dd>
+        <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
+      </dl>
+    </section>
+
+    <% if can?(:delete_records) %>
+      <%= render "layouts/shared/confirm", trigger: "Delete this client", title: "Delete #{@client.name_was}?",
+            body: "This removes the client with its contacts, commitments and notes. A client with engagements can’t be deleted.",
+            button: "Delete client", path: client_path(@client) %>
+    <% end %>
+  </aside>
+</section>

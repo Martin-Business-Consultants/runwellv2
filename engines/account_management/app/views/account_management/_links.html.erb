@@ -1,0 +1,8 @@
+<%# locals: () %>
+<nav class="accounts-links txt-small" aria-label="Account management">
+  <%= link_to "Overview", account_management_root_path, class: class_names("btn txt-small", "btn--reversed": current_page?(account_management_root_path)) %>
+  <%= link_to "Meetings", account_management_meetings_path, class: class_names("btn txt-small", "btn--reversed": current_page?(account_management_meetings_path)) %>
+  <%= link_to "Access register", account_management_accesses_path, class: class_names("btn txt-small", "btn--reversed": current_page?(account_management_accesses_path)) %>
+  <%= link_to "Weekly updates", account_management_weekly_updates_path, class: class_names("btn txt-small", "btn--reversed": current_page?(account_management_weekly_updates_path)) %>
+  <%= link_to "Playbook", account_management_playbook_path, class: class_names("btn txt-small", "btn--reversed": current_page?(account_management_playbook_path)) %>
+</nav>

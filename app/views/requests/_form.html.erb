@@ -1,0 +1,52 @@
+<%# locals: (request_record:) %>
+<%= render "layouts/shared/errors", record: request_record %>
+
+<%= form_with model: request_record, url: request_record.new_record? ? requests_path : request_path(request_record), scope: :request, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Subject</span>
+    <%= form.text_field :subject, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Can we add a newsletter signup?" %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Details</span>
+    <%= rich_text_field form, :body, staff: true %>
+  </label>
+
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Source</span>
+    <%= form.text_field :source, required: true, class: "input full-width", autocomplete: "off", placeholder: "email: Re: newsletter, or call 9/24" %>
+  </label>
+
+  <div class="flex gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Client</span>
+      <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Unknown" }, class: "input input--select full-width" %>
+    </label>
+
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Contact</span>
+      <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,
+            { include_blank: "None" }, class: "input input--select full-width" %>
+    </label>
+  </div>
+
+  <div class="flex gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Sender name</span>
+      <%= form.text_field :sender_name, class: "input full-width", autocomplete: "off" %>
+    </label>
+
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Sender email</span>
+      <%= form.email_field :sender_email, class: "input full-width", autocomplete: "off" %>
+    </label>
+  </div>
+  <p class="txt-x-small txt-subtle margin-none txt-align-start">A sender email that matches a contact fills in the client and contact.</p>
+
+  <button type="submit" class="btn btn--link center" data-form-target="submit">
+    <span><%= request_record.new_record? ? "Log request" : "Save changes" %></span>
+    <%= icon_tag "arrow-right" %>
+  </button>
+
+  <%= link_to "Cancel and go back", request_record.new_record? ? requests_path : request_path(request_record), data: { form_target: "cancel" }, hidden: true %>
+<% end %>

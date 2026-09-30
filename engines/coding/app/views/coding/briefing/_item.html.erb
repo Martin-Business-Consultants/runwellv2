@@ -1,0 +1,18 @@
+<%# locals: (item:) %>
+<% case item %>
+<% when Coding::Branch %>
+  <%= link_to todo_path(item.todo), class: "txt-ink txt-align-start" do %>
+    <strong><%= item.todo.title %></strong> <span class="txt-subtle">· checks failing</span>
+    <div class="txt-x-small txt-subtle"><%= item.todo.engagement.ref %> · <%= item.repository.name %> · <%= item.pr_label %></div>
+  <% end %>
+<% when Coding::Deploy %>
+  <div class="txt-align-start">
+    <strong><%= item.label %></strong> <span class="txt-subtle">· deploy <%= item.state %></span>
+    <div class="txt-x-small txt-subtle"><%= item.repository.client.name %> · <%= item.sha.to_s.first(7) %> · <%= time_ago_in_words(item.deployed_at) %> ago</div>
+  </div>
+<% when Coding::Collaborator %>
+  <%= link_to "#{item.repository.web_url}/settings/access", class: "txt-ink txt-align-start", target: "_blank", rel: "noopener" do %>
+    <strong><%= item.label %></strong>
+    <div class="txt-x-small txt-subtle">Deactivated here, still a collaborator on GitHub (@<%= item.login %>). Remove their access there.</div>
+  <% end %>
+<% end %>

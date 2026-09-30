@@ -1,0 +1,148 @@
+<% @page_title = @client.name %>
+<% contacts = @client.contacts.active.ordered.to_a %>
+<% tabs = [
+     record_tab("engagements", term(:engagement, count: 2), count: @client.engagements.count),
+     record_tab("commitments", "Commitments", count: @client.commitments.open.count),
+     record_tab("notes", "Notes", count: @client.notes.count),
+     record_tab("documents", "Documents", count: @client.documents.count)
+   ] + plugin_record_tabs(:client_panel) %>
+<% tab = current_record_tab(tabs, "engagements") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+
+<% content_for :header do %>
+  <%= parent_page term(:client, count: 2), clients_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions">
+        <%= link_to edit_client_path(@client), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+          <%= icon_tag "pencil" %>
+          <span>Edit</span>
+          <kbd class="hide-on-touch">E</kbd>
+        <% end %>
+      </div>
+    </div>
+
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "engagements" %>
+            <section class="settings__section">
+              <header>
+                <h2 class="divider"><%= term(:engagement, count: 2) %></h2>
+                <div class="filters">
+                  <%= render "layouts/shared/quick_filter", title: "Show…", param: :engagements, current: @engagement_state,
+                        options: Engagement.filter_options(Engagement.filter_counts(scope: @client.engagements)) %>
+                </div>
+              </header>
+
+              <% engagements = Engagement.filtered(state: @engagement_state, scope: @client.engagements) %>
+              <% if engagements.any? %>
+                <ul class="settings__scrollable-list">
+                  <% engagements.each do |engagement| %>
+                    <%# herb:key engagement.id %>
+                    <li data-filter-target="item" class="flex align-center gap-half">
+                      <%= link_to engagement, class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+                        <strong><%= engagement.ref %></strong> <%= engagement.title %>
+                        <span class="txt-x-small txt-subtle"><%= engagement.label_name %> · <%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></span>
+                      <% end %>
+                      <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                      <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% elsif @client.engagements.exists? %>
+                <p class="txt-subtle txt-small margin-none">
+                  None <%= Engagement.filter_options.to_h.invert.fetch(@engagement_state).downcase %>.
+                  <%= link_to "Show all", client_path(@client, engagements: "all"), class: "txt-link" %>
+                </p>
+              <% else %>
+                <p class="txt-subtle txt-small margin-none">No <%= term(:engagement, count: 2).downcase %> yet.</p>
+              <% end %>
+
+              <div class="section-actions">
+                <%= link_to new_engagement_path(client_id: @client.id), class: "btn txt-small" do %>
+                  <%= icon_tag "add" %>
+                  <span>New <%= term(:engagement).downcase %></span>
+                <% end %>
+              </div>
+            </section>
+          <% when "commitments" %>
+            <%= render "commitments/section", subject: @client %>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @client %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @client %>
+          <% end %>
+          <% if plugin_partial %>
+            <%= render plugin_partial, client: @client %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @client.status, highlight: @client.status == "active" %></dd>
+        <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
+        <dt>Time zone</dt>
+        <dd>
+          <% if @client.own_time_zone? %>
+            <%= @client.time_zone %> · <%= l Time.current.in_time_zone(@client.zone), format: "%-l:%M %p" %> there now
+          <% else %>
+            Same as ours
+          <% end %>
+        </dd>
+      </dl>
+      <%= render "custom_fields/values", record: @client %>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Contacts <span class="txt-subtle"><%= contacts.size %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% contacts.each do |contact| %>
+          <%# herb:key contact.id %>
+          <li data-filter-target="item" class="contact-row">
+            <%= link_to edit_contact_path(contact), class: "contact-row__who txt-ink" do %>
+              <strong class="overflow-ellipsis"><%= contact.name %></strong>
+              <span class="txt-x-small txt-subtle overflow-ellipsis"><%= [ contact.role, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
+            <% end %>
+            <span class="contact-row__marks">
+              <% if contact.portal? %>
+                <span class="contact-row__mark" title="Can sign in to the portal"><%= icon_tag "globe" %><span class="for-screen-reader">Portal</span></span>
+              <% end %>
+              <% if contact.can_approve? %>
+                <span class="contact-row__mark contact-row__mark--approve" title="Can approve agreements"><%= icon_tag "check-circle" %><span class="for-screen-reader">Can approve</span></span>
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+      <% if contacts.empty? %>
+        <p class="txt-subtle txt-small margin-none">No contacts yet.</p>
+      <% end %>
+      <div class="section-actions">
+        <%= link_to new_client_contact_path(@client), class: "btn txt-small" do %>
+          <%= icon_tag "person-add" %>
+          <span>Add a contact</span>
+        <% end %>
+      </div>
+    </section>
+
+    <%= render "events/timeline", subject: @client %>
+  </aside>
+</section>

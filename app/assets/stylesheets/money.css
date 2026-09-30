@@ -1,0 +1,6 @@
+/* A money field is two inputs (dollars shown, cents sent) that lay out as the one field. */
+@layer components {
+  .money-field {
+    display: contents;
+  }
+}

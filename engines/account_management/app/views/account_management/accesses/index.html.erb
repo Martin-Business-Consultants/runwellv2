@@ -1,0 +1,66 @@
+<% @page_title = "Access register" %>
+<% clients = ::Client.where(id: AccountManagement::Access.select(:client_id)).ordered %>
+
+<%= render "account_management/links" %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
+        options: [ [ "Every account", "all" ], [ "Needing attention", "attention" ] ] %>
+  <% if clients.size > 1 %>
+    <%= render "layouts/shared/quick_filter", title: "#{term(:client)}…", param: :client_id, current: params[:client_id].to_s,
+          options: [ [ "Every #{term(:client).downcase}", "" ] ] + clients.map { [ it.name, it.id.to_s ] } %>
+  <% end %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", new_text: "Add an account", new_path: new_account_management_access_path(client_id: params[:client_id].presence) %>
+
+<% if @accesses.any? %>
+  <section class="panel shadow center index-table">
+    <table class="data-table">
+      <thead>
+        <tr><th>Account</th><th><%= term(:client) %></th><th>Owned by</th><th>Our access</th><th>Login lives in</th><th>Token</th><th>Checked</th><th>Problems</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% @accesses.each do |access| %>
+          <%# herb:key access.id %>
+          <tr data-filter-target="item">
+            <td>
+              <%= link_to access.name, edit_account_management_access_path(access), class: "txt-ink font-weight-bold" %>
+              <div class="txt-x-small txt-subtle"><%= access.platform_label %><%= " · #{access.external_id}" if access.external_id.present? %></div>
+            </td>
+            <td class="txt-subtle"><%= link_to access.client.name, client_path(access.client, tab: "plugin-account_management"), class: "txt-ink" %></td>
+            <td class="<%= "txt-negative" if access.owned_by.in?(%w[third_party unknown]) %>"><%= access.owned_by_label %></td>
+            <td class="<%= "txt-negative" if access.our_access.in?(%w[none requested]) %>"><%= access.our_access_label %></td>
+            <td class="txt-small txt-subtle"><%= access.login_location.presence || "—" %></td>
+            <td class="txt-nowrap <%= "txt-negative" if access.token_problem %>"><%= access.token_expires_on ? l(access.token_expires_on, format: :short) : "—" %></td>
+            <td class="txt-nowrap txt-subtle"><%= access.verified_on ? l(access.verified_on, format: :short) : "Never" %></td>
+            <td class="txt-small">
+              <% if access.in_order? %>
+                <%= account_status_tag "in_order" %>
+              <% else %>
+                <ul class="accounts-problems">
+                  <% access.problems.each do |problem| %>
+                    <%# herb:key problem %>
+                    <li><%= problem %></li>
+                  <% end %>
+                </ul>
+              <% end %>
+            </td>
+            <td class="txt-nowrap">
+              <%= button_to "Checked today", verify_account_management_access_path(access), class: "btn txt-x-small", form_class: "flex" %>
+            </td>
+            <%= render "layouts/shared/row_actions", name: access.name, edit_path: edit_account_management_access_path(access),
+                  delete_path: (account_management_access_path(access) if can?(:manage_accounts)) %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% else %>
+  <div class="blank-slate">
+    <% if AccountManagement::Access.none? %>
+      The register is empty. Add every outside account the work depends on: the Facebook page and Instagram account, the ad account, the pixel, analytics, tag manager, the domain. Say who owns each, what access we hold, and where its login lives. Never the password itself.
+    <% else %>
+      Every account is in order.
+    <% end %>
+  </div>
+<% end %>

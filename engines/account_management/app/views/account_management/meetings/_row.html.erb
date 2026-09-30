@@ -1,0 +1,16 @@
+<%# locals: (meeting:, with_client: false) %>
+<%# One meeting in a list: when, with whom, where its papers stand, who runs it. %>
+<li class="flex align-center gap-half" data-filter-target="item">
+  <%= link_to account_management_meeting_path(meeting), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+    <strong><%= meeting.title %></strong>
+    <div class="txt-x-small txt-subtle">
+      <%= [ (meeting.client.name if with_client), meeting.when_label,
+            (meeting.state == "recap_due" ? account_paper_line(meeting, :recap) : ("Agenda: " + account_paper_line(meeting, :agenda).downcase_first unless meeting.state == "done" || meeting.cancelled?)) ].compact.join(" · ") %>
+    </div>
+  <% end %>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <% if meeting.owner %>
+    <%= person_tag meeting.owner %>
+  <% end %>
+  <%= account_meeting_tag meeting %>
+</li>

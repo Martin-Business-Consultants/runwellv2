@@ -1,0 +1,22 @@
+<%# locals: (trigger:, title:, body:, button:, path:, method: nil, icon: nil) %>
+<%# herb:slots server %>
+<%# herb:state (confirming: false) %>
+<div class="txt-align-center margin-block-start">
+  <% if confirming %>
+    <div class="panel panel--narrow fill-white shadow flex flex-column gap center">
+      <h3 class="txt-large font-weight-bold margin-none"><%= title %></h3>
+      <p class="txt-medium margin-none"><%= body %></p>
+      <div class="flex gap-half justify-center">
+        <button type="button" class="btn" data-herb-reset="confirming">Cancel</button>
+        <%= button_to path, method: method || :delete, class: "btn txt-negative" do %>
+          <span><%= button %></span>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <button type="button" class="btn txt-negative borderless txt-small" data-keys="d" data-herb-toggle="confirming">
+      <%= icon_tag icon || "trash" %>
+      <span><%= trigger %></span>
+    </button>
+  <% end %>
+</div>

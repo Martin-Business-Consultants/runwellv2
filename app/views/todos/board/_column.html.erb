@@ -1,0 +1,14 @@
+<%# locals: (status:, count:) %>
+<%= column_tag id: "todos-#{status}", name: status.humanize, drop_url: columns_todo_drops_column_path("__id__", todo_board_filters.merge(column_id: status)),
+      card_color: todo_column_color(status), class: "cards--doing cards--#{status.dasherize}",
+  data: {
+    drag_and_strum_target: "container",
+    collapsible_columns_target: "column",
+    action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
+  } do %>
+  <header class="cards__header">
+    <%= render "todos/board/expander", title: status.humanize, count: count, column_id: "todos-#{status}" %>
+    <%= render "todos/board/maximize", column_path: todos_column_path(status, todo_board_filters) %>
+  </header>
+  <%= column_frame_tag "#{status}_cards", src: todos_column_path(status, todo_board_filters) %>
+<% end %>

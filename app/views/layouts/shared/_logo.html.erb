@@ -1,0 +1,8 @@
+<%# locals: () %>
+<%# The install's logo (Settings > Appearance), or the wordmark. %>
+<% logo = Setting.current.logo %>
+<% if logo.attached? %>
+  <%= image_tag rails_blob_path(logo, disposition: :inline), alt: "Runwell", class: "header__logo-image" %>
+<% else %>
+  Runwell
+<% end %>

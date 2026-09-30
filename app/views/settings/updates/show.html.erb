@@ -1,0 +1,116 @@
+<% @page_title = "Updates" %>
+<%= render "settings/header", current: :updates %>
+
+<turbo-frame id="updates" target="_top">
+  <section class="settings">
+    <div class="settings__panel panel shadow txt-align-start">
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">This install</h2>
+        </header>
+        <dl class="record-facts">
+          <dt>Running</dt>
+          <dd>Runwell <%= Runwell::VERSION %></dd>
+          <dt>Newest release</dt>
+          <dd>
+            <% if @release %>
+              <%= link_to "Runwell #{@release.version}", @release.url, class: "txt-link", target: "_blank", rel: "noopener" %>
+              <span class="txt-subtle"><%= @release.newer? ? "(newer)" : "(up to date)" %></span>
+            <% else %>
+              <span class="txt-subtle">Not checked yet</span>
+            <% end %>
+          </dd>
+          <dt>Checked</dt>
+          <dd>
+            <% if Release.checked_at %>
+              <%= time_ago_in_words(Release.checked_at) %> ago<% if Release.checking? %>, and every night<% end %>
+            <% else %>
+              <span class="txt-subtle">Never</span>
+            <% end %>
+          </dd>
+          <dt>Updates by</dt>
+          <dd><%= update_method_description %></dd>
+        </dl>
+        <div class="section-actions">
+          <%= button_to settings_updates_check_path, class: "btn txt-small" do %>
+            <%= icon_tag "refresh" %>
+            <span>Check now</span>
+          <% end %>
+        </div>
+      </section>
+
+      <% if @upgrade %>
+        <section class="settings__section flex flex-column gap" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
+          <header>
+            <h2 class="divider">Updating to <%= @upgrade.to_version %></h2>
+          </header>
+          <p class="txt-small margin-none">
+            Started <%= time_ago_in_words(@upgrade.created_at) %> ago by <%= person_tag @upgrade.requested_by %>.
+            The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running.
+            This page checks every few seconds.
+          </p>
+          <% if @upgrade.external_url %>
+            <p class="txt-small margin-none"><%= link_to "Follow the deploy on GitHub", @upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %></p>
+          <% end %>
+        </section>
+      <% elsif @release&.newer? %>
+        <section class="settings__section flex flex-column gap">
+          <header>
+            <h2 class="divider">Runwell <%= @release.version %></h2>
+          </header>
+          <% if @release.published_at %>
+            <p class="txt-small txt-subtle margin-none">Released <%= l @release.published_at.to_date, format: :long %>.</p>
+          <% end %>
+          <% if @release.notes.present? %>
+            <div class="txt-small release-notes"><%= simple_format @release.notes %></div>
+          <% end %>
+
+          <% if Upgrade.available? %>
+            <details class="txt-align-start">
+              <summary class="btn btn--link">Update to <%= @release.version %></summary>
+              <div class="flex flex-column gap-half margin-block-start">
+                <p class="txt-small margin-none">
+                  Runwell backs up its databases, updates and restarts. It’s unavailable for a minute or two; nobody is signed out.
+                  If anything fails, <%= Runwell::VERSION %> keeps running and this page says why.
+                </p>
+                <%= button_to "Update now", settings_updates_path, class: "btn btn--link" %>
+              </div>
+            </details>
+          <% else %>
+            <p class="txt-small margin-none">Updating from here isn’t set up on this install. On the server:</p>
+            <pre class="txt-small margin-none"><code><%= manual_update_command(@release) %></code></pre>
+            <p class="txt-small txt-subtle margin-none">
+              To use a button instead, set <code>RUNWELL_GITHUB_TOKEN</code> (a Docker install) or run from a checkout made by <code>bin/install</code>. See <code>docs/install.md</code>.
+            </p>
+          <% end %>
+        </section>
+      <% end %>
+
+      <% if @upgrades.any? %>
+        <section class="settings__section flex flex-column gap">
+          <header>
+            <h2 class="divider">Past updates</h2>
+          </header>
+          <ul class="settings__scrollable-list">
+            <% @upgrades.each do |upgrade| %>
+              <%# herb:key upgrade.id %>
+              <li class="flex align-start gap-half txt-small">
+                <%= person_tag upgrade.requested_by %>
+                <div class="txt-align-start min-width flex-item-grow">
+                  <strong><%= upgrade.from_version %> → <%= upgrade.to_version %></strong>
+                  <span class="txt-subtle">· <%= upgrade.status %> · <%= time_ago_in_words(upgrade.created_at) %> ago</span>
+                  <% if upgrade.external_url %>
+                    · <%= link_to "Deploy log", upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %>
+                  <% end %>
+                  <% if upgrade.message.present? %>
+                    <pre class="txt-x-small margin-none upgrade-message"><%= upgrade.message %></pre>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+  </section>
+</turbo-frame>

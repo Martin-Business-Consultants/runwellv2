@@ -1,0 +1,10 @@
+<%# locals: (approval:) %>
+<div class="flex flex-column gap-half txt-align-start">
+  <div class="flex flex-wrap align-center gap-half txt-small">
+    <%= status_tag approval.decision.humanize, highlight: approval.decision == "approved" %>
+    <span>by <%= approval.approver_name %> on <%= l approval.decided_at, format: :long %></span>
+  </div>
+  <% if approval.comment.present? %>
+    <div class="txt-small"><%= rich_text approval.comment %></div>
+  <% end %>
+</div>

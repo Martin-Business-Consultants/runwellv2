@@ -1,0 +1,24 @@
+<% @page_title = "Choose a new password" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end"><%= @page_title %></h1>
+
+  <%= form_with url: password_path(params[:token]), method: :put, class: "flex flex-column gap txt-medium" do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.password_field :password, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "new-password", placeholder: "Enter a new password…", maxlength: 72 %>
+    </label>
+
+    <label class="flex align-center gap input input--actor">
+      <%= form.password_field :password_confirmation, required: true, class: "input txt-large full-width", autocomplete: "new-password", placeholder: "Repeat the new password…", maxlength: 72 %>
+    </label>
+
+    <button type="submit" class="btn btn--link center txt-medium">
+      <span>Save</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

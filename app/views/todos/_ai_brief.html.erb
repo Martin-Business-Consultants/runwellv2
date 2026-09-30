@@ -1,0 +1,14 @@
+<%# locals: (todo:, labelled: nil) %>
+<%# Copies a brief for a local AI: the work, its scope and notes, repos (from plugins) and the
+    runwell commands to update status and leave notes, acting as the person's agent. %>
+<% title = "Copy a brief for your AI (c)" %>
+<button type="button" class="<%= class_names("btn ai-brief", "btn--circle borderless row-action": !labelled, "btn--circle-mobile": labelled) %>" title="<%= title %>" data-keys="c"
+  data-controller="copy-to-clipboard" data-copy-to-clipboard-url-value="<%= brief_todo_path(todo, format: :text) %>" data-copy-to-clipboard-success-class="ai-brief--copied" data-action="copy-to-clipboard#copy">
+  <%= icon_tag "ai" %>
+  <% if labelled %>
+    <span class="txt-nowrap">Copy for AI</span>
+    <kbd class="hide-on-touch">C</kbd>
+  <% else %>
+    <span class="for-screen-reader">Copy a brief of <%= todo.title %> for your AI</span>
+  <% end %>
+</button>

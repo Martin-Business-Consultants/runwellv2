@@ -1,0 +1,122 @@
+# An example client's source of truth: a portable storage company with a quote form, the emails
+# it sends and a CRM webhook. Made up; copy it and put your client's real values in.
+#
+#   bin/rails "qa:import[engines/qa/examples/acme_storage.yml]"
+#
+# Load it again after changing a value here: changed values are recorded on the client's
+# history and the check has to be tested again. Each check's report URL (on its page) is where
+# the site's daily canary can post what it actually sent, keyed as below.
+client: Acme Storage Denver
+checks:
+  - name: Quote email to the customer
+    kind: email
+    live: true
+    every_days: 1
+    instructions: >-
+      Submit the quote form at https://denver.acme-storage.example/quote as a Keep It lead for
+      ZIP 80202 with your own inbox as the email. Check it in Gmail and Outlook, on a phone too.
+    expectations:
+      - label: Subject
+        expected: "Acme Storage Denver Quote - Keep It"
+        note: "The subject template, {brand} Quote - {serviceType}, for a Keep It lead"
+      - label: From name
+        expected: "Acme Storage Denver"
+      - label: From address
+        expected: "hello@acme-storage.example"
+        note: "Must be verified with the mail provider, or nothing sends"
+      - label: CC
+        match: list
+        expected: [ "leads@agency.example" ]
+        note: "The agency is copied on every message"
+      - label: Heading
+        expected: "We received your quote request."
+      - label: Promo line
+        expected: "$99 first month with $1 delivery. Ends 9/30. Book today!"
+        expires_on: 2026-09-30
+        note: "Decide what replaces it on 10/1"
+      - label: Phone in the email
+        match: includes
+        expected: "(303) 555-0142"
+      - label: Another market's number never shows
+        match: excludes
+        expected: "(720) 555-0199"
+        note: "The shared template once showed Boulder's number to Denver customers"
+      - label: Footer
+        expected: "Acme Storage Denver · (303) 555-0142"
+      - label: The Call button dials the business, not the customer
+      - label: Pricing matches the quote tool and the thank-you page
+      - label: Every link and button clicked
+      - label: Reads well on mobile, Gmail, Outlook and Apple Mail
+
+  - name: Lead alert to the office
+    kind: email
+    live: true
+    every_days: 1
+    instructions: The same test lead as the customer email. Ask the office to confirm it arrived.
+    expectations:
+      - label: Subject starts New Lead
+        match: includes
+        expected: "New Lead:"
+      - label: From address
+        expected: "hello@acme-storage.example"
+      - label: To
+        match: list
+        expected: [ "office@acme-storage.example", "owner@acme-storage.example" ]
+      - label: Heading
+        expected: "New quote request"
+      - label: Reply goes to the lead
+      - label: Every field the customer entered is shown
+
+  - name: CRM webhook
+    kind: webhook
+    live: true
+    every_days: 1
+    instructions: After the test lead, find it in the CRM and check each mapped field. Its field mapping is the contract.
+    expectations:
+      - label: Endpoint URL
+        expected: "https://crm.example.com/webhook/0000example"
+      - label: Keys sent
+        match: list
+        expected: [ "firstName", "lastName", "phone", "email", "delivery_date", "delivery_zip", "service_needed", "box_size" ]
+      - label: Delivery date format
+        expected: "mm/dd/yyyy"
+      - label: service_needed values
+        match: list
+        expected: [ "keep-it", "move-it", "store-it" ]
+      - label: The test lead arrives in the CRM with every field mapped
+
+  - name: Home page
+    kind: page
+    live: true
+    url: https://denver.acme-storage.example/
+    every_days: 7
+    expectations:
+      - label: Phone number
+        match: includes
+        expected: "(303) 555-0142"
+      - label: Street address
+        match: includes
+        expected: "100 Example Way"
+      - label: Another market's number never shows
+        match: excludes
+        expected: "(720) 555-0199"
+      - label: No placeholder address
+        match: excludes
+        expected: "TODO-ADDRESS"
+      - label: Analytics and pixels fire
+      - label: Footer, hours and address match the Google Business Profile
+
+  - name: Quote form and thank-you page
+    kind: form
+    live: true
+    url: https://denver.acme-storage.example/quote
+    every_days: 7
+    expectations:
+      - label: Phone number
+        match: includes
+        expected: "(303) 555-0142"
+      - label: ZIP 80202 qualifies for Keep It
+      - label: An out-of-area ZIP shows the out-of-area message
+      - label: Thank-you page shows the phone and the price for the chosen size
+      - label: Thank-you price matches the customer email
+      - label: A bad captcha token is refused

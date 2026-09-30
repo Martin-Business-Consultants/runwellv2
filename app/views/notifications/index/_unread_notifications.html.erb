@@ -1,0 +1,20 @@
+<%# locals: (unread:) %>
+<section class="notifications-list panel panel--wide center borderless unpad flex flex-column gap-half">
+  <% if unread.any? %>
+    <div class="flex align-center justify-space-between margin-block-start margin-block-end-half">
+      <h2 class="txt-medium txt-uppercase txt-alert">New for you</h2>
+      <%= button_to "Mark all as read", bulk_reading_path, class: "btn txt-small", form: { data: { turbo: false } }, data: { action: "badge#clear" } %>
+    </div>
+  <% else %>
+    <div class="notifications-list__blank-slate blank-slate align-self-center">
+      Nothing new for you
+    </div>
+  <% end %>
+
+  <div id="notifications_list">
+    <% unread.each do |notification| %>
+      <%# herb:key notification.id %>
+      <%= render "notifications/notification", notification: notification %>
+    <% end %>
+  </div>
+</section>

@@ -1,0 +1,70 @@
+<% @page_title = @request.subject %>
+
+<% content_for :header do %>
+  <%= parent_page "Requests", requests_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <section class="settings__section">
+      <% if @request.body.present? %>
+        <div class="txt-small"><%= rich_text @request.body %></div>
+      <% else %>
+        <p class="txt-small txt-subtle">No details.</p>
+      <% end %>
+    </section>
+
+    <% if @request.open? %>
+      <% if can?(:triage_requests) %>
+        <%= render "requests/triage", request_record: @request %>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">A manager or owner triages requests: promoting this to work or dismissing it.</p>
+      <% end %>
+    <% else %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider"><%= @request.status == "promoted" ? "Became" : "Dismissed" %></h2>
+        </header>
+        <p class="txt-small">
+          <% if @request.status == "promoted" && @request.promoted %>
+            <%= link_to @request.promoted_label, promoted_path(@request.promoted), class: "txt-link" %>
+          <% else %>
+            <%= @request.dismissed_reason %>
+          <% end %>
+        </p>
+        <p class="txt-x-small txt-subtle"><%= person_tag @request.triaged_by, fallback: "—" %><%= " · #{l(@request.triaged_at, format: :short)}" if @request.triaged_at %></p>
+      </section>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @request.status.humanize, highlight: @request.open? %></dd>
+        <dt><%= term(:client) %></dt>
+        <dd>
+          <% if @request.client %>
+            <%= link_to @request.client.name, @request.client, class: "txt-link" %>
+          <% else %>
+            <span class="txt-subtle">No client matched</span>
+          <% end %>
+        </dd>
+        <dt>From</dt><dd><%= @request.requester_name.presence || "Unknown sender" %></dd>
+        <% if @request.sender_email.present? %>
+          <dt>Email</dt><dd><%= @request.sender_email %></dd>
+        <% end %>
+        <dt>Source</dt><dd><%= @request.source %></dd>
+        <dt>Received</dt><dd><%= l @request.received_at, format: :short %></dd>
+      </dl>
+    </section>
+
+    <%= render "notes/section", subject: @request %>
+    <%= render "documents/section", subject: @request %>
+  </aside>
+</section>

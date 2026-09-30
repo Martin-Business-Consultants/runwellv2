@@ -1,0 +1,31 @@
+<% @page_title = "Views" %>
+<%= render "settings/header", current: :views %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">How lists open</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        <%= term(:client, count: 2) %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, commitments and requests open as cards or as a table.
+        Anyone can switch a list with its View menu; this sets where it starts.
+      </p>
+
+      <%= form_with url: settings_views_path, method: :patch, data: { controller: "form" } do %>
+        <div class="theme-switcher flex gap max-width justify-center txt-small">
+          <label class="btn theme-switcher__btn">
+            <%= icon_tag "grid" %>
+            <span class="overflow-ellipsis">Cards</span>
+            <%= radio_button_tag :index_view, "cards", @setting.index_view == "cards", data: { action: "change->form#submit" } %>
+          </label>
+          <label class="btn theme-switcher__btn">
+            <%= icon_tag "column-left" %>
+            <span class="overflow-ellipsis">Table</span>
+            <%= radio_button_tag :index_view, "table", @setting.index_view == "table", data: { action: "change->form#submit" } %>
+          </label>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</section>

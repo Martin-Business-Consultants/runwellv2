@@ -1,0 +1,43 @@
+<% @page_title = "Log a request" %>
+<% open = Request.where(status: "open").order(received_at: :desc).limit(6).to_a %>
+
+<% content_for :header do %>
+  <%= parent_page "Requests", requests_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "requests/form", request_record: @request_record %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">What happens to it</h2>
+      </header>
+      <p class="txt-small margin-none">A manager or owner triages it: a new <%= term(:engagement).downcase %>, scope on a draft, a piece of <%= term(:work).downcase %>, a commitment, or dismissed with a reason. Until then it shows on home.</p>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">Waiting for triage <span class="txt-subtle"><%= open.size %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% open.each do |request_record| %>
+          <%# herb:key request_record.id %>
+          <li class="flex align-center gap-half txt-small" data-filter-target="item">
+            <%= link_to request_record.subject, request_path(request_record), class: "txt-ink overflow-ellipsis min-width" %>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <span class="txt-subtle txt-nowrap"><%= l request_record.received_at.to_date, format: :short %></span>
+          </li>
+        <% end %>
+      </ul>
+      <% if open.empty? %>
+        <p class="txt-subtle txt-small margin-none">None.</p>
+      <% end %>
+    </section>
+  </aside>
+</section>

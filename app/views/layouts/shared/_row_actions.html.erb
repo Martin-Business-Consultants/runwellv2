@@ -1,0 +1,20 @@
+<%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, todo: nil) %>
+<%# A table row's last cell: edit and delete, each only when the record allows it (and
+    delete only for people who may delete records). %>
+<td class="data-table__actions">
+  <div class="flex align-center justify-end gap-half">
+    <% if todo %>
+      <%= render "todos/ai_brief", todo: todo %>
+    <% end %>
+    <% if edit_path %>
+      <% edit_label = "Edit " + name %>
+      <%= link_to edit_path, class: "btn btn--circle borderless row-action", title: edit_label, data: { keys: "e" } do %>
+        <%= icon_tag "pencil" %>
+        <span class="for-screen-reader"><%= edit_label %></span>
+      <% end %>
+    <% end %>
+    <% if delete_path && can?(:delete_records) %>
+      <%= render "layouts/shared/delete_dialog", name: name, path: delete_path, message: delete_message, trigger_class: "row-action", keys: "d" %>
+    <% end %>
+  </div>
+</td>

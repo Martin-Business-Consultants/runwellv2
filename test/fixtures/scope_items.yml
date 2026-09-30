@@ -1,0 +1,24 @@
+design:
+  agreement_version: landing_v1
+  description: Design and copy
+  price_cents: 150000
+  internal_estimate: 3 days
+  position: 1
+
+build:
+  agreement_version: landing_v1
+  description: Build and launch
+  price_cents: 250000
+  position: 2
+
+care:
+  agreement_version: retainer_v1
+  description: Updates, backups, monitoring
+  price_cents: 45000
+  position: 1
+
+globex_design:
+  agreement_version: globex_v1
+  description: Design
+  price_cents: 100000
+  position: 1

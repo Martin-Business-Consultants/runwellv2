@@ -1,0 +1,18 @@
+<%# locals: (results:, query:) %>
+<section class="search">
+  <div class="search__results">
+    <% if query.nil? %>
+      <div class="search__blank-slate blank-slate">
+        Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, requests, work, commitments, notes and documents
+      </div>
+    <% elsif results.empty? %>
+      <div class="search__blank-slate blank-slate">
+        No matches
+      </div>
+    <% end %>
+
+    <ul class="search__list">
+      <%= render partial: "searches/result", collection: results %>
+    </ul>
+  </div>
+</section>

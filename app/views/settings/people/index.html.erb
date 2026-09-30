@@ -1,0 +1,104 @@
+<% @page_title = "People" %>
+<%= render "settings/header", current: :people %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Team</h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% @people.each do |person| %>
+          <%# herb:key person.id %>
+          <li class="flex align-center gap-half people__person" data-filter-target="item">
+            <%= avatar_preview_tag person, hidden_for_screen_reader: true, class: "people__avatar" %>
+            <div class="txt-align-start overflow-ellipsis min-width">
+              <strong><%= person.display_name %></strong><%= " (you)" if person == Current.user %>
+              <div class="txt-x-small txt-subtle overflow-ellipsis"><%= person.email_address %></div>
+              <% if person.agent %>
+                <div class="txt-x-small txt-subtle overflow-ellipsis">Apps they connect act as <strong><%= person.agent.display_name %></strong></div>
+              <% end %>
+            </div>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <% if person.deactivated? %>
+              <%= status_tag "Deactivated" %>
+              <%= button_to "Reactivate", settings_person_deactivation_path(person), method: :delete, class: "btn txt-small" %>
+            <% else %>
+              <%= form_with model: person, url: settings_person_path(person), method: :patch, scope: :user, namespace: dom_id(person), data: { controller: "form" } do |form| %>
+                <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {}, class: "input input--select txt-small", aria: { label: "Role for " + person.display_name }, data: { action: "change->form#submit" } %>
+              <% end %>
+              <% if person != Current.user %>
+                <%= button_to "Deactivate", settings_person_deactivation_path(person), class: "btn txt-small", title: "Signs them out and keeps them out. Their name stays on their work." %>
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Invite someone</h2>
+      </header>
+      <%= form_with model: @invitation, url: settings_invitations_path, class: "people__invite txt-small" do |form| %>
+        <%= form.email_field :email_address, required: true, class: "input", autocomplete: "off", placeholder: "name@example.com", aria: { label: "Email address" } %>
+        <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, { selected: "member" }, class: "input input--select", aria: { label: "Role" } %>
+        <button type="submit" class="btn btn--link">Send invitation</button>
+      <% end %>
+      <p class="txt-x-small txt-subtle margin-none">They get an email with a link to choose a name and password. It works once and expires in <%= distance_of_time_in_words(0, Invitation::EXPIRES_IN) %>.</p>
+
+      <ul class="settings__scrollable-list">
+        <% @invitations.each do |invitation| %>
+          <%# herb:key invitation.id %>
+          <li class="flex align-center gap-half txt-small" data-filter-target="item">
+            <div class="txt-align-start overflow-ellipsis min-width">
+              <strong><%= invitation.email_address %></strong>
+              <div class="txt-x-small txt-subtle"><%= invitation.role.capitalize %> · invited by <%= invitation.invited_by.display_name %> <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></div>
+            </div>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <%= button_to "Resend", settings_invitation_path(invitation), method: :patch, class: "btn txt-small" %>
+            <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: settings_invitation_path(invitation), trigger_class: "txt-small",
+                  message: "The link they were sent stops working." %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">What each role can do</h2>
+      </header>
+      <dl class="people__roles txt-small margin-none">
+        <% User::ROLE_DESCRIPTIONS.each do |role, description| %>
+          <%# herb:key role %>
+          <dt class="font-weight-bold"><%= role.capitalize %></dt>
+          <dd class="txt-subtle margin-none"><%= description %></dd>
+        <% end %>
+      </dl>
+      <table class="data-table people__permissions txt-small">
+        <thead>
+          <tr><th>Permission</th><% User::ROLES.each do |role| %><%# herb:key role %><th class="txt-align-center"><%= role.capitalize %></th><% end %></tr>
+        </thead>
+        <tbody>
+          <% User.permissions.each do |key, permission| %>
+            <%# herb:key key %>
+            <tr>
+              <td><%= permission[:name] %></td>
+              <% User::ROLES.each do |role| %>
+                <%# herb:key role %>
+                <td class="txt-align-center">
+                  <% if permission[:roles].include?(role) %>
+                    <%= icon_tag "check" %><span class="for-screen-reader">Yes</span>
+                  <% else %>
+                    <span class="txt-subtle">—</span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p class="txt-x-small txt-subtle margin-none">Everyone can work on <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, commitments, requests, notes and documents. Plugins that are on add their own permissions here.</p>
+    </section>
+  </div>
+</section>

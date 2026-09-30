@@ -1,0 +1,236 @@
+/* The staff nav down the left (layouts/shared/_sidenav). The page runs in a second column
+/* beside it; the bottom of the screen stays clear but for the notification bell (corner.css).
+/* Below 800px the nav runs across the top as one scrolling row. */
+@layer components {
+  body.with-sidenav {
+    --sidenav-width: 13.5rem;
+
+    grid-template-columns: var(--sidenav-width) minmax(0, 1fr);
+    /* The last row keeps the bottom right clear for the notification bell. */
+    grid-template-rows: auto 1fr auto 4em;
+
+    #global-container > :not(.sidenav),
+    > #footer {
+      grid-column: 2;
+    }
+
+    /* Fill the column: auto margins would shrink a grid item to its content. */
+    #header,
+    #main,
+    #footer {
+      inline-size: auto;
+      margin-inline: 0;
+      max-inline-size: 100%;
+    }
+
+    #header:has(~ #main .card-columns) {
+      inline-size: auto;
+    }
+
+    @media (max-width: 799px) {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr auto 4em;
+
+      #global-container > :not(.sidenav),
+      > #footer {
+        grid-column: 1;
+      }
+    }
+  }
+
+  .sidenav {
+    background-color: var(--color-ink-lightest);
+    block-size: 100dvh;
+    border-inline-end: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    grid-column: 1;
+    grid-row: 1 / -1;
+    inset-block-start: 0;
+    overflow-y: auto;
+    padding-block: calc(var(--block-space) + var(--custom-safe-inset-top)) var(--block-space);
+    padding-inline: calc(var(--inline-space) + var(--custom-safe-inset-left)) var(--inline-space);
+    position: sticky;
+    text-align: start;
+    z-index: var(--z-nav);
+
+    @media (max-width: 799px) {
+      align-items: center;
+      block-size: auto;
+      border-block-end: 1px solid var(--color-ink-lighter);
+      border-inline-end: 0;
+      flex-direction: row;
+      grid-row: auto;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding-block: calc(var(--block-space-half) + var(--custom-safe-inset-top)) var(--block-space-half);
+      position: relative;
+    }
+  }
+
+  .sidenav__logo {
+    color: var(--color-ink);
+    flex-shrink: 0;
+    padding-inline: 0.5em;
+  }
+
+  .sidenav__nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--block-space-half);
+
+    @media (max-width: 799px) {
+      flex-direction: row;
+    }
+  }
+
+  .sidenav__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 799px) {
+      flex-direction: row;
+    }
+  }
+
+  .sidenav__heading {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin: var(--block-space-half) 0 0;
+    padding-inline: 0.75em;
+    text-transform: uppercase;
+
+    @media (max-width: 799px) {
+      display: none;
+    }
+  }
+
+  .sidenav__link {
+    --icon-size: 1.05em;
+
+    align-items: center;
+    border-radius: var(--radius-control);
+    color: var(--color-ink);
+    display: flex;
+    font-size: var(--text-small);
+    font-weight: 600;
+    gap: 0.65em;
+    padding: 0.45em 0.75em;
+    text-decoration: none;
+    white-space: nowrap;
+
+    .icon {
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background-color: var(--color-ink-lighter);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-link);
+      outline-offset: 1px;
+    }
+
+    &[aria-current="page"] {
+      background-color: var(--color-selected);
+      color: var(--color-ink);
+
+      .icon {
+        opacity: 1;
+      }
+    }
+  }
+
+  .sidenav__foot {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    padding-block-start: var(--block-space-half);
+
+    .nav-filter {
+      justify-content: flex-start;
+    }
+
+    @media (max-width: 799px) {
+      align-items: center;
+      border-block-start: 0;
+      flex-direction: row;
+      padding-block-start: 0;
+    }
+  }
+
+  .sidenav__tools {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15em;
+
+    @media (max-width: 799px) {
+      flex-wrap: nowrap;
+    }
+  }
+
+  .sidenav__tools [aria-current="page"] {
+    background-color: var(--color-selected);
+    border-radius: var(--radius-control);
+  }
+}
+
+/* "/" and "?" live on the keyboard, not in the nav: both stay on the page so their keys work,
+/* out of sight until used. The filter field shows while it's focused or holding text. */
+@layer components {
+  .sidenav .nav-filter:not(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))),
+  .sidenav [data-keys="?"] {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+  }
+}
+
+/* Collapsed ([): the nav narrows to its icons; each keeps its name as a tooltip. */
+@layer components {
+  html[data-sidenav="collapsed"] body.with-sidenav {
+    --sidenav-width: 3.75rem;
+
+    @media (min-width: 800px) {
+      .sidenav {
+        align-items: center;
+        padding-inline: 0.5rem;
+      }
+
+      .sidenav__logo,
+      .sidenav__heading,
+      .sidenav__label {
+        display: none !important;
+      }
+
+      .sidenav__nav { align-items: center; }
+      .sidenav__list + .sidenav__list { border-block-start: 1px solid var(--color-ink-lighter); padding-block-start: var(--block-space-half); }
+
+      .sidenav__link {
+        justify-content: center;
+        padding: 0.55em;
+      }
+
+      .sidenav__foot { align-items: center; }
+      .sidenav__tools { flex-direction: column; }
+      .sidenav__collapse .icon { transform: scaleX(-1); }
+    }
+  }
+
+  .sidenav__collapse {
+    @media (max-width: 799px) { display: none; }
+  }
+}

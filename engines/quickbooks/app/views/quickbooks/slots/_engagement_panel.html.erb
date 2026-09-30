@@ -1,0 +1,14 @@
+<%# locals: (engagement:) %>
+<%# Billing: a service's recurring invoice, or a fixed-price engagement's invoices. %>
+<% if can?(:manage_billing) %>
+  <section class="settings__section flex flex-column gap-half" id="billing">
+    <header>
+      <h2 class="divider">Billing</h2>
+    </header>
+    <% if engagement.recurring? %>
+      <%= render "quickbooks/recurring", engagement: engagement %>
+    <% else %>
+      <%= render "quickbooks/work_order", engagement: engagement %>
+    <% end %>
+  </section>
+<% end %>

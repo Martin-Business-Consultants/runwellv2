@@ -1,0 +1,11 @@
+<%# locals: (form_id:) %>
+<%= form_with model: Note.new, url: notes_path, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <%= rich_text_field form, :body, placeholder: "What was said or decided…", staff: true %>
+  <div class="flex flex-wrap gap-half">
+    <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" }, class: "input input--select flex-item-grow", aria: { label: "Kind" } %>
+    <%= form.text_field :source, class: "input flex-item-grow", autocomplete: "off", placeholder: "Source, e.g. call with Ann 24 Sep" %>
+  </div>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Add note</button>
+  </div>
+<% end %>

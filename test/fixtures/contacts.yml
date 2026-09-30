@@ -1,0 +1,18 @@
+ann:
+  client: acme
+  name: Ann Approver
+  email: ann@acme.example
+  role: Director
+  can_approve: true
+
+bob:
+  client: acme
+  name: Bob Requester
+  email: bob@acme.example
+  can_approve: false
+
+gina:
+  client: globex
+  name: Gina Globex
+  email: gina@globex.example
+  can_approve: true

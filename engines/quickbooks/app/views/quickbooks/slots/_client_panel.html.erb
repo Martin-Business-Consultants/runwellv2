@@ -1,0 +1,51 @@
+<%# locals: (client:) %>
+<%# The client in QuickBooks: which customer it is, and its invoices. %>
+<% customer = client.quickbooks_customer %>
+<% invoices = client.quickbooks_invoices.live.includes(:engagement).recent.limit(10).to_a %>
+<% if customer || can?(:manage_billing) %>
+  <section class="settings__section flex flex-column gap-half" id="quickbooks">
+    <header>
+      <h2 class="divider">QuickBooks</h2>
+    </header>
+
+    <% if customer %>
+      <div class="flex align-center gap-half txt-small">
+        <span class="txt-align-start overflow-ellipsis min-width">Customer <strong><%= customer.display_name %></strong><%= " · " + customer.email if customer.email.present? %></span>
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+        <% if can?(:manage_billing) %>
+          <%= render "layouts/shared/delete_dialog", name: "the link to " + customer.display_name.to_s, path: quickbooks_client_customer_path(client), trigger_class: "txt-small",
+                message: "Runwell stops invoicing and mirroring for this client. Nothing changes in QuickBooks." %>
+        <% end %>
+      </div>
+      <ul class="settings__scrollable-list">
+        <% invoices.each do |invoice| %>
+          <%# herb:key invoice.id %>
+          <li data-filter-target="item">
+            <%= render "quickbooks/invoice", invoice: invoice %>
+          </li>
+        <% end %>
+      </ul>
+      <% if invoices.empty? %>
+        <p class="txt-small txt-subtle margin-none">No invoices yet.</p>
+      <% end %>
+    <% elsif Quickbooks::Connection.ready? %>
+      <details class="section-actions">
+        <summary class="btn txt-small"><%= icon_tag "add" %> Link to a QuickBooks customer</summary>
+        <%= form_with url: quickbooks_client_customer_path(client), scope: :customer, namespace: "qbo_link", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+          <%= form.text_field :qbo_id, required: true, class: "input full-width", autocomplete: "off", placeholder: "QuickBooks customer id", aria: { label: "QuickBooks customer id" } %>
+          <button type="submit" class="btn btn--link center">Link customer</button>
+        <% end %>
+      </details>
+      <details>
+        <summary class="btn center txt-small">Create the customer in QuickBooks</summary>
+        <%= form_with url: quickbooks_client_customer_path(client), scope: :customer, namespace: "qbo_new", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+          <%= form.email_field :email, value: client.approvers.first&.email, class: "input full-width", autocomplete: "off", placeholder: "Billing email", aria: { label: "Billing email" } %>
+          <button type="submit" class="btn btn--link center">Create <%= client.name %> in QuickBooks</button>
+        <% end %>
+      </details>
+      <p class="txt-x-small txt-subtle margin-none">The nightly sync links a customer with exactly this client’s name by itself.</p>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">Connect QuickBooks in Settings to invoice this client.</p>
+    <% end %>
+  </section>
+<% end %>

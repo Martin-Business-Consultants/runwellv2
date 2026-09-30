@@ -1,0 +1,15 @@
+<%# locals: (record:, client: nil) %>
+<%# A record's custom field values. client: only the fields shown to clients (the portal). %>
+<% values = record.custom_field_values %>
+<% values = values.select { |field, _| field.client_visible } if client %>
+<% if values.any? %>
+  <dl class="custom-fields txt-small">
+    <% values.each do |field, value| %>
+      <%# herb:key field.id %>
+      <div class="custom-fields__row">
+        <dt class="txt-subtle"><%= field.label %></dt>
+        <dd><%= custom_field_display(field, value) %></dd>
+      </div>
+    <% end %>
+  </dl>
+<% end %>

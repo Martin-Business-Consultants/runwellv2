@@ -1,0 +1,95 @@
+<% @page_title = @todo.title %>
+<% home = @todo.scope_item || @todo.engagement %>
+<% tabs = [
+     record_tab("notes", "Notes", count: @todo.notes.count),
+     record_tab("documents", "Documents", count: @todo.documents.count)
+   ] + plugin_record_tabs(:todo_panel) %>
+<% tab = current_record_tab(tabs, "notes") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+
+<% content_for :header do %>
+  <%= parent_page(@todo.scope_item ? @todo.scope_item.description : @todo.engagement.ref, home) %>
+
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions">
+        <%= render "todos/ai_brief", todo: @todo, labelled: true %>
+        <%= link_to edit_todo_path(@todo), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+          <%= icon_tag "pencil" %>
+          <span>Edit</span>
+          <kbd class="hide-on-touch">E</kbd>
+        <% end %>
+      </div>
+    </div>
+    <section class="settings__section flex flex-column gap-half">
+      <div class="txt-small">
+        <%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %>
+        <% if @todo.scope_item %>
+          › <%= link_to @todo.scope_item.description, @todo.scope_item, class: "txt-link" %>
+        <% else %>
+          › <span class="txt-subtle">Other work</span>
+        <% end %>
+      </div>
+
+      <% if @todo.description.present? %>
+        <div class="txt-small"><%= rich_text @todo.description %></div>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">No description.</p>
+      <% end %>
+      <%= render "custom_fields/values", record: @todo %>
+    </section>
+
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @todo %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @todo %>
+          <% end %>
+          <% if plugin_partial %>
+            <%= render plugin_partial, todo: @todo %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= render "todos/status_dot", todo: @todo, labelled: true %></dd>
+        <dt>Owner</dt><dd><%= render "todos/owner_picker", todo: @todo %></dd>
+        <dt>Due</dt>
+        <dd>
+          <% if @todo.due_on %>
+            <%= l @todo.due_on, format: :long %>
+            <% if @todo.status != "done" && @todo.due_on.past? %>
+              <%= status_tag "Overdue", highlight: true %>
+            <% end %>
+          <% else %>
+            <span class="txt-subtle">No date</span>
+          <% end %>
+        </dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @todo.engagement.client.name, @todo.engagement.client, class: "txt-link" %></dd>
+        <dt>Client sees it</dt><dd><%= @todo.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>
+        <% if @todo.completed_at %>
+          <dt>Done</dt><dd><%= l @todo.completed_at.to_date, format: :short %></dd>
+        <% end %>
+      </dl>
+    </section>
+
+    <%= render "events/timeline", subject: @todo %>
+  </aside>
+</section>

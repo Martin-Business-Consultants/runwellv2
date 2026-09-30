@@ -1,0 +1,8 @@
+<%# locals: (release:) %>
+<%# For owners: a newer release is out. Settings > Updates installs it. %>
+<section class="panel panel--wide shadow txt-align-start settings__section">
+  <div class="flex align-center justify-space-between gap txt-small">
+    <span>Runwell <strong><%= release.version %></strong> is out. This install runs <%= Runwell::VERSION %>.</span>
+    <%= link_to "See what’s new", settings_updates_path, class: "btn txt-small" %>
+  </div>
+</section>

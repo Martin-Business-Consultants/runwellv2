@@ -1,0 +1,1 @@
+<%= turbo_stream.replace("todos-#{@status}", partial: "todos/board/column", method: :morph, locals: { status: @status, count: @count }) %>

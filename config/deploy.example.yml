@@ -1,0 +1,62 @@
+# A Kamal deploy of one Runwell install: one server, one image, one volume for the data.
+# Copy it to config/deploy.yml (untracked: it names your server) and fill in the host, server
+# and registry; secrets go in .kamal/secrets (see .kamal/secrets.example). Another install on
+# the same server is a destination: config/deploy.<name>.yml with its own APP_HOST, proxy host
+# and volume, deployed with `kamal deploy -d <name>`. docs/install.md has the rest.
+service: runwell
+image: your-registry-user/runwell
+
+servers:
+  web:
+    - 203.0.113.10
+
+env:
+  clear:
+    SOLID_QUEUE_IN_PUMA: true
+    APP_HOST: runwell.example.com
+    # Behind a proxy that terminates TLS (Cloudflare, a load balancer): the app assumes SSL.
+    ASSUME_SSL: "true"
+    # Outbound mail: any SMTP server (docs/install.md), or leave these out and use the Outsend plugin.
+    SMTP_ADDRESS: smtp.example.com
+    SMTP_PORT: "587"
+    SMTP_USERNAME: runwell
+    # Settings > Updates starts .github/workflows/deploy.yml for this install when it has a token.
+    # RUNWELL_DEPLOY_DESTINATION: name   # for config/deploy.<name>.yml
+  secret:
+    - RAILS_MASTER_KEY
+    - SMTP_PASSWORD
+    # - RUNWELL_GITHUB_TOKEN
+
+proxy:
+  host: runwell.example.com
+  # Kamal's proxy can get a Let's Encrypt certificate itself: ssl: true, and drop ASSUME_SSL.
+  ssl: false
+  forward_headers: true
+  # Thruster's port, not Puma's (3000), so gzip and asset caching happen.
+  app_port: 80
+  healthcheck:
+    interval: 10
+    timeout: 60
+
+deploy_timeout: 180
+drain_timeout: 30
+
+asset_path: /rails/public
+
+# A local registry, pushed to over SSH; or a hosted one (Docker Hub, GHCR) with a username and
+# KAMAL_REGISTRY_PASSWORD in .kamal/secrets.
+registry:
+  server: localhost:5555
+
+builder:
+  arch: amd64
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
+
+# Databases and uploaded files. Each install on a server needs its own volume.
+volumes:
+  - "runwell_storage:/rails/storage"

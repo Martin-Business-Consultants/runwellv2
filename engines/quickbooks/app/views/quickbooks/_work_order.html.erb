@@ -1,0 +1,63 @@
+<%# locals: (engagement:) %>
+<% billing = Quickbooks::WorkOrderBilling.new(engagement) %>
+<% invoices = billing.invoices.to_a %>
+<% plan = billing.plan %>
+<% if engagement.approved? %>
+  <p class="txt-small margin-none">
+    Agreed <strong><%= money billing.agreed_cents %></strong> · invoiced <%= money billing.invoiced_cents %> · paid <%= money billing.paid_cents %><% if billing.remaining_cents.positive? %> · <strong><%= money billing.remaining_cents %></strong> to invoice<% end %>
+  </p>
+<% end %>
+
+<ul class="settings__scrollable-list">
+  <% invoices.each do |invoice| %>
+    <%# herb:key invoice.id %>
+    <li data-filter-target="item">
+      <%= render "quickbooks/invoice", invoice: invoice %>
+    </li>
+  <% end %>
+</ul>
+
+<% if plan&.waiting? %>
+  <p class="txt-small margin-none">The balance goes to <%= plan.contact&.name %> when <%= engagement.ref %> is closed.</p>
+<% end %>
+<% if plan&.last_error.present? %>
+  <p class="txt-small txt-negative margin-none">The balance couldn’t be sent: <%= plan.last_error %></p>
+<% end %>
+
+<% blocker = billing.blocker %>
+<% if blocker %>
+  <p class="txt-small txt-subtle margin-none"><%= blocker %></p>
+<% else %>
+  <% contacts = engagement.client.contacts.where(archived_at: nil).where.not(email: [ nil, "" ]).order(:name) %>
+  <details>
+    <summary class="btn btn--link center txt-small"><%= icon_tag "email" %> <%= invoices.any? ? "Invoice the rest" : "Send an invoice" %></summary>
+    <%= form_with url: quickbooks_engagement_invoices_path(engagement), scope: :invoice, namespace: "qbo_invoice", class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+      <% if invoices.empty? %>
+        <label class="flex align-center gap-half">
+          <%= form.radio_button :portion, "full", checked: true %>
+          <span>All of it: <%= money billing.remaining_cents %></span>
+        </label>
+        <label class="flex align-center gap-half">
+          <%= form.radio_button :portion, "deposit" %>
+          <span>A deposit now, the balance later</span>
+        </label>
+        <div class="flex flex-wrap gap-half">
+          <%= form.number_field :percent, value: 50, min: 1, max: 99, class: "input flex-item-grow", aria: { label: "Deposit percent" }, placeholder: "%" %>
+          <%= money_field form, :amount_cents, value: 0, class: "input flex-item-grow", placeholder: "or an amount", aria: { label: "Deposit amount" } %>
+        </div>
+        <label class="flex align-center gap-half">
+          <%= form.check_box :send_balance_on_close, checked: true %>
+          <span>Send the balance when <%= engagement.ref %> is closed</span>
+        </label>
+      <% else %>
+        <%= form.hidden_field :portion, value: "full" %>
+      <% end %>
+      <label class="flex flex-column gap-half">
+        <span class="font-weight-bold">Email it to</span>
+        <%= form.select :contact_id, contact_options(contacts, email_only: true), { selected: plan&.contact_id || default_approver(contacts) }, class: "input input--select full-width", required: true %>
+      </label>
+      <p class="txt-x-small txt-subtle margin-none">QuickBooks creates the invoice in your books and emails it with a pay link.</p>
+      <button type="submit" class="btn btn--link center">Create and send</button>
+    <% end %>
+  </details>
+<% end %>

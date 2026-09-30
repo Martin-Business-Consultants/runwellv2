@@ -1,0 +1,11 @@
+<%# locals: () %>
+<section class="settings__section">
+  <header>
+    <h2 class="divider">A good meeting</h2>
+  </header>
+  <ul class="record-steps txt-small">
+    <li>The agenda goes out at least <%= (AccountManagement::Playbook::AGENDA_AHEAD / 1.hour).round %> hours ahead, with the research already done on what was left open.</li>
+    <li>The recap goes out within <%= (AccountManagement::Playbook::RECAP_WITHIN / 1.hour).round %> hours: decisions, then action items.</li>
+    <li>Every action item has one owner, ours or theirs, and a date. It becomes a commitment.</li>
+  </ul>
+</section>

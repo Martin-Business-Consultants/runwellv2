@@ -1,0 +1,52 @@
+<% @page_title = "Requests" %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
+        options: [ [ "Open", "open" ], [ "Promoted", "promoted" ], [ "Dismissed", "dismissed" ], [ "All requests", "all" ] ] %>
+  <%= render "layouts/shared/quick_filter", title: "Source…", param: :source, current: @source,
+        options: [ [ "All sources", "all" ] ] + Request.sources.map { |source| [ source, source ] } %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: "Log a request", new_path: new_request_path %>
+
+<% if @view == "cards" %>
+  <section class="cards cards--grid">
+    <div class="cards__list">
+      <%= with_automatic_pagination :requests_cards, @page do %>
+        <% @requests.each do |request_record| %>
+          <%# herb:key request_record.id %>
+          <%= render "layouts/shared/card", path: request_path(request_record), title: request_record.subject, id_label: request_record.source,
+                context: request_record.client&.name || "No " + term(:client).downcase + " matched",
+                meta: [ request_record.requester_name.presence || "Unknown sender", time_ago_in_words(request_record.received_at) + " ago" ],
+                status: request_record.status.humanize, highlight: request_record.open? %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% else %>
+  <section class="panel shadow center index-table">
+    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+      <thead>
+        <tr><th>Request</th><th>From</th><th><%= term(:client) %></th><th>Source</th><th>Received</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody id="<%= pagination_frame_id_for(:requests_rows, @page.number) %>">
+        <% @requests.each do |request_record| %>
+          <%# herb:key request_record.id %>
+          <tr data-filter-target="item">
+            <td><%= link_to request_record.subject, request_record, class: "txt-ink font-weight-bold" %></td>
+            <td class="txt-subtle"><%= request_record.requester_name.presence || "Unknown sender" %></td>
+            <td class="txt-subtle"><%= request_record.client&.name %></td>
+            <td class="txt-subtle"><%= request_record.source %></td>
+            <td class="txt-nowrap txt-subtle"><%= time_ago_in_words(request_record.received_at) %> ago</td>
+            <td><%= status_tag request_record.status.humanize, highlight: request_record.open? %></td>
+            <%= render "layouts/shared/row_actions", name: "this request", edit_path: (edit_request_path(request_record) if request_record.open?), delete_path: (request_path(request_record) if request_record.open?) %>
+          </tr>
+        <% end %>
+        <%= table_next_page_row :requests_rows, @page, columns: 7 %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
+
+<% if @requests.none? %>
+  <div class="blank-slate">No requests match.</div>
+<% end %>

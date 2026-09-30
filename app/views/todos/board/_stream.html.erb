@@ -1,0 +1,18 @@
+<%# locals: (todos:) %>
+<%= column_tag id: "planned-todos", name: "Planned", drop_url: columns_todo_drops_stream_path("__id__", todo_board_filters), collapsed: false, selected: "true", class: "cards--maybe", data: {
+  drag_and_strum_target: "container",
+  collapsible_columns_target: "column maybeColumn",
+  action: "focus->collapsible-columns#focusOnColumn"
+} do %>
+  <header class="cards__header">
+    <%= render "todos/board/expander", title: "Planned", count: todos.size, column_id: "planned-todos" %>
+    <%= render "todos/board/maximize", column_path: todos_column_path("planned", todo_board_filters) %>
+  </header>
+  <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
+    <% if todos.any? %>
+      <%= render "todos/display/previews", todos: todos, draggable: true %>
+    <% else %>
+      <%= render "todos/columns/empty_placeholder" %>
+    <% end %>
+  </div>
+<% end %>

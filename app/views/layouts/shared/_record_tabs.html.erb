@@ -1,0 +1,14 @@
+<%# locals: (tabs:, current:) %>
+<%# A record page's tabs: each a link that swaps ?tab= inside the record_tab frame. %>
+<nav class="record-tabs__nav" aria-label="Sections">
+  <% tabs.each do |tab| %>
+    <%# herb:key tab.key %>
+    <%= link_to record_tab_path(tab.key), class: "record-tabs__tab", aria: { current: ("page" if tab.key == current) },
+          data: { turbo_frame: "record_tab", turbo_action: "advance" } do %>
+      <span><%= tab.label %></span>
+      <% if tab.count.to_i.positive? %>
+        <span class="record-tabs__count"><%= tab.count %></span>
+      <% end %>
+    <% end %>
+  <% end %>
+</nav>

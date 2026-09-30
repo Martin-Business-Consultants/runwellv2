@@ -1,0 +1,20 @@
+<%# locals: (engagement:, scope_item: nil) %>
+<details class="section-actions">
+  <summary class="btn txt-small"><%= icon_tag "add" %> Add a todo</summary>
+  <%= form_with model: Todo.new, url: engagement_todos_path(engagement), namespace: dom_id(scope_item || engagement, :new_todo),
+        class: "flex flex-column gap txt-small", data: { controller: "form" } do |form| %>
+    <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What needs doing…" %>
+    <div class="flex flex-wrap gap-half">
+      <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, class: "input input--select flex-item-grow", aria: { label: "Owner" } %>
+      <%= date_input form, :due_on, class: "input flex-item-grow", aria: { label: "Due" } %>
+      <% if scope_item %>
+        <%= form.hidden_field :scope_item_id, value: scope_item.id %>
+      <% else %>
+        <%= form.select :scope_item_id, engagement.agreed_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other work" }, class: "input input--select flex-item-grow", aria: { label: "Scope item" } %>
+      <% end %>
+    </div>
+    <div class="flex gap-half justify-center">
+      <button type="submit" class="btn btn--link">Add a todo</button>
+    </div>
+  <% end %>
+</details>

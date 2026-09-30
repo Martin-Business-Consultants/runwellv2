@@ -1,0 +1,62 @@
+<% @page_title = term(:client, count: 2) %>
+<% listed = CustomField.for("Client").listed.to_a %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status, options: Client.filter_options %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:client).downcase, new_path: new_client_path %>
+
+<% if @clients.any? && @view == "cards" %>
+  <section class="cards cards--grid">
+    <div class="cards__list">
+      <%= with_automatic_pagination :clients_cards, @page do %>
+        <% @clients.each do |client| %>
+          <%# herb:key client.id %>
+          <%= render "layouts/shared/card", path: client_path(client), title: client.name, id_label: term(:client),
+                context: listed.first && custom_field_text(listed.first, client.custom_value(listed.first)),
+                meta: [ pluralize(client.contacts.count { !it.archived? }, "contact"), pluralize(client.engagements.count { !it.closed? }, "open " + term(:engagement).downcase, plural: "open " + term(:engagement, count: 2).downcase) ],
+                status: client.status, highlight: client.status == "active" %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% elsif @clients.any? %>
+  <section class="panel shadow center index-table">
+    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+      <thead>
+        <tr><th>Name</th><th>Status</th><th class="data-table__number">Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+      </thead>
+      <tbody id="<%= pagination_frame_id_for(:clients_rows, @page.number) %>">
+        <% @clients.each do |client| %>
+          <%# herb:key client.id %>
+          <tr data-filter-target="item">
+            <td><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
+            <td><%= status_tag client.status, highlight: client.status == "active" %></td>
+            <td class="data-table__number"><%= client.contacts.count { !it.archived? } %></td>
+            <td class="data-table__number"><%= client.engagements.count { !it.closed? } %></td>
+            <% listed.each do |field| %>
+              <%# herb:key field.id %>
+              <td class="txt-subtle"><%= custom_field_text(field, client.custom_value(field)) %></td>
+            <% end %>
+            <%= render "layouts/shared/row_actions", name: client.name, edit_path: edit_client_path(client), delete_path: client_path(client),
+                  delete_message: "This removes its contacts, commitments and notes. A " + term(:client).downcase + " with " + term(:engagement, count: 2).downcase + " can’t be deleted." %>
+          </tr>
+        <% end %>
+        <%= table_next_page_row :clients_rows, @page, columns: 5 + listed.size %>
+      </tbody>
+    </table>
+  </section>
+<% elsif Client.exists? %>
+  <div class="blank-slate">
+    No <%= @status %> <%= term(:client, count: 2).downcase %>.
+    <%= link_to "Show all", clients_path(status: "all", view: params[:view]), class: "txt-link" %>
+  </div>
+<% else %>
+  <div class="panel panel--centered flex flex-column gap-half">
+    <p class="txt-medium">No <%= term(:client, count: 2).downcase %> yet.</p>
+    <%= link_to new_client_path, class: "btn btn--link center" do %>
+      <span>Add your first <%= term(:client).downcase %></span>
+      <%= icon_tag "arrow-right" %>
+    <% end %>
+  </div>
+<% end %>

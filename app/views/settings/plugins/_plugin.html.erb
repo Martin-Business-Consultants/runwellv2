@@ -1,0 +1,57 @@
+<%# locals: (plugin:, enabled:) %>
+<%# herb:slots server %>
+<%# herb:state (on: enabled) %>
+<%# One plugin as a card. The switch flips `on` at once, so the card shows the new state
+    before the save lands; the save then renders the page fresh, with whatever the plugin
+    adds or hides. %>
+<% settings = Runwell::Plugins.settings_pages[plugin.key] %>
+<% page_path = enabled && settings ? instance_exec(&settings.last) : settings_plugin_path(plugin.key) %>
+<% gear_title = plugin.name + (enabled && settings ? " settings" : " details") %>
+<li class="plugin-card panel flex flex-column gap-half txt-align-start" data-filter-target="item">
+  <div class="flex align-center gap-half">
+    <div class="flex flex-column min-width">
+      <strong><%= plugin.name %></strong>
+      <span class="txt-x-small txt-subtle"><%= plugin.version %><%= " · #{plugin.author}" if plugin.author %></span>
+    </div>
+
+    <%= link_to page_path, class: "btn btn--circle btn--plain txt-small flex-item-no-shrink flex-item-justify-end", title: gear_title do %>
+      <%= icon_tag "settings-outline" %>
+      <span class="for-screen-reader"><%= plugin.name %> settings</span>
+    <% end %>
+    <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "flex align-center flex-item-no-shrink", data: { controller: "form", turbo_action: "advance" } do |form| %>
+      <label class="switch" title="Switch on or off">
+        <%= form.hidden_field :enabled, value: "0", id: nil %>
+        <input type="checkbox" name="plugin[enabled]" value="1" class="switch__input" id="plugin_<%= plugin.key %>_enabled" checked="<%= on %>" data-herb-toggle="on" data-action="change->form#submit">
+        <span class="switch__btn"></span>
+        <span class="for-screen-reader">Switch <%= plugin.name %> on or off</span>
+      </label>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap align-center gap-half">
+    <% if on %>
+      <%= status_tag "Active" %>
+    <% else %>
+      <%= status_tag "Dormant" %>
+    <% end %>
+    <% if plugin.bundled %>
+      <span class="txt-x-small txt-subtle">Bundled with Runwell</span>
+    <% end %>
+  </div>
+
+  <p class="txt-small margin-none flex-item-grow"><%= plugin.description %></p>
+
+  <% unless plugin.compatible? %>
+    <p class="txt-x-small txt-negative margin-none">Needs Runwell <%= plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
+  <% end %>
+  <% if plugin.homepage.present? %>
+    <p class="txt-x-small margin-none"><%= link_to "About this plugin", plugin.homepage, class: "txt-link", target: "_blank", rel: "noopener" %></p>
+  <% end %>
+
+  <div class="flex flex-wrap gap-half">
+    <% Runwell::Plugins.additions(plugin.key).each do |addition| %>
+      <%# herb:key addition %>
+      <span class="txt-x-small border-radius pad-inline-half fill-shade"><%= addition %></span>
+    <% end %>
+  </div>
+</li>

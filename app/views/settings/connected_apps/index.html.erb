@@ -1,0 +1,69 @@
+<% @page_title = "Connected apps" %>
+<%= render "settings/header", current: :connected_apps %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <% if @new_token %>
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">Your new token</h2>
+        </header>
+        <p class="txt-small margin-none">Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
+        <div class="copy-row">
+          <code class="input full-width txt-small overflow-ellipsis" id="new_token"><%= @new_token.plaintext %></code>
+          <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Apps acting as your agent</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
+      </p>
+      <% if @tokens.any? %>
+        <ul class="settings__scrollable-list">
+          <% @tokens.each do |token| %>
+            <%# herb:key token.id %>
+            <li class="flex align-center gap-half txt-small">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= token.name %></strong>
+                <div class="txt-x-small txt-subtle">
+                  <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
+                </div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token), trigger_class: "txt-small",
+                    message: "It stops working at once. Anything it already did stays, marked as your agent via #{token.name}." %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Nothing is connected yet.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Connect an AI app</h2>
+      </header>
+      <p class="txt-small margin-none">Runwell speaks MCP at <code class="txt-small"><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
+      <ul class="txt-small flex flex-column gap-half margin-none">
+        <li><strong>Claude or ChatGPT:</strong> add a custom connector with that URL. You’ll be asked to approve it here.</li>
+        <li><strong>Claude Code:</strong> <code class="txt-x-small">claude mcp add --transport http runwell <%= mcp_url %></code>, then run <code class="txt-x-small">/mcp</code> to sign in.</li>
+        <li><strong>The command line:</strong> <code class="txt-x-small">curl -fsSL <%= cli_install_url %> | sh</code>, then <code class="txt-x-small">runwell login</code>.</li>
+      </ul>
+      <%= form_with url: settings_connected_apps_path, scope: :access_token, class: "flex flex-wrap gap-half txt-small" do |form| %>
+        <%= form.text_field :name, class: "input flex-item-grow", autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”", aria: { label: "Token name" } %>
+        <label class="flex align-center gap-half">
+          <%= form.check_box :read_only %>
+          <span>Read only</span>
+        </label>
+        <button type="submit" class="btn btn--link">Make a personal token</button>
+      <% end %>
+      <p class="txt-x-small txt-subtle margin-none">A personal token is for scripts and tools that can’t sign in through the browser.</p>
+    </section>
+  </div>
+</section>

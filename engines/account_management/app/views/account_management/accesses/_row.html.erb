@@ -1,0 +1,13 @@
+<%# locals: (access:, with_client: false) %>
+<%# One outside account: what it is, who owns it, our access, and its worst problem. %>
+<li class="flex align-center gap-half" data-filter-target="item">
+  <%= link_to edit_account_management_access_path(access), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+    <strong><%= access.name %></strong>
+    <div class="txt-x-small txt-subtle"><%= [ (access.client.name if with_client), access.platform_label, "owned by #{access.owned_by_label.downcase_first}", "our access: #{access.our_access_label.downcase}" ].compact.join(" · ") %></div>
+    <% unless access.in_order? %>
+      <div class="txt-x-small txt-negative"><%= access.problems.first %></div>
+    <% end %>
+  <% end %>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <%= account_status_tag access.in_order? ? "in_order" : "attention" %>
+</li>

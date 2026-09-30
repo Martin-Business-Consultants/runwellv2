@@ -1,0 +1,93 @@
+<%# locals: (check:, expectation:) %>
+<%# A fact's details, sliding in from the right when its row is clicked (?fact=): the whole rule,
+    where it comes from, who agreed it, what the last tests saw, and any open issue. Edit opens
+    its own page. Esc or the close link shuts it. %>
+<% results = expectation.results.includes(run: :user).order(id: :desc).limit(8).to_a %>
+<% issue = check.issues.unverified.find_by(expectation: expectation) %>
+<% editable = can_edit_check?(check) %>
+<aside class="fact-sheet panel shadow txt-align-start" aria-label="<%= expectation.label %>">
+  <header class="fact-sheet__header">
+    <div class="min-width">
+      <p class="txt-x-small txt-subtle margin-none"><%= check.name %></p>
+      <h2 class="fact-sheet__title"><%= expectation.label %></h2>
+    </div>
+    <%= link_to qa_check_path(check), class: "btn btn--circle borderless", title: "Close (Esc)", data: { turbo_frame: "fact_sheet", turbo_action: "advance", keys: "esc" } do %>
+      <%= icon_tag "close" %>
+      <span class="for-screen-reader">Close</span>
+    <% end %>
+  </header>
+
+  <div class="fact-sheet__status">
+    <% if results.first %>
+      <%= qa_status_tag results.first.passed ? "passed" : "failed" %>
+      <span class="txt-small txt-subtle">last tested <%= time_ago_in_words(results.first.created_at) %> ago by <%= results.first.run.tester_label %></span>
+    <% else %>
+      <%= qa_status_tag "due" %>
+      <span class="txt-small txt-subtle">never tested</span>
+    <% end %>
+  </div>
+
+  <dl class="record-facts">
+    <dt>Rule</dt><dd><%= expectation.value? ? expectation.match_label.capitalize : "A step to tick off" %></dd>
+    <% if expectation.value? %>
+      <dt>Agreed</dt><dd class="qa-fact__value"><%= expectation.expected %></dd>
+    <% end %>
+    <dt>Source</dt>
+    <dd>
+      <% if expectation.note.present? %>
+        <%= expectation.note %>
+      <% else %>
+        <span class="txt-subtle">Not recorded</span>
+      <% end %>
+    </dd>
+    <% if expectation.expires_on %>
+      <dt>Ends</dt><dd class="<%= "txt-negative" if expectation.expiring?(within: 7.days) %>"><%= l expectation.expires_on, format: :long %></dd>
+    <% end %>
+    <dt>Agreed by</dt><dd><%= expectation.approved_by ? "#{expectation.approved_by.display_name}, #{l expectation.approved_at.to_date, format: :short}" : "Imported" %></dd>
+    <dt>Key</dt><dd><code><%= expectation.key %></code></dd>
+    <% if expectation.fetchable? %>
+      <dt>Checked</dt><dd>Every night, on <%= check.url.to_s.sub(%r{\Ahttps?://}, "") %></dd>
+    <% end %>
+  </dl>
+
+  <% if issue %>
+    <section class="fact-sheet__section">
+      <h3 class="fact-sheet__heading">Open issue</h3>
+      <%= link_to qa_issue_path(issue), class: "fact-sheet__issue txt-ink" do %>
+        <strong><%= issue.title %></strong>
+        <span class="txt-x-small txt-subtle"><%= issue.state.humanize %><%= " · found live" if issue.found_live %> · <%= time_ago_in_words(issue.created_at) %> ago</span>
+      <% end %>
+    </section>
+  <% end %>
+
+  <section class="fact-sheet__section">
+    <h3 class="fact-sheet__heading">Results</h3>
+    <% if results.any? %>
+      <ol class="fact-sheet__results">
+        <% results.each do |result| %>
+          <%# herb:key result.id %>
+          <li>
+            <%= link_to qa_run_path(result.run), class: "fact-sheet__result txt-ink" do %>
+              <%= qa_status_tag result.passed ? "passed" : "failed" %>
+              <span class="min-width">
+                <span class="qa-fact__value txt-small overflow-ellipsis"><%= result.actual.presence || "—" %></span>
+                <span class="txt-x-small txt-subtle"><%= result.run.tester_label %> · <%= time_ago_in_words(result.created_at) %> ago</span>
+              </span>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">No test has covered it yet.</p>
+    <% end %>
+  </section>
+
+  <% if editable %>
+    <footer class="fact-sheet__footer">
+      <%= link_to edit_qa_check_expectation_path(check, expectation), class: "btn" do %>
+        <%= icon_tag "pencil" %>
+        <span>Edit this fact</span>
+      <% end %>
+    </footer>
+  <% end %>
+</aside>

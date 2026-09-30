@@ -1,0 +1,26 @@
+<% @page_title = "Forgot your password?" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end"><%= @page_title %></h1>
+
+  <%= form_with url: passwords_path, class: "flex flex-column gap txt-medium" do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…", value: params[:email_address] %>
+    </label>
+
+    <p>We’ll email you a link to choose a new one.</p>
+
+    <button type="submit" class="btn btn--link center txt-medium">
+      <span>Email reset link</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+
+  <div class="margin-block-start">
+    <%= link_to "Back to sign in", new_session_path, class: "btn btn--plain txt-link center txt-small" %>
+  </div>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

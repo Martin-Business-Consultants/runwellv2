@@ -1,0 +1,64 @@
+<%# locals: (check:) %>
+<%# Beside the check form: what a new check starts with for each kind, the client's other
+    checks (so nothing is added twice), and what the settings do. %>
+<% others = check.client ? Qa::Check.active.where(client: check.client).where.not(id: check.id).includes(:owner, :expectations).ordered.to_a : [] %>
+<% if check.new_record? %>
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Starts with</h2>
+    </header>
+    <p class="txt-x-small txt-subtle margin-none">With “Start from the usual list” on, a new check gets these for its kind. Fill in the agreed values after.</p>
+    <% Qa::Check::TEMPLATES.reject { |_, items| items.empty? }.each do |kind, items| %>
+      <%# herb:key kind %>
+      <%= tag.details class: "qa-template", open: kind == check.kind do %>
+        <summary class="txt-small font-weight-bold"><%= kind.humanize %> <span class="txt-subtle"><%= items.size %></span></summary>
+        <ul class="qa-template__list txt-x-small">
+          <% items.each do |item_label, match| %>
+            <%# herb:key item_label %>
+            <li><%= item_label %> <span class="txt-subtle"><%= match == "is" ? "" : Qa::Matcher::MATCHES.fetch(match) %></span></li>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </section>
+<% else %>
+  <section class="settings__section flex flex-column gap-half">
+    <header>
+      <h2 class="divider">This check</h2>
+    </header>
+    <dl class="qa-facts txt-small">
+      <dt>State</dt><dd><%= qa_status_tag check.state %></dd>
+      <dt>Facts</dt><dd><%= check.expectations.size %></dd>
+      <dt>Tests</dt><dd><%= check.runs.count %></dd>
+      <dt>Open issues</dt><dd><%= check.issues.unverified.count %></dd>
+    </dl>
+    <p class="txt-x-small txt-subtle margin-none">Agreed values are changed on the check’s page, each on its own row.</p>
+  </section>
+<% end %>
+
+<section class="settings__section">
+  <header>
+    <h2 class="divider"><%= check.client ? "#{check.client.name}’s checks" : "Checks" %> <span class="txt-subtle"><%= others.size %></span></h2>
+  </header>
+  <ul class="settings__scrollable-list">
+    <% others.each do |other| %>
+      <%# herb:key other.id %>
+      <%= render "qa/checks/row", check: other %>
+    <% end %>
+  </ul>
+  <% if others.empty? %>
+    <p class="txt-subtle txt-small margin-none"><%= check.client ? "None yet." : "Choose a #{term(:client).downcase} to see what’s already checked." %></p>
+  <% end %>
+</section>
+
+<section class="settings__section">
+  <header>
+    <h2 class="divider">What these mean</h2>
+  </header>
+  <dl class="qa-glossary txt-x-small">
+    <dt>Owner</dt><dd>Answers for it: sees it on home when it fails or is due, and can change its agreed values.</dd>
+    <dt>Every</dt><dd>How long a pass counts. After that it’s due again. Daily for emails and webhooks that take leads.</dd>
+    <dt>Live</dt><dd>Customers see it now. Failures count as escapes, its page is checked each night, and a production deploy asks for a retest.</dd>
+    <dt>URL</dt><dd>For a page, what the nightly check loads. For an email or webhook, where it starts.</dd>
+  </dl>
+</section>

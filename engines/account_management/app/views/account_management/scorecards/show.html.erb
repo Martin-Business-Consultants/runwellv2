@@ -1,0 +1,110 @@
+<% @page_title = "#{@user.display_name}’s scorecard" %>
+
+<% content_for :header do %>
+  <%= parent_page "Accounts", account_management_root_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions txt-small">
+        <% [ 30, 90 ].each do |days| %>
+          <%# herb:key days %>
+          <%= link_to "#{days} days", account_management_scorecard_path(@user, days: days), class: class_names("btn txt-small", "btn--reversed": @scorecard.days == days) %>
+        <% end %>
+      </div>
+    </div>
+
+    <%= render "account_management/measures", scorecard: @scorecard %>
+
+    <% @scorecard.measures.each do |measure| %>
+      <%# herb:key measure.key %>
+      <section class="settings__section" id="<%= measure.key %>">
+        <header>
+          <h2 class="divider"><%= measure.label %> <span class="txt-subtle"><%= measure.misses.any? ? "#{measure.misses.size} missed" : "" %></span></h2>
+        </header>
+        <% if measure.misses.any? %>
+          <ul class="settings__scrollable-list">
+            <% measure.misses.each do |miss| %>
+              <%# herb:key "#{miss.class.name}-#{miss.id || miss.try(:week_of)}" %>
+              <% case miss %>
+              <% when AccountManagement::Meeting %>
+                <%= render "account_management/meetings/row", meeting: miss, with_client: true %>
+              <% when AccountManagement::WeeklyUpdate %>
+                <li class="flex align-center gap-half">
+                  <%= link_to (miss.persisted? ? account_management_weekly_update_path(miss) : account_management_weekly_updates_path), class: "txt-ink txt-align-start min-width" do %>
+                    <strong><%= miss.label %></strong>
+                    <div class="txt-x-small txt-subtle">Due <%= l miss.due_at, format: :short %> · <%= miss.sent? ? "sent #{l miss.sent_at, format: :short}" : "never sent" %></div>
+                  <% end %>
+                  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                  <%= account_status_tag "late" %>
+                </li>
+              <% else %>
+                <li class="flex align-center gap-half">
+                  <%= link_to (miss.engagement || miss.client), class: "txt-ink txt-align-start min-width" do %>
+                    <strong><%= miss.description %></strong>
+                    <div class="txt-x-small txt-subtle"><%= miss.client.name %> · due <%= l miss.due_on, format: :short %> · <%= miss.open? ? "still open" : "#{miss.resolution} #{l miss.resolved_at.to_date, format: :short}" %></div>
+                  <% end %>
+                  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                  <%= account_status_tag "late" %>
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
+        <% elsif measure.total.zero? %>
+          <p class="txt-small txt-subtle margin-none">Nothing to count in the last <%= @scorecard.days %> days.</p>
+        <% else %>
+          <p class="txt-small txt-subtle margin-none">All <%= measure.total %> on time.</p>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Person</dt><dd><%= person_tag @user %> <%= @user.display_name %></dd>
+        <dt>Leads</dt>
+        <dd>
+          <% if @scorecard.clients.any? %>
+            <%= safe_join(@scorecard.clients.map { link_to it.name, client_path(it), class: "txt-link" }, ", ") %>
+          <% else %>
+            —
+          <% end %>
+        </dd>
+        <dt>Overdue now</dt><dd class="<%= "txt-negative" if @scorecard.overdue_commitments.any? %>"><%= pluralize @scorecard.overdue_commitments.size, "commitment" %></dd>
+        <dt>Accounts</dt><dd class="<%= "txt-negative" if @scorecard.accesses_needing_attention.any? %>"><%= @scorecard.accesses_needing_attention.size %> needing attention</dd>
+      </dl>
+    </section>
+
+    <% if @scorecard.accesses_needing_attention.any? %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider">Accounts needing attention</h2>
+        </header>
+        <ul class="settings__scrollable-list">
+          <% @scorecard.accesses_needing_attention.each do |access| %>
+            <%# herb:key access.id %>
+            <%= render "account_management/accesses/row", access: access, with_client: true %>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">How it’s counted</h2>
+      </header>
+      <ul class="record-steps txt-small">
+        <li>Only what’s settled counts: an agenda that can still go out on time, or a commitment not yet due, waits.</li>
+        <li>A commitment is kept when it’s marked done on or before its date. Dropped ones don’t count.</li>
+        <li>The targets are in the <%= link_to "playbook", account_management_playbook_path, class: "txt-link" %>.</li>
+      </ul>
+    </section>
+  </aside>
+</section>

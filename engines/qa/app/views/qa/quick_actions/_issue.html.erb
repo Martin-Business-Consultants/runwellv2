@@ -1,0 +1,22 @@
+<%# locals: (form_id:) %>
+<%= form_with url: qa_issues_path, scope: :issue, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What’s wrong, in a line", aria: { label: "What’s wrong" } %>
+  <%= form.url_field :url, class: "input full-width", autocomplete: "off", placeholder: "Where: the page’s URL", aria: { label: "URL" } %>
+  <%= rich_text_field form, :steps, placeholder: "How to see it: the page, the step, the input used. Paste screenshots.", staff: true %>
+  <%= rich_text_field form, :expected, placeholder: "What should happen (per the source of truth)" %>
+  <%= rich_text_field form, :actual, placeholder: "What happened instead", staff: true %>
+  <div class="flex flex-wrap gap-half">
+    <%= form.text_field :environment, class: "input flex-item-grow", autocomplete: "off", placeholder: "Seen on: browser, device, inbox", aria: { label: "Seen on" } %>
+    <%= form.select :assignee_id, qa_owner_options, { include_blank: "Who fixes it?" }, class: "input input--select flex-item-grow", aria: { label: "Who fixes it" } %>
+  </div>
+  <div class="flex align-center gap-half">
+    <label class="switch flex-item-no-shrink">
+      <%= form.check_box :found_live, class: "switch__input" %>
+      <span class="switch__btn"></span>
+    </label>
+    <%= form.label :found_live, "Found live: customers could see it", class: "txt-small" %>
+  </div>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Log issue</button>
+  </div>
+<% end %>

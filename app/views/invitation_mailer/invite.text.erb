@@ -1,0 +1,6 @@
+<%= @invitation.invited_by.display_name %> invited you to join Runwell as <%= @invitation.role == "owner" ? "an owner" : "a " + @invitation.role %>.
+
+Accept the invitation to choose your name and password:
+<%= invitation_url(@invitation.generate_token_for(:acceptance)) %>
+
+The link works once and expires in <%= distance_of_time_in_words(0, Invitation::EXPIRES_IN) %>.

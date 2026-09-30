@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<% appearance = appearance_data %>
+<html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-default-theme="<%= appearance[:default_theme] %>">
+  <%= render "layouts/shared/head" %>
+
+  <body class="public">
+    <div id="global-container">
+      <header class="header" id="header">
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <nav class="flex align-center justify-space-between gap full-width">
+          <%= link_to current_contact.client.name, portal_root_path, class: "header__logo txt-large font-weight-black txt-current" %>
+
+          <div class="flex align-center gap">
+            <%= link_to term(:engagement, count: 2), portal_root_path, class: "btn btn--plain txt-small" %>
+            <%= link_to term(:work), portal_todos_path, class: "btn btn--plain txt-small" %>
+            <%= plugin_portal_nav_links(class: "btn btn--plain txt-small") %>
+            <%= link_to "New request", new_portal_request_path, class: "btn btn--plain txt-small" %>
+            <%= render "layouts/shared/theme_toggle" %>
+            <%= button_to portal_session_path, method: :delete, class: "btn btn--plain", title: "Sign out" do %>
+              <%= icon_tag "logout" %>
+              <span class="for-screen-reader">Sign out</span>
+            <% end %>
+          </div>
+        </nav>
+
+        <%= yield :header %>
+      </header>
+
+      <%= render "layouts/shared/flash" %>
+
+      <main id="main">
+        <%= yield %>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <%= yield :footer %>
+    </footer>
+  </body>
+</html>

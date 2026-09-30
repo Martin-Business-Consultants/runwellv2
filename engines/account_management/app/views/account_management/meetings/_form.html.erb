@@ -1,0 +1,55 @@
+<%# locals: (meeting:) %>
+<% url = meeting.persisted? ? account_management_meeting_path(meeting) : account_management_meetings_path %>
+<%= form_with model: meeting, url: url, scope: :meeting, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <% unless meeting.persisted? %>
+    <% if meeting.client %>
+      <%= hidden_field_tag :record, QuickAction.value_for(meeting.engagement || meeting.client) %>
+    <% else %>
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold"><%= term(:client) %></span>
+        <%= select_tag :record, options_for_select(::Client.active.ordered.map { [ it.name, QuickAction.value_for(it) ] }), include_blank: "Choose…", required: true, class: "input input--select full-width" %>
+      </label>
+    <% end %>
+  <% end %>
+  <label class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">What it’s for</span>
+    <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", autofocus: meeting.new_record?, placeholder: "Meta check-in, monthly review, launch kickoff…" %>
+  </label>
+  <div class="flex flex-wrap gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Day</span>
+      <%= date_input form, :starts_on, required: true, disabled: meeting.agenda_sent?, class: "input full-width" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Starts <span class="txt-subtle font-weight-normal">our time, <%= Time.zone.name %></span></span>
+      <%= form.time_field :starts_at_time, required: true, disabled: meeting.agenda_sent?, class: "input full-width" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Runs it</span>
+      <%= form.select :owner_id, account_people_options, { include_blank: "The #{term(:client).downcase}’s lead" }, class: "input input--select full-width" %>
+    </label>
+  </div>
+  <% if meeting.agenda_sent? %>
+    <div class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold">Agenda <span class="txt-subtle font-weight-normal">sent, so final</span></span>
+      <div class="txt-small accounts-paper"><%= rich_text meeting.agenda %></div>
+    </div>
+  <% else %>
+    <div class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold">Agenda</span>
+      <%= rich_text_field form, :agenda, placeholder: "What we’ll cover, and the answers to what was left open last time.", staff: true %>
+    </div>
+  <% end %>
+  <% if meeting.persisted? && (meeting.started? || meeting.recap.present?) %>
+    <div class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold">Recap</span>
+      <%= rich_text_field form, :recap, placeholder: "What was decided. Add each action item on the meeting’s page, with an owner and a date.", staff: true %>
+    </div>
+  <% end %>
+
+  <button type="submit" class="btn btn--link center" data-form-target="submit">
+    <span><%= meeting.persisted? ? "Save changes" : "Plan the meeting" %></span>
+    <%= icon_tag "arrow-right" %>
+  </button>
+  <%= link_to "Cancel and go back", (meeting.persisted? ? account_management_meeting_path(meeting) : account_management_meetings_path), data: { form_target: "cancel" }, hidden: true %>
+<% end %>

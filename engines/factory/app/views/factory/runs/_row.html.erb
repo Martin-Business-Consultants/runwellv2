@@ -1,0 +1,18 @@
+<%# locals: (run:, with_todo: nil) %>
+<%# One run in a list: what it worked on (when the list spans todos), where and how it went. %>
+<li class="flex align-center gap-half" data-filter-target="item">
+  <%= link_to factory_run_path(run), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+    <% if with_todo %>
+      <strong><%= run.todo.title %></strong>
+      <div class="txt-x-small txt-subtle"><%= run.todo.engagement.ref %> · <%= run.todo.engagement.client.name %> · <%= factory_run_details(run) %></div>
+    <% else %>
+      <strong><%= run.label %></strong>
+      <div class="txt-x-small txt-subtle"><%= factory_run_details(run) %></div>
+    <% end %>
+  <% end %>
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+  <% if run.pull_request_url %>
+    <%= link_to "Pull request", run.pull_request_url, class: "btn txt-x-small txt-nowrap flex-item-no-shrink", target: "_blank", rel: "noopener" %>
+  <% end %>
+  <%= factory_status_tag run.status %>
+</li>

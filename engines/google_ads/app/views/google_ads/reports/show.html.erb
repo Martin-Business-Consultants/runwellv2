@@ -1,0 +1,13 @@
+<% @page_title = "Advertising · " + @engagement.ref %>
+
+<% content_for :header do %>
+  <%= parent_page @engagement.ref, engagement_path(@engagement) %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title">Advertising · <%= @engagement.ref %> <%= @engagement.title %></h1>
+    <p class="txt-small txt-subtle margin-none"><%= @engagement.client.name %> · <%= @link.label %> · <%= @link.formatted_customer_id %> · the client sees this report in their portal.</p>
+    <%= render "google_ads/reports/report", report: @report %>
+  </div>
+</section>

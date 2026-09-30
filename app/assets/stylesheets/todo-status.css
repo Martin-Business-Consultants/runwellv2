@@ -1,0 +1,170 @@
+/* A todo's status as a colored circle (todos/_status_dot), in the Work board's column colors:
+/* planned blue, in progress lime, in review violet, blocked pink, done ink with a check. */
+@layer components {
+  .status-dot {
+    --status-dot-color: var(--color-card-default);
+
+    background-color: var(--status-dot-color);
+    block-size: 1.1em;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    inline-size: 1.1em;
+    position: relative;
+  }
+
+  .status-dot--planned {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--status-dot-color);
+  }
+  .status-dot--in-progress { --status-dot-color: var(--color-card-4); }
+  .status-dot--in-review {
+    --status-dot-color: var(--color-card-6);
+
+    /* A ring with a centre: done by someone, waiting on a person's check. */
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--status-dot-color), inset 0 0 0 4px var(--color-canvas);
+    background-image: radial-gradient(circle, var(--status-dot-color) 0 35%, transparent 38%);
+  }
+  .status-dot--blocked { --status-dot-color: var(--color-card-8); }
+  .status-dot--done {
+    --status-dot-color: var(--color-card-complete);
+
+    &::after {
+      block-size: 0.5em;
+      border: solid var(--color-ink-inverted);
+      border-width: 0 2px 2px 0;
+      content: "";
+      inline-size: 0.28em;
+      inset: 0.18em auto auto 0.4em;
+      position: absolute;
+      transform: rotate(45deg);
+    }
+  }
+
+  /* The small in-place pickers on work rows: status (a circle) and owner (an avatar). */
+  .row-picker {
+    display: inline-block;
+    position: relative;
+
+    .popup {
+      min-inline-size: 11em;
+      max-block-size: min(22em, 70dvh);
+      overflow-y: auto;
+    }
+
+    /* Pinned to the viewport beside its trigger (fixed_popup_controller), so a scrolling list
+       can't clip it. */
+    &.fixed-popup--placed .popup[open] {
+      inset: var(--popup-top) auto auto var(--popup-left);
+      margin: 0;
+      position: fixed;
+      z-index: 50;
+    }
+  }
+
+  .status-dot-picker__trigger {
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-grid;
+    font-size: 1.15rem;
+    padding: 0.3em;
+    place-items: center;
+    transition: transform 120ms ease;
+
+    @media (any-hover: hover) {
+      &:hover { transform: scale(1.15); }
+    }
+
+    &:has(.status-dot-picker__label) {
+      border-radius: var(--radius-pill, 99rem);
+      color: inherit;
+      font: inherit;
+      gap: 0.5ch;
+      grid-auto-flow: column;
+      padding-inline: 0.5em 0.7em;
+
+      @media (any-hover: hover) {
+        &:hover { background-color: var(--color-ink-lightest); transform: none; }
+      }
+    }
+  }
+
+  .status-dot-picker__label {
+    font-size: var(--text-small);
+    white-space: nowrap;
+  }
+
+  .owner-picker__trigger {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-pill, 99rem);
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    gap: 0.5ch;
+    max-inline-size: 14em;
+    padding: 0.15em;
+    text-align: start;
+
+    @media (any-hover: hover) {
+      &:hover { background-color: var(--color-ink-lightest); }
+    }
+  }
+
+  .owner-picker__avatar {
+    block-size: 1.6rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    inline-size: 1.6rem;
+  }
+
+  .owner-picker__avatar--small {
+    block-size: 1.3rem;
+    inline-size: 1.3rem;
+  }
+
+  .owner-picker__empty {
+    align-items: center;
+    block-size: 1.6rem;
+    border: 1.5px dashed var(--color-ink-light);
+    border-radius: 50%;
+    color: var(--color-ink-medium);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    inline-size: 1.6rem;
+    justify-content: center;
+  }
+
+  .owner-picker__empty--small {
+    block-size: 1.3rem;
+    inline-size: 1.3rem;
+  }
+
+  .owner-picker__name {
+    min-inline-size: 0;
+  }
+}
+
+/* An engagement's work (todos/_section): groups sit close, with a small gap, not a section's. */
+@layer components {
+  .work-groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
+  .work-group {
+    display: flex;
+    flex-direction: column;
+
+    .settings__scrollable-list {
+      margin-block: 0;
+    }
+  }
+}

@@ -1,0 +1,2 @@
+class SearchableDocument < ApplicationRecord
+end

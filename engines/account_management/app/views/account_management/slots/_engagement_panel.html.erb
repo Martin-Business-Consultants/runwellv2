@@ -1,0 +1,23 @@
+<%# locals: (engagement:) %>
+<%# The meetings held about an engagement. %>
+<% meetings = AccountManagement::Meeting.for(engagement).recent.includes(:client, :owner).limit(10).to_a %>
+<section class="settings__section" id="account_management">
+  <header>
+    <h2 class="divider">Meetings</h2>
+  </header>
+  <ul class="settings__scrollable-list">
+    <% meetings.each do |meeting| %>
+      <%# herb:key meeting.id %>
+      <%= render "account_management/meetings/row", meeting: meeting %>
+    <% end %>
+  </ul>
+  <% if meetings.empty? %>
+    <p class="txt-subtle txt-small margin-none">No meetings about this <%= term(:engagement).downcase %> yet.</p>
+  <% end %>
+  <div class="section-actions">
+    <%= link_to new_account_management_meeting_path(record: QuickAction.value_for(engagement)), class: "btn txt-small" do %>
+      <%= icon_tag "add" %>
+      <span>Plan a meeting</span>
+    <% end %>
+  </div>
+</section>

@@ -1,0 +1,23 @@
+<%# locals: (subject:) %>
+<% events = subject.events.recent.limit(30).includes(:actor_user) %>
+<% if events.any? %>
+  <section class="settings__section">
+    <details class="txt-align-start">
+      <summary class="txt-subtle txt-small">History</summary>
+      <ol class="settings__scrollable-list">
+        <% events.each do |event| %>
+          <%# herb:key event.id %>
+          <li data-filter-target="item" class="flex flex-column txt-small">
+            <div>
+              <strong><%= event_title(event) %></strong>
+              <span class="txt-subtle">by <% if event.actor_user %><%= person_tag event.actor_user %><% else %><%= event.actor_name %><% end %> · <%= event.source_label %> · <%= l event.occurred_at, format: :short %></span>
+            </div>
+            <% if (details = event_details(event)).present? %>
+              <div class="txt-x-small txt-subtle"><%= details %></div>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+    </details>
+  </section>
+<% end %>

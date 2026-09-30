@@ -1,0 +1,48 @@
+<%# locals: () %>
+<%# The staff nav, down the left: Needs You (home) and the core sections, then what plugins add, then the
+    page filter, help, theme, settings and signing out at the foot. The current section is
+    marked (aria-current). Below 800px it runs across the top instead. %>
+<aside class="sidenav" id="sidenav" aria-label="Main">
+  <%= link_to root_path, class: "sidenav__logo txt-large font-weight-black txt-current", title: "Needs You (g h)", data: { keys: "g h" } do %>
+    <%= render "layouts/shared/logo" %>
+  <% end %>
+
+  <nav class="sidenav__nav">
+    <ul class="sidenav__list">
+      <li><%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %></li>
+      <li><%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %></li>
+      <li><%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %></li>
+      <li><%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %></li>
+      <li><%= sidenav_link_to "Commitments", commitments_path, icon: "check-circle", keys: "g m" %></li>
+      <li><%= sidenav_link_to "Requests", requests_path, icon: "email", keys: "g r" %></li>
+    </ul>
+
+    <% if Runwell::Plugins.enabled_nav_items.any? %>
+      <p class="sidenav__heading">Plugins</p>
+      <ul class="sidenav__list">
+        <%= plugin_sidenav_links %>
+      </ul>
+    <% end %>
+  </nav>
+
+  <div class="sidenav__foot">
+    <%= render "layouts/shared/nav_filter" %>
+    <div class="sidenav__tools">
+      <button type="button" class="btn btn--plain sidenav__collapse" title="Collapse or expand the menu ([)" data-keys="[" data-pane="sidenav" data-action="panes#toggleNav" aria-expanded="true">
+        <%= icon_tag "column-left" %>
+        <span class="for-screen-reader">Collapse or expand the menu</span>
+      </button>
+      <%= plugin_slots(:nav_actions) %>
+      <%= render "layouts/shared/theme_toggle" %>
+      <%= render "layouts/shared/shortcuts" %>
+      <%= link_to settings_path, class: "btn btn--plain", title: "Settings and help (g s)", data: { keys: "g s" }, aria: { current: ("page" if request.path.start_with?(settings_path)) } do %>
+        <%= icon_tag "settings-outline" %>
+        <span class="for-screen-reader">Settings and help</span>
+      <% end %>
+      <%= button_to session_path, method: :delete, class: "btn btn--plain", title: "Sign out" do %>
+        <%= icon_tag "logout" %>
+        <span class="for-screen-reader">Sign out</span>
+      <% end %>
+    </div>
+  </div>
+</aside>

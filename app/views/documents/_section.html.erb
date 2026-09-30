@@ -1,0 +1,36 @@
+<%# locals: (subject:) %>
+<section class="settings__section" id="documents">
+  <header>
+    <h2 class="divider">Documents</h2>
+  </header>
+
+  <% documents = subject.documents.recent.includes(:uploaded_by, file_attachment: :blob) %>
+  <ul class="settings__scrollable-list">
+    <% documents.each do |document| %>
+      <%# herb:key document.id %>
+      <li class="flex align-center gap-half" data-filter-target="item">
+        <%= render "documents/link", document: document, meta: safe_join([ number_to_human_size(document.byte_size), person_tag(document.uploaded_by).presence, "#{time_ago_in_words(document.created_at)} ago" ].compact, " · ") %>
+
+        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+
+        <%= form_with model: document, namespace: dom_id(document), class: "flex align-center gap-half txt-x-small", data: { controller: "form" } do |form| %>
+          <label class="switch" title="Visible to the client">
+            <%= form.check_box :client_visible, class: "switch__input", data: { action: "change->form#submit" } %>
+            <span class="switch__btn"></span>
+            <span class="for-screen-reader">Visible to the client</span>
+          </label>
+        <% end %>
+        <% if document.deletable_by?(Current.user) %>
+          <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), trigger_class: "txt-small", keys: "d",
+                message: "The file is removed for everyone, including the client’s portal." %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if documents.any? %>
+    <p class="txt-x-small txt-subtle margin-none">The switch shows a file to the client in their portal.</p>
+  <% else %>
+    <p class="txt-subtle txt-small margin-none">No documents yet.</p>
+  <% end %>
+</section>

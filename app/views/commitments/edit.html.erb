@@ -1,0 +1,57 @@
+<% @page_title = "Edit commitment" %>
+<% home = @commitment.engagement || @commitment.client %>
+
+<% content_for :header do %>
+  <%= parent_page(@commitment.engagement ? @commitment.engagement.ref : @commitment.client.name, home) %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "layouts/shared/errors", record: @commitment %>
+
+    <%= form_with model: @commitment, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">What was promised</span>
+        <%= form.text_field :description, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
+      </label>
+
+      <div class="flex gap">
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Due</span>
+          <%= date_input form, :due_on, required: true, class: "input full-width" %>
+        </label>
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Whose</span>
+          <%= form.select :owner, grouped_options_for_select(commitment_owner_options(@commitment.client), @commitment.owner), {}, class: "input input--select full-width" %>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn--link center" data-form-target="submit">
+        <span>Save changes</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+
+      <%= link_to "Cancel and go back", home, data: { form_target: "cancel" }, hidden: true %>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt><%= term(:client) %></dt><dd><%= link_to @commitment.client.name, @commitment.client, class: "txt-link" %></dd>
+        <% if @commitment.engagement %>
+          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@commitment.engagement.ref} #{@commitment.engagement.title}", @commitment.engagement, class: "txt-link" %></dd>
+        <% end %>
+        <dt>Whose</dt><dd><%= @commitment.owner_kind == "us" ? "Ours" : "Theirs" %></dd>
+        <dt>Added</dt><dd><%= l @commitment.created_at.to_date, format: :long %></dd>
+      </dl>
+      <p class="txt-x-small txt-subtle margin-none">A commitment is final once resolved: done, missed or dropped.</p>
+    </section>
+  </aside>
+</section>

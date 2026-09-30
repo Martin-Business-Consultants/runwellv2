@@ -1,0 +1,41 @@
+@layer components {
+  /* Each agreement version on the engagement page, separated like list rows. */
+  .agreement-version {
+    border-block-end: 1px solid var(--color-ink-lighter);
+    padding-block-end: var(--block-space);
+
+    &:last-child {
+      border-block-end: 0;
+      padding-block-end: 0;
+    }
+  }
+
+  /* A scope item on one line: a wide description, short price and estimate, then two
+  /* round buttons (save, remove). The new-item row uses the same columns, with its Add
+  /* button across both button columns, so every row lines up. Forms are display: contents
+  /* so their fields join the row's grid. */
+  .scope-item-fields {
+    align-items: center;
+    display: grid;
+    gap: var(--inline-space-half);
+    grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--btn-size) var(--btn-size);
+    inline-size: 100%;
+
+    form {
+      display: contents;
+    }
+
+    .input {
+      min-inline-size: 0;
+    }
+  }
+
+  .scope-item-fields__add {
+    --btn-gap: 0.25em;
+
+    grid-column: span 2;
+    justify-content: center;
+    padding-inline: 0;
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,95 @@
+<% @page_title = "Factory" %>
+<% running = @items.fetch("running", []) %>
+<% attention = %w[failed blocked review].flat_map { @items.fetch(it, []) } %>
+
+<div class="flex flex-column gap align-center">
+  <section class="panel panel--wide shadow txt-align-start settings__section">
+    <div class="flex flex-wrap align-center justify-space-between gap txt-small">
+      <span><strong><%= running.size %></strong> of <%= @policy.max_concurrent_runs %> runs going · <strong><%= @queue.size %></strong> queued</span>
+      <span>
+        <%= money(@policy.spent_this_month_cents) %> this month<% if @policy.monthly_budget_cents %> of <%= money(@policy.monthly_budget_cents) %><% end %>
+        <% if @policy.over_budget? %>
+          <%= factory_status_tag "blocked" %>
+        <% end %>
+      </span>
+      <% if can?(:manage_settings) %>
+        <%= link_to "Limits and runners", factory_settings_path, class: "txt-link" %>
+      <% end %>
+    </div>
+  </section>
+
+  <% if running.empty? && @queue.empty? && attention.empty? && @recent.empty? %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <p class="margin-none">Nothing has been handed to agents yet.</p>
+      <ol class="txt-small margin-none">
+        <li>Link a repository to a client, <%= term(:engagement).downcase %> or piece of <%= term(:work).downcase %> (Code plugin).</li>
+        <li>On a piece of <%= term(:work).downcase %> with approved scope, choose <strong>Hand to an agent</strong>, or queue a whole <%= term(:engagement).downcase %>’s ready <%= term(:work).downcase %> from its page.</li>
+        <li>Start a runner on a machine with Docker (<%= link_to "Settings → Factory", factory_settings_path, class: "txt-link" %> shows how). It claims the next piece, opens a pull request and puts the work in review for you.</li>
+      </ol>
+    </section>
+  <% end %>
+
+  <% if running.any? %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <header>
+        <h2 class="divider">Running <span class="txt-subtle"><%= running.size %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% running.each do |item| %>
+          <%# herb:key item.id %>
+          <%= render "factory/runs/row", run: item.current_run, with_todo: true %>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if @queue.any? %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <header>
+        <h2 class="divider">Queued <span class="txt-subtle"><%= @queue.size %></span></h2>
+      </header>
+      <p class="txt-x-small txt-subtle margin-none">In the order runners take them: earliest due first, then oldest.</p>
+      <ol class="settings__scrollable-list">
+        <% @queue.each do |item| %>
+          <%# herb:key item.id %>
+          <li class="flex align-center gap-half" data-filter-target="item">
+            <%= link_to todo_path(item.todo), class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
+              <strong><%= item.todo.title %></strong>
+              <div class="txt-x-small txt-subtle"><%= [ item.todo.engagement.ref, item.todo.engagement.client.name, (item.todo.due_on && "due " + l(item.todo.due_on, format: :short)), (item.attempts.positive? && "attempt #{item.attempts + 1}") ].select(&:present?).join(" · ") %></div>
+            <% end %>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <%= person_tag item.queued_by %>
+          </li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+
+  <% if attention.any? %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <header>
+        <h2 class="divider">Needs a person <span class="txt-subtle"><%= attention.size %></span></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% attention.each do |item| %>
+          <%# herb:key item.id %>
+          <li data-filter-target="item"><%= render "factory/briefing/item", item: item %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if @recent.any? %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <header>
+        <h2 class="divider">Recent runs</h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% @recent.each do |run| %>
+          <%# herb:key run.id %>
+          <%= render "factory/runs/row", run: run, with_todo: true %>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</div>

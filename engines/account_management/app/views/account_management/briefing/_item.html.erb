@@ -1,0 +1,35 @@
+<%# locals: (item:) %>
+<% case item %>
+<% when AccountManagement::Meeting %>
+  <%= link_to account_management_meeting_path(item), class: "txt-ink txt-align-start flex align-center gap-half" do %>
+    <div class="min-width flex-item-grow">
+      <strong><%= item.state == "recap_due" ? "Recap" : "Agenda" %>: <%= item.title %></strong>
+      <div class="txt-x-small txt-subtle"><%= item.client.name %> · <%= item.when_label %> · <%= account_paper_line(item, item.state == "recap_due" ? :recap : :agenda) %></div>
+    </div>
+    <%= account_meeting_tag item %>
+  <% end %>
+<% when AccountManagement::WeeklyUpdate %>
+  <%= link_to (item.persisted? ? edit_account_management_weekly_update_path(item) : new_account_management_weekly_update_path(week_of: item.week_of)), class: "txt-ink txt-align-start flex align-center gap-half" do %>
+    <div class="min-width flex-item-grow">
+      <strong>Weekly update: <%= item.label.downcase_first %></strong>
+      <div class="txt-x-small txt-subtle">Due <%= l item.due_at, format: :short %> · <%= item.persisted? ? "draft saved" : "starts from a draft of the week" %></div>
+    </div>
+    <%= account_status_tag item.late? ? "late" : "draft" %>
+  <% end %>
+<% when AccountManagement::Access %>
+  <%= link_to edit_account_management_access_path(item), class: "txt-ink txt-align-start flex align-center gap-half" do %>
+    <div class="min-width flex-item-grow">
+      <strong><%= item.name %></strong>
+      <div class="txt-x-small txt-subtle"><%= item.client.name %> · <%= item.platform_label %> · <%= item.problems.first %></div>
+    </div>
+    <%= account_status_tag "attention" %>
+  <% end %>
+<% when ::Client %>
+  <%= link_to client_path(item, tab: "plugin-account_management"), class: "txt-ink txt-align-start flex align-center gap-half" do %>
+    <div class="min-width flex-item-grow">
+      <strong><%= item.name %></strong>
+      <div class="txt-x-small txt-subtle">Nobody leads it: choose who answers for it</div>
+    </div>
+    <%= account_status_tag "attention" %>
+  <% end %>
+<% end %>

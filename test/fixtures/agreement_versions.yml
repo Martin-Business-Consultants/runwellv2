@@ -1,0 +1,15 @@
+landing_v1:
+  engagement: landing
+  number: 1
+  kind: initial
+
+retainer_v1:
+  engagement: retainer
+  number: 1
+  kind: initial
+  cadence: monthly
+
+globex_v1:
+  engagement: globex_site
+  number: 1
+  kind: initial

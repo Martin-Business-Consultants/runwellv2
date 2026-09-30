@@ -1,0 +1,26 @@
+<%# locals: (engagement:) %>
+<%# Agents across this engagement's work: how much is with them, and handing over the rest. %>
+<% items = Factory::Item.where(engagement: engagement).includes(:runs, :todo).to_a %>
+<% queued_ids = items.map(&:todo_id) %>
+<% ready = engagement.closed? ? [] : engagement.todos.open.reject { queued_ids.include?(it.id) }.select { Factory::Readiness.new(it).ready? } %>
+<% if items.any? || ready.any? %>
+  <section class="settings__section flex flex-column gap-half" id="factory">
+    <header>
+      <h2 class="divider">Agents</h2>
+    </header>
+    <% if items.any? %>
+      <div class="flex flex-wrap align-center gap-half justify-center">
+        <% items.group_by(&:state).sort_by { |state, _| Factory::Item::STATES.index(state) }.each do |state, group| %>
+          <%# herb:key state %>
+          <span class="flex align-center gap-half txt-small"><%= factory_status_tag state %> <%= group.size %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <% if ready.any? && can?(:queue_agent_work) %>
+      <%= button_to factory_engagement_queue_path(engagement), class: "btn txt-small" do %>
+        <span>Hand <%= pluralize(ready.size, "ready " + term(:work).downcase + " item") %> to agents</span>
+      <% end %>
+    <% end %>
+    <%= link_to "Open the factory", factory_root_path, class: "txt-link txt-small" %>
+  </section>
+<% end %>

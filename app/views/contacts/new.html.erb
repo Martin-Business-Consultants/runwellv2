@@ -1,0 +1,18 @@
+<% @page_title = "Add a contact" %>
+
+<% content_for :header do %>
+  <%= parent_page @client.name, @client %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title">Add a contact at <%= @client.name %></h1>
+    <%= render "contacts/form", contact: @contact %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <%= render "contacts/sidebar", client: @client, contact: @contact %>
+  </aside>
+</section>

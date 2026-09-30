@@ -1,0 +1,13 @@
+<%# locals: (client:) %>
+<% links = GoogleAds::Link.for_client(client).includes(:account).order(:customer_id).to_a.uniq(&:customer_id) %>
+<% if links.any? %>
+  <section class="settings__section flex flex-column gap">
+    <header>
+      <h2 class="divider">Advertising</h2>
+    </header>
+    <% links.each do |link| %>
+      <%# herb:key link.customer_id %>
+      <%= render "google_ads/summary", link: link, path: google_ads_portal_report_path(account: link.customer_id) %>
+    <% end %>
+  </section>
+<% end %>

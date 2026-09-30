@@ -1,0 +1,34 @@
+/* Documents: a file's name is a link (download, or a new tab for PDFs) or, for an image, a
+/* button opening a preview dialog. Fizzy has no file preview. */
+@layer components {
+  .document-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: start;
+  }
+
+  .document-preview {
+    --panel-padding: var(--block-space);
+    --panel-size: fit-content;
+
+    max-block-size: calc(100dvh - var(--block-space-double) * 2);
+
+    /* A closed dialog stays display: none; only an open one lays out as a column. */
+    &[open] {
+      display: flex;
+      flex-direction: column;
+      gap: var(--block-space);
+    }
+  }
+
+  .document-preview__image {
+    block-size: auto;
+    display: block;
+    inline-size: auto;
+    margin-inline: auto;
+    max-block-size: calc(100dvh - var(--block-space-double) * 2 - 5rem);
+    max-inline-size: 100%;
+    object-fit: contain;
+  }
+}

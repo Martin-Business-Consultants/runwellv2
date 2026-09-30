@@ -1,0 +1,18 @@
+<%# locals: (todo:, with_engagement: nil) %>
+<li data-filter-target="item" class="flex align-center gap-half">
+  <%= link_to todo_path(todo), class: "txt-ink flex gap-half align-center min-width" do %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong><%= todo.title %></strong>
+      <div class="txt-x-small txt-subtle"><%= todo_details(todo, with_engagement: with_engagement) %></div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+
+  <% if todo.status != "done" && todo.due_on&.past? %>
+    <%= status_tag "Overdue", highlight: true %>
+  <% end %>
+  <%= render "todos/owner_picker", todo: todo %>
+  <%= render "todos/status_dot", todo: todo %>
+  <%= render "todos/ai_brief", todo: todo %>
+</li>

@@ -1,0 +1,46 @@
+<% @page_title = term(:engagement, count: 2) %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<% if @engagements.any? %>
+  <section class="settings">
+    <div class="settings__panel panel shadow">
+      <section class="settings__section">
+        <p class="txt-small txt-subtle margin-none">Everything we have agreed with you, and where each one stands.</p>
+        <ul class="settings__scrollable-list">
+          <% @engagements.each do |engagement| %>
+            <%# herb:key engagement.id %>
+            <li class="flex align-center gap-half">
+              <%= link_to portal_engagement_path(engagement), class: "txt-ink flex gap-half align-center min-width" do %>
+                <div class="txt-align-start overflow-ellipsis">
+                  <strong><%= engagement.ref %></strong> <%= engagement.title %>
+                  <div class="txt-x-small txt-subtle"><%= engagement.label_name %></div>
+                </div>
+              <% end %>
+
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+
+              <span class="txt-small txt-nowrap"><%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></span>
+              <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    </div>
+  </section>
+<% else %>
+  <div class="panel panel--centered">
+    <div class="blank-slate">No agreements yet.</div>
+  </div>
+<% end %>
+
+<% plugins = plugin_slots(:portal_home, client: current_contact.client) %>
+<% if plugins.present? %>
+  <section class="settings margin-block-start">
+    <div class="settings__panel panel shadow txt-align-start">
+      <%= plugins %>
+    </div>
+  </section>
+<% end %>

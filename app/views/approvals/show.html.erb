@@ -1,0 +1,24 @@
+<% @page_title = "Review your agreement" %>
+
+<div class="flex flex-column gap align-center">
+  <p class="txt-small txt-subtle margin-none">Prepared for <%= @link.contact.name %></p>
+
+  <section class="panel panel--wide shadow">
+    <%= render "approvals/snapshot", version: @version %>
+  </section>
+
+  <section class="panel panel--wide shadow flex flex-column gap-half txt-align-start">
+    <h2 class="txt-medium font-weight-black margin-none"><%= @version.approval ? "Decision" : "Your decision" %></h2>
+
+    <% if @version.approval %>
+      <%= render "approvals/record", approval: @version.approval %>
+    <% elsif !@link.usable? %>
+      <p class="txt-small txt-subtle margin-none">This link is no longer valid. Ask us for a new one if you still need to decide.</p>
+    <% elsif @link.contact.can_approve? %>
+      <p class="txt-small txt-subtle margin-none">Approving records your name, the time, and the exact terms shown above.</p>
+      <%= render "approvals/decision_form", url: approval_path(@link) %>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">This link was sent to you for review. Someone at your company who can approve agreements needs to decide.</p>
+    <% end %>
+  </section>
+</div>

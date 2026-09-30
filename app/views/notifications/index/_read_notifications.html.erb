@@ -1,0 +1,13 @@
+<%# locals: (read:) %>
+<% if read.any? %>
+  <section class="notifications-list notifications-list--read panel panel--wide center borderless unpad flex flex-column gap-half margin-block-start">
+    <h2 class="txt-medium margin-block-start-double margin-block-end-half txt-uppercase translucent">Previously seen</h2>
+
+    <div id="notifications_list_read">
+      <% read.each do |notification| %>
+        <%# herb:key notification.id %>
+        <%= render "notifications/notification", notification: notification %>
+      <% end %>
+    </div>
+  </section>
+<% end %>

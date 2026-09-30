@@ -1,0 +1,21 @@
+<%# locals: (engagement:) %>
+<%# herb:slots server %>
+<%# herb:state (closing: false) %>
+<div class="txt-align-center margin-block-start">
+  <% if closing %>
+    <%= form_with url: close_engagement_path(engagement), class: "panel panel--narrow fill-white shadow flex flex-column gap center" do |form| %>
+      <h3 class="txt-large font-weight-bold margin-none">Close <%= engagement.ref %>?</h3>
+      <p class="txt-medium margin-none">Closed <%= term(:engagement, count: 2).downcase %> drop off the open list. The agreement and its history stay.</p>
+      <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Why? (optional)" %>
+      <div class="flex gap-half justify-center">
+        <button type="button" class="btn" data-herb-reset="closing">Cancel</button>
+        <button type="submit" class="btn txt-negative">Close <%= term(:engagement).downcase %></button>
+      </div>
+    <% end %>
+  <% else %>
+    <button type="button" class="btn txt-negative borderless txt-small" data-keys="d" data-herb-toggle="closing">
+      <%= icon_tag "close" %>
+      <span>Close this <%= term(:engagement).downcase %></span>
+    </button>
+  <% end %>
+</div>

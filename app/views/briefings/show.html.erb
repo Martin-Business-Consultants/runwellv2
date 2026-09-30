@@ -1,0 +1,43 @@
+<% @page_title = "Needs you" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<div class="flex flex-column gap align-center">
+  <% if @release&.newer? %>
+    <%= render "briefings/update", release: @release %>
+  <% end %>
+
+  <% if @setup.show? %>
+    <%= render "briefings/setup", setup: @setup %>
+  <% end %>
+
+  <% if @sections.empty? && !@setup.show? %>
+    <div class="panel panel--centered">
+      <div class="blank-slate">Nothing needs you.</div>
+    </div>
+  <% end %>
+
+  <% @sections.each do |section| %>
+    <%# herb:key section.key %>
+    <section class="panel panel--wide shadow txt-align-start settings__section">
+      <header>
+        <h2 class="divider"><%= section.title %> <span class="txt-subtle"><%= section.items.size %></span></h2>
+      </header>
+
+      <ul class="settings__scrollable-list">
+        <% section.items.each do |item| %>
+          <%# herb:key "#{item.class.name}-#{item.id}" %>
+          <li data-filter-target="item" class="flex flex-column gap-half">
+            <% if section.partial %>
+              <%= render section.partial, item: item %>
+            <% else %>
+              <%= render "briefings/item", key: section.key, item: item %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</div>

@@ -1,0 +1,16 @@
+<turbo-frame id="quick_action">
+  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
+    <dialog class="dialog dialog--action panel fill-white shadow flex-column gap txt-align-start quick-action" aria-label="<%= @action.title %>" autofocus data-dialog-target="dialog">
+      <header class="flex align-center gap-half margin-block-end-half">
+        <%= icon_tag @action.icon %>
+        <h3 class="txt-large font-weight-bold margin-none flex-item-grow"><%= @action.title %></h3>
+        <button type="button" class="btn btn--circle borderless quick-action__close" title="Close" data-action="dialog#close">
+          <%= icon_tag "close" %>
+          <span class="for-screen-reader">Close</span>
+        </button>
+      </header>
+      <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form" %>
+      <%= render @action.partial, form_id: "quick_action_form" %>
+    </dialog>
+  </div>
+</turbo-frame>

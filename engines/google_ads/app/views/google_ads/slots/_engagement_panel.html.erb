@@ -1,0 +1,36 @@
+<%# locals: (engagement:) %>
+<%# Google Ads on an engagement: the linked account at a glance, or linking one. %>
+<% link = engagement.google_ads_link %>
+<% if link || can?(:link_ad_accounts) %>
+  <section class="settings__section" id="google_ads">
+    <header>
+      <h2 class="divider">Google Ads</h2>
+    </header>
+
+    <% if link %>
+      <%= render "google_ads/summary", link: link, path: google_ads_engagement_report_path(engagement) %>
+      <% if can?(:link_ad_accounts) %>
+        <div class="flex justify-center">
+          <%= render "layouts/shared/delete_dialog", name: "the link to " + link.formatted_customer_id, path: google_ads_engagement_link_path(engagement), trigger_class: "txt-small",
+                message: "The report leaves this engagement and the client’s portal. Nothing changes in Google Ads." %>
+        </div>
+      <% end %>
+    <% else %>
+      <% known = GoogleAds::Account.order(:descriptive_name).pluck(:descriptive_name, :customer_id) %>
+      <details class="section-actions">
+        <summary class="btn txt-small"><%= icon_tag "add" %> Link an ad account</summary>
+        <%= form_with url: google_ads_engagement_link_path(engagement), scope: :link, class: "flex flex-column gap txt-small margin-block-start-half" do |form| %>
+          <%= form.text_field :customer_id, required: true, class: "input full-width", autocomplete: "off", list: "google_ads_accounts", placeholder: "Customer id, like 123-456-7890", aria: { label: "Google Ads customer id" } %>
+          <datalist id="google_ads_accounts">
+            <% known.each do |name, id| %>
+              <%# herb:key id %>
+              <option value="<%= GoogleAds::Client.format_customer_id(id) %>"><%= name %></option>
+            <% end %>
+          </datalist>
+          <button type="submit" class="btn btn--link center">Link account</button>
+        <% end %>
+        <p class="txt-x-small txt-subtle margin-none">The client sees its spend and results in their portal. Nothing is ever changed in Google Ads.</p>
+      </details>
+    <% end %>
+  </section>
+<% end %>

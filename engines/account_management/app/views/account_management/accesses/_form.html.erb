@@ -1,0 +1,64 @@
+<%# locals: (access:) %>
+<% url = access.persisted? ? account_management_access_path(access) : account_management_accesses_path %>
+<%= form_with model: access, url: url, scope: :access, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <% unless access.persisted? %>
+    <label class="flex flex-column gap-half txt-align-start">
+      <span class="txt-small font-weight-bold"><%= term(:client) %></span>
+      <%= form.select :client_id, ::Client.active.ordered.map { [ it.name, it.id ] }, { include_blank: "Choose…" }, required: true, class: "input input--select full-width" %>
+    </label>
+  <% end %>
+  <div class="flex flex-wrap gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Kind</span>
+      <%= form.select :platform, AccountManagement::Access::PLATFORMS.map { |key, label| [ label, key ] }, {}, class: "input input--select full-width" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Name</span>
+      <%= form.text_field :name, required: true, class: "input full-width", autocomplete: "off", placeholder: "BioFuse Traverse City" %>
+    </label>
+  </div>
+  <div class="flex flex-wrap gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">ID on the platform</span>
+      <%= form.text_field :external_id, class: "input full-width", autocomplete: "off", placeholder: "Page ID, ad account ID, property ID" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Link</span>
+      <%= form.url_field :url, class: "input full-width", autocomplete: "off", placeholder: "https://business.facebook.com/…" %>
+    </label>
+  </div>
+  <div class="flex flex-wrap gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Owned by</span>
+      <%= form.select :owned_by, AccountManagement::Access::OWNED_BY.map { |key, label| [ label, key ] }, {}, class: "input input--select full-width" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Third party’s name</span>
+      <%= form.text_field :owner_name, class: "input full-width", autocomplete: "off", placeholder: "When a third party owns it: the old agency, a freelancer" %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Our access</span>
+      <%= form.select :our_access, AccountManagement::Access::OUR_ACCESS.map { |key, label| [ label, key ] }, {}, class: "input input--select full-width" %>
+    </label>
+  </div>
+  <div class="flex flex-wrap gap">
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Where the login lives</span>
+      <%= form.text_field :login_location, class: "input full-width", autocomplete: "off", placeholder: "Bitwarden › BioFuse › Meta. Never the password itself." %>
+    </label>
+    <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+      <span class="txt-small font-weight-bold">Token expires</span>
+      <%= date_input form, :token_expires_on, class: "input full-width" %>
+    </label>
+  </div>
+  <div class="flex flex-column gap-half txt-align-start">
+    <span class="txt-small font-weight-bold">Notes</span>
+    <%= rich_text_field form, :notes, placeholder: "History, pending requests, who to ask. Never a password or token." %>
+  </div>
+
+  <button type="submit" class="btn btn--link center" data-form-target="submit">
+    <span><%= access.persisted? ? "Save changes" : "Add to the register" %></span>
+    <%= icon_tag "arrow-right" %>
+  </button>
+  <%= link_to "Cancel and go back", account_management_accesses_path(client_id: access.client_id), data: { form_target: "cancel" }, hidden: true %>
+<% end %>

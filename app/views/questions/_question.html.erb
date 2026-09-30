@@ -1,0 +1,27 @@
+<%# locals: (question:) %>
+<div class="txt-align-start">
+  <strong><%= question.text %></strong>
+  <div class="txt-x-small txt-subtle">
+    Asked by <%= question.asked_by %> · <%= question.source %>
+    <% if question.subject.is_a?(Engagement) || question.subject.is_a?(Client) %>
+      · <%= link_to question_subject_label(question.subject), question.subject, class: "txt-link" %>
+    <% end %>
+  </div>
+  <% if question.context.present? %>
+    <div class="txt-x-small txt-subtle"><%= simple_format question.context %></div>
+  <% end %>
+</div>
+
+<div class="flex flex-wrap align-center gap-half">
+  <% question.choices.each do |choice| %>
+    <%# herb:key choice %>
+    <%= button_to choice, answer_question_path(question), params: { answer: choice }, class: "btn txt-small" %>
+  <% end %>
+
+  <%= form_with url: answer_question_path(question), class: "flex align-center gap-half" do |form| %>
+    <%= form.text_field :answer, required: true, class: "input txt-small", autocomplete: "off", placeholder: "Or type an answer" %>
+    <button type="submit" class="btn txt-small txt-nowrap">Answer</button>
+  <% end %>
+
+  <%= button_to "Dismiss", dismiss_question_path(question), class: "btn btn--plain txt-small txt-subtle" %>
+</div>

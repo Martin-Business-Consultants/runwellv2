@@ -1,0 +1,75 @@
+<% @page_title = @run.label %>
+<% todo = @run.todo %>
+
+<% content_for :header do %>
+  <%= parent_page "Factory", factory_root_path %>
+  <% if @run.running? && can?(:queue_agent_work) %>
+    <div class="header__actions header__actions--end">
+      <%= button_to "Stop the run", factory_run_cancellation_path(@run), class: "btn" %>
+    </div>
+  <% end %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <section class="settings__section flex flex-column gap-half">
+      <div class="flex flex-wrap align-center gap-half">
+        <%= factory_status_tag @run.status %>
+        <%= link_to todo.title, todo_path(todo), class: "txt-link txt-small" %>
+        <span class="txt-small txt-subtle">· <%= todo.engagement.ref %> · <%= todo.engagement.client.name %></span>
+      </div>
+      <dl class="factory-facts txt-small">
+        <dt>Claimed by</dt><dd><%= person_tag @run.claimed_by, fallback: "—" %> on <%= @run.runner %>, attempt <%= @run.attempt %></dd>
+        <dt>Started</dt><dd><%= l @run.started_at, format: :short %> (<%= time_ago_in_words(@run.started_at) %> ago)</dd>
+        <% if @run.running? %>
+          <dt>Lease</dt><dd>until <%= l @run.lease_expires_at, format: :short %>; last heard from <%= @run.heartbeat_at ? time_ago_in_words(@run.heartbeat_at) + " ago" : "never" %></dd>
+          <dt>Deadline</dt><dd><%= l @run.deadline, format: :short %></dd>
+        <% else %>
+          <dt>Ended</dt><dd><%= l @run.finished_at, format: :short %>, after <%= distance_of_time_in_words(@run.duration) %></dd>
+        <% end %>
+        <% if @run.branch %>
+          <dt>Branch</dt><dd><code><%= @run.branch %></code></dd>
+        <% end %>
+        <% if @run.pull_request_url %>
+          <dt>Pull request</dt><dd><%= link_to @run.pull_request_url, @run.pull_request_url, class: "txt-link", target: "_blank", rel: "noopener" %></dd>
+        <% end %>
+        <% if @run.log_url %>
+          <dt>Log</dt><dd><%= link_to "Open the log", @run.log_url, class: "txt-link", target: "_blank", rel: "noopener" %></dd>
+        <% end %>
+        <dt>Cost</dt><dd><%= money @run.cost_cents %><% if @run.input_tokens.positive? %> · <%= number_with_delimiter @run.input_tokens %> tokens in, <%= number_with_delimiter @run.output_tokens %> out<% end %></dd>
+      </dl>
+    </section>
+
+    <% if @run.summary.present? %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider">What the agent said</h2>
+        </header>
+        <p class="txt-small factory-text"><%= @run.summary %></p>
+      </section>
+    <% end %>
+    <% if @run.error.present? && @run.error != @run.summary %>
+      <section class="settings__section">
+        <p class="txt-small txt-negative factory-text"><%= @run.error %></p>
+      </section>
+    <% end %>
+  </div>
+
+  <div class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">All runs on this <%= term(:work).downcase %></h2>
+      </header>
+      <ul class="settings__scrollable-list">
+        <% todo.factory_runs.recent.each do |run| %>
+          <%# herb:key run.id %>
+          <%= render "factory/runs/row", run: run %>
+        <% end %>
+      </ul>
+    </section>
+    <%= render "events/timeline", subject: todo %>
+  </div>
+</section>

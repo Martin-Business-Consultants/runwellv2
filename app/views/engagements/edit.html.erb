@@ -1,0 +1,30 @@
+<% @page_title = "Edit #{@engagement.ref}" %>
+
+<% content_for :header do %>
+  <%= parent_page @engagement.ref, @engagement %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "engagements/form", engagement: @engagement %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.state == "approved" %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
+        <dt>Versions</dt><dd><%= @engagement.agreement_versions.count %></dd>
+        <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
+        <dt>Agreed</dt><dd><%= money @engagement.agreed_amount_cents %><%= " / period" if @engagement.recurring? %></dd>
+      </dl>
+      <p class="txt-x-small txt-subtle margin-none">Scope and prices change on the agreement, not here: a sent version never changes.</p>
+    </section>
+  </aside>
+</section>

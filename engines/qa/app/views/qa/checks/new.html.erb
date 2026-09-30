@@ -1,0 +1,21 @@
+<% @page_title = "Add a QA check" %>
+
+<% content_for :header do %>
+  <%= parent_page @check.client ? @check.client.name : "QA", @check.client ? client_path(@check.client) : qa_root_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="flex flex-column gap-half">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="txt-small txt-subtle margin-none">One thing customers see that has to be right: an email, a page, a webhook, a form. Its agreed values come next, on its page.</p>
+    </div>
+    <%= render "qa/checks/form", check: @check %>
+  </div>
+
+  <aside class="settings__panel panel shadow txt-align-start settings__panel--side">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <%= render "qa/checks/form_sidebar", check: @check %>
+  </aside>
+</section>

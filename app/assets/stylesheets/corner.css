@@ -1,0 +1,99 @@
+/* Staff pages keep the bottom of the screen clear: no search strip, no tray buttons. One small
+/* bell sits in the bottom right corner and fans the notifications up when clicked (g n). Search
+/* (S, ⌘K) and quick actions (A) stay on the keyboard: their buttons are out of sight but still
+/* on the page, since keys only click elements that are there, and each opens as before. */
+@layer components {
+  body.with-sidenav {
+    /* Search: nothing until S, then its usual strip with the results above it. */
+    .bar:has(.bar__placeholder:not([hidden])) {
+      background: none;
+      block-size: 0;
+      border: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    .bar__placeholder {
+      block-size: 1px;
+      clip-path: inset(50%);
+      inline-size: 1px;
+      overflow: hidden;
+      position: absolute;
+    }
+
+    /* Quick actions: no button, the fan opens from the corner on A. */
+    .tray--actions {
+      inset-inline: auto var(--tray-margin);
+
+      > .tray__toggle {
+        block-size: 1px;
+        clip-path: inset(50%);
+        inline-size: 1px;
+        overflow: hidden;
+        position: absolute;
+      }
+    }
+
+    /* Notifications: the bell, bottom right, with a dot while there's something unread. */
+    .tray--notifications {
+      inset-inline: auto var(--tray-margin);
+
+      #footer:has(.bar__placeholder[hidden]) & {
+        inset-inline-start: auto;
+        inset-inline-end: -100%;
+      }
+
+      .tray__dialog:not([open]) .tray__item {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .tray__dialog:not([open]) ~ .tray__toggle,
+      .tray__dialog ~ .tray__toggle {
+        block-size: 2.4rem;
+        border: 0;
+        inline-size: 2.4rem;
+        justify-self: end;
+        margin-block-end: 0.15rem;
+        opacity: 1;
+        position: relative;
+        translate: none;
+      }
+
+      .tray__toggle-btn {
+        --btn-background: var(--color-canvas);
+        --btn-border-radius: 50%;
+        --btn-border-size: 1px;
+        --btn-border-color: var(--color-ink-lighter);
+        --btn-padding: 0;
+
+        block-size: 100%;
+        box-shadow: var(--shadow);
+        display: grid;
+        inline-size: 100%;
+        opacity: 1;
+        place-items: center;
+
+        .icon {
+          display: block;
+        }
+      }
+
+      .tray__toggle-text {
+        display: none;
+      }
+
+      &.unread .tray__toggle::after,
+      .tray__dialog:not([open]):has(.tray__item--notification) ~ .tray__toggle::after {
+        background: oklch(var(--lch-red-medium));
+        block-size: 0.55rem;
+        border: 2px solid var(--color-canvas);
+        border-radius: 50%;
+        content: "";
+        inline-size: 0.55rem;
+        inset: 0.1rem 0.1rem auto auto;
+        position: absolute;
+      }
+    }
+  }
+}

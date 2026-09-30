@@ -1,0 +1,95 @@
+# Deploys a release to one Kamal install. Started by hand from the Actions tab, or by an owner
+# pressing Update in the install's Settings > Updates (Upgrade::Github), which fills in
+# `upgrade` so the install can find this run again.
+#
+# Each destination is a GitHub environment of the same name ("production" for config/deploy.yml,
+# otherwise the name in config/deploy.<name>.yml) holding that install's config and secrets,
+# which the repository doesn't carry:
+#   DEPLOY_YML               the contents of config/deploy.yml
+#   DEPLOY_DESTINATION_YML   the contents of config/deploy.<name>.yml (destinations only)
+#   SSH_PRIVATE_KEY          a key the server accepts for Kamal's ssh user
+#   RAILS_MASTER_KEY         and every other secret its .kamal/secrets names (SMTP_PASSWORD, …)
+name: Deploy
+run-name: Deploy ${{ inputs.version }} to ${{ inputs.destination || 'production' }}${{ inputs.upgrade && format(' ({0})', inputs.upgrade) || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag, like v2.1.0
+        required: true
+      destination:
+        description: Kamal destination (blank for config/deploy.yml)
+        required: false
+        default: ""
+      upgrade:
+        description: Set by the install that asked (its host and update number)
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-${{ inputs.destination || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.destination || 'production' }}
+    timeout-minutes: 30
+    env:
+      VERSION_TAG: ${{ inputs.version }}
+      DESTINATION: ${{ inputs.destination }}
+    steps:
+      - name: Check the inputs
+        run: |
+          [[ "$VERSION_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::version must look like v2.1.0"; exit 1; }
+          [[ -z "$DESTINATION" || "$DESTINATION" =~ ^[a-z0-9_-]+$ ]] || { echo "::error::bad destination"; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy config
+        env:
+          DEPLOY_YML: ${{ secrets.DEPLOY_YML }}
+          DEPLOY_DESTINATION_YML: ${{ secrets.DEPLOY_DESTINATION_YML }}
+        run: |
+          [ -n "$DEPLOY_YML" ] || { echo "::error::Set DEPLOY_YML (config/deploy.yml) in this environment's secrets"; exit 1; }
+          printf '%s\n' "$DEPLOY_YML" > config/deploy.yml
+          if [ -n "$DESTINATION" ]; then
+            [ -n "$DEPLOY_DESTINATION_YML" ] || { echo "::error::Set DEPLOY_DESTINATION_YML (config/deploy.$DESTINATION.yml)"; exit 1; }
+            printf '%s\n' "$DEPLOY_DESTINATION_YML" > "config/deploy.$DESTINATION.yml"
+          fi
+
+      # .kamal/secrets (.kamal/secrets.<destination> with one) reads secrets from the deploying
+      # machine's files and tools; here they come from the environment's secrets instead.
+      - name: Secrets for Kamal
+        run: |
+          cat > ".kamal/secrets${DESTINATION:+.$DESTINATION}" <<'SECRETS'
+          RAILS_MASTER_KEY=$RAILS_MASTER_KEY
+          SMTP_PASSWORD=$SMTP_PASSWORD
+          SECRETS
+
+      - name: Deploy
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          if [ -n "$DESTINATION" ]; then
+            bin/kamal deploy -d "$DESTINATION"
+          else
+            bin/kamal deploy
+          fi

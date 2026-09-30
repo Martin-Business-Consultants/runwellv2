@@ -1,0 +1,94 @@
+# What we agreed with a client: scope, price, approval and every change since.
+# The engagement is the container; each AgreementVersion is what the client saw.
+class Engagement < ApplicationRecord
+  include Eventful, Noted, Searchable, Mentions, Documentable
+  include Refs, Agreement, CustomFields
+
+  mentionable_fields :description, :estimate_notes
+
+  LABELS = %w[project work_order service].freeze
+  SHAPES = %w[fixed recurring].freeze
+
+  belongs_to :client
+  belongs_to :created_by, class_name: "User", optional: true
+  has_many :agreement_versions, -> { order(:number) }, dependent: :destroy, inverse_of: :engagement
+  has_many :todos, -> { order(:position) }, dependent: :destroy
+  has_many :commitments, dependent: :destroy
+
+  validates :title, presence: true
+  validates :label, inclusion: { in: LABELS }
+  validates :shape, inclusion: { in: SHAPES }
+
+  scope :open, -> { where(closed_at: nil) }
+  scope :closed, -> { where.not(closed_at: nil) }
+  scope :ordered, -> { order(created_at: :desc) }
+
+  # What a list shows, by derived state: "approved" (the default: agreed and still open),
+  # "open" (every open one), "draft", "sent", "changes_requested", "closed" or "all".
+  FILTERS = %w[approved open draft sent changes_requested closed all].freeze
+
+  def self.filtered(state: "approved", label: "all", scope: all)
+    state = FILTERS.include?(state) ? state : "approved"
+    scope = scope.where(label: label) if LABELS.include?(label)
+    scope = case state
+    when "all" then scope
+    when "closed" then scope.closed
+    else scope.open
+    end
+    scope = scope.ordered.includes(:client, :todos, agreement_versions: [ :approval, :scope_items ])
+    %w[all open closed].include?(state) ? scope : scope.where(id: scope.select { it.state == state }.map(&:id))
+  end
+
+  # The filter's choices, each with how many it holds when `counts` (from filter_counts) is
+  # given, so a draft is never lost behind the Approved default.
+  def self.filter_options(counts = nil)
+    options = [ [ "Approved", "approved" ], [ "All open", "open" ], [ "Draft", "draft" ], [ "Sent", "sent" ],
+      [ "Changes requested", "changes_requested" ], [ "Closed", "closed" ], [ "All", "all" ] ]
+    counts ? options.map { |text, value| [ "#{text} (#{counts.fetch(value, 0)})", value ] } : options
+  end
+
+  # How many engagements each filter choice would show, by derived state.
+  def self.filter_counts(label: "all", scope: all)
+    scope = scope.where(label: label) if LABELS.include?(label)
+    open = scope.open.includes(agreement_versions: [ :approval ]).to_a
+    closed = scope.closed.count
+    open.map(&:state).tally.merge("open" => open.size, "closed" => closed, "all" => open.size + closed)
+  end
+
+  # The list filter from params, reading the old status=open|closed too.
+  def self.filter_from(params, key = :state)
+    params[key].presence_in(FILTERS) || params[:status].presence_in(%w[open closed]) || "approved"
+  end
+
+  def closed? = closed_at.present?
+
+  # Only a draft nobody was ever sent can be deleted; anything sent is history, so close it.
+  def deletable? = agreement_versions.none?(&:sent?)
+  def recurring? = shape == "recurring"
+
+  def close!(reason: nil, actor: Current.user, source: Current.source || "app")
+    transaction do
+      update!(closed_at: Time.current, close_reason: reason)
+      record_event!("engagement.closed", actor: actor, source: source, payload: { reason: reason })
+    end
+  end
+
+  def label_name = Setting.current.label_name(label)
+
+  # Every file the client may see for this engagement: its own, its scope items', its
+  # work's, and the client's.
+  def client_documents
+    Document.client_visible.where(documentable: self)
+      .or(Document.client_visible.where(documentable_type: "ScopeItem", documentable_id: agreement_versions.select(:id).then { ScopeItem.where(agreement_version_id: it).select(:id) }))
+      .or(Document.client_visible.where(documentable_type: "Todo", documentable_id: todos.client_visible.select(:id)))
+      .or(Document.client_visible.where(documentable: client))
+      .recent.includes(file_attachment: :blob)
+  end
+
+  def to_param = ref
+
+  def search_title = "#{ref} #{title}"
+  def search_content = description
+
+  ActiveSupport.run_load_hooks(:runwell_engagement, self)
+end

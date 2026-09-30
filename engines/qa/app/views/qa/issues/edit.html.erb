@@ -1,0 +1,94 @@
+<% @page_title = "Edit issue" %>
+<% checks = Qa::Check.active.where(client: @issue.client).ordered.map { [ it.name, it.id ] } %>
+
+<% content_for :header do %>
+  <%= parent_page @issue.title.truncate(40), qa_issue_path(@issue) %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "layouts/shared/errors", record: @issue %>
+
+    <%= form_with model: @issue, url: qa_issue_path(@issue), scope: :issue, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">What’s wrong</span>
+        <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off" %>
+      </label>
+      <label class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">Where (URL)</span>
+        <%= form.url_field :url, class: "input full-width", autocomplete: "off" %>
+      </label>
+      <div class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">How to see it</span>
+        <%= rich_text_field form, :steps, placeholder: "Page, step, the input used. Paste screenshots.", staff: true %>
+      </div>
+      <div class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">What should happen</span>
+        <%= rich_text_field form, :expected %>
+      </div>
+      <div class="flex flex-column gap-half txt-align-start">
+        <span class="txt-small font-weight-bold">What happened</span>
+        <%= rich_text_field form, :actual, staff: true %>
+      </div>
+      <div class="flex flex-wrap gap">
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Seen on</span>
+          <%= form.text_field :environment, class: "input full-width", autocomplete: "off", placeholder: "Chrome on iPhone, Outlook desktop…" %>
+        </label>
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="txt-small font-weight-bold">Fixes it</span>
+          <%= form.select :assignee_id, qa_owner_options, { include_blank: "Nobody yet" }, class: "input input--select full-width" %>
+        </label>
+        <% if checks.any? %>
+          <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+            <span class="txt-small font-weight-bold">Check</span>
+            <%= form.select :check_id, checks, { include_blank: "None" }, class: "input input--select full-width" %>
+          </label>
+        <% end %>
+      </div>
+      <div class="flex align-center gap-half txt-align-start">
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :found_live, class: "switch__input" %>
+          <span class="switch__btn"></span>
+        </label>
+        <%= form.label :found_live, "Found live: customers could see it", class: "txt-small" %>
+      </div>
+
+      <button type="submit" class="btn btn--link center" data-form-target="submit">
+        <span>Save changes</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+      <%= link_to "Cancel and go back", qa_issue_path(@issue), data: { form_target: "cancel" }, hidden: true %>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt>State</dt><dd><%= qa_status_tag @issue.state %></dd>
+        <dt><%= term(:client) %></dt><dd><%= link_to @issue.client.name, client_path(@issue.client), class: "txt-link" %></dd>
+        <% if @issue.check %>
+          <dt>Check</dt><dd><%= link_to @issue.check.name, qa_check_path(@issue.check), class: "txt-link" %></dd>
+        <% end %>
+        <dt>Opened</dt><dd><%= l @issue.created_at, format: :short %> by <%= @issue.opened_by&.display_name || @issue.run&.tester_label || @issue.source %></dd>
+      </dl>
+    </section>
+
+    <section class="settings__section">
+      <header>
+        <h2 class="divider">A good issue</h2>
+      </header>
+      <ul class="record-steps txt-small">
+        <li>The URL where it shows, and the steps and input that get there.</li>
+        <li>What should happen, from the source of truth, and what did.</li>
+        <li>The browser, device or inbox it was seen on, and a screenshot.</li>
+      </ul>
+    </section>
+  </aside>
+</section>

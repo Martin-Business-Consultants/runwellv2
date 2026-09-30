@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+# Cuts a release: writes VERSION, commits it, tags vX.Y.Z and pushes both. GitHub then publishes
+# the release (.github/workflows/release.yml), every install's nightly check sees it, and each
+# owner can update from Settings > Updates.
+#
+#   bin/release 2.1.0
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+version = ARGV.first.to_s.delete_prefix("v")
+abort "Usage: bin/release 2.1.0" unless version.match?(/\A\d+\.\d+\.\d+\z/)
+
+def system!(*args) = system(*args, exception: true)
+def capture(*args) = IO.popen(args, &:read).strip
+
+FileUtils.chdir APP_ROOT do
+  current = File.read("VERSION").strip
+  abort "#{version} isn't newer than #{current}." unless Gem::Version.new(version) > Gem::Version.new(current)
+  abort "Release from main (on #{capture("git", "branch", "--show-current")})." unless capture("git", "branch", "--show-current") == "main"
+  abort "Commit or stash your changes first." unless capture("git", "status", "--porcelain", "--untracked-files=no").empty?
+
+  File.write "VERSION", "#{version}\n"
+  system! "git", "commit", "--quiet", "-m", "Release #{version}", "VERSION"
+  system! "git", "tag", "-a", "v#{version}", "-m", "Runwell #{version}"
+  system! "git", "push", "--quiet", "origin", "main", "v#{version}"
+  puts "Released v#{version}. GitHub publishes it in a minute; installs see it tonight, or at once with Check now in Settings > Updates."
+end
