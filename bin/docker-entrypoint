@@ -6,6 +6,18 @@ if [ -z "${LD_PRELOAD+x}" ]; then
     export LD_PRELOAD
 fi
 
+# Databases and files stay where they are whichever release runs.
+export RUNWELL_DATA_DIR="$(realpath -m "${RUNWELL_DATA_DIR:-/rails/storage}")"
+
+# An install that updated itself (Settings > Updates, Upgrade::InPlace) keeps the release in its
+# data volume and runs it, until an image at least as new is deployed.
+current="$RUNWELL_DATA_DIR/releases/current"
+if [ -f "$current/VERSION" ] && ruby -e 'exit Gem::Version.new(File.read(ARGV[0]).strip) > Gem::Version.new(File.read(ARGV[1]).strip)' "$current/VERSION" /rails/VERSION; then
+  cd "$(readlink -f "$current")"
+  export BUNDLE_PATH="$PWD/bundle"
+  echo "Running Runwell $(cat VERSION) from $PWD (the image holds $(cat /rails/VERSION))"
+fi
+
 # If running the rails server then create or migrate the databases (primary, cache, queue,
 # cable). A database with migrations to run is backed up first (lib/tasks/backup.rake).
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then

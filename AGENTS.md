@@ -591,7 +591,9 @@ repository is public (FSL-1.1-MIT, `LICENSE.md`). A release is a `vX.Y.Z` tag ma
 publishes it. Nothing that names a deployment or a client is tracked (`config/deploy*.yml`,
 `.kamal/secrets*` and QA source files are ignored): everything committed is public. `Release` is the newest one GitHub lists, checked
 nightly (`ReleaseCheckJob`) and by Check now, kept on `Setting#latest_release`. Owners see it on
-home (`briefings/_update`) and in Settings > Updates, whose button makes an `Upgrade`: `local`
+home (`briefings/_update`) and in Settings > Updates, whose button makes an `Upgrade`: `in_place`
+(any Docker install) downloads the release's bundle into the data volume and restarts on it,
+like WordPress (`Upgrade::InPlace`, run by `bin/docker-entrypoint`), `local`
 runs `bin/update <tag>` in the background (`Upgrade::Local`), `github` starts
 `.github/workflows/deploy.yml` for the install's Kamal destination (`Upgrade::Github`), `manual`
 shows the command. An upgrade succeeds when the install boots on the new version, and fails when

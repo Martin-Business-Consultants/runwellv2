@@ -43,14 +43,26 @@ Behind your own proxy, set `HTTP_PORT=8080` and `ASSUME_SSL=true`.
 A release is a `vX.Y.Z` tag on https://github.com/Martin-Business-Consultants/runwellv2. `bin/release 2.1.0` writes `VERSION`,
 tags and pushes, and GitHub publishes the release (`.github/workflows/release.yml`). Every install checks for a newer one
 each night, and an owner sees it on home and in **Settings > Updates**, with its notes and an
-**Update** button. The button works one of two ways, depending on how the install runs
+**Update** button. The button works one of three ways, depending on how the install runs
 (`RUNWELL_UPDATES` forces one):
+
+- **A Docker install** updates itself in place, the way WordPress does. Each release carries a
+  bundle for amd64 and arm64 (the Dockerfile's `bundle` stage: the app, its gems and compiled
+  assets), built by `.github/workflows/release.yml` in the minutes after it's published. The
+  button downloads the one for this machine into `RUNWELL_DATA_DIR/releases/vX.Y.Z`, checks its
+  checksum, points `releases/current` at it and restarts the container, which is unavailable for
+  a few seconds. On boot `bin/docker-entrypoint` runs whichever is newer, the image or
+  `releases/current`, backing up and migrating as usual; deploying a newer image takes over again.
+  It relies on the container's restart policy (Kamal's `unless-stopped`). A release that needs
+  another Ruby or system packages (`RUNWELL_BASE` in the Dockerfile), or an install with plugins
+  of its own in `plugins/`, is refused with a note to redeploy instead. `kamal app exec --reuse`
+  opens a shell in the image's copy (`/rails`), not the running release
 
 - **A plain install** (a checkout with a `.env`) runs `bin/update <tag>` in the background: fetch
   and check out the release, bundle, back up and migrate, compile assets, restart Puma. The
   checkout must belong to the user Runwell runs as. The repository is public, so fetching and
   the release check need no credentials. Output goes to `RUNWELL_DATA_DIR/updates/<n>/update.log`
-- **A Docker install** starts the repository's **Deploy** workflow (`.github/workflows/deploy.yml`),
+- **A Docker install with `RUNWELL_GITHUB_TOKEN`** starts the repository's **Deploy** workflow (`.github/workflows/deploy.yml`),
   which runs `kamal deploy` for the install's destination. Set `RUNWELL_GITHUB_TOKEN` (a
   fine-grained token on the repository: Contents read, Actions read and write) and, for anything
   but `config/deploy.yml`, `RUNWELL_DEPLOY_DESTINATION`. On GitHub, in the releases repository,
@@ -101,7 +113,7 @@ All in `.env` (or the deploy's `env:`). Only `APP_HOST` and the secrets are requ
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
 | `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process | set by the installer |
 | `RAILS_MAX_THREADS`, `RAILS_LOG_LEVEL` | Puma threads, log level | 3, `info` |
-| `RUNWELL_UPDATES` | How Settings > Updates updates: `local` (bin/update), `github` (the Deploy workflow) or `manual` (shows the command) | worked out from the install |
+| `RUNWELL_UPDATES` | How Settings > Updates updates: `in_place` (a Docker install updating itself), `local` (bin/update), `github` (the Deploy workflow) or `manual` (shows the command) | worked out from the install |
 | `RUNWELL_RELEASES_REPO` | Where releases are published | `Martin-Business-Consultants/runwellv2` |
 | `RUNWELL_GITHUB_TOKEN` | Starts the Deploy workflow (a Docker install updating itself). Not needed to check for releases | none |
 | `RUNWELL_DEPLOY_DESTINATION`, `RUNWELL_DEPLOY_WORKFLOW` | The Kamal destination and workflow file a Docker install deploys itself with | blank (config/deploy.yml), `deploy.yml` |

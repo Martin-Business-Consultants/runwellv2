@@ -12,10 +12,14 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# RUNWELL_BASE counts changes to this stage (Ruby aside): bump it when a release needs other
+# system packages, so an install updating in place (Upgrade::InPlace) redeploys instead.
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development:test"
+    BUNDLE_WITHOUT="development:test" \
+    RUNWELL_RUNTIME="docker" \
+    RUNWELL_BASE="1"
 
 FROM base AS build
 
@@ -36,6 +40,12 @@ COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# The release bundle an install updates itself with (Upgrade::InPlace): the app as built, with
+# its gems in bundle/. The release workflow exports it for each architecture.
+FROM scratch AS bundle
+COPY --from=build /rails /
+COPY --from=build /usr/local/bundle /bundle
 
 FROM base
 

@@ -1,5 +1,6 @@
-# The few calls updating makes to GitHub's REST API: the latest release, and for installs that
-# update through GitHub Actions, starting and following the deploy workflow.
+# The few calls updating makes to GitHub's REST API: the latest release, its assets for an
+# install that updates in place (Upgrade::InPlace), and for installs that update through GitHub
+# Actions, starting and following the deploy workflow.
 #
 #   RUNWELL_RELEASES_REPO   where releases are published (owner/name)
 #   RUNWELL_GITHUB_TOKEN    only to start a deploy (a fine-grained token: Actions read and
@@ -22,6 +23,27 @@ class Release::Github
 
   def post(path, body)
     request(Net::HTTP::Post.new(uri_for(path)).tap { it.body = body.to_json; it["Content-Type"] = "application/json" })
+  end
+
+  # Streams a release asset to a file, following GitHub's redirect to where it's stored. Returns the path.
+  def download(url, path, redirects: 5)
+    uri = URI(url)
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 60) do |http|
+      http.request(Net::HTTP::Get.new(uri, "User-Agent" => "Runwell/#{Runwell::VERSION}")) do |response|
+        case response
+        when Net::HTTPRedirection
+          raise Error, "Too many redirects downloading #{File.basename(path)}." if redirects.zero?
+          return download(response["location"], path, redirects: redirects - 1)
+        when Net::HTTPSuccess
+          File.open(path, "wb") { |file| response.read_body { file.write it } }
+        else
+          raise Error, "GitHub answered #{response.code} for #{File.basename(path)}."
+        end
+      end
+    end
+    path
+  rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => error
+    raise Error, "Couldn't download #{File.basename(path)} (#{error.message})."
   end
 
   private

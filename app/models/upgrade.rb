@@ -1,19 +1,22 @@
 # One update of this install to a newer release, started by an owner from Settings > Updates.
 # How it happens depends on how the install runs (`Upgrade.via`):
 #
-#   github  a Docker install deployed with Kamal: starts the repository's Deploy workflow
-#           (.github/workflows/deploy.yml) for this install's destination (Upgrade::Github)
-#   local   a plain install (bin/install): runs bin/update with the release's tag in the
-#           background, which restarts Puma when it's done (Upgrade::Local)
-#   manual  neither is set up: Settings > Updates shows the command to run instead
+#   in_place  a Docker install: downloads the release's bundle into its data volume and
+#             restarts on it, the way WordPress updates itself (Upgrade::InPlace)
+#   github    a Docker install deployed with Kamal: starts the repository's Deploy workflow
+#             (.github/workflows/deploy.yml) for this install's destination (Upgrade::Github)
+#   local     a plain install (bin/install): runs bin/update with the release's tag in the
+#             background, which restarts Puma when it's done (Upgrade::Local)
+#   manual    none of these: Settings > Updates shows the command to run instead
 #
-# RUNWELL_UPDATES picks one; left unset, a checkout with a .env is local, and a Docker install
-# with RUNWELL_GITHUB_TOKEN is github. It succeeds when this install boots on the new version;
-# a failed run, or no word within TIMEOUT, fails it. The old version keeps running meanwhile.
+# RUNWELL_UPDATES picks one; left unset, a checkout with a .env is local, a Docker install with
+# RUNWELL_GITHUB_TOKEN is github, and any other Docker install is in_place. It succeeds when
+# this install boots on the new version; a failed run, or no word within TIMEOUT, fails it. The
+# old version keeps running meanwhile.
 class Upgrade < ApplicationRecord
   class Refused < StandardError; end
 
-  VIAS = %w[github local manual].freeze
+  VIAS = %w[in_place github local manual].freeze
   STATUSES = %w[running succeeded failed].freeze
   TIMEOUT = 45.minutes
 
@@ -31,11 +34,12 @@ class Upgrade < ApplicationRecord
 
     if Rails.root.join(".git").exist? && Rails.root.join(".env").exist? then "local"
     elsif Release::Github.token then "github"
+    elsif Upgrade::InPlace.available? then "in_place"
     else "manual"
     end
   end
 
-  def self.available? = via == "local" || (via == "github" && Release::Github.token.present?)
+  def self.available? = via == "local" || via == "in_place" || (via == "github" && Release::Github.token.present?)
 
   def self.current = running.ordered.first
 
@@ -81,5 +85,5 @@ class Upgrade < ApplicationRecord
 
   def tag = "v#{to_version}"
 
-  def runner = { "github" => Upgrade::Github, "local" => Upgrade::Local }.fetch(via).new(self)
+  def runner = { "in_place" => Upgrade::InPlace, "github" => Upgrade::Github, "local" => Upgrade::Local }.fetch(via).new(self)
 end
