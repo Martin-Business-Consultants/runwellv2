@@ -24,7 +24,8 @@ module AgentTools
   class_methods do
     # params: the request's params, as Rails sees them (nesting and all). A type is "string",
     # "text" (rich text: HTML or plain), "integer", "number", "boolean", "date", "file", an
-    # array of allowed values, or a nested hash; a trailing "!" makes it required. Path
+    # array of allowed values, a nested hash, a list of one type ("integer[]"), or a list of
+    # objects ([ { title: "string!" } ]); a trailing "!" makes it required. Path
     # parameters (id, ref, client_id…) come from the route; route: picks one by its path when
     # an action has several ("/engagements/:engagement_ref/commitments"). confirm: what reaches a client;
     # the tool then previews until called again with confirm: true.

@@ -381,6 +381,9 @@ The core never names a plugin; remove it and the app runs as before. Extension p
 - Stylesheets: `Runwell::Plugins.stylesheet key, "name"` from the engine's
   `app/assets/stylesheets`, linked while the plugin is on
 - Events: every `Event` is published as `"event.runwell"` (`event:`)
+- Agent workflows: `Runwell::Plugins.agent_workflow key, title, steps` (a few steps naming the
+  plugin's tools), appended to the MCP server's instructions and listed by `me` (`workflows`),
+  which the CLI's skill points at
 
 Each plugin registers a manifest first:
 `Runwell::Plugins.register :key, name:, version:, description:, author:, enabled_by_default:, requires:, homepage:`
@@ -511,7 +514,12 @@ a client's outside accounts. A lead's `WeeklyUpdate` is due by the end of Friday
 week's records; `Digest` is the client-facing half. `Scorecard` counts only what's settled:
 agendas and recaps on time, commitments by their date, updates by Friday, requests answered and
 clients in touch, each with the records that missed. Home (`Attention`) warns before a standard is
-missed. Its guide is `docs/guide.md` in its repository, and Accounts > Guide.
+missed. After a call, an AI harness debriefs it (the plugin's agent workflow): `debrief_call` gives
+the client's open engagements and agreed scope, its people, and the team with each person's
+expertise tags (`Expertise`, Accounts > People) and open work; `record_call` (preview first) makes
+the call note, the contact, todos on the right engagements with owners, commitments, requests and
+health at once (`Call::Plan`, linked by `Call`). Its guide is `docs/guide.md` in its repository,
+and Accounts > Guide.
 
 `runwell-stripe-billing` (Stripe) takes payment for what was approved. On `agreement.approved` it
 makes a `StripeBilling::Charge` per version, in the request, so the approval page
@@ -556,6 +564,8 @@ do, through the same controllers: there is no separate API.
 
 - **Every action declares how an agent reaches it**, next to its authorization rule:
   `agent_tool :create_client, on: :create, title:, description:, params: { client: { name: "string!" } }`
+  (a list is `"integer[]"`, or `[ { title: "string!" } ]` for a list of objects; `[ "a", "b" ]`
+  is one of those values)
   or `agent_exempt :preview, reason: "…"` (`AgentTools`). `new`/`edit` and public pages are
   exempt on their own. An undeclared action raises in development and test;
   `bin/rails agent:coverage` lists them all. Keep `params:` in step with the action's

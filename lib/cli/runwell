@@ -451,12 +451,18 @@ def skill_text = <<~MARKDOWN
   3. Stay within the agreed scope; if it needs more, stop and say so in a note.
   4. Finish with `--todo.status in_review` (or `finish_work` when the Code plugin is on) and a closing note. A person checks it and marks it done; don't mark your own work done.
 
+  ## Workflows from plugins
+
+  Plugins add workflows, like turning a client call's notes into work. `runwell me --field workflows` lists
+  the ones switched on here, each with its steps. Follow them when the person asks for one.
+
   ## Routines people ask for
 
   - "Every morning, go through `runwell briefing` and tell me what needs me, most urgent first."
   - "Triage the open requests: for each, suggest what it should become, and ask before promoting."
   - "Find overdue work and commitments, and draft a note to each owner."
   - "Before a client call, summarise everything on <client> since last week."
+  - "Here are my notes from the call with <client>: debrief it." (the Account management plugin's workflow)
   - "Check my in-progress work against the repos and mark what's actually done, with a note."
 MARKDOWN
 

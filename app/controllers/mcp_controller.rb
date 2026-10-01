@@ -19,13 +19,19 @@ class McpController < ApplicationController
 
   def create
     tools = Agent::Catalogue.for(current_user, read_only: Current.access_token&.read_only?).map { mcp_tool(it) }
-    server = MCP::Server.new(name: "runwell", title: "Runwell", version: "1.0.0", instructions: INSTRUCTIONS, tools: tools,
+    server = MCP::Server.new(name: "runwell", title: "Runwell", version: "1.0.0", instructions: instructions, tools: tools,
       server_context: { token: request.authorization.to_s.delete_prefix("Bearer ").strip, base_url: request.base_url })
     result = server.handle_json(request.body.read)
     result ? render(json: result) : head(:accepted)
   end
 
   private
+    # The core's, then each switched-on plugin's workflows.
+    def instructions
+      workflows = Runwell::Plugins.enabled_agent_workflows.values.map { |title, text| "## #{title}\n\n#{text.strip}" }
+      ([ INSTRUCTIONS.strip ] + workflows).join("\n\n")
+    end
+
     # Bearer tokens only, never a browser's session cookie: that is what makes skipping CSRF
     # protection here safe. Without a token, 401 with where to sign in.
     def require_authentication

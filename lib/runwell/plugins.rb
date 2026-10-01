@@ -45,6 +45,7 @@ module Runwell
     mattr_reader :nightly_tasks, default: {}
     mattr_reader :stylesheets, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :agent_briefs, default: {}
+    mattr_reader :agent_workflows, default: {}
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -87,6 +88,12 @@ module Runwell
 
       # A section of the brief a local AI gets for a todo (the AI button, the brief_work tool):
       # a lambda taking the todo and the install's base URL, returning Markdown or nil.
+      # A workflow an AI harness should know (MCP instructions, `me`, the CLI skill points at it):
+      # what to do when a person asks for it, in a few steps naming the plugin's tools.
+      def agent_workflow(key, title, text)
+        agent_workflows[key] = [ title, text ]
+      end
+
       def agent_brief(key, builder)
         agent_briefs[key] = builder
       end
@@ -122,6 +129,7 @@ module Runwell
       def enabled_settings_pages = settings_pages.select { |key, _| enabled?(key) }
       def enabled_nightly_tasks = nightly_tasks.select { |key, _| enabled?(key) }
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
+      def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
       def enabled_stylesheets = stylesheets.select { |key, _| enabled?(key) }.values.flatten
       def enabled_permissions = permissions.select { |key, _| enabled?(key) }.values.reduce({}, :merge)
 

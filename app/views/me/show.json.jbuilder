@@ -13,5 +13,6 @@ json.team @team do |person|
   json.role person.role
 end
 json.plugins_on Runwell::Plugins.manifests.keys.select { Runwell::Plugins.enabled?(it) }
+json.workflows(Runwell::Plugins.enabled_agent_workflows.map { |key, (title, text)| { plugin: key, title: title, steps: text.strip } })
 json.withheld_tools @withheld.map { |tool| { name: tool.name, why: tool.plugin && !Runwell::Plugins.enabled?(tool.plugin) ? "the #{tool.plugin} plugin is off" : "needs #{tool.permissions.join(", ")}" } }
 json.terms(Setting::TERMS.to_h { [ it, term(it.to_sym) ] })

@@ -83,9 +83,13 @@ module Agent
         when Hash
           { type: "object", properties: spec.to_h { |k, v| [ k.to_s, k.to_s == "custom_fields" ? CUSTOM_FIELDS : schema_for(v) ] }, required: spec.select { |_, v| required_spec?(v) }.keys.map(&:to_s) }.compact_blank
         when Array
-          { type: "string", enum: spec.map(&:to_s) }
+          # [ { title: "string!" } ] is a list of objects; [ "a", "b" ] is one of those values.
+          spec.size == 1 && spec.first.is_a?(Hash) ? { type: "array", items: schema_for(spec.first) } : { type: "string", enum: spec.map(&:to_s) }
         else
           type = spec.to_s.delete_suffix("!")
+          # "integer[]" is a list of integers.
+          return { type: "array", items: schema_for(type.delete_suffix("[]")) } if type.end_with?("[]")
+
           case type
           when "text" then { type: "string", description: "Rich text: HTML (<p>, <strong>, lists) or plain text" }
           when "date" then { type: "string", format: "date", description: "YYYY-MM-DD" }
