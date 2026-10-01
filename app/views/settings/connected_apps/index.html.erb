@@ -52,11 +52,13 @@
       <p class="txt-small margin-none">Runwell speaks MCP at <code class="txt-small"><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
       <ul class="txt-small flex flex-column gap-half margin-none">
         <li><strong>Claude or ChatGPT:</strong> add a custom connector with that URL. You’ll be asked to approve it here.</li>
-        <li><strong>Claude Code:</strong> <code class="txt-x-small">claude mcp add --transport http runwell <%= mcp_url %></code>, then run <code class="txt-x-small">/mcp</code> to sign in.</li>
+        <li class="flex flex-column gap-half">
+          <span><strong>Claude Code:</strong> add it, then run <code class="txt-x-small">/mcp</code> in Claude Code to sign in.</span>
+          <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
+        </li>
         <li class="flex flex-column gap-half">
           <span><strong>The command line:</strong> install it, then sign in.</span>
-          <pre class="txt-small margin-none"><code>curl -fsSL <%= cli_install_url %> | sh
-runwell login</code></pre>
+          <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
         </li>
       </ul>
       <%= form_with url: settings_connected_apps_path, scope: :access_token, class: "flex flex-wrap gap-half txt-small" do |form| %>

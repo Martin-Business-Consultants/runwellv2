@@ -151,6 +151,12 @@ module ApplicationHelper
     content_tag "lexxy-prompt", "", trigger: "@", src: prompts_users_path, name: "mention"
   end
 
+  # A snippet to read or copy (a command, a request), coloured by Lexxy's highlighter the way
+  # code blocks in rich text are. language is a Prism name: bash, json, ruby, javascript.
+  def code_block(code, language: "bash", **options)
+    tag.pre code, **options, class: class_names("code-block", options[:class]), data: { language: language }
+  end
+
   # Sanitized HTML from a rich text field, with mentions rendered. Older values are plain
   # text, so they keep their line breaks.
   def rich_text(html)

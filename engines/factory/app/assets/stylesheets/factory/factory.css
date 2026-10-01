@@ -20,13 +20,4 @@
     gap: var(--block-space-half) 1em;
     grid-template-columns: 1fr 8em;
   }
-
-  .factory-code {
-    background-color: var(--color-ink-lightest);
-    border-radius: calc(0.5em * var(--radius-scale, 1));
-    margin: 0;
-    overflow-x: auto;
-    padding: 0.75em 1em;
-    text-align: start;
-  }
 }

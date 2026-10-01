@@ -18,7 +18,7 @@
           <% commands = workspace.clone_commands(repository).join("\n") %>
           <div class="flex flex-column gap-half txt-small">
             <strong><%= repository.name %></strong>
-            <pre class="input full-width txt-x-small overflow-ellipsis"><%= commands %></pre>
+            <%= code_block commands %>
             <button type="button" class="btn txt-x-small center" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= commands %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy commands</button>
             <% if repository.setup_notes.present? %>
               <div class="txt-small"><%= rich_text repository.setup_notes %></div>

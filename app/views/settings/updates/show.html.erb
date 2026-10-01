@@ -78,7 +78,7 @@
             </details>
           <% else %>
             <p class="txt-small margin-none">Updating from here isn’t set up on this install. On the server:</p>
-            <pre class="txt-small margin-none"><code><%= manual_update_command(@release) %></code></pre>
+            <%= code_block manual_update_command(@release) %>
             <p class="txt-small txt-subtle margin-none">
               Runwell updates itself from here when it runs in its Docker image (from 2.0.3 on: deploy once more to get there) or from a checkout made by <code>bin/install</code>. See <code>docs/install.md</code>.
             </p>

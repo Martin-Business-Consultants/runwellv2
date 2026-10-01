@@ -1,0 +1,25 @@
+/* A snippet outside rich text (code_block): a command or a request to read or copy, coloured
+/* with the same tokens as code blocks in rich text (lexxy.css). */
+@layer components {
+  .code-block {
+    background-color: var(--color-ink-lightest);
+    border-radius: calc(0.5em * var(--radius-scale, 1));
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-x-small);
+    margin: 0;
+    overflow-x: auto;
+    padding: 0.75em 1em;
+    tab-size: 2;
+    text-align: start;
+    white-space: pre;
+
+    .token.attr-name, .token.atrule, .token.attr, .token.keyword { color: var(--color-code-token__att); }
+    .token.boolean, .token.constant, .token.number, .token.property, .token.symbol, .token.tag { color: var(--color-code-token__property); }
+    .token.attr-value, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string { color: var(--color-code-token__selector); }
+    .token.comment, .token.cdata, .token.doctype, .token.prolog { color: var(--color-code-token__comment); font-style: italic; }
+    .token.deleted, .token.entity, .token.operator, .token.url { color: var(--color-code-token__operator); }
+    .token.class, .token.class-name, .token.function { color: var(--color-code-token__function); }
+    .token.important, .token.namespace, .token.regex, .token.variable { color: var(--color-code-token__variable); }
+    .token.punctuation { color: var(--color-code-token__punctuation); }
+  }
+}

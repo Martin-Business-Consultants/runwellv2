@@ -206,9 +206,9 @@
       <% if expectations.any? %>
         <details>
           <summary class="txt-x-small txt-subtle">What to post</summary>
-          <pre class="qa-code txt-x-small">POST <%= qa_report_address(@check) %>
-{ "reporter": "<%= @check.client.name.parameterize %> canary",
-  "results": { <%= safe_join(expectations.first(3).map { |it| %("#{it.key}": #{it.value? ? %("…what it sent…") : "true"}) }, ",\n               ") %> } }</pre>
+          <% results = expectations.first(3).map { |it| %("#{it.key}": #{it.value? ? %("…what it sent…") : "true"}) }.join(",\n               ") %>
+          <p class="txt-x-small margin-none">A <code>POST</code> to the report URL, with a JSON body:</p>
+          <%= code_block %({ "reporter": "#{@check.client.name.parameterize} canary",\n  "results": { #{results} } }), language: "json" %>
         </details>
       <% end %>
     </section>

@@ -93,6 +93,9 @@ scope items).
   sanitizes and keeps older plain-text values readable. Never a `text_area`.
   No attachments (no Active Storage). Search indexes the plain text
   (`Searchable#to_search_document`)
+- A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
+  (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
+  highlighter colours it as it does code blocks in rich text (`code.css`)
 - Every date is a native `<input type="date">` through `date_input form, :due_on` (or
   `date_input_tag` without a form builder), which adds the `date-field` controller: a click
   opens the browser's picker; `t` today, `+`/`-` a day, Delete clears. Never a text field for a

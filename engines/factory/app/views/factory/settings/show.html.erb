@@ -55,9 +55,7 @@
         <li>Build the runner and the agent image from <code>engines/factory/runner</code> (its README has the details).</li>
         <li>Start it with the token, an Anthropic API key and a GitHub token that can push branches and open pull requests:</li>
       </ol>
-      <pre class="factory-code txt-x-small">export RUNWELL_URL=<%= request.base_url %>
-export RUNWELL_TOKEN=…   ANTHROPIC_API_KEY=…   GH_TOKEN=…
-runwell-runner --name <%= Socket.gethostname rescue "build-1" %></pre>
+      <%= code_block "export RUNWELL_URL=#{request.base_url}\nexport RUNWELL_TOKEN=…   ANTHROPIC_API_KEY=…   GH_TOKEN=…\nrunwell-runner --name #{(Socket.gethostname rescue "build-1")}" %>
       <p class="txt-x-small txt-subtle margin-none">Give the GitHub token access to branches only, not to merge or change settings. Stop a runner with Ctrl-C: it finishes reporting first.</p>
     </section>
   </div>

@@ -152,16 +152,6 @@
     min-inline-size: 0;
   }
 
-  .qa-code {
-    background-color: var(--color-ink-lightest);
-    border-radius: calc(0.5em * var(--radius-scale, 1));
-    margin: 0;
-    overflow-x: auto;
-    padding: 0.75em 1em;
-    text-align: start;
-    white-space: pre;
-  }
-
   .qa-stats {
     display: grid;
     gap: var(--block-space) 1.5em;
