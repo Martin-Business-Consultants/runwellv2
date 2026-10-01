@@ -44,6 +44,7 @@
 # the repository. Start from the examples (docs/install.md).
 /config/deploy*.yml
 !/config/deploy.example.yml
+!/config/deploy.yml
 /.kamal/secrets*
 !/.kamal/secrets.example
 

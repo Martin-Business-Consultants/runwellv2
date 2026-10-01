@@ -13,12 +13,15 @@ server, no tenant switch. Two ways to run it, the same code either way.
 
 ## With Docker and Kamal (the default)
 
-A Kamal deploy is one server, one image, one volume for the data. Copy
-`config/deploy.example.yml` to `config/deploy.yml` and `.kamal/secrets.example` to
-`.kamal/secrets` (both untracked, since they name your server), set the host, server address
-and registry, then `kamal setup` the first time and `kamal deploy` after. The image runs `db:prepare` on boot,
-so a new release migrates itself. One install per Kamal destination:
-`config/deploy.acme.yml` and `kamal deploy -d acme`.
+A Kamal deploy is one server, one image, one volume for the data. `config/deploy.yml` is the
+tracked base every install shares (the service, and the `runwell_storage` volume that keeps the
+databases between deploys); each install is a destination over it. Copy
+`config/deploy.example.yml` to `config/deploy.production.yml` and `.kamal/secrets.example` to
+`.kamal/secrets.production` (both untracked, since they name your server), set the host, server
+address and registry, then `kamal setup -d production` the first time and `kamal deploy -d production`
+after. The image runs `db:prepare` on boot, so a new release migrates itself. Another install is
+another destination with its own volume: `config/deploy.acme.yml` and `kamal deploy -d acme`.
+Hoster writes the destination itself, so a Hoster deploy needs nothing more.
 
 ## Without Docker
 

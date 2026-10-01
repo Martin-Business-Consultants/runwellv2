@@ -1,0 +1,16 @@
+# The base every Runwell deploy shares, with nothing in it that names a server: each install's
+# own settings (servers, proxy host, registry, env, secrets) go in a destination,
+# config/deploy.<name>.yml, which Kamal deep-merges over this file (`kamal deploy -d <name>`).
+# Hoster writes that destination itself. config/deploy.example.yml is a full one to start from.
+service: runwell
+image: runwell
+
+env:
+  clear:
+    # Jobs (mail, in-place updates) run inside Puma: one container per install.
+    SOLID_QUEUE_IN_PUMA: true
+
+# Databases, uploaded files, backups and downloaded releases (RUNWELL_DATA_DIR). Without it each
+# deploy starts on an empty database. Each install on a server needs its own volume.
+volumes:
+  - "runwell_storage:/rails/storage"

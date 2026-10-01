@@ -1,8 +1,9 @@
 # A Kamal deploy of one Runwell install: one server, one image, one volume for the data.
-# Copy it to config/deploy.yml (untracked: it names your server) and fill in the host, server
-# and registry; secrets go in .kamal/secrets (see .kamal/secrets.example). Another install on
-# the same server is a destination: config/deploy.<name>.yml with its own APP_HOST, proxy host
-# and volume, deployed with `kamal deploy -d <name>`. docs/install.md has the rest.
+# Copy it to config/deploy.production.yml (untracked: it names your server), a destination over
+# the tracked config/deploy.yml, and fill in the host, server and registry; secrets go in
+# .kamal/secrets.production (see .kamal/secrets.example). Deploy with `kamal deploy -d production`.
+# Another install on the same server is another destination, config/deploy.<name>.yml, with its
+# own APP_HOST, proxy host and volume. docs/install.md has the rest.
 service: runwell
 image: your-registry-user/runwell
 
