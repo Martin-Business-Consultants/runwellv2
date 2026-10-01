@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_150000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "name", null: false
@@ -422,6 +422,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_140000) do
     t.json "latest_release", default: {}, null: false
     t.datetime "release_checked_at"
     t.json "plugin_releases", default: {}, null: false
+    t.string "app_host"
   end
 
   create_table "todos", force: :cascade do |t|

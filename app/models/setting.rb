@@ -27,7 +27,7 @@ class Setting < ApplicationRecord
 
   # The sender when Settings > Email is blank: MAIL_FROM, or a no-reply address at the host.
   def self.default_mail_sender
-    ENV.fetch("MAIL_FROM") { "Runwell <no-reply@#{ENV.fetch("APP_HOST", "localhost")}>" }
+    ENV.fetch("MAIL_FROM") { "Runwell <no-reply@#{Runwell.host}>" }
   end
 
   # Who mail comes from, "Name <address>": the name and address set here, each falling back

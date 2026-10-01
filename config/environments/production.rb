@@ -59,6 +59,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Where links in mail point: APP_HOST=runwell.example (APP_PROTOCOL=http for a plain-http install).
+  # Without APP_HOST, ApplicationMailer uses the address people reach Runwell at (Runwell.host).
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost"), protocol: ENV.fetch("APP_PROTOCOL", "https") }
 
   # Outbound mail: any SMTP server, from the environment (docs/install.md lists the variables).

@@ -39,7 +39,7 @@ class Upgrade::Github
 
     # Names this install and upgrade in the run's title, so the run can be found again when
     # GitHub doesn't return its id (other installs deploy from the same workflow).
-    def marker = "#{ENV.fetch("APP_HOST", "localhost")} ##{@upgrade.id}"
+    def marker = "#{Runwell.host} ##{@upgrade.id}"
 
     def find_run
       runs = api.get("actions/workflows/#{self.class.workflow}/runs", event: "workflow_dispatch",

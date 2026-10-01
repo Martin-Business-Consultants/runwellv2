@@ -5,10 +5,20 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
+  before_action :remember_host
 
   private
 
   def current_user = Current.user
+
+  # Without APP_HOST, mail would link to localhost: keep the address signed-in people reach
+  # Runwell at instead (Runwell.host). Health checks and bare IPs don't count.
+  def remember_host
+    return unless Rails.env.production? && ENV["APP_HOST"].blank? && Current.user
+    return if request.host.blank? || request.host == "localhost" || request.host.match?(/\A[\d.]+\z|:/)
+
+    Setting.current.update_column(:app_host, request.host) unless Setting.current.app_host == request.host
+  end
 
   # A read-only token reads everything its person can and changes nothing. The MCP endpoint
   # is itself a POST; the write tools it dispatches come back through here and are refused.
