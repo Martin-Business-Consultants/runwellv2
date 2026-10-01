@@ -43,7 +43,7 @@
                 <strong><%= engagement.ref %></strong> <%= engagement.title %>
               <% end %>
               <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+              <%= status_tag engagement.state.humanize, highlight: engagement.active? %>
             </li>
           <% end %>
         </ul>

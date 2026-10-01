@@ -18,6 +18,14 @@
     <span class="txt-x-small txt-subtle">Their portal, approval pages and emails show times in it.</span>
   </label>
 
+  <div class="flex align-center gap-half txt-align-start">
+    <label class="switch flex-item-no-shrink">
+      <%= form.check_box :internal, class: "switch__input" %>
+      <span class="switch__btn"></span>
+    </label>
+    <%= form.label :internal, "Internal: this is us. Its engagements are our own projects, with no agreement to send.", class: "txt-small" %>
+  </div>
+
   <%= custom_field_inputs form, client %>
 
   <button type="submit" class="btn btn--link center" data-form-target="submit">

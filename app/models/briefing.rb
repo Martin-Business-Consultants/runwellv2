@@ -32,10 +32,13 @@ class Briefing
 
   def awaiting_client
     AgreementVersion.where.not(sent_at: nil).where(superseded_by_id: nil).left_joins(:approval)
-                    .where(approvals: { id: nil }).includes(engagement: :client).order(:sent_at).to_a
+                    .where(approvals: { id: nil }).joins(engagement: :client).where(clients: { internal: false })
+                    .includes(engagement: :client).order(:sent_at).to_a
   end
 
   def drafts_ready
-    AgreementVersion.where(sent_at: nil).joins(:scope_items).distinct.includes(engagement: :client).to_a
+    # An internal project's draft is a plan, never sent.
+    AgreementVersion.where(sent_at: nil).joins(:scope_items, engagement: :client).where(clients: { internal: false })
+                    .distinct.includes(engagement: :client).to_a
   end
 end

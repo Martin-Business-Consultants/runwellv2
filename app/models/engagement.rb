@@ -23,9 +23,10 @@ class Engagement < ApplicationRecord
   scope :closed, -> { where.not(closed_at: nil) }
   scope :ordered, -> { order(created_at: :desc) }
 
-  # What a list shows, by derived state: "approved" (the default: agreed and still open),
-  # "open" (every open one), "draft", "sent", "changes_requested", "closed" or "all".
-  FILTERS = %w[approved open draft sent changes_requested closed all].freeze
+  # What a list shows, by derived state: "approved" (the default: underway, so agreed or
+  # internal, and still open), "open" (every open one), "draft", "sent", "changes_requested",
+  # "internal", "closed" or "all".
+  FILTERS = %w[approved open draft sent changes_requested internal closed all].freeze
 
   def self.filtered(state: "approved", label: "all", scope: all)
     state = FILTERS.include?(state) ? state : "approved"
@@ -36,23 +37,25 @@ class Engagement < ApplicationRecord
     else scope.open
     end
     scope = scope.ordered.includes(:client, :todos, agreement_versions: [ :approval, :scope_items ])
-    %w[all open closed].include?(state) ? scope : scope.where(id: scope.select { it.state == state }.map(&:id))
+    return scope if %w[all open closed].include?(state)
+
+    scope.where(id: scope.select { state == "approved" ? it.active? : it.state == state }.map(&:id))
   end
 
   # The filter's choices, each with how many it holds when `counts` (from filter_counts) is
   # given, so a draft is never lost behind the Approved default.
   def self.filter_options(counts = nil)
-    options = [ [ "Approved", "approved" ], [ "All open", "open" ], [ "Draft", "draft" ], [ "Sent", "sent" ],
-      [ "Changes requested", "changes_requested" ], [ "Closed", "closed" ], [ "All", "all" ] ]
+    options = [ [ "Active", "approved" ], [ "All open", "open" ], [ "Draft", "draft" ], [ "Sent", "sent" ],
+      [ "Changes requested", "changes_requested" ], [ "Internal", "internal" ], [ "Closed", "closed" ], [ "All", "all" ] ]
     counts ? options.map { |text, value| [ "#{text} (#{counts.fetch(value, 0)})", value ] } : options
   end
 
   # How many engagements each filter choice would show, by derived state.
   def self.filter_counts(label: "all", scope: all)
     scope = scope.where(label: label) if LABELS.include?(label)
-    open = scope.open.includes(agreement_versions: [ :approval ]).to_a
+    open = scope.open.includes(:client, agreement_versions: [ :approval ]).to_a
     closed = scope.closed.count
-    open.map(&:state).tally.merge("open" => open.size, "closed" => closed, "all" => open.size + closed)
+    open.map(&:state).tally.merge("approved" => open.count(&:active?), "open" => open.size, "closed" => closed, "all" => open.size + closed)
   end
 
   # The list filter from params, reading the old status=open|closed too.

@@ -1,9 +1,10 @@
 # Derived state and the current agreed terms. State is never typed in; it is
-# read off the versions and approvals.
+# read off the versions and approvals. An internal client's engagements (the agency's own
+# projects) have no agreement to send, so they are "internal" from the start.
 module Engagement::Agreement
   extend ActiveSupport::Concern
 
-  STATES = %w[draft sent changes_requested approved closed].freeze
+  STATES = %w[draft sent changes_requested approved internal closed].freeze
 
   # The latest version a client approved: the terms in force.
   def current_version
@@ -22,6 +23,7 @@ module Engagement::Agreement
 
   def state
     return "closed" if closed?
+    return "internal" if internal?
 
     latest = agreement_versions.last
     return "draft" if latest.nil? || latest.draft?
@@ -32,6 +34,12 @@ module Engagement::Agreement
   end
 
   def approved? = current_version.present?
+
+  # The agency's own project: no agreement, price or approval.
+  def internal? = client&.internal? || false
+
+  # Underway: agreed with the client, or internal.
+  def active? = state.in?(%w[approved internal])
 
   # Fixed scope: initial amount plus every approved change. Recurring: the
   # latest approved amount per period.

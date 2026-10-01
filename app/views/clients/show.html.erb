@@ -52,7 +52,7 @@
                         <span class="txt-x-small txt-subtle"><%= engagement.label_name %> · <%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></span>
                       <% end %>
                       <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-                      <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+                      <%= status_tag engagement.state.humanize, highlight: engagement.active? %>
                     </li>
                   <% end %>
                 </ul>
@@ -96,6 +96,9 @@
       </header>
       <dl class="record-facts">
         <dt>Status</dt><dd><%= status_tag @client.status, highlight: @client.status == "active" %></dd>
+        <% if @client.internal? %>
+          <dt>Internal</dt><dd>This is us: our own projects, no agreements</dd>
+        <% end %>
         <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
         <dt>Time zone</dt>
         <dd>

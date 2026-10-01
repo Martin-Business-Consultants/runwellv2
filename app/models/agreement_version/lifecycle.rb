@@ -5,6 +5,7 @@ module AgreementVersion::Lifecycle
   # Freeze the terms: snapshot the items and price, hash it, stamp sent_at.
   def send!(actor:, source: Current.source || "app", superseding: true)
     raise ArgumentError, "already sent" if sent?
+    raise ArgumentError, "#{engagement.client.name} is internal: its projects have no agreement to send" if engagement.internal?
     raise ArgumentError, "nothing to send: add at least one item" if scope_items.empty? && !kind.in?(%w[revision])
 
     transaction do

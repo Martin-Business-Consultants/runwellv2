@@ -56,7 +56,9 @@
 <% end %>
 
 <footer class="flex flex-wrap align-center justify-center gap-half">
-  <% if can?(:send_agreements) %>
+  <% if version.engagement.internal? %>
+    <p class="txt-small txt-subtle margin-none"><%= version.engagement.client.name %> is internal: this draft is a plan for the work, never sent.</p>
+  <% elsif can?(:send_agreements) %>
     <% if sending %>
       <%= form_with url: send_out_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap full-width txt-align-start", data: { turbo_action: "advance" } do |form| %>
         <h3 class="txt-medium font-weight-bold margin-none">Send <%= version.label %>?</h3>

@@ -77,6 +77,7 @@
       <li><strong>Work moves through its statuses.</strong> Planned, In progress, In review, Blocked, Done. Click the colored circle on any row to change it, or the avatar to reassign. An AI assistant finishes into In review, and a person checks it and marks it Done.</li>
       <li><strong>Changes are new versions.</strong> A change order (fixed scope) or a revision or add-on (recurring) goes through the same send and approve steps.</li>
       <li><strong>You close the <%= engagement %></strong> when it’s done. Its agreement and history stay.</li>
+      <li><strong>Your own projects skip the agreement.</strong> Mark the <%= client %> that is you as internal, and its <%= engagements %> are Internal from the start: no price, nothing to send or approve, <%= work %> added straight away.</li>
     </ol>
   </section>
 
@@ -87,7 +88,7 @@
     <ul>
       <li><strong>No invoicing, no timesheets.</strong> <%= scope_items.upcase_first %> carry the price the <%= client %> agrees to, but nothing is “billable”: everything is <%= types %>. Plugins add time tracking and invoicing (Settings → Plugins) for teams that want them.</li>
       <li><strong>Agreements are frozen once sent.</strong> Nobody can edit what a <%= client %> saw. A change is a new version the <%= client %> approves again.</li>
-      <li><strong>State is derived, never typed in.</strong> Each <%= engagement %> is Draft, Sent, Changes requested, Approved or Closed because of what happened to its versions, not because someone picked it from a list.</li>
+      <li><strong>State is derived, never typed in.</strong> Each <%= engagement %> is Draft, Sent, Changes requested, Approved, Internal or Closed because of what happened to its versions, not because someone picked it from a list.</li>
       <li><strong>History is append-only.</strong> Every change of consequence is recorded with who did it and where it came from (the app, the portal, an email). Corrections are new entries.</li>
       <li><strong><%= clients.upcase_first %> never have passwords.</strong> They sign in to the portal and approve agreements from signed links that expire.</li>
       <li><strong>Internal estimates stay internal.</strong> <%= clients.upcase_first %> see the frozen snapshot they approved, never estimates or estimate notes.</li>
@@ -103,7 +104,7 @@
     <ul>
       <li><strong>Runwell</strong> (the logo) is home: what needs a person now.</li>
       <li><strong><%= term(:client, count: 2) %></strong>, then each one’s contacts, <%= term(:engagement, count: 2).downcase %>, commitments, notes and history.</li>
-      <li><strong><%= term(:engagement, count: 2) %></strong>, showing approved, open ones by default. Switch the filter to see drafts, sent, changes requested or closed. Each one holds its agreement, scope, work and commitments.</li>
+      <li><strong><%= term(:engagement, count: 2) %></strong>, showing active ones by default (approved or internal, and open). Switch the filter to see drafts, sent, changes requested, internal or closed. Each one holds its agreement, scope, work and commitments.</li>
       <li><strong><%= term(:work) %></strong>, as a table or a board, across every <%= term(:engagement).downcase %>.</li>
       <li><strong>Commitments</strong>, open or resolved, ours or the <%= client %>’s.</li>
       <li><strong>Requests</strong>, everything that came in and what it became.</li>

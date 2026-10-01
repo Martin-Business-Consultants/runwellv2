@@ -7,6 +7,7 @@ module EngagementsHelper
     when "sent" then sent_next_step(engagement)
     when "changes_requested" then changes_next_step(engagement)
     when "approved" then approved_next_step(engagement)
+    when "internal" then internal_next_step(engagement)
     end
   end
 
@@ -39,6 +40,12 @@ module EngagementsHelper
       who = approval.contact&.name || approval.approver_name.presence || engagement.client.name
       fix = engagement.recurring? ? "a revision" : "a change order"
       "#{who} asked for changes on #{l approval.decided_at.to_date, format: :long}. Start #{fix} below and send it again."
+    end
+
+    def internal_next_step(engagement)
+      done, open = engagement.todos.partition { it.status == "done" }.map(&:size)
+      work = engagement.todos.none? ? "nothing yet, so add it below" : (open.zero? ? "all done" : "#{open} open, #{done} done")
+      "Internal: no agreement to send. #{term(:work)}: #{work}."
     end
 
     def approved_next_step(engagement)

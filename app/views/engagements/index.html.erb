@@ -18,7 +18,7 @@
           <%= render "layouts/shared/card", path: engagement_path(engagement), title: engagement.title, id_label: engagement.ref,
                 context: engagement.client.name,
                 meta: [ engagement.label_name, money(engagement.agreed_amount_cents) + (engagement.recurring? ? " / period" : "") ],
-                status: engagement.state.humanize, highlight: engagement.state == "approved" %>
+                status: engagement.state.humanize, highlight: engagement.active? %>
         <% end %>
       <% end %>
     </div>
@@ -38,7 +38,7 @@
             <td><%= link_to engagement.client.name, engagement.client, class: "txt-ink txt-subtle" %></td>
             <td class="txt-subtle"><%= engagement.label_name %></td>
             <td class="data-table__number"><%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></td>
-            <td><%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %></td>
+            <td><%= status_tag engagement.state.humanize, highlight: engagement.active? %></td>
             <% listed.each do |field| %>
               <%# herb:key field.id %>
               <td class="txt-subtle"><%= custom_field_text(field, engagement.custom_value(field)) %></td>

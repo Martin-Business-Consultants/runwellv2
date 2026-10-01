@@ -7,11 +7,11 @@ class ClientsController < ApplicationController
   agent_tool :show_client, on: :show, title: "Show a client",
     description: "A client with its contacts, engagements, commitments, notes and documents.", next_tools: %i[create_contact create_engagement add_note]
   agent_tool :create_client, on: :create, title: "Add a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it.",
-    params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", custom_fields: {} } }, next_tools: %i[create_contact create_engagement]
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it. internal: the agency itself, whose engagements are internal projects with no agreement to send.",
+    params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }, next_tools: %i[create_contact create_engagement]
   agent_tool :update_client, on: :update, title: "Change a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it.",
-    params: { client: { name: "string", status: Client::STATUSES, time_zone: "string", custom_fields: {} } }
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it. internal: the agency itself, whose engagements are internal projects with no agreement to send.",
+    params: { client: { name: "string", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }
   agent_tool :delete_client, on: :destroy, title: "Delete a client",
     description: "Removes the client with its contacts, commitments and notes. A client with engagements can’t be deleted: set its status to former instead."
 
@@ -64,5 +64,5 @@ class ClientsController < ApplicationController
   private
 
   def set_client = @client = Client.find(params[:id])
-  def client_params = params.expect(client: [ :name, :status, :time_zone, custom_fields: {} ])
+  def client_params = params.expect(client: [ :name, :status, :time_zone, :internal, custom_fields: {} ])
 end

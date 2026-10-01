@@ -51,7 +51,10 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    `can_approve`)
 2. **What we agreed** — `Engagement` (ref like WO-12, P-3, S-4; label project /
    work_order / service; shape fixed / recurring) holds `AgreementVersion`s
-   (initial, change_order, revision, add_on). A version is a draft until sent;
+   (initial, change_order, revision, add_on). A client marked `internal` is the agency
+   itself: its engagements are internal projects (state `internal`, `Engagement#internal?`)
+   with no agreement to send, price or approval, and work goes on them directly; any draft
+   is a plan, never sent. A version is a draft until sent;
    sending snapshots and hashes it and freezes it forever. `Approval` records
    the client's decision (by link or recorded with evidence). Approving creates
    one `Todo` per scope item. Nothing is "billable": everything is a project,

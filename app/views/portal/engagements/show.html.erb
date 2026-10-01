@@ -9,7 +9,7 @@
     <h1 class="page-title"><%= @page_title %></h1>
     <section class="settings__section">
       <div class="flex flex-wrap align-center gap">
-        <%= status_tag @engagement.state.humanize, highlight: @engagement.state == "approved" %>
+        <%= status_tag @engagement.state.humanize, highlight: @engagement.active? %>
         <span class="txt-small txt-subtle"><%= @engagement.label_name %></span>
         <strong class="txt-small">Agreed <%= money @engagement.agreed_amount_cents %><%= " per period" if @engagement.recurring? %></strong>
       </div>

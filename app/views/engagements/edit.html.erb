@@ -18,7 +18,7 @@
         <h2 class="divider">Details</h2>
       </header>
       <dl class="record-facts">
-        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.state == "approved" %></dd>
+        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.active? %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
         <dt>Versions</dt><dd><%= @engagement.agreement_versions.count %></dd>
         <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>

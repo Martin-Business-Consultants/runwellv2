@@ -23,7 +23,7 @@
               <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
 
               <span class="txt-small txt-nowrap"><%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></span>
-              <%= status_tag engagement.state.humanize, highlight: engagement.state == "approved" %>
+              <%= status_tag engagement.state.humanize, highlight: engagement.active? %>
             </li>
           <% end %>
         </ul>

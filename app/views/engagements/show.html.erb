@@ -6,7 +6,7 @@
      record_tab("notes", "Notes", count: @engagement.notes.count),
      record_tab("documents", "Documents", count: @engagement.documents.count)
    ] + plugin_record_tabs(:engagement_panel) %>
-<% tab = current_record_tab(tabs, @engagement.agreed_items.any? ? "work" : "agreement") %>
+<% tab = current_record_tab(tabs, @engagement.agreed_items.any? || @engagement.internal? ? "work" : "agreement") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
 <% content_for :header do %>
@@ -71,10 +71,12 @@
         <h2 class="divider">Details</h2>
       </header>
       <dl class="record-facts">
-        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.state == "approved" %></dd>
+        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.active? %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
         <dt>Type</dt><dd><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></dd>
-        <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
+        <% unless @engagement.internal? %>
+          <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
+        <% end %>
         <% if @engagement.closed? %>
           <dt>Closed</dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>
         <% end %>
