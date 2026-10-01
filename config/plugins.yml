@@ -37,6 +37,10 @@
   repo: Martin-Business-Consultants/runwell-reporting
   name: Reporting
   description: Billed, collected, aging and recurring coverage from the QuickBooks plugin's mirror, and QuickBooks' profit and loss.
+- key: stripe_billing
+  repo: Martin-Business-Consultants/runwell-stripe-billing
+  name: Stripe
+  description: Payment links for approved agreements, on the approval page and by email; a subscription for a service, a one-time payment for fixed work, each marked paid by Stripe or by hand.
 - key: time_tracking
   repo: Martin-Business-Consultants/runwell-time-tracking
   name: Time tracking

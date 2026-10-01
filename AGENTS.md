@@ -359,7 +359,8 @@ The core never names a plugin; remove it and the app runs as before. Extension p
 - View slots: `plugin_slots(:nav_actions)` (a button in the nav's foot, beside the theme toggle),
   `plugin_slots(:client_panel, client:)`, `plugin_slots(:engagement_panel, engagement:)`,
   `plugin_slots(:todo_panel, todo:)`, and in the portal `plugin_slots(:portal_home, client:)`
-  and `plugin_slots(:portal_engagement_panel, engagement:)`;
+  and `plugin_slots(:portal_engagement_panel, engagement:)`, and on the client's approval page
+  `plugin_slots(:approval_page, version:, link:)`;
   register with `Runwell::Plugins.slot name, key, partial`
 - Nav: `Runwell::Plugins.nav key, label, -> { path }`
 - Home: `Runwell::Plugins.briefing key, title, partial:, items: ->(user) { … }`
@@ -505,6 +506,19 @@ starts from a draft built from the week's records (`WeeklyUpdate::Draft`) and is
 `AccountManagement::Scorecard` counts only what's settled: agendas and recaps on time,
 commitments done by their date (dropped ones don't count), updates by Friday, each with the
 records that missed. Home (`Attention`) warns before a standard is missed.
+
+`runwell-stripe-billing` (Stripe) takes payment for what was approved. On `agreement.approved` it
+makes a `StripeBilling::Charge` per version, in the request, so the approval page
+(`:approval_page`) offers the link straight away and the client is emailed it: a service's first
+approval starts a subscription on the cadence, a later revision or add-on moves that subscription
+to the new amount, fixed work is a one-time link for the initial price and then each change
+order's difference. Each charge has a `paid` flag, set by Stripe's signed webhook or recorded with
+a note by someone with `manage_billing` (which switches the link off). A service is billed once
+(`StripeBilling::Subscription` is unique per engagement, one open subscription link, a second
+subscription cancelled at once), and Stripe and QuickBooks each refuse a service the other bills.
+Stripe connects with OAuth (Stripe Connect) through a broker on the install holding the platform's
+keys (`STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY`), which hands each install its token
+server to server against a PKCE-style verifier.
 
 ## People and permissions
 

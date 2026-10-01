@@ -21,4 +21,6 @@
       <p class="txt-small txt-subtle margin-none">This link was sent to you for review. Someone at your company who can approve agreements needs to decide.</p>
     <% end %>
   </section>
+
+  <%= plugin_slots(:approval_page, version: @version, link: @link) %>
 </div>
