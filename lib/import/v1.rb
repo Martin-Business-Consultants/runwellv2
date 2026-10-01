@@ -326,7 +326,12 @@ module Import
       end
     end
 
+    # Time entries need the Time tracking plugin installed (Settings > Plugins); without it they're skipped.
     def import_time
+      unless defined?(TimeTracking::Entry)
+        return @skipped[:time_entries] << "all time entries: install the Time tracking plugin first to bring them in"
+      end
+
       rows("time_entries").each do |row|
         user = @users[row["user_id"]]
         trackable = case row["timeable_type"]

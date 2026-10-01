@@ -6,7 +6,7 @@
 # Deploying a newer image takes over again.
 #
 # A release that needs another Ruby or other system packages (RUNWELL_BASE in the Dockerfile)
-# can't come this way, nor can an install with plugins of its own in plugins/: those redeploy.
+# can't come this way: it redeploys. Plugins live in the data volume too, so they carry over.
 require "digest"
 
 class Upgrade::InPlace
@@ -29,7 +29,6 @@ class Upgrade::InPlace
   def install
     return @upgrade.reconcile! if Gem::Version.new(Runwell::VERSION) >= Gem::Version.new(@upgrade.to_version)
 
-    refuse_own_plugins
     refuse_incompatible fetch_manifest
     unpack download
     switch
@@ -55,12 +54,6 @@ class Upgrade::InPlace
 
     def asset_url(name)
       assets[name] or raise Failed, "#{tag} has no #{name} yet. GitHub builds it in the minutes after a release; try again shortly."
-    end
-
-    def refuse_own_plugins
-      return if Dir[Rails.root.join("plugins/*/*.gemspec")].none?
-
-      raise Failed, "This install has plugins of its own in plugins/, which a release doesn't carry. Redeploy the image to update it."
     end
 
     def fetch_manifest
@@ -110,14 +103,7 @@ class Upgrade::InPlace
       (self.class.releases.glob("v*").select(&:directory?) - kept - [ Rails.root ]).each { FileUtils.rm_rf it }
     end
 
-    # Stops the container's main process once this job has finished; Docker's restart policy
-    # (Kamal runs every container with unless-stopped) starts it again on the new release.
-    def restart
-      Thread.new do
-        sleep 5
-        Process.kill "TERM", 1
-      end
-    end
+    def restart = Runwell::Restart.later
 
     def scratch = @scratch ||= self.class.releases.join(".download-#{@upgrade.id}").tap { FileUtils.mkdir_p it }
 end

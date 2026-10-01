@@ -30,10 +30,6 @@
 
 /public/assets
 
-# Installed plugins belong to the install, not the core (plugins/README.md).
-/plugins/*
-!/plugins/.keep
-!/plugins/README.md
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key

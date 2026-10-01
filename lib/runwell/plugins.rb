@@ -1,4 +1,5 @@
-# The core's extension points. A plugin (a Rails engine, see engines/time_tracking) registers
+# The core's extension points. A plugin (a Rails engine installed on the server, see
+# InstalledPlugins and github.com/Martin-Business-Consultants/runwell-time-tracking) registers
 # itself and what it adds here; the core renders whatever is registered for plugins that are
 # switched on (Settings > Plugins) and never names a plugin. Plugins start off unless their
 # manifest says enabled_by_default: true.
@@ -24,7 +25,7 @@
 # subscriber should check Runwell::Plugins.enabled?(key).
 module Runwell
   module Plugins
-    Manifest = Struct.new(:key, :name, :version, :description, :author, :bundled, :enabled_by_default, :requires, :homepage, keyword_init: true) do
+    Manifest = Struct.new(:key, :name, :version, :description, :author, :enabled_by_default, :requires, :homepage, keyword_init: true) do
       # requires: a Gem::Requirement on the core's version (">= 2.1"), checked against VERSION.
       def compatible? = requires.blank? || Gem::Requirement.new(requires).satisfied_by?(Gem::Version.new(Runwell::VERSION))
     end
@@ -48,12 +49,12 @@ module Runwell
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
       # rather than duplicates.
-      # bundled: ships with the core. enabled_by_default: whether it starts on; plugins are
-      # off until the owner switches them on unless they say otherwise. requires: the core
+      # enabled_by_default: whether it starts on; plugins are off until the owner switches them
+      # on unless they say otherwise. bundled: is ignored (plugins once shipped with the core). requires: the core
       # versions it works with (">= 2.1"); homepage: where to read about it.
-      def register(key, name:, version:, description:, author: nil, bundled: false, enabled_by_default: false, requires: nil, homepage: nil)
+      def register(key, name:, version:, description:, author: nil, bundled: nil, enabled_by_default: false, requires: nil, homepage: nil)
         manifests[key] = Manifest.new(key: key, name: name, version: version, description: description, author: author,
-          bundled: bundled, enabled_by_default: enabled_by_default, requires: requires, homepage: homepage)
+          enabled_by_default: enabled_by_default, requires: requires, homepage: homepage)
       end
 
       def slot(name, key, partial)

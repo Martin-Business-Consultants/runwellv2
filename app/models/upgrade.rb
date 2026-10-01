@@ -49,6 +49,7 @@ class Upgrade < ApplicationRecord
     raise Refused, "Updating from here isn't set up on this install: see Settings > Updates." unless available?
     raise Refused, "There's no newer release to update to." unless release&.newer?
     raise Refused, "An update to #{current.to_version} is already running." if current
+    raise Refused, "#{PluginChange.current.summary} is under way; try once it's done." if PluginChange.current
 
     create!(requested_by: by, from_version: Runwell::VERSION, to_version: release.version, via: via).tap(&:start)
   end

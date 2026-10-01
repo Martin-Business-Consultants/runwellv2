@@ -25,7 +25,7 @@ records.
 
 ## Time tracking
 
-Not in the core, but available as the first plugin (`engines/time_tracking`): timers and
+Not in the core, but available as the first plugin (`Martin-Business-Consultants/runwell-time-tracking`): timers and
 logged time on todos, totals per engagement and a weekly timesheet, in its own table and
 reading engagements and todos by id. Estimates stay internal inputs to pricing.
 

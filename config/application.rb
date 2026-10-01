@@ -6,6 +6,11 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Plugins installed on this server (RUNWELL_DATA_DIR/plugins), before the app initializes so
+# their engines take part like any other.
+require_relative "installed_plugins"
+InstalledPlugins.load!
+
 module Runwellv2
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

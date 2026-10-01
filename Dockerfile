@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Runwell v2's production image, for Kamal (config/deploy.yml). Importmap and Propshaft, so no
-# Node: assets precompile with Ruby alone. The plugin engines (bundled in engines/, installed in
-# plugins/) are path gems, so they are copied in before bundling.
+# Node: assets precompile with Ruby alone. Plugins aren't in the image: they live in the data
+# volume (RUNWELL_DATA_DIR/plugins), and the entrypoint compiles their assets on boot.
 
 ARG RUBY_VERSION=4.0.6
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
@@ -30,8 +30,6 @@ RUN apt-get update -qq && \
 RUN gem install bundler -v '~> 4.0'
 
 COPY .ruby-version Gemfile Gemfile.lock ./
-COPY engines/ engines/
-COPY plugins/ plugins/
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
@@ -54,7 +52,7 @@ COPY --from=build /rails /rails
 
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    mkdir -p db log storage tmp && chown -R rails:rails db log storage tmp
+    mkdir -p db log storage tmp && chown -R rails:rails db log public storage tmp
 USER 1000:1000
 
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

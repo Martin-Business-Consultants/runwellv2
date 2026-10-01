@@ -7,11 +7,14 @@
 <% settings = Runwell::Plugins.settings_pages[plugin.key] %>
 <% page_path = enabled && settings ? instance_exec(&settings.last) : settings_plugin_path(plugin.key) %>
 <% gear_title = plugin.name + (enabled && settings ? " settings" : " details") %>
+<% name = plugin.key.to_s %>
+<% source = InstalledPlugins.metadata(name)["repo"] %>
+<% newer = PluginRelease.newer(name) %>
 <li class="plugin-card panel flex flex-column gap-half txt-align-start" data-filter-target="item">
   <div class="flex align-center gap-half">
     <div class="flex flex-column min-width">
       <strong><%= plugin.name %></strong>
-      <span class="txt-x-small txt-subtle"><%= plugin.version %><%= " · #{plugin.author}" if plugin.author %></span>
+      <span class="txt-x-small txt-subtle"><%= [ plugin.version, plugin.author, source ].compact.join(" · ") %></span>
     </div>
 
     <%= link_to page_path, class: "btn btn--circle btn--plain txt-small flex-item-no-shrink flex-item-justify-end", title: gear_title do %>
@@ -34,9 +37,6 @@
     <% else %>
       <%= status_tag "Dormant" %>
     <% end %>
-    <% if plugin.bundled %>
-      <span class="txt-x-small txt-subtle">Bundled with Runwell</span>
-    <% end %>
   </div>
 
   <p class="txt-small margin-none flex-item-grow"><%= plugin.description %></p>
@@ -54,4 +54,19 @@
       <span class="txt-x-small border-radius pad-inline-half fill-shade"><%= addition %></span>
     <% end %>
   </div>
+
+  <% if source %>
+    <div class="flex align-center gap-half">
+      <% if newer %>
+        <%= button_to settings_plugin_upgrade_path(plugin.key), class: "btn btn--link txt-small" do %>
+          <%= icon_tag "refresh" %>
+          <span>Update to <%= newer %></span>
+        <% end %>
+      <% end %>
+      <div class="flex-item-justify-end">
+        <%= render "layouts/shared/delete_dialog", name: plugin.name, path: settings_plugin_path(plugin.key),
+          message: "Its code comes off this server and Runwell restarts. Its tables and data stay, so installing it again brings them back." %>
+      </div>
+    </div>
+  <% end %>
 </li>

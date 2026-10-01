@@ -1,33 +1,103 @@
 <% @page_title = "Plugins" %>
 <%= render "settings/header", current: :plugins %>
+<% available = Runwell::PluginCatalog.available %>
 
-<section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Installed plugins</h2>
-      </header>
-      <p class="txt-small txt-subtle margin-none">Plugins add to the core without changing it. Bundled plugins come with Runwell <%= Runwell::VERSION %>; others are installed from a git repository (below). Every plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
-
-      <ul class="plugin-cards">
-        <% @plugins.each do |plugin| %>
-          <%# herb:key plugin.key %>
-          <%= render "settings/plugins/plugin", plugin: plugin, enabled: Runwell::Plugins.enabled?(plugin.key) %>
-        <% end %>
-      </ul>
-
-      <% if @plugins.none? %>
-        <div class="blank-slate">No plugins installed.</div>
+<turbo-frame id="plugins" target="_top">
+  <section class="settings">
+    <div class="settings__panel panel shadow txt-align-start">
+      <% if @change %>
+        <section class="settings__section flex flex-column gap" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
+          <header>
+            <h2 class="divider"><%= @change.summary %></h2>
+          </header>
+          <p class="txt-small margin-none">
+            Started <%= time_ago_in_words(@change.created_at) %> ago<% if @change.requested_by %> by <%= person_tag @change.requested_by %><% end %>.
+            Runwell restarts when it’s in place, which takes a few seconds. This page checks every few seconds.
+          </p>
+        </section>
       <% end %>
-    </section>
 
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Add a plugin</h2>
-      </header>
-      <p class="txt-small txt-subtle margin-none">A plugin is a git repository (on GitHub or anywhere). On the server, from Runwell’s directory:</p>
-      <%= code_block %(bin/rails "plugins:install[https://github.com/org/runwell-thing]") %>
-      <p class="txt-small txt-subtle margin-none">That clones it into <code>plugins/</code>, bundles, migrates and restarts; then it appears here, off. <code>plugins:update[name]</code> pulls a newer version and <code>plugins:remove[name]</code> takes it out. A Docker install rebuilds its image afterwards.</p>
-    </section>
-  </div>
-</section>
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">Installed plugins</h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. A plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
+
+        <% if @plugins.any? %>
+          <ul class="plugin-cards">
+            <% @plugins.each do |plugin| %>
+              <%# herb:key plugin.key %>
+              <%= render "settings/plugins/plugin", plugin: plugin, enabled: Runwell::Plugins.enabled?(plugin.key) %>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="blank-slate">No plugins installed yet. Add one below.</div>
+        <% end %>
+
+        <% InstalledPlugins.failed.each do |name, error| %>
+          <%# herb:key name %>
+          <p class="txt-small txt-negative margin-none"><strong><%= name %></strong> is installed but didn’t load: <%= error %></p>
+        <% end %>
+
+        <div class="section-actions">
+          <%= button_to settings_plugins_check_path, class: "btn txt-small" do %>
+            <%= icon_tag "refresh" %>
+            <span>Check for updates</span>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">Add a plugin</h2>
+        </header>
+        <% if available.any? %>
+          <ul class="plugin-cards">
+            <% available.each do |entry| %>
+              <%# herb:key entry.key %>
+              <li class="plugin-card panel flex flex-column gap-half txt-align-start">
+                <strong><%= entry.name %></strong>
+                <p class="txt-small margin-none flex-item-grow"><%= entry.description %></p>
+                <%= button_to settings_plugins_installations_path, params: { repo: entry.key }, class: "btn txt-small", form_class: "flex" do %>
+                  <%= icon_tag "add" %>
+                  <span>Install</span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <p class="txt-small txt-subtle margin-none">Or any other plugin, by its GitHub repository. Runwell installs its latest release.</p>
+        <%= form_with url: settings_plugins_installations_path, class: "flex flex-wrap gap-half txt-small" do |form| %>
+          <%= form.text_field :repo, class: "input flex-item-grow", placeholder: "owner/runwell-thing", autocomplete: "off", required: true, aria: { label: "GitHub repository" } %>
+          <button type="submit" class="btn">Install</button>
+        <% end %>
+      </section>
+
+      <% if @changes.any? %>
+        <section class="settings__section flex flex-column gap">
+          <header>
+            <h2 class="divider">Recent changes</h2>
+          </header>
+          <ul class="settings__scrollable-list">
+            <% @changes.each do |change| %>
+              <%# herb:key change.id %>
+              <li class="flex align-start gap-half txt-small">
+                <% if change.requested_by %>
+                  <%= person_tag change.requested_by %>
+                <% end %>
+                <div class="txt-align-start min-width flex-item-grow">
+                  <strong><%= change.summary %></strong>
+                  <span class="txt-subtle">· <%= change.status %> · <%= time_ago_in_words(change.created_at) %> ago</span>
+                  <% if change.message.present? %>
+                    <pre class="txt-x-small margin-none upgrade-message"><%= change.message %></pre>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+  </section>
+</turbo-frame>

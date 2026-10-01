@@ -57,8 +57,8 @@ each night, and an owner sees it on home and in **Settings > Updates**, with its
   a few seconds. On boot `bin/docker-entrypoint` runs whichever is newer, the image or
   `releases/current`, backing up and migrating as usual; deploying a newer image takes over again.
   It relies on the container's restart policy (Kamal's `unless-stopped`). A release that needs
-  another Ruby or system packages (`RUNWELL_BASE` in the Dockerfile), or an install with plugins
-  of its own in `plugins/`, is refused with a note to redeploy instead. `kamal app exec --reuse`
+  another Ruby or system packages (`RUNWELL_BASE` in the Dockerfile) is refused with a note to
+  redeploy instead. Plugins live in the data volume too, so they carry over. `kamal app exec --reuse`
   opens a shell in the image's copy (`/rails`), not the running release
 
 - **A plain install** (a checkout with a `.env`) runs `bin/update <tag>` in the background: fetch
@@ -130,14 +130,18 @@ visitors' real addresses are recorded and `ASSUME_SSL` isn't needed.
 
 ## Plugins
 
-Bundled plugins come with the release and are switched on in Settings > Plugins. Others are git
-repositories, installed on the server:
+Plugins live on the server, in `RUNWELL_DATA_DIR/plugins` beside the databases, never in the
+image or the checkout. **Settings > Plugins** installs one (the ten Runwell publishes, or any
+GitHub repository by `owner/name`), shows an Update button when its repository has a newer
+release, and removes one; each restarts Runwell, which migrates and loads it. The same from the
+server's shell:
 
 ```sh
-bin/rails "plugins:install[https://github.com/org/runwell-thing]"
-bin/rails "plugins:update[runwell-thing]"
-bin/rails "plugins:remove[runwell-thing]"
+bin/rails "plugins:install[time_tracking]"                      # or owner/repo
+bin/rails "plugins:update[time_tracking]"
+bin/rails "plugins:remove[time_tracking]"                       # its tables stay
+bin/rails plugins:list
 ```
 
-They live in `plugins/`, which belongs to the install like its data. A Docker install
-rebuilds its image after installing one. See `docs/plugins.md` for writing one.
+then restart Runwell. `RUNWELL_PLUGINS=off` boots without any of them, should one keep Runwell
+from starting. See `docs/plugins.md` for writing one.

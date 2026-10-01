@@ -23,7 +23,7 @@ module Agent
       # Every action of every staff controller, with its tool or the reason it has none.
       def coverage
         Rails.application.eager_load!
-        ::ApplicationController.descendants.reject { it.abstract? || it.name.start_with?("Portal::", "GoogleAds::Portal::") }.flat_map do |controller|
+        ::ApplicationController.descendants.reject { it.abstract? || it.name.start_with?("Portal::") || it <= Portal::BaseController }.flat_map do |controller|
           controller.action_methods.sort.map do |action|
             declaration = controller.agent_declaration_for(action)
             [ "#{controller.name}##{action}", declaration.nil? ? "MISSING" : (declaration[:exempt] ? "exempt: #{declaration[:exempt]}" : declaration[:name]) ]

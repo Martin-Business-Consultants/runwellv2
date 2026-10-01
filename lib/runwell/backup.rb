@@ -32,8 +32,13 @@ module Runwell::Backup
   end
 
   private
+    # Installed plugins' migrations run on the primary database after the core's.
     def pending?(config)
-      with_pool(config) { it.migration_context.needs_migration? }
+      with_pool(config) do |pool|
+        pool.migration_context.needs_migration? ||
+          (config.name == "primary" && InstalledPlugins.migration_paths.any? &&
+            ActiveRecord::MigrationContext.new(InstalledPlugins.migration_paths, pool.schema_migration, pool.internal_metadata).needs_migration?)
+      end
     end
 
     def with_pool(config)

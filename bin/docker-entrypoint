@@ -19,7 +19,8 @@ if [ -f "$current/VERSION" ] && ruby -e 'exit Gem::Version.new(File.read(ARGV[0]
 fi
 
 # If running the rails server then create or migrate the databases (primary, cache, queue,
-# cable). A database with migrations to run is backed up first (lib/tasks/backup.rake).
+# cable), and installed plugins' tables after them. A database with migrations to run is backed
+# up first (lib/tasks/backup.rake).
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
 fi

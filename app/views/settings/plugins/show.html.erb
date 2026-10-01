@@ -13,7 +13,7 @@
         <% else %>
           <%= status_tag "Dormant" %>
         <% end %>
-        <span class="txt-small txt-subtle"><%= [ @plugin.version, @plugin.author, ("bundled with Runwell" if @plugin.bundled) ].compact.join(" · ") %></span>
+        <span class="txt-small txt-subtle"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></span>
       </div>
       <p class="txt-small margin-none"><%= @plugin.description %></p>
       <% unless @plugin.compatible? %>

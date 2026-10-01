@@ -15,6 +15,11 @@ class Release::Github
   def self.repo = ENV["RUNWELL_RELEASES_REPO"].presence || DEFAULT_REPO
   def self.token = ENV["RUNWELL_GITHUB_TOKEN"].presence
 
+  # Another repository than Runwell's own: a plugin's (PluginChange). Public, so asked without the token.
+  def initialize(repo: nil)
+    @repo = repo
+  end
+
   def get(path, params = {})
     uri = uri_for(path)
     uri.query = URI.encode_www_form(params) if params.any?
@@ -47,13 +52,16 @@ class Release::Github
   end
 
   private
-    def uri_for(path) = URI("https://api.github.com/repos/#{self.class.repo}/#{path}")
+    def repo = @repo || self.class.repo
+    def token = (self.class.token unless @repo)
+
+    def uri_for(path) = URI("https://api.github.com/repos/#{repo}/#{path}")
 
     def request(request)
       request["Accept"] = "application/vnd.github+json"
       request["X-GitHub-Api-Version"] = "2022-11-28"
       request["User-Agent"] = "Runwell/#{Runwell::VERSION}"
-      request["Authorization"] = "Bearer #{self.class.token}" if self.class.token
+      request["Authorization"] = "Bearer #{token}" if token
 
       response = Net::HTTP.start(request.uri.host, request.uri.port, use_ssl: true, open_timeout: 5, read_timeout: 15) { it.request(request) }
       raise Error, failure(response) unless response.is_a?(Net::HTTPSuccess)
@@ -68,7 +76,7 @@ class Release::Github
       case response.code.to_i
       when 401 then self.class.token ? "GitHub refused RUNWELL_GITHUB_TOKEN: it's wrong or has expired." : "GitHub needs RUNWELL_GITHUB_TOKEN for that."
       when 403 then "GitHub refused: #{message || "the token lacks access"}."
-      when 404 then "GitHub has no releases for #{self.class.repo} that this install can see#{" (a private repository needs RUNWELL_GITHUB_TOKEN)" unless self.class.token}."
+      when 404 then "GitHub has no releases for #{repo} that this install can see#{" (a private repository needs RUNWELL_GITHUB_TOKEN)" unless token}."
       else "GitHub answered #{response.code}#{": #{message}" if message}."
       end
     end

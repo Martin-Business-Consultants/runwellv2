@@ -39,7 +39,13 @@ Rails.application.routes.draw do
       resource :test_message, only: :create, module: :emails
     end
     resources :fields, only: %i[index create update destroy]
-    resources :plugins, only: %i[index show update], param: :key
+    namespace :plugins do
+      resources :installations, only: :create
+      resource :check, only: :create
+    end
+    resources :plugins, only: %i[index show update destroy], param: :key do
+      resource :upgrade, only: :create, module: :plugins
+    end
     resources :people, only: %i[index update] do
       resource :deactivation, only: %i[create destroy], module: :people
     end

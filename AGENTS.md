@@ -336,13 +336,21 @@ Files live in Active Storage (`storage/` locally). Two places, both Fizzy's:
 
 ## Plugins
 
-The core has no money or time; plugins add them. A plugin is a Rails engine gem: bundled ones
-under `engines/`, named in the Gemfile (`gem "time_tracking", path: "engines/time_tracking"`);
-installed ones under `plugins/` (gitignored), which the Gemfile globs and
-`bin/rails "plugins:install[git url]"` fills (`plugins:update`, `plugins:remove`,
-`plugins:list`; `docs/plugins.md`). It owns its tables (prefixed, e.g.
-`time_tracking_entries`), points at core records by id, and never changes core tables. The
-core never names a plugin; remove the gem and the app runs as before. Extension points
+The core has no money or time; plugins add them. A plugin is a Rails engine in a public GitHub
+repository of its own, never in this one: the ten Runwell publishes are
+`Martin-Business-Consultants/runwell-<name>` (`config/plugins.yml`). It is installed onto the
+server, like a WordPress plugin: Settings > Plugins downloads the repository's latest release
+into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
+`config/installed_plugins.rb` loads it at boot, outside Bundler, so it can use only the core's
+gems. Its migrations run after the core's on `db:migrate` / `db:prepare` (`plugins:migrate`), its
+tables stay out of `db/schema.rb`, and its stylesheets compile as production boots. Each plugin
+updates only when someone presses its Update button (`PluginRelease`, checked nightly); Remove
+deletes its code and keeps its tables. An install whose plugin is on but missing puts it back
+on boot (`PluginRestoreJob`). From the shell: `plugins:install[owner/repo or key]`,
+`plugins:update[key]`, `plugins:remove[key]`, `plugins:list`, and `plugins:link[../path]` to work
+on one (`docs/plugins.md`). Tests never load plugins. A plugin owns its tables (prefixed with its
+key, e.g. `time_tracking_entries`), points at core records by id, and never changes core tables.
+The core never names a plugin; remove it and the app runs as before. Extension points
 (`lib/runwell/plugins.rb`):
 
 - View slots: `plugin_slots(:nav_actions)` (a button in the nav's foot, beside the theme toggle),
@@ -371,19 +379,19 @@ core never names a plugin; remove the gem and the app runs as before. Extension 
 - Events: every `Event` is published as `"event.runwell"` (`event:`)
 
 Each plugin registers a manifest first:
-`Runwell::Plugins.register :key, name:, version:, description:, author:, bundled:, enabled_by_default:, requires:, homepage:`
+`Runwell::Plugins.register :key, name:, version:, description:, author:, enabled_by_default:, requires:, homepage:`
 (`requires:` is a gem requirement on the core's `VERSION`; Settings > Plugins flags a mismatch).
 Plugins are off until the owner switches them on in Settings > Plugins (state in
 `Setting#plugin_states`), unless the manifest says `enabled_by_default: true`. Everything a
 plugin registers is keyed by its key, and the core only renders registered things for
 plugins that are on; a plugin's controllers and event subscribers check
-`Runwell::Plugins.enabled?(key)` themselves. `time_tracking` is bundled and off by default.
+`Runwell::Plugins.enabled?(key)` themselves. Every plugin Runwell publishes is off by default.
 
 Register in the engine's `config.to_prepare`; add routes to the app's route set from an
 initializer (`app.routes.append { scope "time", module: "time_tracking", as: "time_tracking" … }`)
 rather than mounting an isolated engine, so the core layout's helpers work on plugin pages.
-Add migrations to the app's paths from an initializer. Changes to an engine's `engine.rb`
-(registrations, initializers) need a server restart; they aren't reloaded. `engines/time_tracking` is the
+Migrations need nothing: the core runs each installed plugin's `db/migrate`. Changes to an engine's `engine.rb`
+(registrations, initializers) need a server restart; they aren't reloaded. `runwell-time-tracking` is the
 reference: minutes logged on
 clients, engagements and todos (a polymorphic `trackable`, like notes and documents, with the
 engagement and client kept alongside so totals roll up), totals on engagements, a weekly timesheet, and "Log time" in the quick action tray.
@@ -413,7 +421,7 @@ portal request, so switching access off or archiving a contact signs them out at
 a client sees is decided per record (`client_visible` on work and documents); there are no
 client roles.
 
-`engines/google_ads` is the reference for a plugin that reaches the portal: read-only Google
+`runwell-google-ads` is the reference for a plugin that reaches the portal: read-only Google
 Ads reporting. The agency connects its own Google API app in Settings > Google Ads (OAuth,
 credentials encrypted with Active Record encryption); an engagement links to an ad account
 (`GoogleAds::Link`, permission `link_ad_accounts`); a nightly sync copies monthly and daily
@@ -421,14 +429,14 @@ figures; staff and the client see the same report (server-drawn SVG charts,
 `GoogleAds::ReportsHelper`), and an account that stops serving shows on home and emails the
 listed addresses. No management fee: the core has no money.
 
-`engines/outsend` is the reference for a plugin that changes how the core does something
+`runwell-outsend` is the reference for a plugin that changes how the core does something
 without a hook: a Mail interceptor routes each message through Outsend while the plugin is on
 and has a key (Settings > Outsend, encrypted), so the core needs no mail extension point.
-`engines/cloudflare` is the reference for a plugin with middleware and no tables: inserted
+`runwell-cloudflare` is the reference for a plugin with middleware and no tables: inserted
 before `ActionDispatch::SSL`, it trusts `CF-Connecting-IP` only when the connection came from
 a Cloudflare range (bundled list, refreshed nightly) and marks the request https.
 
-`engines/coding` (Code) is the reference for a plugin that takes webhooks: git repositories
+`runwell-coding` (Code) is the reference for a plugin that takes webhooks: git repositories
 linked to clients, engagements and todos (`Coding::Repository`, a polymorphic `linkable`; a
 todo inherits its engagement's repos and an engagement its client's). `checkout_work` hands an
 agent the clone commands, branch (`p-4/58-slug`) and agreed scope; `log_progress`,
@@ -439,7 +447,7 @@ engagement timeline, and in the portal when shared), labelled issues as requests
 from which time is suggested when Time tracking is on. A deactivated person who can still reach
 a linked repo shows on home. It never pushes code or stores secrets.
 
-`engines/factory` (Factory) is the reference for a plugin that hands work to agents running
+`runwell-factory` (Factory) is the reference for a plugin that hands work to agents running
 unattended. A person queues a todo (`Factory::Item`, with optional instructions) once it is ready
 (`Factory::Readiness`: approved scope, a description or scope item, a linked repository from the
 Code plugin, a client that allows it), or an approval queues its engagement's ready work
@@ -449,9 +457,9 @@ runner, branch, pull request, summary and cost. Success puts the todo in review;
 for another attempt or blocks it once `max_attempts` are used; a lapsed lease abandons the run.
 Limits live in `Factory::Policy` (runs at once, time, attempts, monthly budget, blocked clients).
 What the agent is told is `Factory::Task`, served with each run. The runner is a separate Rust
-binary in `engines/factory/runner` that talks only to `/mcp`; it never merges.
+binary in the plugin's `runner/` that talks only to `/mcp`; it never merges.
 
-`engines/quickbooks` is where money lives, since the core holds none. A client links to a
+`runwell-quickbooks` is where money lives, since the core holds none. A client links to a
 QuickBooks customer by id (`Quickbooks::Customer`). A service links to a recurring invoice
 template (`Quickbooks::RecurringLink`) that Runwell keeps in step: an approved revision
 changes it and closing the service stops it (both from `"event.runwell"`, run in jobs), and
@@ -459,12 +467,12 @@ the nightly sync flags a template edited in QuickBooks so it no longer matches (
 Fixed-price work is invoiced from its panel (`Quickbooks::WorkOrderBilling`), in full or as a
 deposit whose balance can be armed to send when the engagement is closed; QuickBooks emails
 each with its pay link, and the portal lists open invoices with a Pay button. Every write to
-the books is a named method on `Quickbooks::Api`. `engines/reporting` has no tables: it reads
+the books is a named method on `Quickbooks::Api`. `runwell-reporting` has no tables: it reads
 the QuickBooks mirror (billed, collected, aging, by client, recurring coverage, approved but
 not invoiced) and QuickBooks' profit and loss, for `view_financials`. A nav path lambda may
 return nil to hide its link.
 
-`engines/qa` (QA) is the reference for a plugin that adds a rule to a core model. A client's
+`runwell-qa` (QA) is the reference for a plugin that adds a rule to a core model. A client's
 checks (`Qa::Check`: an email, page, webhook or form) hold its source of truth as expectations
 (`Qa::Expectation`: From address is exactly …, To is this list, the page shows the phone, never
 shows another market's number, a promo line until its `expires_on`), each with a key fixed at
@@ -478,9 +486,9 @@ check is live, an escape); fixing it needs a root cause, and someone else or the
 test verifies it. A `Qa::Gate` puts a check on a todo: a validation added through
 `:runwell_todo` keeps it from done until the check passes in tests since it last went to review,
 by someone other than its owner (board drops that a rule refuses refresh the board with the reason).
-`bin/rails "qa:import[engines/qa/examples/acme_storage.yml]"` loads a client's checks from a file.
+`bin/rails "qa:import[path/to/file.yml]"` loads a client's checks from a file (the plugin's `examples/acme_storage.yml`).
 
-`engines/account_management` (Account management) is the working system of whoever runs client
+`runwell-account-management` (Account management) is the working system of whoever runs client
 relationships, with its standard in `AccountManagement::Playbook` (hours ahead, targets). Each
 client has one lead (`AccountManagement::Lead`). A meeting (`AccountManagement::Meeting`) holds
 the agenda, due `AGENDA_AHEAD` before it starts, and the recap, due `RECAP_WITHIN` after; sending

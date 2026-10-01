@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "name", null: false
@@ -29,78 +29,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.index ["refresh_token_digest"], name: "index_access_tokens_on_refresh_token_digest", unique: true
     t.index ["token_digest"], name: "index_access_tokens_on_token_digest", unique: true
     t.index ["user_id"], name: "index_access_tokens_on_user_id"
-  end
-
-  create_table "account_management_accesses", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "verified_by_id"
-    t.string "platform", null: false
-    t.string "name", null: false
-    t.string "external_id"
-    t.string "url"
-    t.string "owned_by", default: "unknown", null: false
-    t.string "owner_name"
-    t.string "our_access", default: "none", null: false
-    t.string "login_location"
-    t.date "token_expires_on"
-    t.date "verified_on"
-    t.text "notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_account_management_accesses_on_client_id"
-    t.index ["verified_by_id"], name: "index_account_management_accesses_on_verified_by_id"
-  end
-
-  create_table "account_management_leads", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_account_management_leads_on_client_id", unique: true
-    t.index ["user_id"], name: "index_account_management_leads_on_user_id"
-  end
-
-  create_table "account_management_meeting_items", force: :cascade do |t|
-    t.integer "meeting_id", null: false
-    t.integer "commitment_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["commitment_id"], name: "index_account_management_meeting_items_on_commitment_id", unique: true
-    t.index ["meeting_id"], name: "index_account_management_meeting_items_on_meeting_id"
-  end
-
-  create_table "account_management_meetings", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "engagement_id"
-    t.integer "owner_id"
-    t.integer "created_by_id"
-    t.string "title", null: false
-    t.datetime "starts_at", null: false
-    t.text "agenda"
-    t.datetime "agenda_sent_at"
-    t.string "agenda_sent_via"
-    t.text "recap"
-    t.datetime "recap_sent_at"
-    t.string "recap_sent_via"
-    t.datetime "cancelled_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_account_management_meetings_on_client_id"
-    t.index ["created_by_id"], name: "index_account_management_meetings_on_created_by_id"
-    t.index ["engagement_id"], name: "index_account_management_meetings_on_engagement_id"
-    t.index ["owner_id"], name: "index_account_management_meetings_on_owner_id"
-    t.index ["starts_at"], name: "index_account_management_meetings_on_starts_at"
-  end
-
-  create_table "account_management_weekly_updates", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.date "week_of", null: false
-    t.text "body"
-    t.datetime "sent_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "week_of"], name: "index_account_management_weekly_updates_on_user_id_and_week_of", unique: true
-    t.index ["user_id"], name: "index_account_management_weekly_updates_on_user_id"
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -194,127 +122,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.datetime "updated_at", null: false
     t.string "time_zone"
     t.index ["name"], name: "index_clients_on_name", unique: true
-  end
-
-  create_table "coding_branches", force: :cascade do |t|
-    t.integer "todo_id", null: false
-    t.integer "repository_id", null: false
-    t.string "name", null: false
-    t.integer "pr_number"
-    t.string "pr_url"
-    t.string "pr_title"
-    t.string "pr_state"
-    t.string "checks_state"
-    t.boolean "review_requested", default: false, null: false
-    t.datetime "merged_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["repository_id", "name"], name: "index_coding_branches_on_repository_id_and_name", unique: true
-    t.index ["repository_id"], name: "index_coding_branches_on_repository_id"
-    t.index ["todo_id"], name: "index_coding_branches_on_todo_id"
-  end
-
-  create_table "coding_collaborators", force: :cascade do |t|
-    t.integer "repository_id", null: false
-    t.string "login", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["repository_id", "login"], name: "index_coding_collaborators_on_repository_id_and_login", unique: true
-    t.index ["repository_id"], name: "index_coding_collaborators_on_repository_id"
-  end
-
-  create_table "coding_commits", force: :cascade do |t|
-    t.integer "repository_id", null: false
-    t.integer "todo_id"
-    t.integer "user_id"
-    t.string "sha", null: false
-    t.string "author_login"
-    t.string "message"
-    t.datetime "committed_at", null: false
-    t.datetime "logged_at"
-    t.datetime "dismissed_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["repository_id", "sha"], name: "index_coding_commits_on_repository_id_and_sha", unique: true
-    t.index ["repository_id"], name: "index_coding_commits_on_repository_id"
-    t.index ["todo_id"], name: "index_coding_commits_on_todo_id"
-    t.index ["user_id"], name: "index_coding_commits_on_user_id"
-  end
-
-  create_table "coding_connections", force: :cascade do |t|
-    t.string "client_id"
-    t.text "client_secret"
-    t.text "access_token"
-    t.string "login"
-    t.string "oauth_state"
-    t.datetime "connected_at"
-    t.text "webhook_secret"
-    t.string "issue_label", default: "client", null: false
-    t.boolean "close_work_on_merge", default: true, null: false
-    t.datetime "last_synced_at"
-    t.text "last_error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "coding_deploys", force: :cascade do |t|
-    t.integer "repository_id", null: false
-    t.bigint "github_id", null: false
-    t.string "environment", null: false
-    t.string "state", null: false
-    t.string "sha"
-    t.string "ref"
-    t.string "url"
-    t.string "description"
-    t.datetime "deployed_at", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["repository_id", "github_id"], name: "index_coding_deploys_on_repository_id_and_github_id", unique: true
-    t.index ["repository_id"], name: "index_coding_deploys_on_repository_id"
-  end
-
-  create_table "coding_identities", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "github_login", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["github_login"], name: "index_coding_identities_on_github_login", unique: true
-    t.index ["user_id"], name: "index_coding_identities_on_user_id", unique: true
-  end
-
-  create_table "coding_issues", force: :cascade do |t|
-    t.integer "repository_id", null: false
-    t.integer "request_id"
-    t.integer "number", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["repository_id", "number"], name: "index_coding_issues_on_repository_id_and_number", unique: true
-    t.index ["repository_id"], name: "index_coding_issues_on_repository_id"
-    t.index ["request_id"], name: "index_coding_issues_on_request_id"
-  end
-
-  create_table "coding_repositories", force: :cascade do |t|
-    t.string "linkable_type", null: false
-    t.integer "linkable_id", null: false
-    t.integer "engagement_id"
-    t.integer "client_id", null: false
-    t.integer "added_by_id"
-    t.string "url", null: false
-    t.string "full_name"
-    t.string "default_branch", default: "main", null: false
-    t.string "path"
-    t.string "staging_url"
-    t.string "production_url"
-    t.text "setup_notes"
-    t.boolean "share_deploys", default: false, null: false
-    t.bigint "webhook_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["added_by_id"], name: "index_coding_repositories_on_added_by_id"
-    t.index ["client_id"], name: "index_coding_repositories_on_client_id"
-    t.index ["engagement_id"], name: "index_coding_repositories_on_engagement_id"
-    t.index ["full_name"], name: "index_coding_repositories_on_full_name"
-    t.index ["linkable_type", "linkable_id"], name: "index_coding_repositories_on_linkable"
   end
 
   create_table "commitments", force: :cascade do |t|
@@ -423,133 +230,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.index ["subject_type", "subject_id", "occurred_at"], name: "index_events_on_subject_type_and_subject_id_and_occurred_at"
   end
 
-  create_table "factory_items", force: :cascade do |t|
-    t.integer "todo_id", null: false
-    t.integer "engagement_id", null: false
-    t.integer "client_id", null: false
-    t.integer "queued_by_id"
-    t.text "instructions"
-    t.string "source", default: "app", null: false
-    t.datetime "queued_at", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_factory_items_on_client_id"
-    t.index ["engagement_id"], name: "index_factory_items_on_engagement_id"
-    t.index ["queued_by_id"], name: "index_factory_items_on_queued_by_id"
-    t.index ["todo_id"], name: "index_factory_items_on_todo_id", unique: true
-  end
-
-  create_table "factory_runs", force: :cascade do |t|
-    t.integer "item_id"
-    t.integer "todo_id", null: false
-    t.integer "claimed_by_id"
-    t.string "runner", null: false
-    t.string "status", default: "running", null: false
-    t.integer "attempt", default: 1, null: false
-    t.datetime "started_at", null: false
-    t.datetime "lease_expires_at", null: false
-    t.datetime "heartbeat_at"
-    t.datetime "finished_at"
-    t.string "branch"
-    t.string "pull_request_url"
-    t.string "log_url"
-    t.text "summary"
-    t.text "error"
-    t.integer "cost_cents", default: 0, null: false
-    t.integer "input_tokens", default: 0, null: false
-    t.integer "output_tokens", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["claimed_by_id"], name: "index_factory_runs_on_claimed_by_id"
-    t.index ["item_id"], name: "index_factory_runs_on_item_id"
-    t.index ["item_id"], name: "index_factory_runs_one_running_per_item", unique: true, where: "status = 'running'"
-    t.index ["status"], name: "index_factory_runs_on_status"
-    t.index ["todo_id"], name: "index_factory_runs_on_todo_id"
-  end
-
-  create_table "factory_settings", force: :cascade do |t|
-    t.integer "max_concurrent_runs", default: 2, null: false
-    t.integer "lease_minutes", default: 10, null: false
-    t.integer "run_time_limit_minutes", default: 60, null: false
-    t.integer "max_attempts", default: 2, null: false
-    t.integer "monthly_budget_cents"
-    t.boolean "queue_on_approval", default: false, null: false
-    t.json "blocked_client_ids", default: [], null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "google_ads_accounts", force: :cascade do |t|
-    t.string "customer_id", null: false
-    t.string "descriptive_name"
-    t.string "currency_code"
-    t.string "status"
-    t.datetime "status_changed_at"
-    t.datetime "alerted_at"
-    t.datetime "synced_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["customer_id"], name: "index_google_ads_accounts_on_customer_id", unique: true
-  end
-
-  create_table "google_ads_connections", force: :cascade do |t|
-    t.string "client_id"
-    t.text "client_secret"
-    t.text "developer_token"
-    t.string "login_customer_id"
-    t.text "access_token"
-    t.text "refresh_token"
-    t.datetime "access_expires_at"
-    t.datetime "connected_at"
-    t.string "oauth_state"
-    t.text "alert_recipients"
-    t.text "last_error"
-    t.datetime "last_synced_at"
-    t.json "last_sync_summary"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "google_ads_days", force: :cascade do |t|
-    t.string "customer_id", null: false
-    t.date "date", null: false
-    t.integer "cost_cents", default: 0, null: false
-    t.integer "clicks", default: 0, null: false
-    t.integer "impressions", default: 0, null: false
-    t.float "conversions", default: 0.0, null: false
-    t.integer "conversions_value_cents", default: 0, null: false
-    t.float "search_impression_share"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["customer_id", "date"], name: "index_google_ads_days_on_customer_id_and_date", unique: true
-  end
-
-  create_table "google_ads_links", force: :cascade do |t|
-    t.integer "engagement_id", null: false
-    t.string "customer_id", null: false
-    t.integer "linked_by_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["customer_id"], name: "index_google_ads_links_on_customer_id"
-    t.index ["engagement_id"], name: "index_google_ads_links_on_engagement_id", unique: true
-    t.index ["linked_by_id"], name: "index_google_ads_links_on_linked_by_id"
-  end
-
-  create_table "google_ads_spends", force: :cascade do |t|
-    t.string "customer_id", null: false
-    t.date "month", null: false
-    t.integer "cost_cents", default: 0, null: false
-    t.integer "impressions", default: 0, null: false
-    t.integer "clicks", default: 0, null: false
-    t.float "conversions", default: 0.0, null: false
-    t.string "currency_code"
-    t.date "through"
-    t.datetime "synced_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["customer_id", "month"], name: "index_google_ads_spends_on_customer_id_and_month", unique: true
-  end
-
   create_table "invitations", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "role", default: "member", null: false
@@ -631,14 +311,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.index ["user_id"], name: "index_oauth_grants_on_user_id"
   end
 
-  create_table "outsend_connections", force: :cascade do |t|
-    t.text "api_key"
-    t.datetime "last_delivered_at"
-    t.integer "delivered_count", default: 0, null: false
-    t.text "last_error"
-    t.datetime "last_error_at"
+  create_table "plugin_changes", force: :cascade do |t|
+    t.integer "requested_by_id"
+    t.string "key"
+    t.string "repo", null: false
+    t.string "action", null: false
+    t.string "from_version"
+    t.string "to_version"
+    t.string "status", default: "running", null: false
+    t.text "message"
+    t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["requested_by_id"], name: "index_plugin_changes_on_requested_by_id"
+    t.index ["status"], name: "index_plugin_changes_on_status"
   end
 
   create_table "portal_sessions", force: :cascade do |t|
@@ -648,128 +334,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["contact_id"], name: "index_portal_sessions_on_contact_id"
-  end
-
-  create_table "qa_checks", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "engagement_id"
-    t.integer "owner_id"
-    t.integer "created_by_id"
-    t.string "name", null: false
-    t.string "kind", default: "other", null: false
-    t.string "url"
-    t.boolean "live", default: false, null: false
-    t.integer "every_days", default: 7, null: false
-    t.text "instructions"
-    t.string "report_token", null: false
-    t.datetime "retest_after"
-    t.datetime "archived_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_qa_checks_on_client_id"
-    t.index ["created_by_id"], name: "index_qa_checks_on_created_by_id"
-    t.index ["engagement_id"], name: "index_qa_checks_on_engagement_id"
-    t.index ["owner_id"], name: "index_qa_checks_on_owner_id"
-    t.index ["report_token"], name: "index_qa_checks_on_report_token", unique: true
-  end
-
-  create_table "qa_expectations", force: :cascade do |t|
-    t.integer "check_id", null: false
-    t.integer "approved_by_id"
-    t.string "key", null: false
-    t.string "label", null: false
-    t.text "expected"
-    t.string "match", default: "is", null: false
-    t.string "note"
-    t.date "expires_on"
-    t.integer "position", default: 0, null: false
-    t.datetime "approved_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["approved_by_id"], name: "index_qa_expectations_on_approved_by_id"
-    t.index ["check_id", "key"], name: "index_qa_expectations_on_check_id_and_key", unique: true
-    t.index ["check_id"], name: "index_qa_expectations_on_check_id"
-  end
-
-  create_table "qa_gates", force: :cascade do |t|
-    t.integer "todo_id", null: false
-    t.integer "check_id", null: false
-    t.integer "created_by_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["check_id"], name: "index_qa_gates_on_check_id"
-    t.index ["created_by_id"], name: "index_qa_gates_on_created_by_id"
-    t.index ["todo_id", "check_id"], name: "index_qa_gates_on_todo_id_and_check_id", unique: true
-    t.index ["todo_id"], name: "index_qa_gates_on_todo_id"
-  end
-
-  create_table "qa_issues", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "engagement_id"
-    t.integer "todo_id"
-    t.integer "check_id"
-    t.integer "expectation_id"
-    t.integer "run_id"
-    t.integer "opened_by_id"
-    t.integer "assignee_id"
-    t.integer "fixed_by_id"
-    t.integer "verified_by_id"
-    t.integer "verified_by_run_id"
-    t.string "title", null: false
-    t.string "url"
-    t.text "steps"
-    t.text "expected"
-    t.text "actual"
-    t.string "environment"
-    t.boolean "found_live", default: false, null: false
-    t.string "source", default: "app", null: false
-    t.string "root_cause"
-    t.text "fix_note"
-    t.datetime "fixed_at"
-    t.datetime "verified_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["assignee_id"], name: "index_qa_issues_on_assignee_id"
-    t.index ["check_id"], name: "index_qa_issues_on_check_id"
-    t.index ["client_id"], name: "index_qa_issues_on_client_id"
-    t.index ["engagement_id"], name: "index_qa_issues_on_engagement_id"
-    t.index ["expectation_id"], name: "index_qa_issues_on_expectation_id"
-    t.index ["fixed_by_id"], name: "index_qa_issues_on_fixed_by_id"
-    t.index ["opened_by_id"], name: "index_qa_issues_on_opened_by_id"
-    t.index ["run_id"], name: "index_qa_issues_on_run_id"
-    t.index ["todo_id"], name: "index_qa_issues_on_todo_id"
-    t.index ["verified_by_id"], name: "index_qa_issues_on_verified_by_id"
-    t.index ["verified_by_run_id"], name: "index_qa_issues_on_verified_by_run_id"
-  end
-
-  create_table "qa_results", force: :cascade do |t|
-    t.integer "run_id", null: false
-    t.integer "expectation_id"
-    t.string "key", null: false
-    t.string "label", null: false
-    t.text "expected"
-    t.text "actual"
-    t.boolean "passed", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["expectation_id"], name: "index_qa_results_on_expectation_id"
-    t.index ["run_id"], name: "index_qa_results_on_run_id"
-  end
-
-  create_table "qa_runs", force: :cascade do |t|
-    t.integer "check_id", null: false
-    t.integer "user_id"
-    t.string "source", null: false
-    t.string "reporter"
-    t.string "status", null: false
-    t.text "notes"
-    t.string "evidence_url"
-    t.integer "http_status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["check_id", "created_at"], name: "index_qa_runs_on_check_id_and_created_at"
-    t.index ["check_id"], name: "index_qa_runs_on_check_id"
-    t.index ["user_id"], name: "index_qa_runs_on_user_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -788,110 +352,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.datetime "updated_at", null: false
     t.index ["user_id", "answered_at", "dismissed_at"], name: "index_questions_on_user_id_and_answered_at_and_dismissed_at"
     t.index ["user_id"], name: "index_questions_on_user_id"
-  end
-
-  create_table "quickbooks_billing_plans", force: :cascade do |t|
-    t.integer "engagement_id", null: false
-    t.integer "contact_id"
-    t.integer "deposit_invoice_id"
-    t.integer "balance_invoice_id"
-    t.boolean "send_balance_on_close", default: false, null: false
-    t.text "last_error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["balance_invoice_id"], name: "index_quickbooks_billing_plans_on_balance_invoice_id"
-    t.index ["contact_id"], name: "index_quickbooks_billing_plans_on_contact_id"
-    t.index ["deposit_invoice_id"], name: "index_quickbooks_billing_plans_on_deposit_invoice_id"
-    t.index ["engagement_id"], name: "index_quickbooks_billing_plans_on_engagement_id", unique: true
-  end
-
-  create_table "quickbooks_connections", force: :cascade do |t|
-    t.string "client_id"
-    t.text "client_secret"
-    t.string "environment", default: "production", null: false
-    t.string "realm_id"
-    t.string "company_name"
-    t.text "access_token"
-    t.text "refresh_token"
-    t.datetime "access_expires_at"
-    t.datetime "refresh_expires_at"
-    t.string "oauth_state"
-    t.datetime "connected_at"
-    t.string "default_item_id"
-    t.string "default_item_name"
-    t.datetime "last_synced_at"
-    t.text "last_error"
-    t.json "last_sync_summary"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "quickbooks_customers", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.string "qbo_id", null: false
-    t.string "display_name"
-    t.string "email"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_quickbooks_customers_on_client_id", unique: true
-    t.index ["qbo_id"], name: "index_quickbooks_customers_on_qbo_id", unique: true
-  end
-
-  create_table "quickbooks_invoices", force: :cascade do |t|
-    t.string "qbo_id", null: false
-    t.integer "client_id", null: false
-    t.integer "engagement_id"
-    t.integer "created_by_id"
-    t.string "kind", default: "other", null: false
-    t.string "doc_number"
-    t.date "txn_date"
-    t.date "due_on"
-    t.integer "total_cents", default: 0, null: false
-    t.integer "balance_cents", default: 0, null: false
-    t.boolean "voided", default: false, null: false
-    t.text "payment_link"
-    t.string "sent_to"
-    t.datetime "sent_at"
-    t.string "sync_token"
-    t.datetime "synced_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_quickbooks_invoices_on_client_id"
-    t.index ["created_by_id"], name: "index_quickbooks_invoices_on_created_by_id"
-    t.index ["engagement_id"], name: "index_quickbooks_invoices_on_engagement_id"
-    t.index ["qbo_id"], name: "index_quickbooks_invoices_on_qbo_id", unique: true
-  end
-
-  create_table "quickbooks_payments", force: :cascade do |t|
-    t.string "qbo_id", null: false
-    t.integer "invoice_id", null: false
-    t.integer "amount_cents", null: false
-    t.date "paid_on", null: false
-    t.string "method_name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["invoice_id"], name: "index_quickbooks_payments_on_invoice_id"
-    t.index ["qbo_id"], name: "index_quickbooks_payments_on_qbo_id", unique: true
-  end
-
-  create_table "quickbooks_recurring_links", force: :cascade do |t|
-    t.integer "engagement_id", null: false
-    t.integer "contact_id"
-    t.string "qbo_id", null: false
-    t.string "sync_token"
-    t.string "name"
-    t.integer "amount_cents"
-    t.string "interval_type"
-    t.integer "num_interval"
-    t.boolean "active", default: true, null: false
-    t.date "next_on"
-    t.string "drift"
-    t.datetime "pushed_at"
-    t.datetime "synced_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["contact_id"], name: "index_quickbooks_recurring_links_on_contact_id"
-    t.index ["engagement_id"], name: "index_quickbooks_recurring_links_on_engagement_id", unique: true
   end
 
   create_table "requests", force: :cascade do |t|
@@ -960,23 +420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
     t.string "mail_from_email"
     t.json "latest_release", default: {}, null: false
     t.datetime "release_checked_at"
-  end
-
-  create_table "time_tracking_entries", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "engagement_id"
-    t.integer "minutes", null: false
-    t.date "worked_on", null: false
-    t.string "note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "trackable_type"
-    t.integer "trackable_id"
-    t.integer "client_id"
-    t.index ["client_id"], name: "index_time_tracking_entries_on_client_id"
-    t.index ["engagement_id"], name: "index_time_tracking_entries_on_engagement_id"
-    t.index ["trackable_type", "trackable_id"], name: "index_time_tracking_entries_on_trackable"
-    t.index ["user_id"], name: "index_time_tracking_entries_on_user_id"
+    t.json "plugin_releases", default: {}, null: false
   end
 
   create_table "todos", force: :cascade do |t|
@@ -1030,17 +474,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
   end
 
   add_foreign_key "access_tokens", "users"
-  add_foreign_key "account_management_accesses", "clients"
-  add_foreign_key "account_management_accesses", "users", column: "verified_by_id"
-  add_foreign_key "account_management_leads", "clients"
-  add_foreign_key "account_management_leads", "users"
-  add_foreign_key "account_management_meeting_items", "account_management_meetings", column: "meeting_id"
-  add_foreign_key "account_management_meeting_items", "commitments", on_delete: :cascade
-  add_foreign_key "account_management_meetings", "clients"
-  add_foreign_key "account_management_meetings", "engagements"
-  add_foreign_key "account_management_meetings", "users", column: "created_by_id"
-  add_foreign_key "account_management_meetings", "users", column: "owner_id"
-  add_foreign_key "account_management_weekly_updates", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agreement_versions", "agreement_versions", column: "superseded_by_id"
@@ -1051,19 +484,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
   add_foreign_key "approvals", "agreement_versions"
   add_foreign_key "approvals", "contacts"
   add_foreign_key "approvals", "users", column: "recorded_by_id"
-  add_foreign_key "coding_branches", "coding_repositories", column: "repository_id"
-  add_foreign_key "coding_branches", "todos"
-  add_foreign_key "coding_collaborators", "coding_repositories", column: "repository_id"
-  add_foreign_key "coding_commits", "coding_repositories", column: "repository_id"
-  add_foreign_key "coding_commits", "todos"
-  add_foreign_key "coding_commits", "users"
-  add_foreign_key "coding_deploys", "coding_repositories", column: "repository_id"
-  add_foreign_key "coding_identities", "users"
-  add_foreign_key "coding_issues", "coding_repositories", column: "repository_id"
-  add_foreign_key "coding_issues", "requests"
-  add_foreign_key "coding_repositories", "clients"
-  add_foreign_key "coding_repositories", "engagements"
-  add_foreign_key "coding_repositories", "users", column: "added_by_id"
   add_foreign_key "commitments", "clients"
   add_foreign_key "commitments", "contacts"
   add_foreign_key "commitments", "engagements"
@@ -1074,13 +494,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
   add_foreign_key "engagements", "clients"
   add_foreign_key "engagements", "users", column: "created_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
-  add_foreign_key "factory_items", "clients"
-  add_foreign_key "factory_items", "engagements"
-  add_foreign_key "factory_items", "todos"
-  add_foreign_key "factory_items", "users", column: "queued_by_id"
-  add_foreign_key "factory_runs", "factory_items", column: "item_id", on_delete: :nullify
-  add_foreign_key "factory_runs", "todos"
-  add_foreign_key "factory_runs", "users", column: "claimed_by_id"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "mentions", "users", column: "mentionee_id"
@@ -1090,51 +503,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_120000) do
   add_foreign_key "notifications", "users", column: "creator_id"
   add_foreign_key "oauth_grants", "oauth_clients"
   add_foreign_key "oauth_grants", "users"
+  add_foreign_key "plugin_changes", "users", column: "requested_by_id"
   add_foreign_key "portal_sessions", "contacts"
-  add_foreign_key "qa_checks", "clients"
-  add_foreign_key "qa_checks", "engagements"
-  add_foreign_key "qa_checks", "users", column: "created_by_id"
-  add_foreign_key "qa_checks", "users", column: "owner_id"
-  add_foreign_key "qa_expectations", "qa_checks", column: "check_id"
-  add_foreign_key "qa_expectations", "users", column: "approved_by_id"
-  add_foreign_key "qa_gates", "qa_checks", column: "check_id"
-  add_foreign_key "qa_gates", "todos"
-  add_foreign_key "qa_gates", "users", column: "created_by_id"
-  add_foreign_key "qa_issues", "clients"
-  add_foreign_key "qa_issues", "engagements"
-  add_foreign_key "qa_issues", "qa_checks", column: "check_id"
-  add_foreign_key "qa_issues", "qa_expectations", column: "expectation_id", on_delete: :nullify
-  add_foreign_key "qa_issues", "qa_runs", column: "run_id"
-  add_foreign_key "qa_issues", "qa_runs", column: "verified_by_run_id"
-  add_foreign_key "qa_issues", "todos"
-  add_foreign_key "qa_issues", "users", column: "assignee_id"
-  add_foreign_key "qa_issues", "users", column: "fixed_by_id"
-  add_foreign_key "qa_issues", "users", column: "opened_by_id"
-  add_foreign_key "qa_issues", "users", column: "verified_by_id"
-  add_foreign_key "qa_results", "qa_expectations", column: "expectation_id", on_delete: :nullify
-  add_foreign_key "qa_results", "qa_runs", column: "run_id"
-  add_foreign_key "qa_runs", "qa_checks", column: "check_id"
-  add_foreign_key "qa_runs", "users"
   add_foreign_key "questions", "users"
-  add_foreign_key "quickbooks_billing_plans", "contacts"
-  add_foreign_key "quickbooks_billing_plans", "engagements"
-  add_foreign_key "quickbooks_billing_plans", "quickbooks_invoices", column: "balance_invoice_id"
-  add_foreign_key "quickbooks_billing_plans", "quickbooks_invoices", column: "deposit_invoice_id"
-  add_foreign_key "quickbooks_customers", "clients"
-  add_foreign_key "quickbooks_invoices", "clients"
-  add_foreign_key "quickbooks_invoices", "engagements"
-  add_foreign_key "quickbooks_invoices", "users", column: "created_by_id"
-  add_foreign_key "quickbooks_payments", "quickbooks_invoices", column: "invoice_id"
-  add_foreign_key "quickbooks_recurring_links", "contacts"
-  add_foreign_key "quickbooks_recurring_links", "engagements"
   add_foreign_key "requests", "clients"
   add_foreign_key "requests", "contacts"
   add_foreign_key "requests", "users", column: "triaged_by_id"
   add_foreign_key "scope_items", "agreement_versions"
   add_foreign_key "sessions", "users"
-  add_foreign_key "time_tracking_entries", "clients"
-  add_foreign_key "time_tracking_entries", "engagements"
-  add_foreign_key "time_tracking_entries", "users"
   add_foreign_key "todos", "engagements"
   add_foreign_key "todos", "scope_items"
   add_foreign_key "todos", "users", column: "created_by_id"

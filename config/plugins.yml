@@ -1,0 +1,43 @@
+# The plugins Runwell's authors publish, offered in Settings > Plugins. Each is its own public
+# repository with releases; any other repository holding a Runwell plugin installs the same way,
+# by name. Nothing here is installed until someone installs it.
+- key: account_management
+  repo: Martin-Business-Consultants/runwell-account-management
+  name: Account management
+  description: One lead per client, meetings with an agenda and recap on time, an access register, weekly updates and a scorecard.
+- key: cloudflare
+  repo: Martin-Business-Consultants/runwell-cloudflare
+  name: Cloudflare
+  description: Behind Cloudflare, records visitors' real addresses and trusts its https, from Cloudflare's own ranges only.
+- key: coding
+  repo: Martin-Business-Consultants/runwell-coding
+  name: Code
+  description: Git repositories on clients, engagements and work; GitHub pull requests, checks, deploys and issues; branches and briefs for coding agents.
+- key: factory
+  repo: Martin-Business-Consultants/runwell-factory
+  name: Factory
+  description: Ready work queued for AI agents running unattended on runners, with limits, leases, attempts and costs.
+- key: google_ads
+  repo: Martin-Business-Consultants/runwell-google-ads
+  name: Google Ads
+  description: Read-only Google Ads reporting on engagements, shared with the client in the portal, with alerts when an account stops serving.
+- key: outsend
+  repo: Martin-Business-Consultants/runwell-outsend
+  name: Outsend
+  description: Sends Runwell's mail through Outsend instead of SMTP.
+- key: qa
+  repo: Martin-Business-Consultants/runwell-qa
+  name: QA
+  description: Each client's source of truth as checks and expectations, with test runs, issues and gates that keep work from done until it passes.
+- key: quickbooks
+  repo: Martin-Business-Consultants/runwell-quickbooks
+  name: QuickBooks
+  description: Clients linked to QuickBooks customers, recurring invoices kept in step with services, and fixed-price work invoiced from its panel.
+- key: reporting
+  repo: Martin-Business-Consultants/runwell-reporting
+  name: Reporting
+  description: Billed, collected, aging and recurring coverage from the QuickBooks plugin's mirror, and QuickBooks' profit and loss.
+- key: time_tracking
+  repo: Martin-Business-Consultants/runwell-time-tracking
+  name: Time tracking
+  description: Log time on clients, engagements and work, with totals and a weekly timesheet.
