@@ -10,7 +10,13 @@
   <div class="settings__panel panel shadow txt-align-start">
     <div class="flex flex-column gap-half">
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="txt-small txt-subtle margin-none">Scope and price go on the agreement draft next.</p>
+      <p class="txt-small txt-subtle margin-none">
+        <% if client&.internal? %>
+          <%= client.name %> is internal: no agreement, add <%= term(:work).downcase %> straight away.
+        <% else %>
+          Scope and price go on the agreement draft next.
+        <% end %>
+      </p>
     </div>
     <%= render "engagements/form", engagement: @engagement %>
   </div>
@@ -22,11 +28,18 @@
       <header>
         <h2 class="divider">How it goes</h2>
       </header>
+      <% steps = if client&.internal?
+           [ "Add #{term(:work).downcase} as it comes up, with owners and due dates.", "Track it on the #{term(:work)} table or board like any other.",
+             "Close the #{term(:engagement).downcase} when it’s done." ]
+         else
+           [ "Add scope items and prices to the draft agreement.", "Send it: the version is frozen and the client decides by link.",
+             "Approval creates one piece of #{term(:work).downcase} per scope item.", "Changes later are change orders or revisions, each approved the same way." ]
+         end %>
       <ol class="record-steps txt-small">
-        <li>Add scope items and prices to the draft agreement.</li>
-        <li>Send it: the version is frozen and the client decides by link.</li>
-        <li>Approval creates one piece of <%= term(:work).downcase %> per scope item.</li>
-        <li>Changes later are change orders or revisions, each approved the same way.</li>
+        <% steps.each do |step| %>
+          <%# herb:key step %>
+          <li><%= step %></li>
+        <% end %>
       </ol>
     </section>
 

@@ -29,7 +29,9 @@
   <label class="flex flex-column gap-half txt-align-start">
     <span class="txt-small font-weight-bold">Description</span>
     <%= rich_text_field form, :description, staff: true %>
-    <span class="txt-x-small txt-subtle">Shown to the client on the agreement.</span>
+    <% unless engagement.internal? %>
+      <span class="txt-x-small txt-subtle">Shown to the client on the agreement.</span>
+    <% end %>
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">

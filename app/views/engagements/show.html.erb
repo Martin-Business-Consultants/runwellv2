@@ -1,11 +1,12 @@
 <% @page_title = "#{@engagement.ref} #{@engagement.title}" %>
+<%# An internal project has no agreement, so no Agreement tab. %>
 <% tabs = [
-     record_tab("agreement", "Agreement", count: @engagement.agreement_versions.count),
+     (record_tab("agreement", "Agreement", count: @engagement.agreement_versions.count) unless @engagement.internal?),
      record_tab("work", term(:work), count: @engagement.todos.open.count),
      record_tab("commitments", "Commitments", count: @engagement.commitments.open.count),
      record_tab("notes", "Notes", count: @engagement.notes.count),
      record_tab("documents", "Documents", count: @engagement.documents.count)
-   ] + plugin_record_tabs(:engagement_panel) %>
+   ].compact + plugin_record_tabs(:engagement_panel) %>
 <% tab = current_record_tab(tabs, @engagement.agreed_items.any? || @engagement.internal? ? "work" : "agreement") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 

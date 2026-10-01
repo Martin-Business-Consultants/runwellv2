@@ -20,11 +20,17 @@
       <dl class="record-facts">
         <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.active? %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
-        <dt>Versions</dt><dd><%= @engagement.agreement_versions.count %></dd>
+        <% unless @engagement.internal? %>
+          <dt>Versions</dt><dd><%= @engagement.agreement_versions.count %></dd>
+        <% end %>
         <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
-        <dt>Agreed</dt><dd><%= money @engagement.agreed_amount_cents %><%= " / period" if @engagement.recurring? %></dd>
+        <% unless @engagement.internal? %>
+          <dt>Agreed</dt><dd><%= money @engagement.agreed_amount_cents %><%= " / period" if @engagement.recurring? %></dd>
+        <% end %>
       </dl>
-      <p class="txt-x-small txt-subtle margin-none">Scope and prices change on the agreement, not here: a sent version never changes.</p>
+      <% unless @engagement.internal? %>
+        <p class="txt-x-small txt-subtle margin-none">Scope and prices change on the agreement, not here: a sent version never changes.</p>
+      <% end %>
     </section>
   </aside>
 </section>
