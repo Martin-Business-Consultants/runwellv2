@@ -20,6 +20,16 @@
     }
   }
 
+  /* A settings page with one panel (People, Email, Plugins) gives it the page's full width. */
+  .settings:has(> .settings__panel:only-child):not(.settings--split) {
+    max-inline-size: 100%;
+
+    > .settings__panel {
+      flex: 1;
+      max-inline-size: 100%;
+    }
+  }
+
   /* Sections & Panels
   /* -------------------------------------------------------------------------- */
 
@@ -198,29 +208,14 @@
 /* Plugins
 /* ------------------------------------------------------------------------ */
 @layer components {
-  /* A settings page whose one panel needs the room (a grid of cards). */
-  .settings--wide {
-    max-inline-size: min(140ch, 100%);
-
-    @media (min-width: 960px) {
-      .settings__panel {
-        max-inline-size: 100%;
-      }
-    }
-  }
-
-  /* Settings > Plugins: one card per plugin, three to a row on a wide screen. */
+  /* Settings > Plugins: one card per plugin, two to a row on a wide screen. */
   .plugin-cards {
     display: grid;
     gap: var(--block-space);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     list-style: none;
     margin: 0;
     padding: 0;
-
-    @media (max-width: 960px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 
     @media (max-width: 640px) {
       grid-template-columns: minmax(0, 1fr);
