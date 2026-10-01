@@ -9,7 +9,14 @@
   <p class="txt-small txt-subtle margin-none">
     It asks you before anything reaches a client, and what it does is marked as your agent “via <%= @client.name %>”. You can disconnect it any time in Settings → Connected apps.
   </p>
-  <p class="txt-x-small txt-subtle margin-none">Returning to <%= URI(@redirect_uri).host %></p>
+  <p class="txt-x-small txt-subtle margin-none">
+    Returning to
+    <% if OauthClient.loopback?(@redirect_uri) %>
+      <%= @client.name %> on this computer
+    <% else %>
+      <%= URI(@redirect_uri).host %>
+    <% end %>
+  </p>
 
   <%= form_with url: oauth_authorization_path, method: :post, class: "flex flex-column gap align-center", data: { turbo: false } do %>
     <label class="flex align-center gap-half txt-small">
