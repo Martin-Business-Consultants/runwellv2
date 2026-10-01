@@ -17,8 +17,8 @@ module Reporting
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :reporting, name: "Reporting", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :reporting, name: "Reporting", version: Reporting::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-reporting",
         description: "Financial reports from QuickBooks: billed and collected by month, what clients owe and how late, revenue by client, recurring revenue and whether QuickBooks bills all of it, agreed work not yet invoiced, and profit and loss. Needs the QuickBooks plugin."
       Runwell::Plugins.permission :reporting, :view_financials, name: "See financial reports", roles: %w[owner manager]
       Runwell::Plugins.nav :reporting, "Reports", -> { reporting_report_path if can?(:view_financials) }

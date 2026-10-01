@@ -7,9 +7,6 @@ module AccountManagement
   # scorecard measures each lead against the playbook's targets from what they actually did.
   # Owns its tables and reaches the core only through Runwell::Plugins and load hooks.
   class Engine < ::Rails::Engine
-    initializer "account_management.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     initializer "account_management.routes" do |app|
       app.routes.append do
@@ -59,8 +56,8 @@ module AccountManagement
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :account_management, name: "Account management", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :account_management, name: "Account management", version: AccountManagement::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-account-management",
         description: "A lead for every client. Client meetings with an agenda sent a day ahead and a recap within a day after, their action items kept as commitments. A register of each client’s outside accounts (pages, ad accounts, pixels, domains): who owns them, our access, where the login lives and when tokens expire. A written weekly update, and a scorecard that measures each lead against the playbook from what they actually did."
       Runwell::Plugins.nav :account_management, "Accounts", -> { account_management_root_path }
       Runwell::Plugins.permission :account_management, :manage_accounts, name: "Assign account leads and keep the access register", roles: %w[owner manager]

@@ -1,5 +1,5 @@
 namespace :qa do
-  desc "Load a client's QA checks and source of truth from a YAML file (engines/qa/examples/acme_storage.yml)"
+  desc "Load a client's QA checks and source of truth from a YAML file (the plugin's examples/acme_storage.yml shows the shape)"
   task :import, [ :path ] => :environment do |_, args|
     path = args[:path].presence or abort "Usage: bin/rails \"qa:import[path/to/checks.yml]\""
     puts Qa::Import.new(YAML.safe_load_file(path, permitted_classes: [ Date ])).call

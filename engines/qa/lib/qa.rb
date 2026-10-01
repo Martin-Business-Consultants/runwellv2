@@ -1,3 +1,4 @@
+require "qa/version"
 require "qa/engine"
 
 module Qa

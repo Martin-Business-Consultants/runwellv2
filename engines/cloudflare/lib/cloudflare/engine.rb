@@ -16,8 +16,8 @@ module Cloudflare
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :cloudflare, name: "Cloudflare", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false, requires: ">= 2.0",
+      Runwell::Plugins.register :cloudflare, name: "Cloudflare", version: Cloudflare::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-cloudflare",
         description: "For an install behind Cloudflare’s proxy: records the visitor’s real address instead of Cloudflare’s, and treats a request Cloudflare received over https as https, so nothing else has to assume it."
       Runwell::Plugins.nightly :cloudflare, -> { Cloudflare::Ranges.refresh! }
     end

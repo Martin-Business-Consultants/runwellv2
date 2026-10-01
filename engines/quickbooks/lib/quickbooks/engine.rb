@@ -6,9 +6,6 @@ module Quickbooks
   # portal and for the Reporting plugin. It owns its tables and extends the core only through
   # Runwell::Plugins, load hooks and "event.runwell".
   class Engine < ::Rails::Engine
-    initializer "quickbooks.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     initializer "quickbooks.routes" do |app|
       app.routes.append do
@@ -45,8 +42,8 @@ module Quickbooks
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :quickbooks, name: "QuickBooks", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :quickbooks, name: "QuickBooks", version: Quickbooks::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-quickbooks",
         description: "Money through QuickBooks Online: keep each service’s recurring invoice in step with what the client approved, invoice work orders in full or as a deposit and balance with a pay link, and show clients their invoices in the portal."
       Runwell::Plugins.settings :quickbooks, "QuickBooks", -> { quickbooks_settings_path }
       Runwell::Plugins.permission :quickbooks, :manage_billing, name: "Invoice clients and link recurring billing", roles: %w[owner manager]

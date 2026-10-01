@@ -8,9 +8,6 @@ module Qa
   # on a check, so it can't be marked done until the check passes again. Owns its tables and
   # reaches the core only through Runwell::Plugins, load hooks and events.
   class Engine < ::Rails::Engine
-    initializer "qa.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     initializer "qa.routes" do |app|
       app.routes.append do
@@ -68,8 +65,8 @@ module Qa
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :qa, name: "QA", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :qa, name: "QA", version: Qa::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-qa",
         description: "Keep each client’s source of truth (email senders and recipients, webhooks, phone numbers, prices, promos and when they end) and prove it’s right: tests by people and agents, nightly page checks, and the site’s own reports. Failures become issues with root causes, work can’t be marked done until its checks pass, and home shows what’s failing, expiring or overdue."
       Runwell::Plugins.nav :qa, "QA", -> { qa_root_path }
       Runwell::Plugins.permission :qa, :manage_qa, name: "Set QA checks and their source of truth", roles: %w[owner manager]

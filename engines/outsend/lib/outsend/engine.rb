@@ -4,9 +4,6 @@ module Outsend
   # core's own SMTP settings, if any, only apply while the plugin is off. A Mail interceptor
   # decides per message, so switching the plugin on or off needs no restart. It owns one table.
   class Engine < ::Rails::Engine
-    initializer "outsend.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     initializer "outsend.routes" do |app|
       app.routes.append do
@@ -25,8 +22,8 @@ module Outsend
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :outsend, name: "Outsend", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false, requires: ">= 2.0",
+      Runwell::Plugins.register :outsend, name: "Outsend", version: Outsend::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-outsend",
         description: "Send Runwell’s email through Outsend: paste your API key and every message goes out through Outsend’s SMTP, with no mail server settings to manage."
       Runwell::Plugins.settings :outsend, "Outsend", -> { outsend_settings_path }
     end

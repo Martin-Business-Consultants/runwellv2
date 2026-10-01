@@ -1,3 +1,4 @@
+require "reporting/version"
 require "reporting/engine"
 
 module Reporting

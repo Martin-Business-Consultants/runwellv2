@@ -1,15 +1,12 @@
 module Factory
   # A Runwell plugin: hands ready work to AI agents running unattended on runners (the
-  # runwell-runner program, in engines/factory/runner), and tracks every run. A person queues work, or an
+  # runwell-runner program, in runner/), and tracks every run. A person queues work, or an
   # approval does; a runner claims the next piece with a lease, keeps it alive with heartbeats,
   # and finishes with a summary, branch, pull request and cost. Finished work goes to review;
   # a person still checks and merges it. Owns its tables and reaches the core only through
   # Runwell::Plugins, load hooks and events. Works with the Code plugin, which says where the
   # code is.
   class Engine < ::Rails::Engine
-    initializer "factory.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     initializer "factory.routes" do |app|
       app.routes.append do
@@ -48,8 +45,8 @@ module Factory
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :factory, name: "Factory", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :factory, name: "Factory", version: Factory::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-factory",
         description: "Hand ready work to AI agents that run unattended on your own machines or servers (the runwell-runner program). Runners claim the next piece, open a pull request and put it in review for a person. Limits on runs at once, time, attempts and a monthly budget. Needs the Code plugin for repositories."
       Runwell::Plugins.nav :factory, "Factory", -> { factory_root_path }
       Runwell::Plugins.settings :factory, "Factory", -> { factory_settings_path }

@@ -1,3 +1,4 @@
+require "account_management/version"
 require "account_management/engine"
 
 module AccountManagement

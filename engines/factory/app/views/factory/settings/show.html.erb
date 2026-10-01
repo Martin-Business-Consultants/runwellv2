@@ -52,7 +52,7 @@
       <p class="txt-small margin-none">A runner is a small program on a machine with Docker. It claims the next piece of <%= term(:work).downcase %>, starts a fresh container, clones the repositories, runs Claude Code on the task, and reports back. The work lands in review for a person; runners never merge.</p>
       <ol class="txt-small margin-none">
         <li>Make a personal token in <%= link_to "Settings → Connected apps", settings_connected_apps_path, class: "txt-link" %> for someone allowed to run the factory (owners and managers). Runs are recorded as their agent.</li>
-        <li>Build the runner and the agent image from <code>engines/factory/runner</code> (its README has the details).</li>
+        <li>Build the runner and the agent image from <code>runner/</code> in the <%= link_to "Factory plugin’s repository", "https://github.com/Martin-Business-Consultants/runwell-factory/tree/main/runner", class: "txt-link", target: "_blank", rel: "noopener" %> (its README has the details).</li>
         <li>Start it with the token, an Anthropic API key and a GitHub token that can push branches and open pull requests:</li>
       </ol>
       <%= code_block "export RUNWELL_URL=#{request.base_url}\nexport RUNWELL_TOKEN=…   ANTHROPIC_API_KEY=…   GH_TOKEN=…\nrunwell-runner --name #{(Socket.gethostname rescue "build-1")}" %>

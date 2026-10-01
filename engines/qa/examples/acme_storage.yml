@@ -1,7 +1,7 @@
 # An example client's source of truth: a portable storage company with a quote form, the emails
 # it sends and a CRM webhook. Made up; copy it and put your client's real values in.
 #
-#   bin/rails "qa:import[engines/qa/examples/acme_storage.yml]"
+#   bin/rails "qa:import[path/to/acme_storage.yml]"   # this file is examples/acme_storage.yml in the plugin
 #
 # Load it again after changing a value here: changed values are recorded on the client's
 # history and the check has to be tested again. Each check's report URL (on its page) is where
