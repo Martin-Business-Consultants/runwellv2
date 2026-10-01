@@ -21,7 +21,10 @@ databases between deploys); each install is a destination over it. Copy
 address and registry, then `kamal setup -d production` the first time and `kamal deploy -d production`
 after. The image runs `db:prepare` on boot, so a new release migrates itself. Another install is
 another destination with its own volume: `config/deploy.acme.yml` and `kamal deploy -d acme`.
-Hoster writes the destination itself, so a Hoster deploy needs nothing more.
+Hoster writes the destination itself, so a Hoster deploy needs nothing more: its Runwell template
+installs the published image (`ghcr.io/martin-business-consultants/runwell`, `.github/workflows/image.yml`) with
+the secrets below generated for it. Don't set `RAILS_MASTER_KEY`: `config/credentials.yml.enc` is encrypted
+with a key no install has, and setting one fails the boot.
 
 ## Without Docker
 
@@ -72,7 +75,7 @@ each night, and an owner sees it on home and in **Settings > Updates**, with its
   make an environment named
   for the destination (`production` for the default) holding `DEPLOY_YML` (its
   `config/deploy.yml`), `DEPLOY_DESTINATION_YML` (its `config/deploy.<name>.yml`, for a
-  destination), `SSH_PRIVATE_KEY`, `RAILS_MASTER_KEY` and the rest of its `.kamal/secrets`.
+  destination), `SSH_PRIVATE_KEY`, `SECRET_KEY_BASE`, the three `ACTIVE_RECORD_ENCRYPTION_*` keys and the rest of its `.kamal/secrets`.
   The token is only for starting that workflow: checking for releases needs none
 
 The page follows the update and says when the install is running the new version, or why it

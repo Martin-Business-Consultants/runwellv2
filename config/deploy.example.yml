@@ -23,8 +23,12 @@ env:
     SMTP_USERNAME: runwell
     # Settings > Updates starts .github/workflows/deploy.yml for this install when it has a token.
     # RUNWELL_DEPLOY_DESTINATION: name   # for config/deploy.<name>.yml
+  # Each install's own (.kamal/secrets.example): no credentials file or master key.
   secret:
-    - RAILS_MASTER_KEY
+    - SECRET_KEY_BASE
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
     - SMTP_PASSWORD
     # - RUNWELL_GITHUB_TOKEN
 
