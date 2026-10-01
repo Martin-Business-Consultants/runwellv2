@@ -7,7 +7,9 @@ class SessionsController < ApplicationController
 
   layout "public"
 
+  # A new install has no one to sign in yet: its first visitor sets it up as the owner.
   def new
+    redirect_to new_signup_path unless User.exists?
   end
 
   def create

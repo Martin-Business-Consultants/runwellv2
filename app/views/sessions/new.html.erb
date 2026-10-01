@@ -12,11 +12,7 @@
       <%= form.password_field :password, required: true, class: "input txt-large full-width", autocomplete: "current-password", placeholder: "Enter your password…", maxlength: 72 %>
     </label>
 
-    <% if User.none? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path, class: "txt-link" %> to set up Runwell. You’ll be its owner.</p>
-    <% else %>
-      <p class="txt-small txt-subtle">Joining a team? Ask an owner for an invitation.</p>
-    <% end %>
+    <p class="txt-small txt-subtle">Joining a team? Ask an owner for an invitation.</p>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium" data-form-target="submit">
       <span>Let’s go</span>
