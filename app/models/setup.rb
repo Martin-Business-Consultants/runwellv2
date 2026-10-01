@@ -14,6 +14,8 @@ class Setup
 
   def steps
     @steps ||= [
+      step(:address, "Set Runwell’s address", "Where your team and #{term(:client, count: 2).downcase} open it. Every link Runwell emails points there.",
+        done: Runwell.host_set?, path: routes.settings_address_path),
       step(:client, "Add your first #{term(:client).downcase}", "Who you work for.",
         done: Client.exists?, path: routes.new_client_path),
       step(:approver, "Add a contact who can approve", "Agreements go to them to approve or ask for changes.",

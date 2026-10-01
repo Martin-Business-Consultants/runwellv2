@@ -21,6 +21,19 @@ class Setting < ApplicationRecord
   normalizes :mail_from_name, :mail_from_email, with: ->(value) { value.to_s.strip.presence }
   validates :mail_from_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "should be an email address" }, allow_nil: true
 
+  # Where people reach this install (Settings > Address), typed as a host or a whole URL.
+  normalizes :app_host, with: ->(value) { value.to_s.strip.downcase.sub(%r{\A[a-z]+://}, "").sub(%r{[/?#].*\z}, "").presence }
+  validates :app_host, format: { with: /\A[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*(:\d+)?\z/, message: "should be a domain, like runwell.example.com" }, allow_nil: true
+  validates :app_protocol, inclusion: { in: %w[https http] }, allow_nil: true
+
+  # Takes "https://runwell.example.com/" or a bare host, which means https.
+  def app_url=(url)
+    self.app_protocol = url.to_s.strip[%r{\A(https?)://}i, 1]&.downcase || "https"
+    self.app_host = url
+  end
+
+  def self.human_attribute_name(attribute, options = {}) = attribute.to_s == "app_host" ? "Address" : super
+
   def self.current
     Current.settings ||= first_or_create!
   end

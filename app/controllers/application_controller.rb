@@ -11,13 +11,13 @@ class ApplicationController < ActionController::Base
 
   def current_user = Current.user
 
-  # Without APP_HOST, mail would link to localhost: keep the address signed-in people reach
-  # Runwell at instead (Runwell.host). Health checks and bare IPs don't count.
+  # Until someone sets the address (Settings > Address or APP_HOST), mail links to the one
+  # signed-in people reach Runwell at (Runwell.host). Health checks and bare IPs don't count.
   def remember_host
-    return unless Rails.env.production? && ENV["APP_HOST"].blank? && Current.user
+    return unless Rails.env.production? && Current.user && !Runwell.host_set?
     return if request.host.blank? || request.host == "localhost" || request.host.match?(/\A[\d.]+\z|:/)
 
-    Setting.current.update_column(:app_host, request.host) unless Setting.current.app_host == request.host
+    Setting.current.update_column(:seen_host, request.host) unless Setting.current.seen_host == request.host
   end
 
   # A read-only token reads everything its person can and changes nothing. The MCP endpoint

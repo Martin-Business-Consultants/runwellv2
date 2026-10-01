@@ -620,7 +620,7 @@ release, once no code reads them. No migration may depend on a person running a 
 
 ## Settings and names
 
-Settings (the gear, `/settings`) has Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `settings-nav.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `settings-nav.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, engagement, scope item and work, and each engagement type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,

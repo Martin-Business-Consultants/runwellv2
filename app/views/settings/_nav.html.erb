@@ -6,6 +6,7 @@
   <% if can?(:manage_settings) %>
     <p class="settings-nav__heading">Workspace</p>
     <ul class="settings-nav__list">
+      <li><%= settings_nav_link "Address", settings_address_path, icon: "globe", current: current == :address %></li>
       <li><%= settings_nav_link "Appearance", settings_appearance_path, icon: "art", current: current == :appearance %></li>
       <li><%= settings_nav_link "Names", settings_names_path, icon: "rename", current: current == :names %></li>
       <li><%= settings_nav_link "Fields", settings_fields_path, icon: "tag-outline", current: current == :fields %></li>

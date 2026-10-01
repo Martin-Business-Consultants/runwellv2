@@ -423,6 +423,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_150000) do
     t.datetime "release_checked_at"
     t.json "plugin_releases", default: {}, null: false
     t.string "app_host"
+    t.string "app_protocol"
+    t.string "seen_host"
   end
 
   create_table "todos", force: :cascade do |t|

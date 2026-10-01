@@ -1,0 +1,30 @@
+<% @page_title = "Address" %>
+<%= render "settings/header", current: :address %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Where people reach Runwell</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Every link Runwell sends points here: approval links, portal sign-ins, invitations and notifications.
+        Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
+      </p>
+      <% if !Runwell.host_set? %>
+        <p class="txt-small txt-negative margin-none">
+          Not set yet, so links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
+        </p>
+      <% end %>
+
+      <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "flex flex-wrap gap-half txt-small" do |form| %>
+        <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
+              class: "input flex-item-grow", autocomplete: "off", aria: { label: "Runwell’s address" } %>
+        <button type="submit" class="btn btn--link">Save</button>
+      <% end %>
+      <% if ENV["APP_HOST"].present? %>
+        <p class="txt-x-small txt-subtle margin-none">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
+      <% end %>
+    </section>
+  </div>
+</section>

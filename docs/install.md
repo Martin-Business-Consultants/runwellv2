@@ -100,18 +100,20 @@ one, once nothing reads them.
 
 ## Settings
 
-All in `.env` (or the deploy's `env:`). Only `APP_HOST` and the secrets are required.
+All in `.env` (or the deploy's `env:`). Only the secrets are required. Runwell's address can be
+set in the app instead (**Settings > Address**, the first step on home), which wins over `APP_HOST`;
+until either is set, links use the address people were last seen using.
 
 | Variable | What it is | Default |
 | --- | --- | --- |
-| `APP_HOST`, `APP_PROTOCOL` | The address in links, and its scheme | `localhost`, `https` |
+| `APP_HOST`, `APP_PROTOCOL` | The address in links, and its scheme, unless Settings > Address sets them | the address people use, `https` |
 | `PORT` | Puma's port (Thruster fronts it on `HTTP_PORT`) | 3000 |
 | `RUNWELL_DATA_DIR` | Databases and uploaded files, together | `storage/` |
 | `SECRET_KEY_BASE` | Signs sessions and links | from `config/credentials.yml.enc` |
 | `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | from credentials |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_DOMAIN`, `SMTP_STARTTLS`, `SMTP_TLS` | Outbound mail. Without `SMTP_ADDRESS` nothing is sent | none |
 | `TIME_ZONE` | The agency's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, approvals and emails in it | `Eastern Time (US & Canada)` |
-| `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@APP_HOST>` |
+| `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@` the address `>` |
 | `ASSUME_SSL` | Trust that a proxy terminated TLS | `false` |
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
 | `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process | set by the installer |
