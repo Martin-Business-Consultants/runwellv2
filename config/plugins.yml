@@ -4,7 +4,7 @@
 - key: account_management
   repo: Martin-Business-Consultants/runwell-account-management
   name: Account management
-  description: One lead per client, meetings with an agenda and recap on time, an access register, weekly updates and a scorecard.
+  description: Keeps every client in play for your project managers. A Today list, every contact logged and quiet clients flagged, replies within a business day, meeting rhythms with drafted agendas, nudges, weekly health, checklists, backup leads and a client digest.
 - key: cloudflare
   repo: Martin-Business-Consultants/runwell-cloudflare
   name: Cloudflare

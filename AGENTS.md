@@ -493,19 +493,25 @@ by someone other than its owner (board drops that a rule refuses refresh the boa
 `bin/rails "qa:import[path/to/file.yml]"` loads a client's checks from a file (the plugin's `examples/acme_storage.yml`).
 
 `runwell-account-management` (Account management) is the working system of whoever runs client
-relationships, with its standard in `AccountManagement::Playbook` (hours ahead, targets). Each
-client has one lead (`AccountManagement::Lead`). A meeting (`AccountManagement::Meeting`) holds
-the agenda, due `AGENDA_AHEAD` before it starts, and the recap, due `RECAP_WITHIN` after; sending
-either (emailed to contacts, or `via` another way) stamps the time for good, and its state is
-derived (planned, agenda due, recap due, done, cancelled). Its action items are core commitments
-(`add_action_item!`, linked by `MeetingItem`). The access register (`AccountManagement::Access`)
-records a client's outside accounts (pages, ad accounts, pixels, analytics, domains): who owns
-each, our access, where its login lives (never the secret), token expiry and when it was last
-checked; `problems` says what's wrong. A lead's `WeeklyUpdate` is due by the end of Friday,
-starts from a draft built from the week's records (`WeeklyUpdate::Draft`) and is final once sent.
-`AccountManagement::Scorecard` counts only what's settled: agendas and recaps on time,
-commitments done by their date (dropped ones don't count), updates by Friday, each with the
-records that missed. Home (`Attention`) warns before a standard is missed.
+relationships, switched on per person (`AccountManagement::Member`, Settings > Account management);
+each chooses every client or a group (My clients), and the clients they lead or back up are always
+theirs. Its standard is `AccountManagement::Playbook` (hours ahead, cadences, targets, checklists).
+Each client has a lead (`Lead`) with a backup who covers while the lead is away, a contact cadence
+and an optional client digest. Today (`Cockpit`) lists what needs someone across their clients,
+overdue first, with snoozes. Every contact is logged (`Touch`, the Contact quick action) and, with
+meetings, non-internal notes, requests, agreements and digests, says when a client last heard from
+us (`Pulse`); requests are answered within a business day (`Replies`); what we're waiting on the
+client for can be nudged (`Waiting`, a previewed email logged as contact). A meeting holds the
+agenda, due `AGENDA_AHEAD` before it starts, and the recap, due `RECAP_WITHIN` after, both
+draftable from the records (`Meeting::AgendaDraft`); sending stamps the time for good. Rhythms
+(`MeetingSeries`) always plan the next meeting (nightly). Each client's health is set weekly
+(`HealthCheck`), who's who is recorded (`ContactProfile`), and onboarding and offboarding are
+`Checklist`s that tick themselves where the records can tell. The access register (`Access`) records
+a client's outside accounts. A lead's `WeeklyUpdate` is due by the end of Friday, drafted from the
+week's records; `Digest` is the client-facing half. `Scorecard` counts only what's settled:
+agendas and recaps on time, commitments by their date, updates by Friday, requests answered and
+clients in touch, each with the records that missed. Home (`Attention`) warns before a standard is
+missed. Its guide is `docs/guide.md` in its repository, and Accounts > Guide.
 
 `runwell-stripe-billing` (Stripe) takes payment for what was approved. On `agreement.approved` it
 makes a `StripeBilling::Charge` per version, in the request, so the approval page
