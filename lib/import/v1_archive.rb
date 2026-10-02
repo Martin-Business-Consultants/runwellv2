@@ -2,10 +2,11 @@
 # and files that someone uploaded here as a document. It's for an install with no shell to reach,
 # run as a hosting task ("run now"); with a shell, `import:v1` on the unpacked files does the same.
 #
-#   bin/rails "import:v1_archive[brem-v1-import.tgz,replace]"
+#   bin/rails "import:v1_archive[acme-v1.tgz,replace]"        the archive's one tenant
+#   bin/rails "import:v1_archive[acme-v1.tgz,replace,acme]"   a named tenant, when it holds several
 #
 # The archive (.tgz) holds v1's tenants/production/<tenant>/main.sqlite3 and the tenant's file
-# tree (<tenant>/ab/cd/…). In order: the archive is copied out of storage, every database is
+# tree (<tenant>/ab/cd/…), for any tenant. In order: the archive is copied out of storage, every database is
 # backed up (runwell:backup), the install is emptied (every table but Rails' own; staff, clients,
 # settings and uploads included, so everyone signs in again), then Import::V1 runs and prints its
 # report, and the copy is removed. "replace" must be passed: there's no undo but the backup.
@@ -16,8 +17,9 @@ module Import
   class V1Archive
     KEEP_TABLES = %w[schema_migrations ar_internal_metadata].freeze
 
-    def initialize(filename, out: $stdout)
+    def initialize(filename, tenant: nil, out: $stdout)
       @filename = filename.to_s
+      @tenant = tenant.presence
       @out = out
     end
 
@@ -32,8 +34,7 @@ module Import
       say "Copied #{@filename} (#{(File.size(archive) / 1_048_576.0).round(1)} MB)"
 
       system("tar", "xzf", archive, "-C", work, exception: true)
-      database = Dir[File.join(work, "tenants", "*", "*", "main.sqlite3")].first
-      raise "#{@filename} has no tenants/production/<tenant>/main.sqlite3 in it." unless database
+      database = tenant_database(work)
 
       # Fold in anything still in the write-ahead log, so the import reads the latest data.
       SQLite3::Database.new(database) { it.execute("PRAGMA wal_checkpoint(TRUNCATE)") }
@@ -52,6 +53,21 @@ module Import
     end
 
     private
+
+    # The named tenant's database, or the archive's only one.
+    def tenant_database(work)
+      databases = Dir[File.join(work, "tenants", "*", "*", "main.sqlite3")]
+      names = databases.map { File.basename(File.dirname(it)) }
+      raise "#{@filename} has no tenants/production/<tenant>/main.sqlite3 in it." if databases.empty?
+
+      if @tenant
+        databases[names.index(@tenant) || raise("#{@filename} has no tenant #{@tenant} (it has #{names.to_sentence}).")]
+      elsif databases.one?
+        databases.first
+      else
+        raise "#{@filename} holds #{names.to_sentence}: name the one to import as the third argument."
+      end
+    end
 
     # Every table but Rails' own, with foreign keys off. Full-text search tables are emptied
     # through the table itself, never their shadow tables, which would corrupt the index.

@@ -9,11 +9,11 @@ namespace :import do
 end
 
 namespace :import do
-  desc "Replace everything in this install with a v1 tenant uploaded as a document: bin/rails \"import:v1_archive[brem-v1-import.tgz,replace]\""
-  task :v1_archive, [ :filename, :confirm ] => :environment do |_task, args|
-    abort "Usage: bin/rails \"import:v1_archive[file.tgz,replace]\" (replace: this empties the install first)" if args[:filename].blank?
+  desc "Replace everything in this install with a v1 tenant uploaded as a document: bin/rails \"import:v1_archive[acme-v1.tgz,replace(,tenant)]\""
+  task :v1_archive, [ :filename, :confirm, :tenant ] => :environment do |_task, args|
+    abort "Usage: bin/rails \"import:v1_archive[file.tgz,replace(,tenant)]\" (replace: this empties the install first)" if args[:filename].blank?
     abort "Pass replace as the second argument: this empties the install (after a backup) before importing." unless args[:confirm] == "replace"
 
-    Import::V1Archive.new(args[:filename]).run
+    Import::V1Archive.new(args[:filename], tenant: args[:tenant]).run
   end
 end
