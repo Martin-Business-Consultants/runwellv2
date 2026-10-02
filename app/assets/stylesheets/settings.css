@@ -128,14 +128,15 @@
   .settings__scrollable-list {
     flex: 1 1 auto;
     list-style: none;
-    margin: 0 calc(-1 * var(--settings-item-padding-inline, 0.6rem));
+    margin-block-end: 0;
+    margin-inline: 0;
     padding: 0;
     overflow: auto;
 
     /* Rows as Linear lists them: a hairline between, a tint under the pointer, and no rule
     /* running from the name to the controls (the separator stays as the spacer). */
-    /* The list bleeds into the panel's padding by the rows' own padding, so a row's text lines
-    /* up with everything else in the column and its hover tint reaches past it. */
+    /* Rows keep to the column, the same width as the filters and buttons around them, with
+    /* their padding inside the hover tint. */
     li {
       border-radius: calc(0.4rem * var(--radius-scale, 1));
       padding: 0.4rem var(--settings-item-padding-inline, 0.6rem);
