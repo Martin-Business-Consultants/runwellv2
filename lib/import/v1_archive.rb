@@ -5,6 +5,10 @@
 #   bin/rails "import:v1_archive[acme-v1.tgz,replace]"        the archive's one tenant
 #   bin/rails "import:v1_archive[acme-v1.tgz,replace,acme]"   a named tenant, when it holds several
 #
+# An archive too big to upload in one piece (Cloudflare refuses a request over 100 MB) goes up as
+# parts named after it, from `split -b 95m acme-v1.tgz acme-v1.tgz.part-`: acme-v1.tgz.part-aa,
+# .part-ab, … The task takes the archive's own name and joins the parts in order.
+#
 # The archive (.tgz) holds v1's tenants/production/<tenant>/main.sqlite3 and the tenant's file
 # tree (<tenant>/ab/cd/…), for any tenant. In order: the archive is copied out of storage, every database is
 # backed up (runwell:backup), the install is emptied (every table but Rails' own; staff, clients,
@@ -24,14 +28,15 @@ module Import
     end
 
     def run
-      blob = ActiveStorage::Blob.where(filename: @filename).order(created_at: :desc).first
-      raise "No uploaded file named #{@filename}. Upload it as a document on any client first." unless blob
+      blobs = uploaded_blobs
 
       work = File.join(File.expand_path(ENV.fetch("RUNWELL_DATA_DIR", "storage"), Rails.root), "import-#{Time.current.strftime("%Y%m%d%H%M%S")}")
       FileUtils.mkdir_p(work)
       archive = File.join(work, @filename)
-      FileUtils.cp(blob.service.path_for(blob.key), archive)
-      say "Copied #{@filename} (#{(File.size(archive) / 1_048_576.0).round(1)} MB)"
+      File.open(archive, "wb") do |file|
+        blobs.each { |blob| File.open(blob.service.path_for(blob.key), "rb") { IO.copy_stream(it, file) } }
+      end
+      say "Copied #{@filename}#{" from #{blobs.size} parts" if blobs.many?} (#{(File.size(archive) / 1_048_576.0).round(1)} MB)"
 
       system("tar", "xzf", archive, "-C", work, exception: true)
       database = tenant_database(work)
@@ -44,7 +49,7 @@ module Import
 
       say "Emptying this install"
       empty_database
-      FileUtils.rm_f(blob.service.path_for(blob.key))
+      blobs.each { FileUtils.rm_f(it.service.path_for(it.key)) }
 
       say "Importing #{File.basename(File.dirname(database))}"
       Import::V1.new(database, work, out: @out).run
@@ -53,6 +58,19 @@ module Import
     end
 
     private
+
+    # The archive uploaded whole, or else its parts (name.part-aa, name.part-ab, …) in order, the
+    # latest upload of each.
+    def uploaded_blobs
+      whole = ActiveStorage::Blob.where(filename: @filename).order(created_at: :desc).first
+      return [ whole ] if whole
+
+      parts = ActiveStorage::Blob.where("filename LIKE ?", "#{ActiveStorage::Blob.sanitize_sql_like(@filename)}.part-%").order(created_at: :desc)
+      parts = parts.group_by { it.filename.to_s }.sort.map { |_name, blobs| blobs.first }
+      raise "No uploaded file named #{@filename} or #{@filename}.part-aa, … Upload it as documents on any client first." if parts.empty?
+
+      parts
+    end
 
     # The named tenant's database, or the archive's only one.
     def tenant_database(work)
