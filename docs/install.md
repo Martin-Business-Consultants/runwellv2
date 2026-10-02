@@ -112,7 +112,7 @@ until either is set, links use the address people were last seen using.
 | `APP_HOST`, `APP_PROTOCOL` | The address in links, and its scheme, unless Settings > Address sets them | the address people use, `https` |
 | `PORT` | Puma's port (Thruster fronts it on `HTTP_PORT`) | 3000 |
 | `RUNWELL_DATA_DIR` | Databases and uploaded files, together | `storage/` |
-| `RUNWELL_MAX_UPLOAD_MB` | The largest file a document may hold, shown on every drop box. Behind Cloudflare's proxy set 100 (its Free and Pro plans refuse bigger requests) | 500 |
+| `RUNWELL_MAX_UPLOAD_MB` | The largest file a document may hold, shown on every drop box. Cloudflare's Free and Pro plans refuse bigger requests, so raise it only on an install not behind its proxy | 100 |
 | `SECRET_KEY_BASE` | Signs sessions and links | from `config/credentials.yml.enc` |
 | `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | from credentials |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_DOMAIN`, `SMTP_STARTTLS`, `SMTP_TLS` | Outbound mail. Without `SMTP_ADDRESS` nothing is sent | none |

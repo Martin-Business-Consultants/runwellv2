@@ -7,9 +7,9 @@ class Document < ApplicationRecord
   belongs_to :uploaded_by, class_name: "User", optional: true
   has_one_attached :file
 
-  # The largest file one document may hold, RUNWELL_MAX_UPLOAD_MB (500 MB unless set). Behind
-  # Cloudflare's proxy a request can't pass 100 MB on its Free and Pro plans, so set 100 there.
-  MAX_SIZE = ENV.fetch("RUNWELL_MAX_UPLOAD_MB", 500).to_i.megabytes
+  # The largest file one document may hold, RUNWELL_MAX_UPLOAD_MB (100 MB unless set): Cloudflare's
+  # proxy refuses a bigger request on its Free and Pro plans. An install not behind it may raise it.
+  MAX_SIZE = ENV.fetch("RUNWELL_MAX_UPLOAD_MB", 100).to_i.megabytes
 
   validates :file, presence: true
   validate :file_within_limit
