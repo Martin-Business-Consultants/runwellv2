@@ -9,12 +9,12 @@
   <%= form_with model: @request_record, scope: :request, url: portal_requests_path, class: "flex flex-column gap txt-medium",
         data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
     <label class="flex flex-column gap-half txt-align-start">
-      <span class="txt-small font-weight-bold">Subject</span>
+      <span class="record-form__label">Subject</span>
       <%= form.text_field :subject, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
     </label>
 
     <label class="flex flex-column gap-half txt-align-start">
-      <span class="txt-small font-weight-bold">Details</span>
+      <span class="record-form__label">Details</span>
       <%= rich_text_field form, :body %>
     </label>
 

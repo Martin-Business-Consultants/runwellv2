@@ -21,11 +21,18 @@ class RequestsController < ApplicationController
 
   before_action :set_request, except: %i[index new create]
 
+  sortable_columns subject: "requests.subject",
+    from: [ "COALESCE(contacts.name, requests.sender_name, requests.sender_email)", ->(scope) { scope.left_joins(:contact) } ],
+    client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ],
+    source: "requests.source", received: "requests.received_at", status: "requests.status"
+
   def index
     @view = index_view
     @status = params[:status].presence_in(Request::STATUSES + %w[all]) || "open"
     @source = params[:source].presence || "all"
-    @requests = paginate Request.filtered(status: @status, source: @source)
+    scope = Request.filtered(status: @status, source: @source)
+    @column_widths = column_widths(scope, :subject, :from, :client, :source) if @view == "table"
+    @requests = paginate sorted(scope)
   end
 
   def show

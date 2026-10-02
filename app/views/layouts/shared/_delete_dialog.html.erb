@@ -7,9 +7,9 @@
     <span class="for-screen-reader"><%= title %></span>
   </button>
   <dialog class="dialog dialog--action panel fill-white shadow gap flex-column txt-align-start" data-dialog-target="dialog">
-    <h3 class="txt-large font-weight-bold margin-none"><%= title %></h3>
-    <p class="txt-medium margin-block-half"><%= message || "This can’t be undone." %></p>
-    <div class="flex gap-half justify-center margin-block-start">
+    <h3 class="dialog__title"><%= title %></h3>
+    <p class="dialog__message"><%= message || "This can’t be undone." %></p>
+    <div class="dialog__actions">
       <button type="button" class="btn" data-action="dialog#close">Cancel</button>
       <%= button_to path, method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "trash" %>

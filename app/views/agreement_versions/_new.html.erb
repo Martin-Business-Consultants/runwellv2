@@ -9,15 +9,15 @@
       <%= form_with url: engagement_agreement_versions_path(engagement), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
         <h3 class="txt-medium font-weight-bold margin-none">Start a new version</h3>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Kind</span>
+          <span class="record-form__label">Kind</span>
           <%= form.select :kind, kinds, {}, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Summary</span>
+          <span class="record-form__label">Summary</span>
           <%= form.text_field :summary, class: "input full-width", autocomplete: "off", placeholder: "Add a blog section" %>
         </label>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Reason</span>
+          <span class="record-form__label">Reason</span>
           <%= rich_text_field form, :reason, placeholder: "Why this is changing, in the client’s words if you have them.", staff: true %>
         </label>
         <div class="flex gap-half justify-center">

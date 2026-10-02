@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   include Authentication
   include Authorization # after Authentication, so its check runs once the session is loaded
   include AgentTools, AgentResponses
+  include TableSorting
   allow_browser versions: :modern
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
@@ -34,12 +35,16 @@ class ApplicationController < ActionController::Base
     params[:view].presence_in(Setting::INDEX_VIEWS + extra) || Setting.current.index_view
   end
 
-  # One page of an index list, Fizzy's way (geared_pagination: 15, then 30, 50, 100 a page),
-  # with @page for the view's "load more". Agents reading JSON get every record, as before.
+  TABLE_PAGE_SIZE = 13
+
+  # One page of an index list, with @page for the view. Cards load more as you scroll, Fizzy's
+  # way (geared_pagination: 15, then 30, 50, 100 a page); a table shows 13 rows a page with
+  # numbered pages under it (table_pagination), so call it after setting @view. Agents reading
+  # JSON get every record, as before.
   def paginate(records)
     return records unless request.format.html?
 
-    set_page_and_extract_portion_from records
+    set_page_and_extract_portion_from records, per_page: (TABLE_PAGE_SIZE if @view == "table")
     @page.records
   end
 end

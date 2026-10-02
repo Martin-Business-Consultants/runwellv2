@@ -3,10 +3,10 @@
 <%# herb:state (confirming: false) %>
 <div class="txt-align-center margin-block-start">
   <% if confirming %>
-    <div class="panel panel--narrow fill-white shadow flex flex-column gap center">
-      <h3 class="txt-large font-weight-bold margin-none"><%= title %></h3>
-      <p class="txt-medium margin-none"><%= body %></p>
-      <div class="flex gap-half justify-center">
+    <div class="panel panel--narrow fill-white shadow flex flex-column gap-half center txt-align-start confirm-panel">
+      <h3 class="dialog__title"><%= title %></h3>
+      <p class="dialog__message"><%= body %></p>
+      <div class="dialog__actions">
         <button type="button" class="btn" data-herb-reset="confirming">Cancel</button>
         <%= button_to path, method: method || :delete, class: "btn txt-negative" do %>
           <span><%= button %></span>

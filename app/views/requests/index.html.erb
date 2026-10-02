@@ -23,10 +23,11 @@
     </div>
   </section>
 <% else %>
-  <section class="panel shadow center index-table">
-    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+  <section class="panel center index-table">
+    <table class="data-table data-table--fixed">
+      <%= table_colgroup [ @column_widths[:subject], "Request" ], [ @column_widths[:from], "From" ], [ @column_widths[:client], term(:client) ], [ @column_widths[:source], "Source" ], :age, :status, :actions %>
       <thead>
-        <tr><th>Request</th><th>From</th><th><%= term(:client) %></th><th>Source</th><th>Received</th><th>Status</th><th></th></tr>
+        <tr><%= sortable_th "Request", :subject %><%= sortable_th "From", :from %><%= sortable_th term(:client), :client %><%= sortable_th "Source", :source %><%= sortable_th "Received", :received %><%= sortable_th "Status", :status %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:requests_rows, @page.number) %>">
         <% @requests.each do |request_record| %>
@@ -41,10 +42,10 @@
             <%= render "layouts/shared/row_actions", name: "this request", edit_path: (edit_request_path(request_record) if request_record.open?), delete_path: (request_path(request_record) if request_record.open?) %>
           </tr>
         <% end %>
-        <%= table_next_page_row :requests_rows, @page, columns: 7 %>
       </tbody>
     </table>
   </section>
+  <%= table_pagination @page %>
 <% end %>
 
 <% if @requests.none? %>

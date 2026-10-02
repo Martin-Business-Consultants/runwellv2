@@ -15,13 +15,14 @@
   }
 
   lexxy-editor.lexxy-content {
-    border: 1px solid var(--color-ink-medium);
-    border-radius: calc(0.5em * var(--radius-scale, 1));
-    padding: 0 0.8em 0.5em;
+    border: 1px solid var(--color-ink-light);
+    border-radius: var(--radius-control);
+    padding: 0 0.75em 0.5em;
 
     &:focus-within {
-      outline: var(--focus-ring-size) solid var(--focus-ring-color);
-      outline-offset: -1px;
+      border-color: var(--color-link);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-link) 22%, transparent);
+      outline: none;
     }
 
     lexxy-toolbar {
@@ -37,24 +38,106 @@
     }
   }
 
-  /* Status labels, tinted by meaning. Fizzy's lightest and darkest steps swap in dark mode,
-  /* so the same pairs stay soft in both themes. */
-  .status-tag--positive { background-color: oklch(var(--lch-green-lightest)); color: oklch(var(--lch-green-darker)); }
-  .status-tag--negative { background-color: oklch(var(--lch-red-lightest)); color: oklch(var(--lch-red-darker)); }
-  .status-tag--waiting { background-color: oklch(var(--lch-yellow-lightest)); color: oklch(var(--lch-yellow-darker)); }
-  .status-tag--progress { background-color: oklch(var(--lch-blue-lightest)); color: oklch(var(--lch-blue-darker)); }
-  .status-tag--neutral { background-color: var(--color-ink-lightest); color: var(--color-ink-dark); }
-}
+  /* Status labels: a quiet outlined tag with a dot in the colour of its meaning, as Linear
+  /* does, with the same corners as every control (Settings > Appearance > Corners). Fizzy's
+  /* steps swap in dark mode, so the dots read in both themes. */
+  .status-tag {
+    --status-dot: var(--color-ink-medium);
 
-/* A faint cool page tint in light mode lets white panels lift off the page. Dark mode keeps
-/* Fizzy's canvas, where borders do the work. */
-:root:not([data-theme="dark"]) body:not(.public) {
-  background-color: color-mix(in oklch, var(--color-canvas) 55%, var(--scheme-tint, oklch(var(--lch-blue-lightest))));
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) body:not(.public) {
+    align-items: center;
     background-color: var(--color-canvas);
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-control);
+    color: var(--color-ink-darker);
+    display: inline-flex;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    gap: 0.45em;
+    line-height: 1;
+    padding: 0.3em 0.65em 0.3em 0.55em;
+    vertical-align: middle;
+
+    &::before {
+      background-color: var(--status-dot);
+      block-size: 0.5em;
+      border-radius: 50%;
+      content: "";
+      flex-shrink: 0;
+      inline-size: 0.5em;
+    }
+  }
+
+  .status-tag--positive { --status-dot: oklch(var(--lch-green-medium)); }
+  .status-tag--negative { --status-dot: oklch(var(--lch-red-medium)); color: oklch(var(--lch-red-dark)); }
+  .status-tag--waiting { --status-dot: oklch(var(--lch-yellow-medium)); }
+  .status-tag--progress { --status-dot: var(--color-link); }
+  .status-tag--neutral { --status-dot: var(--color-ink-light); color: var(--color-ink-dark); }
+}
+
+/* Linear's frame: the nav sits on a slightly deeper ground, and the page is one inset sheet
+/* beside it, hairline-bordered with rounded corners. The sheet is a pseudo-element behind the
+/* page's column, running the full height of the document so it scrolls with the page and the
+/* content never runs past its edges; no markup changes. Below 800px the nav runs across the top and the sheet
+/* goes, leaving the plain canvas. */
+@layer components {
+  body.with-sidenav {
+    background-color: color-mix(in oklch, var(--color-ink-lightest) 70%, var(--color-canvas));
+
+    .sidenav {
+      background-color: transparent;
+      border-inline-end: 0;
+    }
+
+    @media (min-width: 800px) {
+      min-block-size: 100dvh;
+      position: relative;
+
+      &::before {
+        background-color: var(--color-canvas);
+        border: 1px solid var(--color-ink-lighter);
+        border-radius: calc(0.75rem * var(--radius-scale, 1));
+        box-shadow: 0 1px 2px oklch(var(--lch-black) / 3%);
+        content: "";
+        inset: 0.5rem 0.5rem 0.5rem var(--sidenav-width);
+        pointer-events: none;
+        position: absolute;
+        z-index: -1;
+      }
+
+      /* Keep the page clear of the sheet's edge. */
+      #header {
+        padding-block-start: calc(0.5rem + var(--block-space));
+        padding-inline: calc(var(--main-padding) + 0.25rem) calc(var(--main-padding) + 0.75rem);
+      }
+
+      #main {
+        padding-inline: calc(var(--main-padding) + 0.25rem) calc(var(--main-padding) + 0.75rem);
+      }
+    }
+
+    /* On the sheet, panels are flat (their hairline is enough); what floats above the page
+    /* (menus, dialogs) keeps its depth. */
+    #main {
+      --shadow: 0 1px 2px oklch(var(--lch-black) / 3%);
+
+      :is(dialog, .popup, [popover]) {
+        --shadow: var(--shadow-popover);
+      }
+    }
+
+    @media (max-width: 799px) {
+      background-color: var(--color-canvas);
+    }
+  }
+
+  html[data-theme="dark"] body.with-sidenav {
+    background-color: oklch(13.5% 0.004 275);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) body.with-sidenav {
+      background-color: oklch(13.5% 0.004 275);
+    }
   }
 }
 
@@ -81,8 +164,28 @@
       }
     }
 
+    /* The New button matches the pills and the view toggle in height. */
+    .btn--labelled {
+      block-size: 1.9rem;
+      font-size: var(--text-small);
+      padding-block: 0;
+    }
+
+    /* Filters are small controls with the same corners as every other control: a hairline, the
+    /* current choice, a caret. */
     .quick-filter > button {
-      block-size: 2.5rem;
+      --input-background: var(--color-canvas);
+      --input-border-color: var(--color-ink-lighter);
+      --input-padding: 0 1.75em 0 0.9em;
+
+      block-size: 1.9rem;
+      border-radius: var(--radius-control);
+      box-shadow: 0 1px 1px oklch(var(--lch-black) / 4%);
+      color: var(--color-ink-darker);
+      font-size: var(--text-x-small);
+      font-weight: 500;
+
+      &:hover { background-color: var(--color-ink-lightest); }
     }
   }
 }

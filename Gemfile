@@ -31,6 +31,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 group :development do
   gem "letter_opener_web"
+  gem "prosopite"
   gem "web-console"
 end
 

@@ -4,22 +4,22 @@
 <%= form_with model: contact, url: contact.new_record? ? client_contacts_path(contact.client) : contact_path(contact),
       class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Name</span>
+    <span class="record-form__label">Name</span>
     <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Role</span>
+    <span class="record-form__label">Role</span>
     <%= form.text_field :role, class: "input full-width", autocomplete: "off", placeholder: "Marketing lead" %>
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Email</span>
+    <span class="record-form__label">Email</span>
     <%= form.email_field :email, class: "input full-width", autocomplete: "off", placeholder: "ann@acme.example" %>
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Phone</span>
+    <span class="record-form__label">Phone</span>
     <%= form.telephone_field :phone, class: "input full-width", autocomplete: "off" %>
   </label>
 

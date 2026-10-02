@@ -30,7 +30,7 @@ module ApplicationHelper
 
   # A status label tinted by what it means, in Fizzy's palette.
   def status_tag(label, highlight: false)
-    tag.span label, class: "status-tag status-tag--#{status_tone(label, highlight: highlight)} border-radius pad-inline-half txt-x-small txt-uppercase font-weight-bold txt-nowrap"
+    tag.span label, class: "status-tag status-tag--#{status_tone(label, highlight: highlight)} txt-nowrap"
   end
 
   def money(cents) = Money.format(cents)

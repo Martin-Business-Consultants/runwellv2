@@ -16,6 +16,7 @@ export default class extends Controller {
     await nextFrame()
     this.dragItem = this.#itemContaining(event.target)
     this.sourceContainer = this.#containerContaining(this.dragItem)
+    this.originalPlace = { parent: this.dragItem.parentElement, next: this.dragItem.nextElementSibling }
     this.originalDraggedItemCssVariable = this.#containerCssVariableFor(this.sourceContainer)
     this.dragItem.classList.add(this.draggedItemClass)
   }
@@ -35,19 +36,28 @@ export default class extends Controller {
     } else {
       this.#restoreOriginalDraggedItemCssVariable()
     }
+
+    this.#placeAtPointer(container, event.clientY)
   }
 
   async drop(event) {
     const targetContainer = this.#containerContaining(event.target)
+    if (!targetContainer) { return }
 
-    if (!targetContainer || targetContainer === this.sourceContainer) { return }
+    if (targetContainer === this.sourceContainer) {
+      if (!this.#isSortable(targetContainer) || !this.#moved()) { return }
+
+      this.wasDropped = true
+      await this.#submitDropRequest(this.dragItem, targetContainer)
+      return
+    }
 
     this.wasDropped = true
     this.#increaseCounter(targetContainer)
     this.#decreaseCounter(this.sourceContainer)
 
     const sourceContainer = this.sourceContainer
-    this.#insertDraggedItem(targetContainer, this.dragItem)
+    if (!this.#placedIn(targetContainer)) { this.#insertDraggedItem(targetContainer, this.dragItem) }
     await this.#submitDropRequest(this.dragItem, targetContainer)
     this.#reloadSourceFrame(sourceContainer)
   }
@@ -58,12 +68,64 @@ export default class extends Controller {
 
     if (!this.wasDropped) {
       this.#restoreOriginalDraggedItemCssVariable()
+      this.#restoreOriginalPlace()
     }
 
+    this.originalPlace = null
     this.sourceContainer = null
     this.dragItem = null
     this.wasDropped = false
     this.originalDraggedItemCssVariable = null
+  }
+
+  // Runwell: cards can be ordered within a sortable column (data-drag-and-drop-sortable). While
+  // dragging over one, the card moves to where it would land; the drop then sends the card it
+  // now sits before, so the server places it there.
+  #isSortable(container) {
+    return container.hasAttribute("data-drag-and-drop-sortable")
+  }
+
+  #placeAtPointer(container, y) {
+    if (!this.#isSortable(container)) { return }
+
+    const itemContainer = container.querySelector("[data-drag-drop-item-container]")
+    if (!itemContainer || itemContainer.offsetParent === null) { return }
+
+    const items = [ ...itemContainer.querySelectorAll("[data-drag-and-drop-target~=item]") ].filter(item => item !== this.dragItem)
+    const next = items.find(item => {
+      const box = item.getBoundingClientRect()
+      return y < box.top + box.height / 2
+    })
+
+    if (next) {
+      if (next.previousElementSibling !== this.dragItem) { next.before(this.dragItem) }
+    } else if (items.length) {
+      if (items.at(-1).nextElementSibling !== this.dragItem) { items.at(-1).after(this.dragItem) }
+    } else {
+      itemContainer.append(this.dragItem)
+    }
+  }
+
+  #placedIn(container) {
+    return this.#isSortable(container) && container.contains(this.dragItem)
+  }
+
+  #moved() {
+    const { parent, next } = this.originalPlace || {}
+    return this.dragItem.parentElement !== parent || this.dragItem.nextElementSibling !== next
+  }
+
+  #restoreOriginalPlace() {
+    const { parent, next } = this.originalPlace || {}
+    if (!parent || !this.#moved()) { return }
+
+    next?.isConnected ? next.before(this.dragItem) : parent.append(this.dragItem)
+  }
+
+  #nextItemId(item) {
+    let sibling = item.nextElementSibling
+    while (sibling && !sibling.matches("[data-drag-and-drop-target~=item]")) { sibling = sibling.nextElementSibling }
+    return sibling?.dataset.id || ""
   }
 
   #itemContaining(element) {
@@ -138,6 +200,7 @@ export default class extends Controller {
   async #submitDropRequest(item, container) {
     const body = new FormData()
     const id = item.dataset.id
+    if (this.#isSortable(container)) { body.append("before", this.#nextItemId(item)) }
     const url = container.dataset.dragAndDropUrl.replaceAll("__id__", id)
 
     return post(url, { body, headers: { Accept: "text/vnd.turbo-stream.html" } })

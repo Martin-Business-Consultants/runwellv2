@@ -20,11 +20,16 @@ class EngagementsController < ApplicationController
 
   before_action :set_engagement, only: %i[show edit update destroy close]
 
+  sortable_columns ref: "engagements.ref", title: "engagements.title", type: "engagements.label",
+    client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ]
+
   def index
     @view = index_view
     @state = Engagement.filter_from(params)
     @label = params[:label].presence_in(Engagement::LABELS) || "all"
-    @engagements = paginate Engagement.filtered(state: @state, label: @label, scope: Engagement.includes(:custom_values))
+    scope = Engagement.filtered(state: @state, label: @label, scope: Engagement.includes(:custom_values))
+    @column_widths = column_widths(scope, :ref, :title, :client) if @view == "table"
+    @engagements = paginate sorted(scope)
   end
 
   def show

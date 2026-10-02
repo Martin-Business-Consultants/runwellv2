@@ -21,10 +21,11 @@
     </div>
   </section>
 <% elsif @clients.any? %>
-  <section class="panel shadow center index-table">
-    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+  <section class="panel center index-table">
+    <table class="data-table data-table--fixed">
+      <%= table_colgroup [ @column_widths[:name], "Name" ], :status, :avatars, :number, *listed.map { :text }, :actions %>
       <thead>
-        <tr><th>Name</th><th>Status</th><th class="data-table__number">Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+        <tr><%= sortable_th "Name", :name %><%= sortable_th "Status", :status %><th>Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:clients_rows, @page.number) %>">
         <% @clients.each do |client| %>
@@ -32,7 +33,7 @@
           <tr data-filter-target="item">
             <td><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
             <td><%= status_tag client.status, highlight: client.status == "active" %></td>
-            <td class="data-table__number"><%= client.contacts.count { !it.archived? } %></td>
+            <td><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>
             <td class="data-table__number"><%= client.engagements.count { !it.closed? } %></td>
             <% listed.each do |field| %>
               <%# herb:key field.id %>
@@ -42,10 +43,10 @@
                   delete_message: "This removes its contacts, commitments and notes. A " + term(:client).downcase + " with " + term(:engagement, count: 2).downcase + " can’t be deleted." %>
           </tr>
         <% end %>
-        <%= table_next_page_row :clients_rows, @page, columns: 5 + listed.size %>
       </tbody>
     </table>
   </section>
+  <%= table_pagination @page %>
 <% elsif Client.exists? %>
   <div class="blank-slate">
     No <%= @status %> <%= term(:client, count: 2).downcase %>.

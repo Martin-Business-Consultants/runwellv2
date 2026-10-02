@@ -1,0 +1,17 @@
+<%# locals: (label:, param:, options:, current:, counts: nil) %>
+<%# A section's filter as a segmented control: every choice in view, with its count when given,
+    the current one raised. Each choice is a link that swaps one query param, as quick_filter's
+    do, so it's bookmarkable and Back works. With counts, empty choices drop out, except the
+    current one and the last ("All"). %>
+<% shown = options.select.with_index { |(_text, value), index| counts.nil? || value == current || index == options.size - 1 || counts.fetch(value, 0).positive? } %>
+<nav class="segmented-filter" aria-label="<%= label %>">
+  <% shown.each do |text, value| %>
+    <%# herb:key value %>
+    <%= link_to url_for(request.query_parameters.merge(param.to_s => value)), class: "segmented-filter__option", aria: { current: ("true" if value == current) }, data: { turbo_action: "replace" } do %>
+      <span><%= text %></span>
+      <% if counts %>
+        <span class="segmented-filter__count"><%= counts.fetch(value, 0) %></span>
+      <% end %>
+    <% end %>
+  <% end %>
+</nav>

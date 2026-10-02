@@ -138,8 +138,10 @@ previews in Fizzy's `card` markup, and drops posting to one endpoint per
 destination (`Columns::…::Drops::{Streams,Columns,Closures}Controller`) that
 answer with a morphing `turbo_stream.replace` of the target column. The Work
 board (`todos/board/*`, `todos/columns/show`, `columns/todos/drops/*`) is the
-reference. The only departure: column colors come from classes
-(`todo-board.css`), not inline styles.
+reference. Two departures: column colors come from classes (`todo-board.css`), not inline
+styles; and cards keep a manual order (`Todo#board_position`, positioned per status). A column
+marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
+`before` (the card it now sits before) for `Todo#move!`.
 
 Staff pages have a left nav (`layouts/shared/_sidenav`, `sidenav.css`): home and the core
 sections with icons (`sidenav_link_to`, which marks the current one), plugin links under
@@ -299,13 +301,22 @@ one place they are documented for people: add a new key there.
 | `g` + `h c e w b m r n s` | Home, clients, engagements, work, board, commitments, requests, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
-| Board: `h` `l` `j` `k`, `H` `L` | Columns and cards (Fizzy's navigable lists), move the card a column |
+| `.` | Hint mode on or off |
+| Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
 Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-focus` focuses
 it instead, `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
 ⌘ on a Mac, Ctrl elsewhere). A key declared inside an item fires for the selected item only
 (`row_actions` marks edit `e` and delete `d`); one outside any item is the page's. Show the
-key on the button with `<kbd class="hide-on-touch">`. A new index page's "Add a …" button
+key on the button with `<kbd class="hide-on-touch">`.
+
+Hint mode (`.`, or the switch in the `?` sheet) teaches the keys in place: the keyboard controller
+copies each `data-keys` into `data-key-hint` (the first alternative, `mod` as ⌘ or Ctrl) and
+`hints.css` draws it as a keycap over the control, never moving anything; keys inside an item show
+only on the row you're on, and controls that already show a `<kbd>` get none.
+`layouts/shared/_hint_legend` lists the keys with no control (j/k, Enter, /, s, a, Esc, ?). It's
+remembered per browser (localStorage `keyHints`), off by default, and hidden on touch devices.
+A new `data-keys` gets its hint for free. A new index page's "Add a …" button
 renders `render "layouts/shared/new_button", text: "Add a client", path: new_client_path`.
 
 ## Mentions and notifications
@@ -412,8 +423,9 @@ fan is a record picker (Fizzy's filter + combobox) set to the record on screen
 Document in the core, plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal
-(`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. This is
-the only place notes, documents and time are added; a record's sections only list them.
+(`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. Documents
+and time are added only here; notes also have a composer at the top of every Notes section
+(`notes/_section`: the Lexxy editor, kind, source), posting `record` to the same `notes#create`.
 The picker writes `record` ("Client:12") into the form through the `form` attribute; the
 receiving controller reads it with `QuickAction.locate(params[:record], types)`. Forms post
 with `data-turbo-frame="_top"` so the page redirects back as usual. The tray has no button on staff pages: `A` opens it

@@ -1,6 +1,7 @@
 <%# locals: (todos:) %>
 <%= column_tag id: "planned-todos", name: "Planned", drop_url: columns_todo_drops_stream_path("__id__", todo_board_filters), collapsed: false, selected: "true", class: "cards--maybe", data: {
   drag_and_strum_target: "container",
+  drag_and_drop_sortable: true,
   collapsible_columns_target: "column maybeColumn",
   action: "focus->collapsible-columns#focusOnColumn"
 } do %>

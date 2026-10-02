@@ -24,10 +24,11 @@
     </div>
   </section>
 <% else %>
-  <section class="panel shadow center index-table">
-    <table class="data-table" data-controller="pagination" data-pagination-paginate-on-intersection-value="true" data-pagination-discard-frame-value="true">
+  <section class="panel center index-table">
+    <table class="data-table data-table--fixed">
+      <%= table_colgroup [ @column_widths[:description], "Commitment" ], :text, :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
       <thead>
-        <tr><th>Commitment</th><th>Whose</th><th>Due</th><th><%= term(:client) %></th><th>Status</th><th></th><th></th></tr>
+        <tr><%= sortable_th "Commitment", :description %><th>Whose</th><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:commitments_rows, @page.number) %>">
         <% @commitments.each do |commitment| %>
@@ -56,10 +57,10 @@
             <%= render "layouts/shared/row_actions", name: "this commitment", edit_path: (edit_commitment_path(commitment) if commitment.open?), delete_path: (commitment_path(commitment) if commitment.open?) %>
           </tr>
         <% end %>
-        <%= table_next_page_row :commitments_rows, @page, columns: 7 %>
       </tbody>
     </table>
   </section>
+  <%= table_pagination @page %>
 <% end %>
 
 <% if @commitments.none? %>

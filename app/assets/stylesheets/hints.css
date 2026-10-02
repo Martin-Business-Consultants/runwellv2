@@ -1,0 +1,103 @@
+/* Hint mode (keyboard_controller, the . key): each control's key as a small keycap on the
+/* control, from data-key-hint (filled from data-keys), and a strip of the keys with no control
+/* at the foot of the page. Keycaps are overlays, so turning hints on moves nothing. */
+@layer components {
+  :where(html[data-hints] [data-key-hint]:not(input, textarea, select)) {
+    position: relative;
+  }
+
+  html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd))::after {
+    background-color: var(--color-ink);
+    border-radius: var(--radius-control);
+    box-shadow: 0 0 0 2px var(--color-canvas);
+    color: var(--color-ink-inverted);
+    content: attr(data-key-hint);
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    inset: -0.55em -0.55em auto auto;
+    letter-spacing: 0;
+    line-height: 1;
+    min-inline-size: 1.4em;
+    padding: 0.25em 0.4em;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    text-transform: none;
+    white-space: pre;
+    word-spacing: 0.2em;
+    z-index: 2;
+  }
+
+  /* A nav row is wide: the key sits at its end, inside it. */
+  html[data-hints] :is(.sidenav__link, .sidenav__logo)[data-key-hint]::after {
+    inset: 50% 0.5rem auto auto;
+    translate: 0 -50%;
+  }
+
+  /* Keys that act on one row or card (edit, delete, copy) show only on the row you're on. */
+  html[data-hints] :is([data-filter-target~="item"], [data-keyboard-item]):not(:hover, :focus-within, [data-keyboard-current], [aria-selected="true"]) [data-key-hint]::after {
+    display: none;
+  }
+
+  /* Phones and tablets have no keyboard to learn. */
+  @media (any-hover: none) {
+    html[data-hints] [data-key-hint]::after { display: none; }
+  }
+}
+
+/* The strip: only while hint mode is on, centred at the foot of the page, clear of the bell. */
+@layer components {
+  .hint-legend {
+    align-items: center;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.6rem * var(--radius-scale, 1));
+    box-shadow: var(--shadow-popover, var(--shadow));
+    color: var(--color-ink-dark);
+    display: none;
+    font-size: var(--text-x-small);
+    gap: 0.9rem;
+    inset: auto auto 0.9rem 50%;
+    max-inline-size: calc(100vw - 8rem);
+    overflow-x: auto;
+    padding: 0.4rem 0.5rem 0.4rem 0.8rem;
+    position: fixed;
+    scrollbar-width: none;
+    translate: -50% 0;
+    white-space: nowrap;
+    z-index: var(--z-flash);
+
+    html[data-hints] & { display: flex; }
+
+    kbd { opacity: 1; }
+  }
+
+  .hint-legend__item {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.35em;
+  }
+
+  .hint-legend__close {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-inline-start: 1px solid var(--color-ink-lighter);
+    color: var(--color-ink-dark);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    gap: 0.35em;
+    padding: 0.15rem 0.3rem 0.15rem 0.8rem;
+
+    @media (any-hover: hover) {
+      &:hover { color: var(--color-ink); }
+    }
+  }
+
+  /* The ? sheet's switch says what pressing it will do. */
+  .hints-switch__hide { display: none; }
+  html[data-hints] .hints-switch__show { display: none; }
+  html[data-hints] .hints-switch__hide { display: inline; }
+}

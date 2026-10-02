@@ -1,42 +1,49 @@
-/* A todo's status as a colored circle (todos/_status_dot), in the Work board's column colors:
-/* planned blue, in progress lime, in review violet, blocked pink, done ink with a check. */
+/* A todo's status as Linear draws it (todos/_status_dot): a ring that fills as work moves on,
+/* in the Work board's column colors. Planned is an empty grey ring, in progress half full
+/* (yellow), in review three quarters (green), blocked a full red disc, done the accent with a
+/* check. */
+:root {
+  --color-todo-in-progress: oklch(var(--lch-yellow-medium));
+  --color-todo-in-review: oklch(var(--lch-green-medium));
+  --color-todo-blocked: oklch(var(--lch-red-medium));
+}
+
 @layer components {
   .status-dot {
-    --status-dot-color: var(--color-card-default);
+    --status-dot-color: var(--color-ink-medium);
+    --status-dot-fill: 0%;
 
-    background-color: var(--status-dot-color);
-    block-size: 1.1em;
+    background:
+      conic-gradient(var(--status-dot-color) var(--status-dot-fill), transparent 0)
+      content-box;
+    block-size: 0.95em;
+    border: 1.5px solid var(--status-dot-color);
     border-radius: 50%;
     display: inline-block;
     flex-shrink: 0;
-    inline-size: 1.1em;
+    inline-size: 0.95em;
+    padding: 1.5px;
     position: relative;
+    vertical-align: middle;
   }
 
-  .status-dot--planned {
-    background-color: transparent;
-    box-shadow: inset 0 0 0 2px var(--status-dot-color);
-  }
-  .status-dot--in-progress { --status-dot-color: var(--color-card-4); }
-  .status-dot--in-review {
-    --status-dot-color: var(--color-card-6);
-
-    /* A ring with a centre: done by someone, waiting on a person's check. */
-    background-color: transparent;
-    box-shadow: inset 0 0 0 2px var(--status-dot-color), inset 0 0 0 4px var(--color-canvas);
-    background-image: radial-gradient(circle, var(--status-dot-color) 0 35%, transparent 38%);
-  }
-  .status-dot--blocked { --status-dot-color: var(--color-card-8); }
+  .status-dot--planned { --status-dot-color: var(--color-ink-medium); }
+  .status-dot--in-progress { --status-dot-color: var(--color-todo-in-progress); --status-dot-fill: 50%; }
+  .status-dot--in-review { --status-dot-color: var(--color-todo-in-review); --status-dot-fill: 75%; }
+  .status-dot--blocked { --status-dot-color: var(--color-todo-blocked); --status-dot-fill: 100%; }
   .status-dot--done {
-    --status-dot-color: var(--color-card-complete);
+    --status-dot-color: var(--color-link);
+
+    background: var(--status-dot-color);
+    padding: 0;
 
     &::after {
-      block-size: 0.5em;
-      border: solid var(--color-ink-inverted);
-      border-width: 0 2px 2px 0;
+      block-size: 0.45em;
+      border: solid var(--color-white);
+      border-width: 0 1.5px 1.5px 0;
       content: "";
-      inline-size: 0.28em;
-      inset: 0.18em auto auto 0.4em;
+      inline-size: 0.22em;
+      inset: 0.1em auto auto 0.3em;
       position: absolute;
       transform: rotate(45deg);
     }
@@ -59,6 +66,7 @@
       inset: var(--popup-top) auto auto var(--popup-left);
       margin: 0;
       position: fixed;
+      translate: none; /* the popup's own centring would push it half its width away */
       z-index: 50;
     }
   }
@@ -69,13 +77,13 @@
     border-radius: 50%;
     cursor: pointer;
     display: inline-grid;
-    font-size: 1.15rem;
-    padding: 0.3em;
+    font-size: 1rem;
+    padding: 0.35em;
     place-items: center;
-    transition: transform 120ms ease;
+    transition: background-color 80ms ease-out;
 
     @media (any-hover: hover) {
-      &:hover { transform: scale(1.15); }
+      &:hover { background-color: var(--color-hover); }
     }
 
     &:has(.status-dot-picker__label) {
@@ -166,5 +174,20 @@
     .settings__scrollable-list {
       margin-block: 0;
     }
+  }
+}
+
+/* The owner picker's search: the first line of its menu, ruled off from the people. */
+@layer components {
+  .owner-picker__search,
+  .owner-picker__search:focus-visible {
+    background: transparent;
+    border: 0;
+    border-block-end: 1px solid var(--color-ink-lighter);
+    border-radius: 0;
+    box-shadow: none;
+    margin-block-end: 0.25rem;
+    outline: none;
+    padding-block: 0.4rem;
   }
 }

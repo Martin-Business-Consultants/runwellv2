@@ -47,8 +47,40 @@
   }
 
   /* Ensure padding from viewport edges */
+  /* A dialog sets its own padding: one opened from a table row would otherwise inherit the
+  /* table's (none). */
   .dialog.panel {
+    --panel-padding: 1.5rem;
+
+    box-shadow: var(--shadow-popover);
     max-inline-size: calc(100vw - var(--inline-space-double) * 2);
+  }
+
+  .confirm-panel {
+    --panel-padding: 1.25rem;
+    --panel-size: 100%;
+  }
+
+  .dialog__title {
+    font-size: var(--text-medium);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .dialog__message {
+    color: var(--color-ink-dark);
+    font-size: var(--text-small);
+    margin: 0;
+  }
+
+  .dialog__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-block-start: 0.5rem;
+
+    .btn { font-size: var(--text-small); }
   }
 
   /* A modal that asks for something (delete, a quick action): one width for all of them. */

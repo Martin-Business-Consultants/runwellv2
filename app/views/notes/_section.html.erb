@@ -4,8 +4,23 @@
     <h2 class="divider">Notes</h2>
   </header>
 
+  <%# Write a note right here, above the ones already written: the editor (with @mentions and
+      files), what kind of note it is and where it came from, and Add note. ⌘/Ctrl+Enter
+      saves. The composer is permanent, so the page morphing in the new note leaves the editor
+      in place (no flicker) and a saved note just clears it. %>
+  <%= form_with model: Note.new, url: notes_path, namespace: dom_id(subject, :note), id: dom_id(subject, :note_composer), class: "note-composer",
+        data: { controller: "form", turbo_frame: "_top", turbo_permanent: true, action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
+    <%= hidden_field_tag :record, QuickAction.value_for(subject), id: nil %>
+    <%= rich_text_field form, :body, placeholder: "Add a note: what was said or decided… @ to mention someone", staff: true %>
+    <div class="note-composer__footer">
+      <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" }, class: "input input--select note-composer__kind", aria: { label: "Kind" } %>
+      <%= form.text_field :source, class: "input note-composer__source", autocomplete: "off", placeholder: "Source, e.g. call with Ann", aria: { label: "Source" } %>
+      <button type="submit" class="btn btn--link note-composer__submit">Add note</button>
+    </div>
+  <% end %>
+
   <% notes = subject.notes.recent.includes(:author) %>
-  <ul class="settings__scrollable-list">
+  <ul class="settings__scrollable-list notes-list">
     <% notes.each do |note| %>
       <%# herb:key note.id %>
       <li data-filter-target="item" class="flex flex-column txt-align-start">

@@ -1,37 +1,42 @@
 <%# locals: (client:) %>
 <%= render "layouts/shared/errors", record: client %>
 
-<%= form_with model: client, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Name</span>
+<%= form_with model: client, class: "record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <label class="record-form__field">
+    <span class="record-form__label">Name</span>
     <%= form.text_field :name, required: true, class: "input full-width", autofocus: client.new_record?, autocomplete: "off", placeholder: "Acme Inc." %>
   </label>
 
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Status</span>
-    <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, class: "input input--select full-width" %>
-  </label>
+  <div class="record-form__row record-form__row--narrow-first">
+    <label class="record-form__field">
+      <span class="record-form__label">Status</span>
+      <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, class: "input input--select full-width" %>
+    </label>
 
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Time zone</span>
-    <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Time.zone_default.name})" }, class: "input input--select full-width" %>
-    <span class="txt-x-small txt-subtle">Their portal, approval pages and emails show times in it.</span>
-  </label>
+    <label class="record-form__field">
+      <span class="record-form__label">Time zone</span>
+      <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Time.zone_default.name})" }, class: "input input--select full-width" %>
+      <span class="record-form__hint">Their portal, approval pages and emails show times in it.</span>
+    </label>
+  </div>
 
-  <div class="flex align-center gap-half txt-align-start">
+  <div class="record-form__toggle">
+    <div class="record-form__toggle-text">
+      <%= form.label :internal, "Internal", class: "record-form__label" %>
+      <span class="record-form__hint">This is us. Its engagements are our own projects, with no agreement to send.</span>
+    </div>
     <label class="switch flex-item-no-shrink">
       <%= form.check_box :internal, class: "switch__input" %>
       <span class="switch__btn"></span>
     </label>
-    <%= form.label :internal, "Internal: this is us. Its engagements are our own projects, with no agreement to send.", class: "txt-small" %>
   </div>
 
   <%= custom_field_inputs form, client %>
 
-  <button type="submit" class="btn btn--link center" data-form-target="submit">
-    <span><%= client.new_record? ? "Add client" : "Save changes" %></span>
-    <%= icon_tag "arrow-right" %>
-  </button>
-
-  <%= link_to "Cancel and go back", client.new_record? ? clients_path : client_path(client), data: { form_target: "cancel" }, hidden: true %>
+  <div class="record-form__footer">
+    <%= link_to "Cancel", client.new_record? ? clients_path : client_path(client), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
+    <button type="submit" class="btn btn--link" data-form-target="submit">
+      <span><%= client.new_record? ? "Add client" : "Save changes" %></span>
+    </button>
+  </div>
 <% end %>

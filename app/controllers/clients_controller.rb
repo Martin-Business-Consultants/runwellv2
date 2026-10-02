@@ -17,11 +17,14 @@ class ClientsController < ApplicationController
 
   before_action :set_client, only: %i[show edit update destroy]
 
+  sortable_columns name: "clients.name", status: "clients.status"
+
   def index
     @view = index_view
     @status = params[:status].presence_in(Client::STATUSES + %w[all]) || "active"
     scope = @status == "all" ? Client.all : Client.where(status: @status)
-    @clients = paginate scope.ordered.includes(:contacts, :engagements, :custom_values)
+    @column_widths = column_widths(scope, :name) if @view == "table"
+    @clients = paginate sorted(scope.ordered.includes(:contacts, :engagements, :custom_values))
   end
 
   def show

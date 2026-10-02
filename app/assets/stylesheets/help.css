@@ -32,7 +32,7 @@
       &::before {
         color: var(--color-ink-medium);
         content: counter(step);
-        font-weight: 900;
+        font-weight: 600;
         inset-inline-start: 0;
         position: absolute;
       }

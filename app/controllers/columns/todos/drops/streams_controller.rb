@@ -4,7 +4,7 @@ class Columns::Todos::Drops::StreamsController < ApplicationController
   agent_exempt :create, reason: "dragging on the board; update_work changes status"
 
   def create
-    @todo.move!(status: "planned")
-    @todos = board_todos.where(status: "planned").order(:due_on, :position)
+    @todo.move!(status: "planned", before: params[:before])
+    @todos = board_todos.where(status: "planned").board_ordered
   end
 end

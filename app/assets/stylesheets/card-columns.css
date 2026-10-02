@@ -328,7 +328,7 @@
       flex-direction: row;
       flex-wrap: wrap;
       gap: var(--cards-gap);
-      justify-content: center;
+      justify-content: flex-start;
       padding: 1ch;
     }
 
@@ -656,7 +656,7 @@
   /* ------------------------------------------------------------------------ */
 
   .cards--maybe {
-    --card-color: oklch(var(--lch-blue-medium));
+    --card-color: var(--color-ink-medium);
 
     position: relative;
 

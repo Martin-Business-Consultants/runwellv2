@@ -4,13 +4,19 @@
     accent-color: var(--input-accent-color, var(--color-ink));
     background-color: var(--input-background, transparent);
     border-radius: var(--input-border-radius, calc(0.5em * var(--radius-scale, 1)));
-    border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-ink-medium));
+    border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-ink-light));
     color: var(--input-color, var(--color-ink));
+    /* 15px on a desk, matching the text around it; at least 16px on phones so iOS doesn't
+    /* zoom into the field. */
     font-size: max(16px, 1em);
     inline-size: 100%;
+
+    @media (min-width: 640px) {
+      font-size: var(--text-normal);
+    }
     line-height: inherit;
     max-inline-size: 100%;
-    padding: var(--input-padding, 0.5em 0.8em);
+    padding: var(--input-padding, 0.45em 0.75em);
     resize: none;
 
     &:autofill,
@@ -23,6 +29,13 @@
 
     &:where(:focus) {
       --focus-ring-offset: -1px;
+    }
+
+    /* Focus as Linear shows it: the accent on the border and a soft halo, not a hard ring. */
+    &:where(input, textarea, select):focus-visible {
+      border-color: var(--color-link);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-link) 22%, transparent);
+      outline: none;
     }
 
     &[readonly] {
@@ -125,15 +138,15 @@
 
   .input--select {
     --input-border-radius: var(--radius-pill, 99rem);
-    --input-padding: 0.5em 1.8em 0.5em 1.2em;
+    --input-padding: 0.45em 1.8em 0.45em 0.75em;
     --caret-icon: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m12 19.5c-.7 0-1.3-.3-1.7-.8l-9.8-11.1c-.7-.8-.6-1.9.2-2.6.8-.6 1.9-.6 2.5.2l8.6 9.8c0 .1.2.1.4 0l8.6-9.8c.7-.8 1.8-.9 2.6-.2s.9 1.8.2 2.6l-9.8 11.1c-.4.5-1.1.8-1.7.8z' fill='%23000'/%3E%3C/svg%3E");
     --caret-icon-dark: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m12 19.5c-.7 0-1.3-.3-1.7-.8l-9.8-11.1c-.7-.8-.6-1.9.2-2.6.8-.6 1.9-.6 2.5.2l8.6 9.8c0 .1.2.1.4 0l8.6-9.8c.7-.8 1.8-.9 2.6-.2s.9 1.8.2 2.6l-9.8 11.1c-.4.5-1.1.8-1.7.8z' fill='%23fff'/%3E%3C/svg%3E");
 
     -webkit-appearance: none;
     appearance: none;
     background-image: var(--caret-icon);
-    background-size: 0.5em;
-    background-position: center right 0.9em;
+    background-size: 0.45em;
+    background-position: center right 0.8em;
     background-repeat: no-repeat;
     text-align: start;
 
@@ -183,7 +196,7 @@
 
   /* Switches */
   .switch {
-    --switch-color: var(--color-ink-medium);
+    --switch-color: var(--color-ink-light);
     --switch-hover-brightness: 0.9;
 
     block-size: 1.75em;

@@ -29,6 +29,11 @@ class Contact < ApplicationRecord
   # May sign in to the client portal now.
   def portal? = portal_access? && !archived? && email.present?
 
+  # A contact shows as a circle of initials, in one of the staff avatars' colours (avatars.css),
+  # picked from the id so it stays the same everywhere.
+  def initials = name.scan(/\b\p{L}/).first(2).join.upcase
+  def avatar_tone = Zlib.crc32(id.to_s) % User::Avatar::AVATAR_COLORS.size + 1
+
   def search_title = name
   def search_content = [ role, email, phone ].compact_blank.join(" ")
 

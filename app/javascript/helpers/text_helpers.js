@@ -12,6 +12,24 @@ export function filterMatches(text, potentialMatch) {
   return normalizeFilteredText(text).includes(normalizeFilteredText(potentialMatch))
 }
 
+// A looser match for short lists of names (a combobox): the text contains the query, or the
+// query is the words' initials ("sp", Sarah Producer), or its letters appear in order ("srh").
+export function fuzzyMatches(text, potentialMatch) {
+  const haystack = normalizeFilteredText(text).trim()
+  const needle = normalizeFilteredText(potentialMatch).replace(/\s+/g, "")
+  if (!needle || haystack.includes(needle)) return true
+
+  const initials = haystack.split(/\s+/).map(word => word[0]).join("")
+  if (initials.startsWith(needle)) return true
+
+  let index = 0
+  for (const character of haystack) {
+    if (character === needle[index]) index++
+    if (index === needle.length) return true
+  }
+  return false
+}
+
 export function toSentence(array, options = {}) {
   const defaultConnectors = {
     words_connector: ", ",

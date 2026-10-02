@@ -12,6 +12,9 @@ class CommitmentsController < ApplicationController
     description: "Final once resolved.", params: { resolution: Commitment::RESOLUTIONS, note: "string" }
   agent_tool :delete_commitment, on: :destroy, title: "Delete an open commitment"
 
+  sortable_columns description: "commitments.description", due: "commitments.due_on",
+    client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ], status: "commitments.resolution"
+
   def index
     @view = index_view
     @state = params[:state].presence_in(%w[open resolved]) || "open"
@@ -19,7 +22,8 @@ class CommitmentsController < ApplicationController
 
     scope = @state == "resolved" ? Commitment.where.not(resolution: nil).order(resolved_at: :desc) : Commitment.open.ordered
     scope = scope.where(owner_kind: @owner_kind) unless @owner_kind == "all"
-    @commitments = paginate scope.includes(:client, :engagement, :user, :contact)
+    @column_widths = column_widths(scope, :description, :client) if @view == "table"
+    @commitments = paginate sorted(scope.includes(:client, :engagement, :user, :contact))
   end
 
   def create

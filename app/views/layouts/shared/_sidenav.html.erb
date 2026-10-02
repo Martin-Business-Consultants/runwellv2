@@ -3,7 +3,7 @@
     page filter, help, theme, settings and signing out at the foot. The current section is
     marked (aria-current). Below 800px it runs across the top instead. %>
 <aside class="sidenav" id="sidenav" aria-label="Main">
-  <%= link_to root_path, class: "sidenav__logo txt-large font-weight-black txt-current", title: "Needs You (g h)", data: { keys: "g h" } do %>
+  <%= link_to root_path, class: "sidenav__logo txt-current", title: "Needs You (g h)", data: { keys: "g h" } do %>
     <%= render "layouts/shared/logo" %>
   <% end %>
 

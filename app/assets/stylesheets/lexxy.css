@@ -49,7 +49,7 @@
   lexxy-editor {
     --lexxy-border-color: oklch(var(--lch-ink-darkest) / 20%);
     --lexxy-editor-padding: 0;
-    --lexxy-toolbar-button-size: 2rem;
+    --lexxy-toolbar-button-size: 1.85rem;
 
     background-color: transparent;
     border: none;
@@ -58,10 +58,13 @@
 
   lexxy-toolbar {
     border-color: var(--lexxy-border-color);
+    color: var(--color-ink-dark);
     gap: 0;
 
     svg {
+      block-size: 1.05rem;
       fill: currentColor;
+      inline-size: 1.05rem;
     }
   }
 
@@ -71,12 +74,14 @@
 
     &[aria-pressed="true"],
     &[aria-expanded="true"] {
-      background-color: oklch(var(--lch-blue-medium) / 20%);
+      background-color: var(--color-selected);
+      color: var(--color-ink);
     }
 
     @media(any-hover: hover) {
       &:hover:not([aria-pressed="true"]) {
-        background-color: oklch(var(--lch-ink-dark) / 20%);
+        background-color: var(--color-hover);
+        color: var(--color-ink);
       }
     }
   }

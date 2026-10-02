@@ -35,10 +35,8 @@
             <section class="settings__section">
               <header>
                 <h2 class="divider"><%= term(:engagement, count: 2) %></h2>
-                <div class="filters">
-                  <%= render "layouts/shared/quick_filter", title: "Show…", param: :engagements, current: @engagement_state,
-                        options: Engagement.filter_options(Engagement.filter_counts(scope: @client.engagements)) %>
-                </div>
+                <%= render "layouts/shared/segmented_filter", label: "Show " + term(:engagement, count: 2).downcase, param: :engagements, current: @engagement_state,
+                      options: Engagement.filter_options, counts: Engagement.filter_counts(scope: @client.engagements) %>
               </header>
 
               <% engagements = Engagement.filtered(state: @engagement_state, scope: @client.engagements) %>

@@ -1,48 +1,97 @@
 /* Indexes show records as Fizzy cards (cards--grid, colored by status from Fizzy's card
-/* palette) or as a table. Fizzy has no table styles, so these follow its list rows:
-/* hairline rules, small uppercase headings, no boxes. */
+/* dot, in the status pills' colours) or as a table. Fizzy has no table styles, so these follow
+/* Linear's lists: one hairline box, a quiet header row, dense rows. */
 @layer components {
-  .card--tone-positive { --card-color: var(--color-card-4); }
-  .card--tone-negative { --card-color: var(--color-card-8); }
-  .card--tone-waiting { --card-color: var(--color-card-3); }
-  .card--tone-progress { --card-color: var(--color-card-default); }
-  .card--tone-neutral { --card-color: var(--color-card-complete); }
+  .card--tone-positive { --card-color: oklch(var(--lch-green-medium)); }
+  .card--tone-negative { --card-color: oklch(var(--lch-red-medium)); }
+  .card--tone-waiting { --card-color: oklch(var(--lch-yellow-medium)); }
+  .card--tone-progress { --card-color: var(--color-link); }
+  .card--tone-neutral { --card-color: var(--color-ink-light); }
 
+  /* A Linear-style list: one hairline box, a quiet header row, dense rows that tint on hover. */
   .index-table {
+    --panel-border-radius: calc(0.6rem * var(--radius-scale, 1));
+    --panel-padding: 0;
     --panel-size: 100%;
 
+    box-shadow: none;
     overflow-x: auto;
+
+    @media (min-width: 640px) {
+      --panel-padding: 0;
+    }
   }
 
   .data-table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: var(--text-small);
     inline-size: 100%;
     text-align: start;
 
     th {
-      border-block-end: 1px solid var(--color-ink-light);
+      background-color: var(--color-ink-lightest);
+      border-block-end: 1px solid var(--color-ink-lighter);
       color: var(--color-ink-dark);
       font-size: var(--text-x-small);
-      font-weight: 700;
-      padding: 0.5em 0.75em;
+      font-weight: 500;
+      padding: 0.6em 0.9em;
       text-align: start;
-      text-transform: uppercase;
       white-space: nowrap;
     }
 
     td {
       border-block-end: 1px solid var(--color-ink-lighter);
-      padding: 0.6em 0.75em;
+      color: var(--color-ink-darker);
+      padding: 0.55em 0.9em;
       vertical-align: middle;
+
+      /* On a phone each row stays one line and the table scrolls sideways. */
+      @media (max-width: 639px) {
+        white-space: nowrap;
+      }
+    }
+
+    :is(th, td):first-child {
+      padding-inline-start: 1.1em;
+    }
+
+    td strong,
+    td a:not([class]) {
+      color: var(--color-ink);
+      font-weight: 500;
+    }
+
+    td a:not([class]) {
+      text-decoration: none;
+
+      &:hover { text-decoration: underline; text-underline-offset: 0.2em; }
     }
 
     tbody tr:last-child td {
       border-block-end: 0;
     }
 
+    tbody tr {
+      transition: background-color 80ms ease-out;
+    }
+
     tbody tr:hover td {
-      background-color: var(--color-ink-lightest);
+      background-color: var(--color-hover);
+    }
+
+    /* The row j / k landed on: tinted, with the accent down its edge. */
+    tbody tr:focus-visible {
+      outline: none;
+
+      td { background-color: var(--color-selected-light); }
+      td:first-child { box-shadow: inset 2px 0 0 var(--color-link); }
+    }
+
+    /* A disclosure button in a cell (Resolve) sits on the row's centre line like the pills
+    /* beside it: no space below it while closed, as it has outside a table. */
+    td > details:has(> summary.btn):not([open]) {
+      margin-block-end: 0;
     }
 
     .data-table__number {
@@ -76,36 +125,257 @@
   }
 }
 
-/* The Cards / Table (/ Board) toggle: a small pill of icons, the current one filled. */
+/* The Cards / Table (/ Board) toggle: a segmented control, the current option raised. */
 @layer components {
   .view-toggle {
-    border: 1px solid var(--color-ink-light);
-    border-radius: var(--radius-pill, 99rem);
+    background-color: var(--color-ink-lightest);
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-control);
     display: inline-flex;
-    gap: 0.15em;
-    padding: 0.2em;
+    gap: 0.1em;
+    padding: 0.15em;
   }
 
   .view-toggle__option {
-    --icon-size: 1.1em;
+    --icon-size: 1em;
 
-    border-radius: var(--radius-pill, 99rem);
-    color: var(--color-ink-dark);
+    border-radius: calc(var(--radius-control) - 0.15em);
+    color: var(--color-ink-medium);
     display: inline-grid;
-    padding: 0.45em 0.7em;
+    padding: 0.35em 0.55em;
     place-items: center;
 
     @media (any-hover: hover) {
-      &:hover { background-color: var(--color-ink-lightest); }
+      &:hover { color: var(--color-ink); }
     }
   }
 
   .view-toggle__option--current {
-    background-color: var(--color-ink);
-    color: var(--color-ink-inverted);
+    background-color: var(--color-canvas);
+    box-shadow: 0 0 0 1px var(--color-ink-lighter), 0 1px 2px oklch(var(--lch-black) / 6%);
+    color: var(--color-ink);
 
     @media (any-hover: hover) {
-      &:hover { background-color: var(--color-ink); }
+      &:hover { background-color: var(--color-canvas); }
     }
   }
+}
+
+/* Sortable headers (sortable_th): the whole header is the link; a small arrow shows on hover,
+/* and stays, pointing the sort's way, on the sorted column. */
+@layer components {
+  .data-table th.data-table__sortable {
+    padding: 0;
+  }
+
+  .data-table__sort {
+    align-items: center;
+    color: inherit;
+    display: flex;
+    gap: 0.35em;
+    padding: 0.6em 0.9em;
+    text-decoration: none;
+
+    .txt-align-center > & { justify-content: center; }
+    :first-child > & { padding-inline-start: 1.1em; }
+
+    &:hover { color: var(--color-ink); }
+  }
+
+  .data-table__sort--active {
+    color: var(--color-ink);
+  }
+
+  .data-table__sort-arrow {
+    block-size: 0;
+    border-block-end: 0.3em solid currentColor;
+    border-inline: 0.27em solid transparent;
+    inline-size: 0;
+    opacity: 0;
+    transition: opacity 80ms ease-out, rotate 120ms ease-out;
+
+    .data-table__sort:hover &,
+    .data-table__sort--active & { opacity: 1; }
+
+    .data-table__sort:not(.data-table__sort--active):hover & { opacity: 0.4; }
+  }
+
+  .data-table__sort-arrow--desc {
+    rotate: 180deg;
+  }
+}
+
+/* Pages under a table (table_pagination): how many rows are showing on the left, the pages on
+/* the right, with the controls' corners. */
+@layer components {
+  .table-pagination {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-block-start: 0.75rem;
+  }
+
+  .table-pagination__summary {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .table-pagination__pages {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .table-pagination__page {
+    align-items: center;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-control);
+    color: var(--color-ink-darker);
+    display: inline-flex;
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    justify-content: center;
+    min-block-size: 1.9rem;
+    min-inline-size: 1.9rem;
+    padding: 0 0.6rem;
+    text-decoration: none;
+
+    &:is(a):hover { background-color: var(--color-hover); color: var(--color-ink); }
+  }
+
+  .table-pagination__page--current {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-ink-inverted);
+
+    &:is(a):hover { background-color: var(--color-ink); color: var(--color-ink-inverted); }
+  }
+
+  .table-pagination__page--disabled {
+    color: var(--color-ink-light);
+  }
+
+  .table-pagination__gap {
+    color: var(--color-ink-medium);
+    padding-inline: 0.2rem;
+  }
+}
+
+/* Column widths that hold still (table_colgroup): with fixed layout a table's columns come from
+/* its colgroup, never from the rows on screen, so sorting or turning a page moves nothing. Each
+/* column has its share of the width (from its longest value, or its shape's fixed need), so
+/* the table always fits its page; narrower than 48rem it scrolls instead of crushing. */
+@layer components {
+  .data-table--fixed {
+    min-inline-size: 48rem;
+    table-layout: fixed;
+
+    td { overflow-wrap: anywhere; }
+  }
+
+  .data-table__col--p1 { inline-size: 1%; }
+  .data-table__col--p2 { inline-size: 2%; }
+  .data-table__col--p3 { inline-size: 3%; }
+  .data-table__col--p4 { inline-size: 4%; }
+  .data-table__col--p5 { inline-size: 5%; }
+  .data-table__col--p6 { inline-size: 6%; }
+  .data-table__col--p7 { inline-size: 7%; }
+  .data-table__col--p8 { inline-size: 8%; }
+  .data-table__col--p9 { inline-size: 9%; }
+  .data-table__col--p10 { inline-size: 10%; }
+  .data-table__col--p11 { inline-size: 11%; }
+  .data-table__col--p12 { inline-size: 12%; }
+  .data-table__col--p13 { inline-size: 13%; }
+  .data-table__col--p14 { inline-size: 14%; }
+  .data-table__col--p15 { inline-size: 15%; }
+  .data-table__col--p16 { inline-size: 16%; }
+  .data-table__col--p17 { inline-size: 17%; }
+  .data-table__col--p18 { inline-size: 18%; }
+  .data-table__col--p19 { inline-size: 19%; }
+  .data-table__col--p20 { inline-size: 20%; }
+  .data-table__col--p21 { inline-size: 21%; }
+  .data-table__col--p22 { inline-size: 22%; }
+  .data-table__col--p23 { inline-size: 23%; }
+  .data-table__col--p24 { inline-size: 24%; }
+  .data-table__col--p25 { inline-size: 25%; }
+  .data-table__col--p26 { inline-size: 26%; }
+  .data-table__col--p27 { inline-size: 27%; }
+  .data-table__col--p28 { inline-size: 28%; }
+  .data-table__col--p29 { inline-size: 29%; }
+  .data-table__col--p30 { inline-size: 30%; }
+  .data-table__col--p31 { inline-size: 31%; }
+  .data-table__col--p32 { inline-size: 32%; }
+  .data-table__col--p33 { inline-size: 33%; }
+  .data-table__col--p34 { inline-size: 34%; }
+  .data-table__col--p35 { inline-size: 35%; }
+  .data-table__col--p36 { inline-size: 36%; }
+  .data-table__col--p37 { inline-size: 37%; }
+  .data-table__col--p38 { inline-size: 38%; }
+  .data-table__col--p39 { inline-size: 39%; }
+  .data-table__col--p40 { inline-size: 40%; }
+  .data-table__col--p41 { inline-size: 41%; }
+  .data-table__col--p42 { inline-size: 42%; }
+  .data-table__col--p43 { inline-size: 43%; }
+  .data-table__col--p44 { inline-size: 44%; }
+  .data-table__col--p45 { inline-size: 45%; }
+  .data-table__col--p46 { inline-size: 46%; }
+  .data-table__col--p47 { inline-size: 47%; }
+  .data-table__col--p48 { inline-size: 48%; }
+  .data-table__col--p49 { inline-size: 49%; }
+  .data-table__col--p50 { inline-size: 50%; }
+  .data-table__col--p51 { inline-size: 51%; }
+  .data-table__col--p52 { inline-size: 52%; }
+  .data-table__col--p53 { inline-size: 53%; }
+  .data-table__col--p54 { inline-size: 54%; }
+  .data-table__col--p55 { inline-size: 55%; }
+  .data-table__col--p56 { inline-size: 56%; }
+  .data-table__col--p57 { inline-size: 57%; }
+  .data-table__col--p58 { inline-size: 58%; }
+  .data-table__col--p59 { inline-size: 59%; }
+  .data-table__col--p60 { inline-size: 60%; }
+  .data-table__col--p61 { inline-size: 61%; }
+  .data-table__col--p62 { inline-size: 62%; }
+  .data-table__col--p63 { inline-size: 63%; }
+  .data-table__col--p64 { inline-size: 64%; }
+  .data-table__col--p65 { inline-size: 65%; }
+  .data-table__col--p66 { inline-size: 66%; }
+  .data-table__col--p67 { inline-size: 67%; }
+  .data-table__col--p68 { inline-size: 68%; }
+  .data-table__col--p69 { inline-size: 69%; }
+  .data-table__col--p70 { inline-size: 70%; }
+  .data-table__col--p71 { inline-size: 71%; }
+  .data-table__col--p72 { inline-size: 72%; }
+  .data-table__col--p73 { inline-size: 73%; }
+  .data-table__col--p74 { inline-size: 74%; }
+  .data-table__col--p75 { inline-size: 75%; }
+  .data-table__col--p76 { inline-size: 76%; }
+  .data-table__col--p77 { inline-size: 77%; }
+  .data-table__col--p78 { inline-size: 78%; }
+  .data-table__col--p79 { inline-size: 79%; }
+  .data-table__col--p80 { inline-size: 80%; }
+  .data-table__col--p81 { inline-size: 81%; }
+  .data-table__col--p82 { inline-size: 82%; }
+  .data-table__col--p83 { inline-size: 83%; }
+  .data-table__col--p84 { inline-size: 84%; }
+  .data-table__col--p85 { inline-size: 85%; }
+  .data-table__col--p86 { inline-size: 86%; }
+  .data-table__col--p87 { inline-size: 87%; }
+  .data-table__col--p88 { inline-size: 88%; }
+  .data-table__col--p89 { inline-size: 89%; }
+  .data-table__col--p90 { inline-size: 90%; }
+  .data-table__col--p91 { inline-size: 91%; }
+  .data-table__col--p92 { inline-size: 92%; }
+  .data-table__col--p93 { inline-size: 93%; }
+  .data-table__col--p94 { inline-size: 94%; }
+  .data-table__col--p95 { inline-size: 95%; }
+  .data-table__col--p96 { inline-size: 96%; }
+  .data-table__col--p97 { inline-size: 97%; }
+  .data-table__col--p98 { inline-size: 98%; }
+  .data-table__col--p99 { inline-size: 99%; }
+  .data-table__col--p100 { inline-size: 100%; }
 }

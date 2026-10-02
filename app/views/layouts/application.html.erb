@@ -43,6 +43,9 @@
         </div>
         <%= render "quick_actions/tray" %>
       <% end %>
+      <% if authenticated? %>
+        <%= render "layouts/shared/hint_legend" %>
+      <% end %>
     </footer>
   </body>
 </html>

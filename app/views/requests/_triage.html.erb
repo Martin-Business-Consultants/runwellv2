@@ -20,16 +20,16 @@
     <%= form_with url: promote_engagement_request_path(request_record), class: "flex flex-column gap" do |form| %>
       <p class="txt-small txt-subtle margin-none">A new agreement whose first scope item is this request.</p>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Kind</span>
+        <span class="record-form__label">Kind</span>
         <%= form.select :label, label_options, { selected: "work_order" }, class: "input input--select full-width" %>
       </label>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Title (optional)</span>
+        <span class="record-form__label">Title (optional)</span>
         <%= form.text_field :title, class: "input full-width", autocomplete: "off", placeholder: request_record.subject %>
       </label>
       <% if request_record.unmatched? %>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Client</span>
+          <span class="record-form__label">Client</span>
           <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Choose a client" }, required: true, class: "input input--select full-width" %>
         </label>
       <% end %>
@@ -43,11 +43,11 @@
       <%= form_with url: promote_change_request_path(request_record), class: "flex flex-column gap" do |form| %>
         <p class="txt-small txt-subtle margin-none">Adds it to the engagement’s open draft, opening a change order if there isn’t one.</p>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold"><%= term(:engagement) %></span>
+          <span class="record-form__label"><%= term(:engagement) %></span>
           <%= form.select :engagement_ref, engagement_options, {}, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Price</span>
+          <span class="record-form__label">Price</span>
           <%= money_field form, :price_cents, value: 0, class: "input full-width", placeholder: "0.00" %>
         </label>
         <div class="flex gap-half">
@@ -63,15 +63,15 @@
       <%= form_with url: promote_todo_request_path(request_record), class: "flex flex-column gap" do |form| %>
         <p class="txt-small txt-subtle margin-none">A todo on an engagement already agreed.</p>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold"><%= term(:engagement) %></span>
+          <span class="record-form__label"><%= term(:engagement) %></span>
           <%= form.select :engagement_ref, engagement_options, {}, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Owner</span>
+          <span class="record-form__label">Owner</span>
           <%= form.select :owner_id, User.active.people.ordered.pluck(:name, :id), { include_blank: "Unowned" }, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Due</span>
+          <span class="record-form__label">Due</span>
           <%= date_input form, :due_on, class: "input full-width" %>
         </label>
         <div class="flex gap-half">
@@ -86,24 +86,24 @@
     <%= form_with url: promote_commitment_request_path(request_record), class: "flex flex-column gap" do |form| %>
       <p class="txt-small txt-subtle margin-none">A promise with an owner and a date.</p>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Due</span>
+        <span class="record-form__label">Due</span>
         <%= date_input form, :due_on, required: true, class: "input full-width" %>
       </label>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Whose promise</span>
+        <span class="record-form__label">Whose promise</span>
         <%= form.select :owner_kind, [ [ "Ours", "us" ], [ "The client’s", "client" ] ], {}, class: "input input--select full-width" %>
       </label>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Person (when it’s ours)</span>
+        <span class="record-form__label">Person (when it’s ours)</span>
         <%= form.select :user_id, User.active.people.ordered.pluck(:name, :id), { include_blank: "Anyone" }, class: "input input--select full-width" %>
       </label>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold"><%= term(:engagement) %> (optional)</span>
+        <span class="record-form__label"><%= term(:engagement) %> (optional)</span>
         <%= form.select :engagement_ref, engagement_options, { include_blank: "None" }, class: "input input--select full-width" %>
       </label>
       <% if request_record.unmatched? %>
         <label class="flex flex-column gap-half">
-          <span class="txt-small font-weight-bold">Client</span>
+          <span class="record-form__label">Client</span>
           <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Choose a client" }, required: true, class: "input input--select full-width" %>
         </label>
       <% end %>
@@ -115,7 +115,7 @@
   <% elsif triage == "dismiss" %>
     <%= form_with url: dismiss_request_path(request_record), class: "flex flex-column gap" do |form| %>
       <label class="flex flex-column gap-half">
-        <span class="txt-small font-weight-bold">Reason</span>
+        <span class="record-form__label">Reason</span>
         <%= form.text_field :reason, class: "input full-width", autocomplete: "off", placeholder: "Not needed" %>
       </label>
       <div class="flex gap-half">

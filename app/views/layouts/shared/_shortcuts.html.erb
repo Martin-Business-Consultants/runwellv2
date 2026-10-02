@@ -8,7 +8,14 @@
   <dialog class="dialog shortcuts panel fill-white shadow" data-dialog-target="dialog" aria-label="Keyboard shortcuts">
     <header class="flex align-center justify-space-between gap">
       <h2 class="txt-large font-weight-bold margin-none">Keyboard shortcuts</h2>
-      <button type="button" class="btn txt-small" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+      <div class="flex align-center gap-half">
+        <button type="button" class="btn txt-small hints-switch" data-action="keyboard#toggleHints">
+          <span class="hints-switch__show">Show key hints</span>
+          <span class="hints-switch__hide">Hide key hints</span>
+          <kbd class="hide-on-touch">.</kbd>
+        </button>
+        <button type="button" class="btn txt-small" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+      </div>
     </header>
     <p class="txt-small margin-none txt-align-start">
       New here? <%= link_to "How Runwell works", settings_help_path, class: "txt-link", data: { action: "dialog#close" } %> explains the pieces and how work flows through them.

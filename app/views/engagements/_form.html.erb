@@ -3,31 +3,31 @@
 
 <%= form_with model: engagement, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Client</span>
+    <span class="record-form__label">Client</span>
     <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Choose a client" },
           required: true, disabled: engagement.persisted?, class: "input input--select full-width" %>
   </label>
 
   <div class="flex gap">
     <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-      <span class="txt-small font-weight-bold">Label</span>
+      <span class="record-form__label">Label</span>
       <%= form.select :label, label_options(engagement.label), {}, class: "input input--select full-width" %>
     </label>
 
     <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-      <span class="txt-small font-weight-bold">Shape</span>
+      <span class="record-form__label">Shape</span>
       <%= form.select :shape, [ [ "Fixed scope", "fixed" ], [ "Recurring", "recurring" ] ], {},
             disabled: engagement.persisted?, class: "input input--select full-width" %>
     </label>
   </div>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Title</span>
+    <span class="record-form__label">Title</span>
     <%= form.text_field :title, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Spring landing page" %>
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Description</span>
+    <span class="record-form__label">Description</span>
     <%= rich_text_field form, :description, staff: true %>
     <% unless engagement.internal? %>
       <span class="txt-x-small txt-subtle">Shown to the client on the agreement.</span>
@@ -35,7 +35,7 @@
   </label>
 
   <label class="flex flex-column gap-half txt-align-start">
-    <span class="txt-small font-weight-bold">Estimate notes</span>
+    <span class="record-form__label">Estimate notes</span>
     <%= rich_text_field form, :estimate_notes, staff: true %>
     <span class="txt-x-small txt-subtle">Internal. Never shown to clients.</span>
   </label>

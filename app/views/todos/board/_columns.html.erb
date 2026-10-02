@@ -23,7 +23,7 @@
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
   <div class="card-columns__left"></div>
 
-  <%= render "todos/board/stream", todos: board.where(status: "planned").order(:due_on, :position) %>
+  <%= render "todos/board/stream", todos: board.where(status: "planned").board_ordered %>
 
   <div class="card-columns__right">
     <% Todo::BOARD_COLUMNS.each do |status| %>

@@ -30,14 +30,14 @@
 /* containers (panels, cards, dialogs, the editor) multiply by --radius-scale, pill shapes
 /* use --radius-pill, and true circles (50%) stay circles. Every control (buttons, inputs,
 /* selects, toggles, tags) shares one --radius-control so they always match each other. */
-:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: 0.6em; }
+:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: 0.4rem; }
 :root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; --radius-control: 0.2em; }
 :root[data-radius="round"] { --radius-scale: 1.6; --radius-control: 99rem; }
 
 /* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
 .btn { --btn-border-radius: var(--radius-control); }
 .input, .input--select, .input--upload, .input--actor { --input-border-radius: var(--radius-control); }
-.input--upload, .view-toggle, .view-toggle__option, .status-tag, .popup__btn { border-radius: var(--radius-control); }
+.input--upload, .view-toggle, .view-toggle__option, .popup__btn { border-radius: var(--radius-control); }
 
 /* An uploaded logo sits where the wordmark was, at the wordmark's height. */
 @layer components {
@@ -65,7 +65,7 @@
     place-items: center;
   }
 
-  .appearance-swatch--fizzy { background: oklch(var(--lch-blue-dark)); }
+  .appearance-swatch--fizzy { background: oklch(55% 0.16 277); }
   .appearance-swatch--forest { background: oklch(var(--lch-green-dark)); }
   .appearance-swatch--plum { background: oklch(var(--lch-purple-dark)); }
   .appearance-swatch--ocean { background: oklch(var(--lch-aqua-dark)); }
@@ -85,7 +85,7 @@
   .appearance-corner--fizzy { border-radius: 0.5em; }
   .appearance-corner--round { border-radius: 0.9em; }
 
-  .appearance-font--system { font-family: "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .appearance-font--system { font-family: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .appearance-font--humanist { font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, sans-serif; }
   .appearance-font--rounded { font-family: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, "Arial Rounded MT", sans-serif; }
   .appearance-font--serif { font-family: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", Georgia, serif; }

@@ -16,6 +16,11 @@ import { nextFrame } from "helpers/timing_helpers"
 //
 // The ? sheet (layouts/shared/_shortcuts) lists them all. Esc with nothing selected goes up a
 // level (<link rel="up">) or back.
+//
+// Hint mode (. or the switch in the ? sheet) puts each key on the control it presses: every
+// element declaring data-keys gets data-key-hint, which hints.css shows as a keycap, and a
+// strip at the foot of the page lists the keys with no control (layouts/shared/_hint_legend).
+// It's remembered per browser, and off until someone turns it on.
 
 const ITEM = "[data-filter-target~='item'], [data-keyboard-item]"
 const TYPING = "input, textarea, select, [contenteditable], lexxy-editor"
@@ -23,6 +28,7 @@ const OPENER = ":is(a[href], button):not(.row-action):not([data-keys])"
 const CHORD_TIMEOUT = 1500
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "meta" : "ctrl"
 const BOARD_ARROWS = { j: "ArrowDown", k: "ArrowUp", h: "ArrowLeft", l: "ArrowRight" }
+const HINTS_KEY = "keyHints"
 
 export default class extends Controller {
   connect() {
@@ -30,11 +36,21 @@ export default class extends Controller {
     this.focusin = this.focusin.bind(this)
     document.addEventListener("keydown", this.keydown)
     document.addEventListener("focusin", this.focusin)
+    this.#showHints(this.#storedHints)
   }
 
   disconnect() {
     document.removeEventListener("keydown", this.keydown)
     document.removeEventListener("focusin", this.focusin)
+    this.hintObserver?.disconnect()
+  }
+
+  // Hint mode, from . or a button (data-action="keyboard#toggleHints").
+  toggleHints(event) {
+    event?.preventDefault()
+    const on = !document.documentElement.hasAttribute("data-hints")
+    try { localStorage.setItem(HINTS_KEY, on ? "on" : "off") } catch {}
+    this.#showHints(on)
   }
 
   focusin({ target }) {
@@ -68,6 +84,7 @@ export default class extends Controller {
     if (this.#board && this.#boardKey(key, event)) return
 
     switch (key) {
+      case ".": return this.toggleHints(event)
       case "j": return this.#step(1, event)
       case "k": return this.#step(-1, event)
       case "G": return this.#select(this.#items().at(-1), event)
@@ -94,6 +111,37 @@ export default class extends Controller {
       event.preventDefault()
       history.back()
     }
+  }
+
+  // Hints
+
+  get #storedHints() {
+    try { return localStorage.getItem(HINTS_KEY) === "on" } catch { return false }
+  }
+
+  #showHints(on) {
+    document.documentElement.toggleAttribute("data-hints", on)
+    this.hintObserver?.disconnect()
+    this.hintObserver = null
+    if (!on) return
+
+    this.#labelHints()
+    // Frames, morphs and pagination bring in new controls; label those too.
+    this.hintObserver = new MutationObserver(() => {
+      cancelAnimationFrame(this.hintFrame)
+      this.hintFrame = requestAnimationFrame(() => this.#labelHints())
+    })
+    this.hintObserver.observe(document.body, { childList: true, subtree: true })
+  }
+
+  #labelHints() {
+    document.querySelectorAll("[data-keys]").forEach(element => {
+      const keys = element.dataset.keys.trim()
+      if (!keys || keys === "null") return delete element.dataset.keyHint
+
+      const hint = hintFor(keys)
+      if (element.dataset.keyHint !== hint) element.dataset.keyHint = hint
+    })
   }
 
   // Chords
@@ -195,6 +243,10 @@ export default class extends Controller {
       this.#moveCard(key === "L" ? 1 : -1, event)
       return true
     }
+    if (key === "J" || key === "K") {
+      this.#reorderCard(key === "J" ? 1 : -1, event)
+      return true
+    }
     return false
   }
 
@@ -211,12 +263,16 @@ export default class extends Controller {
     target.dispatchEvent(new KeyboardEvent("keydown", { key: arrow, bubbles: true, cancelable: true }))
   }
 
+  // The selected card, the focused one, or the one just moved (redrawn cards lose selection).
+  #boardCard(board) {
+    return board.querySelector("section.cards[aria-selected] .card[aria-selected]") || document.activeElement?.closest(".card") ||
+      (this.movedId && board.querySelector(`.card[data-id="${this.movedId}"]`))
+  }
+
   async #moveCard(delta, event) {
     event.preventDefault()
     const board = this.#board
-    // The selected card, the focused one, or the one just moved (redrawn cards lose selection).
-    const card = board.querySelector("section.cards[aria-selected] .card[aria-selected]") || document.activeElement?.closest(".card") ||
-      (this.movedId && board.querySelector(`.card[data-id="${this.movedId}"]`))
+    const card = this.#boardCard(board)
     if (!card) return
 
     const columns = Array.from(board.querySelectorAll("section.cards"))
@@ -225,13 +281,44 @@ export default class extends Controller {
     if (!to) return
 
     const id = card.dataset.id
+    const list = to.querySelector("[data-drag-drop-item-container]")
+    const body = new FormData()
+    // A sortable column takes the card at its top, where it shows up.
+    if (to.hasAttribute("data-drag-and-drop-sortable")) body.append("before", list?.querySelector(".card[data-id]")?.dataset.id || "")
     adjustCount(from, -1)
     adjustCount(to, 1)
-    to.querySelector("[data-drag-drop-item-container]")?.prepend(card)
+    list?.prepend(card)
     this.movedId = id
-    await post(to.dataset.dragAndDropUrl.replaceAll("__id__", id), { body: new FormData(), headers: { Accept: "text/vnd.turbo-stream.html" } })
+    await post(to.dataset.dragAndDropUrl.replaceAll("__id__", id), { body, headers: { Accept: "text/vnd.turbo-stream.html" } })
     from.querySelector("[data-drag-and-drop-refresh]")?.reload()
+    await this.#pickUpAgain(board, card, id)
+  }
 
+  // J / K: a card one place down or up its column, kept there (the column's drop endpoint with
+  // the card it now sits before).
+  async #reorderCard(delta, event) {
+    event.preventDefault()
+    const board = this.#board
+    const card = this.#boardCard(board)
+    const column = card?.closest("section.cards")
+    if (!column?.hasAttribute("data-drag-and-drop-sortable")) return
+
+    const cards = Array.from(column.querySelectorAll(".card[data-id]"))
+    const neighbour = cards[cards.indexOf(card) + delta]
+    if (!neighbour) return
+
+    delta > 0 ? neighbour.after(card) : neighbour.before(card)
+    const next = cards.filter(other => other !== card)[cards.indexOf(card) + delta]
+    const body = new FormData()
+    body.append("before", delta > 0 ? (next?.dataset.id || "") : neighbour.dataset.id)
+
+    const id = card.dataset.id
+    this.movedId = id
+    await post(column.dataset.dragAndDropUrl.replaceAll("__id__", id), { body, headers: { Accept: "text/vnd.turbo-stream.html" } })
+    await this.#pickUpAgain(board, card, id)
+  }
+
+  async #pickUpAgain(board, card, id) {
     // The target column is redrawn from the server; wait for the card's new node, then pick it
     // up again so the next H or L keeps moving it.
     for (let i = 0; i < 20; i++) {
@@ -267,6 +354,15 @@ function describe(event) {
 // data-keys="s, mod+k": alternatives separated by commas; mod is ⌘ on a Mac, Ctrl elsewhere.
 function declares(element, key) {
   return element.dataset.keys.split(",").map(name => name.trim().replace("mod", MOD)).includes(key)
+}
+
+// The first of a control's keys as people press it: "g c" stays a sequence, mod becomes ⌘ or
+// Ctrl, and named keys get their names.
+function hintFor(keys) {
+  const NAMES = { esc: "Esc", enter: "Enter", space: "Space" }
+  return keys.split(",")[0].trim().split(" ").map(stroke =>
+    stroke.split("+").map(part => part === "mod" ? (MOD === "meta" ? "⌘" : "Ctrl") : (NAMES[part] || part)).join(MOD === "meta" ? "" : "+")
+  ).join(" ")
 }
 
 function usable(element) {

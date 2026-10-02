@@ -25,4 +25,19 @@ module AvatarsHelper
         tag.span(user.display_name, class: "for-screen-reader")
     end
   end
+
+  # A client's contacts as overlapping circles of initials: the first `limit`, then "+N" for the
+  # rest. Each name is its tooltip and what a screen reader hears.
+  def contact_stack(contacts, limit: 3)
+    shown = contacts.first(limit)
+    rest = contacts.size - shown.size
+
+    tag.span class: "contact-stack" do
+      circles = shown.map do |contact|
+        tag.span contact.initials, class: "contact-avatar contact-avatar--#{contact.avatar_tone}", title: contact.name, role: "img", aria: { label: contact.name }
+      end
+      circles << tag.span("+#{rest}", class: "contact-stack__more", title: contacts.drop(limit).map(&:name).to_sentence) if rest.positive?
+      safe_join(circles)
+    end
+  end
 end

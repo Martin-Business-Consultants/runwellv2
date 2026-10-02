@@ -12,17 +12,17 @@
 
     <%= form_with model: @commitment, class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="txt-small font-weight-bold">What was promised</span>
+        <span class="record-form__label">What was promised</span>
         <%= form.text_field :description, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
       </label>
 
       <div class="flex gap">
         <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-          <span class="txt-small font-weight-bold">Due</span>
+          <span class="record-form__label">Due</span>
           <%= date_input form, :due_on, required: true, class: "input full-width" %>
         </label>
         <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-          <span class="txt-small font-weight-bold">Whose</span>
+          <span class="record-form__label">Whose</span>
           <%= form.select :owner, grouped_options_for_select(commitment_owner_options(@commitment.client), @commitment.owner), {}, class: "input input--select full-width" %>
         </label>
       </div>

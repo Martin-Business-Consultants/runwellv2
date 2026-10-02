@@ -66,6 +66,11 @@ export default class extends Controller {
     this.element.reset()
   }
 
+  // Runwell: a form that stays on the page after it saves (a permanent composer) empties itself.
+  resetOnSuccess(event) {
+    if (event.detail.success) this.element.reset()
+  }
+
   cancel() {
     this.cancelTarget?.click()
   }

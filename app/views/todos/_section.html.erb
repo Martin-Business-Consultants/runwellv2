@@ -5,10 +5,8 @@
 <section class="settings__section" id="work">
   <header>
     <h2 class="divider"><%= term(:work) %></h2>
-    <div class="filters">
-      <%= render "layouts/shared/quick_filter", title: "Show…", param: :work, current: state,
-            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
-    </div>
+    <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
+          options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
   </header>
 
   <% todos = engagement.todos.includes(:owner, :scope_item, engagement: :client).order(:due_on, :position) %>

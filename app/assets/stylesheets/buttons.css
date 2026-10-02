@@ -1,21 +1,23 @@
 @layer components {
   .btn {
-    --icon-size: var(--btn-icon-size, 1.3em);
+    --icon-size: var(--btn-icon-size, 1.1em);
     --btn-border-radius: var(--radius-pill, 99rem);
-    --btn-hover-brightness: 0.9;
+    --btn-hover-brightness: 0.96;
 
     align-items: center;
     background-color: var(--btn-background, var(--color-canvas));
     border-radius: var(--btn-border-radius);
-    border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-ink-light));
+    border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-ink-lighter));
+    box-shadow: var(--btn-shadow, 0 1px 1px oklch(var(--lch-black) / 4%));
     color: var(--btn-color, var(--color-ink));
     cursor: pointer;
     display: inline-flex;
     font-size: 1em;
-    font-weight: var(--btn-font-weight, 600);
-    gap: var(--btn-gap, 0.5em);
+    font-weight: var(--btn-font-weight, 500);
+    gap: var(--btn-gap, 0.45em);
     justify-content: center;
-    padding: var(--btn-padding, 0.5em 1.1em);
+    line-height: 1.2;
+    padding: var(--btn-padding, 0.45em 0.85em);
     pointer-events: auto;
     position: relative;
     text-decoration: none;
@@ -29,12 +31,12 @@
     }
 
     html[data-theme="dark"] & {
-      --btn-hover-brightness: 1.25;
+      --btn-hover-brightness: 1.15;
     }
 
     @media (prefers-color-scheme: dark) {
       html:not([data-theme]) & {
-        --btn-hover-brightness: 1.25;
+        --btn-hover-brightness: 1.15;
       }
     }
 
@@ -80,6 +82,7 @@
     --btn-background: transparent;
     --btn-border-radius: 0;
     --btn-border-size: 0;
+    --btn-shadow: none;
     --btn-color: inherit;
     --btn-icon-size: 100%;
     --btn-padding: 0;
@@ -87,9 +90,15 @@
 
   .btn--link {
     --btn-background: var(--color-link);
-    --btn-border-color: var(--color-canvas);
-    --btn-color: var(--color-ink-inverted);
+    --btn-border-color: color-mix(in oklch, var(--color-link) 85%, black);
+    --btn-color: var(--color-white);
+    --btn-shadow: 0 1px 2px oklch(var(--lch-black) / 12%), inset 0 1px 0 oklch(var(--lch-white) / 12%);
     --focus-ring-color: var(--color-link);
+
+    kbd {
+      border-color: oklch(var(--lch-white) / 30%);
+      color: inherit;
+    }
   }
 
   .btn--circle,
@@ -168,7 +177,7 @@
 
   .btn--reversed {
     --btn-background: var(--color-ink);
-    --btn-border-color: var(--color-canvas);
+    --btn-border-color: var(--color-ink);
     --btn-color: var(--color-canvas);
     --focus-ring-color: var(--color-ink);
   }

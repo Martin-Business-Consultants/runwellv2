@@ -13,34 +13,34 @@
       <%= hidden_field_tag :from_edit, "1" %>
 
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="txt-small font-weight-bold">Title</span>
+        <span class="record-form__label">Title</span>
         <%= form.text_field :title, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
       </label>
 
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="txt-small font-weight-bold">Description</span>
+        <span class="record-form__label">Description</span>
         <%= rich_text_field form, :description, staff: true %>
       </label>
 
       <div class="flex gap">
         <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-          <span class="txt-small font-weight-bold">Status</span>
+          <span class="record-form__label">Status</span>
           <%= form.select :status, todo_status_options, {}, class: "input input--select full-width" %>
         </label>
 
         <label class="flex flex-column gap-half txt-align-start flex-item-grow">
-          <span class="txt-small font-weight-bold">Due</span>
+          <span class="record-form__label">Due</span>
           <%= date_input form, :due_on, class: "input full-width" %>
         </label>
       </div>
 
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="txt-small font-weight-bold">Owner</span>
+        <span class="record-form__label">Owner</span>
         <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, class: "input input--select full-width" %>
       </label>
 
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="txt-small font-weight-bold">Scope item</span>
+        <span class="record-form__label">Scope item</span>
         <%= form.select :scope_item_id, @todo.engagement.agreed_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, class: "input input--select full-width" %>
       </label>
 

@@ -1,10 +1,11 @@
 <%# locals: (todo:, labelled: nil) %>
 <%# Who a todo is assigned to, changed in place: the owner's avatar (or an empty circle) opens a
-    menu of the team; choosing one saves it. Same popup as the status circle. %>
+    combobox of the team right beside it. Type to narrow it (fuzzy: "sp" finds Sarah Producer),
+    Enter or a click picks one and saves it. %>
 <% owner = todo.owner %>
 <% label = owner ? owner.display_name : "Unassigned" %>
-<div class="row-picker owner-picker" data-controller="dialog fixed-popup" data-dialog-orient-value="false"
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
+<div class="row-picker owner-picker" data-controller="dialog fixed-popup filter" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
+  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close dialog:close->filter#clearInput">
   <button type="button" class="owner-picker__trigger" title="<%= label %>: click to reassign" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
     <% if owner %>
       <%= avatar_image_tag owner, class: "owner-picker__avatar", alt: "" %>
@@ -18,9 +19,10 @@
   </button>
 
   <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Assign <%= todo.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
-    <strong class="popup__title pad-inline-half">Assign to</strong>
+    <input type="search" class="input input--transparent txt-small full-width owner-picker__search" placeholder="Assign to…" autocomplete="off" aria-label="Find a person" data-1p-ignore="true"
+      data-filter-target="input" data-dialog-target="focusMouse" data-action="input->filter#filter keydown.enter->filter#chooseFirst">
     <ul class="popup__list" role="group">
-      <li class="popup__item" role="checkbox" aria-checked="<%= owner.nil? %>">
+      <li class="popup__item" role="checkbox" aria-checked="<%= owner.nil? %>" data-filter-target="item">
         <%= button_to todo_path(todo), method: :patch, params: { todo: { owner_id: "" } }, class: "btn popup__btn", form_class: "full-width" do %>
           <span class="owner-picker__empty owner-picker__empty--small" aria-hidden="true"><%= icon_tag "person" %></span>
           <span class="overflow-ellipsis flex-item-grow">Unassigned</span>
@@ -29,7 +31,7 @@
       </li>
       <% todo_people.each do |person| %>
         <%# herb:key person.id %>
-        <li class="popup__item" role="checkbox" aria-checked="<%= person.id == todo.owner_id %>">
+        <li class="popup__item" role="checkbox" aria-checked="<%= person.id == todo.owner_id %>" data-filter-target="item">
           <%= button_to todo_path(todo), method: :patch, params: { todo: { owner_id: person.id } }, class: "btn popup__btn", form_class: "full-width" do %>
             <%= avatar_image_tag person, class: "owner-picker__avatar owner-picker__avatar--small", alt: "" %>
             <span class="overflow-ellipsis flex-item-grow"><%= person.display_name %></span>

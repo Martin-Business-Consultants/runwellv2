@@ -1,6 +1,6 @@
 @layer components {
   .divider {
-    --divider-color: var(--color-ink-light);
+    --divider-color: var(--color-ink-lighter);
 
     align-items: center;
     display: flex;

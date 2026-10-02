@@ -17,6 +17,13 @@ class TodosController < ApplicationController
 
   before_action :set_todo, only: %i[show edit update destroy brief]
 
+  sortable_columns title: "todos.title",
+    engagement: [ "engagements.ref", ->(scope) { scope.left_joins(:engagement) } ],
+    client: [ "clients.name", ->(scope) { scope.left_joins(engagement: :client) } ],
+    owner: [ "owners.name", ->(scope) { scope.joins("LEFT JOIN users owners ON owners.id = todos.owner_id") } ],
+    due: "todos.due_on",
+    status: "CASE todos.status #{Todo::STATUSES.each_with_index.map { |status, index| "WHEN '#{status}' THEN #{index}" }.join(" ")} END"
+
   def index
     @view = index_view(extra: %w[board])
     @status = params[:status].presence_in(%w[open all]) || "open"
@@ -26,7 +33,8 @@ class TodosController < ApplicationController
     scope = Todo.filtered(owner: @owner, engagement: @engagement)
     @board = scope
     scope = scope.open unless @status == "all"
-    @todos = paginate scope.includes(:custom_values).order(:due_on, :position, :id)
+    @column_widths = column_widths(scope, :title, :engagement, :client) if @view == "table"
+    @todos = paginate sorted(scope.includes(:custom_values).order(:due_on, :position, :id))
   end
 
   def create

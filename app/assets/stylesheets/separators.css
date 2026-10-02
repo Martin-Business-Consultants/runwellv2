@@ -8,7 +8,10 @@
     inline-size: 0;
   }
 
+  /* A hairline in the same grey as every other rule, whatever the text colour around it. */
   .separator--horizontal {
+    --border-color: var(--color-ink-lighter);
+
     block-size: 0;
     border-block-end: 0;
     border-block-start: var(--border-size, 1px) var(--border-style, solid) var(--border-color, currentColor);

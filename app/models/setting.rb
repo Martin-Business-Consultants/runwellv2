@@ -6,7 +6,7 @@ class Setting < ApplicationRecord
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
   RADII = { "sharp" => "Sharp", "fizzy" => "Soft", "round" => "Round" }.freeze
-  SCHEMES = { "fizzy" => "Blue", "forest" => "Forest", "plum" => "Plum", "ocean" => "Ocean", "graphite" => "Graphite" }.freeze
+  SCHEMES = { "fizzy" => "Indigo", "forest" => "Forest", "plum" => "Plum", "ocean" => "Ocean", "graphite" => "Graphite" }.freeze
   FONTS = { "system" => "System", "humanist" => "Humanist", "rounded" => "Rounded", "serif" => "Serif", "mono" => "Mono" }.freeze
 
   has_one_attached :logo

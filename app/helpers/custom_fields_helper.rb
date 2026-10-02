@@ -6,8 +6,8 @@ module CustomFieldsHelper
     safe_join(record.custom_fields.map do |field|
       name = "#{form.object_name}[custom_fields][#{field.key}]"
       id = "#{form.object_name}_custom_#{field.key}".parameterize(separator: "_")
-      tag.label(class: "flex flex-column gap-half txt-align-start") do
-        safe_join([ tag.span(field.label, class: "txt-small font-weight-bold"), custom_field_input(field, name, id, record.custom_value(field)) ])
+      tag.label(class: "record-form__field") do
+        safe_join([ tag.span(field.label, class: "record-form__label"), custom_field_input(field, name, id, record.custom_value(field)) ])
       end
     end)
   end

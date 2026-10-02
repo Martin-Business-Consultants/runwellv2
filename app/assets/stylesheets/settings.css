@@ -1,7 +1,7 @@
 @layer components {
   .settings {
     --settings-spacer: var(--block-space);
-    --settings-item-padding-inline: 0.5ch;
+    --settings-item-padding-inline: 0.6rem;
 
     align-items: start;
     display: flex;
@@ -60,7 +60,9 @@
 
   .settings__section {
     h2:not(.lexxy-content *) {
-      font-size: var(--text-large);
+      font-size: var(--text-medium);
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
 
     /* A section's header is one compact row: its name at the start, a rule running on, and any
@@ -72,8 +74,9 @@
       gap: var(--inline-space);
 
       h2 {
-        font-size: var(--text-medium);
-        font-weight: 800;
+        font-size: var(--text-normal);
+        font-weight: 600;
+        letter-spacing: -0.01em;
         margin: 0;
       }
 
@@ -125,26 +128,24 @@
   .settings__scrollable-list {
     flex: 1 1 auto;
     list-style: none;
-    margin: calc(var(--settings-spacer) / -4) calc(-1 * var(--settings-item-padding-inline));
+    margin: 0 calc(-1 * var(--settings-item-padding-inline, 0.6rem));
     padding: 0;
     overflow: auto;
 
+    /* Rows as Linear lists them: a hairline between, a tint under the pointer, and no rule
+    /* running from the name to the controls (the separator stays as the spacer). */
+    /* The list bleeds into the panel's padding by the rows' own padding, so a row's text lines
+    /* up with everything else in the column and its hover tint reaches past it. */
     li {
-      border-radius: calc(0.5em * var(--radius-scale, 1));
+      border-radius: calc(0.4rem * var(--radius-scale, 1));
+      padding: 0.4rem var(--settings-item-padding-inline, 0.6rem);
+      transition: background-color 80ms ease-out;
 
-      /* Add padding if it's not already on a link within */
-      &:not(:has(a:first-child)) { padding-inline-end: var(--settings-item-padding-inline); }
-      &:not(:has(a:last-child)) { padding-inline-end: var(--settings-item-padding-inline); }
-    }
-
-    a {
-      padding: calc(var(--settings-spacer) / 4) var(--settings-item-padding-inline);
-
-      @media(any-hover: hover) {
-        &:hover {
-          text-decoration: underline;
-        }
+      @media (any-hover: hover) {
+        &:hover { background-color: var(--color-hover); }
       }
+
+      .separator--horizontal { border-color: transparent; }
     }
 
     /* Only add a BG color when you can actually navigate */
@@ -232,9 +233,10 @@
 /* A record's name, at the top left of its page's first panel (the header keeps the actions). */
 @layer components {
   .page-title {
-    font-size: var(--text-x-large);
-    font-weight: 900;
-    line-height: 1.15;
+    font-size: var(--text-large);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
     margin: 0;
     overflow-wrap: anywhere;
     text-align: start;
@@ -371,8 +373,8 @@
     }
 
     .settings__section h2:not(.lexxy-content *) {
-      font-size: var(--text-medium);
-      font-weight: 800;
+      font-size: var(--text-normal);
+      font-weight: 600;
     }
 
     .settings__panel--side .settings__section h2:not(.lexxy-content *) {
@@ -435,6 +437,344 @@
     > .settings__section:first-child > header > h2.divider {
       display: none;
     }
+  }
+
+  /* A record's form (clients/_form): labelled fields down the column, short ones paired in a row
+  /* that stacks when narrow, a switch as a row of its own with its explanation beside it, and
+  /* Cancel and the save button at the end, on a hairline. Custom fields use the same field and
+  /* label (custom_field_inputs), so they match on every form. */
+  .record-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    text-align: start;
+  }
+
+  .record-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-inline-size: 0;
+    text-align: start;
+  }
+
+  .record-form__label {
+    color: var(--color-ink);
+    font-size: var(--text-small);
+    font-weight: 500;
+  }
+
+  .record-form__hint {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+  }
+
+  .record-form__row {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  }
+
+  /* A short field (a status) beside a long one (a time zone). */
+  .record-form__row--narrow-first {
+    @media (min-width: 640px) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+  }
+
+  .record-form__toggle {
+    align-items: center;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.6rem * var(--radius-scale, 1));
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .record-form__toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-inline-size: 0;
+  }
+
+  .record-form__footer {
+    align-items: center;
+    border-block-start: 1px solid var(--color-ink-lighter);
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-block-start: 0.25rem;
+    padding-block-start: 1rem;
+
+    .btn { font-size: var(--text-small); }
+  }
+
+  .record-form__cancel {
+    --btn-color: var(--color-ink-dark);
+    --btn-padding: 0.45em 0.85em;
+
+    border-radius: var(--radius-control);
+
+    @media (any-hover: hover) {
+      &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
+    }
+  }
+
+  /* A commitment (commitments/_commitment): its text, its state and Resolve on one row. The text
+  /* takes the room, so the state and the button sit at the end. Opened, Resolve takes a line of
+  /* its own: the button stays at the end and the form runs the full width beneath it. */
+  .commitment-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    > :first-child { flex: 1 1 12rem; }
+  }
+
+  .commitment-row > .commitment-row__resolve {
+    flex-shrink: 0;
+    margin-block-end: 0;
+
+    &[open] > summary.btn { margin-block-end: 0; }
+
+    &[open] {
+      flex-basis: 100%;
+      inline-size: 100%;
+      text-align: end;
+
+      > form {
+        flex-wrap: nowrap;
+        margin-block-start: 0.5rem;
+        text-align: start;
+
+        .input {
+          flex: 1 1 auto;
+          inline-size: auto;
+          min-inline-size: 0;
+        }
+
+        .btn { flex-shrink: 0; }
+      }
+    }
+  }
+
+  /* A question for a person (questions/_question): the close button in the top right, clear of
+  /* the text, and the answers on one row below. */
+  .question {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    position: relative;
+  }
+
+  .question__text {
+    padding-inline-end: 2rem;
+  }
+
+  .question__dismiss-form {
+    inset: -0.15rem -0.25rem auto auto;
+    position: absolute;
+  }
+
+  .question__dismiss {
+    --icon-size: 0.85rem;
+
+    block-size: 1.75rem;
+    border-radius: var(--radius-control);
+    color: var(--color-ink-medium);
+    display: grid;
+    inline-size: 1.75rem;
+    place-items: center;
+
+    @media (any-hover: hover) {
+      &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
+    }
+  }
+
+  .question__answers {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .input-action { flex: 1 1 14rem; }
+  }
+
+  /* A field with its submit inside it: the arrow sits at the field's end. */
+  .input-action {
+    display: flex;
+    position: relative;
+
+    .input {
+      padding-inline-end: 2.4rem;
+    }
+  }
+
+  .input-action__submit {
+    --icon-size: 0.95rem;
+
+    block-size: 1.75rem;
+    border-radius: calc(var(--radius-control) - 0.1rem);
+    color: var(--color-ink-medium);
+    display: grid;
+    inline-size: 1.75rem;
+    inset: 50% 0.3rem auto auto;
+    place-items: center;
+    position: absolute;
+    translate: 0 -50%;
+
+    @media (any-hover: hover) {
+      &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
+    }
+
+    .input-action:has(.input:not(:placeholder-shown)) & {
+      background-color: var(--color-link);
+      color: var(--color-white);
+    }
+  }
+
+  /* Writing a note above a record's notes (notes/_section): one bordered box, the editor on top
+  /* (toolbar always shown, so focusing it shifts nothing), and the kind, source and Add note
+  /* along its foot. */
+  .note-composer {
+    --note-padding-inline: 0.9rem;
+
+    border: 1px solid var(--color-ink-light);
+    border-radius: calc(0.6rem * var(--radius-scale, 1));
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    transition: border-color 100ms ease-out, box-shadow 100ms ease-out;
+
+    &:focus-within {
+      border-color: var(--color-link);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-link) 22%, transparent);
+    }
+
+    lexxy-editor.lexxy-content,
+    lexxy-editor.lexxy-content:focus-within {
+      border: 0;
+      border-radius: inherit;
+      box-shadow: none;
+      padding: 0 var(--note-padding-inline);
+
+      .lexxy-editor__content { min-block-size: 3lh; }
+    }
+  }
+
+  /* The notes below the composer line up with it: the same width (no bleed into the panel's
+  /* padding, as other lists have) and the same inner padding, so a note's text starts where
+  /* the composer's does. */
+  .note-composer + .notes-list,
+  .note-composer ~ .notes-list {
+    margin: var(--block-space) 0 0;
+
+    li { padding: 0.6rem 0.9rem; }
+  }
+
+  .note-composer__footer {
+    align-items: center;
+    border-block-start: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+
+    .input {
+      --input-border-color: transparent;
+      --input-background: transparent;
+
+      font-size: var(--text-x-small);
+      inline-size: auto;
+      padding-block: 0.35em;
+
+      &:hover { background-color: var(--color-hover); }
+    }
+
+    .note-composer__kind { flex: 0 0 auto; }
+    .note-composer__source { flex: 1 1 10rem; min-inline-size: 0; }
+    .note-composer__submit { font-size: var(--text-small); margin-inline-start: auto; }
+  }
+
+  /* Adding files where a record's documents are listed (documents/_section): a dashed box the
+  /* full width of the column; dropping files on it uploads them. Hovered or dragged over, it
+  /* takes the accent. */
+  .document-drop__target {
+    --btn-background: transparent;
+    --btn-border-color: var(--color-ink-light);
+    --btn-color: var(--color-ink-dark);
+    --btn-font-weight: 500;
+    --btn-padding: 1.1rem 1rem;
+    --btn-shadow: none;
+    --icon-size: 1rem;
+
+    font-size: var(--text-small);
+    inline-size: 100%;
+
+    @media (any-hover: hover) {
+      &:hover { filter: none; }
+    }
+
+    &:hover,
+    &:has(input:focus-visible),
+    &.drag-and-drop__hover-container {
+      --btn-background: var(--color-selected-light);
+      --btn-border-color: var(--color-link);
+      --btn-color: var(--color-ink);
+    }
+  }
+
+  .document-drop + .settings__scrollable-list {
+    margin-block-start: var(--block-space-half);
+  }
+
+  /* A section's filter (layouts/shared/_segmented_filter): its choices side by side in one
+  /* hairline track, each with a muted count, the current one raised like the view toggle.
+  /* In a tab the section's heading is hidden, so the control leads the section. */
+  .segmented-filter {
+    background-color: var(--color-ink-lightest);
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-control);
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 0.1em;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    padding: 0.15em;
+    scrollbar-width: none;
+  }
+
+  .segmented-filter__option {
+    align-items: center;
+    border-radius: calc(var(--radius-control) - 0.15em);
+    color: var(--color-ink-dark);
+    display: inline-flex;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    gap: 0.45em;
+    padding: 0.3em 0.7em;
+    text-decoration: none;
+    white-space: nowrap;
+
+    @media (any-hover: hover) {
+      &:hover { color: var(--color-ink); }
+    }
+
+    &[aria-current="true"] {
+      background-color: var(--color-canvas);
+      box-shadow: 0 0 0 1px var(--color-ink-lighter), 0 1px 2px oklch(var(--lch-black) / 6%);
+      color: var(--color-ink);
+    }
+  }
+
+  .segmented-filter__count {
+    color: var(--color-ink-medium);
+    font-variant-numeric: tabular-nums;
+
+    [aria-current="true"] > & { color: var(--color-ink-dark); }
   }
 
   /* A section's add action: one small button at the start of the row after the list, the same

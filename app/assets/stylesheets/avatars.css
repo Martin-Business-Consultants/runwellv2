@@ -52,3 +52,61 @@
     inline-size: 100%;
   }
 }
+
+/* A client's contacts (contact_stack): circles of initials, overlapping, each ringed in the
+/* canvas colour so the overlap reads. Contacts have no pictures; the colours are the staff
+/* avatars' (User::Avatar::AVATAR_COLORS), so both kinds of people look alike. */
+@layer components {
+  .contact-stack {
+    align-items: center;
+    display: inline-flex;
+    vertical-align: middle;
+
+    > * + * {
+      margin-inline-start: -0.15rem;
+    }
+  }
+
+  .contact-avatar,
+  .contact-stack__more {
+    block-size: 1.6rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--color-canvas);
+    display: inline-grid;
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    font-weight: 600;
+    inline-size: 1.6rem;
+    letter-spacing: 0;
+    line-height: 1;
+    place-items: center;
+  }
+
+  .contact-avatar {
+    color: var(--color-white);
+  }
+
+  .contact-stack__more {
+    background-color: var(--color-ink-lightest);
+    color: var(--color-ink-dark);
+  }
+
+  .contact-avatar--1 { background-color: #AF2E1B; }
+  .contact-avatar--2 { background-color: #CC6324; }
+  .contact-avatar--3 { background-color: #3B4B59; }
+  .contact-avatar--4 { background-color: #BFA07A; }
+  .contact-avatar--5 { background-color: #ED8008; }
+  .contact-avatar--6 { background-color: #ED3F1C; }
+  .contact-avatar--7 { background-color: #BF1B1B; }
+  .contact-avatar--8 { background-color: #736B1E; }
+  .contact-avatar--9 { background-color: #D07B53; }
+  .contact-avatar--10 { background-color: #736356; }
+  .contact-avatar--11 { background-color: #AD1D1D; }
+  .contact-avatar--12 { background-color: #BF7C2A; }
+  .contact-avatar--13 { background-color: #C09C6F; }
+  .contact-avatar--14 { background-color: #698F9C; }
+  .contact-avatar--15 { background-color: #7C956B; }
+  .contact-avatar--16 { background-color: #5D618F; }
+  .contact-avatar--17 { background-color: #3B3633; }
+  .contact-avatar--18 { background-color: #67695E; }
+}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_215346) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "name", null: false
@@ -441,11 +441,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_150000) do
     t.integer "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "board_position", null: false
     t.index ["created_by_id"], name: "index_todos_on_created_by_id"
     t.index ["engagement_id", "status", "position"], name: "index_todos_on_engagement_id_and_status_and_position"
     t.index ["engagement_id"], name: "index_todos_on_engagement_id"
     t.index ["owner_id"], name: "index_todos_on_owner_id"
     t.index ["scope_item_id"], name: "index_todos_on_scope_item_id"
+    t.index ["status", "board_position"], name: "index_todos_on_status_and_board_position"
   end
 
   create_table "upgrades", force: :cascade do |t|

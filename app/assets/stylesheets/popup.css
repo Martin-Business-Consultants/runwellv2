@@ -1,8 +1,8 @@
 @layer components {
   .popup {
     --btn-background: transparent;
-    --panel-border-radius: calc(0.5em * var(--radius-scale, 1));
-    --panel-padding: var(--block-space);
+    --panel-border-radius: calc(0.6rem * var(--radius-scale, 1));
+    --panel-padding: 0.35rem;
     --panel-size: auto;
     --popup-icon-size: 24px;
     --popup-item-padding-inline: 0.4rem;
@@ -12,10 +12,15 @@
     max-block-size: 70dvh;
     max-inline-size: min(55ch, calc(100vw - (var(--panel-padding))));
     min-inline-size: min(25ch, calc(100vw - (var(--panel-padding))));
+    box-shadow: var(--shadow-popover);
     overflow: auto;
     position: absolute;
     translate: -50%;
     z-index: var(--z-popup);
+
+    @media (min-width: 640px) {
+      --panel-padding: 0.35rem;
+    }
 
     &[open] {
       display: var(--popup-display);
@@ -51,7 +56,10 @@
   }
 
   .popup__title {
-    font-weight: 800;
+    color: var(--color-ink-medium);
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    padding-block: 0.35em 0.15em;
     white-space: nowrap;
 
     &[tabindex="-1"]:focus-visible {
@@ -76,7 +84,6 @@
     list-style: none;
     padding: 0.75ch var(--inline-space-half);
     position: sticky;
-    text-transform: uppercase;
     z-index: 1;
 
     &:is(summary) {

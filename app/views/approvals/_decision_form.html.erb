@@ -1,12 +1,12 @@
 <%# locals: (url:) %>
 <%= form_with url: url, class: "flex flex-column gap txt-medium txt-align-start" do |form| %>
   <label class="flex flex-column gap-half">
-    <span class="txt-small font-weight-bold">Your name</span>
+    <span class="record-form__label">Your name</span>
     <%= form.text_field :approver_name, required: true, class: "input full-width", autocomplete: "name", placeholder: "Type your full name to confirm" %>
   </label>
 
   <label class="flex flex-column gap-half">
-    <span class="txt-small font-weight-bold">Comment (optional)</span>
+    <span class="record-form__label">Comment (optional)</span>
     <%= rich_text_field form, :comment %>
   </label>
 

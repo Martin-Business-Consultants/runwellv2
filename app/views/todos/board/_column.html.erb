@@ -3,6 +3,7 @@
       card_color: todo_column_color(status), class: "cards--doing cards--#{status.dasherize}",
   data: {
     drag_and_strum_target: "container",
+    drag_and_drop_sortable: true,
     collapsible_columns_target: "column",
     action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
   } do %>
