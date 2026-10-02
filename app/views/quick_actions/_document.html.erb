@@ -1,8 +1,4 @@
 <%# locals: (form_id:) %>
-<%= form_with url: documents_path, id: form_id, multipart: true, data: { controller: "form", turbo_frame: "_top" } do |form| %>
-  <label class="btn input--upload full-width txt-small quick-action__upload">
-    <%= icon_tag "attachment" %>
-    <span>Drop files here or choose…</span>
-    <%= form.file_field :files, name: "document[files][]", multiple: true, id: nil, aria: { label: "Add documents" }, data: { action: "change->form#submit" } %>
-  </label>
+<%= form_with url: documents_path, id: form_id, multipart: true, data: document_upload_data do |form| %>
+  <%= document_drop_target form, "full-width txt-small quick-action__upload" %>
 <% end %>

@@ -5,15 +5,12 @@
   </header>
 
   <%# Drop files on the box (or click it to choose): the file input covers it, so a drop fills the
-      input and the form sends at once, to the same documents#create as the quick action tray. %>
+      input, each file uploads with its progress on the box, and the form sends them to the same
+      documents#create as the quick action tray. %>
   <%= form_with url: documents_path, multipart: true, namespace: dom_id(subject, :documents), class: "document-drop",
-        data: { controller: "form", turbo_frame: "_top", turbo_action: "advance" } do |form| %>
+        data: document_upload_data.merge(turbo_action: "advance") do |form| %>
     <%= hidden_field_tag :record, QuickAction.value_for(subject), id: nil %>
-    <label class="btn input--upload document-drop__target">
-      <%= icon_tag "attachment" %>
-      <span>Drop files here or <span class="txt-link">choose…</span></span>
-      <%= form.file_field :files, name: "document[files][]", multiple: true, id: nil, aria: { label: "Add documents" }, data: { action: "change->form#submit" } %>
-    </label>
+    <%= document_drop_target form, "document-drop__target" %>
   <% end %>
 
   <% documents = subject.documents.recent.includes(:uploaded_by, file_attachment: :blob) %>

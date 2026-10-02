@@ -7,7 +7,12 @@ class Document < ApplicationRecord
   belongs_to :uploaded_by, class_name: "User", optional: true
   has_one_attached :file
 
+  # The largest file one document may hold, RUNWELL_MAX_UPLOAD_MB (500 MB unless set). Behind
+  # Cloudflare's proxy a request can't pass 100 MB on its Free and Pro plans, so set 100 there.
+  MAX_SIZE = ENV.fetch("RUNWELL_MAX_UPLOAD_MB", 500).to_i.megabytes
+
   validates :file, presence: true
+  validate :file_within_limit
 
   scope :recent, -> { order(created_at: :desc) }
   scope :client_visible, -> { where(client_visible: true) }
@@ -20,4 +25,9 @@ class Document < ApplicationRecord
   def search_title = filename.to_s
   def search_content = nil
   def search_client_id = documentable.is_a?(Client) ? documentable.id : documentable.try(:client_id) || documentable.try(:client)&.id
+
+  private
+    def file_within_limit
+      errors.add(:file, "is over the #{ActiveSupport::NumberHelper.number_to_human_size(MAX_SIZE)} limit") if file.attached? && file.byte_size > MAX_SIZE
+    end
 end

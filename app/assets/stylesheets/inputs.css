@@ -130,6 +130,19 @@
       position: absolute;
     }
 
+    /* Runwell: a document upload's progress (upload controller), under its status line */
+    &:has(progress:not([hidden])) {
+      cursor: progress;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    progress {
+      accent-color: var(--color-link);
+      flex-basis: 100%;
+      inline-size: 100%;
+    }
+
     &:has([data-upload-preview-target="fileName"]:not([hidden])) {
       --btn-border-color: var(--color-positive);
       --btn-color: var(--color-positive);

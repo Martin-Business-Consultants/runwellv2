@@ -13,7 +13,11 @@ class DocumentsController < ApplicationController
     subject = find_subject or return redirect_back(fallback_location: root_path, alert: "Choose where this goes.")
 
     files = Array(params.dig(:document, :files)).compact_blank
-    documents = files.map { |file| subject.documents.create!(file: file, uploaded_by: current_user) }
+    documents = files.map { |file| subject.documents.new(file: file, uploaded_by: current_user) }
+    if (refused = documents.find(&:invalid?))
+      return redirect_back fallback_location: root_path, alert: "#{refused.filename} #{refused.errors[:file].to_sentence}."
+    end
+    documents.each(&:save!)
 
     if documents.any?
       subject.record_event!("document.added", payload: { files: documents.map { it.filename.to_s } }) if subject.respond_to?(:record_event!)
