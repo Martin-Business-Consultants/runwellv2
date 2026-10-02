@@ -60,14 +60,21 @@ module Import
     private
 
     # The archive uploaded whole, or else its parts (name.part-aa, name.part-ab, …) in order, the
-    # latest upload of each.
+    # latest upload of each. An upload whose file never arrived (a browser upload cut off, say by
+    # Cloudflare's 100 MB limit) leaves a record with nothing behind it, and is passed over.
     def uploaded_blobs
-      whole = ActiveStorage::Blob.where(filename: @filename).order(created_at: :desc).first
+      stored = ->(blob) { blob.service.exist?(blob.key) }
+
+      whole = ActiveStorage::Blob.where(filename: @filename).order(created_at: :desc).find(&stored)
       return [ whole ] if whole
 
-      parts = ActiveStorage::Blob.where("filename LIKE ?", "#{ActiveStorage::Blob.sanitize_sql_like(@filename)}.part-%").order(created_at: :desc)
+      parts = ActiveStorage::Blob.where("filename LIKE ?", "#{ActiveStorage::Blob.sanitize_sql_like(@filename)}.part-%").order(created_at: :desc).select(&stored)
       parts = parts.group_by { it.filename.to_s }.sort.map { |_name, blobs| blobs.first }
       raise "No uploaded file named #{@filename} or #{@filename}.part-aa, … Upload it as documents on any client first." if parts.empty?
+
+      names = parts.map { it.filename.to_s.delete_prefix("#{@filename}.part-") }
+      expected = ("aa"..).first(names.size)
+      raise "#{@filename} is missing part #{(expected - names).first || names.last.succ}: upload every part (it has #{names.to_sentence})." unless names == expected
 
       parts
     end
