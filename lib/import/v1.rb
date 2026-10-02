@@ -9,8 +9,10 @@
 # What maps to what: partners → clients; partner users → contacts; staff → users with their
 # passwords; projects, services and work orders → engagements, each with an initial agreement
 # (milestones and work order items as scope items) sent and recorded as approved; todos → work;
-# tickets → requests; notes, time entries and todo and ticket files. Everything else in v1
-# (invoices, milestone health, specs, questionnaires, groups, tags) stays behind.
+# tickets → requests; notes, time entries and todo and ticket files; client addresses (custom
+# fields) and links (a note). Everything else in v1 (invoices, milestone health, specs,
+# questionnaires, daily reports, groups, tags, files whose records v1 no longer has) stays
+# behind, and the report lists it.
 require "sqlite3"
 
 module Import
@@ -50,11 +52,13 @@ module Import
         ActiveRecord::Base.transaction do
           import_users
           import_clients
+          import_client_details
           import_engagements
           import_requests
           import_notes
           import_time
           import_branding
+          note_what_stays_behind
         end
       end
       report
@@ -305,6 +309,38 @@ module Import
       end
     end
 
+    ADDRESS_FIELDS = { "address" => [ "Address", "long_text" ], "phone" => [ "Phone", "text" ], "email" => [ "Email", "text" ] }.freeze
+
+    # v1 kept a client's address (with a phone and an email) and its links (a repository, an admin
+    # console) on the client. Addresses become client custom fields, each made only when some
+    # client has a value for it; a client's links become a note on it.
+    def import_client_details
+      details = (table?("partner_addresses") ? rows("partner_addresses") : []).filter_map do |row|
+        client = @clients[row["partner_id"]] or next
+        locality = [ [ row["city"], row["state"] ].compact_blank.join(", "), row["zip"] ].compact_blank.join(" ")
+        values = { "address" => [ row["street"], locality, row["country"] ].compact_blank.join("\n"),
+                   "phone" => row["phone"], "email" => row["email"] }.transform_values(&:presence).compact
+        [ client, values ] if values.any?
+      end
+
+      details.flat_map { it.last.keys }.uniq.each do |key|
+        label, kind = ADDRESS_FIELDS.fetch(key)
+        CustomField.find_by(model_type: "Client", key: key) || CustomField.create!(model_type: "Client", key: key, label: label, kind: kind)
+      end
+      details.each do |client, values|
+        client.update!(custom_fields: values)
+        @counts[:client_addresses] += 1
+      end
+
+      (table?("partner_resources") ? rows("partner_resources") : []).group_by { it["partner_id"] }.each do |partner_id, links|
+        client = @clients[partner_id] or next
+        items = links.map { "<li>#{ERB::Util.html_escape(it["name"])}: <a href=\"#{ERB::Util.html_escape(it["url"])}\">#{ERB::Util.html_escape(it["url"])}</a></li>" }
+        client.notes.create!(body: "<p>Links</p><ul>#{items.join}</ul>", kind: "internal", source: SOURCE,
+                             occurred_at: time(links.first["created_at"]), created_at: time(links.first["created_at"]))
+        @counts[:client_links] += links.size
+      end
+    end
+
     def import_notes
       rows("notes").each do |row|
         subject = case row["noteable_type"]
@@ -449,6 +485,29 @@ module Import
     def plain(html) = html.presence && Rails::HTML5::FullSanitizer.new.sanitize(html).squish.presence
 
     # --- Report --------------------------------------------------------------------------
+
+    # Files on records the import doesn't bring (or that v1 itself no longer has), and v1 records
+    # with no home here, so the report says what stayed behind instead of dropping it silently.
+    CARRIED_FILES = %w[Todo Ticket ActionText::RichText Setting ActiveStorage::VariantRecord].freeze
+
+    def note_what_stays_behind
+      @db.execute("SELECT record_type, COUNT(*) AS count, SUM(b.byte_size) AS bytes FROM active_storage_attachments a " \
+                  "JOIN active_storage_blobs b ON b.id = a.blob_id GROUP BY record_type ORDER BY count DESC").each do |row|
+        next if CARRIED_FILES.include?(row["record_type"])
+
+        why = table?(row["record_type"].tableize) ? "nothing to attach them to here" : "their records no longer exist in v1"
+        @skipped[:files] << "#{row["count"]} #{row["record_type"]} file(s), #{(row["bytes"].to_i / 1_048_576.0).round(1)} MB: #{why}"
+      end
+      { "daily_reports" => "daily reports", "documents" => "documents", "invoices" => "invoices", "expenses" => "expenses",
+        "specs" => "specs", "weekly_todo_schedules" => "weekly todo schedules" }.each do |table, label|
+        next unless table?(table)
+
+        count = @db.get_first_value("SELECT COUNT(*) FROM #{table}").to_i
+        @skipped[:records] << "#{count} #{label}: no place for them in Runwell v2" if count > 0
+      end
+    end
+
+    def table?(name) = @db.get_first_value("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", [ name ]).present?
 
     def report
       @out.puts "Imported:"
