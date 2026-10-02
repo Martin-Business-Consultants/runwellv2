@@ -200,4 +200,10 @@
   details[open] > summary.btn {
     margin-block-end: var(--block-space);
   }
+
+  /* In a row of buttons (Set away beside Switch off) it sits on the row's centre line while
+  /* closed: space below would lift it above its neighbours. */
+  .align-center > details:has(> summary.btn):not([open]) {
+    margin-block-end: 0;
+  }
 }
