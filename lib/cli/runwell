@@ -6,7 +6,8 @@
 # --todo.title "Draft the sitemap"`. One file, the Ruby standard library only.
 #
 #   runwell login [URL]          sign in through the browser (--token rw_… for a personal token,
-#                                --read-only for access that can't change anything)
+#                                --read-only for access that can't change anything, --client to
+#                                sign in as a client's contact, to their portal)
 #   runwell tools                what you can do, for your role
 #   runwell help <tool>          a tool's description and inputs (runwell help exit-codes)
 #   runwell <tool> [--key value] run one; dotted keys nest (--client.name Acme); @path reads a file
@@ -36,7 +37,8 @@ SKILL_MARKER = "<!-- managed by the runwell CLI: `runwell agent setup` rewrites 
 
 # Stable exit statuses, one per error code the server sends (see `runwell help exit-codes`).
 EXIT_CODES = { "failed" => 1, "usage" => 2, "not_found" => 3, "auth" => 4, "forbidden" => 5, "refused" => 5,
-               "invalid" => 6, "read_only" => 7, "network" => 8, "needs_confirmation" => 9 }.freeze
+               "invalid" => 6, "read_only" => 7, "network" => 8, "needs_confirmation" => 9, "ambiguous" => 10,
+               "paused" => 11, "rate_limited" => 12 }.freeze
 EXIT_HELP = <<~TEXT
   Exit statuses (the `code` in a JSON error has the same name):
     0  ok
@@ -49,6 +51,9 @@ EXIT_HELP = <<~TEXT
     7  read_only           this sign-in is read-only
     8  network             can't reach Runwell
     9  needs_confirmation  it reaches a client: show the person, then run again with --yes
+   10  ambiguous           a name matched several records: pick one from candidates, use its id
+   11  paused              the person paused this connection: ask them to resume it
+   12  rate_limited        too many calls this minute: wait retry_after seconds
 TEXT
 
 def config = File.exist?(CONFIG) ? JSON.parse(File.read(CONFIG)) : {}
@@ -71,8 +76,14 @@ end
 
 def base_url = (ENV["RUNWELL_URL"] || config["url"] || DEFAULT_URL).sub(%r{/+\z}, "")
 
-def http(method, url, body: nil, form: nil, token: nil, accept: "application/json")
+# Staff talk to /mcp; a client's contact to their portal's /portal/mcp.
+def mcp_url = "#{base_url}#{config["mcp_path"] || "/mcp"}"
+def client? = config["mcp_path"] == "/portal/mcp"
+def me_tool = client? ? "portal_me" : "me"
+
+def http(method, url, body: nil, form: nil, token: nil, accept: "application/json", retry_once: false)
   uri = URI(url)
+  attempts = 0
   request = (method == :get ? Net::HTTP::Get : Net::HTTP::Post).new(uri)
   request["Accept"] = accept
   request["Authorization"] = "Bearer #{token}" if token
@@ -82,8 +93,14 @@ def http(method, url, body: nil, form: nil, token: nil, accept: "application/jso
     request["Content-Type"] = "application/json"
     request.body = JSON.generate(body)
   end
-  Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 120) { it.request(request) }
-rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => e
+  begin
+    attempts += 1
+    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 120) { it.request(request) }
+  rescue Net::ReadTimeout, Errno::ECONNRESET, EOFError
+    retry if retry_once && attempts < 2
+    raise
+  end
+rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError, EOFError => e
   die "can't reach #{uri.host}: #{e.message}", code: "network", hint: "Check the address (#{base_url}) and your connection."
 end
 
@@ -94,12 +111,15 @@ def login(args)
   token = (index = args.index("--token")) && args.slice!(index, 2).last
   die "--token needs a value", code: "usage" if index && token.nil?
   read_only = !args.delete("--read-only").nil?
+  client = !args.delete("--client").nil?
   url = (args.find { !it.start_with?("--") } || base_url).sub(%r{/+\z}, "")
   die "give Runwell's address: runwell login https://runwell.example.com", code: "usage" unless url.match?(%r{\Ahttps?://})
 
+  # A personal token says whose it is: a client's works on the portal, not on /mcp.
   if token
-    save_config("url" => url, "token" => token)
-    return puts("Signed in to #{url} with a personal token.")
+    path = client || http(:post, "#{url}/mcp", token: token, body: { jsonrpc: "2.0", id: 1, method: "tools/list" }).code == "401" ? "/portal/mcp" : "/mcp"
+    save_config("url" => url, "token" => token, "mcp_path" => path)
+    return puts("Signed in to #{url}#{" (client portal)" if path == "/portal/mcp"} with a personal token.")
   end
   unless $stdin.tty? && $stdout.tty?
     die "signing in needs a browser and a person", code: "auth", hint: "Ask the person to run `runwell login #{url}` in a terminal, or use --token."
@@ -108,12 +128,13 @@ def login(args)
   server = TCPServer.new("127.0.0.1", 0)
   redirect = "http://127.0.0.1:#{server.addr[1]}/callback"
   meta = JSON.parse(http(:get, "#{url}/.well-known/oauth-authorization-server").body)
-  client = JSON.parse(http(:post, meta["registration_endpoint"], body: { client_name: "runwell CLI (#{Socket.gethostname})", redirect_uris: [ redirect ] }).body)
+  app = JSON.parse(http(:post, meta["registration_endpoint"], body: { client_name: "runwell CLI (#{Socket.gethostname})", redirect_uris: [ redirect ] }).body)
   verifier = SecureRandom.urlsafe_base64(48)
   challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false)
   state = SecureRandom.hex(16)
-  authorize = "#{meta["authorization_endpoint"]}?" + URI.encode_www_form(response_type: "code", client_id: client["client_id"],
-    redirect_uri: redirect, code_challenge: challenge, code_challenge_method: "S256", state: state, scope: read_only ? "runwell:read" : "runwell")
+  authorize = "#{meta["authorization_endpoint"]}?" + URI.encode_www_form(response_type: "code", client_id: app["client_id"],
+    redirect_uri: redirect, code_challenge: challenge, code_challenge_method: "S256", state: state,
+    scope: [ (read_only ? "runwell:read" : "runwell"), ("runwell:portal" if client) ].compact.join(" "), resource: "#{url}#{client ? "/portal/mcp" : "/mcp"}")
 
   puts "Opening your browser to approve the CLI#{" (read only)" if read_only}. If it doesn't open, visit:\n  #{authorize}"
   system(RUBY_PLATFORM.include?("darwin") ? "open" : "xdg-open", authorize, out: File::NULL, err: File::NULL)
@@ -125,14 +146,14 @@ def login(args)
   socket.close
   die "sign-in was cancelled (#{query["error"]})", code: "auth" unless query["code"] && query["state"] == state
 
-  tokens = JSON.parse(http(:post, meta["token_endpoint"], form: { grant_type: "authorization_code", client_id: client["client_id"],
+  tokens = JSON.parse(http(:post, meta["token_endpoint"], form: { grant_type: "authorization_code", client_id: app["client_id"],
     code: query["code"], redirect_uri: redirect, code_verifier: verifier }).body)
   die "sign-in failed: #{tokens["error"]}", code: "auth" unless tokens["access_token"]
 
   save_config("url" => url, "token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"],
-    "client_id" => client["client_id"], "token_endpoint" => meta["token_endpoint"])
-  me = call_tool("me", {})
-  puts "Signed in to #{url} as #{me.dig("me", "name")} (#{me.dig("me", "role")})#{", read only" if me["read_only"]}."
+    "client_id" => app["client_id"], "token_endpoint" => meta["token_endpoint"], "mcp_path" => client ? "/portal/mcp" : "/mcp")
+  me = call_tool(me_tool, {})
+  puts "Signed in to #{url} as #{me.dig("me", "name")} (#{me.dig("me", client ? "company" : "role")})#{", read only" if me["read_only"]}."
 end
 
 def refresh!
@@ -148,9 +169,11 @@ end
 
 # --- talking to the MCP endpoint ------------------------------------------------------------
 
-def rpc(method, params = nil, retried: false)
+def rpc(method, params = nil, retried: false, retry_network: false)
   token = config["token"] or die("not signed in", code: "auth", hint: "The person runs `runwell login` in a terminal.")
-  response = http(:post, "#{base_url}/mcp", token: token, body: { jsonrpc: "2.0", id: 1, method: method, params: params }.compact)
+  message = { jsonrpc: "2.0", id: 1, method: method, params: params }.compact
+  # A read, or a change with its idempotency key, is safe to send once more if the connection drops.
+  response = http(:post, mcp_url, token: token, body: message, retry_once: retry_network || method != "tools/call")
   return rpc(method, params, retried: true) if response.code == "401" && !retried && refresh!
   die "not signed in, or the token was revoked", code: "auth", hint: "The person runs `runwell login` in a terminal." if response.code == "401"
 
@@ -168,7 +191,7 @@ def find_tool(name) = tools.find { it["name"] == name } || die("no tool called #
 # The tool's answer. When MCP itself rejects the call (a missing required input, say), there is
 # no structured answer, only text: that becomes a usage error.
 def call_tool(name, arguments)
-  result = rpc("tools/call", { name: name, arguments: arguments })
+  result = rpc("tools/call", { name: name, arguments: arguments }, retry_network: arguments.key?("idempotency_key"))
   return result["structuredContent"] if result["structuredContent"]
 
   text = Array(result["content"]).map { it["text"] }.compact.join(" ").strip
@@ -276,6 +299,8 @@ def run_tool(name, args)
   $json_errors = options[:json]
   tool = find_tool(name)
   arguments = arguments_for(tool, args)
+  # Every change carries a key of its own, so retrying it after a dropped connection can't do it twice.
+  arguments["idempotency_key"] ||= SecureRandom.uuid if tool.dig("inputSchema", "properties", "idempotency_key")
   result = call_tool(name, arguments)
 
   if result["status"] == "needs_confirmation"
@@ -338,9 +363,9 @@ def mcp_bridge(args)
       next
     end
 
-    response = http(:post, "#{base_url}/mcp", token: config["token"], body: message)
+    response = http(:post, mcp_url, token: config["token"], body: message)
     if response.code == "401" && refresh!
-      response = http(:post, "#{base_url}/mcp", token: config["token"], body: message)
+      response = http(:post, mcp_url, token: config["token"], body: message)
     end
     body = response.body.to_s
     if read_only && message["method"] == "tools/list" && (parsed = JSON.parse(body) rescue nil)&.dig("result", "tools")
@@ -370,12 +395,13 @@ def doctor(args)
 
   me = nil
   if up && config["token"]
-    response = http(:post, "#{base_url}/mcp", token: config["token"], body: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "me", arguments: {} } })
-    response = http(:post, "#{base_url}/mcp", token: config["token"], body: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "me", arguments: {} } }) if response.code == "401" && refresh!
+    ask = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: me_tool, arguments: {} } }
+    response = http(:post, mcp_url, token: config["token"], body: ask)
+    response = http(:post, mcp_url, token: config["token"], body: ask) if response.code == "401" && refresh!
     me = (JSON.parse(response.body).dig("result", "structuredContent") rescue nil) if response.code == "200"
   end
   signed_in = me && me["status"] != "error"
-  check.("signed in", !!signed_in, signed_in ? "#{me.dig("me", "name")}#{", acting for #{me.dig("me", "acting_for", "name")}" if me.dig("me", "acting_for")} (#{me.dig("me", "role")})#{", read only" if me["read_only"]}" : "not signed in: the person runs `runwell login` in a terminal")
+  check.("signed in", !!signed_in, signed_in ? "#{me.dig("me", "name")}#{", acting for #{me.dig("me", "acting_for", "name")}" if me.dig("me", "acting_for")} (#{me.dig("me", client? ? "company" : "role")})#{", read only" if me["read_only"]}" : "not signed in: the person runs `runwell login` in a terminal")
 
   if up
     latest = served_script.body.to_s
@@ -437,6 +463,9 @@ def skill_text = <<~MARKDOWN
 
   - Start with `runwell briefing` (what needs a person now); find anything with `runwell search --q "…"`.
   - Engagements go by ref (`--ref P-3`, `--engagement_ref WO-12`). Tools taking `--record` want "Type:id" (`Todo:12`), as each result's `record` shows.
+  - Names work where ids do: `--id "Bloom"`, `--todo.owner_id priya`, `--ref "Spanish pages"`, `--record "Client:Bloom"`. An `ambiguous` answer (exit 10) lists `candidates`: ask the person which one, then use its id. `runwell resolve --q "…"` looks a name up.
+  - On a schedule, use `runwell changes --since 24h`, keep the `cursor` it gives, and next time pass `--after <cursor>` to hear only what's new.
+  - Changes are safe to retry: the CLI gives each one an idempotency key, so a repeat after a dropped connection doesn't happen twice.
   - Nested inputs use dots: `runwell create_work --engagement_ref P-3 --todo.title "Draft the sitemap" --todo.due_on 2026-10-02`.
   - Output is JSON when piped. `--ids-only`, `--count` and `--field data.todo.status` keep answers small. Files: `--document.files @brief.pdf`.
   - A success may list `next`: the commands to run next, with what's known filled in.
@@ -461,7 +490,7 @@ def skill_text = <<~MARKDOWN
   - "Every morning, go through `runwell briefing` and tell me what needs me, most urgent first."
   - "Triage the open requests: for each, suggest what it should become, and ask before promoting."
   - "Find overdue work and commitments, and draft a note to each owner."
-  - "Before a client call, summarise everything on <client> since last week."
+  - "Before a client call, summarise everything on <client> since last week." (`runwell changes --client_id "<client>" --since 7d`)
   - "Here are my notes from the call with <client>: debrief it." (the Account management plugin's workflow)
   - "Check my in-progress work against the repos and mark what's actually done, with a note."
 MARKDOWN
