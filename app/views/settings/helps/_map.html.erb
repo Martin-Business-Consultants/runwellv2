@@ -1,0 +1,71 @@
+<%# locals: () %>
+<%# The five questions as one picture (Help > Overview): who we work for agrees to what we agreed,
+    whose approval creates what's happening; what comes in is triaged into the agreement or the
+    work; home gathers what needs a person from all of them. In the install's own words. %>
+<% client, clients = term(:client), term(:client, count: 2).downcase %>
+<figure class="help-map">
+  <div class="help-map__grid">
+    <section class="help-map__node help-map__node--who">
+      <span class="help-map__number">1</span>
+      <strong class="help-map__question">Who we work for</strong>
+      <span class="help-map__ask">and who can say yes</span>
+      <ul class="help-map__things">
+        <li><span class="help-map__thing"><%= icon_tag "everyone" %> <%= client %></span></li>
+        <li><span class="help-map__thing"><%= icon_tag "person" %> Contacts</span><span class="help-map__note">some can approve</span></li>
+      </ul>
+    </section>
+
+    <div class="help-map__link help-map__link--one" aria-hidden="true"><span>agree to</span><b>→</b></div>
+
+    <section class="help-map__node help-map__node--agreed">
+      <span class="help-map__number">2</span>
+      <strong class="help-map__question">What we agreed</strong>
+      <span class="help-map__ask">sent once, frozen for good</span>
+      <ul class="help-map__things">
+        <li><span class="help-map__thing"><%= icon_tag "clipboard" %> <%= term(:engagement) %></span><span class="help-map__note"><%= Setting.current.enabled_labels.map { Setting.current.label_prefix(it) + "-3" }.join(", ") %></span></li>
+        <li><span class="help-map__thing"><%= icon_tag "copy-paste" %> Agreement versions</span></li>
+        <li><span class="help-map__thing"><%= icon_tag "check-circle" %> <%= term(:scope_item, count: 2) %></span><span class="help-map__note">with prices</span></li>
+      </ul>
+    </section>
+
+    <div class="help-map__link help-map__link--two" aria-hidden="true"><span>approving creates</span><b>→</b></div>
+
+    <section class="help-map__node help-map__node--happening">
+      <span class="help-map__number">3</span>
+      <strong class="help-map__question">What is happening</strong>
+      <span class="help-map__ask">against what we agreed</span>
+      <ul class="help-map__things">
+        <li><span class="help-map__thing"><%= icon_tag "board" %> <%= term(:work) %></span><span class="help-map__note">planned → done</span></li>
+        <li><span class="help-map__thing"><%= icon_tag "bookmark" %> Commitments</span><span class="help-map__note">dated promises</span></li>
+        <li><span class="help-map__thing"><%= icon_tag "history" %> Notes and history</span></li>
+      </ul>
+    </section>
+
+    <section class="help-map__node help-map__node--came-in">
+      <span class="help-map__number">4</span>
+      <strong class="help-map__question">What came in</strong>
+      <span class="help-map__ask">from the portal, email or an agent</span>
+      <ul class="help-map__things">
+        <li><span class="help-map__thing"><%= icon_tag "email" %> Requests</span><span class="help-map__note">triaged into a new <%= term(:engagement).downcase %>, a <%= term(:scope_item).downcase %>, <%= term(:work).downcase %> or a commitment</span></li>
+      </ul>
+    </section>
+    <div class="help-map__link help-map__link--up" aria-hidden="true"><b>↑</b><span>triaged into the agreement or the <%= term(:work).downcase %></span></div>
+
+    <section class="help-map__node help-map__node--needs-you">
+      <span class="help-map__number">5</span>
+      <strong class="help-map__question">What needs a person now</strong>
+      <span class="help-map__ask">gathered from all of the above, on Home</span>
+      <ul class="help-map__chips">
+        <li>Questions for you</li>
+        <li>Requests to triage</li>
+        <li>Waiting on a <%= client.downcase %></li>
+        <li>Drafts to send</li>
+        <li>Overdue commitments</li>
+        <li>Blocked or overdue <%= term(:work).downcase %></li>
+      </ul>
+    </section>
+  </div>
+  <figcaption class="txt-small txt-subtle">
+    <%= clients.upcase_first %> agree to what you send; their approval turns it into <%= term(:work).downcase %>; what they ask for along the way is triaged into the agreement or the <%= term(:work).downcase %>; and Home tells you what’s waiting on you.
+  </figcaption>
+</figure>

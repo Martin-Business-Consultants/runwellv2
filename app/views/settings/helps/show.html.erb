@@ -19,6 +19,7 @@
       <% end %>
     </p>
     <p>Runwell is the core of the agency’s project management. It answers five questions and nothing else:</p>
+    <%= render "settings/helps/map" %>
     <ol>
       <li><strong>Who do we work for, and who can say yes?</strong> <%= clients.upcase_first %> and their contacts.</li>
       <li><strong>What did we agree?</strong> <%= engagements.upcase_first %> and their agreements.</li>
@@ -67,6 +68,7 @@
     <header>
       <h2 class="divider">How work flows</h2>
     </header>
+    <%= render "settings/helps/flow" %>
     <ol class="help-steps">
       <li><strong>A request comes in.</strong> A contact sends it from the portal, or you log it from an email or a call.</li>
       <li><strong>You triage it.</strong> It becomes a new <%= engagement %>, a <%= scope_item %> on an open draft, a piece of work or a commitment, or it is dismissed with a reason.</li>

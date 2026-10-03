@@ -39,3 +39,288 @@
     }
   }
 }
+
+
+/* Help > Overview's pictures: the five questions as a map (settings/helps/_map) and how an
+/* agreement and its work move (settings/helps/_flow). Built from the theme's tokens, so they follow
+/* the scheme, corners and dark mode; one column on a phone. */
+@layer components {
+  .help-map {
+    margin: var(--block-space) 0;
+  }
+
+  .help-map__grid {
+    align-items: stretch;
+    display: grid;
+    gap: var(--block-space-half) 0;
+    grid-template-areas:
+      "who link1 agreed link2 happening"
+      ".   .     up     up    up"
+      ".   .     came   came  came"
+      "home home home   home  home";
+    grid-template-columns: 1fr 3.6em 1fr 3.6em 1fr;
+  }
+
+  .help-map__node {
+    --node-color: var(--color-link);
+
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-ink-lighter);
+    border-block-start: 3px solid var(--node-color);
+    border-radius: calc(0.75em * var(--radius-scale, 1));
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    hyphens: manual;
+    overflow-wrap: normal;
+    padding: 0.7em 0.75em;
+    position: relative;
+  }
+
+  .help-map__node--who { --node-color: oklch(var(--lch-blue-medium)); grid-area: who; }
+  .help-map__node--agreed { --node-color: oklch(var(--lch-violet-medium)); grid-area: agreed; }
+  .help-map__node--happening { --node-color: oklch(var(--lch-green-medium)); grid-area: happening; }
+  .help-map__node--came-in { --node-color: oklch(var(--lch-yellow-medium)); grid-area: came; }
+  .help-map__node--needs-you { --node-color: oklch(var(--lch-red-medium)); grid-area: home; }
+
+  .help-map__number {
+    align-items: center;
+    background-color: var(--node-color);
+    border-radius: 50%;
+    color: var(--color-canvas);
+    display: inline-flex;
+    font-size: var(--text-x-small);
+    font-weight: 700;
+    block-size: 1.7em;
+    inline-size: 1.7em;
+    justify-content: center;
+  }
+
+  .help-map__question {
+    font-size: var(--text-medium);
+    line-height: 1.2;
+  }
+
+  .help-map__ask {
+    color: var(--color-ink-medium);
+    font-size: var(--text-x-small);
+  }
+
+  .help-map__things {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-small);
+    gap: 0.35em;
+    list-style: none;
+    margin: 0.4em 0 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .icon {
+      background-color: var(--node-color);
+      block-size: 0.95em;
+      display: inline-block;
+      flex-shrink: 0;
+      inline-size: 0.95em;
+    }
+  }
+
+  .help-map__thing {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.5ch;
+  }
+
+  .help-map__note {
+    color: var(--color-ink-medium);
+    font-size: var(--text-x-small);
+    padding-inline-start: calc(0.95em + 0.5ch);
+  }
+
+  .help-map__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    list-style: none;
+    margin: 0.4em 0 0;
+    padding: 0;
+
+    li {
+      background-color: color-mix(in srgb, var(--node-color) 14%, var(--color-canvas));
+      border-radius: var(--radius-pill, 99rem);
+      font-size: var(--text-x-small);
+      padding: 0.2em 0.75em;
+    }
+  }
+
+  /* The arrows between the boxes, labelled with what carries one into the next. */
+  .help-map__link {
+    align-items: center;
+    color: var(--color-ink-medium);
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-x-small);
+    gap: 0.1em;
+    justify-content: center;
+    line-height: 1.15;
+    padding-inline: 0.15em;
+    text-align: center;
+
+    b {
+      color: var(--color-ink-light);
+      font-size: 1.6rem;
+      font-weight: 400;
+      line-height: 1;
+    }
+  }
+
+  .help-map__link--one { grid-area: link1; }
+  .help-map__link--two { grid-area: link2; }
+
+  .help-map__link--up {
+    flex-direction: row;
+    gap: 0.6ch;
+    grid-area: up;
+    justify-content: flex-start;
+    padding-inline-start: 1.5em;
+  }
+
+  .help-map figcaption {
+    margin-block-start: var(--block-space-half);
+  }
+
+  @media (max-width: 760px) {
+    .help-map__grid {
+      gap: 0;
+      grid-template-areas: "who" "link1" "agreed" "link2" "happening" "up" "came" "home";
+      grid-template-columns: 1fr;
+    }
+
+    .help-map__node--needs-you {
+      margin-block-start: var(--block-space-half);
+    }
+
+    .help-map__link {
+      flex-direction: row;
+      gap: 0.6ch;
+      justify-content: flex-start;
+      padding-block: 0.2em;
+      padding-inline-start: 1.5em;
+
+      b {
+        order: -1;
+        transform: rotate(90deg);
+      }
+    }
+
+    .help-map__link--up {
+      flex-direction: row;
+
+      b { transform: none; }
+    }
+  }
+
+  /* How an agreement and its work move: a timeline down the page, a dot per state on one line. */
+  .help-flow {
+    margin: 0 0 var(--block-space);
+  }
+
+  .help-flow__track {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .help-flow__stage {
+    border-inline-start: 2px solid var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    margin-inline-start: 0.5em;
+    padding: 0 0 var(--block-space) 1.3em;
+    position: relative;
+
+    &::before {
+      background-color: var(--color-canvas);
+      border: 2px solid var(--color-ink-light);
+      border-radius: 50%;
+      block-size: 0.8em;
+      content: "";
+      inline-size: 0.8em;
+      inset: 0.35em auto auto calc(-0.4em - 1px);
+      position: absolute;
+    }
+
+    &:last-child {
+      border-color: transparent;
+      padding-block-end: 0;
+    }
+  }
+
+  .help-flow__state {
+    --state-color: var(--color-ink-medium);
+
+    align-self: flex-start;
+    background-color: color-mix(in srgb, var(--state-color) 15%, var(--color-canvas));
+    border: 1px solid color-mix(in srgb, var(--state-color) 50%, var(--color-canvas));
+    border-radius: var(--radius-control);
+    font-size: var(--text-small);
+    font-weight: 600;
+    padding: 0.2em 0.7em;
+    white-space: nowrap;
+  }
+
+  .help-flow__state--idea { --state-color: oklch(var(--lch-yellow-medium)); }
+  .help-flow__state--draft { --state-color: var(--color-ink-medium); }
+  .help-flow__state--sent { --state-color: oklch(var(--lch-blue-medium)); }
+  .help-flow__state--approved { --state-color: oklch(var(--lch-green-medium)); }
+  .help-flow__state--changes { --state-color: oklch(var(--lch-red-medium)); }
+  .help-flow__state--closed { --state-color: var(--color-ink-dark); }
+
+  .help-flow__how {
+    color: var(--color-ink-medium);
+    font-size: var(--text-small);
+  }
+
+  .help-flow__branch {
+    border-inline-start: 2px dashed var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    margin-block-start: 0.3em;
+    padding-inline-start: 0.9em;
+  }
+
+  .help-flow__branch--loop {
+    border-color: color-mix(in srgb, oklch(var(--lch-red-medium)) 55%, var(--color-canvas));
+  }
+
+  .help-flow__work {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--text-small);
+    gap: 0.35em 0.6ch;
+
+    > span:not(.help-flow__arrow) {
+      align-items: center;
+      display: inline-flex;
+      gap: 0.4ch;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      font-size: 0.85em;
+    }
+  }
+
+  .help-flow__arrow {
+    color: var(--color-ink-light);
+  }
+}

@@ -1,0 +1,42 @@
+<%# locals: () %>
+<%# How an agreement and its work move (Help > Overview), as a timeline: the engagement's states,
+    each with what moves it on; changes loop back from Sent, and approval branches into the work. %>
+<figure class="help-flow">
+  <ol class="help-flow__track">
+    <li class="help-flow__stage">
+      <span class="help-flow__state help-flow__state--idea">Request or idea</span>
+      <span class="help-flow__how">Triage a request into an agreement, or start one.</span>
+    </li>
+    <li class="help-flow__stage">
+      <span class="help-flow__state help-flow__state--draft">Draft</span>
+      <span class="help-flow__how">Add <%= term(:scope_item, count: 2).downcase %> and prices, the summary the <%= term(:client).downcase %> reads.</span>
+    </li>
+    <li class="help-flow__stage">
+      <span class="help-flow__state help-flow__state--sent">Sent</span>
+      <span class="help-flow__how">Frozen for good; the <%= term(:client).downcase %> approves or asks for changes.</span>
+      <span class="help-flow__branch help-flow__branch--loop">
+        <span class="help-flow__state help-flow__state--changes">Changes requested</span>
+        <span class="help-flow__how">↺ A new version, back to Draft. More <%= term(:work).downcase %> later goes the same way (a change order, revision or add-on).</span>
+      </span>
+    </li>
+    <li class="help-flow__stage">
+      <span class="help-flow__state help-flow__state--approved">Approved</span>
+      <span class="help-flow__how">Each <%= term(:scope_item).downcase %> becomes <%= term(:work).downcase %>:</span>
+      <span class="help-flow__branch">
+        <span class="help-flow__work">
+          <span><span class="status-dot status-dot--planned" aria-hidden="true"></span> Planned</span>
+          <span class="help-flow__arrow" aria-hidden="true">→</span>
+          <span><span class="status-dot status-dot--in-progress" aria-hidden="true"></span> In progress</span>
+          <span class="help-flow__arrow" aria-hidden="true">→</span>
+          <span><span class="status-dot status-dot--in-review" aria-hidden="true"></span> In review</span>
+          <span class="help-flow__arrow" aria-hidden="true">→</span>
+          <span><span class="status-dot status-dot--done" aria-hidden="true"></span> Done</span>
+        </span>
+      </span>
+    </li>
+    <li class="help-flow__stage">
+      <span class="help-flow__state help-flow__state--closed">Closed</span>
+      <span class="help-flow__how">When it’s all done. The agreement and its history stay.</span>
+    </li>
+  </ol>
+</figure>
