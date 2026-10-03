@@ -31,7 +31,7 @@
       <% if todo.status == "done" && todo.completed_at %>
         <div class="card__closed">
           <span class="card__closed-title" data-text="Done">Done</span>
-          <strong class="card__closed-date"><%= todo.completed_at.strftime("%b %d, %Y") %></strong>
+          <strong class="card__closed-date"><%= l todo.completed_at.to_date, format: :long %></strong>
         </div>
       <% end %>
     </div>

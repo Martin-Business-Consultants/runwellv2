@@ -29,3 +29,14 @@
 
 en:
   hello: "Hello world"
+
+  # Every date and time on screen and in email: "October 2 - 8:31pm", "October 2, 2026".
+  # Months in full, no leading zeros, 12-hour clock.
+  date:
+    formats:
+      short: "%B %-d"
+      long: "%B %-d, %Y"
+  time:
+    formats:
+      short: "%B %-d - %-l:%M%P"
+      long: "%B %-d, %Y - %-l:%M%P"
