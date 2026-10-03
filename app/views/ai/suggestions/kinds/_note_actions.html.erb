@@ -1,0 +1,21 @@
+<%# locals: (suggestion:, frame_id:) %>
+<% commitments = Array(suggestion.payload["commitments"]) %>
+<% tasks = Array(suggestion.payload["tasks"]) %>
+<% if commitments.empty? && tasks.empty? %>
+  <p class="txt-small txt-subtle margin-none">No promises or work in this note.</p>
+  <%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>
+<% else %>
+  <%= form_with url: ai_suggestion_path(suggestion), method: :patch, class: "flex flex-column gap-half txt-small", data: { turbo_frame: "_top" } do %>
+    <% commitments.each_with_index do |item, index| %>
+      <%# herb:key "c#{index}" %>
+      <label class="ai-suggestion__pick"><%= check_box_tag "items[]", "commitments-#{index}", true, id: nil %> <span><strong><%= item["owner"] == "client" ? "They" : "We" %></strong> will <%= item["description"] %><% if item["due_on"].present? %> · by <%= item["due_on"] %><% end %></span></label>
+    <% end %>
+    <% tasks.each_with_index do |item, index| %>
+      <%# herb:key "t#{index}" %>
+      <label class="ai-suggestion__pick"><%= check_box_tag "items[]", "tasks-#{index}", true, id: nil %> <span><%= term(:work) %>: <%= item["title"] %><% if item["engagement_ref"].present? %> · <%= item["engagement_ref"] %><% end %><% if item["due_on"].present? %> · <%= item["due_on"] %><% end %></span></label>
+    <% end %>
+    <input type="hidden" name="decision" value="accept">
+    <div><button type="submit" class="btn btn--link txt-small">Add the ticked ones</button></div>
+  <% end %>
+  <%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>
+<% end %>

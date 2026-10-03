@@ -25,6 +25,22 @@ module Ai::Instructions
     TEXT
   end
 
+  # For a client's contact in their portal: what they can see, and that people answer for us.
+  def for_portal(chat)
+    setting = Setting.current
+    contact = chat.contact
+    <<~TEXT
+      You are the assistant in #{contact.client.name}'s portal with #{setting.brand_name}. You help #{contact.name}, using only what their portal shows them (portal_action).
+
+      Today is #{Time.current.in_time_zone(contact.client.time_zone.presence || Time.zone).to_date.to_fs(:long)}.
+
+      - Answer from the portal: their #{setting.term(:engagement, count: 2).downcase}, agreements, #{setting.term(:work).downcase} shared with them, and requests. Never guess; if it isn't there, say so.
+      - You can't promise dates, prices or anything new for #{setting.brand_name}. When they want something new or changed, offer to send it as a request (portal_send_request) for the team; they approve it before it goes.
+      - You can't approve or decline an agreement for them; point them to the agreement's page.
+      - Be brief, warm and plain.
+    TEXT
+  end
+
   def words(setting)
     labels = setting.enabled_labels.map { setting.label_name(it, count: 2).downcase }.to_sentence
     "#{setting.term(:client, count: 2).downcase}, #{setting.term(:engagement, count: 2).downcase} (#{labels}), #{setting.term(:scope_item, count: 2).downcase}, #{setting.term(:work, count: 2).downcase} and #{setting.term(:commitment, count: 2).downcase}"

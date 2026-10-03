@@ -1,0 +1,15 @@
+<%# locals: (suggestion:, frame_id:) %>
+<% tasks = Array(suggestion.payload["tasks"]) %>
+<% people = User.people.where(id: tasks.filter_map { it["owner_id"] }).index_by(&:id) %>
+<%= form_with url: ai_suggestion_path(suggestion), method: :patch, class: "flex flex-column gap-half txt-small", data: { turbo_frame: "_top" } do %>
+  <% tasks.each_with_index do |task, index| %>
+    <%# herb:key index %>
+    <label class="ai-suggestion__pick">
+      <%= check_box_tag "items[]", "tasks-#{index}", true, id: nil %>
+      <span><%= task["title"] %><% if people[task["owner_id"]] %> · <%= people[task["owner_id"]].display_name %><% end %><% if task["due_on"].present? %> · <%= task["due_on"] %><% end %><% if task["why"].present? %> <span class="txt-subtle">(<%= task["why"] %>)</span><% end %></span>
+    </label>
+  <% end %>
+  <input type="hidden" name="decision" value="accept">
+  <div><button type="submit" class="btn btn--link txt-small">Add the ticked ones</button></div>
+<% end %>
+<%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>

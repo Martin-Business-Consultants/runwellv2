@@ -15,8 +15,11 @@ class AiChat < ApplicationRecord
   TOOLS = [ Ai::Tools::Search, Ai::Tools::ReadRecord, Ai::Tools::FindTools, Ai::Tools::RunTool ].freeze
   STUCK_AFTER = 5.minutes
 
-  belongs_to :user
+  belongs_to :user, optional: true
+  belongs_to :contact, optional: true
   belongs_to :subject, polymorphic: true, optional: true
+
+  validate { errors.add(:base, "A chat belongs to a person on staff or a client's contact") unless user.present? ^ contact.present? }
 
   validates :purpose, inclusion: { in: PURPOSES }
 
@@ -26,13 +29,13 @@ class AiChat < ApplicationRecord
   after_initialize :use_install_provider
 
   # A chat on the install's model (or its fast one), ready to ask.
-  def self.start!(user:, subject: nil, purpose: "ask", fast: false)
+  def self.start!(user: nil, contact: nil, subject: nil, purpose: "ask", fast: false)
     setting = Setting.current
     raise Ai::Unavailable, "AI isn't set up: Settings > AI." unless setting.ai_ready?
 
     model = setting.ai_model_for(fast: fast)
     register_model(model, setting.ai_provider)
-    new(user: user, subject: subject, purpose: purpose).with_model(model, provider: setting.ai_provider, assume_model_exists: true)
+    new(user: user, contact: contact, subject: subject, purpose: purpose).with_model(model, provider: setting.ai_provider, assume_model_exists: true)
   end
 
   # RubyLLM keeps a row per model its chats use. Runwell reads models from RubyLLM's bundled
@@ -63,15 +66,34 @@ class AiChat < ApplicationRecord
     asks.where(user: user, subject: subject).where(updated_at: 12.hours.ago..).recent.first || start!(user: user, subject: subject)
   end
 
+  # A client contact's ongoing chat in the portal (Settings > AI lets clients ask), or a new one.
+  def self.for_contact(contact)
+    asks.where(contact: contact).where(updated_at: 12.hours.ago..).recent.first || start!(contact: contact)
+  end
+
+  def portal? = contact.present?
+
   def replying? = replying_since.present? && replying_since > STUCK_AFTER.ago
 
-  # The person asks: their message is saved now, the reply written by a job.
-  def ask_soon!(text)
-    raise Ai::Unavailable, "AI is off for this #{Setting.current.term(:client).downcase}." if Ai.excluded?(subject)
+  # Files the model can read alongside a question: PDFs, images and text.
+  READABLE = %r{\A(application/pdf|image/(png|jpeg|gif|webp)|text/)}
+
+  # The record's documents that can go with a question.
+  def attachable_documents
+    return Document.none unless subject.respond_to?(:documents)
+
+    subject.documents.recent.includes(file_attachment: :blob).limit(8).select { it.content_type.to_s.match?(READABLE) }
+  end
+
+  # The person asks (with any of the record's documents attached): their message is saved now,
+  # the reply written by a job.
+  def ask_soon!(text, document_ids: [])
+    raise Ai::Unavailable, "AI is off for this #{Setting.current.term(:client).downcase}." if Ai.excluded?(portal? ? contact.client : subject)
     raise Ai::Unavailable, "This month's AI budget is spent: Settings > AI." if Ai.over_budget?
     raise Ai::Unavailable, "Approve or decline the change above first." if proposals.any?
 
-    ask_later(text.to_s.strip.truncate(8_000))
+    files = attachable_documents.select { it.id.to_s.in?(Array(document_ids).map(&:to_s)) }.map(&:file)
+    ask_later(text.to_s.strip.truncate(8_000), with: files.presence)
     update!(title: title.presence || text.to_s.squish.truncate(80), replying_since: Time.current)
     AiReplyJob.perform_later(self)
   end
@@ -87,8 +109,8 @@ class AiChat < ApplicationRecord
   # Called by AiReplyJob: runs the conversation on (answering the question, or past a decision),
   # writing the reply into its message as it streams so the panel shows it coming.
   def reply!
-    with_instructions(Ai::Instructions.for(self), persist: false)
-    with_tools(*TOOLS.map { it.new(self) })
+    with_instructions(portal? ? Ai::Instructions.for_portal(self) : Ai::Instructions.for(self), persist: false)
+    with_tools(*(portal? ? [ Ai::Tools::PortalAction.new(self) ] : TOOLS.map { it.new(self) }))
 
     buffer = +""
     written_at = Time.current
@@ -110,7 +132,7 @@ class AiChat < ApplicationRecord
   def proposals
     return [] if replying?
 
-    RubyLLM::ActiveRecord::ToolCall.where(message_type: "AiMessage", message_id: ai_messages.select(:id), name: "run_tool", approval: nil, result_id: nil)
+    RubyLLM::ActiveRecord::ToolCall.where(message_type: "AiMessage", message_id: ai_messages.select(:id), name: %w[run_tool portal_action], approval: nil, result_id: nil)
       .select { (action = Agent::Catalogue.find(it.arguments.to_h.stringify_keys["name"])) && !action.read? }
   end
 

@@ -137,3 +137,49 @@
     min-block-size: 2lh;
   }
 }
+
+/* A suggestion on a record: its button, then what it suggested, ready to use. */
+@layer components {
+  .ai-suggestion {
+    display: block;
+
+    form.button_to { display: inline; }
+  }
+
+  .ai-suggestion__body {
+    border: 1px solid var(--color-ink-lighter);
+    border-inline-start: 3px solid var(--color-link);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    padding: var(--block-space-half) var(--inline-space);
+  }
+
+  .ai-suggestion__pick {
+    align-items: baseline;
+    display: flex;
+    gap: var(--inline-space-half);
+  }
+
+  .ai-suggestion__priorities {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    margin: 0;
+    padding-inline-start: 1.25em;
+
+    p { display: inline; margin: 0; }
+  }
+
+  .ai-suggestion__message {
+    font-family: var(--font-sans);
+    white-space: normal;
+  }
+}
+
+@layer components {
+  .ai-chat__compose { display: flex; flex: 1; flex-direction: column; gap: 0.35em; min-inline-size: 0; }
+  .ai-chat__documents { display: flex; flex-direction: column; gap: 0.25em; }
+  .ai-message__files { color: var(--color-ink-dark); display: block; font-size: var(--text-x-small); margin-block-start: 0.25em; }
+}

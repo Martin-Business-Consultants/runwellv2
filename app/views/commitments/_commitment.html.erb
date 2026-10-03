@@ -27,6 +27,10 @@
     <% end %>
   </div>
 
+  <% if commitment.open? && Ai.available_for?(commitment) %>
+    <%= render "ai/suggestions/card", kind: "reminder", subject: commitment, row: true %>
+  <% end %>
+
   <% if commitment.resolution_note.present? %>
     <div class="txt-x-small txt-subtle txt-align-start"><%= commitment.resolution_note %></div>
   <% end %>

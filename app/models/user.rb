@@ -12,6 +12,8 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy
   has_many :access_tokens, dependent: :destroy
   has_many :identities, dependent: :destroy
+  has_many :ai_suggestions, dependent: :destroy
+  has_many :ai_chats, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   validates :name, presence: true

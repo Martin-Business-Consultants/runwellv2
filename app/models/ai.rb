@@ -19,8 +19,14 @@ module Ai
       ready? && !over_budget? && !excluded?(record)
     end
 
+    # The portal assistant: switched on for clients, within budget, and this client not kept out.
+    def portal_available_for?(contact)
+setting.ai_portal? && ready? && !over_budget? && !contact.client.ai_excluded?
+    end
+
     def excluded?(record)
-      client = record.is_a?(Client) ? record : record.try(:client)
+      record = record.subject if record.is_a?(Note)
+      client = record.is_a?(Client) ? record : (record.try(:client) || record.try(:engagement)&.client)
       client&.ai_excluded? || false
     end
 
@@ -29,15 +35,27 @@ module Ai
       RubyLLM::ActiveRecord::Usage.where(chat_type: "AiChat", created_at: since..).sum(:total_cost).to_d
     end
 
+    # Checked once a request (Current), since every card on a page asks.
     def over_budget?
+      return Current.ai_over_budget unless Current.ai_over_budget.nil?
+
       budget = setting.ai_monthly_budget_cents
-      budget.present? && spent * 100 >= budget
+      Current.ai_over_budget = budget.present? && spent * 100 >= budget
     end
 
     # Runs one agent tool as the person, as an agent over MCP would: a token for this call alone,
     # revoked straight after. Answers the tool's JSON.
     def run_tool(user, tool, arguments)
       token = AccessToken.issue!(user: user, name: TOKEN_NAME, kind: "assistant")
+      Agent::Dispatch.new(tool, arguments, token: token.plaintext, base_url: "#{Runwell.protocol}://#{Runwell.host}").call
+    ensure
+      token&.revoke!
+    end
+
+    # The same for a client's contact in the portal: their own token, so it reaches only what
+    # their portal shows.
+    def run_portal_tool(contact, tool, arguments)
+      token = AccessToken.issue!(contact: contact, name: TOKEN_NAME, kind: "assistant")
       Agent::Dispatch.new(tool, arguments, token: token.plaintext, base_url: "#{Runwell.protocol}://#{Runwell.host}").call
     ensure
       token&.revoke!

@@ -20,6 +20,7 @@
   <% end %>
 
   <% notes = subject.notes.recent.includes(:author) %>
+  <% ai_on = Ai.available_for?(subject) %>
   <ul class="settings__scrollable-list notes-list">
     <% notes.each do |note| %>
       <%# herb:key note.id %>
@@ -32,6 +33,9 @@
           <% end %>
         </div>
         <div class="txt-small"><%= rich_text note.body %></div>
+        <% if ai_on %>
+          <%= render "ai/suggestions/card", kind: "note_actions", subject: note, row: true %>
+        <% end %>
       </li>
     <% end %>
   </ul>

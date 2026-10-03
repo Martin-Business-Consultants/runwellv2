@@ -1,0 +1,2 @@
+<%# locals: (suggestion:, frame_id:) %>
+<%= button_to "Dismiss", ai_suggestion_path(suggestion), method: :patch, params: { decision: "dismiss" }, class: "btn btn--plain txt-small", form: { data: { turbo_frame: frame_id } } %>

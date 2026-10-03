@@ -119,6 +119,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_211907) do
     t.bigint "ruby_llm_model_id", null: false
     t.boolean "cancelled", default: false, null: false
     t.integer "user_id"
+    t.integer "contact_id"
     t.string "subject_type"
     t.integer "subject_id"
     t.string "purpose", default: "ask", null: false
@@ -126,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_211907) do
     t.datetime "replying_since"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["contact_id"], name: "index_ai_chats_on_contact_id"
     t.index ["ruby_llm_model_id"], name: "index_ai_chats_on_ruby_llm_model_id"
     t.index ["subject_type", "subject_id"], name: "index_ai_chats_on_subject"
     t.index ["user_id", "purpose", "updated_at"], name: "index_ai_chats_on_user_id_and_purpose_and_updated_at"
@@ -766,6 +768,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_211907) do
   add_foreign_key "agreement_versions", "agreement_versions", column: "superseded_by_id"
   add_foreign_key "agreement_versions", "engagements"
   add_foreign_key "agreement_versions", "users", column: "sent_by_id"
+  add_foreign_key "ai_chats", "contacts"
   add_foreign_key "ai_chats", "ruby_llm_models"
   add_foreign_key "ai_chats", "users"
   add_foreign_key "ai_messages", "ai_chats"

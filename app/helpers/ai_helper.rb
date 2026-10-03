@@ -24,13 +24,13 @@ module AiHelper
     when "search" then "Searched for “#{args["query"].to_s.truncate(60)}”"
     when "read_record" then "Read #{args["record"]}"
     when "find_tools" then "Looked for a way to “#{args["query"].to_s.truncate(60)}”"
-    when "run_tool" then Agent::Catalogue.find(args["name"])&.title || args["name"].to_s.humanize
+    when "run_tool", "portal_action" then Agent::Catalogue.find(args["name"])&.title || args["name"].to_s.humanize
     else tool_call.name.humanize
     end
   end
 
   def ai_proposal?(tool_call)
-    tool_call.name == "run_tool" && (action = Agent::Catalogue.find(tool_call.arguments.to_h.stringify_keys["name"])) && !action.read?
+    tool_call.name.in?(%w[run_tool portal_action]) && (action = Agent::Catalogue.find(tool_call.arguments.to_h.stringify_keys["name"])) && !action.read?
   end
 
   # The arguments of a proposed change, as "Field: value" lines a person can check: nested
@@ -55,19 +55,32 @@ module AiHelper
   end
 
   # Questions worth one click on this kind of record (and plugins' own, Runwell::Plugins.ai_prompt).
-  def ai_prompts(subject)
+  def ai_prompts(subject, page = nil)
     t = Setting.current
     base =
       case subject
+      when nil
+        case page
+        when "settings/names" then [ "Set Runwell up for how we work: suggest names for our things", "We’re planning a wedding: set Runwell up for it" ]
+        when "settings/appearances" then [ "Write a theme from our brand colors", "Make it calmer and easier to read" ]
+        when "settings/fields" then [ "Suggest custom fields we’d use" ]
+        when "settings/audit_logs" then [ "Anything unusual in the last week’s sign-ins?", "Who changed settings this month?" ]
+        when "requests" then [ "Triage the open requests: suggest what each should become", "Which requests are waiting longest?" ]
+        when "commitments" then [ "Which promises are at risk this week?", "Draft reminders for what we’re waiting on" ]
+        when "todos" then [ "What’s blocked, and why?", "Who has too much on?" ]
+        else [ "What needs me today?", "What changed since yesterday?", "Find overdue #{t.term(:commitment, count: 2).downcase}" ]
+        end
       when Client then [ "What’s going on with #{subject.name}?", "What are we waiting on them for, and what have we promised?", "Draft this week’s update for #{subject.name}" ]
       when Engagement then [ "Where are we on #{subject.ref}?", "What’s overdue or blocked here?", "Draft the scope for the next #{t.term(:scope_item).downcase}s" ]
       when Todo then [ "What’s needed to finish this?", "Split this into smaller #{t.term(:work, count: 2).downcase}", "Who should own this?" ]
       when Request then [ "What should this become?", "Is this in the agreed scope?", "Draft a reply" ]
       when ScopeItem then [ "Plan the #{t.term(:work).downcase} for this", "What’s left to deliver?" ]
-      else [ "What needs me today?", "What changed since yesterday?", "Find overdue #{t.term(:commitment, count: 2).downcase}" ]
       end
     base + Runwell::Plugins.enabled_ai_prompts.filter_map { |_, prompt| prompt.label if prompt.applies_to?(subject) }
   end
+
+  # One line of the AI's words, inline (no paragraph): bold, code and record links.
+  def ai_line(text) = ai_inline(ERB::Util.html_escape(text.to_s.squish).to_str)
 
   private
     def ai_inline(line)

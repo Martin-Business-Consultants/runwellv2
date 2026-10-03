@@ -1,0 +1,17 @@
+<%# locals: (suggestion:, frame_id:) %>
+<% issues = Array(suggestion.payload["issues"]) %>
+<% if issues.any? %>
+  <ul class="txt-small margin-none">
+    <% issues.each_with_index do |issue, index| %>
+      <%# herb:key index %>
+      <li><strong><%= issue["item"] %></strong>: <%= issue["problem"] %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="txt-small margin-none"><%= icon_tag "check" %> Nothing to fix.</p>
+<% end %>
+<p class="txt-small margin-none"><span class="txt-subtle">Suggested summary:</span> <%= suggestion.payload["summary"] %></p>
+<div class="flex gap-half">
+  <%= button_to "Use this summary", ai_suggestion_path(suggestion), method: :patch, params: { decision: "accept" }, class: "btn btn--link txt-small", form: { data: { turbo_frame: "_top" } } %>
+  <%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>
+</div>

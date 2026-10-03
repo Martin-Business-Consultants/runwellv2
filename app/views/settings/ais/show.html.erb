@@ -48,6 +48,17 @@
           </div>
         </div>
 
+        <div class="record-form__toggle">
+          <div class="record-form__toggle-text">
+            <%= form.label :ai_portal, "Let #{term(:client, count: 2).downcase} ask too", class: "record-form__label" %>
+            <span class="record-form__hint">An Ask button in their portal. It sees only what their portal shows, can send a request for the team (they approve it first), and never decides on an agreement.</span>
+          </div>
+          <label class="switch flex-item-no-shrink">
+            <%= form.check_box :ai_portal, class: "switch__input" %>
+            <span class="switch__btn"></span>
+          </label>
+        </div>
+
         <%= form.label :ai_monthly_budget_cents, "Monthly budget (optional)", class: "record-form__label" %>
         <%= money_field form, :ai_monthly_budget_cents, class: "input", placeholder: "No limit" %>
         <span class="record-form__hint">When this month’s spend reaches it, AI pauses until next month.</span>

@@ -1,0 +1,6 @@
+<turbo-frame id="ai_panel">
+  <%= render "ai/chats/panel", chat: @chat, title: "Ask about your work with #{Setting.current.brand_name}", messages_path: messages_portal_ai_chat_path(@chat),
+        new_chat_path: portal_ai_chats_path, new_chat_params: {}, documents: [],
+        prompts: [ "Where are we on my #{term(:engagement, count: 2).downcase}?", "What are you waiting on from me?", "I need something new: help me ask for it" ],
+        note: "It answers from your portal, and asks before sending anything." %>
+</turbo-frame>

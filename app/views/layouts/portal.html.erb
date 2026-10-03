@@ -17,6 +17,16 @@
             <%= link_to "Requests", portal_requests_path, class: "btn btn--plain txt-small" %>
             <%= link_to "New request", new_portal_request_path, class: "btn btn--plain txt-small" %>
             <%= link_to "Connected apps", portal_connected_apps_path, class: "btn btn--plain txt-small" %>
+            <% if Ai.portal_available_for?(current_contact) %>
+              <div class="display-contents" data-controller="dialog" data-action="keydown.esc->dialog#close:stop">
+                <button type="button" class="btn btn--plain txt-small" data-action="dialog#toggle"><%= icon_tag "ai" %> <span>Ask</span></button>
+                <dialog class="ai-panel panel shadow" data-dialog-target="dialog" aria-label="Ask">
+                  <turbo-frame id="ai_panel" src="<%= portal_current_ai_chat_path %>" loading="lazy">
+                    <p class="txt-small txt-subtle pad">Loading…</p>
+                  </turbo-frame>
+                </dialog>
+              </div>
+            <% end %>
             <%= render "layouts/shared/theme_toggle" %>
             <%= button_to portal_session_path, method: :delete, class: "btn btn--plain", title: "Sign out" do %>
               <%= icon_tag "logout" %>

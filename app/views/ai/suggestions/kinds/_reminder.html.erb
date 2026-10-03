@@ -1,0 +1,9 @@
+<%# locals: (suggestion:, frame_id:) %>
+<div class="copy-row">
+  <code class="ai-suggestion__message"><%= suggestion.payload["message"] %></code>
+  <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= suggestion.payload["message"] %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
+</div>
+<div class="flex gap-half">
+  <%= button_to "Used it", ai_suggestion_path(suggestion), method: :patch, params: { decision: "accept" }, class: "btn btn--plain txt-small", form: { data: { turbo_frame: "_top" } } %>
+  <%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>
+</div>

@@ -128,6 +128,16 @@ A read needs a `.json.jbuilder` view starting each record with `json.merge! agen
 a `summary`. A write needs nothing extra: its redirect and notice become the tool's answer. See
 [agents.md](agents.md).
 
+## In-app AI
+
+| Call | Since | Status |
+| --- | --- | --- |
+| `Runwell::Plugins.ai_prompt key, label, types:` | 2.16 | Experimental |
+
+A one-click question in the Ask panel, on the given record types (`Client`, `Engagement`, `Todo`,
+`Request`, `ScopeItem`) or every page. The assistant answers through the agent tools, so a plugin's
+declared tools are already within its reach while the plugin is on.
+
 ## Portal
 
 | Call | Since | Status |

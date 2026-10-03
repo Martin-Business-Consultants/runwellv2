@@ -10,7 +10,8 @@ class Ai::MessagesController < ApplicationController
   end
 
   def create
-    @chat.ask_soon!(params.expect(message: [ :content ])[:content])
+    attrs = params.expect(message: [ :content, document_ids: [] ])
+    @chat.ask_soon!(attrs[:content], document_ids: attrs[:document_ids])
     redirect_to ai_chat_path(@chat)
   rescue Ai::Unavailable => error
     redirect_to ai_chat_path(@chat), alert: error.message

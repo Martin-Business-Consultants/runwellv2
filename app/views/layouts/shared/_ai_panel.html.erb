@@ -9,7 +9,7 @@
     <span class="for-screen-reader">Ask AI</span>
   </button>
   <dialog class="ai-panel panel shadow" data-dialog-target="dialog" aria-label="Ask AI">
-    <turbo-frame id="ai_panel" src="<%= ai_current_chat_path(record: record_ref) %>" loading="lazy">
+    <turbo-frame id="ai_panel" src="<%= ai_current_chat_path(record: record_ref, page: controller_path) %>" loading="lazy">
       <p class="txt-small txt-subtle pad">Loading…</p>
     </turbo-frame>
   </dialog>

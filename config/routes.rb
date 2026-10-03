@@ -59,6 +59,7 @@ Rails.application.routes.draw do
       resources :messages, only: %i[index create]
       resources :decisions, only: :create
     end
+    resources :suggestions, only: %i[create show update]
   end
   get "help", to: redirect("/settings/help")
   resource :setup, only: :destroy
@@ -219,6 +220,14 @@ Rails.application.routes.draw do
     resource :me, only: :show
     post "mcp", to: "mcp#create", as: :mcp
     resources :connected_apps, only: %i[index create destroy]
+    get "ai_chats/current", to: "ai_chats#current", as: :current_ai_chat
+    resources :ai_chats, path: "ai", only: %i[show create] do
+      member do
+        get :messages
+        post :messages, action: :ask
+        post :decide
+      end
+    end
     resource :oauth_authorization, path: "oauth/authorization", only: %i[show create]
   end
 

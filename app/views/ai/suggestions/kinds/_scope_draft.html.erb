@@ -1,0 +1,11 @@
+<%# locals: (suggestion:, frame_id:) %>
+<% items = Array(suggestion.payload["items"]) %>
+<%= form_with url: ai_suggestion_path(suggestion), method: :patch, class: "flex flex-column gap-half txt-small", data: { turbo_frame: "_top" } do %>
+  <% items.each_with_index do |item, index| %>
+    <%# herb:key index %>
+    <label class="ai-suggestion__pick"><%= check_box_tag "items[]", "items-#{index}", true, id: nil %> <span><%= item["description"] %><% if item["internal_estimate"].present? %> <span class="txt-subtle">· <%= item["internal_estimate"] %> (internal)</span><% end %></span></label>
+  <% end %>
+  <input type="hidden" name="decision" value="accept">
+  <div><button type="submit" class="btn btn--link txt-small">Add the ticked ones to the draft</button></div>
+<% end %>
+<%= render "ai/suggestions/dismiss", suggestion: suggestion, frame_id: frame_id %>

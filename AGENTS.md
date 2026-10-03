@@ -601,6 +601,20 @@ can be kept out of AI (`Client#ai_excluded`, a person's call, never an agent's).
 - `Ai::Instructions` is rebuilt each reply (unpersisted): the person, today, the install's words, the
   record on screen, and the rules (facts from tools only, records as "Type:id" which `ai_text`
   links, one proposed change at a time, care with anything reaching a client)
+- Suggestions on records (`AiSuggestion`, kinds in `Ai::Suggestions`: triage on a request, promises
+  and work in a note, the day on home, draft scope and a pre-send check on a draft, work for a scope
+  item, a reminder for a commitment, the week for a client): a strict JSON schema answered in a job
+  (`AiSuggestionJob`) through its own `AiChat` (purpose "suggestion"), shown by
+  `ai/suggestions/_card` (in a list, `row: true` starts as just its button: no lookup per row), and
+  applied with the person's permissions through the models' verbs. Settings > AI counts how often
+  each kind is used. A new kind is a `define` with its schema, prompt and apply, plus a
+  `kinds/_<kind>` partial
+- The panel can attach the record's documents to a question (PDFs, images, text; Active Storage on
+  `AiMessage`), and offers page-aware questions where there's no record (`ai_prompts(subject, page)`)
+- The portal assistant (`Setting#ai_portal`, off by default): a contact's own `AiChat`
+  (`contact_id`), answered through `Ai::Tools::PortalAction`, which reaches only the portal's own
+  read tools and `portal_send_request` (the contact approves it first) with the contact's token
+  (`Ai.run_portal_tool`); it never decides on an agreement
 - Plugins add one-click questions with `Runwell::Plugins.ai_prompt key, label, types:`
 
 ## Custom fields

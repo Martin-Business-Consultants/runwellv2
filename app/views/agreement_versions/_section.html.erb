@@ -13,6 +13,14 @@
         <article class="agreement-version flex flex-column gap-half">
           <% if version.draft? %>
             <%= render "agreement_versions/draft", version: version, contacts: contacts %>
+            <% if !engagement.internal? && Ai.available_for?(engagement) %>
+              <div class="flex flex-column gap-half ai-suggestions">
+                <%= render "ai/suggestions/card", kind: "scope_draft", subject: engagement, suggestion: AiSuggestion.latest("scope_draft", engagement, Current.user) %>
+                <% if version.scope_items.any? %>
+                  <%= render "ai/suggestions/card", kind: "agreement_check", subject: engagement, suggestion: AiSuggestion.latest("agreement_check", engagement, Current.user) %>
+                <% end %>
+              </div>
+            <% end %>
           <% else %>
             <%= render "agreement_versions/sent", version: version, contacts: contacts %>
           <% end %>

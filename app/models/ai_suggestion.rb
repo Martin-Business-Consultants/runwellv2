@@ -26,13 +26,19 @@ class AiSuggestion < ApplicationRecord
     chat = AiChat.start!(user: user, subject: subject, purpose: "suggestion", fast: definition.fast)
     update!(ai_chat: chat)
     response = chat.with_instructions(Ai::Instructions.for(chat), persist: false)
-                   .with_schema(definition.schema)
-                   .ask(definition.prompt_for(subject))
-    update!(state: "ready", payload: response.content.is_a?(Hash) ? response.content : JSON.parse(response.content.to_s))
+                   .with_schema(definition.schema.merge(name: kind))
+                   .ask(definition.prompt_for(subject, user))
+    parsed = response.content.is_a?(Hash) ? response.content : JSON.parse(response.content.to_s)
+    update!(state: "ready", payload: parsed)
   rescue => error
     update!(state: "failed", error: "#{error.class.name.demodulize}: #{error.message}".truncate(250))
   end
 
-  def accept! = update!(state: "accepted")
+  # The person uses it (with the items they ticked, for a list): applied with their permissions.
+  def accept!(selection = [])
+    message = definition.apply&.call(self, Array(selection).map(&:to_s), user) || "Noted."
+    update!(state: "accepted")
+    message
+  end
   def dismiss! = update!(state: "dismissed")
 end
