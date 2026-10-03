@@ -1,0 +1,95 @@
+<% @page_title = "Webhooks" %>
+<%= render "settings/header", current: :webhooks %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Webhooks</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Send each event (a <%= term(:client).downcase %> added, an agreement approved, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
+        Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
+        Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
+      </p>
+    </section>
+
+    <% @endpoints.each do |endpoint| %>
+      <%# herb:key endpoint.id %>
+      <section class="settings__section flex flex-column gap-half" id="<%= dom_id(endpoint) %>">
+        <header>
+          <h2 class="divider overflow-ellipsis"><%= endpoint.description.presence || endpoint.url %></h2>
+        </header>
+        <div class="flex flex-wrap align-center gap-half txt-small">
+          <% if endpoint.active? %>
+            <span class="status-tag status-tag--positive">On</span>
+          <% else %>
+            <span class="status-tag status-tag--negative">Off</span>
+          <% end %>
+          <code class="overflow-ellipsis"><%= endpoint.url %></code>
+          <span class="txt-subtle">
+            <%= endpoint.kinds.present? ? endpoint.kinds_text : "every event" %><%= ", with sign-in and security" if endpoint.include_security? %>
+            <% if endpoint.failures_in_a_row.positive? %> · <%= pluralize(endpoint.failures_in_a_row, "failure") %> in a row<% end %>
+          </span>
+        </div>
+        <%= form_with model: endpoint, url: settings_webhook_path(endpoint), method: :patch, namespace: dom_id(endpoint), class: "flex flex-column gap-half txt-small" do |form| %>
+          <%= form.label :secret, "Secret", class: "record-form__label" %>
+          <%= secret_field form, :secret, readonly: true %>
+          <%= form.label :kinds_text, "Only these kinds", class: "record-form__label" %>
+          <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. agreement.approved, todo.*", autocomplete: "off" %>
+          <label class="flex align-center gap-half"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
+          <label class="flex align-center gap-half"><%= form.check_box :active %> <span>On</span></label>
+          <div class="flex flex-wrap gap-half">
+            <button type="submit" class="btn btn--link txt-small">Save</button>
+            <button type="submit" name="ping" value="1" class="btn txt-small">Send a test</button>
+          </div>
+        <% end %>
+        <% deliveries = @deliveries[endpoint.id] || [] %>
+        <% if deliveries.any? %>
+          <table class="data-table txt-x-small">
+            <thead><tr><th>When</th><th>Event</th><th>Result</th><th>Tries</th></tr></thead>
+            <tbody>
+              <% deliveries.each do |delivery| %>
+                <%# herb:key delivery.id %>
+                <tr>
+                  <td class="txt-nowrap"><%= l delivery.created_at, format: :short %></td>
+                  <td><code><%= delivery.kind %></code></td>
+                  <td>
+                    <% if delivery.ok? %>
+                      <span class="status-tag status-tag--positive"><%= delivery.status_code %></span> <span class="txt-subtle"><%= delivery.duration_ms %> ms</span>
+                    <% elsif delivery.attempts.zero? %>
+                      <span class="status-tag status-tag--waiting">Queued</span>
+                    <% else %>
+                      <span class="status-tag status-tag--negative"><%= delivery.status_code || "Failed" %></span> <span class="txt-subtle"><%= delivery.error %></span>
+                    <% end %>
+                  </td>
+                  <td><%= delivery.attempts %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% end %>
+        <div class="section-actions">
+          <%= render "layouts/shared/delete_dialog", name: "this webhook", path: settings_webhook_path(endpoint), trigger_class: "txt-small", message: "Events stop going to #{endpoint.url}." %>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Add a webhook</h2>
+      </header>
+      <%= form_with model: @endpoint, url: settings_webhooks_path, class: "flex flex-column gap-half txt-small" do |form| %>
+        <%= form.label :url, "Address", class: "record-form__label" %>
+        <%= form.url_field :url, class: "input full-width", placeholder: "https://hooks.example.com/runwell", required: true, autocomplete: "off" %>
+        <%= form.label :description, "Name (optional)", class: "record-form__label" %>
+        <%= form.text_field :description, class: "input full-width", placeholder: "Zapier: approvals to the sales sheet", autocomplete: "off" %>
+        <%= form.label :kinds_text, "Only these kinds (optional)", class: "record-form__label" %>
+        <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. agreement.approved, todo.*", autocomplete: "off" %>
+        <label class="flex align-center gap-half"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
+        <div><button type="submit" class="btn btn--link txt-small">Add webhook</button></div>
+      <% end %>
+      <p class="txt-x-small txt-subtle margin-none">Event kinds are listed in the <%= link_to "plugin contract", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/plugin-contract.md#events", target: "_blank", rel: "noopener" %>; sign-in ones in the audit log.</p>
+    </section>
+  </div>
+</section>

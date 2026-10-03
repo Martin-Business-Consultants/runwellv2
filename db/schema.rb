@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_110000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -576,6 +576,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_100000) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.integer "webhook_endpoint_id", null: false
+    t.integer "event_id"
+    t.string "kind", null: false
+    t.integer "attempts", default: 0, null: false
+    t.integer "status_code"
+    t.string "error"
+    t.integer "duration_ms"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
+    t.index ["webhook_endpoint_id", "created_at"], name: "index_webhook_deliveries_on_webhook_endpoint_id_and_created_at"
+    t.index ["webhook_endpoint_id"], name: "index_webhook_deliveries_on_webhook_endpoint_id"
+  end
+
+  create_table "webhook_endpoints", force: :cascade do |t|
+    t.string "url", null: false
+    t.string "description"
+    t.string "secret", null: false
+    t.json "kinds"
+    t.boolean "include_security", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.integer "failures_in_a_row", default: 0, null: false
+    t.datetime "last_delivered_at"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_webhook_endpoints_on_created_by_id"
+  end
+
   add_foreign_key "access_tokens", "contacts"
   add_foreign_key "access_tokens", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -626,6 +657,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_100000) do
   add_foreign_key "todos", "users", column: "owner_id"
   add_foreign_key "upgrades", "users", column: "requested_by_id"
   add_foreign_key "users", "users", column: "agent_owner_id"
+  add_foreign_key "webhook_deliveries", "events"
+  add_foreign_key "webhook_deliveries", "webhook_endpoints"
+  add_foreign_key "webhook_endpoints", "users", column: "created_by_id"
 
   # Virtual tables defined in this database.
   # Note that virtual tables may not work with other database engines. Be careful if changing database.

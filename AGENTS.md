@@ -602,6 +602,16 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 `settings.sign_in_provider`, `settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
 
+## Webhooks
+
+Settings > Webhooks (owners; agents may only `list_webhooks`) sends events to outside addresses:
+`WebhookEndpoint` (url, encrypted secret, optional kinds like `todo.*`, `include_security` for
+User / Setting events), dispatched from `EventPublishJob`, one `WebhookDelivery` per event,
+delivered by `WebhookDeliveryJob` with retries (about a day). The body is JSON (`id`, `kind`,
+`occurred_at`, `actor`, `subject` with name and url, `payload`), signed as
+`X-Runwell-Signature: sha256=HMAC(secret, "#{timestamp}.#{body}")`. Twenty failures in a row
+switch an endpoint off; deliveries are kept 30 days.
+
 ## Export
 
 Settings > Export (owners, `create_export` / `list_exports`) makes one .zip of everything

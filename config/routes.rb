@@ -76,6 +76,7 @@ Rails.application.routes.draw do
     resource :start, only: :update
     resources :exports, only: %i[index create show]
     resource :audit_log, only: :show
+    resources :webhooks, only: %i[index create update destroy]
     resource :views, only: %i[show update]
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails

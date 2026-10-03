@@ -6,5 +6,6 @@ class EventPublishJob < ApplicationJob
     Current.set(source: event.source) do
       ActiveSupport::Notifications.instrument("event.runwell", event: event)
     end
+    WebhookEndpoint.dispatch(event)
   end
 end
