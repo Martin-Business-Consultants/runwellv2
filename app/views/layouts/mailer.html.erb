@@ -1,10 +1,58 @@
+<% setting = Setting.current %>
+<% brand = setting.brand_color %>
 <!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <%# Email can't load app/assets/stylesheets, so this layout carries its own styles: the one
+        place a <style> tag is allowed. The band's color is also a bgcolor attribute, for Outlook. %>
+    <style>
+      body { background: #f4f4f6; color: #1f2024; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; }
+      .mail { margin: 0 auto; max-width: 600px; width: 100%; }
+      .mail__band { background: <%= brand %>; border-radius: 10px 10px 0 0; color: #ffffff; padding: 20px 28px; }
+      .mail__name { color: #ffffff; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+      .mail__logo { border: 0; display: block; height: 36px; max-width: 220px; width: auto; }
+      .mail__body { background: #ffffff; border-radius: 0 0 10px 10px; padding: 28px; }
+      .mail__body a { color: <%= brand %>; }
+      .mail__body p { margin: 0 0 16px; }
+      .mail__foot { color: #8a8c93; font-size: 12px; padding: 16px 28px 32px; text-align: center; }
+      @media (max-width: 620px) { .mail__band, .mail__body { border-radius: 0; padding-left: 20px; padding-right: 20px; } }
+    </style>
   </head>
 
   <body>
-    <%= yield %>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f6">
+      <tr>
+        <td align="center" class="mail-outer">
+          <table role="presentation" class="mail" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="mail__band" bgcolor="<%= brand %>">
+                <% if setting.logo.attached? %>
+                  <%= image_tag rails_blob_url(setting.logo), alt: setting.brand_name, class: "mail__logo", height: 36 %>
+                <% else %>
+                  <span class="mail__name"><%= setting.brand_name %></span>
+                <% end %>
+              </td>
+            </tr>
+            <tr>
+              <td class="mail__body" bgcolor="#ffffff">
+                <%= yield %>
+              </td>
+            </tr>
+            <tr>
+              <td class="mail__foot">
+                <% if setting.brand_name == "Runwell" %>
+                  Sent by Runwell
+                <% else %>
+                  Sent by <%= setting.brand_name %> through Runwell
+                <% end %>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

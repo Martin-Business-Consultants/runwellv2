@@ -7,6 +7,9 @@ class Setting < ApplicationRecord
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
   RADII = { "sharp" => "Sharp", "fizzy" => "Soft", "round" => "Round" }.freeze
   SCHEMES = { "fizzy" => "Indigo", "forest" => "Forest", "plum" => "Plum", "ocean" => "Ocean", "graphite" => "Graphite" }.freeze
+  # Each scheme's accent as hex (its oklch in appearance.css, converted), for email, which knows
+  # neither oklch nor CSS variables.
+  SCHEME_COLORS = { "fizzy" => "#5d63cd", "forest" => "#058931", "plum" => "#a049d4", "ocean" => "#00859a", "graphite" => "#404249" }.freeze
   FONTS = { "system" => "System", "humanist" => "Humanist", "rounded" => "Rounded", "serif" => "Serif", "mono" => "Mono" }.freeze
 
   has_one_attached :logo
@@ -37,6 +40,11 @@ class Setting < ApplicationRecord
   def self.current
     Current.settings ||= first_or_create!
   end
+
+  def brand_color = SCHEME_COLORS.fetch(scheme, SCHEME_COLORS["fizzy"])
+
+  # Who the install is, in words: the sender's name (Settings > Email), else Runwell.
+  def brand_name = Mail::Address.new(mail_sender).display_name.presence || "Runwell"
 
   # The sender when Settings > Email is blank: MAIL_FROM, or a no-reply address at the host.
   def self.default_mail_sender

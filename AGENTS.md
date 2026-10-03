@@ -105,7 +105,9 @@ scope items).
   opens the browser's picker; `t` today, `+`/`-` a day, Delete clears. Never a text field for a
   date, and no date-picker library
 - Never inline CSS: no `style` attributes and no `<style>` tags in views. All
-  styling lives in `app/assets/stylesheets`
+  styling lives in `app/assets/stylesheets`. The one exception is email, which can't load
+  stylesheets: `layouts/mailer.html.erb` carries its own `<style>`, with the brand band in the
+  scheme's color (`Setting#brand_color`) and the logo when there is one
 - Do not write tests. Don't add new ones or extend existing ones unless asked
 
 ## Frontend
