@@ -54,3 +54,10 @@ gem "geared_pagination", "~> 1.2"
 # Two-factor sign-in: authenticator codes (TOTP) and the QR code that sets them up
 gem "rotp"
 gem "rqrcode"
+
+# Signing in with Google, Microsoft or GitHub (Settings > Sign-in)
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem "omniauth-google-oauth2"
+gem "omniauth-github"
+gem "omniauth-entra-id"

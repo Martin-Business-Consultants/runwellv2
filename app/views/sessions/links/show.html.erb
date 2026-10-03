@@ -1,0 +1,10 @@
+<% @page_title = "Sign in" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Sign in as <%= @link_user.display_name %></h1>
+  <p class="txt-subtle margin-none"><%= @link_user.email_address %></p>
+  <%= button_to staff_session_link_path(params[:token]), class: "btn btn--link center txt-medium", form_class: "margin-block-start" do %>
+    <span>Sign in</span>
+    <%= icon_tag "arrow-right" %>
+  <% end %>
+</div>

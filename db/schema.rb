@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_080000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -265,6 +265,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
     t.index ["subject_type", "subject_id", "occurred_at"], name: "index_events_on_subject_type_and_subject_id_and_occurred_at"
   end
 
+  create_table "identities", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.string "email"
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
+    t.index ["user_id"], name: "index_identities_on_user_id"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "role", default: "member", null: false
@@ -479,6 +491,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
     t.boolean "require_two_factor", default: false, null: false
   end
 
+  create_table "sign_in_providers", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "client_id"
+    t.string "client_secret"
+    t.string "tenant_id"
+    t.boolean "enabled", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_sign_in_providers_on_key", unique: true
+  end
+
   create_table "todos", force: :cascade do |t|
     t.integer "engagement_id", null: false
     t.integer "scope_item_id"
@@ -532,6 +555,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
     t.datetime "otp_enabled_at"
     t.datetime "otp_last_used_at"
     t.json "otp_recovery_codes"
+    t.boolean "passwordless", default: false, null: false
+    t.datetime "link_signed_in_at"
     t.index ["agent_owner_id"], name: "index_users_on_agent_owner_id", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
@@ -560,6 +585,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
   add_foreign_key "engagements", "clients"
   add_foreign_key "engagements", "users", column: "created_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
+  add_foreign_key "identities", "users"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "mentions", "users", column: "mentionee_id"

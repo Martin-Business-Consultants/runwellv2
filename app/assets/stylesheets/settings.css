@@ -948,3 +948,21 @@
     min-inline-size: 0;
   }
 }
+
+/* The sign-in page's other ways in (Google, an emailed link), stacked under the password. */
+@layer components {
+  .sign-in-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+
+    form { display: contents; }
+  }
+
+  .sign-in-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    padding-inline-start: 1.25em;
+  }
+}

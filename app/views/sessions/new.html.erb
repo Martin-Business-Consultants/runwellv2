@@ -20,6 +20,19 @@
     </button>
   <% end %>
 
+  <% providers = SignInProvider.usable_keys %>
+  <div class="sign-in-options margin-block-start">
+    <% providers.each do |key| %>
+      <%# herb:key key %>
+      <%= button_to "/auth/#{key}", class: "btn full-width", data: { turbo: false } do %>
+        <span>Continue with <%= SignInProvider.name_for(key) %></span>
+      <% end %>
+    <% end %>
+    <%= link_to new_session_link_path(email_address: params[:email_address]), class: "btn full-width" do %>
+      <%= icon_tag "email" %> <span>Email me a sign-in link</span>
+    <% end %>
+  </div>
+
   <div class="margin-block-start">
     <%= link_to "Forgot your password?", new_password_path, class: "btn btn--plain txt-link center txt-small" %>
   </div>

@@ -2,11 +2,16 @@ class User < ApplicationRecord
   include Named, Avatar, Mentionable, Role, Agent, TwoFactor
 
   has_secure_password
+
+  # An emailed sign-in link (Sessions::LinksController): good for 15 minutes, and once, since
+  # signing in with it moves link_signed_in_at.
+  generates_token_for(:link_sign_in, expires_in: 15.minutes) { link_signed_in_at }
   has_many :sessions, dependent: :destroy
   has_many :todos, foreign_key: :owner_id, dependent: :nullify, inverse_of: :owner
   has_many :questions, dependent: :destroy
   has_many :notifications, dependent: :destroy
   has_many :access_tokens, dependent: :destroy
+  has_many :identities, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   validates :name, presence: true

@@ -15,14 +15,7 @@ class SessionsController < ApplicationController
 
   def create
     if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.active? && !user.agent?
-      if user.two_factor?
-        # The password was right; the session starts once the second step checks out.
-        session[:two_factor] = { "user_id" => user.id, "at" => Time.current.to_i, "tries" => 0 }
-        redirect_to new_session_two_factor_path
-      else
-        start_new_session_for user
-        redirect_to after_authentication_url
-      end
+      sign_in_after_first_step user
     else
       redirect_to new_session_path(email_address: params[:email_address]), alert: "Try another email address or password."
     end

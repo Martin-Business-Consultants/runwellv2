@@ -85,6 +85,18 @@ module Authentication
       redirect_to new_session_path
     end
 
+    # The first step checked out (a password, an emailed link, Google…): sign in, or go on to the
+    # code from the authenticator app when the person has two-factor sign-in on.
+    def sign_in_after_first_step(user)
+      if user.two_factor?
+        session[:two_factor] = { "user_id" => user.id, "at" => Time.current.to_i, "tries" => 0 }
+        redirect_to new_session_two_factor_path
+      else
+        start_new_session_for user
+        redirect_to after_authentication_url
+      end
+    end
+
     def after_authentication_url
       session.delete(:return_to_after_authenticating) || root_url
     end

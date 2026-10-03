@@ -4,6 +4,12 @@ Rails.application.routes.draw do
   resource :session
   get "session/two_factor", to: "sessions/two_factors#new", as: :new_session_two_factor
   post "session/two_factor", to: "sessions/two_factors#create", as: :session_two_factor
+  get "session/link", to: "sessions/links#new", as: :new_session_link
+  post "session/link", to: "sessions/links#create", as: :session_link_request
+  get "session/link/:token", to: "sessions/links#show", as: :staff_session_link
+  post "session/link/:token", to: "sessions/links#update"
+  match "auth/:provider/callback", to: "sessions/omniauths#create", via: %i[get post], as: :omniauth_callback
+  get "auth/failure", to: "sessions/omniauths#failure", as: :omniauth_failure
   resource :signup, only: %i[ new create ]
   resources :users, only: [] do
     resource :avatar, only: :show, module: :users
@@ -57,6 +63,10 @@ Rails.application.routes.draw do
       resource :recovery_codes, only: :create, module: :two_factors
     end
     resource :two_factor_requirement, only: :update
+    resource :sign_in, only: :show
+    resources :sign_in_providers, only: :update, param: :key
+    resources :identities, only: :destroy
+    resource :passwordless, only: :update
     resource :help, only: :show
     get "help/mcp", to: "helps#mcp", as: :help_mcp
     get "help/ai", to: "helps#ai", as: :help_ai

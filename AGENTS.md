@@ -617,6 +617,14 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
   (`Setting#require_two_factor`, Settings > People), which sends anyone without it to set it up
   (`Authentication#require_two_factor_setup`, browser sessions only), and resets someone's who
   lost their phone. Tokens and the portal are untouched; agents can't change any of it
+- Other ways in, ported from authentication-zero onto this sign-in (not regenerated over it):
+  an emailed link for anyone who switches it on (`User#passwordless`, Settings > Your account;
+  `Sessions::LinksController`, a button page so mail scanners can't use it, once, 15 minutes), and
+  Google, Microsoft (Entra ID) or GitHub through OmniAuth (`SignInProvider`, keys saved encrypted in
+  Settings > Sign-in and read in each provider's setup phase, so no restart). A person connects their
+  accounts in Your account (`Identity`), or is matched by an address Google or GitHub verified.
+  Nobody joins this way, and every way in ends in `Authentication#sign_in_after_first_step`, so
+  two-factor sign-in still follows
 - People are deactivated, never deleted (`deactivate!` ends their sessions; their name stays
   on their history). Pickers and mentions list `User.active.ordered`. The last active owner
   can't be demoted or deactivated

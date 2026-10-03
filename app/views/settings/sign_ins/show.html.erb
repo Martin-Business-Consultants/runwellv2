@@ -1,0 +1,51 @@
+<% @page_title = "Sign-in" %>
+<%= render "settings/header", current: :sign_in %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Sign-in</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Everyone signs in with a password, and can switch on emailed links in Settings › Your account. Here you can add Google, Microsoft or GitHub as well.
+        People connect their own accounts, or are matched by an address Google or GitHub has verified. Nobody joins this way: accounts still start with an invitation, and two-factor sign-in still applies.
+      </p>
+    </section>
+
+    <% @providers.each do |provider| %>
+      <%# herb:key provider.key %>
+      <% info = SignInProvider::PROVIDERS.fetch(provider.key) %>
+      <section class="settings__section flex flex-column gap-half" id="<%= provider.key %>">
+        <header>
+          <h2 class="divider"><%= provider.name %></h2>
+        </header>
+        <ol class="txt-small margin-none sign-in-steps">
+          <li>Create an OAuth app in <%= link_to "the #{provider.name} console", info[:console], target: "_blank", rel: "noopener" %>.</li>
+          <li>
+            Give it this callback (redirect) address:
+            <div class="copy-row margin-block-start-half">
+              <code><%= (Runwell.host_set? ? "#{Runwell.protocol}://#{Runwell.host}" : request.base_url) + omniauth_callback_path(provider: provider.key) %></code>
+            </div>
+          </li>
+          <li>Paste its client ID and secret here, and switch it on.</li>
+        </ol>
+        <%= form_with model: provider, url: settings_sign_in_provider_path(provider.key), method: :patch, scope: :sign_in_provider, namespace: provider.key, class: "flex flex-column gap-half txt-small" do |form| %>
+          <%= form.label :client_id, "Client ID", class: "record-form__label" %>
+          <%= form.text_field :client_id, class: "input full-width", autocomplete: "off", spellcheck: false %>
+          <%= form.label :client_secret, "Client secret", class: "record-form__label" %>
+          <%= secret_field form, :client_secret %>
+          <% if provider.key == "entra_id" %>
+            <%= form.label :tenant_id, "Tenant ID (optional)", class: "record-form__label" %>
+            <%= form.text_field :tenant_id, class: "input full-width", autocomplete: "off", spellcheck: false, placeholder: "common: any Microsoft work or personal account" %>
+          <% end %>
+          <label class="flex align-center gap-half">
+            <%= form.check_box :enabled %>
+            <span>Show “Continue with <%= provider.name %>” on the sign-in page</span>
+          </label>
+          <div><button type="submit" class="btn btn--link txt-small">Save</button></div>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</section>

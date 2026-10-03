@@ -1,0 +1,20 @@
+<% @page_title = "Sign in by link" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Email me a link</h1>
+  <p class="txt-subtle margin-none">If you’ve switched on sign-in by link (Settings › Your account), we’ll email you one. No password needed.</p>
+
+  <%= form_with url: session_link_request_path, class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…", value: params[:email_address] %>
+    </label>
+    <button type="submit" class="btn btn--link center txt-medium" data-form-target="submit">
+      <span>Send the link</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+
+  <div class="margin-block-start">
+    <%= link_to "Sign in with a password", new_session_path, class: "btn btn--plain txt-link center txt-small" %>
+  </div>
+</div>

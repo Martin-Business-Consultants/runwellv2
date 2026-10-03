@@ -4,6 +4,51 @@
 
 <section class="settings">
   <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half" id="sign-in">
+      <header>
+        <h2 class="divider">Ways to sign in</h2>
+      </header>
+      <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
+        <div class="record-form__toggle-text">
+          <%= form.label :passwordless, "Sign in with an emailed link", class: "record-form__label" %>
+          <span class="record-form__hint">“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too.</span>
+        </div>
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :passwordless, class: "switch__input", data: { action: "change->form#submit" } %>
+          <span class="switch__btn"></span>
+        </label>
+      <% end %>
+      <% providers = SignInProvider.usable_keys %>
+      <% identities = @user.identities.index_by(&:provider) %>
+      <% if providers.any? || identities.any? %>
+        <ul class="settings__scrollable-list">
+          <% (providers | identities.keys).each do |key| %>
+            <%# herb:key key %>
+            <% identity = identities[key] %>
+            <li class="flex align-center gap-half txt-small">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= SignInProvider.name_for(key) %></strong>
+                <div class="txt-x-small txt-subtle overflow-ellipsis">
+                  <% if identity %>
+                    Connected<%= " as #{identity.email}" if identity.email.present? %><% if identity.last_used_at %> · last used <%= time_ago_in_words(identity.last_used_at) %> ago<% end %>
+                  <% else %>
+                    Not connected
+                  <% end %>
+                </div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <% if identity %>
+                <%= render "layouts/shared/delete_dialog", name: "the connection to " + identity.provider_name, path: settings_identity_path(identity), trigger_class: "txt-small",
+                      message: "You won’t be able to sign in with this account until you connect it again." %>
+              <% elsif providers.include?(key) %>
+                <%= button_to "Connect", "/auth/#{key}", class: "btn txt-small", data: { turbo: false } %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </section>
+
     <section class="settings__section flex flex-column gap-half" id="two-factor">
       <header>
         <h2 class="divider">Two-factor sign-in</h2>
@@ -55,7 +100,8 @@
           <% Setting::TEXT_SIZES.each do |value, label| %>
             <%# herb:key value %>
             <label class="btn theme-switcher__btn">
-              <span class="appearance-sample appearance-size--<%= value %>" aria-hidden="true">Aa</span>
+              <% sample_class = "appearance-sample appearance-size--" + value %>
+              <span class="<%= sample_class %>" aria-hidden="true">Aa</span>
               <span class="overflow-ellipsis"><%= label %></span>
               <%= form.radio_button :text_size, value, checked: @user.text_size == value, data: { action: "click->appearance#preview" } %>
             </label>
