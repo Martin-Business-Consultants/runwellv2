@@ -19,7 +19,7 @@ module Agent
 
     def call
       started_at = Time.current
-      body = guarded { run }
+      body = catch(:answer) { guarded { run } }
       AgentCall.record!(access_token, tool: tool.name, body: body, started_at: started_at) if access_token
       body
     end
@@ -40,6 +40,7 @@ module Agent
       end
 
       def run
+        @arguments = with_names_resolved(arguments)
         return preview if tool.confirm && arguments["confirm"] != true
 
         key = arguments["idempotency_key"].to_s.presence unless tool.read?
@@ -77,6 +78,43 @@ module Agent
         Rails.error.report(e, context: { tool: tool.name })
         with_hint({ "status" => "error", "summary" => "Something went wrong running #{tool.name}: #{e.message.truncate(200)}" }, "failed")
       end
+
+      # Names given for ids, resolved (Agent::Resolver): path ids and refs, id parameters anywhere
+      # in the params (client_id, owner_id…), and "Type:name" records.
+      def with_names_resolved(values)
+        values.to_h do |key, value|
+          [ key, resolved(key, value, path: tool.path_parameters.include?(key)) ]
+        end
+      rescue Resolver::Ambiguous => error
+        throw_answer({ "status" => "error", "code" => "ambiguous", "summary" => error.message,
+          "candidates" => error.candidates.map { Resolver.describe(it) }, "hint" => Errors.hint("ambiguous", tool: tool.name) })
+      rescue Resolver::Missing => error
+        throw_answer(with_hint({ "status" => "error", "summary" => error.message }, "not_found"))
+      end
+
+      def resolved(key, value, path: false)
+        case value
+        when Hash then value.to_h { |k, v| [ k, resolved(k, v) ] }
+        when Array then value.map { resolved(key, it) }
+        when String
+          return value if value.blank?
+
+          if path && key.in?(%w[ref engagement_ref])
+            value.match?(Resolver::REF) ? value : Resolver.resolve("Engagement", value).ref
+          elsif path && key == "id" && (type = tool.controller.controller_path.split("/").last.classify).in?(Resolver.types)
+            Resolver.id_for(type, value)
+          elsif (type = Resolver::PARAMS[key])
+            Resolver.id_for(type, value)
+          elsif key == "record" && (match = value.match(/\A(\w+):(.+)\z/)) && match[1].in?(Resolver.types) && !Resolver.id?(match[2])
+            "#{match[1]}:#{Resolver.resolve(match[1], match[2]).id}"
+          else
+            value
+          end
+        else value
+        end
+      end
+
+      def throw_answer(body) = throw(:answer, body)
 
       def with_hint(body, code)
         body["code"] = code

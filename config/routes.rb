@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   # Agents: the MCP server, and OAuth for connectors (see Agent::, Oauth::)
   post "mcp", to: "mcp#create", as: :mcp
+  get "resolve", to: "resolutions#show", as: :resolution
   get "install/cli", to: "cli#install", as: :cli_install
   get "install/runwell", to: "cli#show", as: :cli_script
   get ".well-known/oauth-protected-resource(/*resource)", to: "oauth/metadata#protected_resource", as: :oauth_protected_resource

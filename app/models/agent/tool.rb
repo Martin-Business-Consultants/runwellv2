@@ -35,10 +35,10 @@ module Agent
     end
 
     def input_schema
-      properties = path_parameters.to_h { [ it, { type: (it.end_with?("id") ? "integer" : "string"), description: path_description(it) } ] }
+      properties = path_parameters.to_h { [ it, { type: (it.end_with?("id") ? %w[integer string] : "string"), description: path_description(it) } ] }
       required = path_parameters.dup
       params.each do |key, spec|
-        properties[key.to_s] = schema_for(spec)
+        properties[key.to_s] = property_schema(key.to_s, spec)
         required << key.to_s if required_spec?(spec)
       end
       properties["confirm"] = { type: "boolean", description: "Set true once you have shown the person the preview and they agreed." } if confirm
@@ -70,19 +70,27 @@ module Agent
 
       def path_description(part)
         case part
-        when "ref", "engagement_ref" then "The engagement's ref, like WO-12 or S-4"
-        when "id" then "The record's id"
+        when "ref", "engagement_ref" then "The engagement's ref, like WO-12 or S-4, or its title"
+        when "id" then "The record's id, or its name to look up"
         when "key" then "The plugin's key"
-        else "The #{part.delete_suffix("_id").humanize.downcase}’s id"
+        else "The #{part.delete_suffix("_id").humanize.downcase}’s id, or its name"
         end
       end
 
       def required_spec?(spec) = spec.is_a?(String) && spec.end_with?("!")
 
+      # An id parameter (client_id, owner_id…) also takes a name, which Agent::Dispatch resolves.
+      def property_schema(key, spec)
+        return CUSTOM_FIELDS if key == "custom_fields"
+        return schema_for(spec) unless Resolver::PARAMS.key?(key) && spec.to_s.delete_suffix("!") == "integer"
+
+        { type: %w[integer string], description: "The #{Resolver::PARAMS[key].underscore.humanize(capitalize: false)}’s id, or its name to look up" }
+      end
+
       def schema_for(spec)
         case spec
         when Hash
-          { type: "object", properties: spec.to_h { |k, v| [ k.to_s, k.to_s == "custom_fields" ? CUSTOM_FIELDS : schema_for(v) ] }, required: spec.select { |_, v| required_spec?(v) }.keys.map(&:to_s) }.compact_blank
+          { type: "object", properties: spec.to_h { |k, v| [ k.to_s, property_schema(k.to_s, v) ] }, required: spec.select { |_, v| required_spec?(v) }.keys.map(&:to_s) }.compact_blank
         when Array
           # [ { title: "string!" } ] is a list of objects; [ "a", "b" ] is one of those values.
           spec.size == 1 && spec.first.is_a?(Hash) ? { type: "array", items: schema_for(spec.first) } : { type: "string", enum: spec.map(&:to_s) }
