@@ -1,6 +1,6 @@
-<p>
-  You can reset your password on
-  <%= link_to "this password reset page", edit_password_url(@user.password_reset_token) %>.
-
-  This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
-</p>
+<% content_for :preheader, "Choose a new password. The link expires in #{distance_of_time_in_words(0, @user.password_reset_token_expires_in)}." %>
+<% content_for :reason, "Someone asked to reset the password for this address. If it wasn’t you, ignore this email: your password stays as it is." %>
+<%= mail_heading "Reset your password" %>
+<p>Choose a new password for <%= @user.email_address %>.</p>
+<%= mail_button "Choose a new password", edit_password_url(@user.password_reset_token) %>
+<%= mail_small "The link expires in #{distance_of_time_in_words(0, @user.password_reset_token_expires_in)}." %>

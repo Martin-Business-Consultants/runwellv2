@@ -1,6 +1,8 @@
-Hi <%= @link.contact.name %>,
+<% content_for :reason, "You're getting this because you can approve work for #{@engagement.client.name}." %>
+Hi <%= @link.contact.name.split.first %>,
 
-Please review <%= @engagement.title %> (<%= @engagement.ref %>) and let us know your decision:
+<%= @engagement.title %> (<%= @engagement.ref %>) is ready for your decision. Read it through, then approve it or ask for changes:
+
 <%= approval_url(@link.token) %>
 
-The link expires on <%= l @link.expires_at.in_time_zone.to_date, format: :long %>.
+The link is yours alone and works until <%= l @link.expires_at.in_time_zone.to_date, format: :long %>.

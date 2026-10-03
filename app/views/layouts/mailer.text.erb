@@ -1,1 +1,9 @@
+<%= Setting.current.brand_name %>
+<%= "=" * Setting.current.brand_name.length %>
+
 <%= yield %>
+<% if content_for?(:reason) %>
+
+--
+<%= CGI.unescapeHTML(yield(:reason)) %>
+<% end %>

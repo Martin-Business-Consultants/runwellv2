@@ -1,4 +1,5 @@
-You can reset your password on
+<% content_for :reason, "Someone asked to reset the password for this address. If it wasn't you, ignore this email: your password stays as it is." %>
+Choose a new password for <%= @user.email_address %>:
 <%= edit_password_url(@user.password_reset_token) %>
 
-This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+The link expires in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.

@@ -1,53 +1,76 @@
 <% setting = Setting.current %>
 <% brand = setting.brand_color %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <%# Email can't load app/assets/stylesheets, so this layout carries its own styles: the one
-        place a <style> tag is allowed. The band's color is also a bgcolor attribute, for Outlook. %>
+        place a <style> tag is allowed. Everything that matters is inline (MailerHelper and the
+        markup below), for Gmail and Outlook; this adds phones and dark mode where a client
+        honors them. The brand color is also a bgcolor attribute, for Outlook. %>
     <style>
-      body { background: #f4f4f6; color: #1f2024; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; }
-      .mail { margin: 0 auto; max-width: 600px; width: 100%; }
-      .mail__band { background: <%= brand %>; border-radius: 10px 10px 0 0; color: #ffffff; padding: 20px 28px; }
-      .mail__name { color: #ffffff; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
-      .mail__logo { border: 0; display: block; height: 36px; max-width: 220px; width: auto; }
-      .mail__body { background: #ffffff; border-radius: 0 0 10px 10px; padding: 28px; }
-      .mail__body a { color: <%= brand %>; }
-      .mail__body p { margin: 0 0 16px; }
-      .mail__foot { color: #8a8c93; font-size: 12px; padding: 16px 28px 32px; text-align: center; }
-      @media (max-width: 620px) { .mail__band, .mail__body { border-radius: 0; padding-left: 20px; padding-right: 20px; } }
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+      .mail-body p { margin: 0 0 16px; }
+      .mail-body a { color: <%= brand %>; }
+      @media (max-width: 620px) {
+        .mail-card { border-radius: 0 !important; }
+        .mail-pad { padding-left: 20px !important; padding-right: 20px !important; }
+      }
+      @media (prefers-color-scheme: dark) {
+        .mail-page { background: #111214 !important; }
+        .mail-card { background: #1c1d21 !important; border-color: #2c2d33 !important; border-top-color: <%= brand %> !important; }
+        .mail-body, .mail-heading, .mail-name { color: #ececf0 !important; }
+        .mail-quote { color: #c9cad1 !important; }
+        .mail-muted, .mail-muted a, .mail-foot, .mail-foot a { color: #8e9099 !important; }
+        .mail-rule { border-color: #2c2d33 !important; }
+      }
     </style>
   </head>
 
-  <body>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f6">
+  <body class="mail-page" style="margin:0;padding:0;background:#f4f4f6;">
+    <% if content_for?(:preheader) %>
+      <%# The line an inbox shows after the subject, then padding so it doesn't run into the body. %>
+      <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;"><%= yield :preheader %><%= "&#8199;&#65279;&#847; ".html_safe * 40 %></div>
+    <% end %>
+    <table role="presentation" class="mail-page" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f6" style="background:#f4f4f6;">
       <tr>
-        <td align="center" class="mail-outer">
-          <table role="presentation" class="mail" cellpadding="0" cellspacing="0" border="0">
+        <td align="center" style="padding:32px 12px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
             <tr>
-              <td class="mail__band" bgcolor="<%= brand %>">
+              <td class="mail-pad" style="padding:0 4px 16px;">
                 <% if setting.logo.attached? %>
-                  <%= image_tag rails_blob_url(setting.logo), alt: setting.brand_name, class: "mail__logo", height: 36 %>
+                  <%= image_tag rails_blob_url(setting.logo), alt: setting.brand_name, height: 32, style: "border:0;display:block;height:32px;max-width:200px;width:auto;" %>
                 <% else %>
-                  <span class="mail__name"><%= setting.brand_name %></span>
+                  <span class="mail-name" style="color:#16171a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.01em;"><%= setting.brand_name %></span>
                 <% end %>
               </td>
             </tr>
             <tr>
-              <td class="mail__body" bgcolor="#ffffff">
-                <%= yield %>
+              <td class="mail-card" bgcolor="#ffffff" style="background:#ffffff;border:1px solid #e6e6ea;border-top:4px solid <%= brand %>;border-radius:12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="mail-body mail-pad" style="padding:32px;color:#2a2b30;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;">
+                      <%= yield %>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
-              <td class="mail__foot">
-                <% if setting.brand_name == "Runwell" %>
-                  Sent by Runwell
-                <% else %>
-                  Sent by <%= setting.brand_name %> through Runwell
+              <td class="mail-foot mail-pad" style="padding:20px 32px 8px;color:#8a8c93;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.6;text-align:center;">
+                <% if content_for?(:reason) %>
+                  <p style="margin:0 0 8px;"><%= yield :reason %></p>
                 <% end %>
+                <p style="margin:0;">
+                  <% if setting.brand_name == "Runwell" %>
+                    Sent by Runwell
+                  <% else %>
+                    Sent by <%= setting.brand_name %> through Runwell
+                  <% end %>
+                </p>
               </td>
             </tr>
           </table>

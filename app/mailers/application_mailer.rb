@@ -5,4 +5,5 @@ class ApplicationMailer < ActionMailer::Base
   # Links point at this install's address (Settings > Address, else APP_HOST: Runwell.host).
   def default_url_options = Rails.env.production? ? super.merge(host: Runwell.host, protocol: Runwell.protocol) : super
   layout "mailer"
+  helper :mailer
 end

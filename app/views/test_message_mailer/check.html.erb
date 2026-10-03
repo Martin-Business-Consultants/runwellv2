@@ -1,1 +1,4 @@
-<p>This is a test message from Runwell at <%= @host %>. If you are reading it, Runwell can send email.</p>
+<% content_for :preheader, "If you’re reading this, email works." %>
+<% content_for :reason, "Sent from Settings › Email to check that mail goes out." %>
+<%= mail_heading "Email works" %>
+<p>This is a test message from Runwell at <%= @host %>. If you’re reading it, Runwell can send email: approvals, sign-in links and invitations will arrive.</p>

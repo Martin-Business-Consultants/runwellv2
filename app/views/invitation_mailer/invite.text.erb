@@ -1,3 +1,4 @@
+<% content_for :reason, "#{@invitation.invited_by.display_name} invited this address. Not expecting it? Ignore this email and nothing happens." %>
 <%= @invitation.invited_by.display_name %> invited you to join Runwell as <%= @invitation.role == "owner" ? "an owner" : "a " + @invitation.role %>.
 
 Accept the invitation to choose your name and password:

@@ -111,8 +111,12 @@ scope items).
   date, and no date-picker library
 - Never inline CSS: no `style` attributes and no `<style>` tags in views. All
   styling lives in `app/assets/stylesheets`. The one exception is email, which can't load
-  stylesheets: `layouts/mailer.html.erb` carries its own `<style>`, with the brand band in the
-  scheme's color (`Setting#brand_color`) and the logo when there is one
+  stylesheets: `layouts/mailer.html.erb` carries its own `<style>` (phones and dark mode only): the logo or
+  name, a card edged in the scheme's color (`Setting#brand_color`), and a footer. Every email is
+  `MailerHelper`'s pieces, styled inline for Gmail and Outlook: `mail_heading`, paragraphs, at
+  most one `mail_button` (with the address under it), `mail_quote`, `mail_small`, plus
+  `content_for :preheader` (the inbox's preview line) and `:reason` (why this address got it,
+  in the footer of both parts). Plugins' mailers use the same. Previews: `/rails/mailers`
 - No N+1 queries: Prosopite scans every request in development (logged, and in `log/prosopite.log`)
   and test (it raises, so the test fails). Preload what a page or JSON view reads (`includes`); a
   loop that queries per record on purpose goes in `Prosopite.allow_stack_paths`

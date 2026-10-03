@@ -1,4 +1,8 @@
-<p>Hi <%= @link.contact.name %>,</p>
-<p>Please review <strong><%= @engagement.title %></strong> (<%= @engagement.ref %>) and let us know your decision.</p>
-<p><%= link_to "Review and approve", approval_url(@link.token) %></p>
-<p>The link expires on <%= l @link.expires_at.in_time_zone.to_date, format: :long %>.</p>
+<% brand = Setting.current.brand_name %>
+<% content_for :preheader, "#{@engagement.title} (#{@engagement.ref}) is ready for your decision." %>
+<% content_for :reason, "You’re getting this because you can approve work for #{@engagement.client.name}." %>
+<%= mail_heading "Please review #{@engagement.title}" %>
+<p>Hi <%= @link.contact.name.split.first %>,</p>
+<p><%= brand == "Runwell" ? "We’ve" : "#{brand} has" %> sent <strong><%= @engagement.title %></strong> (<%= @engagement.ref %>) for your decision. Read it through, then approve it or ask for changes.</p>
+<%= mail_button "Review and decide", approval_url(@link.token) %>
+<%= mail_small "The link is yours alone and works until #{l @link.expires_at.in_time_zone.to_date, format: :long}." %>

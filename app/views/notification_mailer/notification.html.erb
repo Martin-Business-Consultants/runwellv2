@@ -1,3 +1,5 @@
-<strong><%= @mention.mentioner.first_name %> mentioned you:</strong>
-<p><%= @mention.source.mentionable_content.truncate(250) %></p>
-<p><%= link_to "Open it in Runwell", notification_url(@notification) %></p>
+<% content_for :preheader, @mention.source.mentionable_content.truncate(90) %>
+<% content_for :reason, "You’re getting this because someone mentioned you." %>
+<%= mail_heading "#{@mention.mentioner.first_name} mentioned you" %>
+<%= mail_quote @mention.source.mentionable_content.truncate(250) %>
+<%= mail_button "Open it", notification_url(@notification) %>

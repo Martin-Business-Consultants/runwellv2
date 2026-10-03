@@ -1,2 +1,6 @@
-<p>Hi <%= @contact.name %>,</p>
-<p><%= link_to "Sign in", @url %>. This link works for one hour.</p>
+<% content_for :preheader, "Your link to sign in. It works for one hour." %>
+<% content_for :reason, "Someone asked to sign in with this address. If it wasn’t you, ignore this email." %>
+<%= mail_heading "Sign in to #{@contact.client.name}’s portal" %>
+<p>Hi <%= @contact.name.split.first %>, here’s your link to sign in. No password needed.</p>
+<%= mail_button "Sign in", @url %>
+<%= mail_small "It works for one hour." %>
