@@ -19,6 +19,9 @@ production:
   release_check:
     class: ReleaseCheckJob
     schedule: every day at 4am
+  export_cleanup:
+    command: "Export.expire_old!"
+    schedule: every day at 3:30am
   agent_housekeeping:
     class: AgentHousekeepingJob
     schedule: every day at 3am

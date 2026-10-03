@@ -1,0 +1,54 @@
+<% @page_title = "Export" %>
+<%= render "settings/header", current: :export %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Export everything</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        One .zip of everything Runwell holds: every table (yours and your plugins’) as JSON and CSV, and every file.
+        It’s yours to keep, move or open in a spreadsheet. Passwords, tokens and other secrets are left out.
+        It’s built in the background and emailed to you when ready, then kept for a week.
+      </p>
+      <div class="section-actions">
+        <%= button_to settings_exports_path, class: "btn btn--link txt-small" do %>
+          <%= icon_tag "share" %> <span>Make an export</span>
+        <% end %>
+      </div>
+    </section>
+
+    <% if @exports.any? %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Recent exports</h2>
+        </header>
+        <ul class="settings__scrollable-list">
+          <% @exports.each do |export| %>
+            <%# herb:key export.id %>
+            <li class="flex align-center gap-half txt-small" data-filter-target="item">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= l export.created_at, format: :long %></strong>
+                <div class="txt-x-small txt-subtle">
+                  By <%= export.user.display_name %>
+                  <% if export.ready? %>
+                    · <%= number_with_delimiter(export.rows_count) %> records, <%= pluralize(export.files_count, "file") %>, <%= number_to_human_size(export.archive.byte_size) %>
+                  <% elsif export.state == "failed" %>
+                    · failed: <%= export.error %>
+                  <% else %>
+                    · being made…
+                  <% end %>
+                </div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <% if export.ready? %>
+                <%= link_to "Download", settings_export_path(export), class: "btn txt-small", data: { turbo: false } %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </div>
+</section>

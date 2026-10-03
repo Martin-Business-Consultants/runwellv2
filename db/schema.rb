@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_100000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -263,6 +263,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_090000) do
     t.datetime "created_at", null: false
     t.index ["actor_user_id"], name: "index_events_on_actor_user_id"
     t.index ["subject_type", "subject_id", "occurred_at"], name: "index_events_on_subject_type_and_subject_id_and_occurred_at"
+  end
+
+  create_table "exports", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "state", default: "queued", null: false
+    t.integer "tables_count"
+    t.integer "rows_count"
+    t.integer "files_count"
+    t.string "error"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_exports_on_user_id"
   end
 
   create_table "identities", force: :cascade do |t|
@@ -587,6 +600,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_090000) do
   add_foreign_key "engagements", "clients"
   add_foreign_key "engagements", "users", column: "created_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
+  add_foreign_key "exports", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "invited_by_id"

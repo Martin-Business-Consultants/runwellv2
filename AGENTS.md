@@ -591,6 +591,15 @@ pages with `render "custom_fields/values", record:`. Rules: information only, no
 a custom field; never required; a kind can't change once it has values; archiving keeps
 values; a plugin keeps its own data in its own tables, never in a custom field.
 
+## Export
+
+Settings > Export (owners, `create_export` / `list_exports`) makes one .zip of everything
+(`Export`, built by `ExportJob`, emailed when ready, kept a week): every table, the core's and
+plugins', as JSON and CSV with ids intact, and every stored file, with a README. It skips
+sessions, tokens, grants, invitations and the search index (`Export::SKIPPED_TABLES`) and drops
+any password, secret, token or key column (`SECRET_COLUMNS`). A new table holding secrets goes in
+the skip list; a new secret column needs a name the pattern catches.
+
 ## Releases and updates
 
 Every install is its own copy, so a change reaches an install only when it updates. This

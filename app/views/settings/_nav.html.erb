@@ -45,6 +45,7 @@
   <ul class="settings-nav__list">
     <% if can?(:manage_settings) %>
       <li><%= settings_nav_link "Updates", settings_updates_path, icon: "refresh", current: current == :updates %></li>
+      <li><%= settings_nav_link "Export", settings_exports_path, icon: "share", current: current == :export %></li>
     <% end %>
     <li>
       <%= settings_nav_link "Help", settings_help_path, icon: "lifebuoy", current: false %>

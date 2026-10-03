@@ -116,6 +116,7 @@ GEM
     cruise (0.3.0-x86_64-darwin)
     cruise (0.3.0-x86_64-linux-gnu)
     cruise (0.3.0-x86_64-linux-musl)
+    csv (3.3.6)
     date (3.5.1)
     debug (1.11.1)
       irb (~> 1.10)
@@ -523,6 +524,7 @@ DEPENDENCIES
   bootsnap
   bundler-audit
   capybara
+  csv
   debug
   geared_pagination (~> 1.2)
   herb
@@ -549,6 +551,7 @@ DEPENDENCIES
   rotp
   rqrcode
   rubocop-rails-omakase
+  rubyzip
   selenium-webdriver
   solid_cable
   solid_cache
@@ -600,6 +603,7 @@ CHECKSUMS
   cruise (0.3.0-x86_64-darwin) sha256=5dcf048c20cfcaf208cdcdd6ddfd4410acb431ff18a84bd7441bba0c8b8d6b83
   cruise (0.3.0-x86_64-linux-gnu) sha256=a7bdd7c72307a450a9d37f3c7a90c118230ea6122663b32b8c8e52cad32adfa8
   cruise (0.3.0-x86_64-linux-musl) sha256=54ed6809f1d476bf99a3043bc256cca0efed8bbc9df93a55f4e49eac2bbcb7f4
+  csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
   date (3.5.1) sha256=750d06384d7b9c15d562c76291407d89e368dda4d4fff957eb94962d325a0dc0
   debug (1.11.1) sha256=2e0b0ac6119f2207a6f8ac7d4a73ca8eb4e440f64da0a3136c30343146e952b6
   dotenv (3.2.0) sha256=e375b83121ea7ca4ce20f214740076129ab8514cd81378161f11c03853fe619d

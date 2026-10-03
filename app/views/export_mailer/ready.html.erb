@@ -1,0 +1,6 @@
+<% content_for :preheader, "Everything in Runwell, as one .zip. The link works for a week." %>
+<% content_for :reason, "You asked for an export in Settings › Export." %>
+<%= mail_heading "Your export is ready" %>
+<p><%= number_with_delimiter(@export.rows_count) %> records from <%= @export.tables_count %> tables, and <%= pluralize(@export.files_count, "file") %>, as one .zip.</p>
+<%= mail_button "Download it", settings_exports_url %>
+<%= mail_small "It’s kept for a week. Signing in is needed to download it." %>

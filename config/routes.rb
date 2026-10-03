@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     get "help/ai", to: "helps#ai", as: :help_ai
     resource :names, only: %i[show update]
     resource :start, only: :update
+    resources :exports, only: %i[index create show]
     resource :views, only: %i[show update]
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails
