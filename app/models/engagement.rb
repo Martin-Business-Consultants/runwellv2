@@ -28,18 +28,39 @@ class Engagement < ApplicationRecord
   # "internal", "closed" or "all".
   FILTERS = %w[approved open draft sent changes_requested internal closed all].freeze
 
+  # The derived state (Engagement#state), worked out by the database so a list can filter and count
+  # by it without loading every engagement and its agreements: the same rules, in the same order.
+  STATE_JOINS = <<~SQL.squish.freeze
+    INNER JOIN clients state_clients ON state_clients.id = engagements.client_id
+    LEFT JOIN agreement_versions latest_versions ON latest_versions.engagement_id = engagements.id
+      AND latest_versions.number = (SELECT MAX(av.number) FROM agreement_versions av WHERE av.engagement_id = engagements.id)
+    LEFT JOIN approvals latest_approvals ON latest_approvals.agreement_version_id = latest_versions.id
+  SQL
+  STATE_SQL = <<~SQL.squish.freeze
+    CASE
+      WHEN engagements.closed_at IS NOT NULL THEN 'closed'
+      WHEN state_clients.internal THEN 'internal'
+      WHEN latest_versions.id IS NULL OR latest_versions.sent_at IS NULL THEN 'draft'
+      WHEN latest_approvals.id IS NULL AND latest_versions.superseded_by_id IS NULL THEN 'sent'
+      WHEN latest_approvals.decision = 'changes_requested' THEN 'changes_requested'
+      ELSE 'approved'
+    END
+  SQL
+
+  def self.in_states(*states) = joins(STATE_JOINS).where(Arel.sql("(#{STATE_SQL}) IN (?)"), states.flatten)
+
   def self.filtered(state: "approved", label: "all", scope: all)
     state = FILTERS.include?(state) ? state : "approved"
     scope = scope.where(label: label) if LABELS.include?(label)
     scope = case state
     when "all" then scope
     when "closed" then scope.closed
-    else scope.open
+    when "open" then scope.open
+    when "approved" then scope.where(id: in_states("approved", "internal").select(:id))
+    else scope.where(id: in_states(state).select(:id))
     end
-    scope = scope.ordered.includes(:client, :todos, agreement_versions: [ :approval, :scope_items ])
-    return scope if %w[all open closed].include?(state)
-
-    scope.where(id: scope.select { state == "approved" ? it.active? : it.state == state }.map(&:id))
+    # Each row shows its state and agreed amount: versions and their decisions, for that page only.
+    scope.ordered.includes(:client, agreement_versions: :approval)
   end
 
   # The filter's choices, each with how many it holds when `counts` (from filter_counts) is
@@ -50,12 +71,12 @@ class Engagement < ApplicationRecord
     counts ? options.map { |text, value| [ "#{text} (#{counts.fetch(value, 0)})", value ] } : options
   end
 
-  # How many engagements each filter choice would show, by derived state.
+  # How many engagements each filter choice would show, by derived state: one grouped query.
   def self.filter_counts(label: "all", scope: all)
     scope = scope.where(label: label) if LABELS.include?(label)
-    open = scope.open.includes(:client, agreement_versions: [ :approval ]).to_a
-    closed = scope.closed.count
-    open.map(&:state).tally.merge("approved" => open.count(&:active?), "open" => open.size, "closed" => closed, "all" => open.size + closed)
+    tally = scope.joins(STATE_JOINS).group(Arel.sql(STATE_SQL)).count
+    open = tally.except("closed").values.sum
+    tally.merge("approved" => tally.fetch("approved", 0) + tally.fetch("internal", 0), "open" => open, "closed" => tally.fetch("closed", 0), "all" => open + tally.fetch("closed", 0))
   end
 
   # The list filter from params, reading the old status=open|closed too.
