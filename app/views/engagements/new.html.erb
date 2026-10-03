@@ -1,6 +1,6 @@
 <% @page_title = "New " + term(:engagement).downcase %>
 <% client = @engagement.client %>
-<% existing = client ? client.engagements.order(created_at: :desc).limit(8).to_a : [] %>
+<% existing = client ? client.engagements.includes(:client, agreement_versions: :approval).order(created_at: :desc).limit(8).to_a : [] %>
 
 <% content_for :header do %>
   <%= parent_page term(:engagement, count: 2), engagements_path %>

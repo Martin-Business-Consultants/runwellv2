@@ -1,4 +1,5 @@
 <%# locals: (board:) %>
+<% counts = board.reorder(nil).group(:status).count %>
 <%= tag.div class: "card-columns hide-scrollbar", data: {
       controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list",
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
@@ -23,13 +24,13 @@
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
   <div class="card-columns__left"></div>
 
-  <%= render "todos/board/stream", count: board.where(status: "planned").count %>
+  <%= render "todos/board/stream", count: counts.fetch("planned", 0) %>
 
   <div class="card-columns__right">
     <% Todo::BOARD_COLUMNS.each do |status| %>
       <%# herb:key status %>
-      <%= render "todos/board/column", status: status, count: board.where(status: status).count %>
+      <%= render "todos/board/column", status: status, count: counts.fetch(status, 0) %>
     <% end %>
-    <%= render "todos/board/closed", count: board.where(status: "done").count %>
+    <%= render "todos/board/closed", count: counts.fetch("done", 0) %>
   </div>
 <% end %>

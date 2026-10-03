@@ -14,7 +14,12 @@ module SearchesHelper
   end
 
   def search_result_context(record)
-    client = record.is_a?(Client) ? nil : Client.find_by(id: record.search_client_id)
-    [ record.model_name.human, client&.name ].compact.join(" · ")
+    client_name = search_client_names[record.search_client_id] unless record.is_a?(Client)
+    [ record.model_name.human, client_name ].compact.join(" · ")
+  end
+
+  # The clients of every result on the page, looked up once rather than per result.
+  def search_client_names
+    @search_client_names ||= Client.where(id: Array(@search&.results).filter_map { it.try(:search_client_id) }).pluck(:id, :name).to_h
   end
 end

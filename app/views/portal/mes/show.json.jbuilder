@@ -1,4 +1,4 @@
-pending = client.engagements.select(&:pending_version)
+pending = client.engagements.includes(agreement_versions: :approval).select(&:pending_version)
 json.summary "You act for #{current_contact.name} at #{client.name}#{"; #{pluralize pending.size, "agreement"} awaiting a decision" if pending.any?}."
 json.me do
   json.name current_contact.name

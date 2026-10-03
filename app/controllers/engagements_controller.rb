@@ -83,6 +83,11 @@ class EngagementsController < ApplicationController
 
   private
 
-  def set_engagement = @engagement = Engagement.find_by_ref!(params[:ref])
+  # The page reads every version's decision and scope items, and each item's work (its delivery
+  # state): loaded together rather than one query per version and item.
+  def set_engagement
+    scope = action_name == "show" ? Engagement.includes(agreement_versions: [ :approval, { scope_items: :todos } ]) : Engagement
+    @engagement = scope.find_by_ref!(params[:ref])
+  end
   def engagement_params = params.expect(engagement: [ :client_id, :label, :shape, :title, :description, :estimate_notes, custom_fields: {} ])
 end

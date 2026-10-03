@@ -22,7 +22,8 @@ module CustomFields
 
   # field → typed value, for every active field that has one.
   def custom_field_values
-    values = custom_values.includes(:custom_field).index_by(&:custom_field_id)
+    # Already loaded (a list preloads them) is used as is; otherwise one query for this record.
+    values = (custom_values.loaded? ? custom_values : custom_values.includes(:custom_field)).index_by(&:custom_field_id)
     custom_fields.filter_map { |field| (value = values[field.id]) && [ field, field.cast(value.value) ] }
   end
 
