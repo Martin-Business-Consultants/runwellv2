@@ -82,6 +82,7 @@
       <p class="txt-small margin-none">Runwell speaks MCP at <code class="txt-small"><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
       <ul class="txt-small flex flex-column gap-half margin-none">
         <li><strong>Claude or ChatGPT:</strong> add a custom connector with that URL. You’ll be asked to approve it here.</li>
+        <li><strong>Muse, Grok and assistants that build their own connection:</strong> describe Runwell to it as an MCP server at that URL, and make a personal token below when it asks for a key.</li>
         <li class="flex flex-column gap-half">
           <span><strong>Claude Code:</strong> add it, then run <code class="txt-x-small">/mcp</code> in Claude Code to sign in.</span>
           <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>

@@ -44,6 +44,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | `bundle exec herb lint app/views` | Lint templates (Herb) |
 | `bin/rails search:reindex` | Rebuild the search index from every searchable record |
 | `bin/rails agent:coverage` | Every staff action with its agent tool, or why it has none |
+| `bin/rails agent:scenarios` | A manager's, an employee's and a client's requests played through the tools (rolled back) |
 | `bin/rails db:seed:replant` | A sample web / local search / ads agency. Logins `ted@brem.io` (owner), `sarah@` (manager), `marcus@`, `priya@`, `jordan@runwell.app` (members), all `password` |
 
 ## The five things the core answers
@@ -630,17 +631,40 @@ do, through the same controllers: there is no separate API.
 - Plugins declare tools in their controllers the same way; they appear while the plugin is on
 - The CLI has no per-tool code: every command is a tool from `tools/list`. Don't add
   commands to it for app features; declare a tool instead. Its own commands are only about the
-  CLI: `login` (`--read-only`), `doctor` (`--brief` is the Claude Code SessionStart check),
+  CLI: `login` (`--read-only`, `--client` for a contact's portal), `doctor` (`--brief` is the Claude Code SessionStart check),
   `update`, `mcp` (`--read-only`), `agent setup` (a managed skill, marked, refreshed by `update`,
   never overwriting a hand-edited one). Output is JSON when piped; `--ids-only`, `--count`,
   `--field a.b` trim it. Exit statuses follow the error codes (`runwell help exit-codes`)
-- **Errors are machine-readable**: every agent error carries a `code` (usage, not_found, auth,
-  forbidden, refused, invalid, read_only, failed) and a `hint` (`Agent::Errors`); a redirect with
+- **Errors are machine-readable**: every agent error carries a `code` (usage, not_found, ambiguous,
+  auth, forbidden, refused, invalid, read_only, paused, rate_limited, failed) and a `hint` (`Agent::Errors`); a redirect with
   an alert is `refused`, a 422 is `invalid`. A success whose tool declares `next_tools` also
   carries `next`: runwell commands with the ids from the call or its answer filled in
 - **Read-only access**: a token (personal, or OAuth with scope `runwell:read` / the consent
   checkbox) may be read-only. It is offered only GET tools and any non-GET request with it is
   refused with `read_only` (`ApplicationController#refuse_read_only_writes`)
+- **Names stand in for ids**: `Agent::Dispatch` resolves path ids and refs, id params
+  (`Agent::Resolver::PARAMS`: client_id, owner_id…) and "Type:name" records through
+  `Agent::Resolver` (exact, prefix, contains, search). One match is used, several answer
+  `ambiguous` with `candidates`, none `not_found`; the schema types those params integer or string.
+  `resolve` looks a name up directly. A new id param naming a record goes in `PARAMS`
+- **Around every call** (`Agent::Dispatch#call`): a paused token answers `paused`; a token over
+  `Agent::RateLimit` (RUNWELL_AGENT_RATE_LIMIT a minute) answers `rate_limited` with
+  `retry_after`; a write with an `idempotency_key` already seen answers the stored response with
+  `replayed: true`; and the call is logged (`AgentCall`, 90 days), shown per connection in
+  Connected apps, where a person pauses one and an owner sees everyone's
+- **`changes`** is how a scheduled agent catches up: events after a cursor (or since a time),
+  oldest first, optionally for one client or engagement. MCP prompts (`Agent::Prompts`) and
+  resources (`Agent::Resources`, runwell:// URIs read through the show tools) sit beside the tools
+- **Clients' agents**: an `AccessToken` (or `OauthGrant`) belongs to a user or a contact. Staff
+  surfaces take staff tokens only (`authenticate_staff`); the portal takes a contact's
+  (`Portal::BaseController#require_contact_token`), and `/portal/mcp` (`Portal::McpController`)
+  offers only portal tools (`Agent::Catalogue.for_contact`), declared in the portal controllers
+  like any other (`portal_*`) with JSON views that show what the portal shows: agreements only as
+  `AgreementVersion#snapshot`, links to portal pages (`portal_agent_ref`). Names resolve within
+  the contact's client. OAuth for a request naming the portal resource or scope goes to
+  `Portal::OauthAuthorizationsController`, which signs the contact in by emailed link.
+  `portal_decide` confirms first and records `method: "agent"`; `Setting#client_agent_approvals`
+  (Settings > Connected apps) lets the agency turn that off. `docs/agents.md` is the guide
 
 ## Custom fields
 

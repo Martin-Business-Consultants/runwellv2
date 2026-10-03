@@ -127,6 +127,7 @@ until either is set, links use the address people were last seen using.
 | `RUNWELL_GITHUB_TOKEN` | Starts the Deploy workflow (a Docker install updating itself). Not needed to check for releases | none |
 | `RUNWELL_DEPLOY_DESTINATION`, `RUNWELL_DEPLOY_WORKFLOW` | The Kamal destination and workflow file a Docker install deploys itself with | blank (config/deploy.yml), `deploy.yml` |
 | `RUNWELL_UPDATE_CHECK` | `false` stops the nightly check for a newer release | on |
+| `RUNWELL_AGENT_RATE_LIMIT` | Tool calls each connected app or token may make a minute (`docs/agents.md`) | 120 |
 | `STRIPE_CONNECT_BROKER_URL` | Where the Stripe plugin's "Connect with Stripe" signs in | `https://v2.runwell.business` |
 | `STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY` | Only on the install that brokers Stripe sign-ins: the Stripe Connect platform's client id and secret key | none |
 | `RUNWELL_BACKUP_BEFORE_MIGRATE`, `RUNWELL_BACKUPS_KEEP` | Back up databases before migrating; how many backups to keep | on, 5 |
