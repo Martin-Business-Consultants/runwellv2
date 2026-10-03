@@ -1,0 +1,50 @@
+<turbo-frame id="ai_panel">
+  <div class="ai-chat">
+    <header class="ai-chat__header">
+      <h2 class="ai-chat__title overflow-ellipsis">
+        <% if @chat.subject %>
+          <%= @chat.subject.is_a?(Engagement) ? "#{@chat.subject.ref} #{@chat.subject.title}" : (@chat.subject.try(:name) || @chat.subject.try(:title) || @chat.subject.try(:subject)) %>
+        <% else %>
+          Ask anything
+        <% end %>
+      </h2>
+      <% record_ref = @chat.subject && (@chat.subject.is_a?(Engagement) ? "Engagement:#{@chat.subject.ref}" : "#{@chat.subject_type}:#{@chat.subject_id}") %>
+      <%= button_to ai_chats_path, params: { record: record_ref }, class: "btn btn--plain", title: "Start a new chat" do %>
+        <%= icon_tag "add" %>
+        <span class="for-screen-reader">Start a new chat</span>
+      <% end %>
+      <button type="button" class="btn btn--plain" data-action="dialog#close" title="Close (Esc)">
+        <%= icon_tag "close" %>
+        <span class="for-screen-reader">Close</span>
+      </button>
+    </header>
+
+    <turbo-frame id="ai_messages" src="<%= ai_chat_messages_path(@chat) %>" class="ai-chat__messages">
+      <p class="txt-small txt-subtle">Loading…</p>
+    </turbo-frame>
+
+    <% if flash[:alert] %>
+      <p class="txt-small txt-negative margin-none"><%= flash[:alert] %></p>
+    <% end %>
+
+    <% if @chat.ai_messages.none? %>
+      <div class="ai-chat__prompts">
+        <% ai_prompts(@chat.subject).each do |prompt| %>
+          <%# herb:key prompt %>
+          <%= button_to prompt, ai_chat_messages_path(@chat), params: { message: { content: prompt } }, class: "btn txt-small ai-chat__prompt" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @chat.proposals.any? %>
+      <p class="txt-small txt-subtle margin-none">Approve or decline the change above, and it carries on.</p>
+    <% else %>
+    <%= form_with url: ai_chat_messages_path(@chat), scope: :message, class: "ai-chat__form", data: { controller: "form" } do |form| %>
+      <%= form.text_area :content, rows: 2, required: true, class: "input ai-chat__input", placeholder: "Ask, or ask it to do something…", autofocus: true,
+            aria: { label: "Your question" }, data: { action: "keydown.meta+enter->form#submit keydown.ctrl+enter->form#submit" } %>
+      <button type="submit" class="btn btn--link txt-small" data-form-target="submit">Send</button>
+    <% end %>
+    <% end %>
+    <p class="ai-chat__note txt-x-small txt-subtle margin-none">It acts as you, and asks before changing anything.</p>
+  </div>
+</turbo-frame>

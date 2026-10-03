@@ -1,0 +1,116 @@
+<% @page_title = "AI" %>
+<%= render "settings/header", current: :ai %>
+<% providers = Setting::AI_PROVIDERS %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">AI in Runwell</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        An assistant on every page (<kbd>i</kbd>) that answers from your records and does what you ask, as you: it can do only what you can, and shows every change for you to approve first.
+        It also suggests on records: what a request should become, the scope of an agreement, the <%= term(:work).downcase %> a <%= term(:scope_item).downcase %> needs, promises in a note, the day ahead.
+        It uses your own account with an AI provider; nothing is sent anywhere until it’s on. For coding, use an AI on your own computer connected over MCP (Settings › Connected apps).
+      </p>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <%= form_with model: @setting, url: settings_ai_path, method: :patch, class: "flex flex-column gap-half txt-small" do |form| %>
+        <div class="record-form__toggle">
+          <div class="record-form__toggle-text">
+            <%= form.label :ai_enabled, "Switch AI on", class: "record-form__label" %>
+            <span class="record-form__hint">For everyone on the team. Turn it off and the assistant and suggestions disappear; chats stay.</span>
+          </div>
+          <label class="switch flex-item-no-shrink">
+            <%= form.check_box :ai_enabled, class: "switch__input" %>
+            <span class="switch__btn"></span>
+          </label>
+        </div>
+
+        <%= form.label :ai_provider, "Provider", class: "record-form__label" %>
+        <%= form.select :ai_provider, providers.map { |key, info| [ info[:name], key ] }, { include_blank: "Choose…" }, class: "input input--select" %>
+
+        <%= form.label :ai_api_key, "API key", class: "record-form__label" %>
+        <%= secret_field form, :ai_api_key, placeholder: @setting.ai_api_key.present? ? "Saved; paste a new one to replace it" : "From your provider’s console" %>
+
+        <%= form.label :ai_api_base, "Address (Ollama, or a compatible server)", class: "record-form__label" %>
+        <%= form.url_field :ai_api_base, class: "input full-width", placeholder: providers.dig("ollama", :base), autocomplete: "off" %>
+
+        <div class="flex gap-half flex-wrap">
+          <div class="flex flex-column gap-half flex-item-grow">
+            <%= form.label :ai_model, "Model", class: "record-form__label" %>
+            <%= form.text_field :ai_model, class: "input full-width", autocomplete: "off", placeholder: (@setting.ai_provider && providers.dig(@setting.ai_provider, :model)) || "The provider’s recommended" %>
+          </div>
+          <div class="flex flex-column gap-half flex-item-grow">
+            <%= form.label :ai_fast_model, "Fast model, for small jobs", class: "record-form__label" %>
+            <%= form.text_field :ai_fast_model, class: "input full-width", autocomplete: "off", placeholder: (@setting.ai_provider && providers.dig(@setting.ai_provider, :fast)) || "The provider’s recommended" %>
+          </div>
+        </div>
+
+        <%= form.label :ai_monthly_budget_cents, "Monthly budget (optional)", class: "record-form__label" %>
+        <%= money_field form, :ai_monthly_budget_cents, class: "input", placeholder: "No limit" %>
+        <span class="record-form__hint">When this month’s spend reaches it, AI pauses until next month.</span>
+
+        <div><button type="submit" class="btn btn--link txt-small">Save</button></div>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half" id="test">
+      <div class="flex align-center gap-half">
+        <%= button_to "Test the connection", settings_ai_test_path, class: "btn txt-small", disabled: !@setting.ai_ready? %>
+        <turbo-frame id="ai_test" class="txt-small">
+          <% test = @setting.ai_test || {} %>
+          <% if test["error"].present? %>
+            <span class="txt-negative"><%= test["error"] %></span>
+          <% elsif test["ok_at"].present? %>
+            <span class="txt-subtle"><%= test["model"] %> answered “<%= test["reply"] %>” in <%= test["seconds"] %>s, <%= time_ago_in_words(Time.zone.parse(test["ok_at"])) %> ago.</span>
+          <% elsif test["requested_at"].present? && Time.zone.parse(test["requested_at"]) > 2.minutes.ago %>
+            <span class="txt-subtle" data-controller="poll" data-poll-interval-value="2">Asking <%= @setting.ai_provider_name %>…</span>
+          <% end %>
+        </turbo-frame>
+      </div>
+    </section>
+  </div>
+
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">This month</h2>
+      </header>
+      <p class="margin-none"><strong><%= number_to_currency(@spent, precision: @spent < 1 ? 3 : 2) %></strong><% if @setting.ai_monthly_budget_cents %> of <%= money(@setting.ai_monthly_budget_cents) %><% end %></p>
+      <% if @by_person.any? %>
+        <ul class="settings__scrollable-list txt-small">
+          <% @by_person.sort_by { -it.last.to_d }.each do |user_id, cost| %>
+            <%# herb:key user_id %>
+            <li class="flex align-center gap-half">
+              <%= person_tag @people[user_id], fallback: "Someone" %>
+              <span class="flex-item-grow"><%= @people[user_id]&.display_name || "Someone" %></span>
+              <span class="txt-subtle"><%= number_to_currency(cost.to_d, precision: 3) %></span>
+            </li>
+          <% end %>
+        </ul>
+        <p class="txt-x-small txt-subtle margin-none">Ask panel <%= number_to_currency(@by_kind["ask"].to_d, precision: 3) %> · suggestions <%= number_to_currency(@by_kind["suggestion"].to_d, precision: 3) %></p>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Nothing yet.</p>
+      <% end %>
+      <% if @suggestions.any? %>
+        <p class="txt-x-small txt-subtle margin-none">
+          Suggestions used: <%= @suggestions.group_by { it.first.first }.map { |kind, rows| counts = rows.to_h { |(_, state), n| [ state, n ] }; "#{kind.humanize.downcase} #{counts["accepted"].to_i} of #{counts.values.sum}" }.join(" · ") %>
+        </p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">What it sees</h2>
+      </header>
+      <ul class="txt-small margin-none">
+        <li>Only what the person using it may see, through the same actions an AI connected over MCP uses.</li>
+        <li>Each record it reads, and your question, go to your provider. Choose Ollama to keep everything on your own server.</li>
+        <li>A <%= term(:client).downcase %> marked “Keep out of AI” (on its edit page) gets no assistant or suggestions on its records.</li>
+        <li>Every change it makes was approved by a person, and shows in history as their agent “via Runwell AI”.</li>
+      </ul>
+    </section>
+  </div>
+</section>

@@ -31,6 +31,10 @@ module Runwell
       def compatible? = requires.blank? || Gem::Requirement.new(requires).satisfied_by?(Gem::Version.new(Runwell::VERSION))
     end
     Briefing = Struct.new(:title, :partial, :items, keyword_init: true)
+    # A question the Ask panel offers in one click (types: the records it suits, nil for any page).
+    AiPrompt = Struct.new(:label, :types, keyword_init: true) do
+      def applies_to?(subject) = types.nil? || types.map(&:to_s).include?(subject.class.name)
+    end
 
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
       email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel" }.freeze
@@ -47,6 +51,7 @@ module Runwell
     mattr_reader :stylesheets, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :agent_briefs, default: {}
     mattr_reader :agent_workflows, default: {}
+    mattr_reader :ai_prompts, default: Hash.new { |hash, key| hash[key] = [] }
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -99,6 +104,12 @@ module Runwell
         agent_briefs[key] = builder
       end
 
+      # A question for the in-app AI's Ask panel, offered on the given record types (Client,
+      # Engagement, Todo, Request, ScopeItem) or, with none, on every page.
+      def ai_prompt(key, label, types: nil)
+        ai_prompts[key] |= [ AiPrompt.new(label: label, types: types) ]
+      end
+
       # A stylesheet from the plugin's app/assets/stylesheets, linked on every page while it's on.
       def stylesheet(key, name)
         stylesheets[key] |= [ name ]
@@ -131,6 +142,7 @@ module Runwell
       def enabled_nightly_tasks = nightly_tasks.select { |key, _| enabled?(key) }
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
       def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
+      def enabled_ai_prompts = ai_prompts.select { |key, _| enabled?(key) }.values.flatten.map { [ nil, it ] }
       def enabled_stylesheets = stylesheets.select { |key, _| enabled?(key) }.values.flatten
       def enabled_permissions = permissions.select { |key, _| enabled?(key) }.values.reduce({}, :merge)
 

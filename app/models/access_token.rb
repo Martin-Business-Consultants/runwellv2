@@ -5,7 +5,9 @@
 # digests are stored, so a token is shown once, when it's made. A paused token is refused until
 # it's resumed; every call made with one is logged (AgentCall).
 class AccessToken < ApplicationRecord
-  KINDS = %w[personal oauth].freeze
+  # assistant: one call by the in-app AI (Ai.run_tool), for a few minutes, revoked when done.
+  KINDS = %w[personal oauth assistant].freeze
+  ASSISTANT_LIFETIME = 10.minutes
   OAUTH_LIFETIME = 1.hour
   REFRESH_LIFETIME = 90.days
 
@@ -34,6 +36,7 @@ class AccessToken < ApplicationRecord
       plaintext = generate
       attrs = { user: user, contact: contact, name: name, kind: kind, oauth_client: oauth_client, token_digest: digest(plaintext), read_only: read_only }
       refresh = nil
+      attrs[:expires_at] = ASSISTANT_LIFETIME.from_now if kind == "assistant"
       if kind == "oauth"
         refresh = generate
         attrs.merge!(expires_at: OAUTH_LIFETIME.from_now, refresh_token_digest: digest(refresh), refresh_expires_at: REFRESH_LIFETIME.from_now)

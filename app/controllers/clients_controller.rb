@@ -85,5 +85,6 @@ class ClientsController < ApplicationController
 
 
   def set_client = @client = Client.find(params[:id])
-  def client_params = params.expect(client: [ :name, :status, :time_zone, :internal, custom_fields: {} ])
+  # Whether a client is kept out of AI is a person's call, never an agent's.
+  def client_params = params.expect(client: [ :name, :status, :time_zone, :internal, (:ai_excluded unless Current.agent?), custom_fields: {} ].compact)
 end

@@ -580,6 +580,29 @@ do, through the same controllers: there is no separate API.
   `portal_decide` confirms first and records `method: "agent"`; `Setting#client_agent_approvals`
   (Settings > Connected apps) lets the owner turn that off. `docs/agents.md` is the guide
 
+## In-app AI
+
+The third way to use AI with Runwell, beside a local harness over MCP (coding belongs there) and a
+chat app over MCP: an assistant inside the app, through RubyLLM and its Rails integration
+(`acts_as_chat` on `AiChat`, `acts_as_message` on `AiMessage`; RubyLLM's tables keep tool calls,
+approvals and usage). Settings > AI (`Setting::Ai`) holds the provider, an encrypted key, models
+(a main and a fast one), a monthly budget in cents (`Ai.over_budget?`, summed from
+`ruby_llm_usages`) and the switch; nothing is configured globally (`Setting#ai_context`). A client
+can be kept out of AI (`Client#ai_excluded`, a person's call, never an agent's).
+
+- The Ask panel (`layouts/shared/ai_panel`, key `i`) is the person's chat about the record on screen.
+  A reply runs in `AiReplyJob` (`AiChat#reply!`) while `replying_since` is set; the panel's message
+  frame polls until it's done, showing the reply as it streams
+- It works through the MCP tools, not code of its own: `Ai::Tools` gives the model `search`,
+  `read_record`, `find_tools` and `run_tool`, and `Ai.run_tool` dispatches a catalogue tool as the
+  person with a one-call `assistant` token (`AccessToken`), so roles, validations and events are the
+  UI's and history reads "Ted's agent via Runwell AI". Reads run at once; any write is a RubyLLM
+  approval the person approves or declines in the panel (`AiChat#decide!`, `AiChat#proposals`)
+- `Ai::Instructions` is rebuilt each reply (unpersisted): the person, today, the install's words, the
+  record on screen, and the rules (facts from tools only, records as "Type:id" which `ai_text`
+  links, one proposed change at a time, care with anything reaching a client)
+- Plugins add one-click questions with `Runwell::Plugins.ai_prompt key, label, types:`
+
 ## Custom fields
 
 What an install records about clients, engagements and work beyond the core (a plumber's

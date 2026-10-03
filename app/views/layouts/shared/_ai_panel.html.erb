@@ -1,0 +1,16 @@
+<%# locals: () %>
+<%# The in-app AI's Ask panel (Settings > AI): a button in the nav's foot (i) opening a side panel
+    beside the page, not over it, that loads the person's chat about the record on screen. %>
+<% record = current_record %>
+<% record_ref = record && (record.is_a?(Engagement) ? "Engagement:#{record.ref}" : "#{record.class.name}:#{record.id}") %>
+<div class="display-contents" data-controller="dialog" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn btn--plain" title="Ask AI (i)" data-keys="i" data-action="dialog#toggle">
+    <%= icon_tag "ai" %>
+    <span class="for-screen-reader">Ask AI</span>
+  </button>
+  <dialog class="ai-panel panel shadow" data-dialog-target="dialog" aria-label="Ask AI">
+    <turbo-frame id="ai_panel" src="<%= ai_current_chat_path(record: record_ref) %>" loading="lazy">
+      <p class="txt-small txt-subtle pad">Loading…</p>
+    </turbo-frame>
+  </dialog>
+</div>

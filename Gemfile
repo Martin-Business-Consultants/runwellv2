@@ -66,3 +66,6 @@ gem "omniauth_openid_connect"
 # Exports (Settings > Export): everything as one .zip
 gem "rubyzip", require: "zip"
 gem "csv"
+
+# In-app AI (Settings > AI): one interface to Anthropic, OpenAI, Gemini, Ollama and more
+gem "ruby_llm", "~> 2.0"

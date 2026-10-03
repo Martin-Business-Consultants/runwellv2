@@ -26,8 +26,8 @@ class Settings::ConnectedAppsController < ApplicationController
 
   private
     def load_tokens
-      @tokens = current_user.access_tokens.live.ordered.includes(:oauth_client)
-      @everyone = AccessToken.live.where.not(id: @tokens).ordered.includes(:user, :contact, :oauth_client) if can?(:manage_people)
+      @tokens = current_user.access_tokens.live.where.not(kind: "assistant").ordered.includes(:oauth_client)
+      @everyone = AccessToken.live.where.not(kind: "assistant").where.not(id: @tokens).ordered.includes(:user, :contact, :oauth_client) if can?(:manage_people)
     end
 
     # Your own, or, for an owner, anyone's.

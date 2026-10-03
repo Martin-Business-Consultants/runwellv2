@@ -32,6 +32,9 @@
         <%= icon_tag "column-left" %>
         <span class="for-screen-reader">Collapse or expand the menu</span>
       </button>
+      <% if Ai.ready? %>
+        <%= render "layouts/shared/ai_panel" %>
+      <% end %>
       <%= plugin_slots(:nav_actions) %>
       <%= render "layouts/shared/theme_toggle" %>
       <%= render "layouts/shared/shortcuts" %>

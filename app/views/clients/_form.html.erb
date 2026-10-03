@@ -34,6 +34,19 @@
     </div>
   <% end %>
 
+  <% if Setting.current.ai_enabled? %>
+    <div class="record-form__toggle">
+      <div class="record-form__toggle-text">
+        <%= form.label :ai_excluded, "Keep out of AI", class: "record-form__label" %>
+        <span class="record-form__hint">No assistant or suggestions on this <%= term(:client).downcase %>’s records (Settings › AI).</span>
+      </div>
+      <label class="switch flex-item-no-shrink">
+        <%= form.check_box :ai_excluded, class: "switch__input" %>
+        <span class="switch__btn"></span>
+      </label>
+    </div>
+  <% end %>
+
   <%= custom_field_inputs form, client %>
 
   <div class="record-form__footer">
