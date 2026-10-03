@@ -10,7 +10,7 @@ class McpController < ApplicationController
   INSTRUCTIONS = <<~TEXT
     Runwell is an agency's project management: who we work for (clients, and contacts who can approve), what we agreed (engagements holding agreement versions: drafts until sent, frozen once sent), what is happening (work/todos, commitments with dates, notes, documents), what came in (requests to triage), and what needs a person now (the briefing).
 
-    Start with `briefing`. Use `search` to find anything, and `me` for who you are, your role, the team's ids, and why a tool might be missing. Engagements are named by ref (WO-12, P-3, S-4). Tools that take a `record` want "Type:id", like "Client:12", as every result's `record` field shows. Rich text fields take HTML or plain text; write a person's name after @ to mention them.
+    Start with `briefing`; on a schedule, use `changes` and keep its cursor so you hear each change once. Tools take names where they take ids ("Bloom", "Priya", an engagement's title); an "ambiguous" answer lists the candidates to choose from, and `resolve` looks a name up directly. Give writes an `idempotency_key` when you might retry. Use `search` to find anything, and `me` for who you are, your role, the team's ids, and why a tool might be missing. Engagements are named by ref (WO-12, P-3, S-4). Tools that take a `record` want "Type:id", like "Client:12", as every result's `record` field shows. Rich text fields take HTML or plain text; write a person's name after @ to mention them.
 
     Anything that reaches a client (sending an agreement, emailing a link, portal visibility) answers first with a preview (status needs_confirmation). Tell the person what will happen and call again with confirm: true only after they agree. You act as the person's agent, with exactly their role: what you do is recorded as "<Person>'s agent via <this app>". Each result has a `url` so the person can open it.
 
@@ -18,9 +18,12 @@ class McpController < ApplicationController
   TEXT
 
   def create
-    tools = Agent::Catalogue.for(current_user, read_only: Current.access_token&.read_only?).map { mcp_tool(it) }
-    server = MCP::Server.new(name: "runwell", title: "Runwell", version: "1.0.0", instructions: instructions, tools: tools,
-      server_context: { token: request.authorization.to_s.delete_prefix("Bearer ").strip, base_url: request.base_url })
+    catalogue = Agent::Catalogue.for(current_user, read_only: Current.access_token&.read_only?)
+    server = MCP::Server.new(name: "runwell", title: "Runwell", version: "1.1.0", instructions: instructions, tools: catalogue.map { mcp_tool(it) },
+      prompts: Agent::Prompts.staff, resources: Agent::Resources.fixed(Agent::Resources::STAFF),
+      resource_templates: Agent::Resources.templates(Agent::Resources::STAFF),
+      server_context: { token: bearer_token, base_url: request.base_url })
+    server.resources_read_handler { |params| read_resource(catalogue, params[:uri].to_s) }
     result = server.handle_json(request.body.read)
     result ? render(json: result) : head(:accepted)
   end
@@ -36,6 +39,18 @@ class McpController < ApplicationController
     # protection here safe. Without a token, 401 with where to sign in.
     def require_authentication
       authenticate_by_token || request_token_authentication
+    end
+
+    # A runwell:// resource, read by the show tool it stands for.
+    def read_resource(catalogue, uri)
+      name, arguments = Agent::Resources.call_for(Agent::Resources::STAFF, uri)
+      tool = name && catalogue.find { it.name == name }
+      raise MCP::Server::ResourceNotFoundError.new(uri) unless tool
+
+      body = Agent::Dispatch.new(tool, arguments, token: bearer_token, base_url: request.base_url).call
+      raise MCP::Server::ResourceNotFoundError.new(uri) if body["status"] == "error"
+
+      [ { uri: uri, mimeType: "application/json", text: JSON.generate(body) } ]
     end
 
     def mcp_tool(tool)
