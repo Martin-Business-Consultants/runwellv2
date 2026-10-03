@@ -1,10 +1,12 @@
 # A person approving an app to act as them: signed in in the browser, they see which app and
 # what it may do (everything their role allows), and say yes or no. Yes redirects back with a
-# single-use code bound to the redirect URI and the PKCE challenge.
+# single-use code bound to the redirect URI and the PKCE challenge. A request for a client's
+# portal goes to the portal's own consent, where a contact signs in by emailed link.
 class Oauth::AuthorizationsController < ApplicationController
+  prepend_before_action :hand_clients_to_portal, only: :show
   allow_staff
   agent_exempt :show, :create, reason: "a person approving an app in the browser"
-  before_action :set_request
+  include OauthAuthorizing
 
   layout "public"
 
@@ -20,19 +22,7 @@ class Oauth::AuthorizationsController < ApplicationController
   end
 
   private
-    def set_request
-      @client = OauthClient.find_by(uid: params[:client_id])
-      @redirect_uri = params[:redirect_uri].to_s
-      # Never redirect to an address the client didn't register: show the problem here instead.
-      return render(:invalid, status: :bad_request) unless @client&.redirect_uri?(@redirect_uri)
-      return redirect_back_with(error: "unsupported_response_type") unless params[:response_type] == "code"
-
-      redirect_back_with(error: "invalid_request", error_description: "PKCE (S256) is required") unless params[:code_challenge].present? && params[:code_challenge_method] == "S256"
-    end
-
-    def redirect_back_with(**answer)
-      uri = URI(@redirect_uri)
-      uri.query = [ uri.query.presence, answer.merge(state: params[:state]).compact.to_query ].compact.join("&")
-      redirect_to uri.to_s, allow_other_host: true
+    def hand_clients_to_portal
+      redirect_to portal_oauth_authorization_path(request.query_parameters) if OauthAuthorizing.for_portal?(params)
     end
 end

@@ -14,7 +14,9 @@
             <%= link_to term(:engagement, count: 2), portal_root_path, class: "btn btn--plain txt-small" %>
             <%= link_to term(:work), portal_todos_path, class: "btn btn--plain txt-small" %>
             <%= plugin_portal_nav_links(class: "btn btn--plain txt-small") %>
+            <%= link_to "Requests", portal_requests_path, class: "btn btn--plain txt-small" %>
             <%= link_to "New request", new_portal_request_path, class: "btn btn--plain txt-small" %>
+            <%= link_to "Connected apps", portal_connected_apps_path, class: "btn btn--plain txt-small" %>
             <%= render "layouts/shared/theme_toggle" %>
             <%= button_to portal_session_path, method: :delete, class: "btn btn--plain", title: "Sign out" do %>
               <%= icon_tag "logout" %>

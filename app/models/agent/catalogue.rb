@@ -15,7 +15,10 @@ module Agent
       end
 
       def for(user, read_only: false) = all.select { it.available_to?(user) && (!read_only || it.read?) }
-      def withheld_from(user) = all.reject { it.available_to?(user) }
+      def withheld_from(user) = all.reject { it.portal? || it.available_to?(user) }
+
+      # A client contact's tools: the portal's, and their plugins' that are on.
+      def for_contact(contact, read_only: false) = all.select { it.portal? && it.plugin_on? && (!read_only || it.read?) }
       def find(name) = all.find { it.name == name.to_s }
 
       def reset! = @all = nil

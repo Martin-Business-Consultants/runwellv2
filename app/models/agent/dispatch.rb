@@ -100,13 +100,13 @@ module Agent
           return value if value.blank?
 
           if path && key.in?(%w[ref engagement_ref])
-            value.match?(Resolver::REF) ? value : Resolver.resolve("Engagement", value).ref
+            value.match?(Resolver::REF) ? value : Resolver.resolve("Engagement", value, client: client_scope).ref
           elsif path && key == "id" && (type = tool.controller.controller_path.split("/").last.classify).in?(Resolver.types)
-            Resolver.id_for(type, value)
-          elsif (type = Resolver::PARAMS[key])
-            Resolver.id_for(type, value)
+            Resolver.id_for(type, value, client: client_scope)
+          elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Engagement Todo Request]))
+            Resolver.id_for(type, value, client: client_scope)
           elsif key == "record" && (match = value.match(/\A(\w+):(.+)\z/)) && match[1].in?(Resolver.types) && !Resolver.id?(match[2])
-            "#{match[1]}:#{Resolver.resolve(match[1], match[2]).id}"
+            "#{match[1]}:#{Resolver.resolve(match[1], match[2], client: client_scope).id}"
           else
             value
           end
@@ -115,6 +115,9 @@ module Agent
       end
 
       def throw_answer(body) = throw(:answer, body)
+
+      # A client's agent looks names up within their own client only.
+      def client_scope = access_token&.contact&.client
 
       def with_hint(body, code)
         body["code"] = code

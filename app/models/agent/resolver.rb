@@ -34,12 +34,14 @@ module Agent
       def id?(value) = value.is_a?(Integer) || value.to_s.match?(/\A\d+\z/)
 
       # Records of the type that text names, best first: an engagement's ref, then names equal to
-      # it (any case), then starting with it, then containing it, then full-text search.
-      def candidates(type, text, limit: 8)
+      # it (any case), then starting with it, then containing it, then full-text search. For a
+      # client's agent (client:), only that client's engagements and shared work, nothing else.
+      def candidates(type, text, limit: 8, client: nil)
         text = text.to_s.strip
         return [] if text.blank? || !FIELDS.key?(type)
 
-        scope = base(type)
+        scope = client ? within(client, type) : base(type)
+        return [] if scope.nil?
         if type == "Engagement" && text.match?(REF)
           return Array(scope.find_by(ref: text.upcase))
         end
@@ -52,12 +54,12 @@ module Agent
         end
 
         model = type.constantize
-        Search.new(text).results.select { it.is_a?(model) }.first(limit)
+        Search.new(text).results.select { it.is_a?(model) && (client.nil? || scope.exists?(it.id)) }.first(limit)
       end
 
       # The one record text names, or Ambiguous / Missing.
-      def resolve(type, text)
-        found = candidates(type, text)
+      def resolve(type, text, client: nil)
+        found = candidates(type, text, client: client)
         raise Missing.new(type, text) if found.empty?
         raise Ambiguous.new(type, text, found) if found.size > 1
 
@@ -65,7 +67,7 @@ module Agent
       end
 
       # An id as given, or the id of the record a name stands for.
-      def id_for(type, value) = id?(value) ? value : resolve(type, value).id
+      def id_for(type, value, client: nil) = id?(value) ? value : resolve(type, value, client: client).id
 
       def describe(record)
         client = record.is_a?(Client) ? nil : (record.try(:client) || record.try(:engagement)&.client)
@@ -74,6 +76,14 @@ module Agent
       end
 
       private
+        def within(client, type)
+          case type
+          when "Engagement" then client.engagements
+          when "Todo" then Todo.client_visible.joins(:engagement).where(engagements: { client_id: client.id })
+          when "Request" then client.requests
+          end
+        end
+
         def base(type)
           case type
           when "User" then User.active.people

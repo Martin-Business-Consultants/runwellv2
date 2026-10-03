@@ -1,0 +1,38 @@
+<% @page_title = "Connect " + @client.name %>
+
+<div class="panel panel--centered flex flex-column gap">
+  <h1 class="txt-x-large font-weight-black margin-none">Connect <%= @client.name %>?</h1>
+  <p class="txt-medium margin-none">
+    <strong><%= @client.name %></strong> will act as you, <strong><%= current_contact.name %></strong>, in <%= Setting.current.brand_name %>’s portal for <%= current_contact.client.name %>:
+    seeing your engagements, agreements, work and documents, and sending requests<% if current_contact.can_approve? && Setting.current.client_agent_approvals? %>, and deciding agreements once you’ve seen them and given your name<% end %>.
+  </p>
+  <p class="txt-small txt-subtle margin-none">
+    It sees only what you see here. What it does is marked as done through <%= @client.name %>. You can disconnect it any time under Connected apps.
+  </p>
+  <p class="txt-x-small txt-subtle margin-none">
+    Returning to
+    <% if OauthClient.loopback?(@redirect_uri) %>
+      <%= @client.name %> on this computer
+    <% else %>
+      <%= URI(@redirect_uri).host %>
+    <% end %>
+  </p>
+
+  <%= form_with url: portal_oauth_authorization_path, method: :post, class: "flex flex-column gap align-center", data: { turbo: false } do %>
+    <label class="flex align-center gap-half txt-small">
+      <%= check_box_tag :read_only, "1", params[:scope].to_s.split.include?("runwell:read"), id: "read_only" %>
+      <span>Read only: it can look, and change nothing</span>
+    </label>
+    <% %w[client_id redirect_uri response_type code_challenge code_challenge_method state scope resource].each do |key| %>
+      <%# herb:key key %>
+      <input type="hidden" name="<%= key %>" value="<%= params[key] %>">
+    <% end %>
+    <div class="flex gap-half justify-center">
+      <button type="submit" name="approve" value="0" class="btn">Cancel</button>
+      <button type="submit" name="approve" value="1" class="btn btn--link">
+        <span>Connect</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+    </div>
+  <% end %>
+</div>

@@ -1,6 +1,8 @@
 class Approval < ApplicationRecord
   DECISIONS = %w[approved changes_requested].freeze
-  METHODS = %w[link recorded].freeze
+  # link: the client clicked (emailed link or portal); agent: their own agent did, with their typed
+  # name (Portal::ApprovalsController); recorded: we recorded it with evidence.
+  METHODS = %w[link agent recorded].freeze
 
   belongs_to :agreement_version
   belongs_to :contact, optional: true

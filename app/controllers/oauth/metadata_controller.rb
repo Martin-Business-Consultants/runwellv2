@@ -3,9 +3,12 @@
 class Oauth::MetadataController < ApplicationController
   allow_unauthenticated_access
 
+  # The staff MCP endpoint, or a client's portal one (/.well-known/oauth-protected-resource/portal/mcp).
   def protected_resource
-    render json: { resource: mcp_url, authorization_servers: [ root_url.chomp("/") ], bearer_methods_supported: [ "header" ],
-      resource_name: "Runwell" }
+    portal = params[:resource].to_s.start_with?("portal")
+    render json: { resource: portal ? portal_mcp_url : mcp_url, authorization_servers: [ root_url.chomp("/") ], bearer_methods_supported: [ "header" ],
+      resource_name: portal ? "#{Setting.current.brand_name} client portal" : "Runwell",
+      scopes_supported: portal ? [ "runwell:portal", "runwell:read" ] : [ "runwell", "runwell:read" ] }
   end
 
   def authorization_server
@@ -19,7 +22,7 @@ class Oauth::MetadataController < ApplicationController
       grant_types_supported: %w[authorization_code refresh_token],
       code_challenge_methods_supported: [ "S256" ],
       token_endpoint_auth_methods_supported: [ "none" ],
-      scopes_supported: [ "runwell", "runwell:read" ]
+      scopes_supported: [ "runwell", "runwell:read", "runwell:portal" ]
     }
   end
 end

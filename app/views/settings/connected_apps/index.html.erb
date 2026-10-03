@@ -35,6 +35,28 @@
       <% end %>
     </section>
 
+    <% if can?(:manage_settings) %>
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider"><%= term(:client, count: 2) %>’ AI</h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none">
+          A contact with portal access can connect their own assistant under Connected apps in the portal, or by giving it <code class="txt-small"><%= portal_mcp_url %></code>.
+          It sees what they see and can send requests, as them.
+        </p>
+        <%= form_with model: Setting.current, url: settings_client_agent_approvals_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
+          <div class="record-form__toggle-text">
+            <%= form.label :client_agent_approvals, "Their assistants may decide agreements", class: "record-form__label" %>
+            <span class="record-form__hint">Only for a contact who can approve, after showing them the agreement and taking their typed name; the decision says it came through their assistant. Off, they decide in the portal or by the emailed link.</span>
+          </div>
+          <label class="switch flex-item-no-shrink">
+            <%= form.check_box :client_agent_approvals, class: "switch__input", data: { action: "change->form#submit" } %>
+            <span class="switch__btn"></span>
+          </label>
+        <% end %>
+      </section>
+    <% end %>
+
     <% if @everyone&.any? %>
       <section class="settings__section flex flex-column gap">
         <header>

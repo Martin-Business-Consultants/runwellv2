@@ -56,6 +56,7 @@ Rails.application.routes.draw do
     resources :connected_apps, only: %i[index create destroy] do
       resource :pause, only: %i[create destroy], module: :connected_apps
     end
+    resource :client_agent_approvals, only: :update
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
       resource :failures, only: :destroy, module: :updates
@@ -156,7 +157,11 @@ Rails.application.routes.draw do
     end
     resources :todos, path: "work", only: :index
     get "todos", to: redirect("/portal/work")
-    resources :requests, only: %i[new create]
+    resources :requests, only: %i[index new create]
+    resource :me, only: :show
+    post "mcp", to: "mcp#create", as: :mcp
+    resources :connected_apps, only: %i[index create destroy]
+    resource :oauth_authorization, path: "oauth/authorization", only: %i[show create]
   end
 
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?

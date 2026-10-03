@@ -1,0 +1,37 @@
+<% @page_title = "Requests" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow">
+    <section class="settings__section">
+      <p class="txt-small txt-subtle margin-none">What you’ve asked us for, newest first.</p>
+      <% if @requests.any? %>
+        <ul class="settings__scrollable-list">
+          <% @requests.each do |request_record| %>
+            <%# herb:key request_record.id %>
+            <li class="flex align-center gap-half">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= request_record.subject %></strong>
+                <div class="txt-x-small txt-subtle"><%= l request_record.received_at.in_time_zone, format: :long %></div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <% label = request_record.status == "open" ? "Open" : (request_record.status == "promoted" ? "Taken on" : "Closed") %>
+              <%= status_tag label, highlight: request_record.status == "promoted" %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small margin-none">Nothing yet.</p>
+      <% end %>
+      <div class="section-actions">
+        <%= link_to new_portal_request_path, class: "btn txt-small" do %>
+          <%= icon_tag "add" %>
+          <span>New request</span>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</section>

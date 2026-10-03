@@ -1,0 +1,79 @@
+<% @page_title = "Connected apps" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <% if @new_token %>
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">Your new token</h2>
+        </header>
+        <p class="txt-small margin-none">Copy it now: it won’t be shown again. It acts as you, in this portal only, until you disconnect it.</p>
+        <div class="copy-row">
+          <code class="input full-width txt-small overflow-ellipsis"><%= @new_token.plaintext %></code>
+          <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Your AI, connected</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Your own assistant (Muse, Claude, ChatGPT and the like) can see what you see here and ask us for things, as you.
+        Everything it does is recorded as done through it.
+        <% if current_contact.can_approve? %>
+          <% if Setting.current.client_agent_approvals? %>
+            It can decide on an agreement too, but only after showing it to you and taking your typed name.
+          <% else %>
+            Agreements are decided here in the portal, not by an assistant.
+          <% end %>
+        <% end %>
+      </p>
+      <% if @tokens.any? %>
+        <ul class="settings__scrollable-list">
+          <% @tokens.each do |token| %>
+            <%# herb:key token.id %>
+            <li class="flex align-center gap-half txt-small">
+              <div class="txt-align-start overflow-ellipsis min-width">
+                <strong><%= token.name %></strong>
+                <% if token.paused? %>
+                  <%= status_tag "Paused" %>
+                <% end %>
+                <div class="txt-x-small txt-subtle">
+                  <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
+                </div>
+              </div>
+              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              <%= render "layouts/shared/delete_dialog", name: token.name, path: portal_connected_app_path(token), trigger_class: "txt-small",
+                    message: "It stops working at once. Anything it already did stays." %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Nothing is connected yet.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Connect one</h2>
+      </header>
+      <p class="txt-small margin-none">Give your assistant this address. If it can sign in by itself, it sends you here to approve it, after the usual emailed sign-in link.</p>
+      <%= code_block portal_mcp_url %>
+      <p class="txt-small margin-none">If it asks for a key instead (Muse does, for a server you describe to it), make one here and paste it in.</p>
+      <%= form_with url: portal_connected_apps_path, scope: :access_token, class: "flex flex-wrap gap-half txt-small" do |form| %>
+        <%= form.text_field :name, class: "input flex-item-grow", autocomplete: "off", placeholder: "Name it, like “Muse”", aria: { label: "Token name" } %>
+        <label class="flex align-center gap-half">
+          <%= form.check_box :read_only %>
+          <span>Read only</span>
+        </label>
+        <button type="submit" class="btn btn--link">Make a key</button>
+      <% end %>
+    </section>
+  </div>
+</section>

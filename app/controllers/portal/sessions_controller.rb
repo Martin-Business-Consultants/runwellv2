@@ -21,7 +21,7 @@ class Portal::SessionsController < Portal::BaseController
 
     session_record = contact.portal_sessions.create!(ip_address: request.remote_ip, user_agent: request.user_agent)
     cookies.signed.permanent[:portal_session_id] = { value: session_record.id, httponly: true, same_site: :lax }
-    redirect_to portal_root_path
+    redirect_to session.delete(:portal_return_to).presence&.then { it.start_with?("/portal") ? it : nil } || portal_root_path
   end
 
   def destroy

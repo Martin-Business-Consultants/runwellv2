@@ -29,9 +29,13 @@ module Agent
 
     def permissions = controller.authorization_rules.select { it.applies?(action) }.filter_map(&:permission)
 
-    # Offered to this person: their role has the permissions, and its plugin is on.
+    # A client's tool: one of the portal's actions, run as their contact.
+    def portal? = controller <= Portal::BaseController
+    def plugin_on? = plugin.nil? || Runwell::Plugins.enabled?(plugin)
+
+    # Offered to this person on staff: a staff tool their role has the permissions for, its plugin on.
     def available_to?(user)
-      (plugin.nil? || Runwell::Plugins.enabled?(plugin)) && permissions.all? { user.can?(it) }
+      !portal? && plugin_on? && permissions.all? { user.can?(it) }
     end
 
     def input_schema
