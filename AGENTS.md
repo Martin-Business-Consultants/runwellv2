@@ -112,6 +112,10 @@ scope items).
   styling lives in `app/assets/stylesheets`. The one exception is email, which can't load
   stylesheets: `layouts/mailer.html.erb` carries its own `<style>`, with the brand band in the
   scheme's color (`Setting#brand_color`) and the logo when there is one
+- No N+1 queries: Prosopite scans every request in development (logged, and in `log/prosopite.log`)
+  and test (it raises, so the test fails). Preload what a page or JSON view reads (`includes`); a
+  loop that queries per record on purpose goes in `Prosopite.allow_stack_paths`
+  (`config/initializers/prosopite.rb`). `PROSOPITE_RAISE=0 bin/rails test` logs them all at once
 - Do not write tests. Don't add new ones or extend existing ones unless asked
 
 ## Frontend

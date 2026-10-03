@@ -31,11 +31,14 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 group :development do
   gem "letter_opener_web"
-  gem "prosopite"
   gem "web-console"
 end
 
 group :development, :test do
+  # N+1 queries: logged in development, and a failure in tests (config/initializers/prosopite.rb).
+  # pg_query lets Prosopite fingerprint queries on databases other than MySQL.
+  gem "pg_query"
+  gem "prosopite"
   gem "bundler-audit", require: false
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "rubocop-rails-omakase", require: false

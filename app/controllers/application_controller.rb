@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   include Authorization # after Authentication, so its check runs once the session is loaded
   include AgentTools, AgentResponses
   include TableSorting
+  include NPlusOneDetection
   allow_browser versions: :modern
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
