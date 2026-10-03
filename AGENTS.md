@@ -742,6 +742,11 @@ layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font` and
 `data-default-theme` (`appearance_data`); `appearance.css` turns them into Fizzy's tokens,
 and the page previews a change instantly (`appearance` controller) before saving.
 A person's sun/moon choice (localStorage) beats the install's default theme.
+Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
+the root font size (17px on a desk, 18px on phones, `base.css`); a person's own choice in
+Settings > Your account (`User#text_size`, blank follows the install) beats it. Every font size in
+the stylesheets is rem or em so it all scales, and table column shares (`COLUMN_SHAPES`) leave room
+for the larger sizes.
 
 Every border radius in the stylesheets goes through two variables so Corners reaches the
 whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill shapes are

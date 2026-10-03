@@ -15,8 +15,11 @@ export default class extends Controller {
       } else {
         root.dataset.theme = target.value
       }
+    } else if (key === "text_size" && !target.value) {
+      // Your account: blank follows the install's default.
+      root.dataset.textSize = this.element.dataset.installTextSize
     } else if (key) {
-      root.dataset[key] = target.value
+      root.dataset[key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase())] = target.value
     }
 
     this.element.requestSubmit()

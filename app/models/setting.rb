@@ -10,6 +10,9 @@ class Setting < ApplicationRecord
   # Each scheme's accent as hex (its oklch in appearance.css, converted), for email, which knows
   # neither oklch nor CSS variables.
   SCHEME_COLORS = { "fizzy" => "#5d63cd", "forest" => "#058931", "plum" => "#a049d4", "ocean" => "#00859a", "graphite" => "#404249" }.freeze
+  # Text size: the page's base size, which every rem in the stylesheets scales from (Default is
+  # 17px on a desk). Each person may pick their own (User#text_size, Settings > Your account).
+  TEXT_SIZES = { "small" => "Small", "default" => "Default", "large" => "Large", "larger" => "Larger" }.freeze
   FONTS = { "system" => "System", "humanist" => "Humanist", "rounded" => "Rounded", "serif" => "Serif", "mono" => "Mono" }.freeze
 
   has_one_attached :logo
@@ -20,6 +23,7 @@ class Setting < ApplicationRecord
   validates :radius, inclusion: { in: RADII.keys }
   validates :scheme, inclusion: { in: SCHEMES.keys }
   validates :font, inclusion: { in: FONTS.keys }
+  validates :text_size, inclusion: { in: TEXT_SIZES.keys }
 
   normalizes :mail_from_name, :mail_from_email, with: ->(value) { value.to_s.strip.presence }
   validates :mail_from_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "should be an email address" }, allow_nil: true

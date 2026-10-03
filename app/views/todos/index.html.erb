@@ -48,7 +48,7 @@
   <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:title], term(:work) ], [ @column_widths[:engagement], term(:engagement) ], [ @column_widths[:client], term(:client) ], :avatar, [ 22, "Due" ], :status, *listed.map { :text }, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:title], term(:work) ], [ @column_widths[:engagement], term(:engagement) ], [ @column_widths[:client], term(:client) ], :avatar, [ 28, "Due" ], :status, *listed.map { :text }, :actions %>
       <thead>
         <tr><%= bulk_select_all_header %><%= sortable_th term(:work), :title %><%= sortable_th term(:engagement), :engagement %><%= sortable_th term(:client), :client %><%= sortable_th "Owner", :owner %><%= sortable_th "Due", :due %><%= sortable_th "Status", :status, class: "txt-align-center" %><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>

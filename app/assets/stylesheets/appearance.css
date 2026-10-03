@@ -91,6 +91,11 @@
   .appearance-font--serif { font-family: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", Georgia, serif; }
   .appearance-font--mono { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; }
 
+  .appearance-size--small { font-size: 0.85em; }
+  .appearance-size--default { font-size: 1em; }
+  .appearance-size--large { font-size: 1.15em; }
+  .appearance-size--larger { font-size: 1.3em; }
+
   .appearance-upload {
     block-size: 2.5em;
     inline-size: auto;

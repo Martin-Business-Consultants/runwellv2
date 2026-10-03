@@ -156,7 +156,7 @@
     --tray-item-scale: calc(1 - (var(--tray-item-index) - 1) / 30);
     --tray-item-z: calc(6 - var(--tray-item-index));
 
-    font-size: 10px;
+    font-size: 0.625rem;
     margin-block-end: var(--tray-item-margin);
     position: relative;
 
@@ -240,7 +240,7 @@
 
       @media (max-width: 1060px) {
         > span:not(.icon) {
-          font-size: 12px;
+          font-size: 0.75rem;
         }
       }
 

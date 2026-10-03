@@ -39,7 +39,8 @@ module ApplicationHelper
   # can both use them.
   def appearance_data
     setting = Setting.current
-    { scheme: setting.scheme, radius: setting.radius, font: setting.font, default_theme: setting.theme }
+    { scheme: setting.scheme, radius: setting.radius, font: setting.font, default_theme: setting.theme,
+      text_size: Current.user&.text_size.presence || setting.text_size }
   end
 
   # This install's word for a core thing (Settings > Names), e.g. term(:engagement, count: 2).

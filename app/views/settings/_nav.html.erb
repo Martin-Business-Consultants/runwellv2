@@ -33,6 +33,7 @@
 
   <p class="settings-nav__heading">People</p>
   <ul class="settings-nav__list">
+    <li><%= settings_nav_link "Your account", settings_account_path, icon: "person", current: current == :account %></li>
     <% if can?(:manage_people) %>
       <li><%= settings_nav_link "People", settings_people_path, icon: "everyone", current: current == :people %></li>
     <% end %>

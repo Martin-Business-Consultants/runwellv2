@@ -33,6 +33,14 @@
         </header>
         <%= render "settings/appearances/choices", form: form, attribute: :font, choices: Setting::FONTS, current: @setting.font, sample_class: "appearance-font" %>
       </section>
+
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Text size</h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none">Where everyone starts. Each person can choose their own in Settings › Your account.</p>
+        <%= render "settings/appearances/choices", form: form, attribute: :text_size, choices: Setting::TEXT_SIZES, current: @setting.text_size, sample_class: "appearance-size" %>
+      </section>
     <% end %>
   </div>
 

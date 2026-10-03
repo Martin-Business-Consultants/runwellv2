@@ -1,13 +1,18 @@
 @layer base {
-  /* A dense, Linear-like scale: 15px on a desk (so --text-small is 13px), the browser's
-  /* 16px on phones so fields don't zoom. */
+  /* 17px on a desk (so --text-small is about 14.5px) and 18px on phones, scaled by Text size
+  /* (Settings > Appearance, or a person's own in Your account). In rem, so a browser set to
+  /* larger text makes Runwell larger too. Every size in the stylesheets is rem or em from here. */
   html {
-    font-size: 100%;
+    font-size: calc(1.125rem * var(--text-scale, 1));
 
     @media (min-width: 640px) {
-      font-size: 0.9375rem;
+      font-size: calc(1.0625rem * var(--text-scale, 1));
     }
   }
+
+  :root[data-text-size="small"] { --text-scale: 0.8824; }
+  :root[data-text-size="large"] { --text-scale: 1.1176; }
+  :root[data-text-size="larger"] { --text-scale: 1.2353; }
 
   body {
     -moz-osx-font-smoothing: grayscale;

@@ -1,0 +1,31 @@
+<% @page_title = "Your account" %>
+<%= render "settings/header", current: :account %>
+<% install_size = Setting.current.text_size %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Text size</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">Yours alone, on every device you sign in on. The install’s default is <%= Setting::TEXT_SIZES[install_size] %>.</p>
+      <%= form_with model: @user, url: settings_account_path, method: :patch, data: { controller: "appearance", install_text_size: install_size } do |form| %>
+        <div class="theme-switcher appearance-choices flex flex-wrap gap max-width justify-center txt-small">
+          <label class="btn theme-switcher__btn">
+            <span class="appearance-sample" aria-hidden="true"><%= icon_tag "settings" %></span>
+            <span class="overflow-ellipsis">Install default</span>
+            <%= form.radio_button :text_size, "", checked: @user.text_size.blank?, data: { action: "click->appearance#preview" } %>
+          </label>
+          <% Setting::TEXT_SIZES.each do |value, label| %>
+            <%# herb:key value %>
+            <label class="btn theme-switcher__btn">
+              <span class="appearance-sample appearance-size--<%= value %>" aria-hidden="true">Aa</span>
+              <span class="overflow-ellipsis"><%= label %></span>
+              <%= form.radio_button :text_size, value, checked: @user.text_size == value, data: { action: "click->appearance#preview" } %>
+            </label>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</section>

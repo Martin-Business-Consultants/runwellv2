@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <% appearance = appearance_data %>
-<html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-default-theme="<%= appearance[:default_theme] %>">
+<html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-text-size="<%= appearance[:text_size] %>" data-default-theme="<%= appearance[:default_theme] %>">
   <%= render "layouts/shared/head" %>
 
   <body class="<%= class_names(@body_class, "with-sidenav": authenticated?) %>" data-controller="keyboard panes">
