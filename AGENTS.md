@@ -606,6 +606,13 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
 - People join by invitation (`Invitation`, Settings > People): an emailed, signed link
   that works once and expires in 7 days. Sign-up (`/signup`) only works while there are no
   users, and makes the first owner
+- Two-factor sign-in (`User::TwoFactor`, `rotp`): a code from an authenticator app after the
+  password (`Sessions::TwoFactorsController`, the pending sign-in in the session cookie for five
+  minutes and five tries), or one of ten single-use recovery codes (HMAC digests, shown once). Set
+  up and turned off (password) in Settings > Your account; an owner requires it for everyone
+  (`Setting#require_two_factor`, Settings > People), which sends anyone without it to set it up
+  (`Authentication#require_two_factor_setup`, browser sessions only), and resets someone's who
+  lost their phone. Tokens and the portal are untouched; agents can't change any of it
 - People are deactivated, never deleted (`deactivate!` ends their sessions; their name stays
   on their history). Pickers and mentions list `User.active.ordered`. The last active owner
   can't be demoted or deactivated

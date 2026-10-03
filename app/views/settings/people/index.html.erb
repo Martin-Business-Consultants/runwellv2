@@ -20,6 +20,15 @@
               <% end %>
             </div>
             <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <% if person.two_factor? %>
+              <span class="status-tag status-tag--positive" title="Signs in with a code from an authenticator app">Two-factor</span>
+              <% if person != Current.user && person.active? %>
+                <%= render "layouts/shared/delete_dialog", name: "two-factor sign-in for " + person.display_name, path: settings_person_two_factor_path(person), trigger_class: "txt-small",
+                      message: "Use this when they’ve lost their phone and their recovery codes. They’re signed out, sign in with just their password, and set it up again." %>
+              <% end %>
+            <% elsif Setting.current.require_two_factor? && person.active? %>
+              <span class="status-tag status-tag--waiting" title="Sets it up on their next page">Two-factor pending</span>
+            <% end %>
             <% if person.deactivated? %>
               <%= status_tag "Deactivated" %>
               <%= button_to "Reactivate", settings_person_deactivation_path(person), method: :delete, class: "btn txt-small" %>
@@ -34,6 +43,22 @@
           </li>
         <% end %>
       </ul>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half" id="two-factor">
+      <header>
+        <h2 class="divider">Two-factor sign-in</h2>
+      </header>
+      <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
+        <div class="record-form__toggle-text">
+          <%= form.label :require_two_factor, "Require it for everyone", class: "record-form__label" %>
+          <span class="record-form__hint">After their password, everyone enters a code from an authenticator app. Anyone without it sets it up on their next page. <%= term(:client, count: 2).upcase_first %> sign in by emailed link and aren’t affected.</span>
+        </div>
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :require_two_factor, class: "switch__input", data: { action: "change->form#submit" } %>
+          <span class="switch__btn"></span>
+        </label>
+      <% end %>
     </section>
 
     <section class="settings__section flex flex-column gap">

@@ -3,6 +3,7 @@ module Authentication
 
   included do
     before_action :require_authentication
+    before_action :require_two_factor_setup
     helper_method :authenticated?
   end
 
@@ -10,6 +11,7 @@ module Authentication
     # Public pages also skip authorization (Authorization): there is no one to check.
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
+      skip_before_action :require_two_factor_setup, **options
       skip_before_action :authorize_action, **options
       skip_before_action :ensure_agent_declaration, **options, raise: false
       self.agent_public_actions = options[:only] ? Array(options[:only]).map(&:to_s) : :all
@@ -28,6 +30,19 @@ module Authentication
         authenticate_by_token || request_token_authentication
       else
         resume_session || request_authentication
+      end
+    end
+
+    # The install requires two-factor sign-in (Settings > People) and this person, signed in
+    # with a browser, hasn't set it up: every staff page sends them to set it up first. Tokens
+    # already made keep working; a new OAuth connection goes through the browser, so it waits too.
+    def require_two_factor_setup
+      return unless Current.session&.user&.two_factor_setup_required?
+
+      if request.format.html?
+        redirect_to new_settings_two_factor_path, alert: "Set up two-factor sign-in to carry on: this install requires it."
+      else
+        head :forbidden
       end
     end
 

@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   root "briefings#show"
 
   resource :session
+  get "session/two_factor", to: "sessions/two_factors#new", as: :new_session_two_factor
+  post "session/two_factor", to: "sessions/two_factors#create", as: :session_two_factor
   resource :signup, only: %i[ new create ]
   resources :users, only: [] do
     resource :avatar, only: :show, module: :users
@@ -51,6 +53,10 @@ Rails.application.routes.draw do
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
     resource :account, only: %i[show update]
+    resource :two_factor, only: %i[new create destroy] do
+      resource :recovery_codes, only: :create, module: :two_factors
+    end
+    resource :two_factor_requirement, only: :update
     resource :help, only: :show
     get "help/mcp", to: "helps#mcp", as: :help_mcp
     get "help/ai", to: "helps#ai", as: :help_ai
@@ -71,6 +77,7 @@ Rails.application.routes.draw do
     end
     resources :people, only: %i[index update] do
       resource :deactivation, only: %i[create destroy], module: :people
+      resource :two_factor, only: :destroy, module: :people
     end
     resources :invitations, only: %i[create update destroy]
     resources :connected_apps, only: %i[index create destroy] do

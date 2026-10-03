@@ -1,0 +1,23 @@
+<% @page_title = "Two-factor sign-in" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end">One more step</h1>
+  <p class="txt-subtle margin-none">Enter the 6-digit code from your authenticator app.</p>
+
+  <%= form_with url: session_two_factor_path, class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
+    <label class="flex align-center gap input input--actor">
+      <%= form.text_field :code, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 11, aria: { label: "Code" } %>
+    </label>
+
+    <p class="txt-small txt-subtle">Lost your phone? Enter one of your recovery codes instead. If you have none, an owner can reset two-factor sign-in for you in Settings › People.</p>
+
+    <button type="submit" class="btn btn--link center txt-medium" data-form-target="submit">
+      <span>Sign in</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+
+  <div class="margin-block-start">
+    <%= link_to "Start over", new_session_path, class: "btn btn--plain txt-link center txt-small" %>
+  </div>
+</div>

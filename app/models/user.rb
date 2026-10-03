@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Named, Avatar, Mentionable, Role, Agent
+  include Named, Avatar, Mentionable, Role, Agent, TwoFactor
 
   has_secure_password
   has_many :sessions, dependent: :destroy

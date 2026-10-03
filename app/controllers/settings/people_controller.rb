@@ -5,7 +5,7 @@ class Settings::PeopleController < ApplicationController
   agent_tool :change_role, on: :update, title: "Change someone’s role", params: { user: { role: User::ROLES } }
 
   def index
-    @people = User.people.includes(:agent).ordered.to_a.sort_by { [ it.deactivated? ? 1 : 0, User::ROLES.index(it.role) ] }
+    @people = User.people.includes(:agent).ordered.to_a.sort_by { [ it.deactivated? ? 1 : 0, User::ROLES.index(it.role) || User::ROLES.size ] }
     @invitations = Invitation.pending.ordered.includes(:invited_by)
     @invitation = Invitation.new
   end

@@ -1,0 +1,33 @@
+<% @page_title = "Set up two-factor sign-in" %>
+<%= render "settings/header", current: :account %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Set up two-factor sign-in</h2>
+      </header>
+      <p class="margin-none">After your password, Runwell will ask for a code from an app on your phone, so a stolen password isn’t enough to get in.</p>
+      <ol class="two-factor__steps">
+        <li>Open an authenticator app: 1Password, Google Authenticator, Microsoft Authenticator, Authy or your phone’s built-in passwords app.</li>
+        <li>
+          Scan this code with it.
+          <div class="two-factor__qr-frame"><%= @qr_code %></div>
+          <details class="txt-small">
+            <summary class="txt-subtle">Can’t scan? Enter this key instead</summary>
+            <div class="copy-row margin-block-start-half">
+              <code><%= @secret.scan(/.{4}/).join(" ") %></code>
+            </div>
+          </details>
+        </li>
+        <li>
+          Enter the 6-digit code it shows.
+          <%= form_with url: settings_two_factor_path, class: "flex align-center gap-half margin-block-start-half", data: { controller: "form" } do |form| %>
+            <%= form.text_field :code, required: true, class: "input two-factor__code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7, aria: { label: "Code" } %>
+            <button type="submit" class="btn btn--link">Turn on</button>
+          <% end %>
+        </li>
+      </ol>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,17 @@
+<% @page_title = "Recovery codes" %>
+<%= render "settings/header", current: :account %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">Save your recovery codes</h2>
+      </header>
+      <p class="margin-none">If you lose your phone, each of these signs you in once in place of a code. Keep them somewhere safe, like your password manager. <strong>They won’t be shown again.</strong></p>
+      <%= code_block @recovery_codes.join("\n"), language: "plain" %>
+      <div class="flex gap-half">
+        <%= link_to "I’ve saved them", settings_account_path, class: "btn btn--link" %>
+      </div>
+    </section>
+  </div>
+</section>

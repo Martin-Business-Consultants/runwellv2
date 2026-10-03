@@ -4,6 +4,42 @@
 
 <section class="settings">
   <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half" id="two-factor">
+      <header>
+        <h2 class="divider">Two-factor sign-in</h2>
+      </header>
+      <% if @user.two_factor? %>
+        <p class="margin-none"><span class="status-tag status-tag--positive">On</span> since <%= l @user.otp_enabled_at.to_date, format: :long %>. After your password, Runwell asks for a code from your authenticator app.</p>
+        <p class="txt-small txt-subtle margin-none"><%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
+        <details>
+          <summary class="btn txt-small">New recovery codes</summary>
+          <%= form_with url: settings_two_factor_recovery_codes_path, class: "flex flex-wrap align-center gap-half txt-small", namespace: "recovery" do |form| %>
+            <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", aria: { label: "Your password" } %>
+            <button type="submit" class="btn btn--link">Show new codes</button>
+          <% end %>
+          <p class="txt-x-small txt-subtle margin-none margin-block-start-half">Your old codes stop working.</p>
+        </details>
+        <% if Setting.current.require_two_factor? %>
+          <p class="txt-x-small txt-subtle margin-none">This install requires two-factor sign-in, so it stays on.</p>
+        <% else %>
+          <details>
+            <summary class="btn txt-small">Turn off</summary>
+            <%= form_with url: settings_two_factor_path, method: :delete, class: "flex flex-wrap align-center gap-half txt-small", namespace: "disable" do |form| %>
+              <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", aria: { label: "Your password" } %>
+              <button type="submit" class="btn txt-negative">Turn off two-factor sign-in</button>
+            <% end %>
+          </details>
+        <% end %>
+      <% else %>
+        <p class="margin-none">Off. Turn it on and Runwell asks for a code from an app on your phone after your password, so a stolen password isn’t enough to get in.</p>
+        <div class="section-actions">
+          <%= link_to new_settings_two_factor_path, class: "btn btn--link txt-small" do %>
+            <%= icon_tag "lock" %> <span>Set up two-factor sign-in</span>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+
     <section class="settings__section flex flex-column gap-half">
       <header>
         <h2 class="divider">Text size</h2>

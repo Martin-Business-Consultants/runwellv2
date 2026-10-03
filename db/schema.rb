@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_070000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -476,6 +476,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_060000) do
     t.string "smtp_security", default: "starttls", null: false
     t.boolean "prices", default: true, null: false
     t.string "text_size", default: "default", null: false
+    t.boolean "require_two_factor", default: false, null: false
   end
 
   create_table "todos", force: :cascade do |t|
@@ -527,6 +528,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_060000) do
     t.datetime "deactivated_at"
     t.integer "agent_owner_id"
     t.string "text_size"
+    t.string "otp_secret"
+    t.datetime "otp_enabled_at"
+    t.datetime "otp_last_used_at"
+    t.json "otp_recovery_codes"
     t.index ["agent_owner_id"], name: "index_users_on_agent_owner_id", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end

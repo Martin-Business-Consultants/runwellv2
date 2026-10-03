@@ -912,3 +912,39 @@
     }
   }
 }
+
+/* Setting up two-factor sign-in: numbered steps, the QR code on white (authenticator apps read
+/* it best dark on light, whatever the theme), and a code field six digits wide. */
+@layer components {
+  .two-factor__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    margin: 0;
+    padding-inline-start: 1.25em;
+  }
+
+  .two-factor__qr-frame {
+    background: #fff;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    inline-size: fit-content;
+    margin-block: var(--block-space-half);
+    padding: 0.75rem;
+  }
+
+  .two-factor__qr {
+    block-size: 11rem;
+    display: block;
+    inline-size: 11rem;
+  }
+
+  .input.two-factor__code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-medium);
+    font-weight: 600;
+    inline-size: 11ch;
+    letter-spacing: 0.15em;
+    min-inline-size: 0;
+  }
+}

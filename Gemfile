@@ -50,3 +50,7 @@ group :test do
 end
 
 gem "geared_pagination", "~> 1.2"
+
+# Two-factor sign-in: authenticator codes (TOTP) and the QR code that sets them up
+gem "rotp"
+gem "rqrcode"
