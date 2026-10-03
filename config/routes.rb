@@ -67,6 +67,7 @@ Rails.application.routes.draw do
     resource :two_factor_requirement, only: :update
     resource :sign_in, only: :show
     resources :sign_in_providers, only: :update, param: :key
+    resource :providers_only, only: :update
     resources :identities, only: :destroy
     resource :passwordless, only: :update
     resource :help, only: :show

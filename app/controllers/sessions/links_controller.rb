@@ -13,7 +13,7 @@ class Sessions::LinksController < ApplicationController
 
   def create
     user = User.people.active.find_by(email_address: params[:email_address].to_s.strip.downcase)
-    SessionMailer.with(user: user).link.deliver_later if user&.passwordless?
+    SessionMailer.with(user: user).link.deliver_later if user&.passwordless? && Setting.current.password_sign_in_for?(user)
     redirect_to new_session_path, notice: "If that address can sign in by link, one is on its way. It works for 15 minutes."
   end
 
@@ -32,6 +32,6 @@ class Sessions::LinksController < ApplicationController
 
   private
     def link_user
-      @link_user ||= User.find_by_token_for(:link_sign_in, params[:token])&.then { it if it.active? && it.passwordless? }
+      @link_user ||= User.find_by_token_for(:link_sign_in, params[:token])&.then { it if it.active? && it.passwordless? && Setting.current.password_sign_in_for?(it) }
     end
 end

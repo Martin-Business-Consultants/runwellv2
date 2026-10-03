@@ -492,6 +492,10 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
   Google, Microsoft (Entra ID) or GitHub through OmniAuth (`SignInProvider`, keys saved encrypted in
   Settings > Sign-in and read in each provider's setup phase, so no restart). A person connects their
   accounts in Your account (`Identity`), or is matched by an address Google or GitHub verified.
+  Single sign-on is a fourth provider, `openid_connect` (any OpenID Connect directory: Okta, Auth0,
+  Keycloak…), configured by issuer with discovery and PKCE, named by the owner (`label`), whose
+  addresses count as verified. `Setting#providers_only` (Only sign in through these) turns off
+  passwords and links for everyone but owners (`Setting#password_sign_in_for?`).
   Nobody joins this way, and every way in ends in `Authentication#sign_in_after_first_step`, so
   two-factor sign-in still follows
 - People are deactivated, never deleted (`deactivate!` ends their sessions; their name stays

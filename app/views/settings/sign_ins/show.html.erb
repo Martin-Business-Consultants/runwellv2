@@ -13,6 +13,19 @@
       </p>
     </section>
 
+    <section class="settings__section flex flex-column gap-half" id="providers-only">
+      <%= form_with model: Setting.current, url: settings_providers_only_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
+        <div class="record-form__toggle-text">
+          <%= form.label :providers_only, "Only sign in through these", class: "record-form__label" %>
+          <span class="record-form__hint">Passwords and emailed links stop working for everyone but owners, who keep their password in case a provider is down. Switch on at least one provider below first.</span>
+        </div>
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :providers_only, class: "switch__input", data: { action: "change->form#submit" } %>
+          <span class="switch__btn"></span>
+        </label>
+      <% end %>
+    </section>
+
     <% @providers.each do |provider| %>
       <%# herb:key provider.key %>
       <% info = SignInProvider::PROVIDERS.fetch(provider.key) %>
@@ -21,7 +34,11 @@
           <h2 class="divider"><%= provider.name %></h2>
         </header>
         <ol class="txt-small margin-none sign-in-steps">
-          <li>Create an OAuth app in <%= link_to "the #{provider.name} console", info[:console], target: "_blank", rel: "noopener" %>.</li>
+          <% if info[:console] %>
+            <li>Create an OAuth app in <%= link_to "the #{provider.name} console", info[:console], target: "_blank", rel: "noopener" %>.</li>
+          <% else %>
+            <li>In your identity provider (Okta, Auth0, Keycloak, JumpCloud, Google Workspace or any other that speaks OpenID Connect), add a web application.</li>
+          <% end %>
           <li>
             Give it this callback (redirect) address:
             <div class="copy-row margin-block-start-half">
@@ -31,6 +48,12 @@
           <li>Paste its client ID and secret here, and switch it on.</li>
         </ol>
         <%= form_with model: provider, url: settings_sign_in_provider_path(provider.key), method: :patch, scope: :sign_in_provider, namespace: provider.key, class: "flex flex-column gap-half txt-small" do |form| %>
+          <% if provider.key == "openid_connect" %>
+            <%= form.label :label, "Button name", class: "record-form__label" %>
+            <%= form.text_field :label, class: "input full-width", autocomplete: "off", placeholder: "Okta" %>
+            <%= form.label :issuer, "Issuer address", class: "record-form__label" %>
+            <%= form.url_field :issuer, class: "input full-width", autocomplete: "off", spellcheck: false, placeholder: "https://acme.okta.com" %>
+          <% end %>
           <%= form.label :client_id, "Client ID", class: "record-form__label" %>
           <%= form.text_field :client_id, class: "input full-width", autocomplete: "off", spellcheck: false %>
           <%= form.label :client_secret, "Client secret", class: "record-form__label" %>

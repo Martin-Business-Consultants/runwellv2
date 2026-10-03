@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -504,6 +504,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_110000) do
     t.boolean "require_two_factor", default: false, null: false
     t.text "custom_css"
     t.boolean "custom_css_everywhere", default: false, null: false
+    t.boolean "providers_only", default: false, null: false
   end
 
   create_table "sign_in_providers", force: :cascade do |t|
@@ -514,6 +515,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_110000) do
     t.boolean "enabled", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "issuer"
+    t.string "label"
     t.index ["key"], name: "index_sign_in_providers_on_key", unique: true
   end
 

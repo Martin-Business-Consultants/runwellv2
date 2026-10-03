@@ -7,6 +7,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     scope: "email,profile", prompt: "select_account"
   provider :entra_id, setup: ->(env) { SignInProvider.configure(env["omniauth.strategy"], "entra_id") }
   provider :github, setup: ->(env) { SignInProvider.configure(env["omniauth.strategy"], "github") }, scope: "user:email"
+  provider :openid_connect, setup: ->(env) { SignInProvider.configure(env["omniauth.strategy"], "openid_connect") }
 end
 
 OmniAuth.config.allowed_request_methods = %i[post]

@@ -61,6 +61,7 @@ gem "omniauth-rails_csrf_protection"
 gem "omniauth-google-oauth2"
 gem "omniauth-github"
 gem "omniauth-entra-id"
+gem "omniauth_openid_connect"
 
 # Exports (Settings > Export): everything as one .zip
 gem "rubyzip", require: "zip"

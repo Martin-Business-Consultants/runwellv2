@@ -139,6 +139,9 @@ class Setting < ApplicationRecord
     terminology.dig("labels", label.to_s, "enabled") != false
   end
 
+  # Settings > Sign-in > Only sign in through these: passwords and emailed links are for owners alone.
+  def password_sign_in_for?(user) = !providers_only? || user.owner?
+
   def enabled_labels
     Engagement::LABELS.select { label_enabled?(it) }
   end

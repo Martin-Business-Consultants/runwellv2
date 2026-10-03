@@ -15,6 +15,8 @@ class SessionsController < ApplicationController
 
   def create
     if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.active? && !user.agent?
+      return redirect_to(new_session_path, alert: "This install signs in with #{SignInProvider.usable_keys.map { SignInProvider.name_for(it) }.to_sentence(last_word_connector: " or ")}.") unless Setting.current.password_sign_in_for?(user)
+
       sign_in_after_first_step user
     else
       record_failed_sign_in(User.people.find_by(email_address: params[:email_address].to_s.strip.downcase), "password")

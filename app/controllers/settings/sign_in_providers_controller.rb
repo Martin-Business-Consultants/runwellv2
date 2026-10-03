@@ -5,7 +5,7 @@ class Settings::SignInProvidersController < Settings::BaseController
 
   def update
     provider = SignInProvider.for(params[:key])
-    attrs = params.expect(sign_in_provider: %i[client_id client_secret tenant_id enabled])
+    attrs = params.expect(sign_in_provider: %i[client_id client_secret tenant_id issuer label enabled])
     attrs.delete(:client_secret) if attrs[:client_secret].blank?
     if provider.update(attrs)
       Setting.current.record_event!("settings.sign_in_provider", payload: { provider: provider.key, on: provider.usable? })
