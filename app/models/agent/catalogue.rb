@@ -25,7 +25,7 @@ module Agent
         Rails.application.eager_load!
         ::ApplicationController.descendants.reject { it.abstract? || it.name.start_with?("Portal::") || it <= Portal::BaseController }.flat_map do |controller|
           controller.action_methods.sort.map do |action|
-            declaration = controller.agent_declaration_for(action)
+            declaration = controller.agent_declaration_for(action) || nil
             [ "#{controller.name}##{action}", declaration.nil? ? "MISSING" : (declaration[:exempt] ? "exempt: #{declaration[:exempt]}" : declaration[:name]) ]
           end
         end

@@ -13,7 +13,9 @@ module TableSorting
   DIRECTIONS = %w[asc desc].freeze
 
   included do
-    class_attribute :table_sorts, instance_writer: false, default: {}
+    class_attribute :table_sorts, instance_writer: false, instance_predicate: false, default: {}
+    # A public reader would count as an action (agent:coverage listed it as one with no tool).
+    private :table_sorts
     helper_method :current_sort
   end
 
