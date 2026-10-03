@@ -6,6 +6,15 @@
   <%= render "layouts/shared/quick_filter", title: "Source…", param: :source, current: @source,
         options: [ [ "All sources", "all" ] ] + Request.sources.map { |source| [ source, source ] } %>
 <% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_requests_path, noun: "requests", message: "Only open ones are deleted; triaged ones stay as history and are skipped.") : nil) do %>
+    <% if can?(:triage_requests) %>
+      <%= bulk_button bulk_requests_dismissal_path, method: :post, label: "Dismiss" %>
+    <% end %>
+  <% end %>
+  <% end %>
+<% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "Log a request", new_path: new_request_path %>
 
 <% if @view == "cards" %>
@@ -23,15 +32,7 @@
     </div>
   </section>
 <% else %>
-  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
-    <%= bulk_bar do %>
-      <% if can?(:triage_requests) %>
-        <%= bulk_button bulk_requests_dismissal_path, method: :post, label: "Dismiss" %>
-      <% end %>
-      <% if can?(:delete_records) %>
-        <%= bulk_delete bulk_requests_path, noun: "requests", message: "Only open ones are deleted; triaged ones stay as history and are skipped." %>
-      <% end %>
-    <% end %>
+  <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
       <%= table_colgroup :select, [ @column_widths[:subject], "Request" ], [ @column_widths[:from], "From" ], [ @column_widths[:client], term(:client) ], [ @column_widths[:source], "Source" ], :age, :status, :actions %>

@@ -21,7 +21,7 @@
 
       <%= render "layouts/shared/flash" %>
 
-      <main id="main">
+      <main id="main" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
         <% if content_for?(:settings_nav) %>
           <div class="settings-layout">
             <%= yield :settings_nav %>

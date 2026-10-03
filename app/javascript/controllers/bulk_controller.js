@@ -1,9 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Runwell: picking rows in a table to act on together (layouts/shared/bulk_bar, BulkAction).
-// Each row's checkbox is an item; the header's selects every row on the page. While any are
-// picked, the bar shows how many and its actions; each action's form is sent with the picked
-// ids added. Rows that arrive later (the next page) join in.
+// Runwell: picking table rows to act on together (BulkHelper, BulkAction). It sits on <main>, so it
+// sees both the table's checkboxes and the index toolbar, where the bar takes the filters' place
+// while any row is picked. Each action is a small form in the bar, sent with the picked ids added.
 export default class extends Controller {
   static targets = [ "item", "all", "bar", "count" ]
 
@@ -30,9 +29,11 @@ export default class extends Controller {
     this.update()
   }
 
-  // A form in the bar is about to go: carry the picked ids with it.
+  // One of the bar's forms is about to go: carry the picked ids with it.
   include(event) {
     const form = event.target
+    if (!this.hasBarTarget || !this.barTargets.some(bar => bar.contains(form))) return
+
     form.querySelectorAll("input[data-bulk-id]").forEach(input => input.remove())
     this.#picked.forEach(item => {
       const input = document.createElement("input")
@@ -46,16 +47,15 @@ export default class extends Controller {
 
   // After an action, the page comes back with the same rows: start with none picked.
   done(event) {
-    if (event.detail.success) this.clear()
+    if (event.detail.success && this.barTargets.some(bar => bar.contains(event.target))) this.clear()
   }
 
   update() {
-    if (!this.hasBarTarget) return
-
     const count = this.#picked.length
     const total = this.itemTargets.length
-    this.barTarget.hidden = count === 0
-    if (this.hasCountTarget) this.countTarget.textContent = `${count} selected`
+    this.element.toggleAttribute("data-bulk-active", count > 0)
+    this.barTargets.forEach(bar => { bar.hidden = count === 0 })
+    this.countTargets.forEach(target => { target.textContent = `${count} selected` })
     if (this.hasAllTarget) {
       this.allTarget.checked = count > 0 && count === total
       this.allTarget.indeterminate = count > 0 && count < total

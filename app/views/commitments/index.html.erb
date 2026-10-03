@@ -6,6 +6,13 @@
   <%= render "layouts/shared/quick_filter", title: "Whose…", param: :owner_kind, current: @owner_kind,
         options: [ [ "Ours and theirs", "all" ], [ "Ours", "us" ], [ "Theirs", "client" ] ] %>
 <% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_commitments_path, noun: "commitments", message: "Only open ones are deleted; resolved ones stay as history and are skipped.") : nil) do %>
+    <%= bulk_menu bulk_commitments_resolution_path, method: :post, name: "resolution", label: "Resolve as", choices: Commitment::RESOLUTIONS.map { [ it.humanize, it ] } %>
+  <% end %>
+  <% end %>
+<% end %>
 <%= render "layouts/shared/index_toolbar", view: @view %>
 
 <% if @view == "cards" %>
@@ -24,13 +31,7 @@
     </div>
   </section>
 <% else %>
-  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
-    <%= bulk_bar do %>
-      <%= bulk_choice bulk_commitments_resolution_path, method: :post, name: "resolution", label: "Resolve as…", choices: Commitment::RESOLUTIONS.map { [ it.humanize, it ] } %>
-      <% if can?(:delete_records) %>
-        <%= bulk_delete bulk_commitments_path, noun: "commitments", message: "Only open ones are deleted; resolved ones stay as history and are skipped." %>
-      <% end %>
-    <% end %>
+  <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
       <%= table_colgroup :select, [ @column_widths[:description], "Commitment" ], :text, :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>

@@ -381,7 +381,7 @@
 }
 
 /* Picking rows to act on together (bulk_controller, BulkHelper): a checkbox column, picked rows
-/* tinted, and the bar of actions above the table while any are picked. */
+/* tinted, and the bar of actions in the index toolbar's row while any are picked. */
 @layer components {
   /* The header's cell and the rows' are the same width, padding and centre line, whatever their
   /* font sizes (a header is smaller), so the checkboxes stack exactly. */
@@ -406,45 +406,54 @@
     background-color: var(--color-selected-light);
   }
 
+  /* The bulk bar takes the index toolbar's row while rows are picked (data-bulk-active on <main>):
+  /* its pills where the filters were, Delete where the view toggle and New button were. Same
+  /* height, same pills and menus as the filters, so the row changes what it says, not how it looks. */
+  #main[data-bulk-active] {
+    .index-toolbar__filter-pills,
+    .index-toolbar__end {
+      display: none !important; /* over the utility classes' display */
+    }
+
+    .index-toolbar__filters {
+      flex: 1 1 auto;
+    }
+  }
+
   .bulk-bar {
     align-items: center;
-    background-color: var(--color-selected-light);
-    border: 1px solid var(--color-selected);
-    border-radius: calc(0.75em * var(--radius-scale, 1));
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space);
-    inset-block-start: var(--block-space-half);
-    margin-block-end: var(--block-space-half);
-    padding: 0.5em 0.75em;
-    position: sticky;
-    z-index: 2;
+    display: contents;
 
     &[hidden] {
       display: none;
     }
   }
 
-  .bulk-bar__count {
-    font-size: var(--text-small);
-    white-space: nowrap;
-  }
-
   .bulk-bar__actions {
-    align-items: center;
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half, 0.5ch);
+    justify-content: flex-start;
   }
 
-  .bulk-bar__form {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space-half, 0.5ch);
+  /* "3 selected ×": the selection as a filled pill, the one thing set, that clears on a click. */
+  .bulk-bar__count {
+    --btn-background: var(--color-selected);
+    --btn-border-color: var(--color-selected-dark);
+    --btn-border-radius: var(--radius-control);
+    --icon-size: 0.85em;
 
-    .input--select {
-      inline-size: auto;
-    }
+    font-weight: 600;
+    gap: 0.5ch;
+  }
+
+  .bulk-bar__pill {
+    --btn-border-radius: var(--radius-control);
+  }
+
+  .bulk-bar__end {
+    margin-inline-start: auto;
+  }
+
+  .bulk-bar__delete {
+    --btn-border-color: var(--color-ink-medium);
+    --btn-border-radius: var(--radius-control);
   }
 }

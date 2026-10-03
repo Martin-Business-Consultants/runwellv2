@@ -7,6 +7,15 @@
   <%= render "layouts/shared/quick_filter", title: "Type…", param: :label, current: @label,
         options: [ [ "All types", "all" ] ] + Setting.current.enabled_labels.map { [ label_term(it, count: 2), it ] } %>
 <% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_engagements_path, noun: term(:engagement, count: 2).downcase, message: "Only those never sent to the client are deleted; sent ones are skipped (close them instead).") : nil) do %>
+    <% if can?(:close_engagements) %>
+      <%= bulk_button bulk_engagements_closure_path, method: :post, label: "Close" %>
+    <% end %>
+  <% end %>
+  <% end %>
+<% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:engagement).downcase, new_path: new_engagement_path %>
 
 <% if @view == "cards" %>
@@ -24,15 +33,7 @@
     </div>
   </section>
 <% elsif @engagements.any? %>
-  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
-    <%= bulk_bar do %>
-      <% if can?(:close_engagements) %>
-        <%= bulk_button bulk_engagements_closure_path, method: :post, label: "Close" %>
-      <% end %>
-      <% if can?(:delete_records) %>
-        <%= bulk_delete bulk_engagements_path, noun: term(:engagement, count: 2).downcase, message: "Only those never sent to the client are deleted; sent ones are skipped (close them instead)." %>
-      <% end %>
-    <% end %>
+  <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
       <%= table_colgroup :select, [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, :number, :status, *listed.map { :text }, :actions %>

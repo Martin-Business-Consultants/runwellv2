@@ -12,6 +12,16 @@
   <%= render "layouts/shared/quick_filter", title: "Engagement…", param: :engagement, current: @engagement,
         options: [ [ "All engagements", "all" ] ] + todo_engagement_filter_options(@engagement) %>
 <% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_todos_path, noun: term(:work).downcase) : nil) do %>
+    <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: Todo::STATUSES.map { [ it.humanize, it ] } %>
+    <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + todo_owner_options %>
+    <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
+    <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due date" %>
+  <% end %>
+  <% end %>
+<% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, extra_views: [ [ "board", "Board", "board" ] ] %>
 
 <% if @view == "board" %>
@@ -35,19 +45,10 @@
     <%= render "todos/blank" %>
   <% end %>
 <% else %>
-  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
-    <%= bulk_bar do %>
-      <%= bulk_choice bulk_todos_path, method: :patch, name: "todo[status]", label: "Status…", choices: Todo::STATUSES.map { [ it.humanize, it ] } %>
-      <%= bulk_choice bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Owner…", choices: [ [ "Unassigned", "none" ] ] + todo_owner_options %>
-      <%= bulk_choice bulk_todos_path, method: :patch, name: "todo[client_visible]", label: "Visibility…", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
-      <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Set due date" %>
-      <% if can?(:delete_records) %>
-        <%= bulk_delete bulk_todos_path, noun: term(:work).downcase %>
-      <% end %>
-    <% end %>
+  <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:title], term(:work) ], [ @column_widths[:engagement], term(:engagement) ], [ @column_widths[:client], term(:client) ], :avatar, :date, :status, *listed.map { :text }, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:title], term(:work) ], [ @column_widths[:engagement], term(:engagement) ], [ @column_widths[:client], term(:client) ], :avatar, [ 22, "Due" ], :status, *listed.map { :text }, :actions %>
       <thead>
         <tr><%= bulk_select_all_header %><%= sortable_th term(:work), :title %><%= sortable_th term(:engagement), :engagement %><%= sortable_th term(:client), :client %><%= sortable_th "Owner", :owner %><%= sortable_th "Due", :due %><%= sortable_th "Status", :status, class: "txt-align-center" %><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>
