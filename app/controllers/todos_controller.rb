@@ -55,7 +55,10 @@ class TodosController < ApplicationController
   end
 
   def update
-    if @todo.update(todo_params)
+    saved = @todo.update(todo_params)
+    return answer_in_place(saved) if params[:inline].present? && request.format.turbo_stream?
+
+    if saved
       if params[:from_edit]
         redirect_to @todo, notice: "Saved."
       else
@@ -87,6 +90,23 @@ class TodosController < ApplicationController
   end
 
   private
+    # A picker on a list (status or owner) saved: answer with that picker as it now stands, and the
+    # due date beside it (Overdue depends on the status), not a reload of the whole page. Refused,
+    # the picker goes back to what was saved, and the reason shows.
+    def answer_in_place(saved)
+      @todo.reload unless saved
+      labelled = params[:labelled].present?
+      picker = params[:inline] == "owner" ? "todos/owner_picker" : "todos/status_dot"
+      id = helpers.dom_id(@todo, "#{params[:inline] == "owner" ? "owner" : "status"}#{"_labelled" if labelled}")
+      flash.now[:alert] = @todo.errors.full_messages.to_sentence unless saved
+
+      locals = { todo: @todo, labelled: labelled, options_on_page: true } # the page has the choices already
+      streams = [ turbo_stream.replace(id, partial: picker, locals: locals),
+                  turbo_stream.replace(helpers.dom_id(@todo, :due), partial: "todos/due", locals: { todo: @todo }) ]
+      streams << turbo_stream.replace("flash", partial: "layouts/shared/flash") unless saved
+      render turbo_stream: streams
+    end
+
     # The owner param as an id: "me" is the person (for their agent too, the person it acts for),
     # "none" nobody, a name the person it names; the Work page's own filter sends ids.
     def owner_filter

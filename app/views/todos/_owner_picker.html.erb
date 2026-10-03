@@ -1,19 +1,28 @@
-<%# locals: (todo:, labelled: nil) %>
+<%# locals: (todo:, labelled: nil, options_on_page: nil) %>
 <%# Who a todo is assigned to, changed in place: the owner's avatar (or an empty circle) opens a
     combobox of the team right beside it. Type to narrow it (fuzzy: "sp" finds Sarah Producer),
-    Enter or a click picks one and saves it. %>
+    Enter or a click picks one, shows it at once (picker) and saves it. The team's list is on the
+    page once (todo_owner_options_template) and copied into the menu when it first opens, so a
+    table of many rows doesn't carry it on every one (options_on_page: an answer that replaces a
+    picker on a page that has it already). %>
 <% owner = todo.owner %>
 <% label = owner ? owner.display_name : "Unassigned" %>
-<div class="row-picker owner-picker" data-controller="dialog fixed-popup filter" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close dialog:close->filter#clearInput">
+<% unless options_on_page %>
+  <%= todo_owner_options_template %>
+<% end %>
+<div class="row-picker owner-picker" id="<%= dom_id(todo, labelled ? :owner_labelled : :owner) %>" data-controller="dialog fixed-popup filter picker" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
+  data-picker-current-value="<%= todo.owner_id %>" data-picker-options-value="todo-owner-options"
+  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:show->picker#fill dialog:close->fixed-popup#close dialog:close->filter#clearInput">
   <button type="button" class="owner-picker__trigger" title="<%= label %>: click to reassign" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
-    <% if owner %>
-      <%= avatar_image_tag owner, class: "owner-picker__avatar", alt: "" %>
-    <% else %>
-      <span class="owner-picker__empty" aria-hidden="true"><%= icon_tag "person-add" %></span>
-    <% end %>
+    <span class="display-contents" data-picker-target="display" data-picker-part="avatar">
+      <% if owner %>
+        <%= avatar_image_tag owner, class: "owner-picker__avatar", alt: "" %>
+      <% else %>
+        <span class="owner-picker__empty" aria-hidden="true"><%= icon_tag "person-add" %></span>
+      <% end %>
+    </span>
     <% if labelled %>
-      <span class="owner-picker__name overflow-ellipsis"><%= label %></span>
+      <span class="owner-picker__name overflow-ellipsis" data-picker-target="display" data-picker-part="name"><%= label %></span>
     <% end %>
     <span class="for-screen-reader">Assigned to <%= label %>. Reassign <%= todo.title %></span>
   </button>
@@ -21,24 +30,12 @@
   <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Assign <%= todo.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
     <input type="search" class="input input--transparent txt-small full-width owner-picker__search" placeholder="Assign to…" autocomplete="off" aria-label="Find a person" data-1p-ignore="true"
       data-filter-target="input" data-dialog-target="focusMouse" data-action="input->filter#filter keydown.enter->filter#chooseFirst">
-    <ul class="popup__list" role="group">
-      <li class="popup__item" role="checkbox" aria-checked="<%= owner.nil? %>" data-filter-target="item">
-        <%= button_to todo_path(todo), method: :patch, params: { todo: { owner_id: "" } }, class: "btn popup__btn", form_class: "full-width" do %>
-          <span class="owner-picker__empty owner-picker__empty--small" aria-hidden="true"><%= icon_tag "person" %></span>
-          <span class="overflow-ellipsis flex-item-grow">Unassigned</span>
-          <%= icon_tag "check", class: "checked flex-item-justify-end" %>
-        <% end %>
-      </li>
-      <% todo_people.each do |person| %>
-        <%# herb:key person.id %>
-        <li class="popup__item" role="checkbox" aria-checked="<%= person.id == todo.owner_id %>" data-filter-target="item">
-          <%= button_to todo_path(todo), method: :patch, params: { todo: { owner_id: person.id } }, class: "btn popup__btn", form_class: "full-width" do %>
-            <%= avatar_image_tag person, class: "owner-picker__avatar owner-picker__avatar--small", alt: "" %>
-            <span class="overflow-ellipsis flex-item-grow"><%= person.display_name %></span>
-            <%= icon_tag "check", class: "checked flex-item-justify-end" %>
-          <% end %>
-        </li>
+    <%= form_with url: todo_path(todo), method: :patch, class: "full-width" do %>
+      <input type="hidden" name="inline" value="owner">
+      <% if labelled %>
+        <input type="hidden" name="labelled" value="1">
       <% end %>
-    </ul>
+      <ul class="popup__list" role="group" data-picker-target="list"></ul>
+    <% end %>
   </dialog>
 </div>

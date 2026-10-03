@@ -1,30 +1,32 @@
-<%# locals: (todo:, labelled: nil) %>
+<%# locals: (todo:, labelled: nil, options_on_page: nil) %>
 <%# A todo's status as a colored circle, in the Work board's colors. Clicking it opens a menu
-    of the four statuses (Fizzy's popup, like the quick filters); choosing one saves it. %>
+    of the statuses (Fizzy's popup, like the quick filters); choosing one shows at once (picker)
+    and saves it with one form for the menu, answered with just this picker (TodosController#update).
+    The statuses are on the page once (todo_status_options_template), copied into the menu when it
+    opens. %>
 <% label = todo.status.humanize %>
-<div class="row-picker status-dot-picker" data-controller="dialog fixed-popup" data-dialog-orient-value="false"
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
+<% unless options_on_page %>
+  <%= todo_status_options_template %>
+<% end %>
+<div class="row-picker status-dot-picker" id="<%= dom_id(todo, labelled ? :status_labelled : :status) %>" data-controller="dialog fixed-popup picker" data-dialog-orient-value="false"
+  data-picker-current-value="<%= todo.status %>" data-picker-options-value="todo-status-options"
+  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->picker#fill dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
   <button type="button" class="status-dot-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
-    <span class="status-dot status-dot--<%= todo.status.dasherize %>" aria-hidden="true"></span>
+    <span class="display-contents" data-picker-target="display" data-picker-part="dot"><span class="status-dot status-dot--<%= todo.status.dasherize %>" aria-hidden="true"></span></span>
     <% if labelled %>
-      <span class="status-dot-picker__label"><%= label %></span>
+      <span class="status-dot-picker__label" data-picker-target="display" data-picker-part="label"><%= label %></span>
     <% end %>
     <span class="for-screen-reader">Status of <%= todo.title %>: <%= label %>. Change it</span>
   </button>
 
   <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Status of <%= todo.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
     <strong class="popup__title pad-inline-half">Status</strong>
-    <ul class="popup__list" role="group">
-      <% Todo::STATUSES.each do |status| %>
-        <%# herb:key status %>
-        <li class="popup__item" role="checkbox" aria-checked="<%= status == todo.status %>">
-          <%= button_to todo_path(todo), method: :patch, params: { todo: { status: status } }, class: "btn popup__btn", form_class: "full-width" do %>
-            <span class="status-dot status-dot--<%= status.dasherize %>" aria-hidden="true"></span>
-            <span class="overflow-ellipsis flex-item-grow"><%= status.humanize %></span>
-            <%= icon_tag "check", class: "checked flex-item-justify-end" %>
-          <% end %>
-        </li>
+    <%= form_with url: todo_path(todo), method: :patch, class: "full-width" do %>
+      <input type="hidden" name="inline" value="status">
+      <% if labelled %>
+        <input type="hidden" name="labelled" value="1">
       <% end %>
-    </ul>
+      <ul class="popup__list" role="group" data-picker-target="list"></ul>
+    <% end %>
   </dialog>
 </div>

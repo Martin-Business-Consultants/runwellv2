@@ -49,7 +49,10 @@ class ClientsController < ApplicationController
   end
 
   def update
-    if @client.update(client_params)
+    saved = @client.update(client_params)
+    return answer_in_place(saved) if params[:from_list] && request.format.turbo_stream?
+
+    if saved
       if params[:from_list]
         redirect_back fallback_location: clients_path, notice: "#{@client.name} is #{@client.status.humanize.downcase}."
       else
@@ -71,6 +74,15 @@ class ClientsController < ApplicationController
   end
 
   private
+    # The status badge on the clients table saved: answer with that badge, not the whole list.
+    def answer_in_place(saved)
+      @client.reload unless saved
+      flash.now[:alert] = @client.errors.full_messages.to_sentence unless saved
+      streams = [ turbo_stream.replace(helpers.dom_id(@client, :status), partial: "clients/status_picker", locals: { client: @client }) ]
+      streams << turbo_stream.replace("flash", partial: "layouts/shared/flash") unless saved
+      render turbo_stream: streams
+    end
+
 
   def set_client = @client = Client.find(params[:id])
   def client_params = params.expect(client: [ :name, :status, :time_zone, :internal, custom_fields: {} ])
