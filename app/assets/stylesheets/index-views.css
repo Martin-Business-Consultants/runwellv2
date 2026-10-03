@@ -383,16 +383,23 @@
 /* Picking rows to act on together (bulk_controller, BulkHelper): a checkbox column, picked rows
 /* tinted, and the bar of actions above the table while any are picked. */
 @layer components {
-  .data-table__select {
+  /* The header's cell and the rows' are the same width, padding and centre line, whatever their
+  /* font sizes (a header is smaller), so the checkboxes stack exactly. */
+  .data-table :is(th, td).data-table__select {
+    font-size: var(--text-small);
     inline-size: 1%;
-    padding-inline-end: 0;
+    padding-inline: 1.1em 0.25em;
     text-align: center;
+    vertical-align: middle;
   }
 
   .data-table__checkbox {
     accent-color: var(--color-link);
+    block-size: 1rem;
     cursor: pointer;
-    margin: 0;
+    display: block;
+    inline-size: 1rem;
+    margin: 0 auto;
   }
 
   .data-table tr[data-picked] td {
