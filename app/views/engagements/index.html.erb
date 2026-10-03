@@ -24,16 +24,26 @@
     </div>
   </section>
 <% elsif @engagements.any? %>
-  <section class="panel center index-table">
+  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
+    <%= bulk_bar do %>
+      <% if can?(:close_engagements) %>
+        <%= bulk_button bulk_engagements_closure_path, method: :post, label: "Close" %>
+      <% end %>
+      <% if can?(:delete_records) %>
+        <%= bulk_delete bulk_engagements_path, noun: term(:engagement, count: 2).downcase, message: "Only those never sent to the client are deleted; sent ones are skipped (close them instead)." %>
+      <% end %>
+    <% end %>
+
     <table class="data-table data-table--fixed">
-      <%= table_colgroup [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, :number, :status, *listed.map { :text }, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, :number, :status, *listed.map { :text }, :actions %>
       <thead>
-        <tr><%= sortable_th "Ref", :ref %><%= sortable_th "Title", :title %><%= sortable_th term(:client), :client %><%= sortable_th "Type", :type %><th class="data-table__number">Agreed</th><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th "Ref", :ref %><%= sortable_th "Title", :title %><%= sortable_th term(:client), :client %><%= sortable_th "Type", :type %><th class="data-table__number">Agreed</th><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:engagements_rows, @page.number) %>">
         <% @engagements.each do |engagement| %>
           <%# herb:key engagement.id %>
           <tr data-filter-target="item">
+            <%= bulk_select_cell engagement, engagement.ref %>
             <td class="txt-nowrap"><%= link_to engagement.ref, engagement, class: "txt-ink font-weight-bold" %></td>
             <td><%= link_to engagement.title, engagement, class: "txt-ink" %></td>
             <td><%= link_to engagement.client.name, engagement.client, class: "txt-ink txt-subtle" %></td>

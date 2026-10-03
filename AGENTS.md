@@ -163,7 +163,11 @@ spanning the page's column. Then either a `cards cards--grid` grid of
 `panel shadow center index-table`, whose last cell per row is
 `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
 action the record doesn't allow: engagements delete only while never sent, commitments
-and requests only while open). Lists page Fizzy's way (geared_pagination, `PaginationHelper`, the `pagination`
+and requests only while open). Every table can act on several rows at once: the section carries the `bulk` controller, the first
+column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` above the
+table holds the actions (`bulk_choice`, `bulk_button`, `bulk_date`, `bulk_delete`, `BulkHelper`),
+each posting to a `Bulk::` controller that runs the record's own verb on each picked row with
+`BulkAction#apply_to_each` (skipped ones named), with an agent tool beside it. Lists page Fizzy's way (geared_pagination, `PaginationHelper`, the `pagination`
 controller): the action wraps its records in `paginate` (HTML only; JSON for agents stays whole),
 the cards grid wraps its loop in `with_automatic_pagination :name_cards, @page`, and a table's
 `<tbody id="<%= pagination_frame_id_for(:name_rows, @page.number) %>">` ends with
@@ -300,6 +304,7 @@ one place they are documented for people: add a new key there.
 | Key | Action |
 | --- | --- |
 | `j` `k`, `gg` `G` | Move through the page's items (every `data-filter-target="item"`), first and last |
+| `x` | Pick the table row you're on, for the bulk bar |
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (always asks first): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |

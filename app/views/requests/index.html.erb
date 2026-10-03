@@ -23,16 +23,26 @@
     </div>
   </section>
 <% else %>
-  <section class="panel center index-table">
+  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
+    <%= bulk_bar do %>
+      <% if can?(:triage_requests) %>
+        <%= bulk_button bulk_requests_dismissal_path, method: :post, label: "Dismiss" %>
+      <% end %>
+      <% if can?(:delete_records) %>
+        <%= bulk_delete bulk_requests_path, noun: "requests", message: "Only open ones are deleted; triaged ones stay as history and are skipped." %>
+      <% end %>
+    <% end %>
+
     <table class="data-table data-table--fixed">
-      <%= table_colgroup [ @column_widths[:subject], "Request" ], [ @column_widths[:from], "From" ], [ @column_widths[:client], term(:client) ], [ @column_widths[:source], "Source" ], :age, :status, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:subject], "Request" ], [ @column_widths[:from], "From" ], [ @column_widths[:client], term(:client) ], [ @column_widths[:source], "Source" ], :age, :status, :actions %>
       <thead>
-        <tr><%= sortable_th "Request", :subject %><%= sortable_th "From", :from %><%= sortable_th term(:client), :client %><%= sortable_th "Source", :source %><%= sortable_th "Received", :received %><%= sortable_th "Status", :status %><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th "Request", :subject %><%= sortable_th "From", :from %><%= sortable_th term(:client), :client %><%= sortable_th "Source", :source %><%= sortable_th "Received", :received %><%= sortable_th "Status", :status %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:requests_rows, @page.number) %>">
         <% @requests.each do |request_record| %>
           <%# herb:key request_record.id %>
           <tr data-filter-target="item">
+            <%= bulk_select_cell request_record, request_record.subject %>
             <td><%= link_to request_record.subject, request_record, class: "txt-ink font-weight-bold" %></td>
             <td class="txt-subtle"><%= request_record.requester_name.presence || "Unknown sender" %></td>
             <td class="txt-subtle"><%= request_record.client&.name %></td>

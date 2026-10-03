@@ -24,16 +24,24 @@
     </div>
   </section>
 <% else %>
-  <section class="panel center index-table">
+  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
+    <%= bulk_bar do %>
+      <%= bulk_choice bulk_commitments_resolution_path, method: :post, name: "resolution", label: "Resolve as…", choices: Commitment::RESOLUTIONS.map { [ it.humanize, it ] } %>
+      <% if can?(:delete_records) %>
+        <%= bulk_delete bulk_commitments_path, noun: "commitments", message: "Only open ones are deleted; resolved ones stay as history and are skipped." %>
+      <% end %>
+    <% end %>
+
     <table class="data-table data-table--fixed">
-      <%= table_colgroup [ @column_widths[:description], "Commitment" ], :text, :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:description], "Commitment" ], :text, :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
       <thead>
-        <tr><%= sortable_th "Commitment", :description %><th>Whose</th><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th "Commitment", :description %><th>Whose</th><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:commitments_rows, @page.number) %>">
         <% @commitments.each do |commitment| %>
           <%# herb:key commitment.id %>
           <tr data-filter-target="item">
+            <%= bulk_select_cell commitment, commitment.description.truncate(40) %>
             <td class="font-weight-bold"><%= commitment.description %></td>
             <td class="txt-subtle"><%= commitment.owner_kind == "us" ? "Ours" : "Theirs" %>: <%= commitment_owner commitment %></td>
             <td class="txt-nowrap"><%= l commitment.due_on, format: :short %></td>

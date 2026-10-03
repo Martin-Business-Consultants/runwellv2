@@ -19,7 +19,7 @@ module TableSortingHelper
   end
 
   # How many characters a column of each fixed shape needs (its content never changes width).
-  COLUMN_SHAPES = { avatar: 7, avatars: 10, date: 15, age: 14, status: 11, pill: 11, number: 14, button: 10, actions: 9, text: 16 }.freeze
+  COLUMN_SHAPES = { select: 4, avatar: 7, avatars: 10, date: 15, age: 14, status: 11, pill: 11, number: 14, button: 10, actions: 9, text: 16 }.freeze
 
   # The table's column widths, so they hold still whatever the sort or page (with
   # `table-layout: fixed`, data-table--fixed). One entry per column: [characters, header] for a

@@ -17,6 +17,21 @@ Rails.application.routes.draw do
   post "mcp", to: "mcp#create", as: :mcp
   get "resolve", to: "resolutions#show", as: :resolution
   get "changes", to: "changes#index", as: :changes
+
+  # Many records at once, from a table's selection (BulkAction).
+  namespace :bulk do
+    resource :todos, path: "work", only: %i[update destroy]
+    resource :clients, only: %i[update destroy]
+    resource :engagements, only: :destroy do
+      resource :closure, only: :create, module: :engagements
+    end
+    resource :commitments, only: :destroy do
+      resource :resolution, only: :create, module: :commitments
+    end
+    resource :requests, only: :destroy do
+      resource :dismissal, only: :create, module: :requests
+    end
+  end
   get "install/cli", to: "cli#install", as: :cli_install
   get "install/runwell", to: "cli#show", as: :cli_script
   get ".well-known/oauth-protected-resource(/*resource)", to: "oauth/metadata#protected_resource", as: :oauth_protected_resource

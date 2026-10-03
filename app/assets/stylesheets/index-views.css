@@ -379,3 +379,65 @@
   .data-table__col--p99 { inline-size: 99%; }
   .data-table__col--p100 { inline-size: 100%; }
 }
+
+/* Picking rows to act on together (bulk_controller, BulkHelper): a checkbox column, picked rows
+/* tinted, and the bar of actions above the table while any are picked. */
+@layer components {
+  .data-table__select {
+    inline-size: 1%;
+    padding-inline-end: 0;
+    text-align: center;
+  }
+
+  .data-table__checkbox {
+    accent-color: var(--color-link);
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .data-table tr[data-picked] td {
+    background-color: var(--color-selected-light);
+  }
+
+  .bulk-bar {
+    align-items: center;
+    background-color: var(--color-selected-light);
+    border: 1px solid var(--color-selected);
+    border-radius: calc(0.75em * var(--radius-scale, 1));
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space);
+    inset-block-start: var(--block-space-half);
+    margin-block-end: var(--block-space-half);
+    padding: 0.5em 0.75em;
+    position: sticky;
+    z-index: 2;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .bulk-bar__count {
+    font-size: var(--text-small);
+    white-space: nowrap;
+  }
+
+  .bulk-bar__actions {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half, 0.5ch);
+  }
+
+  .bulk-bar__form {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half, 0.5ch);
+
+    .input--select {
+      inline-size: auto;
+    }
+  }
+}

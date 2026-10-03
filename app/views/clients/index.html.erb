@@ -21,16 +21,24 @@
     </div>
   </section>
 <% elsif @clients.any? %>
-  <section class="panel center index-table">
+  <section class="panel center index-table" data-controller="bulk" data-action="submit->bulk#include turbo:submit-end->bulk#done">
+    <%= bulk_bar do %>
+      <%= bulk_choice bulk_clients_path, method: :patch, name: "client[status]", label: "Status…", choices: Client::STATUSES.map { [ it.humanize, it ] } %>
+      <% if can?(:delete_records) %>
+        <%= bulk_delete bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with engagements can’t be deleted, and are skipped and named." %>
+      <% end %>
+    <% end %>
+
     <table class="data-table data-table--fixed">
-      <%= table_colgroup [ @column_widths[:name], "Name" ], :status, :avatars, :number, *listed.map { :text }, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:name], "Name" ], :status, :avatars, :number, *listed.map { :text }, :actions %>
       <thead>
-        <tr><%= sortable_th "Name", :name %><%= sortable_th "Status", :status %><th>Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th "Name", :name %><%= sortable_th "Status", :status %><th>Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:clients_rows, @page.number) %>">
         <% @clients.each do |client| %>
           <%# herb:key client.id %>
           <tr data-filter-target="item">
+            <%= bulk_select_cell client, client.name %>
             <td><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
             <td><%= render "clients/status_picker", client: client %></td>
             <td><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>

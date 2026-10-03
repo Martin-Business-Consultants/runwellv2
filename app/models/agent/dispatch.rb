@@ -103,6 +103,8 @@ module Agent
             value.match?(Resolver::REF) ? value : Resolver.resolve("Engagement", value, client: client_scope).ref
           elsif path && key == "id" && (type = tool.controller.controller_path.split("/").last.classify).in?(Resolver.types)
             Resolver.id_for(type, value, client: client_scope)
+          elsif Resolver::PARAMS[key] == "User" && value.downcase.in?(%w[me none])
+            value.downcase == "me" ? (access_token&.user&.id || value) : ""
           elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Engagement Todo Request]))
             Resolver.id_for(type, value, client: client_scope)
           elsif key == "record" && (match = value.match(/\A(\w+):(.+)\z/)) && match[1].in?(Resolver.types) && !Resolver.id?(match[2])
