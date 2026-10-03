@@ -197,8 +197,8 @@ header block: a `<link rel="up">` that Esc follows, never a Back button.
 Guide people through the hierarchy rather than documenting it. A record page says what happens
 next (`engagement_next_step` under the engagement's state). An empty list says where its records
 come from and links there (`todos/_blank`), since Work and Commitments are added on the
-engagement or client, never from their index. Help (`settings/helps/show`) uses `term()` for every
-name, and the `?` sheet links to it.
+engagement or client, never from their index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
+in the Settings sidebar) uses `term()` for every name, and the `?` sheet links to it.
 
 People show as their avatar, never their name: `person_tag user` (name as the tooltip and
 for screen readers; `fallback: "Unassigned"` for nobody). Only a list of the people

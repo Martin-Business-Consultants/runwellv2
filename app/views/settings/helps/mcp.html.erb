@@ -1,0 +1,102 @@
+<% @page_title = "Connecting an MCP" %>
+<% client, clients = term(:client).downcase, term(:client, count: 2).downcase %>
+<% agent_name = Current.user.agent&.display_name || "your agent" %>
+
+<%= render "settings/header", current: :help_mcp %>
+
+<div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">What it is</h2>
+    </header>
+    <p>
+      Runwell speaks MCP, the way AI assistants plug into the systems people use. Connect yours once and it can read and do anything you can here,
+      as <strong><%= agent_name %></strong>, with your role: no more, no less.
+    </p>
+    <p class="margin-none">Runwell’s address for assistants:</p>
+    <%= code_block mcp_url %>
+    <p class="txt-small txt-subtle margin-none">
+      Everything it does is marked in the history as <%= agent_name %>, with the assistant’s name. Anything that reaches a <%= client %> (sending an agreement, emailing a link, showing something in their portal) is shown to you first and done only when you agree.
+      You can see what each connection did, pause it or disconnect it in <%= link_to "Connected apps", settings_connected_apps_path, class: "txt-link" %>.
+    </p>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Claude and ChatGPT</h2>
+    </header>
+    <ol class="txt-small">
+      <li>In Claude, open Settings → Connectors and add a custom connector. In ChatGPT, add it under Settings → Connectors (or Apps).</li>
+      <li>Paste the address above and save.</li>
+      <li>It opens Runwell and asks you to approve it. Tick <em>Read only</em> if it should only look.</li>
+      <li>That’s it: it keeps its own access fresh. Ask it “What needs me in Runwell today?”</li>
+    </ol>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Muse, Grok and assistants that build their own connection</h2>
+    </header>
+    <p class="txt-small">Some assistants connect to anything you describe, and ask for a key rather than signing in.</p>
+    <ol class="txt-small">
+      <li>In <%= link_to "Connected apps", settings_connected_apps_path, class: "txt-link" %>, make a personal token named after the assistant (“Muse”). Copy it: it’s shown once.</li>
+      <li>Tell the assistant: “Connect to Runwell, an MCP server over Streamable HTTP at <%= mcp_url %>. It needs a bearer token.”</li>
+      <li>When it asks for the key, paste the token into its secure credentials prompt, not into the chat.</li>
+      <li>Ask it to save the connection as a skill, so it’s there next time.</li>
+    </ol>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Claude Code, Cursor and other coding tools</h2>
+    </header>
+    <p class="txt-small margin-none">Claude Code: add Runwell, then run <code>/mcp</code> in Claude Code to sign in.</p>
+    <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
+    <p class="txt-small margin-none">A tool configured with JSON takes the address and, if it can’t sign in by itself, a personal token:</p>
+    <%= code_block JSON.pretty_generate({ "mcpServers" => { "runwell" => { "url" => mcp_url, "headers" => { "Authorization" => "Bearer rw_your_token" } } } }), language: "json" %>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">The command line</h2>
+    </header>
+    <p class="txt-small margin-none">For you, for scripts, and for any assistant that runs commands. Every Runwell tool is a command (<code>runwell tools</code> lists them).</p>
+    <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login\nrunwell agent setup   # teaches Claude Code to use it" %>
+    <p class="txt-small txt-subtle margin-none"><code>runwell login --read-only</code> signs in to look only; <code>runwell doctor</code> checks everything.</p>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">Your <%= clients %>’ assistants</h2>
+    </header>
+    <p class="txt-small">
+      A contact with portal access can connect their own assistant to their portal, from <strong>Connected apps</strong> in the portal, or by giving it:
+    </p>
+    <%= code_block portal_mcp_url %>
+    <p class="txt-small margin-none">
+      It sees what they see there and can send you requests, as them; never anything internal or another <%= client %>’s.
+      <% if Setting.current.client_agent_approvals? %>
+        A contact who can approve may have it decide an agreement, after it shows them the agreement and takes their typed name.
+      <% else %>
+        Agreements are decided in the portal or by the emailed link, not by an assistant.
+      <% end %>
+      <% if can?(:manage_settings) %>
+        Change that in <%= link_to "Connected apps", settings_connected_apps_path, class: "txt-link" %>.
+      <% end %>
+    </p>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider">If something’s wrong</h2>
+    </header>
+    <ul class="help-tree txt-small">
+      <li><strong>It says it isn’t signed in</strong> (<code>auth</code>): the token was disconnected or has expired. Connect again, or make a new token.</li>
+      <li><strong>It says it’s paused</strong> (<code>paused</code>): someone paused it in Connected apps. Resume it there.</li>
+      <li><strong>It says it can’t</strong> (<code>forbidden</code>): your role doesn’t allow that. It can ask Runwell (<code>me</code>) what your role can do.</li>
+      <li><strong>It’s told to slow down</strong> (<code>rate_limited</code>): each connection may make <%= Agent::RateLimit.limit %> calls a minute. It waits and carries on.</li>
+      <li><strong>It can’t find something by name</strong> (<code>ambiguous</code>): the name fits more than one record. It should ask you which.</li>
+      <li><strong>A tool you expect is missing</strong>: it belongs to a plugin that’s off, or your role doesn’t have it.</li>
+    </ul>
+  </section>
+</div>

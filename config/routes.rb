@@ -36,6 +36,8 @@ Rails.application.routes.draw do
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
     resource :help, only: :show
+    get "help/mcp", to: "helps#mcp", as: :help_mcp
+    get "help/ai", to: "helps#ai", as: :help_ai
     resource :names, only: %i[show update]
     resource :views, only: %i[show update]
     resource :email, only: %i[show update] do

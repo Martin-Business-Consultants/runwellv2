@@ -1,7 +1,7 @@
 <%# locals: (current:) %>
 <%# The Settings sidebar, beside every settings page (rendered through settings/header, which the
     application layout places): the install's own settings, plugins with each plugin's page
-    nested under them, people and apps, updates and help. Only what the person may change. %>
+    nested under them, people and apps, updates, and help with its pages. Only what the person may change. %>
 <nav class="settings-nav" aria-label="Settings">
   <% if can?(:manage_settings) %>
     <p class="settings-nav__heading">Workspace</p>
@@ -44,6 +44,13 @@
     <% if can?(:manage_settings) %>
       <li><%= settings_nav_link "Updates", settings_updates_path, icon: "refresh", current: current == :updates %></li>
     <% end %>
-    <li><%= settings_nav_link "Help", settings_help_path, icon: "lifebuoy", current: current == :help %></li>
+    <li>
+      <%= settings_nav_link "Help", settings_help_path, icon: "lifebuoy", current: false %>
+      <ul class="settings-nav__list settings-nav__list--nested">
+        <li><%= settings_nav_link "Overview", settings_help_path, current: current == :help %></li>
+        <li><%= settings_nav_link "Connecting an MCP", settings_help_mcp_path, current: current == :help_mcp %></li>
+        <li><%= settings_nav_link "Using with AI", settings_help_ai_path, current: current == :help_ai %></li>
+      </ul>
+    </li>
   </ul>
 </nav>
