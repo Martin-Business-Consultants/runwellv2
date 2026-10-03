@@ -3,7 +3,7 @@ class TodosController < ApplicationController
   require_permission :delete_records, only: :destroy
   agent_tool :list_work, on: :index, title: "List work (todos)",
     params: { status: %w[open all], owner: "string", engagement: "string" },
-    description: "Todos across engagements. owner: me, none, any or a person’s id; engagement: a ref or all."
+    description: "Todos across engagements. owner: me (the person you act for), none, any, or a person’s id or name; engagement: a ref or all."
   agent_tool :show_work, on: :show, title: "Show a todo"
   agent_tool :create_work, on: :create, title: "Add work (a todo) to an engagement",
     params: { todo: { title: "string!", description: "text", owner_id: "integer", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
@@ -30,7 +30,7 @@ class TodosController < ApplicationController
     @owner = params[:owner].presence || "any"
     @engagement = params[:engagement].presence || "all"
 
-    scope = Todo.filtered(owner: @owner, engagement: @engagement)
+    scope = Todo.filtered(owner: owner_filter, engagement: @engagement)
     @board = scope
     scope = scope.open unless @status == "all"
     @column_widths = column_widths(scope, :title, :engagement, :client) if @view == "table"
@@ -87,6 +87,16 @@ class TodosController < ApplicationController
   end
 
   private
+    # The owner param as an id: "me" is the person (for their agent too, the person it acts for),
+    # "none" nobody, a name the person it names; the Work page's own filter sends ids.
+    def owner_filter
+      case @owner
+      when "any" then "any"
+      when "me" then current_user.person.id
+      when "none" then nil
+      else Agent::Resolver.id?(@owner) ? @owner : Agent::Resolver.candidates("User", @owner).first&.id || 0
+      end
+    end
 
   def set_todo = @todo = Todo.find(params[:id])
   def todo_params = params.expect(todo: [ :title, :description, :status, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {} ])
