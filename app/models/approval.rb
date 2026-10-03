@@ -13,5 +13,5 @@ class Approval < ApplicationRecord
   validates :evidence, presence: true, if: -> { method == "recorded" }
 
   before_update { raise ActiveRecord::ReadOnlyRecord, "approvals are immutable" }
-  before_destroy { throw :abort }
+  before_destroy { throw :abort unless Current.erasing }
 end

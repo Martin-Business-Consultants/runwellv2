@@ -28,7 +28,7 @@ class ScopeItem < ApplicationRecord
   private
 
   def refuse_if_sent
-    if agreement_version.sent?
+    if agreement_version.sent? && !Current.erasing
       errors.add(:base, "items of a sent version are immutable")
       throw :abort
     end

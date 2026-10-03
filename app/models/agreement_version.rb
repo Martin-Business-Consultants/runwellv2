@@ -62,7 +62,7 @@ class AgreementVersion < ApplicationRecord
   end
 
   def refuse_destroy_if_sent
-    if sent?
+    if sent? && !Current.erasing
       errors.add(:base, "sent agreement versions cannot be deleted")
       throw :abort
     end

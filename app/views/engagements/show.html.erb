@@ -90,6 +90,9 @@
     <% if !@engagement.closed? && can?(:close_engagements) %>
       <%= render "engagements/close", engagement: @engagement %>
     <% end %>
+    <% if @engagement.closed? && can?(:erase_engagements) %>
+      <%= render "engagements/erase", engagement: @engagement %>
+    <% end %>
 
   </aside>
 </section>

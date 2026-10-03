@@ -69,6 +69,19 @@ class Engagement < ApplicationRecord
   def deletable? = agreement_versions.none?(&:sent?)
   def recurring? = shape == "recurring"
 
+  # Gone for good: a closed engagement with its agreements (sent ones too), the client's decisions,
+  # work, commitments, notes, documents and history. The one exception to "sent is forever", for an
+  # owner (erase_engagements) who types the ref to mean it; the client keeps one event saying so.
+  def erase!(actor: Current.user, source: Current.source || "app")
+    raise ArgumentError, "close it first" unless closed?
+
+    summary = { ref: ref, title: title, versions: agreement_versions.count(&:sent?), todos: todos.count }
+    transaction do
+      Current.set(erasing: true) { destroy! }
+      client.record_event!("engagement.erased", actor: actor, source: source, payload: summary)
+    end
+  end
+
   def close!(reason: nil, actor: Current.user, source: Current.source || "app")
     transaction do
       update!(closed_at: Time.current, close_reason: reason)

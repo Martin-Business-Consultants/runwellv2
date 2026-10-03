@@ -1,0 +1,21 @@
+<%# locals: (engagement:) %>
+<%# Deleting a closed engagement for good (Engagements::ErasuresController), for owners: a native
+    disclosure holding the form, which asks for the ref so it can't happen by accident. %>
+<details class="erase-engagement txt-align-start margin-block-start">
+  <summary class="btn txt-negative borderless txt-small">
+    <%= icon_tag "trash" %>
+    <span>Delete permanently</span>
+  </summary>
+  <%= form_with url: engagement_erasure_path(engagement), class: "panel fill-white shadow flex flex-column gap-half margin-block-start txt-small", data: { turbo_action: "advance" } do |form| %>
+    <strong>Delete <%= engagement.ref %> for good?</strong>
+    <span>
+      It removes the <%= term(:engagement).downcase %> with its agreements and <%= engagement.client.name %>’s decisions on them, its <%= term(:work).downcase %>,
+      commitments, notes, documents and history. There’s no undo; the <%= term(:client).downcase %> keeps one note that it was deleted.
+    </span>
+    <label class="flex flex-column gap-half">
+      <span>Type <strong><%= engagement.ref %></strong> to confirm</span>
+      <%= form.text_field :confirm_ref, class: "input full-width", autocomplete: "off", required: true, aria: { label: "Type #{engagement.ref} to confirm" } %>
+    </label>
+    <button type="submit" class="btn txt-negative">Delete <%= engagement.ref %> permanently</button>
+  <% end %>
+</details>

@@ -17,6 +17,7 @@ module User::Role
     manage_people: { name: "Invite people and change their roles", roles: %w[owner] },
     send_agreements: { name: "Send agreements and record client decisions", roles: %w[owner manager] },
     close_engagements: { name: "Close engagements", roles: %w[owner manager] },
+    erase_engagements: { name: "Delete closed engagements permanently, agreements and all", roles: %w[owner] },
     triage_requests: { name: "Triage requests", roles: %w[owner manager] },
     delete_records: { name: "Delete records", roles: %w[owner manager] }
   }.freeze
