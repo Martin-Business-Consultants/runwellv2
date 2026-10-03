@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_090000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -489,6 +489,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_080000) do
     t.boolean "prices", default: true, null: false
     t.string "text_size", default: "default", null: false
     t.boolean "require_two_factor", default: false, null: false
+    t.text "custom_css"
+    t.boolean "custom_css_everywhere", default: false, null: false
   end
 
   create_table "sign_in_providers", force: :cascade do |t|

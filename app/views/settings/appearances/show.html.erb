@@ -45,6 +45,34 @@
   </div>
 
   <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half" id="custom-css">
+      <header>
+        <h2 class="divider">Custom CSS</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        Make Runwell your own by giving its design tokens new values: colors, fonts, corners, spacing.
+        Copy the brief, paste it into any AI with your logo or website, and paste its answer here. The rules are in
+        <%= link_to "the theming guide", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/theming.md", target: "_blank", rel: "noopener" %>.
+        Add <code>?theme=off</code> to any address to see a page without it.
+      </p>
+      <% if @setting.errors[:custom_css].any? %>
+        <p class="txt-small txt-negative margin-none">Custom CSS <%= @setting.errors[:custom_css].to_sentence %>. Nothing was saved.</p>
+      <% end %>
+      <div class="section-actions">
+        <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-url-value="<%= settings_theme_brief_path(format: :text) %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">
+          <%= icon_tag "ai" %> <span>Copy brief for AI</span>
+        </button>
+      </div>
+      <%= form_with model: @setting, url: settings_appearance_path, method: :patch, class: "flex flex-column gap-half", namespace: "custom_css" do |form| %>
+        <%= form.text_area :custom_css, class: "input custom-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --lch-accent: 58% 0.14 40;\n  --radius-scale: 1.4;\n}", aria: { label: "Custom CSS" } %>
+        <label class="flex align-center gap-half txt-small">
+          <%= form.check_box :custom_css_everywhere %>
+          <span>Use it on <%= term(:client).downcase %> pages too: the portal and approvals</span>
+        </label>
+        <div><button type="submit" class="btn btn--link txt-small">Save CSS</button></div>
+      <% end %>
+    </section>
+
     <% [ [ :logo, "Logo", "Shown in the header in place of the Runwell name. A wide PNG or SVG works best." ],
          [ :favicon, "Favicon", "The icon in the browser tab. A square PNG, at least 64 pixels." ] ].each do |attribute, title, hint| %>
       <%# herb:key attribute %>

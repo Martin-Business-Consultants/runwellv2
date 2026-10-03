@@ -37,6 +37,15 @@ module ApplicationHelper
 
   # Settings > Appearance, as attributes on <html> so CSS (appearance.css) and a live preview
   # can both use them.
+  # Custom CSS (Settings > Appearance) on this page: staff pages always, the portal and approval
+  # pages when the owner says so, and nowhere with ?theme=off.
+  def custom_theme?
+    setting = Setting.current
+    return false if setting.custom_css.blank? || params[:theme] == "off"
+
+    setting.custom_css_everywhere? || !request.path.start_with?("/portal", "/approve")
+  end
+
   def appearance_data
     setting = Setting.current
     { scheme: setting.scheme, radius: setting.radius, font: setting.font, default_theme: setting.theme,

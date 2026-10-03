@@ -107,3 +107,16 @@
     inline-size: 2.5em;
   }
 }
+
+/* Settings > Appearance > Custom CSS: a code box, not a rich text editor. */
+@layer components {
+  .input.custom-css {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    min-block-size: 14lh;
+    resize: vertical;
+    tab-size: 2;
+    white-space: pre;
+  }
+}

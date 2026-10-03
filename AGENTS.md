@@ -773,4 +773,11 @@ whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill sha
 selects, toggles, tags) uses `var(--radius-control)` so they always match. Write new CSS
 the same way.
 Schemes and fonts override Fizzy's unlayered tokens, so they are unlayered too.
+Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: values for the design tokens
+in `docs/theming.md`, the contract (tokens stable across releases, class names not). It is served
+from `/theme/:digest` (`ThemesController`, never a `<style>`), linked last and unlayered on staff
+pages, and on the portal and approvals only with `custom_css_everywhere`; `?theme=off` skips it.
+No `@import`, no `url()` but `data:`. `ThemeBrief` (Copy brief for AI, the `theme_brief` tool) is
+that guide with the install's current choices, for an AI to write one; `update_appearance` takes
+`custom_css`. A new token worth theming goes in the guide's tables.
 

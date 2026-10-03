@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   root "briefings#show"
 
+  get "theme/:digest", to: "themes#show", as: :theme_stylesheet, constraints: { digest: /[0-9a-f]+/ }, format: false
   resource :session
   get "session/two_factor", to: "sessions/two_factors#new", as: :new_session_two_factor
   post "session/two_factor", to: "sessions/two_factors#create", as: :session_two_factor
@@ -58,6 +59,7 @@ Rails.application.routes.draw do
   namespace :settings do
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
+    resource :theme_brief, only: :show
     resource :account, only: %i[show update]
     resource :two_factor, only: %i[new create destroy] do
       resource :recovery_codes, only: :create, module: :two_factors

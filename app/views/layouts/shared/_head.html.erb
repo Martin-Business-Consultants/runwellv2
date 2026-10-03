@@ -13,6 +13,9 @@
 
   <%= render "layouts/theme_preference" %>
   <%= app_stylesheet_tags %>
+  <% if custom_theme? %>
+    <%= stylesheet_link_tag theme_stylesheet_path(Setting.current.custom_css_digest), data: { turbo_track: "reload" } %>
+  <% end %>
   <%= javascript_importmap_tags %>
 
   <%= yield :parent_page %>
