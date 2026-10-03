@@ -437,6 +437,18 @@ receiving controller reads it with `QuickAction.locate(params[:record], types)`.
 with `data-turbo-frame="_top"` so the page redirects back as usual. The tray has no button on staff pages: `A` opens it
 from the bottom right corner, above the notification bell.
 
+## Requests by email
+
+Clients email requests rather than signing in (Action Mailbox; `docs/install.md` has the setup).
+An inbound service named by `INBOUND_EMAIL_INGRESS` forwards the address in Settings > Email
+(`Setting#requests_email`) and `ApplicationMailbox` routes everything to `RequestsMailbox`: the
+subject becomes the title, the message the description (`Request::EmailBody` cuts quoted mail and
+signatures, preferring the text part), attachments its documents (internal until shared), and the
+sender is matched to a contact, or left for triage unmatched. A known contact gets
+`RequestMailer#received`, whose Reply-To is the request's plus address (`requests+r42-<token>@`)
+and Message-ID carries the same token (`Request#reply_token`, from the app's secret); a reply by
+either becomes an email note on that request. Automatic replies and our own mail are dropped.
+
 ## Clients and the portal
 
 Clients are `Contact`s, never `User`s: no password, no staff role. Two switches per contact:

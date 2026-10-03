@@ -130,11 +130,33 @@ until either is set, links use the address people were last seen using.
 | `STRIPE_CONNECT_BROKER_URL` | Where the Stripe plugin's "Connect with Stripe" signs in | `https://v2.runwell.business` |
 | `STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY` | Only on the install that brokers Stripe sign-ins: the Stripe Connect platform's client id and secret key | none |
 | `RUNWELL_BACKUP_BEFORE_MIGRATE`, `RUNWELL_BACKUPS_KEEP` | Back up databases before migrating; how many backups to keep | on, 5 |
+| `INBOUND_EMAIL_INGRESS` | The service that forwards the requests address here: `postmark`, `mailgun`, `sendgrid`, `mandrill` or `relay` (see Requests by email) | none: no mail is received |
+| `RAILS_INBOUND_EMAIL_PASSWORD` | The password Postmark, SendGrid or a relay signs in with (user `actionmailbox`): a long random string | none |
+| `MAILGUN_INGRESS_SIGNING_KEY`, `MANDRILL_INGRESS_API_KEY` | Mailgun's webhook signing key, or Mandrill's API key, when one of them forwards the mail | none |
 
 Who mail comes from is set in Settings > Email, which also sends a test message. Mail can instead
 go through the Outsend plugin (Settings > Plugins, then Settings > Outsend for the key), which
 needs no SMTP settings. Behind Cloudflare, switch on the Cloudflare plugin:
 visitors' real addresses are recorded and `ASSUME_SSL` isn't needed.
+
+### Requests by email
+
+Clients can email a request instead of signing in to the portal. Mail to the requests address
+becomes a request to triage (the subject its title, the message its description, attachments its
+documents); a known contact gets a short reply, and their replies to it become notes on the same
+request. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
+
+1. Choose the address in Settings > Email (for example `requests@youragency.com`).
+2. Set up inbound mail for it at Postmark, Mailgun, SendGrid or Mandrill, or on your own mail server
+   (Postfix or Exim piping into `bin/rails action_mailbox:ingress:postfix` or `:exim`), including
+   plus addresses (`requests+anything@…`), which carry replies.
+3. On the server set `INBOUND_EMAIL_INGRESS` to the service, and its secret:
+   `RAILS_INBOUND_EMAIL_PASSWORD` for Postmark, SendGrid and a relay, `MAILGUN_INGRESS_SIGNING_KEY`
+   for Mailgun, `MANDRILL_INGRESS_API_KEY` for Mandrill. Restart.
+4. Settings > Email then shows the URL to give the service (Postmark's is
+   `https://actionmailbox:PASSWORD@your-install/rails/action_mailbox/postmark/inbound_emails`).
+
+Received mail is kept 30 days, then deleted; the requests and notes made from it stay.
 
 ## Plugins
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "name", null: false
@@ -29,6 +29,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_000100) do
     t.index ["refresh_token_digest"], name: "index_access_tokens_on_refresh_token_digest", unique: true
     t.index ["token_digest"], name: "index_access_tokens_on_token_digest", unique: true
     t.index ["user_id"], name: "index_access_tokens_on_user_id"
+  end
+
+  create_table "action_mailbox_inbound_emails", force: :cascade do |t|
+    t.integer "status", default: 0, null: false
+    t.string "message_id", null: false
+    t.string "message_checksum", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "message_checksum"], name: "index_action_mailbox_inbound_emails_uniqueness", unique: true
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -428,6 +437,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_000100) do
     t.datetime "release_check_requested_at"
     t.string "release_check_error"
     t.json "test_email", default: {}, null: false
+    t.string "requests_email"
   end
 
   create_table "todos", force: :cascade do |t|

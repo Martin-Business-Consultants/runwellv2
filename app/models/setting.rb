@@ -41,6 +41,15 @@ class Setting < ApplicationRecord
     Current.settings ||= first_or_create!
   end
 
+  # Where clients email requests (RequestsMailbox), and each request's reply address on it.
+  normalizes :requests_email, with: ->(value) { value.to_s.strip.downcase.presence }
+  validates :requests_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "should be an email address" }, allow_nil: true
+
+  def requests_reply_address(request)
+    local, domain = requests_email.split("@", 2)
+    "#{local.split("+").first}+r#{request.id}-#{request.reply_token}@#{domain}"
+  end
+
   def brand_color = SCHEME_COLORS.fetch(scheme, SCHEME_COLORS["fizzy"])
 
   # Who the install is, in words: the sender's name (Settings > Email), else Runwell.

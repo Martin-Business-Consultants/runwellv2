@@ -1,6 +1,10 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  # Requests by email (RequestsMailbox): the service forwarding the requests address here, named by
+  # INBOUND_EMAIL_INGRESS (postmark, mailgun, sendgrid, mandrill or relay). Unset, none is accepted.
+  config.action_mailbox.ingress = ENV["INBOUND_EMAIL_INGRESS"].presence&.to_sym
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.

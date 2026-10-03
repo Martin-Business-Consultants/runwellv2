@@ -34,6 +34,15 @@ class Request < ApplicationRecord
 
   def requester_name = contact&.name || sender_name.presence || sender_email
 
+  # Proves a reply by email is to this request (RequestsMailbox): in its plus address and the
+  # acknowledgement's Message-ID. Derived from the app's secret, so nothing is stored.
+  def reply_token = OpenSSL::HMAC.hexdigest("SHA256", Rails.application.secret_key_base, "request-reply:#{id}").first(12)
+
+  def self.find_by_reply_token(id, token)
+    request = find_by(id: id)
+    request if request && ActiveSupport::SecurityUtils.secure_compare(request.reply_token, token.to_s.downcase)
+  end
+
   # Draft an engagement whose first scope item is the request.
   def promote_to_engagement!(label:, actor:, title: nil, shape: "fixed")
     raise ArgumentError, "request has no client" unless client
