@@ -6,4 +6,4 @@ json.default_sender Setting.default_mail_sender
 json.delivery_method ActionMailer::Base.delivery_method
 json.test_email @setting.test_email
 json.requests_email @setting.requests_email
-json.inbound_ingress Rails.application.config.action_mailbox.ingress
+json.inbound_ingress Setting.inbound_ingress

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_020000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -466,6 +466,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_010000) do
     t.json "test_email", default: {}, null: false
     t.string "requests_email"
     t.boolean "client_agent_approvals", default: true, null: false
+    t.string "inbound_ingress"
+    t.text "inbound_password"
   end
 
   create_table "todos", force: :cascade do |t|

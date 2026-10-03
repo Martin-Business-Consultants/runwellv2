@@ -51,4 +51,13 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Active Record encryption (stored API keys, the inbound mail password) needs keys; production's come
+  # from the environment or credentials. Here, fixed ones unless credentials give some, so a
+  # clone runs and tests can save encrypted columns. Never used in production.
+  if Rails.application.credentials.dig(:active_record_encryption, :primary_key).blank?
+    config.active_record.encryption.primary_key = "runwell-#{Rails.env}-primary-key-not-secret"
+    config.active_record.encryption.deterministic_key = "runwell-#{Rails.env}-deterministic-key-not-secret"
+    config.active_record.encryption.key_derivation_salt = "runwell-#{Rails.env}-key-derivation-salt-not-secret"
+  end
 end

@@ -379,7 +379,8 @@ The core never names a plugin; remove it and the app runs as before. Extension p
 
 - View slots: `plugin_slots(:nav_actions)` (a button in the nav's foot, beside the theme toggle),
   `plugin_slots(:client_panel, client:)`, `plugin_slots(:engagement_panel, engagement:)`,
-  `plugin_slots(:todo_panel, todo:)`, and in the portal `plugin_slots(:portal_home, client:)`
+  `plugin_slots(:todo_panel, todo:)`, `plugin_slots(:email_inbound)` (Settings > Email, how requests'
+  mail comes in), and in the portal `plugin_slots(:portal_home, client:)`
   and `plugin_slots(:portal_engagement_panel, engagement:)`, and on the client's approval page
   `plugin_slots(:approval_page, version:, link:)`;
   register with `Runwell::Plugins.slot name, key, partial`
@@ -446,8 +447,11 @@ from the bottom right corner, above the notification bell.
 ## Requests by email
 
 Clients email requests rather than signing in (Action Mailbox; `docs/install.md` has the setup).
-An inbound service named by `INBOUND_EMAIL_INGRESS` forwards the address in Settings > Email
-(`Setting#requests_email`) and `ApplicationMailbox` routes everything to `RequestsMailbox`: the
+An inbound service forwards the address in Settings > Email
+(`Setting#requests_email`): the server's `INBOUND_EMAIL_INGRESS` / `RAILS_INBOUND_EMAIL_PASSWORD`, or else
+the install's own `Setting.inbound_ingress` / `inbound_password` (Settings > Email, or a plugin such as
+Cloudflare via `Setting#receive_mail_through!`; `config/initializers/action_mailbox.rb` reads them
+per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: the
 subject becomes the title, the message the description (`Request::EmailBody` cuts quoted mail and
 signatures, preferring the text part), attachments its documents (internal until shared), and the
 sender is matched to a contact, or left for triage unmatched. A known contact gets

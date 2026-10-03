@@ -57,6 +57,7 @@ Rails.application.routes.draw do
     resource :views, only: %i[show update]
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails
+      resource :inbound, only: :update, module: :emails
     end
     resources :fields, only: %i[index create update destroy]
     namespace :plugins do

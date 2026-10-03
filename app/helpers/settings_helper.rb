@@ -19,7 +19,7 @@ module SettingsHelper
     pages
   end
 
-  INBOUND_INGRESSES = { postmark: "Postmark", mailgun: "Mailgun", sendgrid: "SendGrid", mandrill: "Mandrill", relay: "your mail server (relay)" }.freeze
+  INBOUND_INGRESSES = { postmark: "Postmark", mailgun: "Mailgun", sendgrid: "SendGrid", mandrill: "Mandrill", relay: "a relay (Cloudflare Email Routing or your own mail server)" }.freeze
 
   def inbound_ingress_name(ingress) = INBOUND_INGRESSES.fetch(ingress.to_sym, ingress.to_s)
 
@@ -40,7 +40,7 @@ module SettingsHelper
     case ingress.to_sym
     when :mailgun then "Mailgun signs each delivery: set MAILGUN_INGRESS_SIGNING_KEY to its webhook signing key."
     when :mandrill then "Mandrill signs each delivery: set MANDRILL_INGRESS_API_KEY to its API key."
-    else "PASSWORD is RAILS_INBOUND_EMAIL_PASSWORD from the server’s environment: a long random string you choose."
+    else Setting.inbound_from_environment? || ENV["RAILS_INBOUND_EMAIL_PASSWORD"].present? ? "PASSWORD is RAILS_INBOUND_EMAIL_PASSWORD from the server’s environment." : "PASSWORD is the password below."
     end
   end
 end

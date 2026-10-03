@@ -13,7 +13,8 @@
 #   Runwell::Plugins.quick_action :time_tracking, label: "Time", icon: "history", partial: "...", types: %w[Client Engagement Todo]
 #
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
-# :engagement_panel (engagement:), :todo_panel (todo:); in the client portal, :portal_home (client:)
+# :engagement_panel (engagement:), :todo_panel (todo:), :email_inbound (no locals; Settings > Email,
+# where requests' mail comes in); in the client portal, :portal_home (client:)
 # and :portal_engagement_panel (engagement:). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
@@ -32,7 +33,7 @@ module Runwell
     Briefing = Struct.new(:title, :partial, :items, keyword_init: true)
 
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
-      portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel" }.freeze
+      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel" }.freeze
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }

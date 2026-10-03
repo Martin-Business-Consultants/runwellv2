@@ -82,7 +82,7 @@
         <button type="submit" class="btn btn--link">Save</button>
       <% end %>
 
-      <% ingress = Rails.application.config.action_mailbox.ingress %>
+      <% ingress = Setting.inbound_ingress %>
       <% if ingress %>
         <p class="txt-small margin-none">
           <%= status_tag "Receiving" %>
@@ -93,9 +93,28 @@
       <% else %>
         <p class="txt-small margin-none">
           <%= status_tag "Off" %>
-          Runwell can’t receive mail on its own: an inbound email service (Postmark, Mailgun, SendGrid or Mandrill) or your own mail server forwards the address here.
-          Set <code>INBOUND_EMAIL_INGRESS</code> and its secret on the server, then restart; <code>docs/install.md</code> has the steps.
+          Runwell can’t receive mail on its own: a service (Cloudflare Email Routing, Postmark, SendGrid) or your own mail server forwards the address here.
+          Choose it below, or let a plugin set it up.
         </p>
+      <% end %>
+
+      <%= plugin_slots(:email_inbound) %>
+
+      <% unless Setting.inbound_from_environment? %>
+        <%= form_with url: settings_email_inbound_path, method: :patch, scope: :inbound, class: "flex flex-wrap align-end gap-half txt-small" do |form| %>
+          <label class="flex flex-column gap-half">
+            <span class="font-weight-bold">Comes in through</span>
+            <%= form.select :ingress, [ [ "Nothing yet", "" ], [ "Relay (Cloudflare Email Routing, your mail server)", "relay" ], [ "Postmark", "postmark" ], [ "SendGrid", "sendgrid" ] ], { selected: @setting.inbound_ingress.to_s }, class: "input input--select" %>
+          </label>
+          <button type="submit" class="btn btn--link">Save</button>
+        <% end %>
+        <% if @setting.inbound_password.present? %>
+          <%= form_with model: @setting, url: settings_email_path, class: "flex flex-column gap-half txt-small" do |form| %>
+            <span class="font-weight-bold">Password</span>
+            <%= secret_field form, :inbound_password, readonly: true %>
+            <span class="txt-x-small txt-subtle">The service signs in with it as <code>actionmailbox</code>. It was made for this install; it isn’t shown anywhere else.</span>
+          <% end %>
+        <% end %>
       <% end %>
     </section>
   </div>

@@ -41,6 +41,25 @@ class Setting < ApplicationRecord
     Current.settings ||= first_or_create!
   end
 
+  # How requests' mail reaches Runwell (Action Mailbox): the service forwarding it, and the password
+  # it signs in with. The server's environment wins (INBOUND_EMAIL_INGRESS, RAILS_INBOUND_EMAIL_PASSWORD);
+  # otherwise Settings > Email or a plugin (Cloudflare) sets them here, with no restart.
+  INBOUND_INGRESSES = %w[relay postmark sendgrid mailgun mandrill].freeze
+  encrypts :inbound_password
+  validates :inbound_ingress, inclusion: { in: INBOUND_INGRESSES }, allow_nil: true
+  normalizes :inbound_ingress, with: ->(value) { value.to_s.strip.presence }
+
+  def self.inbound_ingress = Rails.configuration.action_mailbox.ingress.presence&.to_sym || current.inbound_ingress&.to_sym
+  def self.inbound_from_environment? = Rails.configuration.action_mailbox.ingress.present?
+  def self.inbound_password = Rails.application.credentials.dig(:action_mailbox, :ingress_password).presence || ENV["RAILS_INBOUND_EMAIL_PASSWORD"].presence || current.inbound_password.presence
+
+  # Receive through a service: kept here (unless the environment names one), with a password made
+  # for it if there's none yet. Answers the password, for whatever forwards the mail.
+  def receive_mail_through!(ingress)
+    update!(inbound_ingress: ingress.to_s, inbound_password: inbound_password.presence || SecureRandom.hex(32))
+    self.class.inbound_password
+  end
+
   # Where clients email requests (RequestsMailbox), and each request's reply address on it.
   normalizes :requests_email, with: ->(value) { value.to_s.strip.downcase.presence }
   validates :requests_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "should be an email address" }, allow_nil: true
