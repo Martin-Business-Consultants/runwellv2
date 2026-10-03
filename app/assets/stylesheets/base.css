@@ -128,14 +128,3 @@
     }
   }
 }
-
-/* Moving between pages keeps view transitions (meta view-transition), so the trays and the search
-/* bar, which name their own, hold still while the page changes beneath them. But nothing animates:
-/* the browser's default 250ms cross-fade and morphs made every click wait for them. Unlayered and
-/* important, so no component's transition rule brings a duration back. */
-::view-transition-group(*),
-::view-transition-image-pair(*),
-::view-transition-old(*),
-::view-transition-new(*) {
-  animation-duration: 0s !important;
-}
