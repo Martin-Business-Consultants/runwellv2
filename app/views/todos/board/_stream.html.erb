@@ -1,4 +1,6 @@
-<%# locals: (todos:) %>
+<%# locals: (count:) %>
+<%# The planned stream: like the doing columns, its cards load into a frame from Todos::ColumnsController,
+    a page at a time as it scrolls, so a board with hundreds of planned todos opens at once. %>
 <%= column_tag id: "planned-todos", name: "Planned", drop_url: columns_todo_drops_stream_path("__id__", todo_board_filters), collapsed: false, selected: "true", class: "cards--maybe", data: {
   drag_and_strum_target: "container",
   drag_and_drop_sortable: true,
@@ -6,14 +8,8 @@
   action: "focus->collapsible-columns#focusOnColumn"
 } do %>
   <header class="cards__header">
-    <%= render "todos/board/expander", title: "Planned", count: todos.size, column_id: "planned-todos" %>
+    <%= render "todos/board/expander", title: "Planned", count: count, column_id: "planned-todos" %>
     <%= render "todos/board/maximize", column_path: todos_column_path("planned", todo_board_filters) %>
   </header>
-  <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
-    <% if todos.any? %>
-      <%= render "todos/display/previews", todos: todos, draggable: true %>
-    <% else %>
-      <%= render "todos/columns/empty_placeholder" %>
-    <% end %>
-  </div>
+  <%= column_frame_tag "planned_cards", src: todos_column_path("planned", todo_board_filters) %>
 <% end %>

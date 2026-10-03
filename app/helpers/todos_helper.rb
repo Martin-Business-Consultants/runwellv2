@@ -3,6 +3,13 @@ module TodosHelper
 
   def todo_owner_options = User.active.people.ordered.map { |user| [ user.display_name, user.id ] }
 
+  # The Work page's engagement filter: only engagements with open work (a large install has
+  # hundreds of engagements, most with nothing to show here), and the one chosen, whatever it is.
+  def todo_engagement_filter_options(current)
+    engagements = Engagement.where(id: Todo.open.select(:engagement_id)).or(Engagement.where(ref: current)).order(:ref)
+    engagements.map { |engagement| [ "#{engagement.ref} #{engagement.title}", engagement.ref ] }
+  end
+
   # The team for the inline owner picker, loaded once per page however many rows use it.
   def todo_people = @todo_people ||= User.active.people.ordered.to_a
 

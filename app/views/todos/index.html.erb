@@ -10,7 +10,7 @@
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
         options: [ [ "Anyone", "any" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
   <%= render "layouts/shared/quick_filter", title: "Engagement…", param: :engagement, current: @engagement,
-        options: [ [ "All engagements", "all" ] ] + Engagement.open.order(:ref).map { |engagement| [ "#{engagement.ref} #{engagement.title}", engagement.ref ] } %>
+        options: [ [ "All engagements", "all" ] ] + todo_engagement_filter_options(@engagement) %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, extra_views: [ [ "board", "Board", "board" ] ] %>
 

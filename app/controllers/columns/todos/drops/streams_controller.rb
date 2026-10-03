@@ -5,6 +5,6 @@ class Columns::Todos::Drops::StreamsController < ApplicationController
 
   def create
     @todo.move!(status: "planned", before: params[:before])
-    @todos = board_todos.where(status: "planned").board_ordered
+    @count = board_todos.where(status: "planned").count
   end
 end

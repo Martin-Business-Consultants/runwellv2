@@ -1,7 +1,12 @@
-<%# locals: (records:, record:, form_id:, prefix: nil) %>
-<%# Where the action goes: Fizzy's combobox with a filter, writing "Type:id" into the form's
-    record field. The blank field comes first so a pick (appended after it) wins. %>
-<div class="<%= class_names("quick-action__picker flex align-center gap-half", "quick-action__picker--full": !prefix) %>" data-controller="dialog filter combobox" data-action="keydown.esc->dialog#close:stop:prevent click@document->dialog#closeOnClickOutside dialog:close->filter#clearInput">
+<%# locals: (records:, record:, form_id:, prefix: nil, types: nil) %>
+<%# Where the action goes: Fizzy's combobox, writing "Type:id" into the form's record field. The
+    blank field comes first so a pick (appended after it) wins. It starts with the record on screen
+    and the most recently changed few; typing asks the server for matches (record_search, filling
+    the list's frame from quick_actions/records), so a page never carries every record. %>
+<% list_id = "#{form_id}_records" %>
+<% search_url = quick_action_records_path(types: (types || QuickAction::RECORD_TYPES).join(","), form_id: form_id) %>
+<div class="<%= class_names("quick-action__picker flex align-center gap-half", "quick-action__picker--full": !prefix) %>" data-controller="dialog combobox record-search" data-record-search-url-value="<%= search_url %>"
+  data-action="keydown.esc->dialog#close:stop:prevent click@document->dialog#closeOnClickOutside dialog:close->record-search#reset">
   <input type="hidden" name="record" value="" form="<%= form_id %>">
   <% if prefix %>
     <span class="txt-small txt-subtle"><%= prefix %></span>
@@ -14,18 +19,9 @@
   </template>
 
   <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Where it goes" data-dialog-target="dialog">
-    <input type="search" class="input input--transparent txt-small full-width" placeholder="Find a <%= records.map { record_type_term(it.class.name) }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ").downcase %>…" autocomplete="off" aria-label="Find a record" data-1p-ignore="true" data-filter-target="input" data-dialog-target="focusMouse" data-action="input->filter#filter">
-    <ul class="popup__list quick-action__records" role="listbox">
-      <% records.each do |candidate| %>
-        <%# herb:key QuickAction.value_for(candidate) %>
-        <li class="popup__item" role="checkbox" aria-checked="<%= candidate == record %>" data-filter-target="item" data-combobox-target="item" data-combobox-value="<%= QuickAction.value_for(candidate) %>" data-combobox-label="<%= record_label(candidate) %>">
-          <button type="button" class="btn popup__btn" data-action="dialog#close combobox#change">
-            <span class="txt-x-small txt-subtle txt-nowrap"><%= record_kind(candidate) %></span>
-            <span class="overflow-ellipsis flex-item-grow"><%= record_label(candidate) %></span>
-            <%= icon_tag "check", class: "checked flex-item-justify-end" %>
-          </button>
-        </li>
-      <% end %>
-    </ul>
+    <input type="search" class="input input--transparent txt-small full-width" placeholder="Find a <%= records.map { record_type_term(it.class.name) }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ").downcase %>…" autocomplete="off" aria-label="Find a record" data-1p-ignore="true" data-record-search-target="input" data-dialog-target="focusMouse" data-action="input->record-search#search keydown.enter->record-search#chooseFirst:prevent">
+    <turbo-frame id="<%= list_id %>" data-record-search-target="frame">
+      <%= render "quick_actions/records", records: records, record: record %>
+    </turbo-frame>
   </dialog>
 </div>

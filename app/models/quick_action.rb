@@ -3,6 +3,7 @@
 # and plugin records are polymorphic, so each action names the record types it takes.
 class QuickAction
   RECORD_TYPES = %w[Client Engagement ScopeItem Todo Request].freeze
+  STARTING = 12 # records a picker shows before anything is typed
 
   attr_reader :key, :label, :title, :icon, :partial, :types
 
@@ -32,14 +33,27 @@ class QuickAction
 
     def value_for(record) = "#{record.class.name}:#{record.id}"
 
-    # What a picker offers: the record on screen first, then clients, open engagements and
-    # open work, limited to the given types.
+    # What a picker offers before anything is typed: the record on screen, then the ones changed
+    # most recently, a dozen in all. Never the whole install: a page carries the picker in its
+    # tray, and a large install has thousands of records (the rest are found by search).
     def records(current = nil, types = RECORD_TYPES)
-      candidates = []
-      candidates += Client.ordered.to_a if types.include?("Client")
-      candidates += Engagement.open.ordered.includes(:client).to_a if types.include?("Engagement")
-      candidates += Todo.open.includes(engagement: :client).order(:due_on, :id).to_a if types.include?("Todo")
-      ([ current ].compact + candidates).uniq
+      recent = types.flat_map { |type| scope_for(type).order(updated_at: :desc).limit(STARTING).to_a }
+      ([ current ].compact + recent.sort_by(&:updated_at).reverse).uniq.first(STARTING)
+    end
+
+    # What a picker offers for what was typed: names, refs and titles that match (Agent::Resolver),
+    # across the types it takes, closed ones included.
+    def search(query, types = RECORD_TYPES)
+      types.flat_map { |type| Agent::Resolver.candidates(type, query, limit: 8) }.first(20)
+    end
+
+    def scope_for(type)
+      case type
+      when "Client" then Client.all
+      when "Engagement" then Engagement.includes(:client)
+      when "Todo" then Todo.includes(engagement: :client)
+      else type.constantize.all
+      end
     end
   end
 

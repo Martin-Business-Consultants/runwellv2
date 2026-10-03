@@ -1,0 +1,17 @@
+<%# locals: (records:, record: nil) %>
+<%# A picker's choices (quick_actions/picker): the starting few, or what a search found. %>
+<ul class="popup__list quick-action__records" role="listbox">
+  <% records.each do |candidate| %>
+    <%# herb:key QuickAction.value_for(candidate) %>
+    <li class="popup__item" role="checkbox" aria-checked="<%= candidate == record %>" data-combobox-target="item" data-combobox-value="<%= QuickAction.value_for(candidate) %>" data-combobox-label="<%= record_label(candidate) %>">
+      <button type="button" class="btn popup__btn" data-action="dialog#close combobox#change">
+        <span class="txt-x-small txt-subtle txt-nowrap"><%= record_kind(candidate) %></span>
+        <span class="overflow-ellipsis flex-item-grow"><%= record_label(candidate) %></span>
+        <%= icon_tag "check", class: "checked flex-item-justify-end" %>
+      </button>
+    </li>
+  <% end %>
+  <% if records.empty? %>
+    <li class="popup__item txt-subtle pad-inline-half">Nothing matches.</li>
+  <% end %>
+</ul>

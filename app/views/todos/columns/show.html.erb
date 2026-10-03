@@ -11,7 +11,9 @@
   <turbo-frame id="<%= @status %>_cards">
     <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
       <% if @todos.any? %>
-        <%= render "todos/display/previews", todos: @todos, draggable: true %>
+        <%= with_automatic_pagination "#{@status}_cards_page", @page do %>
+          <%= render "todos/display/previews", todos: @todos, draggable: true %>
+        <% end %>
       <% else %>
         <%= render "todos/columns/empty_placeholder" %>
       <% end %>

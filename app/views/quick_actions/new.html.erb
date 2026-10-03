@@ -9,7 +9,7 @@
           <span class="for-screen-reader">Close</span>
         </button>
       </header>
-      <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form" %>
+      <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
       <%= render @action.partial, form_id: "quick_action_form" %>
     </dialog>
   </div>

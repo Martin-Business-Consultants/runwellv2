@@ -159,6 +159,7 @@ Rails.application.routes.draw do
     end
   end
   get "quick_actions/new", to: "quick_actions#new", as: :new_quick_action
+  get "quick_actions/records", to: "quick_actions/records#index", as: :quick_action_records
   resources :notes, only: %i[create destroy]
   resources :documents, only: %i[create update destroy]
 
