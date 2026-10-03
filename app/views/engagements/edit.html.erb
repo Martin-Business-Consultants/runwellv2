@@ -25,7 +25,9 @@
         <% end %>
         <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
         <% unless @engagement.internal? %>
-          <dt>Agreed</dt><dd><%= money @engagement.agreed_amount_cents %><%= " / period" if @engagement.recurring? %></dd>
+          <% if priced_engagement?(@engagement) %>
+            <dt>Agreed</dt><dd><%= engagement_amount(@engagement) %></dd>
+          <% end %>
         <% end %>
       </dl>
       <% unless @engagement.internal? %>

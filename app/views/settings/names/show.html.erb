@@ -46,5 +46,24 @@
         <button type="submit" class="btn btn--link center" data-form-target="submit">Save names</button>
       <% end %>
     </section>
+
+    <section class="settings__section flex flex-column gap" id="prices">
+      <header>
+        <h2 class="divider">Prices</h2>
+      </header>
+      <%= form_with model: @setting, url: settings_prices_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
+        <div class="record-form__toggle-text">
+          <%= form.label :prices, "Agreements have prices", class: "record-form__label" %>
+          <span class="record-form__hint">
+            On, <%= term(:scope_item, count: 2).downcase %> take a price and agreements show totals, wherever they have some: one with no prices reads as a plain list of what’s agreed.
+            Off, money is hidden everywhere, for planning without it: a home, a wedding, internal work.
+          </span>
+        </div>
+        <label class="switch flex-item-no-shrink">
+          <%= form.check_box :prices, class: "switch__input", data: { action: "change->form#submit" } %>
+          <span class="switch__btn"></span>
+        </label>
+      <% end %>
+    </section>
   </div>
 </section>

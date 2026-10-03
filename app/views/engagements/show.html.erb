@@ -76,7 +76,9 @@
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
         <dt>Type</dt><dd><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></dd>
         <% unless @engagement.internal? %>
-          <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
+          <% if priced_engagement?(@engagement) %>
+            <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
+          <% end %>
         <% end %>
         <% if @engagement.closed? %>
           <dt>Closed</dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>

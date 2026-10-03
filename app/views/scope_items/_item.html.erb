@@ -2,7 +2,9 @@
 <div class="scope-item-fields txt-small">
   <%= form_with model: item, namespace: dom_id(item) do |form| %>
     <%= form.text_field :description, required: true, class: "input", autocomplete: "off", aria: { label: "Description" } %>
-    <%= money_field form, :price_cents, class: "input", placeholder: "Price", aria: { label: "Price" } %>
+    <% if prices_on? %>
+      <%= money_field form, :price_cents, class: "input", placeholder: "Price", aria: { label: "Price" } %>
+    <% end %>
     <%= form.text_field :internal_estimate, class: "input", autocomplete: "off", placeholder: "Internal est.", aria: { label: "Internal estimate" } %>
     <button type="submit" class="btn btn--circle" title="Save item">
       <%= icon_tag "check" %>

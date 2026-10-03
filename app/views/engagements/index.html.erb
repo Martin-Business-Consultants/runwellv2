@@ -26,7 +26,7 @@
           <%# herb:key engagement.id %>
           <%= render "layouts/shared/card", path: engagement_path(engagement), title: engagement.title, id_label: engagement.ref,
                 context: engagement.client.name,
-                meta: [ engagement.label_name, money(engagement.agreed_amount_cents) + (engagement.recurring? ? " / period" : "") ],
+                meta: [ engagement.label_name, engagement_amount(engagement) ].compact,
                 status: engagement.state.humanize, highlight: engagement.active? %>
         <% end %>
       <% end %>
@@ -36,9 +36,9 @@
   <section class="panel center index-table">
 
     <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, :number, :status, *listed.map { :text }, :actions %>
+      <%= table_colgroup :select, [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, *([ :number ] if prices_on?), :status, *listed.map { :text }, :actions %>
       <thead>
-        <tr><%= bulk_select_all_header %><%= sortable_th "Ref", :ref %><%= sortable_th "Title", :title %><%= sortable_th term(:client), :client %><%= sortable_th "Type", :type %><th class="data-table__number">Agreed</th><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th "Ref", :ref %><%= sortable_th "Title", :title %><%= sortable_th term(:client), :client %><%= sortable_th "Type", :type %><% if prices_on? %><th class="data-table__number">Agreed</th><% end %><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:engagements_rows, @page.number) %>">
         <% @engagements.each do |engagement| %>
@@ -49,7 +49,9 @@
             <td><%= link_to engagement.title, engagement, class: "txt-ink" %></td>
             <td><%= link_to engagement.client.name, engagement.client, class: "txt-ink txt-subtle" %></td>
             <td class="txt-subtle"><%= engagement.label_name %></td>
-            <td class="data-table__number"><%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></td>
+            <% if prices_on? %>
+              <td class="data-table__number"><%= engagement_amount(engagement) %></td>
+            <% end %>
             <td><%= status_tag engagement.state.humanize, highlight: engagement.active? %></td>
             <% listed.each do |field| %>
               <%# herb:key field.id %>

@@ -11,7 +11,7 @@
   <%= link_to engagement_path(item.engagement), class: "txt-ink txt-align-start" do %>
     <strong><%= item.engagement.ref %> <%= item.engagement.title %></strong> <span class="txt-subtle">· <%= item.label %></span>
     <div class="txt-x-small txt-subtle">
-      <%= item.engagement.client.name %> · <%= money key == "drafts" ? item.items_total_cents : item.amount_cents %><%= " · sent #{time_ago_in_words(item.sent_at)} ago" if item.sent_at %>
+      <%= item.engagement.client.name %><% if priced_version?(item) %> · <%= money key == "drafts" ? item.items_total_cents : item.amount_cents %><% end %><%= " · sent #{time_ago_in_words(item.sent_at)} ago" if item.sent_at %>
     </div>
   <% end %>
 <% when "overdue_commitments", "due_soon" %>

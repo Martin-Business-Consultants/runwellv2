@@ -46,10 +46,12 @@
           <span class="record-form__label"><%= term(:engagement) %></span>
           <%= form.select :engagement_ref, engagement_options, {}, class: "input input--select full-width" %>
         </label>
-        <label class="flex flex-column gap-half">
-          <span class="record-form__label">Price</span>
-          <%= money_field form, :price_cents, value: 0, class: "input full-width", placeholder: "0.00" %>
-        </label>
+        <% if prices_on? %>
+          <label class="flex flex-column gap-half">
+            <span class="record-form__label">Price</span>
+            <%= money_field form, :price_cents, value: 0, class: "input full-width", placeholder: "0.00" %>
+          </label>
+        <% end %>
         <div class="flex gap-half">
           <button type="submit" class="btn btn--link">Add as scope</button>
           <button type="button" class="btn" data-herb-reset="triage">Cancel</button>

@@ -76,6 +76,7 @@ Rails.application.routes.draw do
       resource :pause, only: %i[create destroy], module: :connected_apps
     end
     resource :client_agent_approvals, only: :update
+    resource :prices, only: :update
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
       resource :failures, only: :destroy, module: :updates

@@ -4,7 +4,9 @@
 <header class="flex align-center gap-half">
   <strong><%= version.label %></strong>
   <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-  <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <% if priced_version?(version) %>
+    <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <% end %>
   <%= status_tag version.status.humanize, highlight: version.approved? %>
 </header>
 
@@ -28,7 +30,9 @@
       <li data-filter-target="item" class="flex align-center gap-half txt-small">
         <%= link_to item.description, item, class: "txt-ink txt-align-start overflow-ellipsis min-width" %>
         <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-        <span class="txt-nowrap"><%= money item.price_cents %></span>
+        <% if priced_version?(version) %>
+          <span class="txt-nowrap"><%= money item.price_cents %></span>
+        <% end %>
       </li>
     <% end %>
   </ul>

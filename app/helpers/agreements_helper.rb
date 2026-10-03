@@ -28,4 +28,24 @@ module AgreementsHelper
     else [ [ "Change order", "change_order" ] ]
     end
   end
+
+  # Money shows only where there is some, and only while the install keeps prices (Settings >
+  # Names, Setting#prices): an agreement of $0 items reads as a list of what's agreed, no total.
+  def prices_on? = Setting.current.prices?
+
+  def priced_version?(version)
+    return false unless prices_on?
+
+    items = version.sent? ? Array(agreement_snapshot(version)["items"]).map { it["price_cents"].to_i } : version.scope_items.map(&:price_cents)
+    items.any?(&:nonzero?) || version.amount_cents.to_i.nonzero? || agreement_total_cents(version).to_i.nonzero?
+  end
+
+  def priced_engagement?(engagement) = prices_on? && engagement.agreed_amount_cents.nonzero?
+
+  # "$1,200" or "$1,200 / period" for an engagement, or nothing when it has no price to show.
+  def engagement_amount(engagement, per: " / period")
+    return unless priced_engagement?(engagement)
+
+    money(engagement.agreed_amount_cents) + (engagement.recurring? ? per : "")
+  end
 end

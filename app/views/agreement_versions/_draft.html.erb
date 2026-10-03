@@ -6,7 +6,9 @@
 <header class="flex align-center gap-half">
   <strong><%= version.label %></strong>
   <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-  <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <% if priced_version?(version) %>
+    <span class="txt-small txt-nowrap"><%= version_amount(version) %></span>
+  <% end %>
   <%= status_tag "Draft" %>
 </header>
 
@@ -30,10 +32,12 @@
         <%= form.select :cadence, AgreementVersion::CADENCES.map { |cadence| [ cadence.humanize, cadence ] }, {}, class: "input input--select full-width txt-small" %>
       </label>
       <% if revision || version.initial? %>
-        <label class="flex flex-column gap-half flex-item-grow">
-          <span class="txt-x-small font-weight-bold"><%= revision ? "New price per period" : "Price per period" %></span>
-          <%= money_field form, :amount_cents, class: "input full-width txt-small", placeholder: "1,500.00" %>
-        </label>
+        <% if prices_on? %>
+          <label class="flex flex-column gap-half flex-item-grow">
+            <span class="txt-x-small font-weight-bold"><%= revision ? "New price per period" : "Price per period" %></span>
+            <%= money_field form, :amount_cents, class: "input full-width txt-small", placeholder: "1,500.00" %>
+          </label>
+        <% end %>
       <% end %>
     </div>
   <% end %>

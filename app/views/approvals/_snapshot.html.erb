@@ -24,25 +24,30 @@
   <% end %>
 
   <% items = snapshot["items"].to_a %>
+  <% priced = priced_version?(version) %>
   <% if items.any? %>
     <ul class="settings__scrollable-list">
       <% items.each_with_index do |item, index| %>
         <%# herb:key index %>
         <li class="flex align-center gap-half">
           <div class="txt-align-start min-width"><%= item["description"] %></div>
-          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-          <span class="txt-small txt-nowrap"><%= money item["price_cents"] %></span>
+          <% if priced %>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <span class="txt-small txt-nowrap"><%= money item["price_cents"] %></span>
+          <% end %>
         </li>
       <% end %>
-      <li class="flex align-center gap-half">
-        <strong class="txt-align-start">
-          <%= change && version.kind != "revision" ? "Change to price" : "Total" %><% if version.cadence.present? %> (<%= version.cadence.humanize.downcase %>)<% end %>
-        </strong>
-        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-        <strong class="txt-nowrap"><%= money agreement_total_cents(version) %></strong>
-      </li>
+      <% if priced %>
+        <li class="flex align-center gap-half">
+          <strong class="txt-align-start">
+            <%= change && version.kind != "revision" ? "Change to price" : "Total" %><% if version.cadence.present? %> (<%= version.cadence.humanize.downcase %>)<% end %>
+          </strong>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <strong class="txt-nowrap"><%= money agreement_total_cents(version) %></strong>
+        </li>
+      <% end %>
     </ul>
-  <% elsif version.cadence.present? %>
+  <% elsif version.cadence.present? && priced %>
     <p class="txt-small margin-none">New price: <strong><%= money agreement_total_cents(version) %></strong> <%= version.cadence.humanize.downcase %></p>
   <% end %>
 

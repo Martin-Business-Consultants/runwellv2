@@ -47,7 +47,7 @@
                     <li data-filter-target="item" class="flex align-center gap-half">
                       <%= link_to engagement, class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
                         <strong><%= engagement.ref %></strong> <%= engagement.title %>
-                        <span class="txt-x-small txt-subtle"><%= engagement.label_name %> · <%= money engagement.agreed_amount_cents %><%= " / period" if engagement.recurring? %></span>
+                        <span class="txt-x-small txt-subtle"><%= [ engagement.label_name, engagement_amount(engagement) ].compact.join(" · ") %></span>
                       <% end %>
                       <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
                       <%= status_tag engagement.state.humanize, highlight: engagement.active? %>
