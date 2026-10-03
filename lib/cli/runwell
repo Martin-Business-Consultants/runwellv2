@@ -485,6 +485,12 @@ def skill_text = <<~MARKDOWN
   Plugins add workflows, like turning a client call's notes into work. `runwell me --field workflows` lists
   the ones switched on here, each with its steps. Follow them when the person asks for one.
 
+  ## Building on Runwell
+
+  - A theme ("make Runwell look like our brand"): `runwell theme_brief --field brief` gives the design tokens and rules; write CSS that sets only tokens, show it, then `runwell update_appearance --setting.custom_css @theme.css` (owners).
+  - A plugin (a new feature of its own): start from github.com/Martin-Business-Consultants/runwell-plugin-template (`bin/rename "Name"`), keep to docs/plugin-contract.md in Runwell's repository, and read the template's AGENTS.md.
+  - Words: Settings › Names renames clients, engagements, work and the rest (`runwell me` shows the current ones). Use the install's words with the person.
+
   ## Routines people ask for
 
   - "Every morning, go through `runwell briefing` and tell me what needs me, most urgent first."

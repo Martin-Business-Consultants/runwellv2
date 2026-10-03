@@ -391,59 +391,29 @@ on boot (`PluginRestoreJob`). From the shell: `plugins:install[owner/repo or key
 `plugins:update[key]`, `plugins:remove[key]`, `plugins:list`, and `plugins:link[../path]` to work
 on one (`docs/plugins.md`). Tests never load plugins. A plugin owns its tables (prefixed with its
 key, e.g. `time_tracking_entries`), points at core records by id, and never changes core tables.
-The core never names a plugin; remove it and the app runs as before. Extension points
-(`lib/runwell/plugins.rb`):
+The core never names a plugin; remove it and the app runs as before.
 
-- View slots: `plugin_slots(:nav_actions)` (a button in the nav's foot, beside the theme toggle),
-  `plugin_slots(:client_panel, client:)`, `plugin_slots(:engagement_panel, engagement:)`,
-  `plugin_slots(:todo_panel, todo:)`, `plugin_slots(:email_inbound)` (Settings > Email, how requests'
-  mail comes in), and in the portal `plugin_slots(:portal_home, client:)`
-  and `plugin_slots(:portal_engagement_panel, engagement:)`, and on the client's approval page
-  `plugin_slots(:approval_page, version:, link:)`;
-  register with `Runwell::Plugins.slot name, key, partial`
-- Nav: `Runwell::Plugins.nav key, label, -> { path }`
-- Home: `Runwell::Plugins.briefing key, title, partial:, items: ->(user) { … }`
-- Models: `ActiveSupport.on_load(:runwell_client | :runwell_engagement | :runwell_todo | :runwell_user) { has_many … }`
-- Quick actions: `Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, context:`
-- Permissions: `Runwell::Plugins.permission key, :name, name:, roles:` (checked with `can?`)
-- Portal: `Runwell::Plugins.portal_nav key, label, -> { path or nil }` (nil hides it). A
-  plugin's portal pages inherit `Portal::BaseController`, so they only see the signed-in
-  contact's client
-- Settings: `Runwell::Plugins.settings key, label, -> { path }` gives the plugin a settings page,
-  opened from the gear on its card in Settings > Plugins (a plugin without one gets a details page,
-  `settings/plugins/:key`); its controller says `require_permission :manage_settings` and renders
-  `settings/header` with `current: key`, which nests the page under Plugins in the Settings sidebar. Keys, tokens and
-  secrets are `encrypts` columns shown with `secret_field form, :api_key`: masked, with an eye to
-  reveal
-- Nightly: `Runwell::Plugins.nightly key, -> { … }`, run by `PluginsNightlyJob`
-  (`config/recurring.yml`); one plugin failing doesn't stop the others
-- Stylesheets: `Runwell::Plugins.stylesheet key, "name"` from the engine's
-  `app/assets/stylesheets`, linked while the plugin is on
-- Events: every `Event` is published as `"event.runwell"` (`event:`) from a job
-  (`EventPublishJob`), never inside the request: read who did it from the event (`actor_user`),
-  since there's no `Current.user` there
-- Agent workflows: `Runwell::Plugins.agent_workflow key, title, steps` (a few steps naming the
-  plugin's tools), appended to the MCP server's instructions and listed by `me` (`workflows`),
-  which the CLI's skill points at
-
-Each plugin registers a manifest first:
-`Runwell::Plugins.register :key, name:, version:, description:, author:, enabled_by_default:, requires:, homepage:`
-(`requires:` is a gem requirement on the core's `VERSION`; Settings > Plugins flags a mismatch).
-Plugins are off until the owner switches them on in Settings > Plugins (state in
-`Setting#plugin_states`), unless the manifest says `enabled_by_default: true`. Everything a
-plugin registers is keyed by its key, and the core only renders registered things for
-plugins that are on; a plugin's controllers and event subscribers check
-`Runwell::Plugins.enabled?(key)` themselves. Every plugin Runwell publishes is off by default.
+**`docs/plugin-contract.md` is the contract**: every extension point (`lib/runwell/plugins.rb`:
+manifest, slots and their locals, nav, home, quick actions, permissions, portal, settings pages,
+nightly tasks, stylesheets, agent briefs and workflows), the model load hooks, the event kinds
+published as `"event.runwell"` (from `EventPublishJob`, so subscribers read the actor from the
+event), the helpers and partials a plugin may use, and the version each arrived in. Changing or
+adding one means updating that page in the same commit (a new one says `Since` the next
+release); removing or changing a stable one waits for a major version. Plugins are off until the
+owner switches them on (`Setting#plugin_states`); the core renders only what's registered by
+plugins that are on, and a plugin's controllers and subscribers check
+`Runwell::Plugins.enabled?(key)`. A settings page nests under Plugins with
+`render "settings/header", current: key`, and keeps keys in `encrypts` columns shown with
+`secret_field`.
 
 Register in the engine's `config.to_prepare`; add routes to the app's route set from an
 initializer (`app.routes.append { scope "time", module: "time_tracking", as: "time_tracking" … }`)
 rather than mounting an isolated engine, so the core layout's helpers work on plugin pages.
 Migrations need nothing: the core runs each installed plugin's `db/migrate`. Changes to an engine's `engine.rb`
-(registrations, initializers) need a server restart; they aren't reloaded. `runwell-time-tracking` is the
-reference: minutes logged on
-clients, engagements and todos (a polymorphic `trackable`, like notes and documents, with the
-engagement and client kept alongside so totals roll up), totals on engagements, a weekly timesheet, and "Log time" in the quick action tray.
-No live timers.
+(registrations, initializers) need a server restart; they aren't reloaded. A new plugin starts from
+`Martin-Business-Consultants/runwell-plugin-template` (a working example of the contract, its own
+AGENTS.md, `bin/rename`). The plugins Runwell publishes, and which is the reference for what, are
+described in `docs/plugins.md`.
 
 ## Quick actions
 
@@ -485,111 +455,10 @@ portal request, so switching access off or archiving a contact signs them out at
 a client sees is decided per record (`client_visible` on work and documents); there are no
 client roles.
 
-`runwell-google-ads` is the reference for a plugin that reaches the portal: read-only Google
-Ads reporting. The owner connects their own Google API app in Settings > Google Ads (OAuth,
-credentials encrypted with Active Record encryption); an engagement links to an ad account
-(`GoogleAds::Link`, permission `link_ad_accounts`); a nightly sync copies monthly and daily
-figures; staff and the client see the same report (server-drawn SVG charts,
-`GoogleAds::ReportsHelper`), and an account that stops serving shows on home and emails the
-listed addresses. No management fee: the core has no money.
-
-`runwell-outsend` is the reference for a plugin that changes how the core does something
-without a hook: a Mail interceptor routes each message through Outsend while the plugin is on
-and has a key (Settings > Outsend, encrypted), so the core needs no mail extension point.
-`runwell-cloudflare` is the reference for a plugin with middleware and no tables: inserted
-before `ActionDispatch::SSL`, it trusts `CF-Connecting-IP` only when the connection came from
-a Cloudflare range (bundled list, refreshed nightly) and marks the request https.
-
-`runwell-coding` (Code) is the reference for a plugin that takes webhooks: git repositories
-linked to clients, engagements and todos (`Coding::Repository`, a polymorphic `linkable`; a
-todo inherits its engagement's repos and an engagement its client's). `checkout_work` hands an
-agent the clone commands, branch (`p-4/58-slug`) and agreed scope; `log_progress`,
-`finish_work` and `flag_out_of_scope` (a request to triage) report back. Connected to GitHub in
-Settings > Code (OAuth), a signed public endpoint (`/code/github/webhooks`) brings in pull
-requests and checks on work (a merge can mark the todo done), deploys (production ones on the
-engagement timeline, and in the portal when shared), labelled issues as requests, and commits,
-from which time is suggested when Time tracking is on. A deactivated person who can still reach
-a linked repo shows on home. It never pushes code or stores secrets.
-
-`runwell-factory` (Factory) is the reference for a plugin that hands work to agents running
-unattended. A person queues a todo (`Factory::Item`, with optional instructions) once it is ready
-(`Factory::Readiness`: approved scope, a description or scope item, a linked repository from the
-Code plugin, a client that allows it), or an approval queues its engagement's ready work
-(`queue_on_approval`). A runner claims the next item with a lease (`claim_work`, earliest due first,
-no priorities), renews it (`heartbeat_run`) and ends it (`finish_run`); a `Factory::Run` records the
-runner, branch, pull request, summary and cost. Success puts the todo in review; failure frees it
-for another attempt or blocks it once `max_attempts` are used; a lapsed lease abandons the run.
-Limits live in `Factory::Policy` (runs at once, time, attempts, monthly budget, blocked clients).
-What the agent is told is `Factory::Task`, served with each run. The runner is a separate Rust
-binary in the plugin's `runner/` that talks only to `/mcp`; it never merges.
-
-`runwell-quickbooks` is where money lives, since the core holds none. A client links to a
-QuickBooks customer by id (`Quickbooks::Customer`). A service links to a recurring invoice
-template (`Quickbooks::RecurringLink`) that Runwell keeps in step: an approved revision
-changes it and closing the service stops it (both from `"event.runwell"`, run in jobs), and
-the nightly sync flags a template edited in QuickBooks so it no longer matches (`drift`).
-Fixed-price work is invoiced from its panel (`Quickbooks::WorkOrderBilling`), in full or as a
-deposit whose balance can be armed to send when the engagement is closed; QuickBooks emails
-each with its pay link, and the portal lists open invoices with a Pay button. Every write to
-the books is a named method on `Quickbooks::Api`. `runwell-reporting` has no tables: it reads
-the QuickBooks mirror (billed, collected, aging, by client, recurring coverage, approved but
-not invoiced) and QuickBooks' profit and loss, for `view_financials`. A nav path lambda may
-return nil to hide its link.
-
-`runwell-qa` (QA) is the reference for a plugin that adds a rule to a core model. A client's
-checks (`Qa::Check`: an email, page, webhook or form) hold its source of truth as expectations
-(`Qa::Expectation`: From address is exactly …, To is this list, the page shows the phone, never
-shows another market's number, a promo line until its `expires_on`), each with a key fixed at
-creation. A run (`Qa::Run`, immutable, results per expectation) comes from a person, an agent
-(`record_qa_test`), the nightly page fetch (`Qa::PageFetch`, includes / excludes, phones matched in any
-format) or the site itself posting to the check's public report URL (`/qa/report/:token`). A
-check's state is derived from the latest result per expectation: failing, due (never tested,
-older than `every_days`, or before a retest that a production deploy, a fix or a changed value asks for),
-passing. A failed result opens a `Qa::Issue` (where, steps, expected, actual; found live when the
-check is live, an escape); fixing it needs a root cause, and someone else or the next passing
-test verifies it. A `Qa::Gate` puts a check on a todo: a validation added through
-`:runwell_todo` keeps it from done until the check passes in tests since it last went to review,
-by someone other than its owner (board drops that a rule refuses refresh the board with the reason).
-`bin/rails "qa:import[path/to/file.yml]"` loads a client's checks from a file (the plugin's `examples/acme_storage.yml`).
-
-`runwell-account-management` (Account management) is the working system of whoever runs client
-relationships, switched on per person (`AccountManagement::Member`, Settings > Account management);
-each chooses every client or a group (My clients), and the clients they lead or back up are always
-theirs. Its standard is `AccountManagement::Playbook` (hours ahead, cadences, targets, checklists).
-Each client has a lead (`Lead`) with a backup who covers while the lead is away, a contact cadence
-and an optional client digest. Today (`Cockpit`) lists what needs someone across their clients,
-overdue first, with snoozes. Every contact is logged (`Touch`, the Contact quick action) and, with
-meetings, non-internal notes, requests, agreements and digests, says when a client last heard from
-us (`Pulse`); requests are answered within a business day (`Replies`); what we're waiting on the
-client for can be nudged (`Waiting`, a previewed email logged as contact). A meeting holds the
-agenda, due `AGENDA_AHEAD` before it starts, and the recap, due `RECAP_WITHIN` after, both
-draftable from the records (`Meeting::AgendaDraft`); sending stamps the time for good. Rhythms
-(`MeetingSeries`) always plan the next meeting (nightly). Each client's health is set weekly
-(`HealthCheck`), who's who is recorded (`ContactProfile`), and onboarding and offboarding are
-`Checklist`s that tick themselves where the records can tell. The access register (`Access`) records
-a client's outside accounts. A lead's `WeeklyUpdate` is due by the end of Friday, drafted from the
-week's records; `Digest` is the client-facing half. `Scorecard` counts only what's settled:
-agendas and recaps on time, commitments by their date, updates by Friday, requests answered and
-clients in touch, each with the records that missed. Home (`Attention`) warns before a standard is
-missed. After a call, an AI harness debriefs it (the plugin's agent workflow): `debrief_call` gives
-the client's open engagements and agreed scope, its people, and the team with each person's
-expertise tags (`Expertise`, Accounts > People) and open work; `record_call` (preview first) makes
-the call note, the contact, todos on the right engagements with owners, commitments, requests and
-health at once (`Call::Plan`, linked by `Call`). Its guide is `docs/guide.md` in its repository,
-and Accounts > Guide.
-
-`runwell-stripe-billing` (Stripe) takes payment for what was approved. On `agreement.approved` it
-makes a `StripeBilling::Charge` per version, in the request, so the approval page
-(`:approval_page`) offers the link straight away and the client is emailed it: a service's first
-approval starts a subscription on the cadence, a later revision or add-on moves that subscription
-to the new amount, fixed work is a one-time link for the initial price and then each change
-order's difference. Each charge has a `paid` flag, set by Stripe's signed webhook or recorded with
-a note by someone with `manage_billing` (which switches the link off). A service is billed once
-(`StripeBilling::Subscription` is unique per engagement, one open subscription link, a second
-subscription cancelled at once), and Stripe and QuickBooks each refuse a service the other bills.
-Stripe connects with OAuth (Stripe Connect) through a broker on the install holding the platform's
-keys (`STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY`), which hands each install its token
-server to server against a PKCE-style verifier.
+The plugins Runwell publishes (Account management, Cloudflare, Code, Factory, Google Ads, Outsend,
+QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
+and what it's the reference for (portal pages, webhooks, middleware, unattended agents, money,
+model rules) is in `docs/plugins.md`. Read it before changing a contract they use.
 
 ## People and permissions
 
