@@ -17,15 +17,16 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Staff auth: Rails' generated authentication (`Session`, `User`). Sign-up only makes
   the first owner; everyone else joins by invitation. Clients never have passwords:
   portal sign-in and approvals are signed, expiring links
-- Time zones: stored in UTC, shown in the agency's zone (`config.time_zone`, Eastern unless
-  `TIME_ZONE` says otherwise). A client may have its own (`Client#time_zone`, blank = ours); its
+- Time zones: stored in UTC, shown in the agency's zone (`Setting.zone`: Settings > Address, else
+  `TIME_ZONE`, else Eastern; `ApplicationController` and `ApplicationJob` run inside it). A client may have its own (`Client#time_zone`, blank = ours); its
   portal (`Portal::BaseController`), approval pages and emails run inside `client.in_time_zone`.
   Staff pages and agent input stay in the agency's zone. A record read before the zone switched
   keeps the old zone, so client-facing templates call `.in_time_zone` on times they show
 - Solid Queue for everything slow: mail, plugin changes, updates, search indexing, events
   to plugins, Check now and the test email (nothing waits on SMTP or GitHub in a request); letter_opener_web at `/letter_opener` in development. Production mail
-  is any SMTP server from the environment (`SMTP_*`, see `docs/install.md`); the Outsend
-  plugin routes it through Outsend instead, per message, with no restart. The sender is
+  is any SMTP server from the environment (`SMTP_*`, see `docs/install.md`) or, when none, the one
+  saved in Settings > Email (`Setting#smtp_settings`, password encrypted, `Runwell::MailDelivery`);
+  the Outsend plugin routes it through Outsend instead, per message, with no restart. The sender is
   `Setting#mail_sender` (Settings > Email), falling back to `MAIL_FROM`, whichever way it goes out
 - One install per deployment, its own data directory (`RUNWELL_DATA_DIR`: databases and files).
   Docker with Kamal by default (`config/deploy.yml`); a plain install is `bin/install` and
@@ -75,7 +76,9 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    hides it, the first-run checklist (`Setup`, `briefings/_setup`) checks itself off from what
    exists
 
-Rules the code enforces: sent versions, approvals and events are immutable;
+Rules the code enforces: sent versions, approvals and events are immutable (the one exception:
+an owner erasing a closed engagement for good, `Engagement#erase!`, typing its ref; the client
+keeps an `engagement.erased` event);
 every event has a source; internal estimates and estimate notes never reach a
 client (portal and approval pages render `AgreementVersion#snapshot`, never live
 scope items).

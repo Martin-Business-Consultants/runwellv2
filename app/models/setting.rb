@@ -41,6 +41,32 @@ class Setting < ApplicationRecord
     Current.settings ||= first_or_create!
   end
 
+  # The agency's time zone: what staff pages, agent answers and emails use (a client may have its
+  # own, Client#time_zone). Saved here it wins over TIME_ZONE in the environment, which is the default.
+  validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) }, message: "isn’t a time zone we know" }, allow_nil: true
+  normalizes :time_zone, with: ->(value) { value.presence && (ActiveSupport::TimeZone::MAPPING.key(value) || value) }
+
+  def self.zone = ActiveSupport::TimeZone[current.time_zone.presence || Time.zone_default.name] || Time.zone_default
+  def self.time_zone_set? = current.time_zone.present? || ENV["TIME_ZONE"].present?
+
+  # The outgoing mail server, when the environment names none (SMTP_* wins): Settings > Email.
+  SMTP_SECURITIES = { "starttls" => "STARTTLS (usually port 587)", "tls" => "TLS (usually port 465)", "none" => "None" }.freeze
+  encrypts :smtp_password
+  normalizes :smtp_address, :smtp_username, with: ->(value) { value.to_s.strip.presence }
+  validates :smtp_security, inclusion: { in: SMTP_SECURITIES.keys }
+  validates :smtp_port, numericality: { only_integer: true, greater_than: 0, less_than: 65_536 }, allow_nil: true
+
+  def self.smtp_from_environment? = ENV["SMTP_ADDRESS"].present?
+
+  # Settings for Mail's SMTP delivery from what's saved here, or nil when nothing is.
+  def smtp_settings
+    return if smtp_address.blank?
+
+    { address: smtp_address, port: smtp_port || (smtp_security == "tls" ? 465 : 587), user_name: smtp_username, password: smtp_password.presence,
+      authentication: (:plain if smtp_username.present?), enable_starttls_auto: smtp_security == "starttls", tls: smtp_security == "tls",
+      open_timeout: 5, read_timeout: 10 }.compact
+  end
+
   # How requests' mail reaches Runwell (Action Mailbox): the service forwarding it, and the password
   # it signs in with. The server's environment wins (INBOUND_EMAIL_INGRESS, RAILS_INBOUND_EMAIL_PASSWORD);
   # otherwise Settings > Email or a plugin (Cloudflare) sets them here, with no restart.

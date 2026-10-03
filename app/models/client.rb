@@ -26,9 +26,9 @@ class Client < ApplicationRecord
     STATUSES.map { [ "#{it.humanize} (#{counts.fetch(it, 0)})", it ] } + [ [ "All (#{counts.values.sum})", "all" ] ]
   end
 
-  # Where the client is: its own zone, or the agency's (config.time_zone) when it has none.
-  def zone = ActiveSupport::TimeZone[time_zone || Time.zone_default.name]
-  def own_time_zone? = time_zone.present? && zone.name != Time.zone_default.name
+  # Where the client is: its own zone, or the agency's (Setting.zone) when it has none.
+  def zone = time_zone ? ActiveSupport::TimeZone[time_zone] : Setting.zone
+  def own_time_zone? = time_zone.present? && zone.name != Setting.zone.name
 
   # Runs the block with times shown in the client's zone: its portal, approval pages and emails.
   def in_time_zone(&) = Time.use_zone(zone, &)

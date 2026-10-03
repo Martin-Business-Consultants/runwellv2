@@ -58,6 +58,7 @@ Rails.application.routes.draw do
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails
       resource :inbound, only: :update, module: :emails
+      resource :smtp, only: :update, module: :emails
     end
     resources :fields, only: %i[index create update destroy]
     namespace :plugins do
@@ -111,6 +112,7 @@ Rails.application.routes.draw do
 
   resources :engagements, param: :ref do
     member { post :close }
+    resource :erasure, only: :create, module: :engagements
     resources :agreement_versions, only: %i[create update destroy], shallow: true do
       member do
         post :send_out

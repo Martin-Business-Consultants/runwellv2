@@ -30,6 +30,9 @@ module Runwellv2
     # (a Rails name like "Pacific Time (US & Canada)" or an IANA one like "America/Chicago"). A client
     # with its own zone (Client#time_zone) sees its portal, approval pages and emails in that zone.
     config.time_zone = ENV.fetch("TIME_ZONE", "Eastern Time (US & Canada)")
+
+    # Outgoing mail through the server saved in Settings > Email when the environment names none.
+    config.action_mailer.interceptors = %w[Runwell::MailDelivery]
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

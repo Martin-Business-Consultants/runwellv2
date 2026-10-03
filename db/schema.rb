@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_040000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -468,6 +468,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_020000) do
     t.boolean "client_agent_approvals", default: true, null: false
     t.string "inbound_ingress"
     t.text "inbound_password"
+    t.string "time_zone"
+    t.string "smtp_address"
+    t.integer "smtp_port"
+    t.string "smtp_username"
+    t.text "smtp_password"
+    t.string "smtp_security", default: "starttls", null: false
   end
 
   create_table "todos", force: :cascade do |t|

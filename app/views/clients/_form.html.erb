@@ -16,7 +16,7 @@
 
     <label class="record-form__field">
       <span class="record-form__label">Time zone</span>
-      <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Time.zone_default.name})" }, class: "input input--select full-width" %>
+      <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" }, class: "input input--select full-width" %>
       <span class="record-form__hint">Their portal, approval pages and emails show times in it.</span>
     </label>
   </div>

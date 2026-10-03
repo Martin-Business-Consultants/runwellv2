@@ -33,16 +33,53 @@
         <h2 class="divider">How it goes out</h2>
       </header>
       <p class="txt-small margin-none">
-        <% case ActionMailer::Base.delivery_method %>
-        <% when :smtp %>
-          Through the mail server at <%= ActionMailer::Base.smtp_settings[:address] %>, from the server’s SMTP settings.
-        <% when :letter_opener_web %>
+        <% if ActionMailer::Base.delivery_method == :letter_opener_web %>
           In development, mail opens in <%= link_to "letter_opener", "/letter_opener", class: "txt-link" %> instead of being sent.
+        <% elsif Setting.smtp_from_environment? %>
+          Through the mail server at <%= ENV["SMTP_ADDRESS"] %>, from the server’s SMTP settings.
+        <% elsif @setting.smtp_address.present? %>
+          Through the mail server at <%= @setting.smtp_address %>, saved below.
         <% else %>
-          The server has no SMTP settings (SMTP_ADDRESS), so mail isn’t sent.
+          No mail server yet, so mail isn’t sent. Give one below, or let a plugin such as Outsend send it (<%= link_to "Plugins", settings_plugins_path, class: "txt-link" %>).
         <% end %>
-        A plugin such as Outsend can send it instead; see <%= link_to "Plugins", settings_plugins_path, class: "txt-link" %>.
+        <% if Setting.smtp_from_environment? || @setting.smtp_address.present? %>
+          A plugin such as Outsend, when it’s on, sends instead.
+        <% end %>
       </p>
+
+      <% unless Setting.smtp_from_environment? %>
+        <%= tag.details class: "txt-align-start", open: @setting.smtp_address.blank? do %>
+          <summary class="btn txt-small"><%= @setting.smtp_address.present? ? "Change the mail server" : "Add a mail server" %></summary>
+          <%= form_with model: @setting, url: settings_email_smtp_path, method: :patch, scope: :smtp, class: "flex flex-column gap txt-small margin-block-start" do |form| %>
+            <div class="flex flex-wrap gap-half">
+              <label class="flex flex-column gap-half flex-item-grow">
+                <span class="font-weight-bold">Server</span>
+                <%= form.text_field :smtp_address, value: @setting.smtp_address, class: "input full-width", autocomplete: "off", placeholder: "smtp.example.com" %>
+              </label>
+              <label class="flex flex-column gap-half">
+                <span class="font-weight-bold">Port</span>
+                <%= form.number_field :smtp_port, value: @setting.smtp_port, class: "input", placeholder: "587", min: 1, max: 65535 %>
+              </label>
+              <label class="flex flex-column gap-half">
+                <span class="font-weight-bold">Security</span>
+                <%= form.select :smtp_security, Setting::SMTP_SECURITIES.invert, { selected: @setting.smtp_security }, class: "input input--select" %>
+              </label>
+            </div>
+            <div class="flex flex-wrap gap-half">
+              <label class="flex flex-column gap-half flex-item-grow">
+                <span class="font-weight-bold">Username</span>
+                <%= form.text_field :smtp_username, value: @setting.smtp_username, class: "input full-width", autocomplete: "off" %>
+              </label>
+              <label class="flex flex-column gap-half flex-item-grow">
+                <span class="font-weight-bold">Password</span>
+                <%= secret_field form, :smtp_password, placeholder: (@setting.smtp_password.present? ? "Saved: leave blank to keep it" : "") %>
+              </label>
+            </div>
+            <span class="txt-x-small txt-subtle">The password is stored encrypted. Save, then send a test email below to check it.</span>
+            <button type="submit" class="btn btn--link center">Save</button>
+          <% end %>
+        <% end %>
+      <% end %>
 
       <%= form_with url: settings_email_test_message_path, class: "flex flex-wrap align-center gap-half txt-small" do |form| %>
         <%= form.email_field :to, value: Current.user.email_address, class: "input", autocomplete: "off", placeholder: "you@agency.example" %>
