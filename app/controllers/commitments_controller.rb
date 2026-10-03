@@ -23,7 +23,9 @@ class CommitmentsController < ApplicationController
     scope = @state == "resolved" ? Commitment.where.not(resolution: nil).order(resolved_at: :desc) : Commitment.open.ordered
     scope = scope.where(owner_kind: @owner_kind) unless @owner_kind == "all"
     @column_widths = column_widths(scope, :description, :client) if @view == "table"
-    @commitments = paginate sorted(scope.includes(:client, :engagement, :user, :contact))
+    scope = sorted(scope.includes(:client, :engagement, :user, :contact))
+    # Open ones show whole, in their two lanes (waiting on them, you promised); resolved ones page.
+    @commitments = @state == "open" && request.format.html? ? scope.to_a : paginate(scope)
   end
 
   def create
@@ -34,7 +36,7 @@ class CommitmentsController < ApplicationController
     commitment.engagement = parent if parent.is_a?(Engagement)
     if commitment.save
       commitment.record_event!("commitment.added")
-      redirect_back fallback_location: parent, notice: "Commitment added."
+      redirect_back fallback_location: parent, notice: "#{Setting.current.term(:commitment)} added: #{commitment.owner_name} by #{I18n.l(commitment.due_on, format: :short)}."
     else
       redirect_back fallback_location: parent, alert: commitment.errors.full_messages.to_sentence
     end

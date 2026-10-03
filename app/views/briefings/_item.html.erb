@@ -14,12 +14,12 @@
       <%= item.engagement.client.name %><% if priced_version?(item) %> · <%= money key == "drafts" ? item.items_total_cents : item.amount_cents %><% end %><%= " · sent #{time_ago_in_words(item.sent_at)} ago" if item.sent_at %>
     </div>
   <% end %>
-<% when "overdue_commitments", "due_soon" %>
+<% when "waiting_on_them", "you_promised" %>
   <div class="flex flex-wrap align-center gap-half">
     <div class="txt-align-start min-width flex-item-grow">
-      <strong><%= item.description %></strong>
+      <span><%= commitment_sentence(item) %></span>
       <div class="txt-x-small txt-subtle">
-        <%= commitment_owner item %> · <%= item.client.name %><%= " · #{item.engagement.ref}" if item.engagement %> · due <%= l item.due_on, format: :short %>
+        <%= item.client.name %><%= " · #{item.engagement.ref}" if item.engagement %> · <%= commitment_when(item) %>
       </div>
     </div>
     <% if item.overdue? %>

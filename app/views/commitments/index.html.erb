@@ -1,70 +1,94 @@
-<% @page_title = "Commitments" %>
+<% @page_title = term(:commitment, count: 2) %>
+<%# Commitments: promises with a date between you and the people you work for. Open ones in two
+    lanes, what they owe you (waiting on them) and what you've promised them; resolved ones as one
+    list, a page at a time. %>
 
 <% content_for :index_filters do %>
   <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
         options: [ [ "Open", "open" ], [ "Resolved", "resolved" ] ] %>
-  <%= render "layouts/shared/quick_filter", title: "Whose…", param: :owner_kind, current: @owner_kind,
-        options: [ [ "Ours and theirs", "all" ], [ "Ours", "us" ], [ "Theirs", "client" ] ] %>
 <% end %>
 <% if @view == "table" %>
   <% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_commitments_path, noun: "commitments", message: "Only open ones are deleted; resolved ones stay as history and are skipped.") : nil) do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_commitments_path, noun: term(:commitment, count: 2).downcase, message: "Only open ones are deleted; resolved ones stay as history and are skipped.") : nil) do %>
     <%= bulk_menu bulk_commitments_resolution_path, method: :post, name: "resolution", label: "Resolve as", choices: Commitment::RESOLUTIONS.map { [ it.humanize, it ] } %>
   <% end %>
   <% end %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view %>
 
-<% if @view == "cards" %>
+<% if @state == "open" %>
+  <% theirs, ours = commitment_lanes(@commitments) %>
+  <% lanes = [ [ "theirs", waiting_on_title, theirs, "Nothing anyone has promised you is open." ], [ "ours", "You promised", ours, "Nothing you’ve promised is open." ] ] %>
+  <% if @view == "cards" %>
+    <% lanes.each do |key, title, items, empty| %>
+      <%# herb:key key %>
+      <section class="commitment-index-lane">
+        <h2 class="commitment-lane__title"><%= title %> <span class="txt-subtle"><%= items.size %></span></h2>
+        <% if items.any? %>
+          <section class="cards cards--grid">
+            <div class="cards__list">
+              <% items.each do |commitment| %>
+                <%# herb:key commitment.id %>
+                <%= render "layouts/shared/card", path: commitment.engagement ? engagement_path(commitment.engagement) : client_path(commitment.client),
+                      title: "#{commitment_promiser(commitment)} will #{commitment_action(commitment)}", id_label: commitment.engagement&.ref, context: commitment.client.name,
+                      meta: [ commitment_when(commitment).upcase_first, commitment.source.presence ].compact,
+                      status: (commitment.overdue? ? "Overdue" : "Open"), highlight: false %>
+              <% end %>
+            </div>
+          </section>
+        <% else %>
+          <p class="txt-small txt-subtle margin-none"><%= empty %></p>
+        <% end %>
+      </section>
+    <% end %>
+  <% else %>
+    <section class="panel center index-table">
+      <table class="data-table data-table--fixed">
+        <%= table_colgroup :select, [ [ @column_widths[:description], 10 ].max + 12, term(:commitment) ], :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
+        <thead>
+          <tr><%= bulk_select_all_header %><%= sortable_th term(:commitment), :description %><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
+        </thead>
+        <% lanes.each do |key, title, items, empty| %>
+          <%# herb:key key %>
+          <tbody class="commitment-table-lane">
+            <tr class="data-table__group"><th colspan="7"><%= title %> <span class="txt-subtle"><%= items.size %></span></th></tr>
+            <% items.each do |commitment| %>
+              <%# herb:key commitment.id %>
+              <%= render "commitments/row", commitment: commitment %>
+            <% end %>
+            <% if items.empty? %>
+              <tr><td colspan="7" class="txt-subtle"><%= empty %></td></tr>
+            <% end %>
+          </tbody>
+        <% end %>
+      </table>
+    </section>
+  <% end %>
+<% elsif @view == "cards" %>
   <section class="cards cards--grid">
     <div class="cards__list">
       <%= with_automatic_pagination :commitments_cards, @page do %>
         <% @commitments.each do |commitment| %>
           <%# herb:key commitment.id %>
-          <% status = commitment.overdue? ? "Overdue" : (commitment.resolution&.humanize || "Open") %>
           <%= render "layouts/shared/card", path: commitment.engagement ? engagement_path(commitment.engagement) : client_path(commitment.client),
-                title: commitment.description, id_label: commitment.engagement&.ref, context: commitment.client.name,
-                meta: [ safe_join([ commitment.owner_kind == "us" ? "Ours: " : "Theirs: ", commitment_owner(commitment) ]), "Due " + l(commitment.due_on, format: :short) ],
-                status: status, highlight: commitment.resolution == "done" %>
+                title: "#{commitment_promiser(commitment)} will #{commitment_action(commitment)}", id_label: commitment.engagement&.ref, context: commitment.client.name,
+                meta: [ commitment_when(commitment).upcase_first, commitment.source.presence ].compact,
+                status: commitment.resolution.humanize, highlight: commitment.resolution == "done" %>
         <% end %>
       <% end %>
     </div>
   </section>
 <% else %>
   <section class="panel center index-table">
-
     <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:description], "Commitment" ], :text, :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
+      <%= table_colgroup :select, [ [ @column_widths[:description], 10 ].max + 12, term(:commitment) ], :age, [ @column_widths[:client] + 6, term(:client) ], :status, :button, :actions %>
       <thead>
-        <tr><%= bulk_select_all_header %><%= sortable_th "Commitment", :description %><th>Whose</th><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
+        <tr><%= bulk_select_all_header %><%= sortable_th term(:commitment), :description %><%= sortable_th "Due", :due %><%= sortable_th term(:client), :client %><%= sortable_th "Status", :status %><th></th><th></th></tr>
       </thead>
       <tbody id="<%= pagination_frame_id_for(:commitments_rows, @page.number) %>">
         <% @commitments.each do |commitment| %>
           <%# herb:key commitment.id %>
-          <tr data-filter-target="item">
-            <%= bulk_select_cell commitment, commitment.description.truncate(40) %>
-            <td class="font-weight-bold"><%= commitment.description %></td>
-            <td class="txt-subtle"><%= commitment.owner_kind == "us" ? "Ours" : "Theirs" %>: <%= commitment_owner commitment %></td>
-            <td class="txt-nowrap"><%= l commitment.due_on, format: :short %></td>
-            <td class="txt-subtle">
-              <%= link_to commitment.client.name, commitment.client, class: "txt-ink" %><% if commitment.engagement %> · <%= link_to commitment.engagement.ref, commitment.engagement, class: "txt-ink" %><% end %>
-            </td>
-            <td><%= status_tag(commitment.overdue? ? "Overdue" : (commitment.resolution&.humanize || "Open"), highlight: commitment.resolution == "done") %></td>
-            <td>
-              <% if commitment.open? %>
-                <details>
-                  <summary class="btn txt-x-small">Resolve</summary>
-                  <%= form_with url: resolve_commitment_path(commitment), class: "flex flex-wrap align-center gap-half txt-small margin-block-start-half", data: { controller: "form" } do |form| %>
-                    <%= form.text_field :note, class: "input", autocomplete: "off", placeholder: "Note (optional)" %>
-                    <button type="submit" name="resolution" value="done" class="btn btn--link">Done</button>
-                    <button type="submit" name="resolution" value="missed" class="btn">Missed</button>
-                    <button type="submit" name="resolution" value="dropped" class="btn">Dropped</button>
-                  <% end %>
-                </details>
-              <% end %>
-            </td>
-            <%= render "layouts/shared/row_actions", name: "this commitment", edit_path: (edit_commitment_path(commitment) if commitment.open?), delete_path: (commitment_path(commitment) if commitment.open?) %>
-          </tr>
+          <%= render "commitments/row", commitment: commitment %>
         <% end %>
       </tbody>
     </table>
@@ -74,9 +98,9 @@
 
 <% if @commitments.none? %>
   <div class="blank-slate">
-    <%= @state == "open" ? "No open commitments." : "Nothing resolved yet." %>
+    <%= @state == "open" ? "No open #{term(:commitment, count: 2).downcase}." : "Nothing resolved yet." %>
     <% if Commitment.none? %>
-      A commitment is a dated promise, ours or the client’s. Add one from a <%= term(:client).downcase %> or <%= term(:engagement).downcase %> page, or triage a request into one.
+      A <%= term(:commitment).downcase %> is a promise with a date between you and the people you work for: something they’ll send you, or something you’ve told them they’ll have. Add one from a <%= term(:client).downcase %> or <%= term(:engagement).downcase %> page, or triage a request into one.
     <% end %>
   </div>
 <% end %>

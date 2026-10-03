@@ -14,6 +14,9 @@ en:
     work:
       one: "Work"
       other: "Work"
+    commitment:
+      one: "Commitment"
+      other: "Commitments"
     labels:
       project:
         one: "Project"

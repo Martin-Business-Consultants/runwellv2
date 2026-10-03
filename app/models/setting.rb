@@ -1,7 +1,7 @@
 # This install's settings: what it calls things, who its mail comes from, and which plugins
 # are switched on. One row: one install is one business (or household, or whatever it runs).
 class Setting < ApplicationRecord
-  TERMS = %w[client engagement scope_item work].freeze
+  TERMS = %w[client engagement scope_item work commitment].freeze
   INDEX_VIEWS = %w[cards table].freeze
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze

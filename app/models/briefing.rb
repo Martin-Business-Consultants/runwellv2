@@ -12,8 +12,8 @@ class Briefing
       Section.new(key: "requests", title: "Requests to triage", items: Request.open.ordered.includes(:contact, :client).to_a),
       Section.new(key: "awaiting_client", title: "Waiting on a client", items: awaiting_client),
       Section.new(key: "drafts", title: "Drafts ready to send", items: drafts_ready),
-      Section.new(key: "overdue_commitments", title: "Overdue commitments", items: Commitment.overdue.ordered.includes(:client, :engagement, :user, :contact).to_a),
-      Section.new(key: "due_soon", title: "Due this week", items: Commitment.due_soon.ordered.includes(:client, :engagement, :user, :contact).to_a),
+      Section.new(key: "waiting_on_them", title: "Waiting on them", items: due_commitments.select { it.owner_kind == "client" }),
+      Section.new(key: "you_promised", title: "You promised", items: due_commitments.select { it.owner_kind == "us" }),
       Section.new(key: "review", title: "Ready for review", items: Todo.where(status: "in_review").order(:updated_at).includes(:engagement, :owner).to_a),
       Section.new(key: "blocked", title: "Blocked work", items: Todo.where(status: "blocked").includes(:engagement, :owner).to_a),
       Section.new(key: "overdue_todos", title: "Overdue work", items: Todo.overdue.includes(:engagement, :owner).to_a)
@@ -28,6 +28,11 @@ class Briefing
     Runwell::Plugins.enabled_briefings.map do |key, briefing|
       Section.new(key: key.to_s, title: briefing.title, partial: briefing.partial, items: briefing.items.call(@user).to_a)
     end
+  end
+
+  # Open commitments that are late or due within the week, both lanes.
+  def due_commitments
+    @due_commitments ||= Commitment.open.where(due_on: ..(Date.current + 7)).ordered.includes(:client, :engagement, :user, :contact).to_a
   end
 
   def awaiting_client

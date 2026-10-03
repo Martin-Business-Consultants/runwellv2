@@ -3,7 +3,7 @@
 <% tabs = [
      (record_tab("agreement", "Agreement", count: @engagement.agreement_versions.count) unless @engagement.internal?),
      record_tab("work", term(:work), count: @engagement.todos.open.count),
-     record_tab("commitments", "Commitments", count: @engagement.commitments.open.count),
+     record_tab("commitments", term(:commitment, count: 2), count: @engagement.commitments.open.count),
      record_tab("notes", "Notes", count: @engagement.notes.count),
      record_tab("documents", "Documents", count: @engagement.documents.count)
    ].compact + plugin_record_tabs(:engagement_panel) %>

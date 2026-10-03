@@ -4,7 +4,7 @@
       line of its own below, across the row (commitment-row in settings.css). %>
   <div class="commitment-row">
     <div class="txt-align-start overflow-ellipsis min-width">
-      <strong><%= commitment.description %></strong>
+      <span><%= commitment_sentence(commitment) %></span>
       <div class="txt-x-small txt-subtle"><%= commitment_details(commitment, with_context: with_context) %></div>
     </div>
 

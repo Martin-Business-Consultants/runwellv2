@@ -3,6 +3,7 @@
 <% engagement, engagements = term(:engagement).downcase, term(:engagement, count: 2).downcase %>
 <% scope_item, scope_items = term(:scope_item).downcase, term(:scope_item, count: 2).downcase %>
 <% work = term(:work).downcase %>
+<% commitment, commitments = term(:commitment).downcase, term(:commitment, count: 2).downcase %>
 <% types = Setting.current.enabled_labels.map { label_term(it).downcase.then { |name| (name.match?(/\A[aeiou]/) ? "an " : "a ") + name } }.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>
 
 <%= render "settings/header", current: :help %>
@@ -23,7 +24,7 @@
     <ol>
       <li><strong>Who do we work for, and who can say yes?</strong> <%= clients.upcase_first %> and their contacts.</li>
       <li><strong>What did we agree?</strong> <%= engagements.upcase_first %> and their agreements.</li>
-      <li><strong>What is happening against it?</strong> Work, commitments, notes and history.</li>
+      <li><strong>What is happening against it?</strong> <%= term(:work) %>, <%= commitments %>, notes and history.</li>
       <li><strong>What came in?</strong> Requests.</li>
       <li><strong>What needs a person now?</strong> The home page.</li>
     </ol>
@@ -53,10 +54,10 @@
                 </ul>
               </li>
               <li><strong>Other <%= term(:work).downcase %></strong> <span class="txt-subtle"><%= work.upcase_first %> on the <%= term(:engagement).downcase %> that isn’t one <%= scope_item %>, such as a quick fix or a request made into work</span></li>
-              <li><strong>Commitments</strong> <span class="txt-subtle">dated promises, ours or the <%= client %>’s</span></li>
+              <li><strong><%= commitments.upcase_first %></strong> <span class="txt-subtle">dated promises, yours or the <%= client %>’s</span></li>
             </ul>
           </li>
-          <li><strong>Commitments</strong> <span class="txt-subtle">promises that belong to the <%= client %> rather than one <%= engagement %></span></li>
+          <li><strong><%= commitments.upcase_first %></strong> <span class="txt-subtle">promises that belong to the <%= client %> rather than one <%= engagement %></span></li>
         </ul>
       </li>
       <li><strong>Requests</strong> <span class="txt-subtle">asks that come in from a <%= client %>, the portal, email or a call, before they are anything else</span></li>
@@ -71,7 +72,7 @@
     <%= render "settings/helps/flow" %>
     <ol class="help-steps">
       <li><strong>A request comes in.</strong> A contact sends it from the portal, or you log it from an email or a call.</li>
-      <li><strong>You triage it.</strong> It becomes a new <%= engagement %>, a <%= scope_item %> on an open draft, a piece of work or a commitment, or it is dismissed with a reason.</li>
+      <li><strong>You triage it.</strong> It becomes a new <%= engagement %>, a <%= scope_item %> on an open draft, a piece of work or a <%= commitment %>, or it is dismissed with a reason.</li>
       <li><strong>You draft the agreement.</strong> <%= scope_items.upcase_first %>, prices and the summary the <%= client %> will read.</li>
       <li><strong>You send it.</strong> Sending takes a snapshot, fingerprints it and freezes it. Nothing sent ever changes.</li>
       <li><strong>The <%= client %> decides.</strong> They approve or ask for changes from an emailed link, or you record their decision with evidence such as a forwarded email.</li>
@@ -81,6 +82,24 @@
       <li><strong>You close the <%= engagement %></strong> when it’s done. Its agreement and history stay.</li>
       <li><strong>Your own projects skip the agreement.</strong> Mark the <%= client %> that is you as internal, and its <%= engagements %> are Internal from the start: no price, nothing to send or approve, <%= work %> added straight away.</li>
     </ol>
+  </section>
+
+  <section class="settings__section">
+    <header>
+      <h2 class="divider"><%= commitments.upcase_first %>: work versus promises</h2>
+    </header>
+    <p><%= term(:work) %> is what you do. A <%= commitment %> is a promise with a date between you and a <%= client %>, and it reads as a sentence: <em>Rosa will send the logo · by Friday</em>, or <em>We will share the first draft · by the 14th</em>.</p>
+    <div class="help-promises">
+      <div class="help-promises__lane">
+        <strong>Waiting on them</strong>
+        <span class="txt-subtle">The <%= client %> or one of their contacts promised you something: content, a decision, access. Your <%= work %> may be stuck until it arrives.</span>
+      </div>
+      <div class="help-promises__lane">
+        <strong>You promised</strong>
+        <span class="txt-subtle">You, or someone on your side, told them they’d have something by a date. Keep it, or say early that it will slip.</span>
+      </div>
+    </div>
+    <p>Add one on a <%= client %> or <%= engagement %> page (“[Who] will [what] by [date]”), or triage a request into one. When the date comes it is resolved as done, missed or dropped, and stays as history. Home shows both lanes for the week ahead.</p>
   </section>
 
   <section class="settings__section">
@@ -95,7 +114,7 @@
       <li><strong><%= clients.upcase_first %> never have passwords.</strong> They sign in to the portal and approve agreements from signed links that expire.</li>
       <li><strong>Internal estimates stay internal.</strong> <%= clients.upcase_first %> see the frozen snapshot they approved, never estimates or estimate notes.</li>
       <li><strong>@mention a teammate</strong> in any note, description or request by typing <kbd>@</kbd>. They get it in Notifications (bottom left) and by email.</li>
-      <li><strong>Home is what needs you.</strong> Questions for you, requests to triage, agreements waiting on a <%= client %>, drafts ready to send, overdue and upcoming commitments, and blocked or overdue work.</li>
+      <li><strong>Home is what needs you.</strong> Questions for you, requests to triage, agreements waiting on a <%= client %>, drafts ready to send, what you’re waiting on them for and what you’ve promised them, and blocked or overdue work.</li>
     </ul>
   </section>
 
@@ -105,12 +124,12 @@
     </header>
     <ul>
       <li><strong>Runwell</strong> (the logo) is home: what needs a person now.</li>
-      <li><strong><%= term(:client, count: 2) %></strong>, then each one’s contacts, <%= term(:engagement, count: 2).downcase %>, commitments, notes and history.</li>
+      <li><strong><%= term(:client, count: 2) %></strong>, then each one’s contacts, <%= term(:engagement, count: 2).downcase %>, <%= commitments %>, notes and history.</li>
       <li><strong><%= term(:engagement, count: 2) %></strong>, showing active ones by default (approved or internal, and open). Switch the filter to see drafts, sent, changes requested, internal or closed. Each one holds its agreement, scope, work and commitments.</li>
       <li><strong><%= term(:work) %></strong>, as a table or a board, across every <%= term(:engagement).downcase %>.</li>
-      <li><strong>Commitments</strong>, open or resolved, ours or the <%= client %>’s.</li>
+      <li><strong><%= commitments.upcase_first %></strong>: open ones in two lanes, waiting on them and you promised; resolved ones as history.</li>
       <li><strong>Requests</strong>, everything that came in and what it became.</li>
-      <li><strong>Search</strong> at the bottom of every page (<kbd>s</kbd>) finds <%= clients %>, contacts, <%= engagements %>, requests, work, commitments and notes. <kbd>/</kbd> in the top bar filters just the page you’re on.</li>
+      <li><strong>Search</strong> at the bottom of every page (<kbd>s</kbd>) finds <%= clients %>, contacts, <%= engagements %>, requests, work, <%= commitments %> and notes. <kbd>/</kbd> in the top bar filters just the page you’re on.</li>
       <li><strong>Add</strong> at the bottom right (<kbd>a</kbd>) is where notes and documents are added, to the record on screen or any other.</li>
     </ul>
   </section>

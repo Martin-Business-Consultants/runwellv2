@@ -1,0 +1,65 @@
+/* Commitments read as sentences ("Rosa will send the logo · by Friday") in two lanes: what
+/* they owe you (waiting on them) and what you've promised. Side by side on a wide page,
+/* stacked on a narrow one. */
+@layer components {
+  .commitment-lanes {
+    display: grid;
+    gap: var(--block-space) var(--inline-space-double);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+
+  .commitment-lane__title {
+    font-size: var(--text-small);
+    font-weight: 600;
+    margin-block: 0 var(--block-space-half);
+  }
+
+  .commitment-index-lane + .commitment-index-lane {
+    margin-block-start: var(--block-space-double);
+  }
+
+  /* The add form: [Who] will [what] by [date]. */
+  .commitment-sentence {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half) var(--inline-space);
+
+    > .input { inline-size: auto; }
+
+    .commitment-sentence__what {
+      flex: 1 1 14rem;
+      min-inline-size: 0;
+    }
+  }
+
+  /* A lane's heading row inside the Commitments table. */
+  .data-table .data-table__group th {
+    background-color: var(--color-ink-lightest);
+    font-size: var(--text-small);
+    font-weight: 600;
+    text-align: start;
+  }
+}
+
+/* Help: the two lanes side by side. */
+@layer components {
+  .help-promises {
+    display: grid;
+    gap: var(--inline-space);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    margin-block: var(--block-space);
+  }
+
+  .help-promises__lane {
+    border: 1px solid var(--color-ink-lighter);
+    border-inline-start: 3px solid var(--color-link);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    padding: var(--block-space-half) var(--inline-space);
+
+    & + & { border-inline-start-color: oklch(var(--lch-yellow-medium)); }
+  }
+}

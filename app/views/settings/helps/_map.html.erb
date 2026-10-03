@@ -36,7 +36,7 @@
       <span class="help-map__ask">against what we agreed</span>
       <ul class="help-map__things">
         <li><span class="help-map__thing"><%= icon_tag "board" %> <%= term(:work) %></span><span class="help-map__note">planned → done</span></li>
-        <li><span class="help-map__thing"><%= icon_tag "bookmark" %> Commitments</span><span class="help-map__note">dated promises</span></li>
+        <li><span class="help-map__thing"><%= icon_tag "bookmark" %> <%= term(:commitment, count: 2) %></span><span class="help-map__note">promises with a date, theirs and yours</span></li>
         <li><span class="help-map__thing"><%= icon_tag "history" %> Notes and history</span></li>
       </ul>
     </section>
@@ -60,7 +60,7 @@
         <li>Requests to triage</li>
         <li>Waiting on a <%= client.downcase %></li>
         <li>Drafts to send</li>
-        <li>Overdue commitments</li>
+        <li>Waiting on them, and what you promised</li>
         <li>Blocked or overdue <%= term(:work).downcase %></li>
       </ul>
     </section>

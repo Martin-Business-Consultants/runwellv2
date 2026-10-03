@@ -2,7 +2,7 @@
 <% contacts = @client.contacts.active.ordered.to_a %>
 <% tabs = [
      record_tab("engagements", term(:engagement, count: 2), count: @client.engagements.count),
-     record_tab("commitments", "Commitments", count: @client.commitments.open.count),
+     record_tab("commitments", term(:commitment, count: 2), count: @client.commitments.open.count),
      record_tab("notes", "Notes", count: @client.notes.count),
      record_tab("documents", "Documents", count: @client.documents.count)
    ] + plugin_record_tabs(:client_panel) %>

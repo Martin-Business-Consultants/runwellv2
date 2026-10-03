@@ -1,25 +1,48 @@
 <%# locals: (subject:) %>
+<%# A client's or engagement's commitments in two lanes: what the other side owes you (waiting on
+    them) and what you've promised them, each a sentence with its date; resolved ones folded away.
+    Adding one reads the same way: who will do what, by when. %>
+<% client = subject.is_a?(Client) ? subject : subject.client %>
 <section class="settings__section" id="commitments">
   <header>
-    <h2 class="divider">Commitments</h2>
+    <h2 class="divider"><%= term(:commitment, count: 2) %></h2>
   </header>
 
-  <% open_commitments = subject.commitments.open.ordered.includes(:client, :user, :contact) %>
-  <ul class="settings__scrollable-list">
-    <% open_commitments.each do |commitment| %>
-      <%# herb:key commitment.id %>
-      <%= render "commitments/commitment", commitment: commitment %>
-    <% end %>
-  </ul>
-
-  <% if open_commitments.none? %>
-    <p class="txt-subtle txt-small margin-none">No open commitments.</p>
-  <% end %>
+  <% open_commitments = subject.commitments.open.ordered.includes(:client, :user, :contact).to_a %>
+  <% theirs, ours = commitment_lanes(open_commitments) %>
+  <div class="commitment-lanes">
+    <section class="commitment-lane commitment-lane--theirs">
+      <h3 class="commitment-lane__title"><%= waiting_on_title(client) %> <span class="txt-subtle"><%= theirs.size %></span></h3>
+      <% if theirs.any? %>
+        <ul class="settings__scrollable-list">
+          <% theirs.each do |commitment| %>
+            <%# herb:key commitment.id %>
+            <%= render "commitments/commitment", commitment: commitment %>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-subtle txt-small margin-none">Nothing they’ve promised is open.</p>
+      <% end %>
+    </section>
+    <section class="commitment-lane commitment-lane--ours">
+      <h3 class="commitment-lane__title">You promised <span class="txt-subtle"><%= ours.size %></span></h3>
+      <% if ours.any? %>
+        <ul class="settings__scrollable-list">
+          <% ours.each do |commitment| %>
+            <%# herb:key commitment.id %>
+            <%= render "commitments/commitment", commitment: commitment %>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-subtle txt-small margin-none">Nothing you’ve promised is open.</p>
+      <% end %>
+    </section>
+  </div>
 
   <% resolved = subject.commitments.where.not(resolution: nil).order(resolved_at: :desc).includes(:client, :user, :contact) %>
   <% if resolved.any? %>
     <details class="txt-small txt-align-start">
-      <summary class="txt-subtle"><%= pluralize resolved.size, "resolved commitment" %></summary>
+      <summary class="txt-subtle"><%= pluralize resolved.size, "resolved #{term(:commitment).downcase}" %></summary>
       <ul class="settings__scrollable-list">
         <% resolved.each do |commitment| %>
           <%# herb:key commitment.id %>
@@ -29,19 +52,20 @@
     </details>
   <% end %>
 
-  <% client = subject.is_a?(Client) ? subject : subject.client %>
   <details class="section-actions">
-    <summary class="btn txt-small"><%= icon_tag "add" %> Add a commitment</summary>
+    <summary class="btn txt-small"><%= icon_tag "add" %> Add a <%= term(:commitment).downcase %></summary>
     <%= form_with model: Commitment.new, url: subject.is_a?(Client) ? client_commitments_path(subject) : engagement_commitments_path(subject),
           class: "flex flex-column gap txt-small", data: { controller: "form" } do |form| %>
-      <%= form.text_field :description, required: true, class: "input full-width", autocomplete: "off", placeholder: "Who will do what…" %>
-      <div class="flex flex-wrap gap-half">
-        <%= date_input form, :due_on, required: true, class: "input flex-item-grow", aria: { label: "Due" } %>
-        <%= form.select :owner, grouped_options_for_select(commitment_owner_options(client), "us"), {}, class: "input input--select flex-item-grow", aria: { label: "Owner" } %>
-        <%= form.text_field :source, class: "input flex-item-grow", autocomplete: "off", placeholder: "Source, e.g. call 24 Sep" %>
+      <div class="commitment-sentence">
+        <%= form.select :owner, grouped_options_for_select(commitment_owner_options(client), "us"), {}, class: "input input--select", aria: { label: "Who" } %>
+        <span>will</span>
+        <%= form.text_field :description, required: true, class: "input commitment-sentence__what", autocomplete: "off", placeholder: "send the logo", aria: { label: "What" } %>
+        <span>by</span>
+        <%= date_input form, :due_on, required: true, class: "input", aria: { label: "By when" } %>
       </div>
+      <%= form.text_field :source, class: "input full-width", autocomplete: "off", placeholder: "Where it was promised, e.g. call on Tuesday (optional)" %>
       <div class="flex gap-half justify-center">
-        <button type="submit" class="btn btn--link">Add commitment</button>
+        <button type="submit" class="btn btn--link">Add <%= term(:commitment).downcase %></button>
       </div>
     <% end %>
   </details>

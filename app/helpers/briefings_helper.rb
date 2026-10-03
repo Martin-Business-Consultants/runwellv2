@@ -12,7 +12,7 @@ module BriefingsHelper
     when "requests" then requests_path
     when "awaiting_client" then engagements_path(state: "sent")
     when "drafts" then engagements_path(state: "draft")
-    when "overdue_commitments", "due_soon" then commitments_path
+    when "waiting_on_them", "you_promised" then commitments_path
     when "review", "blocked" then todos_path(view: "board")
     when "overdue_todos" then todos_path(view: "table", sort: "due")
     end
