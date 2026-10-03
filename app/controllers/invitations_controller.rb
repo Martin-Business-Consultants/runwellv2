@@ -14,7 +14,7 @@ class InvitationsController < ApplicationController
   def update
     user = @invitation.accept!(**params.expect(user: %i[name password]).to_h.symbolize_keys)
     terminate_session if authenticated?
-    start_new_session_for user
+    start_new_session_for user, method: "invitation"
     redirect_to root_path, notice: "Welcome to Runwell, #{user.display_name}."
   rescue ActiveRecord::RecordInvalid => error
     @user = error.record.is_a?(User) ? error.record : User.new(email_address: @invitation.email_address)

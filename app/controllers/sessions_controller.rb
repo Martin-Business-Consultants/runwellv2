@@ -17,6 +17,7 @@ class SessionsController < ApplicationController
     if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.active? && !user.agent?
       sign_in_after_first_step user
     else
+      record_failed_sign_in(User.people.find_by(email_address: params[:email_address].to_s.strip.downcase), "password")
       redirect_to new_session_path(email_address: params[:email_address]), alert: "Try another email address or password."
     end
   end

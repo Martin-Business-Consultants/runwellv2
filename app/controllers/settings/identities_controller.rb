@@ -6,6 +6,7 @@ class Settings::IdentitiesController < ApplicationController
   def destroy
     identity = Current.user.identities.find(params[:id])
     identity.destroy!
+    Current.user.record_event!("user.identity_disconnected", payload: { provider: identity.provider })
     redirect_to settings_account_path, notice: "#{identity.provider_name} disconnected."
   end
 end

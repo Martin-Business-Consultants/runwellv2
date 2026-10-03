@@ -46,6 +46,7 @@
     <% if can?(:manage_settings) %>
       <li><%= settings_nav_link "Updates", settings_updates_path, icon: "refresh", current: current == :updates %></li>
       <li><%= settings_nav_link "Export", settings_exports_path, icon: "share", current: current == :export %></li>
+      <li><%= settings_nav_link "Audit log", settings_audit_log_path, icon: "history", current: current == :audit_log %></li>
     <% end %>
     <li>
       <%= settings_nav_link "Help", settings_help_path, icon: "lifebuoy", current: false %>

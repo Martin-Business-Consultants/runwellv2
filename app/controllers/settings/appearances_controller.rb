@@ -10,6 +10,7 @@ class Settings::AppearancesController < Settings::BaseController
   def update
     setting = Setting.current
     if setting.update(params.fetch(:setting, {}).permit(:theme, :radius, :scheme, :font, :text_size, :custom_css, :custom_css_everywhere, :logo, :favicon))
+      setting.record_event!("settings.custom_css", payload: { digest: (setting.custom_css_digest if setting.custom_css) }) if setting.saved_change_to_custom_css?
       setting.logo.purge if params[:remove] == "logo"
       setting.favicon.purge if params[:remove] == "favicon"
       redirect_to settings_appearance_path, notice: "Appearance saved."

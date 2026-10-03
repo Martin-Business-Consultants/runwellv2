@@ -25,6 +25,7 @@ class Settings::PluginsController < Settings::BaseController
     manifest = find_manifest
     enabled = params.dig(:plugin, :enabled) == "1"
     Setting.current.toggle_plugin!(manifest.key, enabled: enabled)
+    Setting.current.record_event!("settings.plugin", payload: { plugin: manifest.key, on: enabled })
     redirect_back fallback_location: settings_plugins_path, notice: "#{manifest.name} #{enabled ? "switched on" : "switched off"}."
   end
 

@@ -56,6 +56,7 @@ module User::Role
   def deactivate!
     transaction do
       update!(deactivated_at: Time.current)
+      record_event!("user.deactivated")
       sessions.destroy_all
       access_tokens.live.find_each(&:revoke!)
       agent&.update!(deactivated_at: Time.current)
@@ -65,6 +66,7 @@ module User::Role
   def reactivate!
     transaction do
       update!(deactivated_at: nil)
+      record_event!("user.reactivated")
       agent&.update!(deactivated_at: nil)
     end
   end

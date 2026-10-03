@@ -87,12 +87,12 @@ module Authentication
 
     # The first step checked out (a password, an emailed link, Google…): sign in, or go on to the
     # code from the authenticator app when the person has two-factor sign-in on.
-    def sign_in_after_first_step(user)
+    def sign_in_after_first_step(user, method: "password")
       if user.two_factor?
-        session[:two_factor] = { "user_id" => user.id, "at" => Time.current.to_i, "tries" => 0 }
+        session[:two_factor] = { "user_id" => user.id, "at" => Time.current.to_i, "tries" => 0, "method" => method }
         redirect_to new_session_two_factor_path
       else
-        start_new_session_for user
+        start_new_session_for user, method: method
         redirect_to after_authentication_url
       end
     end
@@ -101,11 +101,22 @@ module Authentication
       session.delete(:return_to_after_authenticating) || root_url
     end
 
-    def start_new_session_for(user)
+    # method: how they got in (password, link, a provider's key, signup, invitation), for the
+    # audit log (Settings > Audit log).
+    def start_new_session_for(user, method: "password")
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         Current.session = session
         cookies.signed.permanent[:session_id] = { value: session.id, httponly: true, same_site: :lax }
+        user.record_event!("user.signed_in", actor: user, source: "app", actor_label: nil,
+          payload: { method: method, two_factor: user.two_factor?, ip: request.remote_ip, browser: request.user_agent.to_s.truncate(120) })
       end
+    end
+
+    # A wrong password or code for a real account, for the audit log. Nobody is signed in, so the
+    # event has no actor.
+    def record_failed_sign_in(user, reason)
+      user&.record_event!("user.sign_in_failed", actor: nil, source: "app", actor_label: "unknown",
+        payload: { reason: reason, ip: request.remote_ip, browser: request.user_agent.to_s.truncate(120) })
     end
 
     def terminate_session

@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Named, Avatar, Mentionable, Role, Agent, TwoFactor
+  include Named, Avatar, Mentionable, Role, Agent, TwoFactor, Eventful
 
   has_secure_password
 
@@ -18,10 +18,17 @@ class User < ApplicationRecord
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   before_validation :become_owner, on: :create, if: -> { User.none? }
+  after_update :record_role_change, if: :saved_change_to_role?
 
   def display_name = name.presence || email_address
 
   private
+
+  # Settings > Audit log: who changed whose role.
+  def record_role_change
+    from, to = saved_change_to_role
+    record_event!("user.role_changed", payload: { from: from, to: to }) if from
+  end
 
   # The first person to sign up owns the install.
   def become_owner

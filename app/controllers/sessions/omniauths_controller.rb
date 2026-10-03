@@ -19,7 +19,7 @@ class Sessions::OmniauthsController < ApplicationController
   private
     def sign_in(auth)
       if (user = Identity.user_for(auth))
-        sign_in_after_first_step user
+        sign_in_after_first_step user, method: auth.provider
       else
         redirect_to new_session_path, alert: "No one here signs in with that #{SignInProvider.name_for(auth.provider)} account. Sign in another way and connect it in Settings › Your account, or ask an owner for an invitation."
       end
@@ -31,6 +31,7 @@ class Sessions::OmniauthsController < ApplicationController
         redirect_to settings_account_path, alert: "That #{identity.provider_name} account is connected to someone else."
       else
         identity.update!(user: Current.user, email: auth.info.email, last_used_at: Time.current)
+        Current.user.record_event!("user.identity_connected", payload: { provider: auth.provider })
         redirect_to settings_account_path, notice: "#{identity.provider_name} connected. You can sign in with it now."
       end
     end

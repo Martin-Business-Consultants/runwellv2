@@ -17,8 +17,8 @@ class Sessions::TwoFactorsController < ApplicationController
 
   def create
     if @user.verify_second_factor(params[:code])
-      session.delete(:two_factor)
-      start_new_session_for @user
+      method = session.delete(:two_factor)["method"] || "password"
+      start_new_session_for @user, method: method
       notice = ("#{@user.recovery_codes_left} recovery codes left. Make new ones in Settings › Your account." if @user.recovery_codes_left < 3)
       redirect_to after_authentication_url, notice: notice
     else
@@ -37,6 +37,7 @@ class Sessions::TwoFactorsController < ApplicationController
     end
 
     def wrong_code
+      record_failed_sign_in(@user, "code")
       tries = session[:two_factor]["tries"].to_i + 1
       if tries >= TRIES
         session.delete(:two_factor)

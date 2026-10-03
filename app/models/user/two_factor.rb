@@ -34,11 +34,14 @@ module User::TwoFactor
     codes = new_recovery_codes
     update!(otp_secret: secret, otp_enabled_at: Time.current, otp_last_used_at: at, otp_recovery_codes: codes.map { digest(it) })
     sessions.where.not(id: Current.session&.id).destroy_all
+    record_event!("user.two_factor_enabled")
     codes
   end
 
   def disable_two_factor!
+    was_on = two_factor?
     update!(otp_secret: nil, otp_enabled_at: nil, otp_last_used_at: nil, otp_recovery_codes: nil)
+    record_event!(Current.user == self ? "user.two_factor_disabled" : "user.two_factor_reset") if was_on
   end
 
   # A code from the app, or a recovery code (used up). True when one of them checks out.
@@ -50,7 +53,10 @@ module User::TwoFactor
   end
 
   def regenerate_recovery_codes!
-    new_recovery_codes.tap { |codes| update!(otp_recovery_codes: codes.map { digest(it) }) }
+    new_recovery_codes.tap do |codes|
+      update!(otp_recovery_codes: codes.map { digest(it) })
+      record_event!("user.recovery_codes_renewed")
+    end
   end
 
   def recovery_codes_left = Array(otp_recovery_codes).size

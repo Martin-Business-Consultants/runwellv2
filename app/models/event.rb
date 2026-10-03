@@ -5,6 +5,10 @@ class Event < ApplicationRecord
 
   validates :kind, :source, :occurred_at, presence: true
 
+  # Sign-ins, two-factor, roles and settings: the audit log's, not a record's history, so they're
+  # kept out of `changes` (what agents catch up on).
+  SECURITY_SUBJECTS = %w[User Setting].freeze
+
   scope :recent, -> { order(occurred_at: :desc) }
 
   before_update { raise ActiveRecord::ReadOnlyRecord, "events are append-only" }

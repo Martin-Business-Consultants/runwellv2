@@ -12,7 +12,7 @@ class ChangesController < ApplicationController
   def index
     request.format = :json
     limit = params[:limit].to_i.clamp(1, MAX).then { params[:limit].present? ? it : 100 }
-    scope = Event.order(:id).includes(:subject, :actor_user)
+    scope = Event.where.not(subject_type: Event::SECURITY_SUBJECTS).order(:id).includes(:subject, :actor_user)
     scope = params[:after].present? ? scope.where("id > ?", params[:after].to_i) : scope.where(occurred_at: since..)
 
     @client = Client.find(params[:client_id]) if params[:client_id].present?

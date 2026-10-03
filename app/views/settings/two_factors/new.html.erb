@@ -28,6 +28,12 @@
           <% end %>
         </li>
       </ol>
+      <% if Setting.current.require_two_factor? && can?(:manage_people) %>
+        <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "txt-small" do |form| %>
+          <%= form.hidden_field :require_two_factor, value: "0" %>
+          <p class="txt-subtle margin-none">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="btn btn--plain txt-link">Stop requiring it</button></p>
+        <% end %>
+      <% end %>
     </section>
   </div>
 </section>

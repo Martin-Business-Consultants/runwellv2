@@ -17,7 +17,7 @@ class SignupsController < ApplicationController
 
     if @user.save
       Setting.current.apply_start!(@start) if Setting::STARTS.key?(@start)
-      start_new_session_for @user
+      start_new_session_for @user, method: "signup"
       redirect_to root_path, notice: "Welcome to Runwell."
     else
       render :new, status: :unprocessable_entity

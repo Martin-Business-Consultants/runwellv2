@@ -24,7 +24,7 @@ class Sessions::LinksController < ApplicationController
   def update
     if (user = link_user)
       user.update!(link_signed_in_at: Time.current)
-      sign_in_after_first_step user
+      sign_in_after_first_step user, method: "link"
     else
       redirect_to new_session_path, alert: "That link has expired or been used. Ask for a new one."
     end

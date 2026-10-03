@@ -591,6 +591,17 @@ pages with `render "custom_fields/values", record:`. Rules: information only, no
 a custom field; never required; a kind can't change once it has values; archiving keeps
 values; a plugin keeps its own data in its own tables, never in a custom field.
 
+## Audit log
+
+Settings > Audit log (owners, `audit_log` tool) lists every `Event`, filtered by area, person and
+period, and downloads as CSV. Security events have the person (`User`) or the install
+(`Setting`) as their subject: `user.signed_in` (method, two_factor, ip, browser),
+`user.sign_in_failed`, `user.two_factor_enabled / _disabled / _reset`, `user.recovery_codes_renewed`,
+`user.role_changed`, `user.deactivated / reactivated`, `user.identity_connected / _disconnected`,
+`user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
+`settings.sign_in_provider`, `settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
+(`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
+
 ## Export
 
 Settings > Export (owners, `create_export` / `list_exports`) makes one .zip of everything

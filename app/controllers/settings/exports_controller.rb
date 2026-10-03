@@ -14,6 +14,7 @@ class Settings::ExportsController < Settings::BaseController
   def create
     export = Export.create!(user: Current.user)
     ExportJob.perform_later(export)
+    Current.user.record_event!("user.exported", payload: { export: export.id })
     redirect_to settings_exports_path, notice: "Export started. It takes a minute or so; we’ll email #{Current.user.email_address} when it’s ready."
   end
 
