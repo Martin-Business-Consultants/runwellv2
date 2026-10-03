@@ -1,0 +1,26 @@
+<%# locals: (client:) %>
+<%# A client's status on the clients table, changed in place: its badge opens a menu of the
+    statuses (Fizzy's popup, like todos/status_dot); choosing one saves it and comes back here. %>
+<% label = client.status.humanize %>
+<div class="row-picker" data-controller="dialog fixed-popup" data-dialog-orient-value="false"
+  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
+  <button type="button" class="status-tag-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
+    <%= status_tag client.status, highlight: client.status == "active" %>
+    <span class="for-screen-reader">Status of <%= client.name %>: <%= label %>. Change it</span>
+  </button>
+
+  <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Status of <%= client.name %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
+    <strong class="popup__title pad-inline-half">Status</strong>
+    <ul class="popup__list" role="group">
+      <% Client::STATUSES.each do |status| %>
+        <%# herb:key status %>
+        <li class="popup__item" role="checkbox" aria-checked="<%= status == client.status %>">
+          <%= button_to client_path(client), method: :patch, params: { client: { status: status }, from_list: true }, class: "btn popup__btn", form_class: "full-width" do %>
+            <span class="overflow-ellipsis flex-item-grow"><%= status.humanize %></span>
+            <%= icon_tag "check", class: "checked flex-item-justify-end" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </dialog>
+</div>

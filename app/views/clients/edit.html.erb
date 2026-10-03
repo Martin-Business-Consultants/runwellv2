@@ -7,7 +7,7 @@
 <section class="settings settings--split">
   <div class="settings__panel panel shadow txt-align-start">
     <h1 class="page-title"><%= @page_title %></h1>
-    <%= render "clients/form", client: @client %>
+    <%= render "clients/form", client: @client, internal_aside: true %>
   </div>
 
   <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
@@ -23,6 +23,21 @@
         <dt><%= term(:engagement, count: 2) %></dt><dd><%= @client.engagements.count %></dd>
         <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
       </dl>
+    </section>
+
+    <%# Saved with the form beside it (the form attribute), on Save changes. %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Internal</h2>
+      </header>
+      <div class="record-form__toggle">
+        <label class="record-form__hint record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its engagements are our own projects, with no agreement to send.</label>
+        <label class="switch flex-item-no-shrink">
+          <input type="hidden" name="client[internal]" value="0" form="<%= dom_id(@client, :form) %>" autocomplete="off">
+          <input type="checkbox" name="client[internal]" value="1" id="<%= dom_id(@client, :internal) %>" class="switch__input" form="<%= dom_id(@client, :form) %>"<% if @client.internal? %> checked<% end %>>
+          <span class="switch__btn"></span>
+        </label>
+      </div>
     </section>
 
     <% if can?(:delete_records) %>

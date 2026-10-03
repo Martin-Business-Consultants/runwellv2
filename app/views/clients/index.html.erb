@@ -32,7 +32,7 @@
           <%# herb:key client.id %>
           <tr data-filter-target="item">
             <td><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
-            <td><%= status_tag client.status, highlight: client.status == "active" %></td>
+            <td><%= render "clients/status_picker", client: client %></td>
             <td><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>
             <td class="data-table__number"><%= client.engagements.count { !it.closed? } %></td>
             <% listed.each do |field| %>

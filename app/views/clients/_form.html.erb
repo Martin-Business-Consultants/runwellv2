@@ -1,7 +1,8 @@
-<%# locals: (client:) %>
+<%# locals: (client:, internal_aside: nil) %>
+<%# internal_aside: the edit page puts the Internal switch in its sidebar, tied to this form by id. %>
 <%= render "layouts/shared/errors", record: client %>
 
-<%= form_with model: client, class: "record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+<%= form_with model: client, id: dom_id(client, :form), class: "record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
   <label class="record-form__field">
     <span class="record-form__label">Name</span>
     <%= form.text_field :name, required: true, class: "input full-width", autofocus: client.new_record?, autocomplete: "off", placeholder: "Acme Inc." %>
@@ -20,16 +21,18 @@
     </label>
   </div>
 
-  <div class="record-form__toggle">
-    <div class="record-form__toggle-text">
-      <%= form.label :internal, "Internal", class: "record-form__label" %>
-      <span class="record-form__hint">This is us. Its engagements are our own projects, with no agreement to send.</span>
+  <% unless internal_aside %>
+    <div class="record-form__toggle">
+      <div class="record-form__toggle-text">
+        <%= form.label :internal, "Internal", class: "record-form__label" %>
+        <span class="record-form__hint">This is us. Its engagements are our own projects, with no agreement to send.</span>
+      </div>
+      <label class="switch flex-item-no-shrink">
+        <%= form.check_box :internal, class: "switch__input" %>
+        <span class="switch__btn"></span>
+      </label>
     </div>
-    <label class="switch flex-item-no-shrink">
-      <%= form.check_box :internal, class: "switch__input" %>
-      <span class="switch__btn"></span>
-    </label>
-  </div>
+  <% end %>
 
   <%= custom_field_inputs form, client %>
 

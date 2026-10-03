@@ -50,7 +50,13 @@ class ClientsController < ApplicationController
 
   def update
     if @client.update(client_params)
-      redirect_to @client, notice: "Client updated."
+      if params[:from_list]
+        redirect_back fallback_location: clients_path, notice: "#{@client.name} is #{@client.status.humanize.downcase}."
+      else
+        redirect_to @client, notice: "Client updated."
+      end
+    elsif params[:from_list]
+      redirect_back fallback_location: clients_path, alert: @client.errors.full_messages.to_sentence
     else
       render :edit, status: :unprocessable_entity
     end

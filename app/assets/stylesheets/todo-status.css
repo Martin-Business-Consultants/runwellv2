@@ -100,6 +100,19 @@
     }
   }
 
+  /* A status badge that opens its picker (clients/_status_picker): the badge is the button. */
+  .status-tag-picker__trigger {
+    background: none;
+    border: 0;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    padding: 0;
+
+    @media (any-hover: hover) {
+      &:hover .status-tag { filter: brightness(0.95); }
+    }
+  }
+
   .status-dot-picker__label {
     font-size: var(--text-small);
     white-space: nowrap;
