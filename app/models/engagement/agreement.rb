@@ -1,5 +1,5 @@
 # Derived state and the current agreed terms. State is never typed in; it is
-# read off the versions and approvals. An internal client's engagements (the agency's own
+# read off the versions and approvals. An internal client's engagements (your own
 # projects) have no agreement to send, so they are "internal" from the start.
 module Engagement::Agreement
   extend ActiveSupport::Concern
@@ -35,7 +35,7 @@ module Engagement::Agreement
 
   def approved? = current_version.present?
 
-  # The agency's own project: no agreement, price or approval.
+  # Your own project: no agreement, price or approval.
   def internal? = client&.internal? || false
 
   # Underway: agreed with the client, or internal.

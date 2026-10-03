@@ -8,7 +8,7 @@ class McpController < ApplicationController
   skip_forgery_protection
 
   INSTRUCTIONS = <<~TEXT
-    Runwell is an agency's project management: who we work for (clients, and contacts who can approve), what we agreed (engagements holding agreement versions: drafts until sent, frozen once sent), what is happening (work/todos, commitments with dates, notes, documents), what came in (requests to triage), and what needs a person now (the briefing).
+    Runwell is project management for a business, a team or anything someone runs (a home, a wedding, a trip): who we work for (clients, and contacts who can approve), what we agreed (engagements holding agreement versions: drafts until sent, frozen once sent), what is happening (work/todos, commitments with dates, notes, documents), what came in (requests to triage), and what needs a person now (the briefing).
 
     Start with `briefing`; on a schedule, use `changes` and keep its cursor so you hear each change once. Tools take names where they take ids ("Bloom", "Priya", an engagement's title); an "ambiguous" answer lists the candidates to choose from, and `resolve` looks a name up directly. Give writes an `idempotency_key` when you might retry. Use `search` to find anything, and `me` for who you are, your role, the team's ids, and why a tool might be missing. Engagements are named by ref (WO-12, P-3, S-4). Tools that take a `record` want "Type:id", like "Client:12", as every result's `record` field shows. Rich text fields take HTML or plain text; write a person's name after @ to mention them.
 

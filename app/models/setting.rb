@@ -1,5 +1,5 @@
 # This install's settings: what it calls things, who its mail comes from, and which plugins
-# are switched on. One row: one install is one agency.
+# are switched on. One row: one install is one business (or household, or whatever it runs).
 class Setting < ApplicationRecord
   TERMS = %w[client engagement scope_item work].freeze
   INDEX_VIEWS = %w[cards table].freeze
@@ -41,7 +41,7 @@ class Setting < ApplicationRecord
     Current.settings ||= first_or_create!
   end
 
-  # The agency's time zone: what staff pages, agent answers and emails use (a client may have its
+  # The install's time zone: what your pages, agent answers and emails use (a client may have its
   # own, Client#time_zone). Saved here it wins over TIME_ZONE in the environment, which is the default.
   validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) }, message: "isn’t a time zone we know" }, allow_nil: true
   normalizes :time_zone, with: ->(value) { value.presence && (ActiveSupport::TimeZone::MAPPING.key(value) || value) }

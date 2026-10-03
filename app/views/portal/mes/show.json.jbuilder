@@ -8,6 +8,6 @@ json.me do
   json.agents_may_decide Setting.current.client_agent_approvals?
   json.time_zone Time.zone.name
 end
-json.agency Setting.current.brand_name
+json.business Setting.current.brand_name
 json.awaiting_decision pending.map { portal_agent_ref(it) }
 json.read_only Current.access_token&.read_only? || false

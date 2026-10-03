@@ -1,8 +1,8 @@
 class Portal::RequestsController < Portal::BaseController
-  agent_tool :portal_requests, on: :index, title: "What you've asked the agency for",
+  agent_tool :portal_requests, on: :index, title: "What you've asked for",
     description: "Your requests, newest first, with whether each is still open, became work, or was closed."
-  agent_tool :portal_send_request, on: :create, title: "Ask the agency for something",
-    description: "A request the agency triages: a short subject and what you need (and by when) in body. Show the person what you'll send first.",
+  agent_tool :portal_send_request, on: :create, title: "Ask for something",
+    description: "A request they triage: a short subject and what you need (and by when) in body. Show the person what you'll send first.",
     params: { request: { subject: "string!", body: "text" } }
 
   def index

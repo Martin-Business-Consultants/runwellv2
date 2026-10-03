@@ -8,13 +8,13 @@ class ApplicationController < ActionController::Base
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
   before_action :remember_host
-  around_action :in_agency_time_zone
+  around_action :in_install_time_zone
 
   private
 
-  # The agency's time zone (Settings > Address), unless the environment's default stands. The
+  # The install's time zone (Settings > Address), unless the environment's default stands. The
   # portal and approval pages switch to the client's own inside this.
-  def in_agency_time_zone(&) = Time.use_zone(Setting.zone, &)
+  def in_install_time_zone(&) = Time.use_zone(Setting.zone, &)
 
   public
 

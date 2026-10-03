@@ -22,11 +22,11 @@ module Agent
     ].freeze
 
     CLIENT = [
-      Spec.new("project_status", "Where are things at?", "The state of your work with the agency.", [],
+      Spec.new("project_status", "Where are things at?", "The state of the work being done for you.", [],
         ->(_) { "Call `portal_engagements`, then `portal_engagement` for each that's active. Tell me in plain language what's done, what's in progress, and anything waiting on me (an agreement to decide, or something they asked for)." }),
-      Spec.new("send_a_request", "Ask the agency for something", "Turn what you need into a request they'll triage.",
+      Spec.new("send_a_request", "Ask for something", "Turn what you need into a request they'll triage.",
         [ { name: "what", description: "What you need, in your words", required: true } ],
-        ->(args) { "I want to ask the agency for this: #{args[:what]}. Write it as a request with a short, clear subject and a description of what I need and by when, show me, and send it with `portal_send_request` once I agree." })
+        ->(args) { "I want to ask them for this: #{args[:what]}. Write it as a request with a short, clear subject and a description of what I need and by when, show me, and send it with `portal_send_request` once I agree." })
     ].freeze
 
     def self.staff = STAFF.map { build(it) }

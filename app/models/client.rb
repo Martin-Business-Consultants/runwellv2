@@ -14,7 +14,7 @@ class Client < ApplicationRecord
   validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) }, message: "isn’t a time zone we know" }, allow_nil: true
 
   # A Rails zone name ("Pacific Time (US & Canada)"); an IANA one ("America/Los_Angeles") is
-  # accepted and stored as its Rails name. Blank means the agency's own zone.
+  # accepted and stored as its Rails name. Blank means the install's own zone.
   normalizes :time_zone, with: ->(value) { value.presence && (ActiveSupport::TimeZone::MAPPING.key(value) || value) }
 
   scope :ordered, -> { order(:name) }
@@ -26,7 +26,7 @@ class Client < ApplicationRecord
     STATUSES.map { [ "#{it.humanize} (#{counts.fetch(it, 0)})", it ] } + [ [ "All (#{counts.values.sum})", "all" ] ]
   end
 
-  # Where the client is: its own zone, or the agency's (Setting.zone) when it has none.
+  # Where the client is: its own zone, or the install's (Setting.zone) when it has none.
   def zone = time_zone ? ActiveSupport::TimeZone[time_zone] : Setting.zone
   def own_time_zone? = time_zone.present? && zone.name != Setting.zone.name
 

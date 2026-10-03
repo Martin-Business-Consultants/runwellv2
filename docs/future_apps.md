@@ -16,7 +16,7 @@ and invoice from it, keeping its own record of what it has invoiced.
 
 Left out with it: invoices, invoice items, payments, recurring invoices,
 expenses, financials (daily brief, losses, revenue), customer billing and costs,
-Stripe billing for the agency's own subscription.
+Stripe billing for the install's own subscription.
 
 Recurring engagements: the core stores the agreed cadence and amount per period.
 Period confirmation (with inputs such as ad spend for percent-of-spend pricing)
@@ -80,7 +80,7 @@ Google Ads customer id means.
 
 ## Multi-tenancy, signup, Stripe trial
 
-v2 is single-tenant. Hosting many agencies (subdomain tenancy, signup,
+v2 is single-tenant. Hosting many businesses (subdomain tenancy, signup,
 provisioning, subscription billing) is a hosting layer added later and must not
 change the domain model.
 

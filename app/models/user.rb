@@ -18,7 +18,7 @@ class User < ApplicationRecord
 
   private
 
-  # The first person to sign up runs the agency.
+  # The first person to sign up owns the install.
   def become_owner
     self.role = "owner"
   end

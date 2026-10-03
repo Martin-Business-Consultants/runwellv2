@@ -1,6 +1,6 @@
 # Runwell v2
 
-The core of agency project management. See `AGENTS.md` for the guide,
+The core of project management: for a business, a team, or anything you run. See `AGENTS.md` for the guide,
 `docs/install.md` to run your own (Docker or not), `docs/plugins.md` to extend it,
 and `docs/future_apps.md` for what was deliberately left out.
 

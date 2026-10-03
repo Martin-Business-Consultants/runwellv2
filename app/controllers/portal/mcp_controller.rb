@@ -1,15 +1,15 @@
 # Runwell for a client's own agent (MCP, Streamable HTTP, stateless): the portal's tools, run as
 # the contact whose token it is, so it sees and does exactly what they can in the portal and
-# nothing of the agency's. Bearer tokens only: a personal one from the portal's Connected apps,
+# nothing else of the business's. Bearer tokens only: a personal one from the portal's Connected apps,
 # or OAuth, which signs the contact in by emailed link.
 class Portal::McpController < Portal::BaseController
   agent_exempt :create, reason: "the client MCP endpoint itself"
   skip_forgery_protection
 
   INSTRUCTIONS = <<~TEXT
-    You act for a client of an agency, through the agency's Runwell portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for, their company, and whether they can decide agreements.
+    You act for a client of a business (or of whoever runs this Runwell), through its portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for, their company, and whether they can decide agreements.
 
-    `portal_engagements` lists the work the agency has agreed with them (engagements, named by ref like WO-12, or by title); `portal_engagement` shows one: what was agreed, the work shared with them, documents, and any agreement awaiting their decision exactly as it was sent. `portal_work` lists all shared work; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
+    `portal_engagements` lists the work agreed with them (engagements, named by ref like WO-12, or by title); `portal_engagement` shows one: what was agreed, the work shared with them, documents, and any agreement awaiting their decision exactly as it was sent. `portal_work` lists all shared work; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
 
     Deciding an agreement (`portal_decide`) is binding, as if they clicked it themselves. Show the person the agreement, get their decision and their typed name, and only then call it; the first call answers with a preview (needs_confirmation) and you call again with confirm: true. Never decide for them on your own judgement.
 

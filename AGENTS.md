@@ -1,6 +1,7 @@
 # Runwell v2 — Project Guide
 
-The core of an agency's project management: who we work for, what we agreed,
+The core of project management, for a business or anything someone runs (a home, a wedding, a
+trip): who we work for, what we agreed,
 what is happening against it, what came in, and what needs a person now. No
 money, no time tracking; see `docs/future_apps.md` for everything left out.
 
@@ -17,10 +18,10 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Staff auth: Rails' generated authentication (`Session`, `User`). Sign-up only makes
   the first owner; everyone else joins by invitation. Clients never have passwords:
   portal sign-in and approvals are signed, expiring links
-- Time zones: stored in UTC, shown in the agency's zone (`Setting.zone`: Settings > Address, else
+- Time zones: stored in UTC, shown in the install's zone (`Setting.zone`: Settings > Address, else
   `TIME_ZONE`, else Eastern; `ApplicationController` and `ApplicationJob` run inside it). A client may have its own (`Client#time_zone`, blank = ours); its
   portal (`Portal::BaseController`), approval pages and emails run inside `client.in_time_zone`.
-  Staff pages and agent input stay in the agency's zone. A record read before the zone switched
+  Staff pages and agent input stay in the install's zone. A record read before the zone switched
   keeps the old zone, so client-facing templates call `.in_time_zone` on times they show
 - Solid Queue for everything slow: mail, plugin changes, updates, search indexing, events
   to plugins, Check now and the test email (nothing waits on SMTP or GitHub in a request); letter_opener_web at `/letter_opener` in development. Production mail
@@ -46,7 +47,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | `bin/rails search:reindex` | Rebuild the search index from every searchable record |
 | `bin/rails agent:coverage` | Every staff action with its agent tool, or why it has none |
 | `bin/rails agent:scenarios` | A manager's, an employee's and a client's requests played through the tools (rolled back) |
-| `bin/rails db:seed:replant` | A sample web / local search / ads agency. Logins `ted@brem.io` (owner), `sarah@` (manager), `marcus@`, `priya@`, `jordan@runwell.app` (members), all `password` |
+| `bin/rails db:seed:replant` | A sample business (a web / local search / ads studio). Logins `ted@brem.io` (owner), `sarah@` (manager), `marcus@`, `priya@`, `jordan@runwell.app` (members), all `password` |
 
 ## The five things the core answers
 
@@ -54,8 +55,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    `can_approve`)
 2. **What we agreed** — `Engagement` (ref like WO-12, P-3, S-4; label project /
    work_order / service; shape fixed / recurring) holds `AgreementVersion`s
-   (initial, change_order, revision, add_on). A client marked `internal` is the agency
-   itself: its engagements are internal projects (state `internal`, `Engagement#internal?`)
+   (initial, change_order, revision, add_on). A client marked `internal` is the
+   business itself: its engagements are internal projects (state `internal`, `Engagement#internal?`)
    with no agreement to send, price or approval, and work goes on them directly; any draft
    is a plan, never sent. A version is a draft until sent;
    sending snapshots and hashes it and freezes it forever. `Approval` records
@@ -116,6 +117,9 @@ scope items).
   and test (it raises, so the test fails). Preload what a page or JSON view reads (`includes`); a
   loop that queries per record on purpose goes in `Prosopite.allow_stack_paths`
   (`config/initializers/prosopite.rb`). `PROSOPITE_RAISE=0 bin/rails test` logs them all at once
+- Write for anyone running something: a business of any kind, a team, or a person managing a home,
+  a wedding or a trip. Never "agency" or any one industry's jargon in what people or agents read;
+  the core's nouns come from Settings > Names (`term`)
 - Do not write tests. Don't add new ones or extend existing ones unless asked
 
 ## Frontend
@@ -478,7 +482,7 @@ a client sees is decided per record (`client_visible` on work and documents); th
 client roles.
 
 `runwell-google-ads` is the reference for a plugin that reaches the portal: read-only Google
-Ads reporting. The agency connects its own Google API app in Settings > Google Ads (OAuth,
+Ads reporting. The owner connects their own Google API app in Settings > Google Ads (OAuth,
 credentials encrypted with Active Record encryption); an engagement links to an ad account
 (`GoogleAds::Link`, permission `link_ad_accounts`); a nightly sync copies monthly and daily
 figures; staff and the client see the same report (server-drawn SVG charts,
@@ -682,12 +686,12 @@ do, through the same controllers: there is no separate API.
   the contact's client. OAuth for a request naming the portal resource or scope goes to
   `Portal::OauthAuthorizationsController`, which signs the contact in by emailed link.
   `portal_decide` confirms first and records `method: "agent"`; `Setting#client_agent_approvals`
-  (Settings > Connected apps) lets the agency turn that off. `docs/agents.md` is the guide
+  (Settings > Connected apps) lets the owner turn that off. `docs/agents.md` is the guide
 
 ## Custom fields
 
 What an install records about clients, engagements and work beyond the core (a plumber's
-property address, a firm's matter number, an agency's website) is a custom field, not a
+property address, a firm's matter number, a studio's client website) is a custom field, not a
 column: the core only holds what every business needs. Defined in Settings > Fields
 (`CustomField`: model, label, a key fixed at creation, kind, choices, `listed` as a table
 column, `client_visible` in the portal); values live in `CustomValue` as text (money in

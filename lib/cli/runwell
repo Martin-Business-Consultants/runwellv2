@@ -452,7 +452,7 @@ end
 def skill_text = <<~MARKDOWN
   ---
   name: runwell
-  description: Use Runwell, the agency's project management, from the shell with the `runwell` CLI. Use for anything about clients, engagements, agreements, work (todos), commitments, requests, notes, documents or time, and when given a Runwell work brief.
+  description: Use Runwell, the project management, from the shell with the `runwell` CLI. Use for anything about clients, engagements, agreements, work (todos), commitments, requests, notes, documents or time, and when given a Runwell work brief.
   ---
   #{SKILL_MARKER}
 

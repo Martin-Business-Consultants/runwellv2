@@ -9,7 +9,7 @@ class EngagementsController < ApplicationController
     description: "An engagement with its agreement versions (drafts and sent), scope, work, commitments, notes, documents and history.",
     next_tools: %i[create_agreement_version add_scope_item create_work]
   agent_tool :create_engagement, on: :create, route: "/engagements", title: "Start an engagement",
-    description: "A project, work order or service for a client. Its agreement starts as a draft (create_agreement_version, add_scope_item), and it is sent to the client with send_agreement. For an internal client (the agency itself) it's an internal project: no agreement, add work straight away (create_work).",
+    description: "A project, work order or service for a client. Its agreement starts as a draft (create_agreement_version, add_scope_item), and it is sent to the client with send_agreement. For an internal client (yourself) it's an internal project: no agreement, add work straight away (create_work).",
     params: { engagement: { client_id: "integer!", label: Engagement::LABELS, shape: Engagement::SHAPES, title: "string!", description: "text", estimate_notes: "text", custom_fields: {} } },
     next_tools: %i[add_scope_item send_agreement]
   agent_tool :update_engagement, on: :update, title: "Change an engagement",

@@ -116,7 +116,7 @@ until either is set, links use the address people were last seen using.
 | `SECRET_KEY_BASE` | Signs sessions and links | from `config/credentials.yml.enc` |
 | `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | from credentials |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_DOMAIN`, `SMTP_STARTTLS`, `SMTP_TLS` | Outbound mail. Without `SMTP_ADDRESS` nothing is sent | none |
-| `TIME_ZONE` | The agency's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, approvals and emails in it | `Eastern Time (US & Canada)` |
+| `TIME_ZONE` | The install's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, approvals and emails in it | `Eastern Time (US & Canada)` |
 | `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@` the address `>` |
 | `ASSUME_SSL` | Trust that a proxy terminated TLS | `false` |
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
@@ -128,7 +128,7 @@ until either is set, links use the address people were last seen using.
 | `RUNWELL_DEPLOY_DESTINATION`, `RUNWELL_DEPLOY_WORKFLOW` | The Kamal destination and workflow file a Docker install deploys itself with | blank (config/deploy.yml), `deploy.yml` |
 | `RUNWELL_UPDATE_CHECK` | `false` stops the nightly check for a newer release | on |
 | `RUNWELL_AGENT_RATE_LIMIT` | Tool calls each connected app or token may make a minute (`docs/agents.md`) | 120 |
-| `STRIPE_CONNECT_BROKER_URL` | Where the Stripe plugin's "Connect with Stripe" signs in | `https://v2.runwell.business` |
+| `STRIPE_CONNECT_BROKER_URL` | Where the Stripe plugin's "Connect with Stripe" signs in | `https://runwell.app` |
 | `STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY` | Only on the install that brokers Stripe sign-ins: the Stripe Connect platform's client id and secret key | none |
 | `RUNWELL_BACKUP_BEFORE_MIGRATE`, `RUNWELL_BACKUPS_KEEP` | Back up databases before migrating; how many backups to keep | on, 5 |
 | `INBOUND_EMAIL_INGRESS` | The service that forwards the requests address here: `postmark`, `mailgun`, `sendgrid`, `mandrill` or `relay` (see Requests by email) | none: no mail is received |
@@ -147,7 +147,7 @@ becomes a request to triage (the subject its title, the message its description,
 documents); a known contact gets a short reply, and their replies to it become notes on the same
 request. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
 
-1. Choose the address in Settings > Email (for example `requests@youragency.com`).
+1. Choose the address in Settings > Email (for example `requests@yourcompany.com`).
 2. Set up inbound mail for it at Postmark, Mailgun, SendGrid or Mandrill, or on your own mail server
    (Postfix or Exim piping into `bin/rails action_mailbox:ingress:postfix` or `:exim`), including
    plus addresses (`requests+anything@…`), which carry replies.

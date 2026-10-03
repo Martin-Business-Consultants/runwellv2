@@ -1,7 +1,7 @@
-# A small agency doing websites, local search (Google Business Profiles, citations,
+# A sample business: a small studio doing websites, local search (Google Business Profiles, citations,
 # reviews) and paid ads, with clients at every stage. Logins: ted@brem.io (owner), Sarah
 # (manager) and the members below, all with the password "password". Users are idempotent; the sample
-# agency is only created into an empty database (bin/rails db:seed:replant to redo it).
+# sample is only created into an empty database (bin/rails db:seed:replant to redo it).
 #
 # Never in production: db:prepare seeds a database it creates, and a new install starts empty
 # so its first visitor signs up as the owner (SignupsController).
@@ -54,7 +54,7 @@ if Client.none?
     as.(author) { subject.notes.create!(body: body, kind: kind, author: author, source: source, occurred_at: days_ago.days.ago) }
   end
 
-  # An agency records each client's website. Not every business would, so it's a custom field
+  # This studio records each client's website. Not every business would, so it's a custom field
   # this install added (Settings > Fields), not a column.
   CustomField.create!(model_type: "Client", label: "Website", kind: "link", listed: true)
 
