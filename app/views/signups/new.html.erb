@@ -16,6 +16,21 @@
       <%= form.password_field :password, required: true, class: "input txt-large full-width", autocomplete: "new-password", placeholder: "Choose a password…", maxlength: 72 %>
     </label>
 
+    <fieldset class="start-choices">
+      <legend class="txt-small font-weight-bold">What will you run with Runwell?</legend>
+      <% Setting::STARTS.each do |key, start| %>
+        <%# herb:key key %>
+        <label class="start-choice">
+          <%= form.radio_button :start, key, checked: key == @start %>
+          <span>
+            <strong><%= start[:name] %></strong>
+            <span class="txt-small txt-subtle"><%= start[:description] %></span>
+          </span>
+        </label>
+      <% end %>
+      <p class="txt-x-small txt-subtle margin-none">It sets the words Runwell starts with. Change any of them later in Settings › Names.</p>
+    </fieldset>
+
     <%= render "layouts/shared/errors", record: @user %>
 
     <p><strong>Already have an account?</strong> <%= link_to "Sign in", new_session_path, class: "txt-link" %>.</p>

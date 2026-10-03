@@ -65,5 +65,24 @@
         </label>
       <% end %>
     </section>
+
+    <section class="settings__section flex flex-column gap-half" id="start">
+      <header>
+        <h2 class="divider">Start from</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">Replace every name above, and the prices switch, with a starting setup’s. Your records stay as they are; only the words change.</p>
+      <div class="start-choices">
+        <% Setting::STARTS.each do |key, start| %>
+          <%# herb:key key %>
+          <div class="start-choice">
+            <span>
+              <strong><%= start[:name] %></strong>
+              <span class="txt-small txt-subtle"><%= start[:description] %></span>
+            </span>
+            <%= button_to "Use these", settings_start_path, method: :patch, params: { start: key }, class: "btn txt-small" %>
+          </div>
+        <% end %>
+      </div>
+    </section>
   </div>
 </section>

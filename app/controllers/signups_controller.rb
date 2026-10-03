@@ -7,13 +7,16 @@ class SignupsController < ApplicationController
   layout "public"
 
   def new
+    @start = "business"
     @user = User.new
   end
 
   def create
     @user = User.new(signup_params)
+    @start = params.dig(:signup, :start).presence_in(Setting::STARTS.keys) || "business"
 
     if @user.save
+      Setting.current.apply_start!(@start) if Setting::STARTS.key?(@start)
       start_new_session_for @user
       redirect_to root_path, notice: "Welcome to Runwell."
     else

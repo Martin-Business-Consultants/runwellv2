@@ -966,3 +966,36 @@
     padding-inline-start: 1.25em;
   }
 }
+
+/* Starting setups (sign-up, Settings > Names > Start from): one row each, the choice beside its
+/* words. */
+@layer components {
+  .start-choices {
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    margin: 0;
+    padding: 0;
+
+    legend { margin-block-end: var(--block-space-half); padding: 0; }
+  }
+
+  .start-choice {
+    align-items: center;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    cursor: pointer;
+    display: flex;
+    gap: var(--inline-space);
+    padding: var(--block-space-half) var(--inline-space);
+    text-align: start;
+
+    > span { display: flex; flex: 1 1 auto; flex-direction: column; gap: 0.15em; min-inline-size: 0; }
+
+    &:has(input:checked) {
+      background: var(--color-selected-light);
+      border-color: var(--color-link);
+    }
+  }
+}

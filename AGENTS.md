@@ -620,7 +620,9 @@ prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; ov
 `Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,
 `term(:engagement, count: 2)`, `label_term(label)` and `label_options(current)` — never
 hard-code "Engagement", "Project", "Client" or "Work". Keys (`project`, `work_order`,
-`service`) never change. A new prefix applies to new refs only.
+`service`) never change. A new prefix applies to new refs only. Sign-up asks what the install will run (`Setting::Start`: a business,
+a team, personal life) and starts its names and prices switch from that; Settings > Names > Start
+from puts one back (`apply_starting_setup`). Only words and that switch differ between them.
 
 ## Appearance
 
