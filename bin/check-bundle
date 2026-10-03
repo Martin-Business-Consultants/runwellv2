@@ -1,0 +1,27 @@
+#!/bin/bash -e
+# Checks a release bundle (the Dockerfile's `bundle` stage, as a tar) runs on the Ruby it carries,
+# whatever Ruby starts it: boots it inside an older Ruby image, the way an install that updated in
+# place runs it (bin/docker-entrypoint), migrates a fresh database and asks which Ruby answered.
+# Used by .github/workflows/release.yml; needs Docker.
+#
+#   bin/check-bundle bundle.tar [host image, default ruby:3.4-slim-trixie]
+tar_file="$(realpath "$1")"
+host="${2:-ruby:3.4-slim-trixie}"
+dir="$(mktemp -d)"
+trap 'rm -rf "$dir" || true' EXIT
+
+mkdir -p "$dir/app" "$dir/data"
+tar -xf "$tar_file" -C "$dir/app"
+want="$(sed -n 's/^ARG RUBY_VERSION=//p' Dockerfile)"
+
+output="$(docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$dir/app:/app" -v "$dir/data:/data" -w /app \
+  -e RAILS_ENV=production -e BUNDLE_PATH=/app/bundle -e BUNDLE_DEPLOYMENT=1 -e BUNDLE_WITHOUT=development:test \
+  -e SECRET_KEY_BASE_DUMMY=1 -e RUNWELL_DATA_DIR=/data -e RUNWELL_RUNTIME=docker \
+  "$host" bash -c './bin/rails db:prepare >/dev/null && ./bin/rails runner "puts [RUBY_VERSION, RbConfig.ruby, Runwell::VERSION].join(%q( ))"' 2>&1)" || { echo "$output"; exit 1; }
+echo "$output"
+
+line="$(echo "$output" | tail -1)"
+case "$line" in
+  "$want /app/ruby/bin/ruby "*) echo "The bundle runs on its own Ruby $want inside $host." ;;
+  *) echo "::error::Expected Ruby $want from /app/ruby, got: $line"; exit 1 ;;
+esac

@@ -5,8 +5,11 @@
 # whichever is newer, the image or releases/current, then backs up and migrates as always.
 # Deploying a newer image takes over again.
 #
-# A release that needs another Ruby or other system packages (RUNWELL_BASE in the Dockerfile)
-# can't come this way: it redeploys. Plugins live in the data volume too, so they carry over.
+# Each bundle carries the Ruby its gems were built for (config/bundled_ruby.rb switches to it), so
+# a new Ruby comes this way too. A release that needs other system packages or Debian
+# (RUNWELL_BASE in the Dockerfile) can't: it redeploys, through GitHub when the install can
+# (Upgrade::Github), else with the command the failure names. Plugins live in the data volume
+# too, so they carry over.
 require "digest"
 
 class Upgrade::InPlace
@@ -29,7 +32,8 @@ class Upgrade::InPlace
   def install
     return @upgrade.reconcile! if Gem::Version.new(Runwell::VERSION) >= Gem::Version.new(@upgrade.to_version)
 
-    refuse_incompatible fetch_manifest
+    return if needs_image?(fetch_manifest)
+
     unpack download
     switch
     prune
@@ -60,9 +64,21 @@ class Upgrade::InPlace
       JSON.parse(download_to("runwell-#{tag}.json", scratch.join("manifest.json")).read)
     end
 
-    def refuse_incompatible(manifest)
-      if manifest["ruby"] != RUBY_VERSION || manifest["base"].to_s != ENV["RUNWELL_BASE"].to_s
-        raise Failed, "#{tag} needs a new image (Ruby #{manifest["ruby"]}, base #{manifest["base"]}; this one has Ruby #{RUBY_VERSION}, base #{ENV["RUNWELL_BASE"]}). Redeploy to update."
+    # A bundle that carries its Ruby needs only the same base; an older one, the same Ruby too.
+    # When it needs a new image, deploy one through GitHub if this install can, else fail with how.
+    def needs_image?(manifest)
+      same_ruby = manifest["bundles_ruby"] || manifest["ruby"] == RUBY_VERSION
+      return false if same_ruby && manifest["base"].to_s == ENV["RUNWELL_BASE"].to_s
+
+      reason = same_ruby ? "base #{manifest["base"]} (this image has #{ENV["RUNWELL_BASE"]})" : "Ruby #{manifest["ruby"]} (this image has #{RUBY_VERSION})"
+      if Release::Github.token.present?
+        @upgrade.update!(via: "github", message: "#{tag} needs a new image, for #{reason}: deploying it through GitHub.")
+        Upgrade::Github.new(@upgrade).start
+        true
+      else
+        raise Failed, "#{tag} needs a new image, for #{reason}. Redeploy: `kamal deploy` from a checkout of #{tag}, or pull " \
+          "ghcr.io/martin-business-consultants/runwell:#{tag.delete_prefix("v")} and recreate the container with the same volume and settings. " \
+          "Data and plugins carry over; later updates come this way again."
       end
     end
 

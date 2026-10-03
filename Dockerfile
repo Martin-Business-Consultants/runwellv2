@@ -3,8 +3,10 @@
 # Node: assets precompile with Ruby alone. Plugins aren't in the image: they live in the data
 # volume (RUNWELL_DATA_DIR/plugins), and the entrypoint compiles their assets on boot.
 
+# The Debian release is pinned with the base (RUNWELL_BASE): the Ruby each release carries is built
+# on it, so an install updating in place keeps a system it runs on.
 ARG RUBY_VERSION=4.0.7
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+FROM docker.io/library/ruby:$RUBY_VERSION-slim-trixie AS base
 
 WORKDIR /rails
 
@@ -12,8 +14,9 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# RUNWELL_BASE counts changes to this stage (Ruby aside): bump it when a release needs other
-# system packages, so an install updating in place (Upgrade::InPlace) redeploys instead.
+# RUNWELL_BASE counts changes to this stage (Ruby aside, which travels with each release): bump it
+# when a release needs other system packages or a newer Debian, so an install updating in place
+# (Upgrade::InPlace) redeploys instead.
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
@@ -40,10 +43,14 @@ RUN bundle exec bootsnap precompile app/ lib/
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # The release bundle an install updates itself with (Upgrade::InPlace): the app as built, with
-# its gems in bundle/. The release workflow exports it for each architecture.
+# its gems in bundle/ and the Ruby they were built for in ruby/ (config/bundled_ruby.rb switches
+# to it), so a new Ruby updates in place too. The release workflow exports it for each
+# architecture and checks it boots on another Ruby (bin/check-bundle).
 FROM scratch AS bundle
 COPY --from=build /rails /
 COPY --from=build /usr/local/bundle /bundle
+COPY --from=build /usr/local/bin /ruby/bin
+COPY --from=build /usr/local/lib /ruby/lib
 
 FROM base
 

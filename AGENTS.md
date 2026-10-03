@@ -635,7 +635,10 @@ publishes it. Nothing that names a deployment or a client is tracked (`config/de
 nightly (`ReleaseCheckJob`) and by Check now, kept on `Setting#latest_release`. Owners see it on
 home (`briefings/_update`) and in Settings > Updates, whose button makes an `Upgrade`: `in_place`
 (any Docker install) downloads the release's bundle into the data volume and restarts on it,
-like WordPress (`Upgrade::InPlace`, run by `bin/docker-entrypoint`), `local`
+like WordPress (`Upgrade::InPlace`, run by `bin/docker-entrypoint`); each bundle carries its Ruby
+(`ruby/`, switched to by `config/bundled_ruby.rb` from `config/boot.rb` and `bin/thrust`, checked by
+`bin/check-bundle` in the release workflow), so only a `RUNWELL_BASE` change (system packages,
+the pinned Debian) needs a new image, deployed through GitHub when the install has a token, `local`
 runs `bin/update <tag>` in the background (`Upgrade::Local`), `github` starts
 `.github/workflows/deploy.yml` for the install's Kamal destination (`Upgrade::Github`), `manual`
 shows the command. An upgrade succeeds when the install boots on the new version, and fails when

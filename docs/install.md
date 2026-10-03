@@ -59,9 +59,12 @@ each night, and an owner sees it on home and in **Settings > Updates**, with its
   checksum, points `releases/current` at it and restarts the container, which is unavailable for
   a few seconds. On boot `bin/docker-entrypoint` runs whichever is newer, the image or
   `releases/current`, backing up and migrating as usual; deploying a newer image takes over again.
-  It relies on the container's restart policy (Kamal's `unless-stopped`). A release that needs
-  another Ruby or system packages (`RUNWELL_BASE` in the Dockerfile) is refused with a note to
-  redeploy instead. Plugins live in the data volume too, so they carry over. `kamal app exec --reuse`
+  It relies on the container's restart policy (Kamal's `unless-stopped`). Since 2.15.1 each bundle
+  carries the Ruby it was built for (`config/bundled_ruby.rb` switches to it as the app starts), so
+  a new Ruby updates in place too; only a release that needs other system packages or Debian
+  (`RUNWELL_BASE` in the Dockerfile) needs a new image. Then the update deploys it through GitHub
+  when the install can (`RUNWELL_GITHUB_TOKEN`), or says how to redeploy. An install on an image
+  older than 2.15.0 (Ruby 4.0.6) redeploys once to reach this. Plugins live in the data volume too, so they carry over. `kamal app exec --reuse`
   opens a shell in the image's copy (`/rails`), not the running release
 
 - **A plain install** (a checkout with a `.env`) runs `bin/update <tag>` in the background: fetch
