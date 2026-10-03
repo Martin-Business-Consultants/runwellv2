@@ -61,6 +61,8 @@ module Import
           note_what_stays_behind
         end
       end
+      # Indexing jobs were held with the rest, so the index is built here, in one pass.
+      Searchable.reindex_all
       report
     end
 

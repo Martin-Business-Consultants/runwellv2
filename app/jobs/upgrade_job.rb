@@ -1,6 +1,7 @@
-# Installs an in-place update (Upgrade::InPlace) away from the request that asked for it.
+# Starts an update away from the request that asked for it: an in-place install, a GitHub
+# deploy, or bin/update in the background (Upgrade#run).
 class UpgradeJob < ApplicationJob
   def perform(upgrade)
-    upgrade.runner.install if upgrade.running?
+    upgrade.run if upgrade.running?
   end
 end

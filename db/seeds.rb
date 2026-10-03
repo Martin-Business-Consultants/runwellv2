@@ -205,5 +205,8 @@ if Client.none?
     text: "Tasha wants to pause the north-suburb campaigns for two weeks. Pause them?", choices: [ "Pause", "Keep running" ])
 end
 
+# Indexing runs in jobs; build the index now so search works straight after seeding.
+Searchable.reindex_all
+
 puts "Seeded: #{User.count} users, #{Client.count} clients, #{Engagement.count} engagements, #{Todo.count} todos, " \
      "#{Note.count} notes, #{Mention.count} mentions, #{Request.count} requests"

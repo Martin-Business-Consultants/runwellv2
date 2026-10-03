@@ -8,6 +8,8 @@ end)
 json.version Runwell::VERSION
 json.updates_by Upgrade.via
 json.checked_at Release.checked_at
+json.checking Release.check_pending?
+json.check_error Release.check_error
 json.latest_release do
   if @release
     json.version @release.version

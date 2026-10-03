@@ -23,7 +23,7 @@ class Upgrade::InPlace
     @upgrade = upgrade
   end
 
-  def start = UpgradeJob.perform_later(@upgrade)
+  def start = install
 
   # Run by UpgradeJob. A job that runs again after the restart finds the new version running.
   def install

@@ -10,7 +10,8 @@ class Event < ApplicationRecord
   before_update { raise ActiveRecord::ReadOnlyRecord, "events are append-only" }
   before_destroy { throw :abort unless destroyed_by_association }
 
-  after_create_commit { ActiveSupport::Notifications.instrument("event.runwell", event: self) }
+  # Plugins hear of it from a job (EventPublishJob), so a slow subscriber never holds up the save.
+  after_create_commit { EventPublishJob.perform_later(self) }
 
   def actor_name = actor_user&.display_name || actor || "system"
 

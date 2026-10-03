@@ -1,16 +1,10 @@
 # Checks GitHub for a newer release now, rather than waiting for the nightly check.
 class Settings::Updates::ChecksController < Settings::BaseController
-  agent_tool :check_for_updates, on: :create, title: "Check for a newer Runwell release now"
+  agent_tool :check_for_updates, on: :create, title: "Check for a newer Runwell release now",
+    description: "Asks GitHub from a job; show_updates has the answer a few seconds later."
 
   def create
-    release = Release.check!
-
-    if release.newer?
-      redirect_to settings_updates_path, notice: "Runwell #{release.version} is out. This install runs #{Runwell::VERSION}."
-    else
-      redirect_to settings_updates_path, notice: "Runwell #{Runwell::VERSION} is the newest release."
-    end
-  rescue Release::Github::Error => error
-    redirect_to settings_updates_path, alert: error.message
+    Release.check_later
+    redirect_to settings_updates_path, notice: "Checking GitHub for a newer release."
   end
 end

@@ -26,6 +26,7 @@ class Upgrade < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
 
   scope :running, -> { where(status: "running") }
+  scope :failed, -> { where(status: "failed") }
   scope :ordered, -> { order(created_at: :desc) }
 
   def self.via
@@ -58,7 +59,10 @@ class Upgrade < ApplicationRecord
   # failed or went quiet. Called on Settings > Updates and nightly.
   def self.reconcile = running.find_each(&:reconcile!)
 
-  def start
+  # Started from a job (UpgradeJob), so the request that asked never waits on GitHub or a download.
+  def start = UpgradeJob.perform_later(self)
+
+  def run
     runner.start
   rescue Release::Github::Error, SystemCallError => error
     fail! error.message

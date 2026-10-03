@@ -51,6 +51,18 @@
           <span>Send a test email</span>
         </button>
       <% end %>
+
+      <%# The test message is sent from a job (TestEmailJob); this frame reloads until it's gone or failed. %>
+      <turbo-frame id="test_email">
+        <% test = @setting.test_email %>
+        <% if test["error"].present? %>
+          <p class="txt-small txt-negative margin-none">Couldn’t send to <%= test["to"] %>: <%= test["error"] %></p>
+        <% elsif test["sent_at"].present? %>
+          <p class="txt-small txt-subtle margin-none">Sent a test email to <%= test["to"] %> <%= time_ago_in_words(Time.zone.parse(test["sent_at"])) %> ago.</p>
+        <% elsif test["requested_at"].present? && Time.zone.parse(test["requested_at"]) > 5.minutes.ago %>
+          <p class="txt-small txt-subtle margin-none" data-controller="poll" data-poll-interval-value="2">Sending a test email to <%= test["to"] %>…</p>
+        <% end %>
+      </turbo-frame>
     </section>
   </div>
 </section>

@@ -21,6 +21,22 @@ class Release
 
   def self.checked_at = Setting.current.release_checked_at
 
+  # Check now: asks from a job (ReleaseCheckNowJob) and the page shows it's under way until the
+  # answer or GitHub's error is in. One that hasn't come back in five minutes isn't shown as running.
+  def self.check_later
+    Setting.current.update!(release_check_requested_at: Time.current, release_check_error: nil)
+    ReleaseCheckNowJob.perform_later
+  end
+
+  def self.check_pending?
+    setting = Setting.current
+    requested = setting.release_check_requested_at
+    requested.present? && requested > 5.minutes.ago && setting.release_check_error.blank? &&
+      (setting.release_checked_at.nil? || setting.release_checked_at < requested)
+  end
+
+  def self.check_error = Setting.current.release_check_error
+
   # Off with RUNWELL_UPDATE_CHECK=false (an install with no way out to GitHub).
   def self.checking? = ENV["RUNWELL_UPDATE_CHECK"] != "false"
 

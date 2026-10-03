@@ -11,16 +11,12 @@ class Settings::UpdatesController < Settings::BaseController
     @release = Release.latest
     @upgrade = Upgrade.current
     @upgrades = Upgrade.ordered.includes(:requested_by).limit(10)
+    @failed_count = Upgrade.failed.count
   end
 
   def create
     upgrade = Upgrade.start!(Release.latest, by: Current.user)
-
-    if upgrade.failed?
-      redirect_to settings_updates_path, alert: "The update to #{upgrade.to_version} didn't start: #{upgrade.message}"
-    else
-      redirect_to settings_updates_path, notice: "Updating to #{upgrade.to_version}. Runwell restarts when it's done; this page shows how it went."
-    end
+    redirect_to settings_updates_path, notice: "Updating to #{upgrade.to_version}. Runwell restarts when it's done; this page shows how it went."
   rescue Upgrade::Refused => error
     redirect_to settings_updates_path, alert: error.message
   end

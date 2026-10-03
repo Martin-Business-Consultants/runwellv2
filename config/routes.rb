@@ -54,6 +54,7 @@ Rails.application.routes.draw do
     resources :connected_apps, only: %i[index create destroy]
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
+      resource :failures, only: :destroy, module: :updates
     end
   end
 

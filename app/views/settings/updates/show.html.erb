@@ -4,6 +4,29 @@
 <turbo-frame id="updates" target="_top">
   <section class="settings">
     <div class="settings__panel panel shadow txt-align-start">
+      <div class="page-heading">
+        <h1 class="page-title"><%= @page_title %></h1>
+        <% if @failed_count.positive? %>
+          <div class="page-heading__actions" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+            <button type="button" class="btn txt-negative" data-action="dialog#open">
+              <%= icon_tag "trash" %>
+              <span>Clear failed updates</span>
+            </button>
+            <dialog class="dialog dialog--action panel fill-white shadow gap flex-column txt-align-start" data-dialog-target="dialog">
+              <h3 class="dialog__title">Clear <%= pluralize(@failed_count, "failed update") %>?</h3>
+              <p class="dialog__message">They leave Past updates, with what went wrong. Updates that worked stay.</p>
+              <div class="dialog__actions">
+                <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+                <%= button_to settings_updates_failures_path, method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+                  <%= icon_tag "trash" %>
+                  <span>Clear</span>
+                <% end %>
+              </div>
+            </dialog>
+          </div>
+        <% end %>
+      </div>
+
       <section class="settings__section flex flex-column gap">
         <header>
           <h2 class="divider">This install</h2>
@@ -31,6 +54,11 @@
           <dt>Updates by</dt>
           <dd><%= update_method_description %></dd>
         </dl>
+        <% if Release.check_pending? %>
+          <p class="txt-small txt-subtle margin-none" data-controller="poll" data-poll-interval-value="2">Checking GitHub for a newer release…</p>
+        <% elsif Release.check_error.present? %>
+          <p class="txt-small txt-negative margin-none">Couldn’t check: <%= Release.check_error %></p>
+        <% end %>
         <div class="section-actions">
           <%= button_to settings_updates_check_path, class: "btn txt-small" do %>
             <%= icon_tag "refresh" %>

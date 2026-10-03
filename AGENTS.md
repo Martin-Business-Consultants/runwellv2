@@ -22,7 +22,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
   portal (`Portal::BaseController`), approval pages and emails run inside `client.in_time_zone`.
   Staff pages and agent input stay in the agency's zone. A record read before the zone switched
   keeps the old zone, so client-facing templates call `.in_time_zone` on times they show
-- Solid Queue for mail; letter_opener_web at `/letter_opener` in development. Production mail
+- Solid Queue for everything slow: mail, plugin changes, updates, search indexing, events
+  to plugins, Check now and the test email (nothing waits on SMTP or GitHub in a request); letter_opener_web at `/letter_opener` in development. Production mail
   is any SMTP server from the environment (`SMTP_*`, see `docs/install.md`); the Outsend
   plugin routes it through Outsend instead, per message, with no restart. The sender is
   `Setting#mail_sender` (Settings > Email), falling back to `MAIL_FROM`, whichever way it goes out
@@ -275,8 +276,9 @@ ReActionView rules:
 - A model becomes searchable by including `Searchable` and defining
   `search_title` and `search_content` (plus `search_client_id` when the
   client isn't `client_id`). Put these public methods above `private`.
-  Indexing is inline on save; no job
-- Add the model to `lib/tasks/search.rake` and to `search_result_path` in
+  Indexing runs in a job after each save (ActiveSearch's `ReindexJob`), so a new record shows
+  a moment later; `Searchable.reindex_all` rebuilds it inline (the rake task, an import, seeds)
+- Add the model to `Searchable::MODELS` and to `search_result_path` in
   `SearchesHelper`, then run `bin/rails search:reindex`
 - `Search.new(terms).results` cleans the terms and returns records ranked by
   relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe
@@ -391,7 +393,9 @@ The core never names a plugin; remove it and the app runs as before. Extension p
   (`config/recurring.yml`); one plugin failing doesn't stop the others
 - Stylesheets: `Runwell::Plugins.stylesheet key, "name"` from the engine's
   `app/assets/stylesheets`, linked while the plugin is on
-- Events: every `Event` is published as `"event.runwell"` (`event:`)
+- Events: every `Event` is published as `"event.runwell"` (`event:`) from a job
+  (`EventPublishJob`), never inside the request: read who did it from the event (`actor_user`),
+  since there's no `Current.user` there
 - Agent workflows: `Runwell::Plugins.agent_workflow key, title, steps` (a few steps naming the
   plugin's tools), appended to the MCP server's instructions and listed by `me` (`workflows`),
   which the CLI's skill points at
