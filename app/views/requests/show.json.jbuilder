@@ -1,6 +1,6 @@
 json.summary "#{@request.subject} (#{@request.status})"
 json.request do
-  json.partial! "requests/request", request: @request
+  json.partial! "requests/request", request_record: @request
   json.extract! @request, :sender_name, :sender_email
   json.contact agent_ref(@request.contact)
   json.body agent_text(@request.body)

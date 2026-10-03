@@ -42,6 +42,7 @@ module Agent
         required << key.to_s if required_spec?(spec)
       end
       properties["confirm"] = { type: "boolean", description: "Set true once you have shown the person the preview and they agreed." } if confirm
+      properties["idempotency_key"] = { type: "string", description: "Optional: any unique string for this change. Sent again with the same key (a retry), the tool answers as before instead of doing it twice." } unless read?
       { type: "object", properties: properties, required: required.uniq }
     end
 

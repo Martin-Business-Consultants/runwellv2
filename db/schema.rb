@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_010000) do
   create_table "access_tokens", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.string "name", null: false
     t.string "kind", default: "personal", null: false
     t.string "token_digest", null: false
@@ -25,6 +25,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "read_only", default: false, null: false
+    t.integer "contact_id"
+    t.datetime "paused_at"
+    t.index ["contact_id"], name: "index_access_tokens_on_contact_id"
     t.index ["oauth_client_id"], name: "index_access_tokens_on_oauth_client_id"
     t.index ["refresh_token_digest"], name: "index_access_tokens_on_refresh_token_digest", unique: true
     t.index ["token_digest"], name: "index_access_tokens_on_token_digest", unique: true
@@ -66,6 +69,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "agent_calls", force: :cascade do |t|
+    t.integer "access_token_id", null: false
+    t.string "tool", null: false
+    t.string "status", null: false
+    t.string "code"
+    t.string "summary"
+    t.integer "duration_ms"
+    t.datetime "created_at", null: false
+    t.index ["access_token_id", "created_at"], name: "index_agent_calls_on_access_token_id_and_created_at"
+    t.index ["access_token_id"], name: "index_agent_calls_on_access_token_id"
+  end
+
+  create_table "agent_idempotency_keys", force: :cascade do |t|
+    t.integer "access_token_id", null: false
+    t.string "key", null: false
+    t.string "tool", null: false
+    t.json "response", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.index ["access_token_id", "key"], name: "index_agent_idempotency_keys_on_access_token_id_and_key", unique: true
+    t.index ["created_at"], name: "index_agent_idempotency_keys_on_created_at"
   end
 
   create_table "agreement_versions", force: :cascade do |t|
@@ -307,7 +332,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
 
   create_table "oauth_grants", force: :cascade do |t|
     t.integer "oauth_client_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.string "code_digest", null: false
     t.string "redirect_uri", null: false
     t.string "code_challenge", null: false
@@ -316,7 +341,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "read_only", default: false, null: false
+    t.integer "contact_id"
     t.index ["code_digest"], name: "index_oauth_grants_on_code_digest", unique: true
+    t.index ["contact_id"], name: "index_oauth_grants_on_contact_id"
     t.index ["oauth_client_id"], name: "index_oauth_grants_on_oauth_client_id"
     t.index ["user_id"], name: "index_oauth_grants_on_user_id"
   end
@@ -438,6 +465,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
     t.string "release_check_error"
     t.json "test_email", default: {}, null: false
     t.string "requests_email"
+    t.boolean "client_agent_approvals", default: true, null: false
   end
 
   create_table "todos", force: :cascade do |t|
@@ -492,9 +520,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "access_tokens", "contacts"
   add_foreign_key "access_tokens", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agent_calls", "access_tokens"
+  add_foreign_key "agent_idempotency_keys", "access_tokens"
   add_foreign_key "agreement_versions", "agreement_versions", column: "superseded_by_id"
   add_foreign_key "agreement_versions", "engagements"
   add_foreign_key "agreement_versions", "users", column: "sent_by_id"
@@ -520,6 +551,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_002100) do
   add_foreign_key "notes", "users", column: "author_id"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "creator_id"
+  add_foreign_key "oauth_grants", "contacts"
   add_foreign_key "oauth_grants", "oauth_clients"
   add_foreign_key "oauth_grants", "users"
   add_foreign_key "plugin_changes", "users", column: "requested_by_id"

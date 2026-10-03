@@ -1,0 +1,52 @@
+<%# locals: (token:, holder: nil) %>
+<%# One connection: what it is, whose (holder: for an owner's list of everyone's), whether it's
+    paused, and its recent calls (AgentCall) under Activity. %>
+<li class="flex flex-column gap-half txt-small" data-filter-target="item">
+  <div class="flex align-center gap-half">
+    <div class="txt-align-start overflow-ellipsis min-width">
+      <strong><%= token.name %></strong>
+      <% if token.paused? %>
+        <%= status_tag "Paused" %>
+      <% end %>
+      <div class="txt-x-small txt-subtle">
+        <% if holder %>
+          <%= token.client? ? "#{token.contact.name} (#{token.contact.client.name})" : token.holder_name %> ·
+        <% end %>
+        <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
+      </div>
+    </div>
+    <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+    <% if token.paused? %>
+      <%= button_to "Resume", settings_connected_app_pause_path(token), method: :delete, class: "btn txt-x-small" %>
+    <% else %>
+      <%= button_to "Pause", settings_connected_app_pause_path(token), class: "btn txt-x-small" %>
+    <% end %>
+    <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token), trigger_class: "txt-small",
+          message: "It stops working at once. Anything it already did stays, marked with its name." %>
+  </div>
+
+  <% calls = token.agent_calls.recent.limit(20) %>
+  <% if calls.any? %>
+    <details class="connected-app__activity">
+      <summary class="txt-x-small txt-subtle">Activity: the last <%= pluralize calls.size, "call" %></summary>
+      <ul class="connected-app__calls txt-x-small">
+        <% calls.each do |call| %>
+          <%# herb:key call.id %>
+          <li class="flex align-center gap-half">
+            <span class="txt-subtle txt-nowrap"><%= time_ago_in_words(call.created_at) %> ago</span>
+            <code><%= call.tool %></code>
+            <% if call.status == "error" %>
+              <span class="txt-negative"><%= call.code || "error" %></span>
+            <% elsif call.status == "needs_confirmation" %>
+              <span class="txt-subtle">asked first</span>
+            <% end %>
+            <span class="txt-subtle overflow-ellipsis min-width flex-item-grow"><%= call.summary %></span>
+            <% if call.duration_ms %>
+              <span class="txt-subtle txt-nowrap"><%= call.duration_ms %> ms</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </details>
+  <% end %>
+</li>

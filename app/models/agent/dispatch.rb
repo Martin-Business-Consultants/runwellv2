@@ -3,6 +3,10 @@
 # go in as Rails would parse them (booleans as the "1"/"0" a checkbox sends, files as uploads).
 # A write that succeeds is followed to the page it redirects to, so the answer carries the
 # record as it now stands.
+#
+# Around every call: a paused token is refused, a token over its rate is told to wait
+# (Agent::RateLimit), a write sent again with the same idempotency_key answers as the first did
+# instead of running twice, and the call is logged (AgentCall) for the person to see.
 module Agent
   class Dispatch
     def initialize(tool, arguments, token:, base_url:)
@@ -11,29 +15,69 @@ module Agent
 
     attr_reader :tool, :arguments
 
-    def call
-      return preview if tool.confirm && arguments["confirm"] != true
+    CONTROL_ARGUMENTS = %w[confirm idempotency_key].freeze
 
-      status, body = perform(tool.verb, tool.path_for(arguments), params_from(arguments.except(*tool.path_parameters, "confirm")))
-      if body["status"] == "ok" && !tool.read? && tool.follow && (followed = follow(body["path"]))
-        body["data"] = followed
-      end
-      body["status"] ||= status < 400 ? "ok" : "error"
-      if body["status"] == "error"
-        with_hint(body, body["code"] || Errors.code_for_status(status))
-      elsif body["status"] == "ok" && tool.next_tools.any?
-        body["next_tools"] = tool.next_tools
-        body["next"] = suggestions(body)
-      end
+    def call
+      started_at = Time.current
+      body = guarded { run }
+      AgentCall.record!(access_token, tool: tool.name, body: body, started_at: started_at) if access_token
       body
-    rescue ActionController::UrlGenerationError, ActionController::RoutingError => e
-      with_hint({ "status" => "error", "summary" => "Missing or wrong #{tool.path_parameters.join(", ")}: #{e.message.truncate(160)}" }, "usage")
-    rescue => e
-      Rails.error.report(e, context: { tool: tool.name })
-      with_hint({ "status" => "error", "summary" => "Something went wrong running #{tool.name}: #{e.message.truncate(200)}" }, "failed")
     end
 
     private
+      def access_token = defined?(@access_token) ? @access_token : (@access_token = AccessToken.authenticate(@token))
+
+      def guarded
+        if access_token&.paused?
+          with_hint({ "status" => "error", "summary" => "This connection is paused." }, "paused")
+        elsif RateLimit.exceeded?(access_token)
+          retry_after = RateLimit.retry_after
+          { "status" => "error", "code" => "rate_limited", "summary" => "Too many calls this minute.", "retry_after" => retry_after,
+            "hint" => Errors.hint("rate_limited", tool: tool.name, retry_after: retry_after) }
+        else
+          yield
+        end
+      end
+
+      def run
+        return preview if tool.confirm && arguments["confirm"] != true
+
+        key = arguments["idempotency_key"].to_s.presence unless tool.read?
+        if key && access_token && (prior = access_token.agent_idempotency_keys.find_by(key: key))
+          return prior.response.merge("replayed" => true) if prior.tool == tool.name
+
+          return with_hint({ "status" => "error", "summary" => "That idempotency_key was already used for #{prior.tool}. Use a new key for a new change." }, "usage")
+        end
+
+        answer.tap do |body|
+          if key && access_token && body["status"] == "ok"
+            access_token.agent_idempotency_keys.create!(key: key, tool: tool.name, response: body)
+          end
+        rescue ActiveRecord::RecordNotUnique
+          nil
+        end
+      end
+
+      def answer
+        status, body = perform(tool.verb, tool.path_for(arguments), params_from(arguments.except(*tool.path_parameters, *CONTROL_ARGUMENTS)))
+        if body["status"] == "ok" && !tool.read? && tool.follow && (followed = follow(body["path"]))
+          body["data"] = followed
+        end
+        body["status"] ||= status < 400 ? "ok" : "error"
+        if body["status"] == "error"
+          with_hint(body, body["code"] || Errors.code_for_status(status))
+        elsif body["status"] == "ok" && tool.next_tools.any?
+          body["next_tools"] = tool.next_tools
+          body["next"] = suggestions(body)
+        end
+        body
+      rescue ActionController::UrlGenerationError, ActionController::RoutingError => e
+        with_hint({ "status" => "error", "summary" => "Missing or wrong #{tool.path_parameters.join(", ")}: #{e.message.truncate(160)}" }, "usage")
+      rescue => e
+        Rails.error.report(e, context: { tool: tool.name })
+        with_hint({ "status" => "error", "summary" => "Something went wrong running #{tool.name}: #{e.message.truncate(200)}" }, "failed")
+      end
+
       def with_hint(body, code)
         body["code"] = code
         body["hint"] ||= Errors.hint(code, tool: tool.name)

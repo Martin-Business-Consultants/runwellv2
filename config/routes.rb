@@ -51,7 +51,9 @@ Rails.application.routes.draw do
       resource :deactivation, only: %i[create destroy], module: :people
     end
     resources :invitations, only: %i[create update destroy]
-    resources :connected_apps, only: %i[index create destroy]
+    resources :connected_apps, only: %i[index create destroy] do
+      resource :pause, only: %i[create destroy], module: :connected_apps
+    end
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
       resource :failures, only: :destroy, module: :updates

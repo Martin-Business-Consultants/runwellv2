@@ -33,10 +33,20 @@ module Authentication
 
     def bearer_request? = request.authorization.to_s.start_with?("Bearer ")
 
+    # Staff surfaces take staff tokens only: a client's token reaches the portal and nothing else.
     def authenticate_by_token
-      token = AccessToken.authenticate(request.authorization.to_s.delete_prefix("Bearer ").strip)
-      token&.used!
+      token = AccessToken.authenticate_staff(bearer_token)
+      return unless token
+      return refuse_paused_token if token.paused?
+
+      token.used!
       Current.access_token = token
+    end
+
+    def bearer_token = request.authorization.to_s.delete_prefix("Bearer ").strip
+
+    def refuse_paused_token
+      render json: { status: "error", code: "paused", summary: "This connection is paused.", hint: Agent::Errors.hint("paused") }, status: :forbidden
     end
 
     # 401 with a pointer to how to get a token (OAuth metadata, RFC 9728), so a connector can

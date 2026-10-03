@@ -24,26 +24,34 @@
         Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
       </p>
       <% if @tokens.any? %>
-        <ul class="settings__scrollable-list">
+        <ul class="settings__scrollable-list connected-apps">
           <% @tokens.each do |token| %>
             <%# herb:key token.id %>
-            <li class="flex align-center gap-half txt-small">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= token.name %></strong>
-                <div class="txt-x-small txt-subtle">
-                  <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
-                </div>
-              </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token), trigger_class: "txt-small",
-                    message: "It stops working at once. Anything it already did stays, marked as your agent via #{token.name}." %>
-            </li>
+            <%= render "settings/connected_apps/token", token: token %>
           <% end %>
         </ul>
       <% else %>
         <p class="txt-small txt-subtle margin-none">Nothing is connected yet.</p>
       <% end %>
     </section>
+
+    <% if @everyone&.any? %>
+      <section class="settings__section flex flex-column gap">
+        <header>
+          <h2 class="divider">Everyone’s connections <span class="txt-subtle"><%= @everyone.size %></span></h2>
+        </header>
+        <p class="txt-small txt-subtle margin-none">
+          Every app and token connected to Runwell by your team and by <%= term(:client, count: 2).downcase %>’ contacts. Pause one to stop it at once, or disconnect it.
+          Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
+        </p>
+        <ul class="settings__scrollable-list connected-apps">
+          <% @everyone.each do |token| %>
+            <%# herb:key token.id %>
+            <%= render "settings/connected_apps/token", token: token, holder: true %>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
 
     <section class="settings__section flex flex-column gap">
       <header>

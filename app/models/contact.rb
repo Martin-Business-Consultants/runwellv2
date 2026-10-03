@@ -3,6 +3,7 @@ class Contact < ApplicationRecord
 
   belongs_to :client
   has_many :portal_sessions, dependent: :destroy
+  has_many :access_tokens, dependent: :destroy
   has_many :approvals, dependent: :nullify
   has_many :approval_links, dependent: :destroy
   has_many :requests, dependent: :nullify

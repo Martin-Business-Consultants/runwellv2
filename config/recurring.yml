@@ -19,3 +19,6 @@ production:
   release_check:
     class: ReleaseCheckJob
     schedule: every day at 4am
+  agent_housekeeping:
+    class: AgentHousekeepingJob
+    schedule: every day at 3am
