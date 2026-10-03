@@ -3,7 +3,7 @@
 # Node: assets precompile with Ruby alone. Plugins aren't in the image: they live in the data
 # volume (RUNWELL_DATA_DIR/plugins), and the entrypoint compiles their assets on boot.
 
-ARG RUBY_VERSION=4.0.6
+ARG RUBY_VERSION=4.0.7
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 WORKDIR /rails
