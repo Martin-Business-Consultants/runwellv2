@@ -31,7 +31,8 @@ class AiSuggestion < ApplicationRecord
     parsed = response.content.is_a?(Hash) ? response.content : JSON.parse(response.content.to_s)
     update!(state: "ready", payload: parsed)
   rescue => error
-    update!(state: "failed", error: "#{error.class.name.demodulize}: #{error.message}".truncate(250))
+    model = ai_chat&.model_id || Setting.current.ai_model_for(fast: definition.fast)
+    update!(state: "failed", error: "#{Setting.current.ai_route_name(model)}: #{error.class.name.demodulize}: #{error.message}".truncate(300))
   end
 
   # The person uses it (with the items they ticked, for a list): applied with their permissions.

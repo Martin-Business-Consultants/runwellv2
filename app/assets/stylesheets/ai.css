@@ -115,15 +115,25 @@
     dd { margin: 0; overflow-wrap: anywhere; }
   }
 
+  /* One-click questions: a stack of full-width rows, each as tall as its words. */
   .ai-chat__prompts {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half);
+    flex-direction: column;
+    gap: var(--block-space-half);
 
     form { display: contents; }
   }
 
-  .ai-chat__prompt { text-align: start; white-space: normal; }
+  .btn.ai-chat__prompt {
+    block-size: auto;
+    inline-size: 100%;
+    justify-content: flex-start;
+    line-height: 1.35;
+    min-block-size: var(--btn-size);
+    padding-block: 0.5em;
+    text-align: start;
+    white-space: normal;
+  }
 
   .ai-chat__form {
     align-items: flex-end;

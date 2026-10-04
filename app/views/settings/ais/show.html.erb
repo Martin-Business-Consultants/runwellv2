@@ -70,14 +70,20 @@
     </section>
 
     <section class="settings__section flex flex-column gap-half" id="test">
-      <div class="flex align-center gap-half">
+      <div class="flex align-start gap-half">
         <%= button_to "Test the connection", settings_ai_test_path, class: "btn txt-small", disabled: !@setting.ai_ready? %>
-        <turbo-frame id="ai_test" class="txt-small">
+        <turbo-frame id="ai_test" class="txt-small flex flex-column gap-half">
           <% test = @setting.ai_test || {} %>
-          <% if test["error"].present? %>
-            <span class="txt-negative"><%= test["error"] %></span>
-          <% elsif test["ok_at"].present? %>
-            <span class="txt-subtle"><%= test["model"] %> answered “<%= test["reply"] %>” in <%= test["seconds"] %>s, <%= time_ago_in_words(Time.zone.parse(test["ok_at"])) %> ago.</span>
+          <% if test["results"].present? %>
+            <% test["results"].each do |result| %>
+              <%# herb:key result["model"] %>
+              <% if result["ok"] %>
+                <span class="txt-subtle"><%= icon_tag "check" %> <%= result["route"] %> answered in <%= result["seconds"] %>s.</span>
+              <% else %>
+                <span class="txt-negative"><%= result["route"] %>: <%= result["error"] %></span>
+              <% end %>
+            <% end %>
+            <span class="txt-x-small txt-subtle">Tested <%= time_ago_in_words(Time.zone.parse(test["at"])) %> ago.</span>
           <% elsif test["requested_at"].present? && Time.zone.parse(test["requested_at"]) > 2.minutes.ago %>
             <span class="txt-subtle" data-controller="poll" data-poll-interval-value="2">Asking <%= @setting.ai_provider_name %>…</span>
           <% end %>

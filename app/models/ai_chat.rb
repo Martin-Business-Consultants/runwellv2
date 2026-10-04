@@ -130,7 +130,7 @@ class AiChat < ApplicationRecord
       written_at = Time.current
     end
   rescue Ai::Unavailable, RubyLLM::Error, Faraday::Error, Timeout::Error => error
-    ai_messages.create!(role: "assistant", content: "I couldn’t answer: #{error.message.truncate(300)}")
+    ai_messages.create!(role: "assistant", content: "I couldn’t answer (#{Setting.current.ai_route_name(model_id)}): #{error.message.truncate(300)}")
   ensure
     update_columns(replying_since: nil, updated_at: Time.current)
   end

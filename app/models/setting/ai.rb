@@ -30,18 +30,28 @@ module Setting::Ai
   end
 
   # Which RubyLLM provider and wire protocol reach a model. One provider is one route, except
-  # OpenCode Zen, which serves each family of models its own way behind one key: Claude as
-  # Anthropic's Messages, GPT and Grok as OpenAI's Responses, Gemini as Google's, and the rest
-  # (DeepSeek, Kimi, GLM, Qwen…) as OpenAI chat completions.
+  # OpenCode Zen, which serves each family of models its own way behind one key (opencode.ai/docs/zen):
+  # Claude and most Qwen as Anthropic's Messages, GPT, Grok and Muse as OpenAI's Responses, Gemini
+  # as Google's, and the rest (DeepSeek, Kimi, GLM, MiniMax, Qwen3.8 Max, the free ones) as OpenAI
+  # chat completions.
   def ai_route(model_id)
     return { provider: ai_provider.to_sym, protocol: nil } unless ai_provider == "opencode"
 
     case model_id.to_s
-    when /\Aclaude/ then { provider: :anthropic, protocol: nil }
-    when /\A(gpt|grok|o\d)/ then { provider: :openai, protocol: nil }
+    when /\Aqwen3\.8-max/ then { provider: :openai, protocol: :chat_completions }
+    when /\A(claude|qwen)/ then { provider: :anthropic, protocol: nil }
+    when /\A(gpt|grok|muse|o\d)/ then { provider: :openai, protocol: nil }
     when /\Agemini/ then { provider: :gemini, protocol: nil }
     else { provider: :openai, protocol: :chat_completions }
     end
+  end
+
+  # How a model is reached, in words, for errors and the connection test.
+  def ai_route_name(model_id)
+    route = ai_route(model_id)
+    endpoint = { anthropic: "Anthropic Messages", gemini: "Google" }[route[:provider]] ||
+      (route[:protocol] == :chat_completions ? "chat completions" : (ai_provider == "openai" || ai_provider == "opencode" ? "OpenAI Responses" : nil))
+    [ model_id, ("through #{ai_provider_name.to_s.split(" (").first}#{"’s #{endpoint} endpoint" if endpoint}" if ai_provider == "opencode") ].compact.join(" ")
   end
 
   # A RubyLLM context with this install's provider settings, leaving the global config alone.

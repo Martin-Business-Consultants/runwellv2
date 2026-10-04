@@ -191,9 +191,11 @@
   }
 
   .sidenav__tools {
-    --btn-size: 2rem;
+    /* The foot's own icon buttons; not the buttons inside a dialog opened from it (the Ask panel,
+    /* the shortcut sheet), which keep their usual shape. */
+    > *, > .display-contents > * { --btn-size: 2rem; }
 
-    .btn {
+    .btn:not(dialog .btn) {
       --btn-background: transparent;
       --btn-border-size: 0;
       --btn-color: var(--color-ink-dark);
