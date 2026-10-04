@@ -34,8 +34,10 @@ class AiChat < ApplicationRecord
     raise Ai::Unavailable, "AI isn't set up: Settings > AI." unless setting.ai_ready?
 
     model = setting.ai_model_for(fast: fast)
-    register_model(model, setting.ai_provider)
-    new(user: user, contact: contact, subject: subject, purpose: purpose).with_model(model, provider: setting.ai_provider, assume_model_exists: true)
+    route = setting.ai_route(model)
+    register_model(model, route[:provider])
+    new(user: user, contact: contact, subject: subject, purpose: purpose)
+      .with_model(model, provider: route[:provider], protocol: route[:protocol], assume_model_exists: true)
   end
 
   # RubyLLM keeps a row per model its chats use. Runwell reads models from RubyLLM's bundled
@@ -72,6 +74,12 @@ class AiChat < ApplicationRecord
   end
 
   def portal? = contact.present?
+
+  # RubyLLM doesn't keep the wire protocol, so it's worked out again from the model (OpenCode Zen
+  # reaches some models by chat completions; everything else uses the provider's own).
+  def protocol
+    super || (Setting.current.ai_route(model_id)[:protocol] if Setting.current.ai_provider == "opencode")
+  end
 
   def replying? = replying_since.present? && replying_since > STUCK_AFTER.ago
 

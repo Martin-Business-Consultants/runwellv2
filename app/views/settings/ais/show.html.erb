@@ -34,7 +34,9 @@
         <%= form.label :ai_api_key, "API key", class: "record-form__label" %>
         <%= secret_field form, :ai_api_key, placeholder: @setting.ai_api_key.present? ? "Saved; paste a new one to replace it" : "From your provider’s console" %>
 
-        <%= form.label :ai_api_base, "Address (Ollama, or a compatible server)", class: "record-form__label" %>
+        <span class="record-form__hint">OpenCode Zen: paste your Zen key, and name models as Zen lists them (claude-sonnet-5, gpt-5.5, kimi-k2…); Runwell reaches each family the way Zen serves it. The main and fast models can be from different families.</span>
+
+        <%= form.label :ai_api_base, "Address (Ollama, or a compatible server; leave blank otherwise)", class: "record-form__label" %>
         <%= form.url_field :ai_api_base, class: "input full-width", placeholder: providers.dig("ollama", :base), autocomplete: "off" %>
 
         <div class="flex gap-half flex-wrap">

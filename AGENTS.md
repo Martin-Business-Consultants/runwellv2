@@ -586,7 +586,7 @@ The third way to use AI with Runwell, beside a local harness over MCP (coding be
 chat app over MCP: an assistant inside the app, through RubyLLM and its Rails integration
 (`acts_as_chat` on `AiChat`, `acts_as_message` on `AiMessage`; RubyLLM's tables keep tool calls,
 approvals and usage). Settings > AI (`Setting::Ai`) holds the provider, an encrypted key, models
-(a main and a fast one), a monthly budget in cents (`Ai.over_budget?`, summed from
+(a main and a fast one; with OpenCode Zen each model is reached its own family's way, `Setting#ai_route`), a monthly budget in cents (`Ai.over_budget?`, summed from
 `ruby_llm_usages`) and the switch; nothing is configured globally (`Setting#ai_context`). A client
 can be kept out of AI (`Client#ai_excluded`, a person's call, never an agent's).
 
