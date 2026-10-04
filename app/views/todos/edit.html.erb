@@ -81,6 +81,10 @@
       </dl>
     </section>
 
+    <% if @todo.status_was != "done" %>
+      <%= render "todos/make_commitment", todo: @todo %>
+    <% end %>
+
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Remove this work", title: "Remove #{@todo.title_was}?",
             body: "It comes off the engagement and the client’s portal. Its history stays.",

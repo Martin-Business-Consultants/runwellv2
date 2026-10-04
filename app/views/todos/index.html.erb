@@ -19,6 +19,7 @@
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + todo_owner_options %>
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
     <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due date" %>
+    <%= bulk_menu bulk_todos_commitments_path, method: :post, name: "owner_kind", label: "Make #{term(:commitment, count: 2).downcase}", choices: [ [ "We promised", "us" ], [ "They promised", "client" ] ] %>
   <% end %>
   <% end %>
 <% end %>

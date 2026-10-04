@@ -1,0 +1,18 @@
+<%# locals: (todo:) %>
+<%# Work that was really a promise ("Send the invoice by Friday") becomes a commitment on the client:
+    who promised and by when, then Todos::CommitmentsController converts it (Todo#convert_to_commitment!). %>
+<section class="settings__section flex flex-column gap-half">
+  <details>
+    <summary class="btn txt-small"><%= icon_tag "bookmark" %> Make this a <%= term(:commitment).downcase %></summary>
+    <%= form_with url: todo_commitment_path(todo), class: "flex flex-column gap-half txt-small", data: { turbo_action: "advance" } do |form| %>
+      <p class="txt-subtle margin-none">For a promise with a date rather than <%= term(:work).downcase %> to do. Its notes and documents move to <%= todo.engagement.ref %>.</p>
+      <label class="flex align-center gap-half"><%= form.radio_button :owner_kind, "us", checked: true %> <span>We promised it</span></label>
+      <label class="flex align-center gap-half"><%= form.radio_button :owner_kind, "client" %> <span><%= todo.engagement.client.name %> promised it</span></label>
+      <label class="flex flex-column gap-half">
+        <span class="record-form__label">By</span>
+        <%= date_input_tag "due_on", todo.due_on || 1.week.from_now.to_date, class: "input" %>
+      </label>
+      <div><button type="submit" class="btn btn--link txt-small">Make it a <%= term(:commitment).downcase %></button></div>
+    <% end %>
+  </details>
+</section>

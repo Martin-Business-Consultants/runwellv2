@@ -90,6 +90,10 @@
       </dl>
     </section>
 
+    <% if @todo.status != "done" %>
+      <%= render "todos/make_commitment", todo: @todo %>
+    <% end %>
+
     <%= render "events/timeline", subject: @todo %>
   </aside>
 </section>

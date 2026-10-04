@@ -29,7 +29,9 @@ Rails.application.routes.draw do
 
   # Many records at once, from a table's selection (BulkAction).
   namespace :bulk do
-    resource :todos, path: "work", only: %i[update destroy]
+    resource :todos, path: "work", only: %i[update destroy] do
+      resource :commitments, only: :create, module: :todos
+    end
     resource :clients, only: %i[update destroy]
     resource :engagements, only: :destroy do
       resource :closure, only: :create, module: :engagements
@@ -170,6 +172,7 @@ Rails.application.routes.draw do
   end
   resources :todos, path: "work", only: %i[index show edit update destroy] do
     get :brief, on: :member
+    resource :commitment, only: :create, module: :todos
   end
   get "todos(/*rest)", format: false, to: redirect { |params, request|
     [ "/work", params[:rest] ].compact.join("/") + (request.query_string.present? ? "?#{request.query_string}" : "")
