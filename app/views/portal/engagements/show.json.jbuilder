@@ -1,4 +1,4 @@
-json.summary "#{@engagement.ref} #{@engagement.title}: #{@engagement.state.humanize.downcase}#{"; an agreement awaits your decision" if @pending}"
+json.summary "#{@engagement.ref} #{@engagement.title}: #{@engagement.state_label.downcase}#{"; an agreement awaits your decision" if @pending}"
 json.engagement do
   json.merge! portal_agent_ref(@engagement)
   json.extract! @engagement, :title

@@ -11,7 +11,7 @@
   <% content_for :index_bulk do %>
   <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_engagements_path, noun: term(:engagement, count: 2).downcase, message: "Only those never sent to the client are deleted; sent ones are skipped (close them instead).") : nil) do %>
     <% if can?(:close_engagements) %>
-      <%= bulk_button bulk_engagements_closure_path, method: :post, label: "Close" %>
+      <%= bulk_menu bulk_engagements_closure_path, method: :post, name: "outcome", label: "Close as", choices: [ [ "Completed", "completed" ], [ "Cancelled", "cancelled" ] ] %>
     <% end %>
   <% end %>
   <% end %>
@@ -27,7 +27,7 @@
           <%= render "layouts/shared/card", path: engagement_path(engagement), title: engagement.title, id_label: engagement.ref,
                 context: engagement.client.name,
                 meta: [ engagement.label_name, engagement_amount(engagement) ].compact,
-                status: engagement.state.humanize, highlight: engagement.active? %>
+                status: engagement.state_label, highlight: engagement.active? %>
         <% end %>
       <% end %>
     </div>
@@ -52,7 +52,7 @@
             <% if prices_on? %>
               <td class="data-table__number"><%= engagement_amount(engagement) %></td>
             <% end %>
-            <td><%= status_tag engagement.state.humanize, highlight: engagement.active? %></td>
+            <td><%= status_tag engagement.state_label, highlight: engagement.active? %></td>
             <% listed.each do |field| %>
               <%# herb:key field.id %>
               <td class="txt-subtle"><%= custom_field_text(field, engagement.custom_value(field)) %></td>

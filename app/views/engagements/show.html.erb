@@ -72,7 +72,7 @@
         <h2 class="divider">Details</h2>
       </header>
       <dl class="record-facts">
-        <dt>Status</dt><dd><%= status_tag @engagement.state.humanize, highlight: @engagement.active? %></dd>
+        <dt>Status</dt><dd><%= status_tag @engagement.state_label, highlight: @engagement.active? %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
         <dt>Type</dt><dd><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></dd>
         <% unless @engagement.internal? %>
@@ -81,17 +81,23 @@
           <% end %>
         <% end %>
         <% if @engagement.closed? %>
-          <dt>Closed</dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>
+          <dt><%= @engagement.state_label %></dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>
         <% end %>
       </dl>
       <%= render "custom_fields/values", record: @engagement %>
+      <% if can?(:close_engagements) %>
+        <% if @engagement.closed? %>
+          <%= button_to reopen_engagement_path(@engagement), class: "btn txt-small", form_class: "engagement-finish" do %>
+            <%= icon_tag "refresh" %> <span>Reopen</span>
+          <% end %>
+        <% else %>
+          <%= render "engagements/close", engagement: @engagement %>
+        <% end %>
+      <% end %>
     </section>
 
     <%= render "events/timeline", subject: @engagement %>
 
-    <% if !@engagement.closed? && can?(:close_engagements) %>
-      <%= render "engagements/close", engagement: @engagement %>
-    <% end %>
     <% if @engagement.closed? && can?(:erase_engagements) %>
       <%= render "engagements/erase", engagement: @engagement %>
     <% end %>

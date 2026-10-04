@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_211907) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -300,6 +300,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_211907) do
     t.integer "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "close_outcome"
     t.index ["client_id"], name: "index_engagements_on_client_id"
     t.index ["created_by_id"], name: "index_engagements_on_created_by_id"
     t.index ["ref"], name: "index_engagements_on_ref", unique: true

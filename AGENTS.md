@@ -77,6 +77,11 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    hides it, the first-run checklist (`Setup`, `briefings/_setup`) checks itself off from what
    exists
 
+An engagement ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
+`Engagement#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
+(`reopen!`, `engagement.reopened`) puts it back. Work that was really a promise converts to a
+commitment (`Todo#convert_to_commitment!`, refused while a plugin keeps records on it).
+
 Rules the code enforces: sent versions, approvals and events are immutable (the one exception:
 an owner erasing a closed engagement for good, `Engagement#erase!`, typing its ref; the client
 keeps an `engagement.erased` event);
@@ -328,6 +333,7 @@ one place they are documented for people: add a new key there.
 | `g` + `h c e w b m r n s` | Home, clients, engagements, work, board, commitments, requests, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
+| `p`, `i` | Add a commitment (the quick action, on the record on screen), ask AI |
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
@@ -419,8 +425,8 @@ described in `docs/plugins.md`.
 
 The tray at the bottom right (`A`, `quick_actions/_tray`) is Fizzy's tray. At the top of the
 fan is a record picker (Fizzy's filter + combobox) set to the record on screen
-(`current_record`) and able to pick any other; below it, one entry per action: Note and
-Document in the core, plus any a plugin registers
+(`current_record`) and able to pick any other; below it, one entry per action: Note,
+Document and Commitment in the core (`p` opens Commitment's straight away), plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal
 (`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. Documents

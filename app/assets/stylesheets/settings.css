@@ -999,3 +999,8 @@
     }
   }
 }
+
+/* Finishing an engagement, under its Details: Mark complete or Cancel, or Reopen once closed. */
+@layer components {
+  .engagement-finish { margin-block-start: var(--block-space-half); }
+}

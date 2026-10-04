@@ -6,6 +6,8 @@
 <% record = current_record %>
 <section class="tray tray--actions" data-controller="dialog" data-dialog-sizing-value="false" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>
+  <%# p opens the commitment form straight away, on the record on screen. %>
+  <a href="<%= new_quick_action_path(kind: "commitment", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="p" class="for-screen-reader">Add a <%= term(:commitment).downcase %></a>
 
   <dialog class="tray__dialog" aria-label="Quick actions" data-dialog-target="dialog">
     <% QuickAction.all.each do |action| %>

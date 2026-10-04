@@ -1,0 +1,16 @@
+<%# locals: (form_id:) %>
+<%# A commitment from anywhere (p, or the tray): who will do what by when, on the record picked above. %>
+<%= form_with model: Commitment.new, url: commitments_path, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <div class="flex flex-wrap gap-half">
+    <label class="flex align-center gap-half"><%= form.radio_button :owner, "us", checked: true %> <span>We will</span></label>
+    <label class="flex align-center gap-half"><%= form.radio_button :owner, "client" %> <span>They will</span></label>
+  </div>
+  <%= form.text_field :description, required: true, class: "input full-width", autocomplete: "off", placeholder: "send the invoice", autofocus: true, aria: { label: "What" } %>
+  <div class="flex flex-wrap gap-half">
+    <label class="flex align-center gap-half flex-item-grow"><span>By</span> <%= date_input form, :due_on, required: true, value: 1.week.from_now.to_date, class: "input" %></label>
+    <%= form.text_field :source, class: "input flex-item-grow", autocomplete: "off", placeholder: "Where it was said (optional)" %>
+  </div>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Add <%= term(:commitment).downcase %></button>
+  </div>
+<% end %>

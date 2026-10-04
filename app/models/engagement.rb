@@ -103,11 +103,30 @@ class Engagement < ApplicationRecord
     end
   end
 
-  def close!(reason: nil, actor: Current.user, source: Current.source || "app")
+  # How it ended: completed (delivered) or cancelled (stopped before then). Either way it's closed.
+  CLOSE_OUTCOMES = %w[completed cancelled].freeze
+
+  def close!(reason: nil, outcome: "completed", actor: Current.user, source: Current.source || "app")
+    outcome = outcome.presence_in(CLOSE_OUTCOMES) || "completed"
     transaction do
-      update!(closed_at: Time.current, close_reason: reason)
-      record_event!("engagement.closed", actor: actor, source: source, payload: { reason: reason })
+      update!(closed_at: Time.current, close_reason: reason, close_outcome: outcome)
+      record_event!("engagement.closed", actor: actor, source: source, payload: { outcome: outcome, reason: reason })
     end
+  end
+
+  # Closed by mistake, or work starting again: open as it was, its history keeping both.
+  def reopen!(actor: Current.user, source: Current.source || "app")
+    transaction do
+      update!(closed_at: nil, close_reason: nil, close_outcome: nil)
+      record_event!("engagement.reopened", actor: actor, source: source)
+    end
+  end
+
+  # The state in words: "Completed" or "Cancelled" once closed, else the state itself.
+  def state_label
+    return (close_outcome.presence || "closed").humanize if closed?
+
+    state.humanize
   end
 
   def label_name = Setting.current.label_name(label)

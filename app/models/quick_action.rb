@@ -16,7 +16,11 @@ class QuickAction
 
   CORE = [
     new(key: :note, label: "Note", icon: "comment", partial: "quick_actions/note"),
-    new(key: :document, label: "Document", icon: "attachment", partial: "quick_actions/document")
+    new(key: :document, label: "Document", icon: "attachment", partial: "quick_actions/document"),
+    # A promise with a date (p): on a client or engagement; work, a scope item or a request take
+    # its engagement, or its client.
+    new(key: :commitment, label: "Commitment", title: "Add a commitment", icon: "bookmark", partial: "quick_actions/commitment",
+      types: %w[Client Engagement], context: ->(record) { record.try(:engagement) || record.try(:client) })
   ].freeze
 
   class << self

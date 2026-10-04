@@ -9,7 +9,7 @@
     <h1 class="page-title"><%= @page_title %></h1>
     <section class="settings__section">
       <div class="flex flex-wrap align-center gap">
-        <%= status_tag @engagement.state.humanize, highlight: @engagement.active? %>
+        <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
         <span class="txt-small txt-subtle"><%= @engagement.label_name %></span>
         <% if priced_engagement?(@engagement) %>
           <strong class="txt-small">Agreed <%= engagement_amount(@engagement, per: " per period") %></strong>

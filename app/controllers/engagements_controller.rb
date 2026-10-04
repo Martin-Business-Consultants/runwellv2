@@ -1,7 +1,7 @@
 class EngagementsController < ApplicationController
   allow_staff
   require_permission :delete_records, only: :destroy
-  require_permission :close_engagements, only: :close
+  require_permission :close_engagements, only: %i[close reopen]
   agent_tool :list_engagements, on: :index, title: "List engagements",
     description: "By derived state: approved (the default: agreed and not closed), open (every open one), draft, sent, changes_requested, closed or all.",
     params: { state: Engagement::FILTERS, label: Engagement::LABELS + %w[all] }
@@ -16,9 +16,12 @@ class EngagementsController < ApplicationController
     params: { engagement: { title: "string", description: "text", estimate_notes: "text", label: Engagement::LABELS, shape: Engagement::SHAPES, custom_fields: {} } }
   agent_tool :delete_engagement, on: :destroy, title: "Delete an engagement",
     description: "Only while nothing was ever sent to the client: its draft, work and notes go with it."
-  agent_tool :close_engagement, on: :close, title: "Close an engagement", params: { reason: "string" }
+  agent_tool :close_engagement, on: :close, title: "Mark an engagement complete, or cancel it",
+    description: "outcome: completed (delivered; the default) or cancelled (stopped before then). Either way it's closed: off the open list, its agreement and history kept.",
+    params: { outcome: Engagement::CLOSE_OUTCOMES, reason: "string" }
+  agent_tool :reopen_engagement, on: :reopen, title: "Reopen a closed engagement"
 
-  before_action :set_engagement, only: %i[show edit update destroy close]
+  before_action :set_engagement, only: %i[show edit update destroy close reopen]
 
   sortable_columns ref: "engagements.ref", title: "engagements.title", type: "engagements.label",
     client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ]
@@ -77,8 +80,15 @@ class EngagementsController < ApplicationController
   end
 
   def close
-    @engagement.close!(reason: params[:reason].presence)
-    redirect_to @engagement, notice: "#{@engagement.ref} closed."
+    @engagement.close!(reason: params[:reason].presence, outcome: params[:outcome])
+    redirect_to @engagement, notice: "#{@engagement.ref} #{@engagement.close_outcome}."
+  end
+
+  def reopen
+    return redirect_to(@engagement, alert: "#{@engagement.ref} is open.") unless @engagement.closed?
+
+    @engagement.reopen!
+    redirect_to @engagement, notice: "#{@engagement.ref} is open again."
   end
 
   private

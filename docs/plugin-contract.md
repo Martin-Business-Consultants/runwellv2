@@ -107,7 +107,8 @@ Every `Event` is published from a job after it's saved, never inside the request
 `Current.user`: read who did it from `event.actor_user` / `event.actor`, and where from
 `event.source`. Its `subject` is the record and `kind` one of:
 
-`client.created`, `engagement.created`, `engagement.closed`, `engagement.erased`,
+`client.created`, `engagement.created`, `engagement.closed` (payload `outcome`: completed or
+cancelled, since 2.17), `engagement.reopened` (2.17), `engagement.erased`, `todo.converted` (2.17),
 `agreement.sent`, `agreement.emailed`, `agreement.approved`, `agreement.changes_requested`,
 `todo.created`, `todo.status`, `commitment.added`, `commitment.done`, `commitment.missed`,
 `commitment.dropped`, `request.received`, `request.replied`, `request.promoted`,

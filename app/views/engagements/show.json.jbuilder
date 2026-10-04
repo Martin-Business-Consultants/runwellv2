@@ -1,4 +1,4 @@
-json.summary "#{@engagement.ref} #{@engagement.title}: #{@engagement.state.humanize.downcase}"
+json.summary "#{@engagement.ref} #{@engagement.title}: #{@engagement.state_label.downcase}"
 json.engagement do
   json.partial! "engagements/engagement", engagement: @engagement
   json.description agent_text(@engagement.description)

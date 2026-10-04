@@ -29,7 +29,11 @@ class CommitmentsController < ApplicationController
   end
 
   def create
-    parent = params[:engagement_ref] ? Engagement.find_by_ref!(params[:engagement_ref]) : Client.find(params[:client_id])
+    parent =
+      if params[:engagement_ref] then Engagement.find_by_ref!(params[:engagement_ref])
+      elsif params[:client_id] then Client.find(params[:client_id])
+      else QuickAction.locate(params[:record], %w[Client Engagement]) # the quick action modal (p)
+      end
     client = parent.is_a?(Engagement) ? parent.client : parent
     commitment = client.commitments.new(commitment_params)
     commitment.source = commitment.source.presence || Current.source

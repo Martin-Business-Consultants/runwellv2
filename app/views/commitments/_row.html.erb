@@ -10,7 +10,7 @@
   <td><%= status_tag(commitment.overdue? ? "Overdue" : (commitment.resolution&.humanize || "Open"), highlight: commitment.resolution == "done") %></td>
   <td>
     <% if commitment.open? %>
-      <details>
+      <details class="row-menu">
         <summary class="btn txt-x-small">Resolve</summary>
         <%= form_with url: resolve_commitment_path(commitment), class: "flex flex-wrap align-center gap-half txt-small margin-block-start-half", data: { controller: "form" } do |form| %>
           <%= form.text_field :note, class: "input", autocomplete: "off", placeholder: "Note (optional)" %>

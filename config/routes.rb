@@ -151,7 +151,10 @@ Rails.application.routes.draw do
   end
 
   resources :engagements, param: :ref do
-    member { post :close }
+    member do
+      post :close
+      post :reopen
+    end
     resource :erasure, only: :create, module: :engagements
     resources :agreement_versions, only: %i[create update destroy], shallow: true do
       member do
@@ -189,7 +192,7 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :commitments, only: %i[index edit update destroy] do
+  resources :commitments, only: %i[index create edit update destroy] do
     member { post :resolve }
   end
   resources :requests do

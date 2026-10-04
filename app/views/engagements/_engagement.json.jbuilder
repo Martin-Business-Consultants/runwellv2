@@ -2,6 +2,8 @@ json.merge! agent_ref(engagement)
 json.extract! engagement, :title, :label, :shape
 json.type_name engagement.label_name
 json.state engagement.state
+json.state_label engagement.state_label
+json.close_outcome engagement.close_outcome if engagement.closed?
 json.internal engagement.internal?
 json.agreed_amount money(engagement.agreed_amount_cents)
 json.agreed_amount_cents engagement.agreed_amount_cents
