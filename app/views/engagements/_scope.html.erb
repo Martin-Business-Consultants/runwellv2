@@ -11,10 +11,8 @@
 <% everything = statuses.values.flatten %>
 <% filters = request.query_parameters.slice("work") %>
 
+<%# Under the sidebar's Scope items tab (engagements/_sidebar), which names it. %>
 <section class="settings__section flex flex-column gap-half">
-  <header>
-    <h2 class="divider"><%= term(:scope_item, count: 2) %></h2>
-  </header>
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= engagement_path(engagement, filters.merge(tab: "work")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
       <span class="scope-nav__name">All <%= term(:work).downcase %></span>

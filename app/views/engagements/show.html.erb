@@ -53,7 +53,6 @@
         <div class="txt-small txt-subtle"><strong>Estimate notes (internal):</strong> <%= rich_text @engagement.estimate_notes %></div>
       <% end %>
 
-      <%= render "custom_fields/values", record: @engagement %>
     </section>
 
     <turbo-frame id="record_tab" target="_top">
@@ -85,7 +84,7 @@
   <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
 
     <%= render "layouts/shared/sidebar_toggle" %>
-    <%= render "engagements/scope", engagement: @engagement, current: (tab == "work" ? (@work_item || "all") : nil) %>
+    <%= render "engagements/sidebar", engagement: @engagement, current: (tab == "work" ? (@work_item || "all") : nil) %>
 
     <% if can?(:close_engagements) %>
       <section class="settings__section">

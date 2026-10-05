@@ -543,10 +543,25 @@
 
     &:hover { color: var(--color-ink); }
 
-    &[aria-current="page"] {
+    &[aria-current="page"],
+    &[aria-pressed="true"] {
       border-block-end-color: var(--color-link);
       color: var(--color-ink);
     }
+  }
+
+  /* Tabs that switch in place (ReActionView state) rather than by link: an engagement's sidebar. */
+  button.record-tabs__tab {
+    background: none;
+    border-block-start: 0;
+    border-inline: 0;
+    border-radius: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .sidebar-tabs {
+    margin-block-end: calc(var(--block-space-half) * -1);
   }
 
   .record-tabs__count {
@@ -978,7 +993,8 @@
   .settings__panel--side {
     position: relative;
 
-    > .settings__section:first-of-type > header {
+    > .settings__section:first-of-type > header,
+    > .sidebar-tabs {
       padding-inline-end: 2rem;
     }
   }

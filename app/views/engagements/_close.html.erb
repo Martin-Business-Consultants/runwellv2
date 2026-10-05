@@ -5,9 +5,12 @@
     optional note. Either closes it: off the open list, its agreement and history kept. Both forms
     are always on the page and state only shows one, so opening them never waits on the server. %>
 <div class="engagement-finish" data-controller="state-focus" data-state-focus-state-value="closing">
-  <div class="flex flex-wrap gap-half" hidden="<%= closing != "" %>">
+  <div class="flex align-center gap-half justify-space-between" hidden="<%= closing != "" %>">
     <button type="button" class="btn txt-small" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-    <button type="button" class="btn btn--plain txt-small txt-negative" data-herb-set="closing=cancelled"><span>Cancel it</span></button>
+    <button type="button" class="btn btn--circle borderless txt-small txt-negative" title="Cancel <%= engagement.ref %>" data-herb-set="closing=cancelled">
+      <%= icon_tag "close-circle" %>
+      <span class="for-screen-reader">Cancel <%= engagement.ref %></span>
+    </button>
   </div>
 
   <div hidden="<%= closing != "completed" %>">
