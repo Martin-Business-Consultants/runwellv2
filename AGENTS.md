@@ -139,7 +139,8 @@ Reach for these in order, and stop at the first that fits:
    opens, closes, switches or reveals. Declare it in the template with
    `<%# herb:state (open: false) %>`, change it with `data-herb-toggle`,
    `data-herb-set`, `data-herb-reset`, `data-herb-increment` or
-   `data-herb-decrement`, and read it with plain `<% if open %>`. See
+   `data-herb-decrement`, and read it with plain `<% if open %>` around plain markup, or
+   `hidden="<%= !open %>"` around anything with Ruby output. See
    `layouts/shared/_confirm.html.erb`
 2. **A Fizzy Stimulus controller** for behavior markup can't express (focus,
    hotkeys, submitting on change). Copy it from
@@ -147,6 +148,27 @@ Reach for these in order, and stop at the first that fits:
    controller that needs template state uses ReActionView's `useState(this)`
    instead of touching the DOM
 3. **A new Stimulus controller** only when neither of the above fits
+
+Every state change must run in the browser, never wait on the server: reads in the shapes the
+client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-reads`), in
+`<%# herb:slots client %>` templates. A branch holding Ruby output (a path, a form, a CSRF token)
+makes every toggle re-run the whole controller action and page, so a form opened in place is
+always rendered and only hidden: `<div hidden="<%= !open %>">` around it,
+`hidden="<%= open %>"` on its trigger, and `aria-pressed="<%= tab == "todo" %>"` for a pressed
+choice, never a class picked by `if` (`layouts/shared/_confirm`, `engagements/_close`,
+`requests/_triage`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
+wrapper carries `data-controller="state-focus" data-state-focus-state-value="open"`, which focuses
+it when the state changes (the guide's `useState` pattern). Esc closes it, even from a field: its
+Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
+focuses its `autofocus` field.
+
+JavaScript that should follow elements as they come and go is a ReActionView behavior
+(`app/javascript/behaviors`, one file per attribute, listed in `behaviors/index.js`), not a
+controller or a document listener.
+
+`<Async>` / `<Lazy>` (deferred content) re-run the controller action and render only their block,
+which the server finds in the action's own template: they work only there, never in a partial or
+a loop, and pay off only when the block is slow (measure; the History timeline isn't).
 
 Every trash icon opens Fizzy's modal delete dialog,
 `render "layouts/shared/delete_dialog", name:, path:, message:` — never a native
@@ -251,9 +273,9 @@ ReActionView rules:
   `<%# locals: (client:) %>`, or `<%# locals: () %>` when it takes none.
   Render partials by full path (`render "clients/form"`,
   `render partial: "clients/client", collection: @clients`)
-- A template with state names its rendering mode above the state:
-  `<%# herb:slots server %>` when a branch holds Ruby output (paths, forms,
-  CSRF tokens), `<%# herb:slots client %>` when branches are plain markup
+- A template with state names its rendering mode above the state: `<%# herb:slots client %>`,
+  with forms hidden rather than branched (above). `<%# herb:slots server %>` only where a state
+  change truly needs Ruby
 - Key every loop: put `<%# herb:key record.id %>` on the line before each
   row. Without it a list that re-renders for a state change (a filter)
   keeps its old rows
@@ -270,9 +292,13 @@ ReActionView rules:
 - Don't mix a Ruby condition and a state read in one `if`/`elsif` chain
   (`if engagement.draft_version … elsif starting`): the state change is
   never sent. Nest the state `if` inside the Ruby one
-- State in attributes isn't reactive (`<% if open %>hidden<% end %>` never
-  updates), and state in a partial rendered once per row can't be told apart
-  between rows. For a per-row or inline "add / resolve" form, use a native
+- State in attributes is reactive: `hidden="<%= !open %>"` (dropped while false),
+  `aria-pressed="<%= tab == "todo" %>"` and `<% if open %>hidden<% end %>` update in the browser;
+  `class="<%= "x" if tab == "todo" %>"` updates too, but only by asking the server. Never render a
+  partial with state more than once on a page: ReActionView 0.6 sends the server only the first
+  copy's state (`steering()` keys by file), so the others' toggles do nothing
+  (`agreement_versions/_sent`, once per version; `settings/plugins/_plugin` shows its switch by
+  CSS `:has(:checked)` instead). For a per-row or inline "add / resolve" form, use a native
   `<details>` with a button-styled `<summary>`, which the morph after submit
   closes again (`commitments/_commitment`)
 - Several forms for the same model on one page take

@@ -1,16 +1,17 @@
 <%# locals: (engagement:) %>
-<%# herb:slots server %>
+<%# herb:slots client %>
 <%# herb:state (starting: false) %>
-<div class="txt-align-center margin-block-start">
+<%# The form is always on the page and state only shows it, so opening it never waits on the server. %>
+<div class="txt-align-center margin-block-start" data-controller="state-focus" data-state-focus-state-value="starting">
   <%# Nothing to start while a draft is open: finish or discard it first. %>
   <% if engagement.draft_version.nil? %>
-    <% if starting %>
-      <% kinds = new_version_kinds(engagement) %>
+    <% kinds = new_version_kinds(engagement) %>
+    <div hidden="<%= !starting %>">
       <%= form_with url: engagement_agreement_versions_path(engagement), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
         <h3 class="txt-medium font-weight-bold margin-none">Start a new version</h3>
         <label class="flex flex-column gap-half">
           <span class="record-form__label">Kind</span>
-          <%= form.select :kind, kinds, {}, class: "input input--select full-width" %>
+          <%= form.select :kind, kinds, {}, autofocus: true, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
           <span class="record-form__label">Summary</span>
@@ -21,15 +22,14 @@
           <%= rich_text_field form, :reason, placeholder: "Why this is changing, in the client’s words if you have them.", staff: true %>
         </label>
         <div class="flex gap-half justify-center">
-          <button type="button" class="btn" data-herb-reset="starting">Cancel</button>
+          <button type="button" class="btn" data-keys="esc" data-herb-reset="starting">Cancel</button>
           <button type="submit" class="btn btn--link">Start draft</button>
         </div>
       <% end %>
-    <% else %>
-      <button type="button" class="btn btn--link txt-small" data-herb-toggle="starting">
-        <%= icon_tag "add" %>
-        <span><%= engagement.agreement_versions.none? ? "Start the agreement" : (engagement.recurring? ? "Start a revision or add-on" : "Start a change order") %></span>
-      </button>
-    <% end %>
+    </div>
+    <button type="button" class="btn btn--link txt-small" data-herb-toggle="starting" hidden="<%= starting %>">
+      <%= icon_tag "add" %>
+      <span><%= engagement.agreement_versions.none? ? "Start the agreement" : (engagement.recurring? ? "Start a revision or add-on" : "Start a change order") %></span>
+    </button>
   <% end %>
 </div>

@@ -4,7 +4,7 @@
     it, answered with just this picker (ClientsController#update). %>
 <% label = client.status.humanize %>
 <div class="row-picker" id="<%= dom_id(client, :status) %>" data-controller="dialog fixed-popup picker" data-dialog-orient-value="false"
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
+  data-action="keydown.esc->dialog#close picker:chosen->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
   <button type="button" class="status-tag-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
     <span class="display-contents" data-picker-target="display" data-picker-part="tag"><%= status_tag client.status, highlight: client.status == "active" %></span>
     <span class="for-screen-reader">Status of <%= client.name %>: <%= label %>. Change it</span>

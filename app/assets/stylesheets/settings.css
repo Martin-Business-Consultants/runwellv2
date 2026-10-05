@@ -228,6 +228,12 @@
     --panel-padding: var(--block-space);
     --panel-size: 100%;
     --panel-border-radius: calc(0.75em * var(--radius-scale, 1));
+
+    /* Active or Dormant follows the switch the moment it flips, before the save lands. */
+    &:has(.switch__input:checked) .plugin-card__dormant,
+    &:not(:has(.switch__input:checked)) .plugin-card__active {
+      display: none;
+    }
   }
 }
 

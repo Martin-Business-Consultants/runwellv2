@@ -175,7 +175,9 @@
     --btn-icon-size: 0.7em;
   }
 
-  .btn--reversed {
+  /* A pressed toggle (aria-pressed, e.g. the triage choices) looks reversed. */
+  .btn--reversed,
+  .btn[aria-pressed="true"] {
     --btn-background: var(--color-ink);
     --btn-border-color: var(--color-ink);
     --btn-color: var(--color-canvas);

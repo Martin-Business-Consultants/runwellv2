@@ -12,7 +12,7 @@
 <% end %>
 <div class="row-picker owner-picker" id="<%= dom_id(todo, labelled ? :owner_labelled : :owner) %>" data-controller="dialog fixed-popup filter picker" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
   data-picker-current-value="<%= todo.owner_id %>" data-picker-options-value="todo-owner-options"
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:show->picker#fill dialog:close->fixed-popup#close dialog:close->filter#clearInput">
+  data-action="keydown.esc->dialog#close picker:chosen->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:show->picker#fill dialog:close->fixed-popup#close dialog:close->filter#clearInput">
   <button type="button" class="owner-picker__trigger" title="<%= label %>: click to reassign" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
     <span class="display-contents" data-picker-target="display" data-picker-part="avatar">
       <% if owner %>

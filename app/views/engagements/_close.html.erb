@@ -1,28 +1,38 @@
 <%# locals: (engagement:) %>
-<%# herb:slots server %>
+<%# herb:slots client %>
 <%# herb:state (closing: "") %>
 <%# Finishing an engagement: Mark complete (delivered) or Cancel (stopped before then), each with an
-    optional note. Either closes it: off the open list, its agreement and history kept. %>
-<div class="engagement-finish">
-  <% if closing == "" %>
-    <div class="flex flex-wrap gap-half">
-      <button type="button" class="btn txt-small" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-      <button type="button" class="btn btn--plain txt-small txt-negative" data-herb-set="closing=cancelled"><span>Cancel it</span></button>
-    </div>
-  <% else %>
-    <%= form_with url: close_engagement_path(engagement), class: "flex flex-column gap-half txt-small" do |form| %>
-      <strong><%= closing == "completed" ? "Mark #{engagement.ref} complete?" : "Cancel #{engagement.ref}?" %></strong>
-      <span class="txt-subtle"><%= closing == "completed" ? "Delivered and done." : "Stopped before it was delivered." %> It leaves the open list; the agreement and its history stay, and it can be reopened.</span>
-      <input type="hidden" name="outcome" value="<%= closing %>">
+    optional note. Either closes it: off the open list, its agreement and history kept. Both forms
+    are always on the page and state only shows one, so opening them never waits on the server. %>
+<div class="engagement-finish" data-controller="state-focus" data-state-focus-state-value="closing">
+  <div class="flex flex-wrap gap-half" hidden="<%= closing != "" %>">
+    <button type="button" class="btn txt-small" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
+    <button type="button" class="btn btn--plain txt-small txt-negative" data-herb-set="closing=cancelled"><span>Cancel it</span></button>
+  </div>
+
+  <div hidden="<%= closing != "completed" %>">
+    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :complete), class: "flex flex-column gap-half txt-small" do |form| %>
+      <strong>Mark <%= engagement.ref %> complete?</strong>
+      <span class="txt-subtle">Delivered and done. It leaves the open list; the agreement and its history stay, and it can be reopened.</span>
+      <input type="hidden" name="outcome" value="completed">
       <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
       <div class="flex gap-half">
-        <% if closing == "completed" %>
-          <button type="submit" class="btn btn--link txt-small">Mark complete</button>
-        <% else %>
-          <button type="submit" class="btn txt-small txt-negative">Cancel it</button>
-        <% end %>
-        <button type="button" class="btn btn--plain txt-small" data-herb-reset="closing">Not now</button>
+        <button type="submit" class="btn btn--link txt-small">Mark complete</button>
+        <button type="button" class="btn btn--plain txt-small" data-keys="esc" data-herb-reset="closing">Not now</button>
       </div>
     <% end %>
-  <% end %>
+  </div>
+
+  <div hidden="<%= closing != "cancelled" %>">
+    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :cancel), class: "flex flex-column gap-half txt-small" do |form| %>
+      <strong>Cancel <%= engagement.ref %>?</strong>
+      <span class="txt-subtle">Stopped before it was delivered. It leaves the open list; the agreement and its history stay, and it can be reopened.</span>
+      <input type="hidden" name="outcome" value="cancelled">
+      <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
+      <div class="flex gap-half">
+        <button type="submit" class="btn txt-small txt-negative">Cancel it</button>
+        <button type="button" class="btn btn--plain txt-small" data-keys="esc" data-herb-reset="closing">Not now</button>
+      </div>
+    <% end %>
+  </div>
 </div>

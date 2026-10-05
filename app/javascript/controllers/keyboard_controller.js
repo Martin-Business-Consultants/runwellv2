@@ -14,8 +14,9 @@ import { nextFrame } from "helpers/timing_helpers"
 // - on the Work board, h / l and j / k drive Fizzy's column navigation and H / L move the
 //   card a column, posting to the same drop endpoint a drag would
 //
-// The ? sheet (layouts/shared/_shortcuts) lists them all. Esc with nothing selected goes up a
-// level (<link rel="up">) or back.
+// The ? sheet (layouts/shared/_shortcuts) lists them all. Esc in a form opened in place closes it
+// (its data-keys="esc" Cancel, or its <details>); with nothing selected it goes up a level
+// (<link rel="up">) or back.
 //
 // Hint mode (. or the switch in the ? sheet) puts each key on the control it presses: every
 // element declaring data-keys gets data-key-hint, which hints.css shows as a keycap, and a
@@ -71,6 +72,7 @@ export default class extends Controller {
     const key = describe(event)
 
     if (key === `${MOD}+enter`) return this.#save(event)
+    if (key === "esc" && this.#cancel(event)) return
     if (event.target.closest?.(TYPING) || event.target.closest?.("dialog[open]") || document.querySelector("dialog:modal")) return
 
     if (this.pending) {
@@ -166,6 +168,25 @@ export default class extends Controller {
       element.select?.()
     } else {
       element.click()
+    }
+    return true
+  }
+
+  // Esc in a form opened in place, even from a field (where keys are otherwise the field's):
+  // ReActionView state's Cancel, marked data-keys="esc", or else the <details> it opened in.
+  #cancel(event) {
+    if (event.target.closest?.("dialog[open]")) return false
+
+    const cancel = Array.from(event.target.closest?.("form")?.querySelectorAll("[data-keys]") || []).find(element => declares(element, "esc"))
+    const details = event.target.closest?.("details[open]")
+    if (!cancel && !details) return false
+
+    event.preventDefault()
+    if (cancel) {
+      cancel.click()
+    } else {
+      details.open = false
+      details.querySelector("summary")?.focus()
     }
     return true
   }

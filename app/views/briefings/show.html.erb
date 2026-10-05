@@ -33,12 +33,12 @@
     <%# herb:key section.key %>
     <section class="panel panel--wide shadow txt-align-start settings__section">
       <header>
-        <h2 class="divider"><%= section.title %> <span class="txt-subtle"><%= section.items.size %></span></h2>
+        <h2 class="divider"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
       </header>
 
       <%# The first few of each, with the way to the rest: a large install has hundreds overdue. %>
       <ul class="settings__scrollable-list">
-        <% section.items.first(briefing_shown).each do |item| %>
+        <% section.items.each do |item| %>
           <%# herb:key "#{item.class.name}-#{item.id}" %>
           <li data-filter-target="item" class="flex flex-column gap-half">
             <% if section.partial %>
@@ -49,12 +49,12 @@
           </li>
         <% end %>
       </ul>
-      <% if section.items.size > briefing_shown %>
+      <% if section.count > section.items.size %>
         <% more_path = briefing_more_path(section.key) %>
         <p class="txt-small txt-subtle margin-none">
-          And <%= section.items.size - briefing_shown %> more.
+          And <%= section.count - section.items.size %> more.
           <% if more_path %>
-            <%= link_to "See all #{section.items.size}", more_path, class: "txt-link" %>
+            <%= link_to "See all #{section.count}", more_path, class: "txt-link" %>
           <% end %>
         </p>
       <% end %>

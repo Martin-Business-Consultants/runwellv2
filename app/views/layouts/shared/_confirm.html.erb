@@ -1,22 +1,21 @@
 <%# locals: (trigger:, title:, body:, button:, path:, method: nil, icon: nil) %>
-<%# herb:slots server %>
+<%# herb:slots client %>
 <%# herb:state (confirming: false) %>
-<div class="txt-align-center margin-block-start">
-  <% if confirming %>
-    <div class="panel panel--narrow fill-white shadow flex flex-column gap-half center txt-align-start confirm-panel">
-      <h3 class="dialog__title"><%= title %></h3>
-      <p class="dialog__message"><%= body %></p>
-      <div class="dialog__actions">
-        <button type="button" class="btn" data-herb-reset="confirming">Cancel</button>
-        <%= button_to path, method: method || :delete, class: "btn txt-negative" do %>
-          <span><%= button %></span>
-        <% end %>
-      </div>
+<%# Both halves are always on the page and state only hides one, so asking and cancelling never
+    wait on the server. %>
+<div class="txt-align-center margin-block-start" data-controller="state-focus" data-state-focus-state-value="confirming">
+  <div class="panel panel--narrow fill-white shadow flex flex-column gap-half center txt-align-start confirm-panel" hidden="<%= !confirming %>">
+    <h3 class="dialog__title"><%= title %></h3>
+    <p class="dialog__message"><%= body %></p>
+    <div class="dialog__actions">
+      <button type="button" class="btn" data-keys="esc" data-herb-reset="confirming" autofocus>Cancel</button>
+      <%= button_to path, method: method || :delete, class: "btn txt-negative" do %>
+        <span><%= button %></span>
+      <% end %>
     </div>
-  <% else %>
-    <button type="button" class="btn txt-negative borderless txt-small" data-keys="d" data-herb-toggle="confirming">
-      <%= icon_tag icon || "trash" %>
-      <span><%= trigger %></span>
-    </button>
-  <% end %>
+  </div>
+  <button type="button" class="btn txt-negative borderless txt-small" data-keys="d" data-herb-toggle="confirming" hidden="<%= confirming %>">
+    <%= icon_tag icon || "trash" %>
+    <span><%= trigger %></span>
+  </button>
 </div>

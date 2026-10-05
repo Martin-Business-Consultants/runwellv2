@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
 // A secret field (secret_field): masked until the eye is clicked, masked again on a second click.
-// The input's type can't be ReActionView state (state in attributes isn't reactive), so this
-// flips it and says so on the button.
+// secret_field is a helper used inside form_with blocks, where ReActionView state can't reach
+// (helpers aren't compiled templates, and partials can't render in a form), so this flips the
+// input's type and says so on the button.
 export default class extends Controller {
   static targets = [ "input", "button" ]
 

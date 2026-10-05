@@ -10,6 +10,11 @@
     }
   }
 
+  /* Email approval link and Record decision side by side; the one opened takes the row. */
+  .agreement-version__actions > details[open] {
+    flex-basis: 100%;
+  }
+
   /* A scope item on one line: a wide description, short price and estimate, then two
   /* round buttons (save, remove). The new-item row uses the same columns, with its Add
   /* button across both button columns, so every row lines up. Forms are display: contents

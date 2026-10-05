@@ -21,7 +21,8 @@ export default class extends Controller {
     })
   }
 
-  // A choice was clicked: show it now; the form goes on to save it.
+  // A choice was clicked: show it now; the form goes on to save it. The menu closes on
+  // picker:chosen (data-action="picker:chosen->dialog#close").
   choose(event) {
     const option = event.currentTarget
     this.displayTargets.forEach(display => {
@@ -29,6 +30,6 @@ export default class extends Controller {
       if (source) display.replaceChildren(...Array.from(source.cloneNode(true).childNodes))
     })
     this.element.querySelectorAll("[role=checkbox]").forEach(item => item.setAttribute("aria-checked", item.contains(option)))
-    setTimeout(() => this.application.getControllerForElementAndIdentifier(this.element, "dialog")?.close())
+    setTimeout(() => this.dispatch("chosen"))
   }
 }

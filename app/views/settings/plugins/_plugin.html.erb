@@ -1,8 +1,7 @@
 <%# locals: (plugin:, enabled:) %>
-<%# herb:slots server %>
-<%# herb:state (on: enabled) %>
-<%# One plugin as a card. The switch flips `on` at once, so the card shows the new state
-    before the save lands; the save then renders the page fresh, with whatever the plugin
+<%# One plugin as a card, once per plugin. The switch shows Active or Dormant at once by CSS
+    (.plugin-card:has(:checked)), not state: a server-mode partial rendered more than once only
+    sends its first copy's state. The save then renders the page fresh, with whatever the plugin
     adds or hides. %>
 <% settings = Runwell::Plugins.settings_pages[plugin.key] %>
 <% page_path = enabled && settings ? instance_exec(&settings.last) : settings_plugin_path(plugin.key) %>
@@ -24,7 +23,7 @@
     <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "flex align-center flex-item-no-shrink", data: { controller: "form", turbo_action: "advance" } do |form| %>
       <label class="switch" title="Switch on or off">
         <%= form.hidden_field :enabled, value: "0", id: nil %>
-        <input type="checkbox" name="plugin[enabled]" value="1" class="switch__input" id="plugin_<%= plugin.key %>_enabled" checked="<%= on %>" data-herb-toggle="on" data-action="change->form#submit">
+        <%= check_box_tag "plugin[enabled]", "1", enabled, class: "switch__input", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" } %>
         <span class="switch__btn"></span>
         <span class="for-screen-reader">Switch <%= plugin.name %> on or off</span>
       </label>
@@ -32,11 +31,8 @@
   </div>
 
   <div class="flex flex-wrap align-center gap-half">
-    <% if on %>
-      <%= status_tag "Active" %>
-    <% else %>
-      <%= status_tag "Dormant" %>
-    <% end %>
+    <span class="plugin-card__active"><%= status_tag "Active" %></span>
+    <span class="plugin-card__dormant"><%= status_tag "Dormant" %></span>
   </div>
 
   <p class="txt-small margin-none flex-item-grow"><%= plugin.description %></p>

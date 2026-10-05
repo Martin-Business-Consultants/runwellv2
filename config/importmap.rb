@@ -6,6 +6,7 @@ pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin_all_from "app/javascript/helpers", under: "helpers"
+pin_all_from "app/javascript/behaviors", under: "behaviors"
 pin "lexxy"
 pin "@rails/activestorage", to: "activestorage.esm.js"
 pin "@rails/request.js", to: "@rails--request.js" # @0.0.13

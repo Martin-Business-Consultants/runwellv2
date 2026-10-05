@@ -1,6 +1,6 @@
 <%# locals: (version:, contacts:) %>
-<%# herb:slots server %>
-<%# herb:state (linking: false, deciding: false) %>
+<%# Rendered once per version, so its forms open as <details>, not state (which can't tell one
+    version's copy of this partial from another's). %>
 <header class="flex align-center gap-half">
   <strong><%= version.label %></strong>
   <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
@@ -66,40 +66,38 @@
 <% end %>
 
 <% if version.awaiting_decision? && can?(:send_agreements) %>
-  <% if linking %>
-    <%= form_with url: issue_link_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
-      <h3 class="txt-medium font-weight-bold margin-none">Email an approval link</h3>
-      <p class="txt-small margin-none">The contact gets a signed link to review this exact version and approve it or ask for changes.</p>
-      <%= form.select :contact_id, contact_options(contacts, email_only: true), { selected: default_approver(contacts) }, required: true, class: "input input--select full-width txt-small" %>
-      <div class="flex gap-half justify-center">
-        <button type="button" class="btn" data-herb-reset="linking">Cancel</button>
-        <button type="submit" class="btn btn--link">Email link</button>
-      </div>
-    <% end %>
-  <% elsif deciding %>
-    <%= form_with url: record_decision_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap txt-align-start", data: { turbo_action: "advance" } do |form| %>
-      <h3 class="txt-medium font-weight-bold margin-none">Record the client’s decision</h3>
-      <p class="txt-small margin-none">For a decision that came by email, call or meeting. Say where it came from: the evidence is kept with the approval.</p>
-      <%= form.select :decision, Approval::DECISIONS.map { |decision| [ decision.humanize, decision ] }, {}, class: "input input--select full-width txt-small" %>
-      <%= form.select :contact_id, contact_options(contacts), { include_blank: "Someone else", selected: default_approver(contacts) }, class: "input input--select full-width txt-small" %>
-      <%= form.text_field :approver_name, class: "input full-width txt-small", autocomplete: "off", placeholder: "Their name, if not a contact" %>
-      <%= form.text_field :evidence, required: true, class: "input full-width txt-small", autocomplete: "off", placeholder: "Evidence: “Email from Ann, 3 March”" %>
-      <%= rich_text_field form, :comment, placeholder: "Their comment (optional)" %>
-      <div class="flex gap-half justify-center">
-        <button type="button" class="btn" data-herb-reset="deciding">Cancel</button>
-        <button type="submit" class="btn btn--link">Record decision</button>
-      </div>
-    <% end %>
-  <% else %>
-    <footer class="flex flex-wrap align-center justify-center gap-half">
-      <button type="button" class="btn txt-small" data-herb-toggle="linking">
+  <footer class="agreement-version__actions flex flex-wrap align-center justify-center gap-half">
+    <details>
+      <summary class="btn txt-small">
         <%= icon_tag "email" %>
         <span>Email approval link</span>
-      </button>
-      <button type="button" class="btn btn--link txt-small" data-herb-toggle="deciding">
+      </summary>
+      <%= form_with url: issue_link_agreement_version_path(version), namespace: dom_id(version, :link), class: "panel fill-white shadow flex flex-column gap txt-align-start" do |form| %>
+        <h3 class="txt-medium font-weight-bold margin-none">Email an approval link</h3>
+        <p class="txt-small margin-none">The contact gets a signed link to review this exact version and approve it or ask for changes.</p>
+        <%= form.select :contact_id, contact_options(contacts, email_only: true), { selected: default_approver(contacts) }, required: true, autofocus: true, class: "input input--select full-width txt-small" %>
+        <div class="flex gap-half justify-center">
+          <button type="submit" class="btn btn--link">Email link</button>
+        </div>
+      <% end %>
+    </details>
+    <details>
+      <summary class="btn btn--link txt-small">
         <%= icon_tag "check" %>
         <span>Record decision</span>
-      </button>
-    </footer>
-  <% end %>
+      </summary>
+      <%= form_with url: record_decision_agreement_version_path(version), namespace: dom_id(version, :decision), class: "panel fill-white shadow flex flex-column gap txt-align-start" do |form| %>
+        <h3 class="txt-medium font-weight-bold margin-none">Record the client’s decision</h3>
+        <p class="txt-small margin-none">For a decision that came by email, call or meeting. Say where it came from: the evidence is kept with the approval.</p>
+        <%= form.select :decision, Approval::DECISIONS.map { |decision| [ decision.humanize, decision ] }, {}, autofocus: true, class: "input input--select full-width txt-small" %>
+        <%= form.select :contact_id, contact_options(contacts), { include_blank: "Someone else", selected: default_approver(contacts) }, class: "input input--select full-width txt-small" %>
+        <%= form.text_field :approver_name, class: "input full-width txt-small", autocomplete: "off", placeholder: "Their name, if not a contact" %>
+        <%= form.text_field :evidence, required: true, class: "input full-width txt-small", autocomplete: "off", placeholder: "Evidence: “Email from Ann, 3 March”" %>
+        <%= rich_text_field form, :comment, placeholder: "Their comment (optional)" %>
+        <div class="flex gap-half justify-center">
+          <button type="submit" class="btn btn--link">Record decision</button>
+        </div>
+      <% end %>
+    </details>
+  </footer>
 <% end %>

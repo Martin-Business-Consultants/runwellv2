@@ -2,6 +2,7 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import "reactionview"
+import "behaviors"
 import { highlightCode } from "lexxy"
 
 // Lexxy's Prism has no JSON: the grammar from Prism's own json component, for code_block.

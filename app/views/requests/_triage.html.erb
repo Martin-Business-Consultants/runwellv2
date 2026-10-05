@@ -1,27 +1,29 @@
 <%# locals: (request_record:) %>
-<%# herb:slots server %>
+<%# herb:slots client %>
 <%# herb:state (triage: "") %>
 <% engagement_options = request_engagement_options(request_record) %>
-<section class="settings__section flex flex-column gap">
+<%# Every form is always on the page and state only shows the one picked, so switching between
+    them never waits on the server. %>
+<section class="settings__section flex flex-column gap" data-controller="state-focus" data-state-focus-state-value="triage">
   <header>
     <h2 class="divider">Triage</h2>
   </header>
   <p class="txt-small txt-subtle margin-none">Turn this into scope, work or a promise, or dismiss it.</p>
 
   <div class="flex flex-wrap gap-half">
-    <button type="button" class="btn txt-small <%= "btn--reversed" if triage == "engagement" %>" data-herb-set="triage=engagement">New <%= term(:engagement).downcase %></button>
-    <button type="button" class="btn txt-small <%= "btn--reversed" if triage == "change" %>" data-herb-set="triage=change">Add as scope</button>
-    <button type="button" class="btn txt-small <%= "btn--reversed" if triage == "todo" %>" data-herb-set="triage=todo">Add as work</button>
-    <button type="button" class="btn txt-small <%= "btn--reversed" if triage == "commitment" %>" data-herb-set="triage=commitment">Make a commitment</button>
-    <button type="button" class="btn txt-small txt-negative <%= "btn--reversed" if triage == "dismiss" %>" data-herb-set="triage=dismiss">Dismiss</button>
+    <button type="button" class="btn txt-small" aria-pressed="<%= triage == "engagement" %>" data-herb-set="triage=engagement">New <%= term(:engagement).downcase %></button>
+    <button type="button" class="btn txt-small" aria-pressed="<%= triage == "change" %>" data-herb-set="triage=change">Add as scope</button>
+    <button type="button" class="btn txt-small" aria-pressed="<%= triage == "todo" %>" data-herb-set="triage=todo">Add as work</button>
+    <button type="button" class="btn txt-small" aria-pressed="<%= triage == "commitment" %>" data-herb-set="triage=commitment">Make a commitment</button>
+    <button type="button" class="btn txt-small txt-negative" aria-pressed="<%= triage == "dismiss" %>" data-herb-set="triage=dismiss">Dismiss</button>
   </div>
 
-  <% if triage == "engagement" %>
-    <%= form_with url: promote_engagement_request_path(request_record), class: "flex flex-column gap" do |form| %>
+  <div class="flex flex-column gap" hidden="<%= triage != "engagement" %>">
+    <%= form_with url: promote_engagement_request_path(request_record), namespace: "triage_engagement", class: "flex flex-column gap" do |form| %>
       <p class="txt-small txt-subtle margin-none">A new agreement whose first scope item is this request.</p>
       <label class="flex flex-column gap-half">
         <span class="record-form__label">Kind</span>
-        <%= form.select :label, label_options, { selected: "work_order" }, class: "input input--select full-width" %>
+        <%= form.select :label, label_options, { selected: "work_order" }, autofocus: true, class: "input input--select full-width" %>
       </label>
       <label class="flex flex-column gap-half">
         <span class="record-form__label">Title (optional)</span>
@@ -35,16 +37,17 @@
       <% end %>
       <div class="flex gap-half">
         <button type="submit" class="btn btn--link">Draft <%= term(:engagement).downcase %></button>
-        <button type="button" class="btn" data-herb-reset="triage">Cancel</button>
+        <button type="button" class="btn" data-keys="esc" data-herb-reset="triage">Cancel</button>
       </div>
     <% end %>
-  <% elsif triage == "change" %>
+  </div>
+  <div class="flex flex-column gap" hidden="<%= triage != "change" %>">
     <% if engagement_options.any? %>
-      <%= form_with url: promote_change_request_path(request_record), class: "flex flex-column gap" do |form| %>
+      <%= form_with url: promote_change_request_path(request_record), namespace: "triage_change", class: "flex flex-column gap" do |form| %>
         <p class="txt-small txt-subtle margin-none">Adds it to the engagement’s open draft, opening a change order if there isn’t one.</p>
         <label class="flex flex-column gap-half">
           <span class="record-form__label"><%= term(:engagement) %></span>
-          <%= form.select :engagement_ref, engagement_options, {}, class: "input input--select full-width" %>
+          <%= form.select :engagement_ref, engagement_options, {}, autofocus: true, class: "input input--select full-width" %>
         </label>
         <% if prices_on? %>
           <label class="flex flex-column gap-half">
@@ -54,19 +57,20 @@
         <% end %>
         <div class="flex gap-half">
           <button type="submit" class="btn btn--link">Add as scope</button>
-          <button type="button" class="btn" data-herb-reset="triage">Cancel</button>
+          <button type="button" class="btn" data-keys="esc" data-herb-reset="triage">Cancel</button>
         </div>
       <% end %>
     <% else %>
       <p class="txt-small txt-subtle margin-none">This request’s client has no open engagements. Draft one instead.</p>
     <% end %>
-  <% elsif triage == "todo" %>
+  </div>
+  <div class="flex flex-column gap" hidden="<%= triage != "todo" %>">
     <% if engagement_options.any? %>
-      <%= form_with url: promote_todo_request_path(request_record), class: "flex flex-column gap" do |form| %>
+      <%= form_with url: promote_todo_request_path(request_record), namespace: "triage_todo", class: "flex flex-column gap" do |form| %>
         <p class="txt-small txt-subtle margin-none">A todo on an engagement already agreed.</p>
         <label class="flex flex-column gap-half">
           <span class="record-form__label"><%= term(:engagement) %></span>
-          <%= form.select :engagement_ref, engagement_options, {}, class: "input input--select full-width" %>
+          <%= form.select :engagement_ref, engagement_options, {}, autofocus: true, class: "input input--select full-width" %>
         </label>
         <label class="flex flex-column gap-half">
           <span class="record-form__label">Owner</span>
@@ -78,18 +82,19 @@
         </label>
         <div class="flex gap-half">
           <button type="submit" class="btn btn--link">Add as work</button>
-          <button type="button" class="btn" data-herb-reset="triage">Cancel</button>
+          <button type="button" class="btn" data-keys="esc" data-herb-reset="triage">Cancel</button>
         </div>
       <% end %>
     <% else %>
       <p class="txt-small txt-subtle margin-none">This request’s client has no open engagements. Draft one instead.</p>
     <% end %>
-  <% elsif triage == "commitment" %>
-    <%= form_with url: promote_commitment_request_path(request_record), class: "flex flex-column gap" do |form| %>
+  </div>
+  <div class="flex flex-column gap" hidden="<%= triage != "commitment" %>">
+    <%= form_with url: promote_commitment_request_path(request_record), namespace: "triage_commitment", class: "flex flex-column gap" do |form| %>
       <p class="txt-small txt-subtle margin-none">A promise with an owner and a date.</p>
       <label class="flex flex-column gap-half">
         <span class="record-form__label">Due</span>
-        <%= date_input form, :due_on, required: true, class: "input full-width" %>
+        <%= date_input form, :due_on, required: true, autofocus: true, class: "input full-width" %>
       </label>
       <label class="flex flex-column gap-half">
         <span class="record-form__label">Whose promise</span>
@@ -111,19 +116,20 @@
       <% end %>
       <div class="flex gap-half">
         <button type="submit" class="btn btn--link">Make commitment</button>
-        <button type="button" class="btn" data-herb-reset="triage">Cancel</button>
+        <button type="button" class="btn" data-keys="esc" data-herb-reset="triage">Cancel</button>
       </div>
     <% end %>
-  <% elsif triage == "dismiss" %>
-    <%= form_with url: dismiss_request_path(request_record), class: "flex flex-column gap" do |form| %>
+  </div>
+  <div class="flex flex-column gap" hidden="<%= triage != "dismiss" %>">
+    <%= form_with url: dismiss_request_path(request_record), namespace: "triage_dismiss", class: "flex flex-column gap" do |form| %>
       <label class="flex flex-column gap-half">
         <span class="record-form__label">Reason</span>
-        <%= form.text_field :reason, class: "input full-width", autocomplete: "off", placeholder: "Not needed" %>
+        <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Not needed" %>
       </label>
       <div class="flex gap-half">
         <button type="submit" class="btn txt-negative">Dismiss request</button>
-        <button type="button" class="btn" data-herb-reset="triage">Cancel</button>
+        <button type="button" class="btn" data-keys="esc" data-herb-reset="triage">Cancel</button>
       </div>
     <% end %>
-  <% end %>
+  </div>
 </section>

@@ -1,49 +1,60 @@
 # What needs a human right now. This is the home page.
 class Briefing
-  Section = Struct.new(:key, :title, :items, :partial, keyword_init: true)
+  # items is the first `limit` of the section (what home and the briefing tool show); count is all.
+  Section = Struct.new(:key, :title, :items, :count, :partial, keyword_init: true)
 
-  def initialize(user)
+  def initialize(user, limit: 25)
     @user = user
+    @limit = limit
   end
 
   def sections
     [
-      Section.new(key: "questions", title: "Questions for you", items: Question.unanswered.where(user: @user).ordered.includes(:subject).to_a),
-      Section.new(key: "requests", title: "Requests to triage", items: Request.open.ordered.includes(:contact, :client).to_a),
-      Section.new(key: "awaiting_client", title: "Waiting on a client", items: awaiting_client),
-      Section.new(key: "drafts", title: "Drafts ready to send", items: drafts_ready),
-      Section.new(key: "waiting_on_them", title: "Waiting on them", items: due_commitments.select { it.owner_kind == "client" }),
-      Section.new(key: "you_promised", title: "You promised", items: due_commitments.select { it.owner_kind == "us" }),
-      Section.new(key: "review", title: "Ready for review", items: Todo.where(status: "in_review").order(:updated_at).includes(:engagement, :owner).to_a),
-      Section.new(key: "blocked", title: "Blocked work", items: Todo.where(status: "blocked").includes(:engagement, :owner).to_a),
-      Section.new(key: "overdue_todos", title: "Overdue work", items: Todo.overdue.includes(:engagement, :owner).to_a)
-    ].concat(plugin_sections).reject { |s| s.items.empty? }
+      section("questions", "Questions for you", Question.unanswered.where(user: @user).ordered.includes(:subject)),
+      section("requests", "Requests to triage", Request.open.ordered.includes(:contact, :client)),
+      section("awaiting_client", "Waiting on a client", awaiting_client),
+      section("drafts", "Drafts ready to send", drafts_ready),
+      section("waiting_on_them", "Waiting on them", due_commitments.where(owner_kind: "client")),
+      section("you_promised", "You promised", due_commitments.where(owner_kind: "us")),
+      section("review", "Ready for review", Todo.where(status: "in_review").order(:updated_at).includes(:engagement, :owner)),
+      section("blocked", "Blocked work", Todo.where(status: "blocked").includes(:engagement, :owner)),
+      section("overdue_todos", "Overdue work", Todo.overdue.includes(:engagement, :owner))
+    ].concat(plugin_sections).reject { |s| s.count.zero? }
   end
 
-  def counts = sections.to_h { |s| [ s.key, s.items.size ] }
+  def counts = sections.to_h { |s| [ s.key, s.count ] }
 
   private
 
+  # The first few rows, and a count only when there are more: a large install has hundreds
+  # overdue, and home shows eight.
+  def section(key, title, scope)
+    items = scope.limit(@limit).to_a
+    Section.new(key: key, title: title, items: items, count: items.size < @limit ? items.size : scope.count)
+  end
+
+  # A plugin's items are whatever its lambda returns (a relation or an array), so they load whole.
   def plugin_sections
     Runwell::Plugins.enabled_briefings.map do |key, briefing|
-      Section.new(key: key.to_s, title: briefing.title, partial: briefing.partial, items: briefing.items.call(@user).to_a)
+      items = briefing.items.call(@user).to_a
+      Section.new(key: key.to_s, title: briefing.title, partial: briefing.partial, items: items.first(@limit), count: items.size)
     end
   end
 
   # Open commitments that are late or due within the week, both lanes.
   def due_commitments
-    @due_commitments ||= Commitment.open.where(due_on: ..(Date.current + 7)).ordered.includes(:client, :engagement, :user, :contact).to_a
+    Commitment.open.where(due_on: ..(Date.current + 7)).ordered.includes(:client, :engagement, :user, :contact)
   end
 
   def awaiting_client
     AgreementVersion.where.not(sent_at: nil).where(superseded_by_id: nil).left_joins(:approval)
                     .where(approvals: { id: nil }).joins(engagement: :client).where(clients: { internal: false })
-                    .includes(:approval, { scope_items: :todos }, engagement: :client).order(:sent_at).to_a
+                    .includes(:approval, { scope_items: :todos }, engagement: :client).order(:sent_at)
   end
 
   def drafts_ready
     # An internal project's draft is a plan, never sent.
-    AgreementVersion.where(sent_at: nil).joins(:scope_items, engagement: :client).where(clients: { internal: false })
-                    .distinct.includes(:approval, { scope_items: :todos }, engagement: :client).to_a
+    AgreementVersion.where(sent_at: nil).where(id: ScopeItem.select(:agreement_version_id)).joins(engagement: :client)
+                    .where(clients: { internal: false }).includes(:approval, { scope_items: :todos }, engagement: :client)
   end
 end

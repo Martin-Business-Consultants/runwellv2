@@ -1,5 +1,5 @@
 <%# locals: (version:, contacts:) %>
-<%# herb:slots server %>
+<%# herb:slots client %>
 <%# herb:state (sending: false) %>
 <% engagement = version.engagement %>
 <% revision = version.kind == "revision" %>
@@ -59,26 +59,26 @@
   </ul>
 <% end %>
 
-<footer class="flex flex-wrap align-center justify-center gap-half">
+<footer class="flex flex-wrap align-center justify-center gap-half" data-controller="state-focus" data-state-focus-state-value="sending">
   <% if version.engagement.internal? %>
     <p class="txt-small txt-subtle margin-none"><%= version.engagement.client.name %> is internal: this draft is a plan for the work, never sent.</p>
   <% elsif can?(:send_agreements) %>
-    <% if sending %>
+    <%# Always on the page; state only shows it, so opening it never waits on the server. %>
+    <div class="full-width" hidden="<%= !sending %>">
       <%= form_with url: send_out_agreement_version_path(version), class: "panel fill-white shadow flex flex-column gap full-width txt-align-start", data: { turbo_action: "advance" } do |form| %>
         <h3 class="txt-medium font-weight-bold margin-none">Send <%= version.label %>?</h3>
         <p class="txt-small margin-none">Sending freezes this version. Choose a contact to email them an approval link, or mark it sent and record their decision yourself.</p>
-        <%= form.select :contact_id, contact_options(contacts, email_only: true), { include_blank: "Don’t email anyone", selected: default_approver(contacts) }, class: "input input--select full-width txt-small" %>
+        <%= form.select :contact_id, contact_options(contacts, email_only: true), { include_blank: "Don’t email anyone", selected: default_approver(contacts) }, autofocus: true, class: "input input--select full-width txt-small" %>
         <div class="flex gap-half justify-center">
-          <button type="button" class="btn" data-herb-reset="sending">Cancel</button>
+          <button type="button" class="btn" data-keys="esc" data-herb-reset="sending">Cancel</button>
           <button type="submit" class="btn btn--link">Send</button>
         </div>
       <% end %>
-    <% else %>
-      <button type="button" class="btn btn--link txt-small" data-herb-toggle="sending">
-        <%= icon_tag "email" %>
-        <span>Send to client</span>
-      </button>
-    <% end %>
+    </div>
+    <button type="button" class="btn btn--link txt-small" data-herb-toggle="sending" hidden="<%= sending %>">
+      <%= icon_tag "email" %>
+      <span>Send to client</span>
+    </button>
   <% else %>
     <p class="txt-small txt-subtle margin-none">A manager or owner sends this to the client.</p>
   <% end %>
