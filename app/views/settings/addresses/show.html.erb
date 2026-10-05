@@ -35,7 +35,7 @@
         Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
       </p>
       <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "flex flex-wrap gap-half txt-small" do |form| %>
-        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { selected: Setting.zone.name }, class: "input input--select flex-item-grow", aria: { label: "Time zone" } %>
+        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name }, class: "input input--select flex-item-grow", aria: { label: "Time zone" } %>
         <button type="submit" class="btn btn--link">Save</button>
       <% end %>
       <% if @setting.time_zone.blank? %>

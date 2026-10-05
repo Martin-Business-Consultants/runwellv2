@@ -11,7 +11,7 @@ class Client < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }
-  validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) }, message: "isn’t a time zone we know" }, allow_nil: true
+  validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) + TZInfo::Timezone.all_identifiers }, message: "isn’t a time zone we know" }, allow_nil: true
 
   # A Rails zone name ("Pacific Time (US & Canada)"); an IANA one ("America/Los_Angeles") is
   # accepted and stored as its Rails name. Blank means the install's own zone.
