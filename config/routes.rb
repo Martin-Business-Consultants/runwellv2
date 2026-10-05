@@ -94,9 +94,12 @@ Rails.application.routes.draw do
     resources :plugins, only: %i[index show update destroy], param: :key do
       resource :upgrade, only: :create, module: :plugins
     end
-    resources :people, only: %i[index update] do
+    resources :people, only: %i[index show update] do
       resource :deactivation, only: %i[create destroy], module: :people
       resource :two_factor, only: :destroy, module: :people
+      resource :password, only: %i[create update], module: :people
+      resource :sessions, only: :destroy, module: :people
+      resource :connections, only: :destroy, module: :people
     end
     resources :invitations, only: %i[create update destroy]
     resources :connected_apps, only: %i[index create destroy] do

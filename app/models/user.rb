@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Named, Avatar, Mentionable, Role, Agent, TwoFactor, Eventful
+  include Named, Avatar, Mentionable, Role, Agent, TwoFactor, Access, Eventful
 
   has_secure_password
 

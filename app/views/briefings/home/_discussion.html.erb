@@ -1,0 +1,24 @@
+<%# locals: (home:) %>
+<%# The latest notes by others, on anything, each a line of what was said and where. %>
+<% notes = home.discussion %>
+<section class="panel shadow txt-align-start settings__section home-panel">
+  <header class="home-panel__header">
+    <h2 class="home-panel__title">Latest discussion</h2>
+  </header>
+  <% if notes.any? %>
+    <ul class="settings__scrollable-list">
+      <% notes.each do |note| %>
+        <%# herb:key note.id %>
+        <li data-filter-target="item" class="home-note">
+          <%= person_tag note.author, fallback: "Someone" %>
+          <div class="home-note__body min-width">
+            <%= link_to strip_tags(note.body).squish.truncate(140), note.subject, class: "txt-ink" %>
+            <span class="home-item__meta"><%= home_subject_label(note.subject) %> · <%= time_ago_in_words(note.occurred_at) %> ago</span>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="txt-small txt-subtle margin-none">Nothing new. Notes on <%= term(:client, count: 2).downcase %> and <%= term(:engagement, count: 2).downcase %> show up here.</p>
+  <% end %>
+</section>

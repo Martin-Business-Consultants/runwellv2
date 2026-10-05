@@ -13,7 +13,7 @@
           <li class="flex align-center gap-half people__person" data-filter-target="item">
             <%= avatar_preview_tag person, hidden_for_screen_reader: true, class: "people__avatar" %>
             <div class="txt-align-start overflow-ellipsis min-width">
-              <strong><%= person.display_name %></strong><%= " (you)" if person == Current.user %>
+              <%= link_to person.display_name, settings_person_path(person), class: "txt-ink font-weight-bold" %><%= " (you)" if person == Current.user %>
               <div class="txt-x-small txt-subtle overflow-ellipsis"><%= person.email_address %></div>
               <% if person.agent %>
                 <div class="txt-x-small txt-subtle overflow-ellipsis">Apps they connect act as <strong><%= person.agent.display_name %></strong></div>

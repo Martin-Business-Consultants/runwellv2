@@ -1,0 +1,22 @@
+<%# locals: (home:) %>
+<%# The engagements this person has work on (or the latest open ones), as cards: done of total, and
+    how each is going, derived from late work, late promises and the agreement's state. %>
+<% engagements = home.engagements %>
+<% if engagements.any? %>
+  <section class="home-section">
+    <header class="home-panel__header">
+      <h2 class="home-panel__title">Your <%= term(:engagement, count: 2).downcase %></h2>
+      <%= link_to "All #{term(:engagement, count: 2).downcase}", engagements_path, class: "txt-link txt-small" %>
+    </header>
+    <div class="cards cards--grid">
+      <div class="cards__list">
+        <% engagements.each do |engagement| %>
+          <%# herb:key engagement.record.id %>
+          <%= render "layouts/shared/card", path: engagement_path(engagement.record), title: engagement.record.title,
+                id_label: engagement.record.ref, context: engagement.record.client.name,
+                meta: [ "#{engagement.open} open", "#{engagement.done} of #{engagement.total} done" ], status: engagement.health %>
+        <% end %>
+      </div>
+    </div>
+  </section>
+<% end %>

@@ -17,4 +17,26 @@ module BriefingsHelper
     when "overdue_todos" then todos_path(view: "table", sort: "due")
     end
   end
+
+  # When something is due, the way a person says it: "today", "tomorrow", "Friday", "Oct 20", or
+  # "3 days late".
+  def home_due(date)
+    days = (date - Date.current).to_i
+    if days.negative? then "#{pluralize(-days, "day")} late"
+    elsif days.zero? then "today"
+    elsif days == 1 then "tomorrow"
+    elsif days < 7 then date.strftime("%A")
+    else l(date, format: :short)
+    end
+  end
+
+  # A note's subject in a few words, for the discussion on home.
+  def home_subject_label(subject)
+    case subject
+    when Engagement then subject.ref
+    when Todo then subject.title
+    when Request then subject.subject
+    else subject.try(:name) || subject.try(:description) || subject.model_name.human
+    end
+  end
 end

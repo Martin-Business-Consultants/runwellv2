@@ -186,6 +186,22 @@
     flex-shrink: 0;
   }
 
+  /* A person's page (settings/people/show): their avatar, larger, beside their name and tags. */
+  .person-heading {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space);
+    margin-block-end: var(--block-space);
+
+    .people__avatar {
+      --avatar-size: 3.5em;
+    }
+
+    .page-title {
+      margin-block-end: 0.2em;
+    }
+  }
+
   .people__invite {
     display: grid;
     gap: var(--inline-space-half);

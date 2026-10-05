@@ -1,0 +1,156 @@
+/* Home (briefings/show): a greeting with the day, a line for today, what needs a person, then what's
+/* coming up and the latest notes side by side, the person's engagements as cards, and the team. One
+/* column wider than a panel, two side by side where there's room. */
+@layer components {
+  .home {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    inline-size: min(100%, 72rem);
+    margin-inline: auto;
+    text-align: start;
+
+    /* Every panel takes the column's width, over panel--wide's own. */
+    .panel {
+      --panel-size: 100%;
+    }
+  }
+
+  .home-greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    padding-block: var(--block-space) var(--block-space-half);
+  }
+
+  .home-greeting__date {
+    color: var(--color-ink-dark);
+    font-size: var(--text-small);
+    margin: 0;
+  }
+
+  .home-greeting__title {
+    font-size: clamp(var(--text-xx-large), 5vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .home-greeting__summary {
+    color: var(--color-ink-dark);
+    margin: 0;
+  }
+
+  /* Today: one line, the label, what's due, and the way to the list at the end. */
+  .home-today {
+    --panel-padding: var(--block-space-half) var(--inline-space);
+
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--text-small);
+    gap: var(--inline-space-half) var(--inline-space);
+  }
+
+  .home-today__label {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .home-today__item,
+  .home-today__end {
+    align-items: center;
+    color: var(--color-link);
+    display: inline-flex;
+    gap: 0.35em;
+  }
+
+  .home-today__end {
+    margin-inline-start: auto;
+  }
+
+  /* A panel's heading with its link on the right, in place of the divider. */
+  .home-panel__header {
+    align-items: baseline;
+    display: flex;
+    gap: var(--inline-space);
+    justify-content: space-between;
+    margin-block-end: var(--block-space-half);
+  }
+
+  .home-panel__title {
+    font-size: var(--text-large);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .home-grid {
+    align-items: start;
+    display: grid;
+    gap: var(--block-space);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+
+    /* Side by side, both start on the same line (a first child with a heading is otherwise pulled
+    /* up a third of a line). */
+    .home & > .panel {
+      margin: 0;
+    }
+  }
+
+  /* A row of coming up: what, where, and when, the date at the end. */
+  .home-item {
+    align-items: baseline;
+    display: flex;
+    gap: var(--inline-space-half);
+    min-inline-size: 0;
+  }
+
+  .home-item__title {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-item__meta {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    white-space: nowrap;
+  }
+
+  .home-item__due {
+    color: var(--color-ink-dark);
+    font-size: var(--text-small);
+    white-space: nowrap;
+  }
+
+  .home-item__due--late {
+    color: var(--color-negative);
+  }
+
+  /* A note or a person: the avatar, then the words. */
+  .home-note {
+    align-items: flex-start;
+    display: flex;
+    gap: var(--inline-space-half);
+  }
+
+  .home-note__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    font-size: var(--text-small);
+    gap: 0.15em;
+  }
+
+  .home-section {
+    display: flex;
+    flex-direction: column;
+  }
+}

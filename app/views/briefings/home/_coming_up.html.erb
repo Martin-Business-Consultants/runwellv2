@@ -1,0 +1,28 @@
+<%# locals: (home:) %>
+<%# This person's own work and promises due within the week (late ones first), soonest first. %>
+<% items = home.coming_up %>
+<section class="panel shadow txt-align-start settings__section home-panel">
+  <header class="home-panel__header">
+    <h2 class="home-panel__title">Coming up for you</h2>
+    <%= link_to "All your #{term(:work).downcase}", todos_path(owner: "me"), class: "txt-link txt-small" %>
+  </header>
+  <% if items.any? %>
+    <ul class="settings__scrollable-list">
+      <% items.each do |item| %>
+        <%# herb:key "#{item.class.name}-#{item.id}" %>
+        <li data-filter-target="item" class="home-item">
+          <% if item.is_a?(Todo) %>
+            <%= link_to item.title, item, class: "home-item__title txt-ink" %>
+            <span class="home-item__meta"><%= item.engagement.ref %></span>
+          <% else %>
+            <%= link_to commitment_sentence(item), item.engagement || item.client, class: "home-item__title txt-ink" %>
+            <span class="home-item__meta"><%= term(:commitment) %></span>
+          <% end %>
+          <span class="home-item__due<%= " home-item__due--late" if item.due_on < Date.current %>"><%= home_due(item.due_on) %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="txt-small txt-subtle margin-none">Nothing due this week. Enjoy the quiet.</p>
+  <% end %>
+</section>

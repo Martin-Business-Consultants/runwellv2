@@ -1,10 +1,9 @@
 <% @page_title = "Needs you" %>
 
-<% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
-<% end %>
+<% needs = @sections.sum(&:count) %>
+<div class="home">
+  <%= render "briefings/home/greeting", home: @home, needs: needs %>
 
-<div class="flex flex-column gap align-center">
   <% if @release&.newer? %>
     <%= render "briefings/update", release: @release %>
   <% end %>
@@ -15,17 +14,18 @@
 
   <%= plugin_slots(:home_top) %>
 
-  <% if @sections.empty? && !@setup.show? %>
-    <div class="panel panel--centered">
-      <div class="blank-slate">Nothing needs you.</div>
-    </div>
-  <% end %>
+  <%= render "briefings/home/today", home: @home %>
+
+  <div class="home-grid">
+    <%= render "briefings/home/coming_up", home: @home %>
+    <%= render "briefings/home/discussion", home: @home %>
+  </div>
 
   <% @sections.each do |section| %>
     <%# herb:key section.key %>
-    <section class="panel panel--wide shadow txt-align-start settings__section">
-      <header>
-        <h2 class="divider"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
+    <section class="panel shadow txt-align-start settings__section home-panel">
+      <header class="home-panel__header">
+        <h2 class="home-panel__title"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
       </header>
 
       <%# The first few of each, with the way to the rest: a large install has hundreds overdue. %>
@@ -51,5 +51,11 @@
         </p>
       <% end %>
     </section>
+  <% end %>
+
+  <%= render "briefings/home/engagements", home: @home %>
+
+  <% if can?(:triage_requests) %>
+    <%= render "briefings/home/team", home: @home %>
   <% end %>
 </div>

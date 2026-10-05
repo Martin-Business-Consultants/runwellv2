@@ -12,7 +12,7 @@ class Settings::People::TwoFactorsController < ApplicationController
     else
       person.disable_two_factor!
       person.sessions.destroy_all
-      redirect_to settings_people_path, notice: "#{person.display_name}’s two-factor sign-in is reset. They’ll set it up again."
+      redirect_back_or_to settings_people_path, notice: "#{person.display_name}’s two-factor sign-in is reset. They’ll set it up again."
     end
   end
 end

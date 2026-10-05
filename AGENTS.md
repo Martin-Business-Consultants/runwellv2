@@ -531,8 +531,11 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
   Nobody joins this way, and every way in ends in `Authentication#sign_in_after_first_step`, so
   two-factor sign-in still follows
 - People are deactivated, never deleted (`deactivate!` ends their sessions; their name stays
-  on their history). Pickers and mentions list `User.active.ordered`. The last active owner
-  can't be demoted or deactivated
+  on their history). Each has a page in Settings > People (`settings/people/show`): their name,
+  address and role, a password reset email or a password set for them (`User::Access`), their
+  sessions (sign out everywhere), their connected apps (cut them all off), two-factor, recent
+  sign-ins, and deactivation. Your own password and two-factor stay in Your account. Pickers and
+  mentions list `User.active.ordered`. The last active owner can't be demoted or deactivated
 
 ## Agents
 
@@ -647,7 +650,8 @@ Settings > Audit log (owners, `audit_log` tool) lists every `Event`, filtered by
 period, and downloads as CSV. Security events have the person (`User`) or the install
 (`Setting`) as their subject: `user.signed_in` (method, two_factor, ip, browser),
 `user.sign_in_failed`, `user.two_factor_enabled / _disabled / _reset`, `user.recovery_codes_renewed`,
-`user.role_changed`, `user.deactivated / reactivated`, `user.identity_connected / _disconnected`,
+`user.role_changed`, `user.profile_changed`, `user.password_set`, `user.password_reset_sent`,
+`user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`, `user.identity_connected / _disconnected`,
 `user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
 `settings.sign_in_provider`, `settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.

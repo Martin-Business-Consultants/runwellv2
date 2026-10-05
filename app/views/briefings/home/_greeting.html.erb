@@ -1,0 +1,13 @@
+<%# locals: (home:, needs:) %>
+<%# The top of home: the day, a greeting, and in one line whether anything needs this person. %>
+<header class="home-greeting">
+  <p class="home-greeting__date"><%= l Date.current, format: :long %></p>
+  <h1 class="home-greeting__title"><%= home.greeting %></h1>
+  <p class="home-greeting__summary">
+    <% if needs.zero? %>
+      Nothing needs you right now. Enjoy the quiet.
+    <% else %>
+      <%= pluralize(needs, "thing") %> <%= needs == 1 ? "needs" : "need" %> you below.
+    <% end %>
+  </p>
+</header>

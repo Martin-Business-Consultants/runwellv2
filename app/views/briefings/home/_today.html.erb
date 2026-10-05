@@ -1,0 +1,24 @@
+<%# locals: (home:) %>
+<%# One line: what's due today, this person's work and every open promise, each a link to the list. %>
+<% work = home.due_today_work %>
+<% promises = home.due_today_promises %>
+<section class="home-today panel" aria-label="Today">
+  <span class="home-today__label">Today</span>
+  <% if work.zero? && promises.zero? %>
+    <span class="txt-subtle">Nothing due today</span>
+  <% else %>
+    <% if work.positive? %>
+      <%= link_to todos_path(owner: "me", view: "table", sort: "due"), class: "home-today__item" do %>
+        <%= icon_tag "check" %> <span><%= pluralize(work, "piece") %> of your <%= term(:work).downcase %> due</span>
+      <% end %>
+    <% end %>
+    <% if promises.positive? %>
+      <%= link_to commitments_path, class: "home-today__item" do %>
+        <%= icon_tag "check-circle" %> <span><%= pluralize(promises, term(:commitment).downcase) %> due</span>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= link_to todos_path(owner: "me"), class: "home-today__end txt-link" do %>
+    <span>All your <%= term(:work).downcase %></span> <%= icon_tag "arrow-right" %>
+  <% end %>
+</section>

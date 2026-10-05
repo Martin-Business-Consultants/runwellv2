@@ -7,6 +7,8 @@ class BriefingsController < ApplicationController
     # The briefing tool lists 25 of each; home shows a few, with the way to the rest.
     @sections = Briefing.new(current_user, limit: request.format.json? ? 25 : helpers.briefing_shown).sections
     @setup = Setup.new(current_user)
+    # The personal half of home (the greeting, today, coming up, engagements, the team, discussion).
+    @home = Briefing::Home.new(current_user)
     @release = Release.latest if current_user.can?(:manage_settings) && Upgrade.current.nil?
   end
 end

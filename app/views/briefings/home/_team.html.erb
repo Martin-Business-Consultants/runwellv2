@@ -1,0 +1,27 @@
+<%# locals: (home:) %>
+<%# For owners and managers: who has work in progress, and what. %>
+<% team = home.team %>
+<section class="panel shadow txt-align-start settings__section home-panel">
+  <header class="home-panel__header">
+    <h2 class="home-panel__title">Who’s doing what</h2>
+    <span class="txt-small txt-subtle">It’s <%= l Time.current, format: "%-l:%M%P" %></span>
+  </header>
+  <% if team.any? %>
+    <ul class="settings__scrollable-list">
+      <% team.each do |person| %>
+        <%# herb:key person.user.id %>
+        <li data-filter-target="item" class="home-note">
+          <%= person_tag person.user %>
+          <div class="home-note__body min-width">
+            <% person.doing.each do |todo| %>
+              <%# herb:key todo.id %>
+              <div class="overflow-ellipsis"><%= link_to todo.title, todo, class: "txt-ink" %> <span class="home-item__meta"><%= todo.engagement.ref %></span></div>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="txt-small txt-subtle margin-none">Nobody has <%= term(:work).downcase %> in progress.</p>
+  <% end %>
+</section>

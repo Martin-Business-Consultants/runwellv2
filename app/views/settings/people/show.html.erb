@@ -1,0 +1,167 @@
+<% @page_title = @person.display_name %>
+<%= render "settings/header", current: :people %>
+<% content_for :header do %>
+  <%= parent_page "People", settings_people_path %>
+<% end %>
+<% me = @person == Current.user %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="person-heading">
+      <%= avatar_preview_tag @person, hidden_for_screen_reader: true, class: "people__avatar" %>
+      <div class="min-width">
+        <h1 class="page-title"><%= @person.display_name %><%= " (you)" if me %></h1>
+        <div class="flex flex-wrap align-center gap-half txt-small">
+          <%= status_tag @person.role.capitalize %>
+          <% if @person.deactivated? %>
+            <%= status_tag "Deactivated" %>
+          <% else %>
+            <%= status_tag "Active" %>
+          <% end %>
+          <% if @person.two_factor? %>
+            <span class="status-tag status-tag--positive">Two-factor</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <%= form_with model: @person, url: settings_person_path(@person), method: :patch, scope: :user, class: "flex flex-column gap-half txt-small" do |form| %>
+        <%= form.label :name, "Name", class: "record-form__label" %>
+        <%= form.text_field :name, required: true, class: "input full-width", autocomplete: "off" %>
+        <%= form.label :email_address, "Email address", class: "record-form__label" %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autocomplete: "off" %>
+        <span class="record-form__hint">They sign in with it, and Runwell’s email goes there.<% unless me %> Changing it signs them out everywhere.<% end %></span>
+        <%= form.label :role, "Role", class: "record-form__label" %>
+        <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {}, class: "input input--select" %>
+        <span class="record-form__hint"><%= User::ROLE_DESCRIPTIONS[@person.role] %></span>
+        <div><button type="submit" class="btn btn--link txt-small">Save</button></div>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Password</h2>
+      </header>
+      <% if me %>
+        <p class="txt-small margin-none">Change your own in <%= link_to "Your account", settings_account_path, class: "txt-link" %>.</p>
+      <% else %>
+        <div class="flex flex-wrap align-center gap-half">
+          <%= button_to settings_person_password_path(@person), class: "btn txt-small" do %>
+            <%= icon_tag "email" %> <span>Email them a link to choose one</span>
+          <% end %>
+        </div>
+        <details>
+          <summary class="btn txt-small">Set a new password for them</summary>
+          <%= form_with model: @person, url: settings_person_password_path(@person), method: :patch, scope: :user, namespace: dom_id(@person, :password), class: "flex flex-column gap-half txt-small" do |form| %>
+            <%= form.password_field :password, required: true, class: "input full-width", autocomplete: "new-password", placeholder: "New password", maxlength: 72, autofocus: true, aria: { label: "New password" } %>
+            <%= form.password_field :password_confirmation, required: true, class: "input full-width", autocomplete: "new-password", placeholder: "The same again", maxlength: 72, aria: { label: "Confirm the new password" } %>
+            <span class="record-form__hint">For someone who can’t get the email. They’re signed out everywhere; tell them the new one yourself.</span>
+            <div><button type="submit" class="btn btn--link txt-small">Set password</button></div>
+          <% end %>
+        </details>
+      <% end %>
+    </section>
+  </div>
+
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Signed in</h2>
+      </header>
+      <% if @sessions.any? %>
+        <ul class="settings__scrollable-list txt-small">
+          <% @sessions.each do |session| %>
+            <%# herb:key session.id %>
+            <li class="flex flex-column">
+              <span class="overflow-ellipsis"><%= session.user_agent.to_s.truncate(80).presence || "A browser" %></span>
+              <span class="txt-x-small txt-subtle"><%= session.ip_address %> · since <%= l session.created_at, format: :short %></span>
+            </li>
+          <% end %>
+        </ul>
+        <% unless me %>
+          <%= button_to "Sign them out everywhere", settings_person_sessions_path(@person), method: :delete, class: "btn txt-small", form_class: "flex" %>
+        <% end %>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Not signed in anywhere.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Connected apps</h2>
+      </header>
+      <% if @connections.any? %>
+        <ul class="settings__scrollable-list txt-small">
+          <% @connections.each do |token| %>
+            <%# herb:key token.id %>
+            <li class="flex flex-column">
+              <strong class="overflow-ellipsis"><%= token.name %></strong>
+              <span class="txt-x-small txt-subtle"><%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %></span>
+            </li>
+          <% end %>
+        </ul>
+        <%= render "layouts/shared/delete_dialog", name: "every app #{@person.display_name} connected", path: settings_person_connections_path(@person), trigger_class: "txt-small",
+              message: "Their personal tokens and connected apps stop working at once. Anything they already did stays." %>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">No apps or scripts connected.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Two-factor sign-in</h2>
+      </header>
+      <% if @person.two_factor? %>
+        <p class="txt-small margin-none">On: a code from an authenticator app after their password.</p>
+        <% if !me && @person.active? %>
+          <%= render "layouts/shared/delete_dialog", name: "two-factor sign-in for " + @person.display_name, path: settings_person_two_factor_path(@person), trigger_class: "txt-small",
+                message: "Use this when they’ve lost their phone and their recovery codes. They’re signed out, sign in with just their password, and set it up again." %>
+        <% end %>
+      <% elsif Setting.current.require_two_factor? %>
+        <p class="txt-small txt-subtle margin-none">Not set up yet: they set it up on their next page.</p>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Off.</p>
+      <% end %>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Recent sign-ins</h2>
+      </header>
+      <% if @sign_ins.any? %>
+        <ul class="settings__scrollable-list txt-small">
+          <% @sign_ins.each do |event| %>
+            <%# herb:key event.id %>
+            <li class="flex flex-column">
+              <span><%= event.kind == "user.signed_in" ? "Signed in" : "Failed to sign in" %><%= " with #{event.payload["method"]}" if event.payload["method"].present? %></span>
+              <span class="txt-x-small txt-subtle"><%= l event.occurred_at, format: :short %><%= " · #{event.payload["ip"]}" if event.payload["ip"].present? %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">None recorded.</p>
+      <% end %>
+      <%= link_to "Everything in the audit log", settings_audit_log_path(person: @person.id), class: "txt-link txt-small" %>
+    </section>
+
+    <% unless me %>
+      <section class="settings__section flex flex-column gap-half">
+        <header>
+          <h2 class="divider">Access</h2>
+        </header>
+        <% if @person.deactivated? %>
+          <p class="txt-small margin-none">Deactivated: they can’t sign in, and their name stays on their work.</p>
+          <%= button_to "Reactivate", settings_person_deactivation_path(@person), method: :delete, class: "btn txt-small", form_class: "flex" %>
+        <% else %>
+          <%= render "layouts/shared/confirm", trigger: "Deactivate #{@person.display_name}", title: "Deactivate #{@person.display_name}?",
+                body: "They’re signed out everywhere, their connected apps stop, and they can’t sign in. Their name stays on their work, and you can reactivate them.",
+                button: "Deactivate", path: settings_person_deactivation_path(@person), method: :post, icon: "remove" %>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</section>

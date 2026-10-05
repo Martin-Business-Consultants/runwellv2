@@ -17,9 +17,9 @@ module ApplicationHelper
   end
 
   STATUS_TONES = {
-    "positive" => %w[done approved active promoted can\ approve],
-    "negative" => %w[overdue blocked missed stopped changes\ requested],
-    "waiting" => %w[sent open awaiting\ decision awaiting draft planned],
+    "positive" => %w[done approved active promoted can\ approve on\ track],
+    "negative" => %w[overdue blocked missed stopped changes\ requested behind],
+    "waiting" => %w[sent open awaiting\ decision awaiting draft planned waiting],
     "progress" => %w[in\ progress],
     "neutral" => %w[closed superseded dormant former dropped dismissed not\ started]
   }.flat_map { |tone, labels| labels.map { [ it, tone ] } }.to_h.freeze
