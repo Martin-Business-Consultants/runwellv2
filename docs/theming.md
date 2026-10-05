@@ -63,7 +63,7 @@ Families for status colors (`red`, `yellow`, `lime`, `green`, `aqua`, `blue`, `p
 | `--font-serif` | Serif text in rich text | `ui-serif, serif` |
 | `--font-mono` | Code, refs, keys | `ui-monospace, …` |
 | `--text-scale` | Every size at once (Text size sets it) | `1` |
-| `--text-x-small` … `--text-xx-large` | The size steps, in rem | `0.75rem` … `2.5rem` |
+| `--text-x-small` … `--text-xx-large` | The size steps, in rem (shadcn/ui's: the body is `--text-normal`, 14px) | `0.75rem` … `1.875rem` |
 
 ### Shape, space and depth
 

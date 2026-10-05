@@ -20,24 +20,24 @@
   --font-serif: ui-serif, serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
-  --text-xx-small: 0.55rem;
+  /* shadcn/ui's steps on a 16px root: text-xs 12px, text-sm 14px (the body), text-base 16px,
+  /* text-xl 20px, text-2xl 24px, text-3xl 30px. */
+  --text-xx-small: 0.6875rem;
   --text-x-small: 0.75rem;
-  --text-small: 0.85rem;
-  --text-normal: 1rem;
-  --text-medium: 1.1rem;
-  --text-large: 1.5rem;
-  --text-x-large: 1.8rem;
-  --text-xx-large: 2.5rem;
+  --text-small: 0.8125rem;
+  --text-normal: 0.875rem;
+  --text-medium: 1rem;
+  --text-large: 1.25rem;
+  --text-x-large: 1.5rem;
+  --text-xx-large: 1.875rem;
 
+  /* A step up on phones, read at arm's length (inputs stay at least 16px, inputs.css). */
   @media (max-width: 639px) {
-    --text-xx-small: 0.65rem;
-    --text-x-small: 0.85rem;
-    --text-small: 0.95rem;
-    --text-normal: 1.1rem;
-    --text-medium: 1.2rem;
-    --text-large: 1.5rem;
-    --text-x-large: 1.8rem;
-    --text-xx-large: 2.5rem;
+    --text-xx-small: 0.75rem;
+    --text-x-small: 0.8125rem;
+    --text-small: 0.875rem;
+    --text-normal: 0.9375rem;
+    --text-medium: 1.0625rem;
   }
 
   /* Borders */

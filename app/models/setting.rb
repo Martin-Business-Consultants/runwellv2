@@ -13,7 +13,7 @@ class Setting < ApplicationRecord
   # neither oklch nor CSS variables.
   SCHEME_COLORS = { "fizzy" => "#5d63cd", "forest" => "#058931", "plum" => "#a049d4", "ocean" => "#00859a", "graphite" => "#404249" }.freeze
   # Text size: the page's base size, which every rem in the stylesheets scales from (Default is
-  # 17px on a desk). Each person may pick their own (User#text_size, Settings > Your account).
+  # 16px, with the body text at 14px). Each person may pick their own (User#text_size, Settings > Your account).
   TEXT_SIZES = { "small" => "Small", "default" => "Default", "large" => "Large", "larger" => "Larger" }.freeze
   FONTS = { "system" => "System", "humanist" => "Humanist", "rounded" => "Rounded", "serif" => "Serif", "mono" => "Mono" }.freeze
 

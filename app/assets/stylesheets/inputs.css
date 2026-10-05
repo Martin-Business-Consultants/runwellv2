@@ -6,7 +6,7 @@
     border-radius: var(--input-border-radius, calc(0.5em * var(--radius-scale, 1)));
     border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-ink-light));
     color: var(--input-color, var(--color-ink));
-    /* 15px on a desk, matching the text around it; at least 16px on phones so iOS doesn't
+    /* 14px on a desk, matching the text around it; at least 16px on phones so iOS doesn't
     /* zoom into the field. */
     font-size: max(16px, 1em);
     inline-size: 100%;

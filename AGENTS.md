@@ -720,7 +720,7 @@ layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font` and
 and the page previews a change instantly (`appearance` controller) before saving.
 A person's sun/moon choice (localStorage) beats the install's default theme.
 Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
-the root font size (17px on a desk, 18px on phones, `base.css`); a person's own choice in
+the root font size (16px, `base.css`; text on shadcn/ui's steps, the body 14px, `_global.css`); a person's own choice in
 Settings > Your account (`User#text_size`, blank follows the install) beats it. Every font size in
 the stylesheets is rem or em so it all scales, and table column shares (`COLUMN_SHAPES`) leave room
 for the larger sizes.
