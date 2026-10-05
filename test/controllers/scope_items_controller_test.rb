@@ -17,9 +17,11 @@ class ScopeItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create needs a description" do
-    post agreement_version_scope_items_path(@version), params: { scope_item: { description: "", price_cents: 100 } }
-    follow_redirect!
-    assert inertia_props["errors"]["description"].present?
+    assert_no_difference("ScopeItem.count") do
+      post agreement_version_scope_items_path(@version), params: { scope_item: { description: "", price_cents: 100 } }
+    end
+    assert_redirected_to engagement_path(engagements(:landing))
+    assert_match(/Description/, flash[:alert])
   end
 
   test "update and destroy a draft item" do

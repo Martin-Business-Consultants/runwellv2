@@ -5,32 +5,39 @@ class Portal::EngagementsControllerTest < ActionDispatch::IntegrationTest
     @landing = engagements(:landing)
     @version = @landing.draft_version
     @version.send!(actor: users(:ted))
+    contacts(:ann).update!(portal_access: true)
+    contacts(:bob).update!(portal_access: true)
     get portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
   end
 
   test "index lists only the contact's client" do
-    get portal_root_path
+    get portal_root_path, as: :json
     assert_response :success
-    assert_equal %w[S-1 WO-1], inertia_props["engagements"].map { |e| e["ref"] }.sort
+    assert_equal %w[S-1 WO-1], response.parsed_body["engagements"].map { it["ref"] }.sort
   end
 
   test "show with a pending agreement an approver can decide" do
+    @landing.update!(estimate_notes: "Two sprints, internal only")
     get portal_engagement_path(@landing)
     assert_response :success
-    props = inertia_props
-    assert props["can_approve"]
-    assert_equal @version.id, props.dig("pending", "id")
-    assert_nil props.dig("engagement", "estimate_notes")
-    assert props.dig("engagement", "versions").none? { |v| v.key?("internal_estimate") }
+    assert_select "form[action=?]", portal_engagement_approvals_path(@landing)
+    assert_select "li", text: /Design and copy/
+    assert_no_match "Two sprints", response.body
+    assert_no_match "3 days", response.body
   end
 
   test "show hides internal estimates on agreed items and lists visible work" do
     @version.decide!(decision: "approved", method: "recorded", evidence: "x", recorded_by: users(:ted))
     @landing.todos.last.update!(client_visible: false)
+    get portal_engagement_path(@landing), as: :json
+    engagement = response.parsed_body["engagement"]
+    assert_equal 1, engagement["work"].size
+    assert_equal 2, engagement["scope_in_force"].size
+    assert engagement["scope_in_force"].none? { it.key?("internal_estimate") }
+    assert_nil engagement["awaiting_your_decision"]
     get portal_engagement_path(@landing)
-    assert_equal 1, inertia_props["todos"].size
-    assert inertia_props.dig("engagement", "agreed_items").none? { |i| i.key?("internal_estimate") }
-    assert_not inertia_props["can_approve"]
+    assert_no_match "3 days", response.body
+    assert_select "form[action=?]", portal_engagement_approvals_path(@landing), count: 0
   end
 
   test "another client's engagement is not found" do
@@ -42,8 +49,9 @@ class Portal::EngagementsControllerTest < ActionDispatch::IntegrationTest
     delete portal_session_path
     get portal_session_link_path(contacts(:bob).generate_token_for(:portal_login))
     get portal_engagement_path(@landing)
-    assert_not inertia_props["can_approve"]
-    assert inertia_props["pending"]
+    assert_select "h2", text: "Awaiting your decision"
+    assert_select "li", text: /Design and copy/
+    assert_select "form[action=?]", portal_engagement_approvals_path(@landing), count: 0
   end
 
   test "signed out is redirected" do

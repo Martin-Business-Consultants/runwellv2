@@ -18,14 +18,5 @@ module ActiveSupport
       version.decide!(decision: "approved", method: "recorded", contact: contact, evidence: "email on file", recorded_by: actor)
       version
     end
-
-    # The Inertia page a controller rendered, from the data script in the layout.
-    def inertia_page
-      json = Nokogiri::HTML(response.body).at_css("script[data-page]")&.text || response.body[/data-page="([^"]*)"/, 1]&.then { |s| CGI.unescapeHTML(s) }
-      ::JSON.parse(json)
-    end
-
-    def inertia_props = inertia_page["props"]
-    def inertia_component = inertia_page["component"]
   end
 end

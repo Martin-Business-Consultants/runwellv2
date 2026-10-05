@@ -6,7 +6,7 @@ class BriefingsControllerTest < ActionDispatch::IntegrationTest
   test "home greets the signed in user" do
     get root_path
     assert_response :success
-    assert_select "h1", /Ted Owner/
+    assert_select "h1", /Ted/
   end
 
   test "requires sign in" do

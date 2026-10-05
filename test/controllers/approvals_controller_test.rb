@@ -10,13 +10,12 @@ class ApprovalsControllerTest < ActionDispatch::IntegrationTest
   test "show renders the snapshot and marks the link opened" do
     get approval_path(@link.token)
     assert_response :success
-    assert_equal "approvals/show", inertia_component
-    props = inertia_props
-    assert props["usable"]
-    assert_equal 400_000, props.dig("version", "amount_cents")
-    assert_equal 2, props.dig("version", "items").size
-    assert_nil props.dig("version", "items", 0, "internal_estimate")
-    assert_equal "Ann Approver", props.dig("contact", "name")
+    assert_select "form[action=?]", approval_path(@link.token)
+    assert_select "strong", text: "$4,000.00"
+    assert_select "li", text: /Design and copy/
+    assert_select "li", text: /Build and launch/
+    assert_no_match "3 days", response.body
+    assert_select "p", text: /Prepared for Ann Approver/
     assert @link.reload.opened_at
   end
 
@@ -27,16 +26,16 @@ class ApprovalsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "approved", "link", "Ann Approver", "ann@acme.example", "Looks good" ],
                  [ approval.decision, approval.method, approval.approver_name, approval.approver_email, approval.comment ]
     assert_equal contacts(:ann), approval.contact
-    assert_equal 1, engagements(:landing).billable_items.count
+    assert_equal 2, engagements(:landing).todos.count
     get approval_path(@link.token)
-    assert_equal "approved", inertia_props.dig("decision", "decision")
-    assert_not inertia_props["usable"]
+    assert_match "Approved", response.body
+    assert_select "form[action=?]", approval_path(@link.token), count: 0
   end
 
   test "request changes" do
     post approval_path(@link.token), params: { decision: "changes_requested", approver_name: "Ann", comment: "Too much" }
     assert @version.reload.changes_requested?
-    assert_equal 0, BillableItem.count
+    assert_equal 0, engagements(:landing).todos.count
   end
 
   test "refuses a blank name" do
@@ -56,7 +55,8 @@ class ApprovalsControllerTest < ActionDispatch::IntegrationTest
   test "refuses an expired link" do
     @link.update!(expires_at: 1.minute.ago)
     get approval_path(@link.token)
-    assert_not inertia_props["usable"]
+    assert_match "no longer valid", response.body
+    assert_select "form[action=?]", approval_path(@link.token), count: 0
     post approval_path(@link.token), params: { decision: "approved", approver_name: "Ann" }
     assert_match(/no longer valid/, flash[:alert])
     assert_nil @version.reload.approval

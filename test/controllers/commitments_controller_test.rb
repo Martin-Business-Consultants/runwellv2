@@ -7,28 +7,31 @@ class CommitmentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index open and resolved" do
-    open = clients(:acme).commitments.create!(description: "Open", due_on: Date.current, source: "t")
+    clients(:acme).commitments.create!(description: "Open", due_on: Date.current, source: "t")
     done = clients(:acme).commitments.create!(description: "Done", due_on: Date.current, source: "t")
     done.resolve!("done")
     get commitments_path
-    assert_equal [ "Open" ], inertia_props["commitments"].map { |c| c["description"] }
-    get commitments_path(state: "resolved")
-    assert_equal [ "Done" ], inertia_props["commitments"].map { |c| c["description"] }
+    assert_response :success
+    get commitments_path, as: :json
+    assert_equal [ "Open" ], response.parsed_body["commitments"].map { |c| c["description"] }
+    get commitments_path(state: "resolved"), as: :json
+    assert_equal [ "Done" ], response.parsed_body["commitments"].map { |c| c["description"] }
   end
 
   test "create on an engagement" do
     assert_difference("Commitment.count") do
-      post engagement_commitments_path(@landing), params: { commitment: { description: "Send staging link", due_on: Date.current + 2, owner_kind: "us", user_id: users(:sarah).id } }
+      post engagement_commitments_path(@landing), params: { commitment: { description: "Send staging link", due_on: Date.current + 2, owner: "user:#{users(:sarah).id}" } }
     end
     c = Commitment.last
     assert_equal @landing, c.engagement
     assert_equal clients(:acme), c.client
+    assert_equal users(:sarah), c.user
     assert_equal "app", c.source
     assert_equal "commitment.added", c.events.last.kind
   end
 
   test "create on a client, owned by a contact" do
-    post client_commitments_path(clients(:acme)), params: { commitment: { description: "Send logo", due_on: Date.current, owner_kind: "client", contact_id: contacts(:ann).id, source: "call" } }
+    post client_commitments_path(clients(:acme)), params: { commitment: { description: "Send logo", due_on: Date.current, owner: "contact:#{contacts(:ann).id}", source: "call" } }
     c = Commitment.last
     assert_nil c.engagement
     assert_equal "Ann Approver", c.owner_name
@@ -36,11 +39,12 @@ class CommitmentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create with errors" do
-    post engagement_commitments_path(@landing), params: { commitment: { description: "" } }, headers: { "HTTP_REFERER" => engagement_url(@landing) }
+    assert_no_difference("Commitment.count") do
+      post engagement_commitments_path(@landing), params: { commitment: { description: "" } }, headers: { "HTTP_REFERER" => engagement_url(@landing) }
+    end
     assert_redirected_to engagement_url(@landing)
-    follow_redirect!
-    assert inertia_props["errors"]["description"].present?
-    assert inertia_props["errors"]["due_on"].present?
+    assert_match(/Description/, flash[:alert])
+    assert_match(/Due on/, flash[:alert])
   end
 
   test "resolve" do

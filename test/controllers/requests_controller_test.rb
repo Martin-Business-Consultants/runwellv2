@@ -9,17 +9,17 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
 
   test "index open and all" do
     Request.create!(sender_email: "x@example.org", subject: "Old", source: "email").dismiss!(reason: "no", actor: users(:ted))
-    get requests_path
-    assert_equal [ "Add a newsletter" ], inertia_props["requests"].map { |r| r["subject"] }
-    get requests_path(state: "all")
-    assert_equal 2, inertia_props["requests"].size
+    get requests_path, as: :json
+    assert_equal [ "Add a newsletter" ], response.parsed_body["requests"].map { |r| r["subject"] }
+    get requests_path(status: "all"), as: :json
+    assert_equal 2, response.parsed_body["requests"].size
   end
 
   test "show" do
     get request_path(@request_record)
     assert_response :success
-    assert_equal "Bob Requester", inertia_props.dig("request", "requester")
-    assert_equal %w[S-1 WO-1], inertia_props["engagements"].map { |e| e["ref"] }.sort
+    assert_select ".record-facts dd", "Bob Requester"
+    assert_equal %w[S-1 WO-1], css_select("select[name=engagement_ref]").first.css("option").map { it["value"] }.sort
   end
 
   test "create" do
@@ -32,10 +32,11 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create with errors" do
-    post requests_path, params: { request: { subject: "" } }
-    assert_redirected_to new_request_path
-    follow_redirect!
-    assert inertia_props["errors"]["subject"].present?
+    assert_no_difference "Request.count" do
+      post requests_path, params: { request: { subject: "" } }
+    end
+    assert_response :unprocessable_entity
+    assert_match(/Subject can.t be blank/, response.body)
   end
 
   test "promote_engagement" do

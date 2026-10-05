@@ -5,6 +5,7 @@ class Portal::ApprovalsControllerTest < ActionDispatch::IntegrationTest
     @landing = engagements(:landing)
     @version = @landing.draft_version
     @version.send!(actor: users(:ted))
+    %i[ann bob gina].each { contacts(it).update!(portal_access: true) }
   end
 
   test "an approver approves from the portal" do
@@ -13,7 +14,7 @@ class Portal::ApprovalsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to portal_engagement_path(@landing)
     approval = @version.reload.approval
     assert_equal [ "link", contacts(:ann), "portal" ], [ approval.method, approval.contact, @version.events.last.source ]
-    assert_equal 1, @landing.billable_items.count
+    assert_equal 2, @landing.todos.count
   end
 
   test "a typed name is required" do

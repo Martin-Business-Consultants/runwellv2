@@ -8,25 +8,28 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
 
   test "index filters by state and label" do
     @landing.close!
-    get engagements_path
-    assert_equal %w[P-1 S-1], inertia_props["engagements"].map { |e| e["ref"] }.sort
-    get engagements_path(state: "closed")
-    assert_equal %w[WO-1], inertia_props["engagements"].map { |e| e["ref"] }
-    get engagements_path(label: "service")
-    assert_equal %w[S-1], inertia_props["engagements"].map { |e| e["ref"] }
+    get engagements_path(state: "open"), as: :json
+    assert_equal %w[P-1 S-1], engagement_refs.sort
+    get engagements_path(state: "closed"), as: :json
+    assert_equal %w[WO-1], engagement_refs
+    get engagements_path(state: "all", label: "service"), as: :json
+    assert_equal %w[S-1], engagement_refs
   end
 
   test "show" do
     approve!(@landing)
     get engagement_path(@landing)
     assert_response :success
-    props = inertia_props
-    assert_equal "approved", props.dig("engagement", "state")
-    assert_equal 400_000, props.dig("engagement", "agreed_amount_cents")
-    assert_equal 1, props.dig("engagement", "versions").size
-    assert_equal 2, props["todos"].size
-    assert_equal 1, props["billable_items"].size
-    assert_equal 1, props["contacts"].count { |c| c["can_approve"] }
+    assert_select "h1.page-title", "WO-1 Spring landing page"
+    assert_select ".record-meta", /Approved/
+    assert_select ".record-meta strong", "$4,000.00"
+    assert_select ".record-tabs__tab", text: /Agreement\s*1/
+    assert_select "#work .work-group > ul > li", 2
+    assert_select ".scope-nav__item", 3
+
+    get engagement_path(@landing, item: scope_items(:design).id)
+    assert_select ".work-focus__title", "Design and copy"
+    assert_select "#work .work-group > ul > li", 1
   end
 
   test "show by ref is case-insensitive and 404s otherwise" do
@@ -39,13 +42,13 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
   test "new" do
     get new_engagement_path(client_id: clients(:acme).id, label: "project")
     assert_response :success
-    assert_equal "project", inertia_props.dig("engagement", "label")
-    assert_equal clients(:acme).id, inertia_props.dig("engagement", "client_id")
+    assert_select "select[name='engagement[label]'] option[selected][value=project]"
+    assert_select "select[name='engagement[client_id]'] option[selected][value='#{clients(:acme).id}']"
   end
 
   test "create drafts an engagement with an empty first version" do
     assert_difference([ "Engagement.count", "AgreementVersion.count" ]) do
-      post client_engagements_path(clients(:acme)), params: { engagement: { label: "project", title: "Rebrand", estimate_notes: "2 weeks" } }
+      post engagements_path, params: { engagement: { client_id: clients(:acme).id, label: "project", title: "Rebrand", estimate_notes: "2 weeks" } }
     end
     engagement = Engagement.last
     assert_redirected_to engagement_path(engagement)
@@ -55,10 +58,11 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create with errors" do
-    post client_engagements_path(clients(:acme)), params: { engagement: { label: "project", title: "" } }
-    assert_redirected_to new_engagement_path(client_id: clients(:acme).id)
-    follow_redirect!
-    assert inertia_props["errors"]["title"].present?
+    assert_no_difference "Engagement.count" do
+      post engagements_path, params: { engagement: { client_id: clients(:acme).id, label: "project", title: "" } }
+    end
+    assert_response :unprocessable_entity
+    assert_match(/Title can.t be blank/, response.body)
   end
 
   test "update" do
@@ -74,4 +78,7 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
     assert @landing.reload.closed?
     assert_equal "Delivered", @landing.close_reason
   end
+
+  private
+    def engagement_refs = response.parsed_body["engagements"].map { |e| e["ref"] }
 end

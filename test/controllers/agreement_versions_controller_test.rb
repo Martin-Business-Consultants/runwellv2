@@ -49,7 +49,7 @@ class AgreementVersionsControllerTest < ActionDispatch::IntegrationTest
     assert @version.reload.approved?
     assert_equal "recorded", @version.approval.method
     assert_equal users(:ted), @version.approval.recorded_by
-    assert_equal 1, @landing.billable_items.count
+    assert_equal 2, @landing.todos.count
   end
 
   test "record_decision without evidence explains" do

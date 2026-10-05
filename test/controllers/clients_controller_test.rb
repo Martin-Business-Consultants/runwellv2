@@ -6,15 +6,17 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "index" do
     get clients_path
     assert_response :success
-    assert_equal %w[Acme\ Co Globex], inertia_props["clients"].map { |c| c["name"] }
+    get clients_path, as: :json
+    assert_equal [ "Acme Co", "Globex" ], response.parsed_body["clients"].map { |c| c["name"] }
   end
 
   test "show" do
     get client_path(clients(:acme))
     assert_response :success
-    assert_equal 2, inertia_props.dig("client", "contacts").size
-    assert_equal %w[S-1 WO-1], inertia_props["engagements"].map { |e| e["ref"] }.sort
-    assert inertia_props["users"].any?
+    get client_path(clients(:acme)), as: :json
+    client = response.parsed_body["client"]
+    assert_equal 2, client["contacts"].size
+    assert_equal %w[S-1 WO-1], client["engagements"].map { |e| e["ref"] }.sort
   end
 
   test "create" do
@@ -27,10 +29,11 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create with errors" do
-    post clients_path, params: { client: { name: "" } }
-    assert_redirected_to new_client_path
-    follow_redirect!
-    assert inertia_props["errors"]["name"].present?
+    assert_no_difference("Client.count") do
+      post clients_path, params: { client: { name: "" } }
+    end
+    assert_response :unprocessable_entity
+    assert_select "li", text: /Name can.t be blank/
   end
 
   test "update" do
@@ -52,8 +55,10 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "contact with a bad email is rejected" do
-    post client_contacts_path(clients(:acme)), params: { contact: { name: "Cy", email: "nope" } }
-    follow_redirect!
-    assert inertia_props["errors"]["email"].present?
+    assert_no_difference("Contact.count") do
+      post client_contacts_path(clients(:acme)), params: { contact: { name: "Cy", email: "nope" } }
+    end
+    assert_response :unprocessable_entity
+    assert_select "li", text: /Email/
   end
 end

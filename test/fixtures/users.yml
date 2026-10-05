@@ -9,5 +9,5 @@ ted:
 sarah:
   email_address: sarah@example.com
   name: Sarah Staff
-  role: staff
+  role: manager
   password_digest: <%= password_digest %>

@@ -1,10 +1,12 @@
 require "test_helper"
 
 class Portal::SessionsControllerTest < ActionDispatch::IntegrationTest
+  setup { %i[ann bob].each { contacts(it).update!(portal_access: true) } }
+
   test "new" do
     get new_portal_session_path
     assert_response :success
-    assert_equal "portal/sessions/new", inertia_component
+    assert_select "form[action=?]", portal_session_path
   end
 
   test "create emails a link to a known contact" do
@@ -32,7 +34,7 @@ class Portal::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, contacts(:ann).portal_sessions.count
     get portal_root_path
     assert_response :success
-    assert_equal "Acme Co", inertia_props.dig("portal", "client")
+    assert_select ".header__logo", text: "Acme Co"
   end
 
   test "a bad token does not" do

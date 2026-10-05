@@ -6,7 +6,7 @@ class NotesControllerTest < ActionDispatch::IntegrationTest
   test "create on an engagement" do
     engagement = engagements(:landing)
     assert_difference("Note.count") do
-      post notes_path, params: { subject_type: "Engagement", subject_id: engagement.id, note: { body: "Kickoff call", kind: "call" } },
+      post notes_path, params: { record: "Engagement:#{engagement.id}", note: { body: "Kickoff call", kind: "call" } },
                        headers: { "HTTP_REFERER" => engagement_url(engagement) }
     end
     note = engagement.notes.sole
@@ -16,13 +16,15 @@ class NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create with errors" do
-    post notes_path, params: { subject_type: "Client", subject_id: clients(:acme).id, note: { body: "" } }
-    follow_redirect!
-    assert inertia_props["errors"]["body"].present?
+    assert_no_difference("Note.count") do
+      post notes_path, params: { record: "Client:#{clients(:acme).id}", note: { body: "" } }
+    end
+    assert_redirected_to client_path(clients(:acme))
+    assert_match(/Body/, flash[:alert])
   end
 
   test "refuses unknown subjects" do
-    post notes_path, params: { subject_type: "User", subject_id: users(:ted).id, note: { body: "x" } }
+    post notes_path, params: { record: "User:#{users(:ted).id}", note: { body: "x" } }
     assert_response :bad_request
   end
 end
