@@ -51,9 +51,12 @@ module Engagement::Agreement
     versions.sum { |v| v.kind == "initial" ? v.amount_cents : v.price_delta_cents }
   end
 
-  # The scope in force: every item from every approved version.
+  # The scope in force: every item from every approved version, with its work loaded, since every
+  # list of them shows each one's delivery state.
   def agreed_items
-    approved_versions.flat_map { |v| v.scope_items.to_a }
+    versions = approved_versions
+    ActiveRecord::Associations::Preloader.new(records: versions, associations: { scope_items: :todos }).call
+    versions.flat_map { |v| v.scope_items.to_a }
   end
 
   def next_version_number = (agreement_versions.maximum(:number) || 0) + 1
