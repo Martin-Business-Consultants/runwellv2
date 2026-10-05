@@ -165,7 +165,7 @@ Received mail is kept 30 days, then deleted; the requests and notes made from it
 ## Plugins
 
 Plugins live on the server, in `RUNWELL_DATA_DIR/plugins` beside the databases, never in the
-image or the checkout. **Settings > Plugins** installs one (the ten Runwell publishes, or any
+image or the checkout. **Settings > Plugins** installs one (the twelve Runwell publishes, or any
 GitHub repository by `owner/name`), shows an Update button when its repository has a newer
 release, and removes one; each restarts Runwell, which migrates and loads it. The same from the
 server's shell:

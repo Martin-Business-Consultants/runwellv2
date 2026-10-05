@@ -1,6 +1,11 @@
 # The plugins Runwell's authors publish, offered in Settings > Plugins. Each is its own public
 # repository with releases; any other repository holding a Runwell plugin installs the same way,
 # by name. Nothing here is installed until someone installs it.
+- key: ai
+  repo: Martin-Business-Consultants/runwell-ai
+  name: AI
+  description: An assistant inside Runwell (Ask, on any page) and one-click suggestions on records, through your own AI provider's key, with a monthly budget. Works through the same tools as MCP, as the person, and changes nothing until they approve it.
+  tables: [ ruby_llm_ ]
 - key: account_management
   repo: Martin-Business-Consultants/runwell-account-management
   name: Account management

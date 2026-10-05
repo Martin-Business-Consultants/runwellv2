@@ -16,11 +16,7 @@
     </section>
 
     <% if @request.open? %>
-      <% if can?(:triage_requests) && Ai.available_for?(@request) %>
-        <section class="settings__section flex flex-column gap-half">
-          <%= render "ai/suggestions/card", kind: "triage", subject: @request, suggestion: AiSuggestion.latest("triage", @request, Current.user) %>
-        </section>
-      <% end %>
+      <%= plugin_slots(:request_aside, request_record: @request) %>
       <% if can?(:triage_requests) %>
         <%= render "requests/triage", request_record: @request %>
       <% else %>

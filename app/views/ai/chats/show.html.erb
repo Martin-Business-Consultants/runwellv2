@@ -1,7 +1,0 @@
-<% subject = @chat.subject %>
-<% record_ref = subject && (subject.is_a?(Engagement) ? "Engagement:#{subject.ref}" : "#{@chat.subject_type}:#{@chat.subject_id}") %>
-<% title = subject.nil? ? "Ask anything" : (subject.is_a?(Engagement) ? "#{subject.ref} #{subject.title}" : (subject.try(:name) || subject.try(:title) || subject.try(:subject))) %>
-<turbo-frame id="ai_panel">
-  <%= render "ai/chats/panel", chat: @chat, title: title, messages_path: ai_chat_messages_path(@chat), new_chat_path: ai_chats_path, new_chat_params: { record: record_ref },
-        prompts: ai_prompts(subject, params[:page]), documents: @chat.attachable_documents, note: "It acts as you, and asks before changing anything." %>
-</turbo-frame>

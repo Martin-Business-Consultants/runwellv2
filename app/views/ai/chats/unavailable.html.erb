@@ -1,5 +1,0 @@
-<turbo-frame id="ai_panel">
-  <div class="ai-chat">
-    <p class="txt-small txt-subtle">AI isn’t switched on here.<% if can?(:manage_settings) %> Set it up in <%= link_to "Settings › AI", settings_ai_path, data: { turbo_frame: "_top" } %>.<% else %> An owner can switch it on in Settings › AI.<% end %></p>
-  </div>
-</turbo-frame>

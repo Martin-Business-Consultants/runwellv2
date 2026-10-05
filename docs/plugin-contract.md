@@ -47,6 +47,7 @@ anything published: an owner switches a plugin on.
 | `Runwell::Plugins.stylesheet key, "name"` | 2.0 | Stable |
 | `Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:` | 2.0 | Stable |
 | `Runwell::Plugins.settings key, label, -> { path }` | 2.0 | Stable |
+| `Runwell::Plugins.shortcut key, "i", "What it does"` | 2.18 | Stable |
 
 Slots, and the locals each partial gets:
 
@@ -60,15 +61,26 @@ Slots, and the locals each partial gets:
 | `:portal_engagement_panel` | An engagement in the portal | `engagement:` | 2.0 |
 | `:approval_page` | The client's approval page | `version:`, `link:` | 2.1 |
 | `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
+| `:home_top` | Home, above the briefing | none | 2.18 |
+| `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
+| `:request_aside` | An open request's sidebar, above triage | `request_record:` | 2.18 |
+| `:scope_item_aside` | A scope item's sidebar, above Details | `scope_item:` | 2.18 |
+| `:draft_version` | Under a draft agreement version | `version:` | 2.18 |
+| `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
+| `:commitment_row` | Inside each commitment row | `commitment:` | 2.18 |
+| `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
 
-A slot partial declares strict locals on its first line, like every core partial. A nav or
+A slot partial declares strict locals on its first line, like every core partial. The row slots
+(`:note_row`, `:commitment_row`) render once per row: work out anything shared once a request (a
+`CurrentAttributes` of the plugin's own), never a query per row. A shortcut only lists a key on the
+`?` sheet; the plugin's control declares it with `data-keys`, which is what makes it work. A nav or
 settings path lambda runs in the view and may return nil to hide the link. A settings page's
 controller says `require_permission :manage_settings` and starts its view with
 `render "settings/header", current: key`.
 
 Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
-`can?`, and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
+`can?`, `current_record` (the record on screen, or nil; 2.18), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
 `quick_filter` and `index_toolbar` (2.0, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
 
@@ -95,7 +107,8 @@ doesn't stop the others.
 
 Add associations, scopes and validations there; never columns. Core models a plugin may read and
 call verbs on: `Client`, `Contact`, `Engagement`, `AgreementVersion`, `ScopeItem`, `Approval`,
-`Todo`, `Commitment`, `Request`, `Note`, `Document`, `Event`, `User` (2.0, stable).
+`Todo`, `Commitment`, `Request`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
+`Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
 
 ## Events
 
@@ -124,6 +137,13 @@ New kinds may be added in any minor release; existing kinds keep their name and 
 | `agent_exempt action, reason:` | 2.0 | Stable |
 | `Runwell::Plugins.agent_brief key, ->(todo, base_url) { markdown or nil }` | 2.0 | Stable |
 | `Runwell::Plugins.agent_workflow key, title, steps` | 2.1 | Stable |
+| `Agent::Dispatch.run_as(user_or_contact, tool, arguments, name:)` | 2.18 | Experimental |
+| `Agent::Catalogue.for(user)`, `.for_contact(contact)`, `.find(name)` and a tool's `name`, `title`, `description`, `read?`, `confirm`, `input_schema` | 2.18 | Experimental |
+
+`Agent::Dispatch.run_as` runs one tool as a person or a client's contact, as their own agent would
+over MCP: a token for that call alone (kept out of Connected apps), revoked after; `name:` is what
+history says it came through ("Ted's agent via Runwell AI"). It's for an in-app assistant (the AI
+plugin), which offers the catalogue's tools to a model.
 
 A read needs a `.json.jbuilder` view starting each record with `json.merge! agent_ref(record)` and
 a `summary`. A write needs nothing extra: its redirect and notice become the tool's answer. See
@@ -135,7 +155,8 @@ a `summary`. A write needs nothing extra: its redirect and notice become the too
 | --- | --- | --- |
 | `Runwell::Plugins.ai_prompt key, label, types:` | 2.16 | Experimental |
 
-A one-click question in the Ask panel, on the given record types (`Client`, `Engagement`, `Todo`,
+The assistant itself is the AI plugin (2.18; before, the core). A one-click question in its Ask
+panel, on the given record types (`Client`, `Engagement`, `Todo`,
 `Request`, `ScopeItem`) or every page. The assistant answers through the agent tools, so a plugin's
 declared tools are already within its reach while the plugin is on.
 

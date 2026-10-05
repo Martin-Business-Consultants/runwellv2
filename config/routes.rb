@@ -54,15 +54,6 @@ Rails.application.routes.draw do
     resource :revocation, only: :create
   end
   resource :search, only: :show
-  # The in-app AI's Ask panel (Settings > AI).
-  namespace :ai do
-    get "chats/current", to: "chats#current", as: :current_chat
-    resources :chats, only: %i[show create] do
-      resources :messages, only: %i[index create]
-      resources :decisions, only: :create
-    end
-    resources :suggestions, only: %i[create show update]
-  end
   get "help", to: redirect("/settings/help")
   resource :setup, only: :destroy
 
@@ -70,9 +61,6 @@ Rails.application.routes.draw do
   namespace :settings do
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
-    resource :ai, only: %i[show update] do
-      resource :test, only: :create, module: :ais
-    end
     resource :theme_brief, only: :show
     resource :account, only: %i[show update]
     resource :two_factor, only: %i[new create destroy] do
@@ -226,14 +214,6 @@ Rails.application.routes.draw do
     resource :me, only: :show
     post "mcp", to: "mcp#create", as: :mcp
     resources :connected_apps, only: %i[index create destroy]
-    get "ai_chats/current", to: "ai_chats#current", as: :current_ai_chat
-    resources :ai_chats, path: "ai", only: %i[show create] do
-      member do
-        get :messages
-        post :messages, action: :ask
-        post :decide
-      end
-    end
     resource :oauth_authorization, path: "oauth/authorization", only: %i[show create]
   end
 

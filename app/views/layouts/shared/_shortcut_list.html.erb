@@ -44,8 +44,9 @@
       <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
       <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:commitment).downcase %> or time</dd>
       <dt><kbd>p</kbd></dt><dd>Add a <%= term(:commitment).downcase %> (a promise with a date)</dd>
-      <% if Ai.ready? %>
-        <dt><kbd>i</kbd></dt><dd>Ask AI about what’s on screen</dd>
+      <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
+        <%# herb:key shortcut.keys %>
+        <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>
       <% end %>
       <dt><kbd>[</kbd></dt><dd>Collapse or expand the menu</dd>
       <dt><kbd>]</kbd></dt><dd>Hide or show a record’s details sidebar</dd>

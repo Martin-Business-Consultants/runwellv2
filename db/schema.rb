@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -113,59 +113,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
     t.index ["engagement_id"], name: "index_agreement_versions_on_engagement_id"
     t.index ["sent_by_id"], name: "index_agreement_versions_on_sent_by_id"
     t.index ["superseded_by_id"], name: "index_agreement_versions_on_superseded_by_id"
-  end
-
-  create_table "ai_chats", force: :cascade do |t|
-    t.bigint "ruby_llm_model_id", null: false
-    t.boolean "cancelled", default: false, null: false
-    t.integer "user_id"
-    t.integer "contact_id"
-    t.string "subject_type"
-    t.integer "subject_id"
-    t.string "purpose", default: "ask", null: false
-    t.string "title"
-    t.datetime "replying_since"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["contact_id"], name: "index_ai_chats_on_contact_id"
-    t.index ["ruby_llm_model_id"], name: "index_ai_chats_on_ruby_llm_model_id"
-    t.index ["subject_type", "subject_id"], name: "index_ai_chats_on_subject"
-    t.index ["user_id", "purpose", "updated_at"], name: "index_ai_chats_on_user_id_and_purpose_and_updated_at"
-    t.index ["user_id"], name: "index_ai_chats_on_user_id"
-  end
-
-  create_table "ai_messages", force: :cascade do |t|
-    t.bigint "ai_chat_id", null: false
-    t.string "role", null: false
-    t.text "content"
-    t.boolean "cache_until_here", default: false, null: false
-    t.text "thinking_text"
-    t.text "thinking_signature"
-    t.json "citations"
-    t.json "server_tool_calls"
-    t.json "raw_content"
-    t.json "raw_reasoning"
-    t.string "finish_reason"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ai_chat_id"], name: "index_ai_messages_on_ai_chat_id"
-  end
-
-  create_table "ai_suggestions", force: :cascade do |t|
-    t.integer "user_id"
-    t.string "subject_type"
-    t.integer "subject_id"
-    t.integer "ai_chat_id"
-    t.string "kind", null: false
-    t.string "state", default: "working", null: false
-    t.json "payload"
-    t.string "error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ai_chat_id"], name: "index_ai_suggestions_on_ai_chat_id"
-    t.index ["kind", "subject_type", "subject_id", "created_at"], name: "idx_on_kind_subject_type_subject_id_created_at_dc694facd4"
-    t.index ["subject_type", "subject_id"], name: "index_ai_suggestions_on_subject"
-    t.index ["user_id"], name: "index_ai_suggestions_on_user_id"
   end
 
   create_table "approval_links", force: :cascade do |t|
@@ -494,92 +441,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
     t.index ["triaged_by_id"], name: "index_requests_on_triaged_by_id"
   end
 
-  create_table "ruby_llm_batches", force: :cascade do |t|
-    t.string "provider_batch_id", null: false
-    t.string "provider", null: false
-    t.string "status", null: false
-    t.string "raw_status"
-    t.boolean "completed", default: false, null: false
-    t.string "chat_type"
-    t.string "batch_protocol"
-    t.json "chat_ids", default: []
-    t.json "request_counts"
-    t.json "reported_cost"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["provider", "provider_batch_id"], name: "index_ruby_llm_batches_on_provider_and_provider_batch_id", unique: true
-    t.index ["status"], name: "index_ruby_llm_batches_on_status"
-  end
-
-  create_table "ruby_llm_models", force: :cascade do |t|
-    t.string "model_id", null: false
-    t.string "name", null: false
-    t.string "provider", null: false
-    t.string "family"
-    t.datetime "model_created_at"
-    t.integer "context_window"
-    t.integer "max_output_tokens"
-    t.date "knowledge_cutoff"
-    t.datetime "unlisted_at"
-    t.json "modalities", default: {}
-    t.json "capabilities", default: []
-    t.json "pricing", default: {}
-    t.json "metadata", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["family"], name: "index_ruby_llm_models_on_family"
-    t.index ["provider", "model_id"], name: "index_ruby_llm_models_on_provider_and_model_id", unique: true
-    t.index ["provider"], name: "index_ruby_llm_models_on_provider"
-  end
-
-  create_table "ruby_llm_tool_calls", force: :cascade do |t|
-    t.string "message_type", null: false
-    t.bigint "message_id", null: false
-    t.string "result_type"
-    t.bigint "result_id"
-    t.string "tool_call_id", null: false
-    t.string "name", null: false
-    t.text "thought_signature"
-    t.string "approval"
-    t.boolean "remote", default: false, null: false
-    t.json "arguments", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["message_type", "message_id"], name: "index_ruby_llm_tool_calls_on_message_type_and_message_id"
-    t.index ["name"], name: "index_ruby_llm_tool_calls_on_name"
-    t.index ["result_type", "result_id"], name: "index_ruby_llm_tool_calls_on_result_type_and_result_id"
-    t.index ["tool_call_id"], name: "index_ruby_llm_tool_calls_on_tool_call_id", unique: true
-  end
-
-  create_table "ruby_llm_usages", force: :cascade do |t|
-    t.string "chat_type", null: false
-    t.bigint "chat_id", null: false
-    t.string "message_type"
-    t.bigint "message_id"
-    t.string "operation", null: false
-    t.string "provider", null: false
-    t.string "model", null: false
-    t.string "status", null: false
-    t.integer "input_tokens"
-    t.integer "output_tokens"
-    t.integer "cache_read_tokens"
-    t.integer "cache_write_tokens"
-    t.integer "thinking_tokens"
-    t.decimal "input_cost", precision: 16, scale: 10
-    t.decimal "output_cost", precision: 16, scale: 10
-    t.decimal "cache_read_cost", precision: 16, scale: 10
-    t.decimal "cache_write_cost", precision: 16, scale: 10
-    t.decimal "thinking_cost", precision: 16, scale: 10
-    t.decimal "total_cost", precision: 16, scale: 10
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["chat_type", "chat_id"], name: "index_ruby_llm_usages_on_chat_type_and_chat_id"
-    t.index ["message_type", "message_id"], name: "index_ruby_llm_usages_on_message_type_and_message_id"
-    t.index ["status"], name: "index_ruby_llm_usages_on_status"
-    t.check_constraint "operation IN ('chat', 'embedding', 'moderation', 'image', 'speech', 'transcription', 'ocr', 'rerank')"
-    t.check_constraint "status IN ('pending', 'succeeded', 'failed', 'cancelled')"
-  end
-
   create_table "scope_items", force: :cascade do |t|
     t.integer "agreement_version_id", null: false
     t.string "description", null: false
@@ -769,12 +630,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
   add_foreign_key "agreement_versions", "agreement_versions", column: "superseded_by_id"
   add_foreign_key "agreement_versions", "engagements"
   add_foreign_key "agreement_versions", "users", column: "sent_by_id"
-  add_foreign_key "ai_chats", "contacts"
-  add_foreign_key "ai_chats", "ruby_llm_models"
-  add_foreign_key "ai_chats", "users"
-  add_foreign_key "ai_messages", "ai_chats"
-  add_foreign_key "ai_suggestions", "ai_chats"
-  add_foreign_key "ai_suggestions", "users"
   add_foreign_key "approval_links", "agreement_versions"
   add_foreign_key "approval_links", "contacts"
   add_foreign_key "approvals", "agreement_versions"

@@ -88,11 +88,7 @@
   <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
 
     <%= render "layouts/shared/sidebar_toggle" %>
-    <% if !@client.internal? && Ai.available_for?(@client) %>
-      <section class="settings__section flex flex-column gap-half">
-        <%= render "ai/suggestions/card", kind: "client_week", subject: @client, suggestion: AiSuggestion.latest("client_week", @client, Current.user) %>
-      </section>
-    <% end %>
+    <%= plugin_slots(:client_aside, client: @client) %>
     <section class="settings__section flex flex-column gap-half">
       <header>
         <h2 class="divider">Details</h2>

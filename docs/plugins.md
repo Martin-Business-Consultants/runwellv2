@@ -83,6 +83,15 @@ engagements and todos (a polymorphic `trackable`, like notes and documents, with
 client kept alongside so totals roll up), totals on engagements, a weekly timesheet, and "Log time"
 in the quick action tray. No live timers.
 
+`runwell-ai` (AI) is the reference for a plugin that runs agent tools for a person and fills the
+row and sidebar slots: an assistant inside the app (Ask, `i`) and one-click suggestions on records,
+through RubyLLM and the install's own provider key, with a monthly budget. It offers the catalogue's
+tools to a model and runs each as the person with `Agent::Dispatch.run_as`, so writes wait for their
+approval and history reads "Ted's agent via Runwell AI". It owns RubyLLM's tables too
+(`tables: [ ruby_llm_ ]` in `config/plugins.yml`). It was in the core until 2.18; an install that had
+it on gets the plugin on updating, its first migrations taking over the tables and copying the
+settings.
+
 `runwell-google-ads` is the reference for a plugin that reaches the portal: read-only Google
 Ads reporting. The owner connects their own Google API app in Settings > Google Ads (OAuth,
 credentials encrypted with Active Record encryption); an engagement links to an ad account

@@ -2,8 +2,8 @@
 # out of the core's schema.rb: a new install loads the core alone, and each plugin migrates its
 # own tables when it's installed.
 Rails.application.config.after_initialize do
-  keys = (InstalledPlugins.present.keys + Runwell::PluginCatalog.keys).uniq
-  ActiveRecord::SchemaDumper.ignore_tables |= [ /\A(?:#{keys.map { Regexp.escape(it) }.join("|")})_/ ] if keys.any?
+  prefixes = (InstalledPlugins.present.keys + Runwell::PluginCatalog.keys).uniq.map { "#{it}_" } + Runwell::PluginCatalog.table_prefixes
+  ActiveRecord::SchemaDumper.ignore_tables |= [ /\A(?:#{prefixes.map { Regexp.escape(it) }.join("|")})/ ] if prefixes.any?
 
   # A plugin installed from Settings > Plugins brings stylesheets the release never compiled.
   # Production serves only compiled assets, so compile once more when any of a plugin's are

@@ -17,6 +17,18 @@ module Agent
 
     CONTROL_ARGUMENTS = %w[confirm idempotency_key].freeze
 
+    # Runs one tool as a person (a User) or a client's contact, the way their own agent would over
+    # MCP: a token for this call alone (kind "assistant", kept out of Connected apps), revoked
+    # straight after. Answers the tool's JSON. name: what the history says it came through
+    # ("Ted's agent via Runwell AI"). For a plugin's in-app assistant; see docs/plugin-contract.md.
+    def self.run_as(person, tool, arguments, name:)
+      owner = person.is_a?(Contact) ? { contact: person } : { user: person }
+      token = AccessToken.issue!(**owner, name: name, kind: "assistant")
+      new(tool, arguments, token: token.plaintext, base_url: "#{Runwell.protocol}://#{Runwell.host}").call
+    ensure
+      token&.revoke!
+    end
+
     def call
       started_at = Time.current
       body = catch(:answer) { guarded { run } }

@@ -13,15 +13,7 @@
     <%= render "briefings/setup", setup: @setup %>
   <% end %>
 
-  <% if Ai.available_for? %>
-    <section class="panel panel--wide shadow txt-align-start settings__section">
-      <header>
-        <h2 class="divider">Your day</h2>
-      </header>
-      <%= render "ai/suggestions/card", kind: "day", subject: Current.user,
-            suggestion: Current.user.ai_suggestions.where(kind: "day", created_at: Date.current.all_day).latest_first.first %>
-    </section>
-  <% end %>
+  <%= plugin_slots(:home_top) %>
 
   <% if @sections.empty? && !@setup.show? %>
     <div class="panel panel--centered">

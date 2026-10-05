@@ -359,7 +359,7 @@ one place they are documented for people: add a new key there.
 | `g` + `h c e w b m r n s` | Home, clients, engagements, work, board, commitments, requests, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
-| `p`, `i` | Add a commitment (the quick action, on the record on screen), ask AI |
+| `p`, `i` | Add a commitment (the quick action, on the record on screen), ask AI (the AI plugin) |
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
@@ -410,7 +410,7 @@ Files live in Active Storage (`storage/` locally). Two places, both Fizzy's:
 ## Plugins
 
 The core has no money or time; plugins add them. A plugin is a Rails engine in a public GitHub
-repository of its own, never in this one: the ten Runwell publishes are
+repository of its own, never in this one: the twelve Runwell publishes are
 `Martin-Business-Consultants/runwell-<name>` (`config/plugins.yml`). It is installed onto the
 server, like a WordPress plugin: Settings > Plugins downloads the repository's latest release
 into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
@@ -487,7 +487,7 @@ portal request, so switching access off or archiving a contact signs them out at
 a client sees is decided per record (`client_visible` on work and documents); there are no
 client roles.
 
-The plugins Runwell publishes (Account management, Cloudflare, Code, Factory, Google Ads, Outsend,
+The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Outsend,
 QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
 and what it's the reference for (portal pages, webhooks, middleware, unattended agents, money,
 model rules) is in `docs/plugins.md`. Read it before changing a contract they use.
@@ -615,39 +615,16 @@ do, through the same controllers: there is no separate API.
 ## In-app AI
 
 The third way to use AI with Runwell, beside a local harness over MCP (coding belongs there) and a
-chat app over MCP: an assistant inside the app, through RubyLLM and its Rails integration
-(`acts_as_chat` on `AiChat`, `acts_as_message` on `AiMessage`; RubyLLM's tables keep tool calls,
-approvals and usage). Settings > AI (`Setting::Ai`) holds the provider, an encrypted key, models
-(a main and a fast one; with OpenCode Zen each model is reached its own family's way, `Setting#ai_route`), a monthly budget in cents (`Ai.over_budget?`, summed from
-`ruby_llm_usages`) and the switch; nothing is configured globally (`Setting#ai_context`). A client
-can be kept out of AI (`Client#ai_excluded`, a person's call, never an agent's).
-
-- The Ask panel (`layouts/shared/ai_panel`, key `i`) is the person's chat about the record on screen.
-  A reply runs in `AiReplyJob` (`AiChat#reply!`) while `replying_since` is set; the panel's message
-  frame polls until it's done, showing the reply as it streams
-- It works through the MCP tools, not code of its own: `Ai::Tools` gives the model `search`,
-  `read_record`, `find_tools` and `run_tool`, and `Ai.run_tool` dispatches a catalogue tool as the
-  person with a one-call `assistant` token (`AccessToken`), so roles, validations and events are the
-  UI's and history reads "Ted's agent via Runwell AI". Reads run at once; any write is a RubyLLM
-  approval the person approves or declines in the panel (`AiChat#decide!`, `AiChat#proposals`)
-- `Ai::Instructions` is rebuilt each reply (unpersisted): the person, today, the install's words, the
-  record on screen, and the rules (facts from tools only, records as "Type:id" which `ai_text`
-  links, one proposed change at a time, care with anything reaching a client)
-- Suggestions on records (`AiSuggestion`, kinds in `Ai::Suggestions`: triage on a request, promises
-  and work in a note, the day on home, draft scope and a pre-send check on a draft, work for a scope
-  item, a reminder for a commitment, the week for a client): a strict JSON schema answered in a job
-  (`AiSuggestionJob`) through its own `AiChat` (purpose "suggestion"), shown by
-  `ai/suggestions/_card` (in a list, `row: true` starts as just its button: no lookup per row), and
-  applied with the person's permissions through the models' verbs. Settings > AI counts how often
-  each kind is used. A new kind is a `define` with its schema, prompt and apply, plus a
-  `kinds/_<kind>` partial
-- The panel can attach the record's documents to a question (PDFs, images, text; Active Storage on
-  `AiMessage`), and offers page-aware questions where there's no record (`ai_prompts(subject, page)`)
-- The portal assistant (`Setting#ai_portal`, off by default): a contact's own `AiChat`
-  (`contact_id`), answered through `Ai::Tools::PortalAction`, which reaches only the portal's own
-  read tools and `portal_send_request` (the contact approves it first) with the contact's token
-  (`Ai.run_portal_tool`); it never decides on an agreement
-- Plugins add one-click questions with `Runwell::Plugins.ai_prompt key, label, types:`
+chat app over MCP, is an assistant inside the app: the AI plugin
+(`Martin-Business-Consultants/runwell-ai`, key `ai`; its AGENTS.md is the guide). Until 2.18 it was
+in the core. The core keeps only what the plugin reaches it through: the slots it fills (the nav's
+Ask button, home, the client, request and scope item sidebars, under a draft, each note and
+commitment row, the portal's header), `Runwell::Plugins.shortcut` for its `i` key,
+`Runwell::Plugins.ai_prompt` (other plugins' questions for it), and `Agent::Dispatch.run_as`, which
+runs a tool as the person with a one-call `assistant` token. `ruby_llm` stays in the Gemfile, since
+plugins use only the core's gems; its tables (`ruby_llm_*`) are the plugin's (`tables:` in
+`config/plugins.yml` keeps them out of `schema.rb`). `settings.ai_*` and `clients.ai_excluded` are
+left from the core's AI, read by the plugin's first migrations, and dropped in a later release.
 
 ## Custom fields
 

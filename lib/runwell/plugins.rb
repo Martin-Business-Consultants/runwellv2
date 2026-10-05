@@ -14,8 +14,11 @@
 #
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
 # :engagement_panel (engagement:), :todo_panel (todo:), :email_inbound (no locals; Settings > Email,
-# where requests' mail comes in); in the client portal, :portal_home (client:)
-# and :portal_engagement_panel (engagement:). Portal pages come from controllers that inherit
+# where requests' mail comes in), :home_top (no locals; home, above the briefing), :client_aside
+# (client:), :request_aside (request_record:, while it's open), :scope_item_aside (scope_item:),
+# :draft_version (version:, under a draft agreement), :note_row (note:) and :commitment_row
+# (commitment:), inside each row; in the client portal, :portal_home (client:),
+# :portal_engagement_panel (engagement:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
 #   Runwell::Plugins.settings :google_ads, "Google Ads", -> { google_ads_settings_path }
@@ -36,8 +39,13 @@ module Runwell
       def applies_to?(subject) = types.nil? || types.map(&:to_s).include?(subject.class.name)
     end
 
+    # A key a plugin answers to, listed on the ? sheet (the control itself declares data-keys).
+    Shortcut = Struct.new(:keys, :description, keyword_init: true)
+
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
-      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel" }.freeze
+      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel",
+      home_top: "Home", client_aside: "Client sidebar", request_aside: "Request sidebar", scope_item_aside: "Scope item sidebar",
+      draft_version: "Draft agreement", note_row: "Notes", commitment_row: "Commitments", portal_actions: "Portal header" }.freeze
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }
@@ -52,6 +60,7 @@ module Runwell
     mattr_reader :agent_briefs, default: {}
     mattr_reader :agent_workflows, default: {}
     mattr_reader :ai_prompts, default: Hash.new { |hash, key| hash[key] = [] }
+    mattr_reader :shortcuts, default: Hash.new { |hash, key| hash[key] = [] }
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -110,6 +119,12 @@ module Runwell
         ai_prompts[key] |= [ AiPrompt.new(label: label, types: types) ]
       end
 
+      # A key on the ? sheet: "i", "Ask AI about what's on screen". The plugin's control declares
+      # it (data-keys="i"), which is what makes it work; this only lists it.
+      def shortcut(key, keys, description)
+        shortcuts[key] |= [ Shortcut.new(keys: keys, description: description) ]
+      end
+
       # A stylesheet from the plugin's app/assets/stylesheets, linked on every page while it's on.
       def stylesheet(key, name)
         stylesheets[key] |= [ name ]
@@ -143,6 +158,7 @@ module Runwell
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
       def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
       def enabled_ai_prompts = ai_prompts.select { |key, _| enabled?(key) }.values.flatten.map { [ nil, it ] }
+      def enabled_shortcuts = shortcuts.select { |key, _| enabled?(key) }.values.flatten
       def enabled_stylesheets = stylesheets.select { |key, _| enabled?(key) }.values.flatten
       def enabled_permissions = permissions.select { |key, _| enabled?(key) }.values.reduce({}, :merge)
 

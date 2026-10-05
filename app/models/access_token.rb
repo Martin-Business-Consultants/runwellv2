@@ -5,7 +5,7 @@
 # digests are stored, so a token is shown once, when it's made. A paused token is refused until
 # it's resumed; every call made with one is logged (AgentCall).
 class AccessToken < ApplicationRecord
-  # assistant: one call by the in-app AI (Ai.run_tool), for a few minutes, revoked when done.
+  # assistant: one call by an in-app assistant (Agent::Dispatch.run_as), for a few minutes, revoked when done.
   KINDS = %w[personal oauth assistant].freeze
   ASSISTANT_LIFETIME = 10.minutes
   OAUTH_LIFETIME = 1.hour

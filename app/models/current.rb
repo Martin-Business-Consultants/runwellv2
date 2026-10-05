@@ -1,5 +1,5 @@
 class Current < ActiveSupport::CurrentAttributes
-  attribute :session, :access_token, :portal_session, :source, :settings, :ai_over_budget
+  attribute :session, :access_token, :portal_session, :source, :settings
   # Set only inside Engagement#erase!, the one place sent agreements and decisions may go.
   attribute :erasing
 
