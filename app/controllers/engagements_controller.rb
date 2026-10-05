@@ -36,8 +36,10 @@ class EngagementsController < ApplicationController
   end
 
   def show
-    # The Work section shows open work unless asked for done or all (?work=done|all).
+    # The Work section shows open work unless asked for done or all (?work=done|all), for every
+    # scope item or the one picked in the sidebar (?item=12, or "other" for work outside the scope).
     @work_state = params[:work].presence_in(%w[open done all]) || "open"
+    @work_item = params[:item] == "other" ? "other" : params[:item].presence&.to_i
   end
 
   def new

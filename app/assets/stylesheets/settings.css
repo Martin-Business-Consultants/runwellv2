@@ -324,6 +324,113 @@
   }
 }
 
+/* An engagement's facts in one line under its title: status, client, type, what's agreed. */
+@layer components {
+  .record-meta {
+    align-items: center;
+    color: var(--color-ink-dark);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em 1em;
+  }
+}
+
+/* An engagement's scope down its sidebar (engagements/_scope): each scope item with a dot for its
+/* state, done of total, and a thin bar. The one whose work is shown is raised, as the settings
+/* nav marks its page. */
+@layer components {
+  .scope-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    margin-inline: -0.6em;
+  }
+
+  .scope-nav__item {
+    align-items: center;
+    border-radius: var(--radius-control);
+    color: var(--color-ink-darker);
+    column-gap: 0.75em;
+    display: grid;
+    font-size: var(--text-small);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.45em 0.6em;
+    row-gap: 0.35em;
+    text-decoration: none;
+
+    &:hover {
+      background-color: var(--color-hover);
+      color: var(--color-ink);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-link);
+      outline-offset: 1px;
+    }
+
+    &[aria-current="page"] {
+      background-color: oklch(var(--lch-ink-darkest) / 7%);
+      color: var(--color-ink);
+      font-weight: 500;
+    }
+  }
+
+  .scope-nav__name {
+    align-items: center;
+    display: flex;
+    gap: 0.5em;
+    min-inline-size: 0;
+  }
+
+  .scope-nav__count {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scope-nav__dot {
+    --scope-dot: var(--color-ink-light);
+
+    background-color: var(--scope-dot);
+    border-radius: 50%;
+    block-size: 0.5em;
+    flex-shrink: 0;
+    inline-size: 0.5em;
+  }
+
+  .scope-nav__dot--in_progress { --scope-dot: var(--color-link); }
+  .scope-nav__dot--blocked { --scope-dot: oklch(var(--lch-red-medium)); }
+  .scope-nav__dot--done { --scope-dot: oklch(var(--lch-green-medium)); }
+
+  .scope-nav__progress {
+    appearance: none;
+    background-color: var(--color-ink-lightest);
+    block-size: 3px;
+    border: 0;
+    border-radius: var(--radius-pill, 99rem);
+    grid-column: 1 / -1;
+    inline-size: 100%;
+    overflow: hidden;
+
+    &::-webkit-progress-bar { background-color: var(--color-ink-lightest); }
+    &::-webkit-progress-value { background-color: oklch(var(--lch-green-medium)); }
+    &::-moz-progress-bar { background-color: oklch(var(--lch-green-medium)); }
+  }
+
+  /* The Work tab showing one scope item's work: its name, how much is done, and a way to its page. */
+  .work-focus {
+    margin-block-end: var(--block-space-half);
+  }
+
+  .work-focus__title {
+    font-size: var(--text-medium);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    min-inline-size: 0;
+  }
+}
+
 /* A record's page, and its new and edit pages: the working column (2/3) and a sidebar (1/3)
 /* of facts and smaller sections, stacked below 960px. The sidebar is as tall as what it holds. */
 @layer components {

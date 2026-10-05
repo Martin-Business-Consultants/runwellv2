@@ -1,8 +1,8 @@
-<%# locals: (subject:) %>
+<%# locals: (subject:, expanded: nil) %>
 <% events = subject.events.recent.limit(30).includes(:actor_user) %>
 <% if events.any? %>
   <section class="settings__section">
-    <details class="txt-align-start">
+    <details class="txt-align-start"<% if expanded %> open<% end %>>
       <summary class="txt-subtle txt-small">History</summary>
       <ol class="settings__scrollable-list">
         <% events.each do |event| %>

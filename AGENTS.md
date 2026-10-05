@@ -235,7 +235,10 @@ in the working column: `record_tab(key, label, count:)` plus `plugin_record_tabs
 `render "layouts/shared/record_tabs"` inside `<turbo-frame id="record_tab" target="_top">`.
 A tab is a `?tab=` link that only reloads the frame; the first heading in a tab is hidden
 since the tab names it. The sidebar keeps Details, the few things always needed (contacts),
-History, and destructive actions. A section's add action is one small outlined button
+History, and destructive actions. An engagement is the exception: its facts are one line under
+the title (`record-meta`), History is a tab, and the sidebar is its scope (`engagements/_scope`):
+all work, each scope item with done of total, and other work, each a `?item=` link that shows just
+that work in the Work tab, where its todos are added. A section's add action is one small outlined button
 (`btn txt-small` with the add icon) in a `section-actions` row after its list, a `<details>`
 when it opens a form; the one filled button on a page is its next step. A record page names
 itself at the top left of its first panel, `<h1 class="page-title"><%= @page_title %></h1>`, not in the header, which

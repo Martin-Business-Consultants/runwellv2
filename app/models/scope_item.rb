@@ -15,10 +15,13 @@ class ScopeItem < ApplicationRecord
   before_destroy :refuse_if_sent
 
   # Delivery state, derived from the work under it.
-  def delivery_state
-    return "not_started" if todos.empty?
-    return "done" if todos.all? { |t| t.status == "done" }
-    return "blocked" if todos.any? { |t| t.status == "blocked" }
+  def delivery_state = self.class.delivery_state_of(todos.map(&:status))
+
+  # The same from the statuses of its work alone, for a list that counted them in one query.
+  def self.delivery_state_of(statuses)
+    return "not_started" if statuses.empty?
+    return "done" if statuses.all?("done")
+    return "blocked" if statuses.include?("blocked")
 
     "in_progress"
   end

@@ -1,0 +1,48 @@
+<%# locals: (engagement:, current: nil) %>
+<%# The engagement's scope down the sidebar: all its work, each agreed scope item, and work outside
+    the scope, each with how much is done. Picking one shows just its work in the Work tab
+    (?item=), where its todos are added. current: the one shown ("all", an id, "other"), nil off
+    the Work tab. Counted in one query, not one per item. %>
+<% statuses = engagement.todos.pluck(:scope_item_id, :status).group_by(&:first).transform_values { |rows| rows.map(&:last) } %>
+<% items = engagement.agreed_items %>
+<% extra = ScopeItem.where(id: statuses.keys.compact - items.map(&:id)).order(:id).to_a %>
+<% rows = (items + extra).map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
+<% rows << [ "other", "Other work", statuses[nil] ] if statuses[nil] %>
+<% everything = statuses.values.flatten %>
+<% filters = request.query_parameters.slice("work") %>
+
+<section class="settings__section flex flex-column gap-half">
+  <header>
+    <h2 class="divider"><%= term(:scope_item, count: 2) %></h2>
+  </header>
+  <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
+    <a href="<%= engagement_path(engagement, filters.merge(tab: "work")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
+      <span class="scope-nav__name">All <%= term(:work).downcase %></span>
+      <span class="scope-nav__count"><%= everything.count("done") %>/<%= everything.size %></span>
+      <progress class="scope-nav__progress" value="<%= everything.count("done") %>" max="<%= [ everything.size, 1 ].max %>"></progress>
+    </a>
+    <% rows.each do |id, name, item_statuses| %>
+      <%# herb:key id %>
+      <% state = id == "other" ? nil : ScopeItem.delivery_state_of(item_statuses) %>
+      <a href="<%= engagement_path(engagement, filters.merge(tab: "work", item: id)) %>" class="scope-nav__item"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
+        <span class="scope-nav__name" title="<%= name %>">
+          <% if state %>
+            <span class="scope-nav__dot scope-nav__dot--<%= state %>" title="<%= state.humanize %>"></span>
+          <% end %>
+          <span class="overflow-ellipsis"><%= name %></span>
+        </span>
+        <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>
+        <progress class="scope-nav__progress" value="<%= item_statuses.count("done") %>" max="<%= [ item_statuses.size, 1 ].max %>"></progress>
+      </a>
+    <% end %>
+  </nav>
+  <% if rows.empty? %>
+    <p class="txt-subtle txt-small margin-none">
+      <% if engagement.internal? %>
+        No <%= term(:work).downcase %> yet: add it in the <%= term(:work) %> tab.
+      <% else %>
+        Nothing agreed yet. Approving the agreement lists its <%= term(:scope_item, count: 2).downcase %> here.
+      <% end %>
+    </p>
+  <% end %>
+</section>

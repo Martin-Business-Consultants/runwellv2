@@ -5,7 +5,8 @@
      record_tab("work", term(:work), count: @engagement.todos.open.count),
      record_tab("commitments", term(:commitment, count: 2), count: @engagement.commitments.open.count),
      record_tab("notes", "Notes", count: @engagement.notes.count),
-     record_tab("documents", "Documents", count: @engagement.documents.count)
+     record_tab("documents", "Documents", count: @engagement.documents.count),
+     record_tab("history", "History")
    ].compact + plugin_record_tabs(:engagement_panel) %>
 <% tab = current_record_tab(tabs, @engagement.agreed_items.any? || @engagement.internal? ? "work" : "agreement") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
@@ -26,6 +27,19 @@
         <% end %>
       </div>
     </div>
+    <p class="record-meta txt-small margin-none">
+      <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
+      <%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %>
+      <span><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></span>
+      <% unless @engagement.internal? %>
+        <% if priced_engagement?(@engagement) %>
+          <span>Agreed <strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></span>
+        <% end %>
+      <% end %>
+      <% if @engagement.closed? %>
+        <span><%= @engagement.state_label %> <%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></span>
+      <% end %>
+    </p>
     <section class="settings__section">
       <% if (next_step = engagement_next_step(@engagement)) %>
         <p class="engagement-next-step txt-small margin-none"><%= next_step %></p>
@@ -38,6 +52,8 @@
       <% if @engagement.estimate_notes.present? %>
         <div class="txt-small txt-subtle"><strong>Estimate notes (internal):</strong> <%= rich_text @engagement.estimate_notes %></div>
       <% end %>
+
+      <%= render "custom_fields/values", record: @engagement %>
     </section>
 
     <turbo-frame id="record_tab" target="_top">
@@ -48,13 +64,15 @@
           <% when "agreement" %>
             <%= render "agreement_versions/section", engagement: @engagement %>
           <% when "work" %>
-            <%= render "todos/section", engagement: @engagement, state: @work_state %>
+            <%= render "todos/section", engagement: @engagement, state: @work_state, item: @work_item %>
           <% when "commitments" %>
             <%= render "commitments/section", subject: @engagement %>
           <% when "notes" %>
             <%= render "notes/section", subject: @engagement %>
           <% when "documents" %>
             <%= render "documents/section", subject: @engagement %>
+          <% when "history" %>
+            <%= render "events/timeline", subject: @engagement, expanded: true %>
           <% end %>
           <% if plugin_partial %>
             <%= render plugin_partial, engagement: @engagement %>
@@ -67,25 +85,10 @@
   <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
 
     <%= render "layouts/shared/sidebar_toggle" %>
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Details</h2>
-      </header>
-      <dl class="record-facts">
-        <dt>Status</dt><dd><%= status_tag @engagement.state_label, highlight: @engagement.active? %></dd>
-        <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
-        <dt>Type</dt><dd><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></dd>
-        <% unless @engagement.internal? %>
-          <% if priced_engagement?(@engagement) %>
-            <dt>Agreed</dt><dd><strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></dd>
-          <% end %>
-        <% end %>
-        <% if @engagement.closed? %>
-          <dt><%= @engagement.state_label %></dt><dd><%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></dd>
-        <% end %>
-      </dl>
-      <%= render "custom_fields/values", record: @engagement %>
-      <% if can?(:close_engagements) %>
+    <%= render "engagements/scope", engagement: @engagement, current: (tab == "work" ? (@work_item || "all") : nil) %>
+
+    <% if can?(:close_engagements) %>
+      <section class="settings__section">
         <% if @engagement.closed? %>
           <%= button_to reopen_engagement_path(@engagement), class: "btn txt-small", form_class: "engagement-finish" do %>
             <%= icon_tag "refresh" %> <span>Reopen</span>
@@ -93,10 +96,8 @@
         <% else %>
           <%= render "engagements/close", engagement: @engagement %>
         <% end %>
-      <% end %>
-    </section>
-
-    <%= render "events/timeline", subject: @engagement %>
+      </section>
+    <% end %>
 
     <% if @engagement.closed? && can?(:erase_engagements) %>
       <%= render "engagements/erase", engagement: @engagement %>
