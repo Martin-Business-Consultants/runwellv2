@@ -276,6 +276,16 @@
   --color-gradient-4: var(--color-canvas);
 }
 
+/* Native controls (checkboxes, selects, date pickers, scrollbars) follow the theme on screen, not
+/* the system's: the head's color-scheme meta offers both, and an explicit choice picks one. */
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 /* Dark mode - explicit theme choice overrides system preference */
 html[data-theme="dark"] {
   --lch-canvas: 17% 0.005 275;

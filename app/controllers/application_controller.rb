@@ -50,9 +50,10 @@ class ApplicationController < ActionController::Base
   # One page of an index list, with @page for the view. Cards load more as you scroll, Fizzy's
   # way (geared_pagination: 15, then 30, 50, 100 a page); a table shows 13 rows a page with
   # numbered pages under it (table_pagination), so call it after setting @view. Agents reading
-  # JSON get every record, as before.
+  # JSON get every record, as before. A ReActionView state request (the slots format) renders the
+  # same page, so it pages too.
   def paginate(records)
-    return records unless request.format.html?
+    return records unless request.format.html? || request.format.symbol == :slots
 
     set_page_and_extract_portion_from records, per_page: (TABLE_PAGE_SIZE if @view == "table")
     @page.records
