@@ -162,28 +162,20 @@ by someone other than its owner (board drops that a rule refuses refresh the boa
 `runwell-account-management` (Account management) is the working system of whoever runs client
 relationships, switched on per person (`AccountManagement::Member`, Settings > Account management);
 each chooses every client or a group (My clients), and the clients they lead or back up are always
-theirs. Its standard is `AccountManagement::Playbook` (hours ahead, cadences, targets, checklists).
-Each client has a lead (`Lead`) with a backup who covers while the lead is away, a contact cadence
-and an optional client digest. Today (`Cockpit`) lists what needs someone across their clients,
-overdue first, with snoozes. Every contact is logged (`Touch`, the Contact quick action) and, with
-meetings, non-internal notes, requests, agreements and digests, says when a client last heard from
-us (`Pulse`); requests are answered within a business day (`Replies`); what we're waiting on the
-client for can be nudged (`Waiting`, a previewed email logged as contact). A meeting holds the
-agenda, due `AGENDA_AHEAD` before it starts, and the recap, due `RECAP_WITHIN` after, both
-draftable from the records (`Meeting::AgendaDraft`); sending stamps the time for good. Rhythms
-(`MeetingSeries`) always plan the next meeting (nightly). Each client's health is set weekly
-(`HealthCheck`), who's who is recorded (`ContactProfile`), and onboarding and offboarding are
-`Checklist`s that tick themselves where the records can tell. The access register (`Access`) records
-a client's outside accounts. A lead's `WeeklyUpdate` is due by the end of Friday, drafted from the
-week's records; `Digest` is the client-facing half. `Scorecard` counts only what's settled:
-agendas and recaps on time, commitments by their date, updates by Friday, requests answered and
-clients in touch, each with the records that missed. Home (`Attention`) warns before a standard is
-missed. After a call, an AI harness debriefs it (the plugin's agent workflow): `debrief_call` gives
-the client's open engagements and agreed scope, its people, and the team with each person's
-expertise tags (`Expertise`, Accounts > People) and open work; `record_call` (preview first) makes
-the call note, the contact, todos on the right engagements with owners, commitments, requests and
-health at once (`Call::Plan`, linked by `Call`). Its guide is `docs/guide.md` in its repository,
-and Accounts > Guide.
+theirs. It does five things, each a page in its section sidebar (`section_nav`, the reference for
+it): Today (`Cockpit`) lists what needs someone across their clients, overdue first, with snoozes.
+Clients shows each one's lead (`Lead`, with a backup who covers while the lead is away and a contact
+cadence), its weekly health (`HealthCheck`) and when it last heard from us (`Pulse`: logged contacts,
+meetings, non-internal notes, requests and agreements). Contacts are logged (`Touch`, the Contact
+quick action), and requests are answered within a business day (`Replies`). Meetings hold the
+agenda, due `AGENDA_AHEAD` before, and the recap, due `RECAP_WITHIN` after, both draftable from the
+records (`Meeting::AgendaDraft`), on rhythms (`MeetingSeries`, planned nightly). Calls: an AI
+harness debriefs a call (the plugin's agent workflow): `debrief_call` gives the client's open
+engagements and agreed scope, its people, and the team with each person's expertise tags
+(`Expertise`, set in its settings) and open work; `record_call` (preview first) makes the call note,
+the contact, todos on the right engagements with owners, commitments, requests and health at once
+(`Call::Plan`). Home (`Attention`) warns before a standard is missed. Its guide is `docs/guide.md`
+in its repository, and Accounts > Guide.
 
 `runwell-stripe-billing` (Stripe) takes payment for what was approved. On `agreement.approved` it
 makes a `StripeBilling::Charge` per version, in the request, so the approval page

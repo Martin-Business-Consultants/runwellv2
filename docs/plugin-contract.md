@@ -80,9 +80,16 @@ controller says `require_permission :manage_settings` and starts its view with
 
 Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
-`can?`, `current_record` (the record on screen, or nil; 2.18), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
+`can?`, `current_record` (the record on screen, or nil; 2.18), `section_nav`, `section_nav_heading`
+and `section_nav_link` (2.21), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
 `quick_filter` and `index_toolbar` (2.0, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
+
+A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
+each page calls `section_nav "Its name" do … end` once (a partial of the plugin's, given the
+current page), with `section_nav_heading` over each group and
+`section_nav_link label, path, icon:, current:` for each page. Below 960px it runs across the top.
+The page itself then needs no links to its siblings. Since 2.21, stable.
 
 ## Home, permissions and the nightly run
 

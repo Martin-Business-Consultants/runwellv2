@@ -439,7 +439,9 @@ owner switches them on (`Setting#plugin_states`); the core renders only what's r
 plugins that are on, and a plugin's controllers and subscribers check
 `Runwell::Plugins.enabled?(key)`. A settings page nests under Plugins with
 `render "settings/header", current: key`, and keeps keys in `encrypts` columns shown with
-`secret_field`.
+`secret_field`. A plugin with several pages lists them in a sidebar beside the page, as Settings
+does: `section_nav "Name" do … end` with `section_nav_heading` and `section_nav_link`
+(`SectionNavHelper`, placed by the application layout), never a row of buttons.
 
 Register in the engine's `config.to_prepare`; add routes to the app's route set from an
 initializer (`app.routes.append { scope "time", module: "time_tracking", as: "time_tracking" … }`)
