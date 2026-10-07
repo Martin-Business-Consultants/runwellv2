@@ -20,18 +20,25 @@
     min-inline-size: 0;
   }
 
+  /* Stays put while the page scrolls: never taller than the window, so a long one (a plugin's
+  /* list of people) scrolls on its own and the page's scrolling never carries it along. */
   .settings-nav {
     display: flex;
     flex-direction: column;
     gap: 0.15em;
     inset-block-start: var(--block-space);
+    max-block-size: calc(100dvh - var(--block-space) * 2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     position: sticky;
     text-align: start;
 
     @media (max-width: 959px) {
       border-block-end: 1px solid var(--color-ink-lighter);
       flex-direction: row;
+      max-block-size: none;
       overflow-x: auto;
+      overflow-y: visible;
       padding-block-end: var(--block-space-half);
       position: static;
     }
