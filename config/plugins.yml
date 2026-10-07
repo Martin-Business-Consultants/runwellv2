@@ -26,6 +26,10 @@
   repo: Martin-Business-Consultants/runwell-google-ads
   name: Google Ads
   description: Read-only Google Ads reporting on engagements, shared with the client in the portal, with alerts when an account stops serving.
+- key: meetings
+  repo: Martin-Business-Consultants/runwell-meetings
+  name: Meetings
+  description: Team meetings with agendas and notes, each person's priorities for the day picked from their work, and an end-of-day report on what went well, what didn't, and why.
 - key: outsend
   repo: Martin-Business-Consultants/runwell-outsend
   name: Outsend

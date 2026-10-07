@@ -69,8 +69,8 @@ working on it.
 ## Where plugins come from
 
 `config/plugins.yml` lists the ones Runwell's authors publish, which Settings > Plugins offers
-with an Install button: Account management, Cloudflare, Code, Factory, Google Ads, Outsend, QA,
-QuickBooks, Reporting and Time tracking, each at
+with an Install button: Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
+Outsend, QA, QuickBooks, Reporting and Time tracking, each at
 `github.com/Martin-Business-Consultants/runwell-<name>`. Any other repository installs the same
 way, by `owner/name`.
 
@@ -189,3 +189,12 @@ subscription cancelled at once), and Stripe and QuickBooks each refuse a service
 Stripe connects with OAuth (Stripe Connect) through a broker on the install holding the platform's
 keys (`STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY`), which hands each install its token
 server to server against a PKCE-style verifier.
+
+`runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
+(`Meetings::Priority`: a todo, done when the todo is, or a line of their own, ticked off by hand)
+and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its
+people, agenda and notes) shows each person beside their priorities for its day, next to open work
+to pick from, and repeats on the next weekday with Plan the next one. At the end of the day each
+person writes a `Meetings::Report` (what went well, what didn't, why, what's next), read a day at a
+time across the team. Home (`:home_top`) shows your priorities and next meeting, and asks for the
+report from the afternoon on.

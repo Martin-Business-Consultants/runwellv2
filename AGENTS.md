@@ -413,7 +413,7 @@ Files live in Active Storage (`storage/` locally). Two places, both Fizzy's:
 ## Plugins
 
 The core has no money or time; plugins add them. A plugin is a Rails engine in a public GitHub
-repository of its own, never in this one: the twelve Runwell publishes are
+repository of its own, never in this one: the thirteen Runwell publishes are
 `Martin-Business-Consultants/runwell-<name>` (`config/plugins.yml`). It is installed onto the
 server, like a WordPress plugin: Settings > Plugins downloads the repository's latest release
 into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
@@ -492,8 +492,8 @@ portal request, so switching access off or archiving a contact signs them out at
 a client sees is decided per record (`client_visible` on work and documents); there are no
 client roles.
 
-The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Outsend,
-QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
+The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
+Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
 and what it's the reference for (portal pages, webhooks, middleware, unattended agents, money,
 model rules) is in `docs/plugins.md`. Read it before changing a contract they use.
 
