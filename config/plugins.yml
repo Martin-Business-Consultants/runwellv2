@@ -29,7 +29,7 @@
 - key: meetings
   repo: Martin-Business-Consultants/runwell-meetings
   name: Meetings
-  description: Team meetings with agendas and notes, each person's priorities for the day picked from their work, and an end-of-day report on what went well, what didn't, and why.
+  description: Team meetings, once or repeating, with agendas and notes, each person's priorities for the day picked from their work, and an end-of-day report on what went well, what didn't, and why.
 - key: outsend
   repo: Martin-Business-Consultants/runwell-outsend
   name: Outsend

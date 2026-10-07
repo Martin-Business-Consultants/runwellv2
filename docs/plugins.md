@@ -194,7 +194,9 @@ server to server against a PKCE-style verifier.
 (`Meetings::Priority`: a todo, done when the todo is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its
 people, agenda and notes) shows each person beside their priorities for its day, next to open work
-to pick from, and repeats on the next weekday with Plan the next one. At the end of the day each
+to pick from. A meeting repeats through a `Meetings::Series` (every weekday, chosen weekdays every
+week or two, or monthly on the same weekday), planned a week ahead and nightly; changing the series
+changes the meetings still to come. At the end of the day each
 person writes a `Meetings::Report` (what went well, what didn't, why, what's next), read a day at a
 time across the team. Home (`:home_top`) shows your priorities and next meeting, and asks for the
 report from the afternoon on.
