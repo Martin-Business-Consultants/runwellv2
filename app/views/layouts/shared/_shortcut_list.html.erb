@@ -44,6 +44,7 @@
       <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
       <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:commitment).downcase %> or time</dd>
       <dt><kbd>p</kbd></dt><dd>Add a <%= term(:commitment).downcase %> (a promise with a date)</dd>
+      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add <%= term(:work).downcase %> to any <%= term(:engagement).downcase %></dd>
       <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
         <%# herb:key shortcut.keys %>
         <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>

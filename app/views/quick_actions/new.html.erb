@@ -1,6 +1,6 @@
 <turbo-frame id="quick_action">
   <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
-    <dialog class="dialog dialog--action panel fill-white shadow flex-column gap txt-align-start quick-action" aria-label="<%= @action.title %>" autofocus data-dialog-target="dialog">
+    <dialog class="dialog dialog--action panel fill-white shadow flex-column gap txt-align-start quick-action" aria-label="<%= @action.title %>" data-dialog-target="dialog">
       <header class="flex align-center gap-half margin-block-end-half">
         <%= icon_tag @action.icon %>
         <h3 class="txt-large font-weight-bold margin-none flex-item-grow"><%= @action.title %></h3>

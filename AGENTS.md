@@ -248,7 +248,7 @@ header block: a `<link rel="up">` that Esc follows, never a Back button.
 Guide people through the hierarchy rather than documenting it. A record page says what happens
 next (`engagement_next_step` under the engagement's state). An empty list says where its records
 come from and links there (`todos/_blank`), since Work and Commitments are added on the
-engagement or client, never from their index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
+engagement or client (or from anywhere with the quick actions, `g w n` and `p`), never from their index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
 in the Settings sidebar) uses `term()` for every name, and the `?` sheet links to it.
 
 People show as their avatar, never their name: `person_tag user` (name as the tooltip and
@@ -369,6 +369,7 @@ one place they are documented for people: add a new key there.
 | `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `p`, `i` | Add a commitment (the quick action, on the record on screen), ask AI (the AI plugin) |
+| `g w n` | Add work (the quick action) to an engagement picked in it, the one on screen to start; `g w` waits a moment for the `n`, vim style |
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
@@ -463,7 +464,7 @@ described in `docs/plugins.md`.
 The tray at the bottom right (`A`, `quick_actions/_tray`) is Fizzy's tray. At the top of the
 fan is a record picker (Fizzy's filter + combobox) set to the record on screen
 (`current_record`) and able to pick any other; below it, one entry per action: Note,
-Document and Commitment in the core (`p` opens Commitment's straight away), plus any a plugin registers
+Document, Commitment and Work in the core (`p` opens Commitment's straight away, `g w n` Work's), plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal
 (`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. Documents

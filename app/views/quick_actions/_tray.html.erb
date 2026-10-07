@@ -8,6 +8,8 @@
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>
   <%# p opens the commitment form straight away, on the record on screen. %>
   <a href="<%= new_quick_action_path(kind: "commitment", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="p" class="for-screen-reader">Add a <%= term(:commitment).downcase %></a>
+  <%# g w n opens the work form, on the engagement on screen (or the work's, the request's). %>
+  <a href="<%= new_quick_action_path(kind: "work", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g w n" class="for-screen-reader">Add <%= term(:work).downcase %></a>
 
   <dialog class="tray__dialog" aria-label="Quick actions" data-dialog-target="dialog">
     <% QuickAction.all.each do |action| %>

@@ -164,7 +164,7 @@ Rails.application.routes.draw do
   namespace :todos, path: "work" do
     resources :columns, only: :show
   end
-  resources :todos, path: "work", only: %i[index show edit update destroy] do
+  resources :todos, path: "work", only: %i[index show create edit update destroy] do
     get :brief, on: :member
     resource :commitment, only: :create, module: :todos
     resources :assignments, only: :create, module: :todos

@@ -39,11 +39,16 @@ class TodosController < ApplicationController
   end
 
   def create
-    engagement = Engagement.find_by_ref!(params[:engagement_ref])
+    engagement =
+      if params[:engagement_ref] then Engagement.find_by_ref!(params[:engagement_ref])
+      elsif params[:record].present? then QuickAction.locate(params[:record], %w[Engagement]) # the quick action modal (g w n)
+      end
+    return redirect_back(fallback_location: todos_path, alert: "Choose the #{Setting.current.term(:engagement).downcase} it’s for.") unless engagement
+
     todo = engagement.todos.new(todo_params.merge(created_by: current_user))
     if todo.save
       todo.record_event!("todo.created")
-      redirect_back fallback_location: engagement, notice: "Added."
+      redirect_back fallback_location: engagement, notice: params[:record].present? ? "Added “#{todo.title}” to #{engagement.ref} #{engagement.title}." : "Added."
     else
       redirect_back fallback_location: engagement, alert: todo.errors.full_messages.to_sentence
     end

@@ -20,7 +20,11 @@ class QuickAction
     # A promise with a date (p): on a client or engagement; work, a scope item or a request take
     # its engagement, or its client.
     new(key: :commitment, label: "Commitment", title: "Add a commitment", icon: "bookmark", partial: "quick_actions/commitment",
-      types: %w[Client Engagement], context: ->(record) { record.try(:engagement) || record.try(:client) })
+      types: %w[Client Engagement], context: ->(record) { record.try(:engagement) || record.try(:client) }),
+    # Work from anywhere (g w n): on an engagement; work, a scope item or a request on screen take
+    # theirs.
+    new(key: :work, label: "Work", title: "Add work", icon: "check-circle", partial: "quick_actions/work",
+      types: %w[Engagement], context: ->(record) { record.try(:engagement) })
   ].freeze
 
   class << self

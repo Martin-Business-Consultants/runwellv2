@@ -7,7 +7,9 @@ import { nextFrame } from "helpers/timing_helpers"
 //
 // - j / k, g g / G walk the page's items (anything marked data-filter-target="item"),
 //   Enter or o opens the one you're on, Esc drops it
-// - a chord starting with g goes somewhere: any element declaring data-keys="g c"
+// - a chord starting with g goes somewhere: any element declaring data-keys="g c". A chord may
+//   take a third key (data-keys="g w n"): after g w it waits a moment for one, vim style, and
+//   with none (or another) does g w
 // - every other key clicks the visible element declaring it (data-keys="e"), or focuses it
 //   (data-keys-focus). One inside the current item wins over the page's own, so e and d
 //   act on the row you're on
@@ -27,6 +29,7 @@ const ITEM = "[data-filter-target~='item'], [data-keyboard-item]"
 const TYPING = "input, textarea, select, [contenteditable], lexxy-editor"
 const OPENER = ":is(a[href], button):not(.row-action):not([data-keys])"
 const CHORD_TIMEOUT = 1500
+const EXTEND_TIMEOUT = 600 // how long g w waits for a third key before it goes
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "meta" : "ctrl"
 const BOARD_ARROWS = { j: "ArrowDown", k: "ArrowUp", h: "ArrowLeft", l: "ArrowRight" }
 const HINTS_KEY = "keyHints"
@@ -76,9 +79,13 @@ export default class extends Controller {
     if (event.target.closest?.(TYPING) || event.target.closest?.("dialog[open]") || document.querySelector("dialog:modal")) return
 
     if (this.pending) {
-      const chord = `${this.pending} ${key}`
+      const previous = this.pending
+      const chord = `${previous} ${key}`
       this.pending = null
+      clearTimeout(this.chordTimer)
       if (chord === "g g") return this.#select(this.#items()[0], event)
+      if (this.#extended(chord)) return this.#awaitThird(chord, event)
+      if (previous.includes(" ")) return this.#trigger(chord, event) || this.#trigger(previous, event)
       return this.#trigger(chord, event)
     }
     if (key === "g") return this.#startChord(event)
@@ -153,6 +160,21 @@ export default class extends Controller {
     this.pending = "g"
     clearTimeout(this.chordTimer)
     this.chordTimer = setTimeout(() => { this.pending = null }, CHORD_TIMEOUT)
+  }
+
+  // A longer chord starts with this one (g w, with g w n declared somewhere).
+  #extended(chord) {
+    return Array.from(document.querySelectorAll("[data-keys]")).some(element =>
+      usable(element) && element.dataset.keys.split(",").some(name => name.trim().startsWith(`${chord} `)))
+  }
+
+  #awaitThird(chord, event) {
+    event.preventDefault()
+    this.pending = chord
+    this.chordTimer = setTimeout(() => {
+      this.pending = null
+      this.#trigger(chord, { preventDefault() {} })
+    }, EXTEND_TIMEOUT)
   }
 
   // Declared keys

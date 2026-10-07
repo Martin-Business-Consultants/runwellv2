@@ -1,0 +1,29 @@
+<%# locals: (form_id:) %>
+<%# Work from anywhere (g w n, or the tray): what needs doing, who leads it and who else is on it,
+    and when, on the engagement picked above. %>
+<% me = Current.user.person %>
+<%= form_with model: Todo.new, url: todos_path, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What needs doing…", autofocus: true, aria: { label: "What" } %>
+  <%= rich_text_field form, :description, placeholder: "Details (optional)" %>
+  <div class="flex flex-wrap gap-half">
+    <label class="flex align-center gap-half flex-item-grow"><span>Lead</span> <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned", selected: me.id }, class: "input input--select flex-item-grow" %></label>
+    <label class="flex align-center gap-half flex-item-grow"><span>Due</span> <%= date_input form, :due_on, class: "input flex-item-grow" %></label>
+  </div>
+  <details class="quick-action__more">
+    <summary class="txt-subtle">Also on it</summary>
+    <div class="flex flex-wrap gap-half margin-block-start-half">
+      <%= hidden_field_tag "todo[other_owner_ids][]", "", id: nil, form: form_id %>
+      <% todo_people.each do |person| %>
+        <%# herb:key person.id %>
+        <label class="owner-checklist__person">
+          <%= check_box_tag "todo[other_owner_ids][]", person.id, false, id: "quick_action_other_owner_#{person.id}", form: form_id %>
+          <%= person_tag person %>
+          <span><%= person.display_name %></span>
+        </label>
+      <% end %>
+    </div>
+  </details>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Add <%= term(:work).downcase %></button>
+  </div>
+<% end %>
