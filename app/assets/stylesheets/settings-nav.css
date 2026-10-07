@@ -7,7 +7,7 @@
     display: grid;
     gap: calc(var(--block-space) * 2);
     grid-template-columns: 13rem minmax(0, 1fr);
-    margin-inline: auto;
+    margin-inline: 0 auto;
     max-inline-size: min(130ch, 100%);
 
     @media (max-width: 959px) {
@@ -21,12 +21,15 @@
   }
 
   /* Stays put while the page scrolls: never taller than the window, so a long one (a plugin's
-  /* list of people) scrolls on its own and the page's scrolling never carries it along. */
+  /* list of people) scrolls on its own and the page's scrolling never carries it along. Its links
+  /* reach out by their own padding, so their icons and headings line up with the page's title in
+  /* the header (Settings, Meetings) above them. */
   .settings-nav {
     display: flex;
     flex-direction: column;
     gap: 0.15em;
     inset-block-start: var(--block-space);
+    margin-inline-start: calc(var(--text-small) * -0.75);
     max-block-size: calc(100dvh - var(--block-space) * 2);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -36,6 +39,7 @@
     @media (max-width: 959px) {
       border-block-end: 1px solid var(--color-ink-lighter);
       flex-direction: row;
+      margin-inline-start: 0;
       max-block-size: none;
       overflow-x: auto;
       overflow-y: visible;
@@ -49,7 +53,7 @@
     font-size: var(--text-x-small);
     font-weight: 500;
     margin: var(--block-space) 0 0.25em;
-    padding-inline: 0.75em;
+    padding-inline: calc(var(--text-small) * 0.75);
 
     &:first-child {
       margin-block-start: 0;
