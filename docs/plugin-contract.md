@@ -117,6 +117,10 @@ call verbs on: `Client`, `Contact`, `Engagement`, `AgreementVersion`, `ScopeItem
 `Todo`, `Commitment`, `Request`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
 `Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
 
+A todo can have several people on it (2.22, stable): `todo.owner` stays the one who leads it, as
+before, and `todo.owners` (lead first), `todo.other_owners` and `Todo.assigned_to(user)` (work
+someone leads or is on) read the rest. Setting `owner` replaces the lead and keeps the others.
+
 ## Events
 
 | Call | Since | Status |

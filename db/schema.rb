@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -147,6 +147,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
     t.index ["agreement_version_id"], name: "index_approvals_on_agreement_version_id", unique: true
     t.index ["contact_id"], name: "index_approvals_on_contact_id"
     t.index ["recorded_by_id"], name: "index_approvals_on_recorded_by_id"
+  end
+
+  create_table "assignments", force: :cascade do |t|
+    t.integer "todo_id", null: false
+    t.integer "user_id", null: false
+    t.integer "assigner_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigner_id"], name: "index_assignments_on_assigner_id"
+    t.index ["todo_id", "user_id"], name: "index_assignments_on_todo_id_and_user_id", unique: true
+    t.index ["todo_id"], name: "index_assignments_on_todo_id"
+    t.index ["user_id"], name: "index_assignments_on_user_id"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -635,6 +647,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
   add_foreign_key "approvals", "agreement_versions"
   add_foreign_key "approvals", "contacts"
   add_foreign_key "approvals", "users", column: "recorded_by_id"
+  add_foreign_key "assignments", "todos", on_delete: :cascade
+  add_foreign_key "assignments", "users"
+  add_foreign_key "assignments", "users", column: "assigner_id", on_delete: :nullify
   add_foreign_key "commitments", "clients"
   add_foreign_key "commitments", "contacts"
   add_foreign_key "commitments", "engagements"

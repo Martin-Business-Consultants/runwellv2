@@ -38,7 +38,7 @@ class Briefing::Home
   # client (sent, or changes asked for), a draft, or on track. Derived, never typed in.
   def engagements
     @engagements ||= begin
-      mine = ::Engagement.open.where(id: Todo.where(owner: @user).select(:engagement_id))
+      mine = ::Engagement.open.where(id: Todo.assigned_to(@user).select(:engagement_id))
       scope = mine.exists? ? mine : ::Engagement.open
       records = scope.joins(::Engagement::STATE_JOINS).select("engagements.*", "(#{::Engagement::STATE_SQL}) AS derived_state")
                      .includes(:client).order(updated_at: :desc).limit(SHOWN).to_a
@@ -68,7 +68,7 @@ class Briefing::Home
   end
 
   private
-    def my_open_work = Todo.open.where(owner: @user)
+    def my_open_work = Todo.open.assigned_to(@user)
 
     def health(record, late)
       if late.include?(record.id) then "Behind"

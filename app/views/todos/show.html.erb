@@ -70,7 +70,7 @@
       </header>
       <dl class="record-facts">
         <dt>Status</dt><dd><%= render "todos/status_dot", todo: @todo, labelled: true %></dd>
-        <dt>Owner</dt><dd><%= render "todos/owner_picker", todo: @todo %></dd>
+        <dt>On it</dt><dd><%= render "todos/owner_picker", todo: @todo, labelled: true %></dd>
         <dt>Due</dt>
         <dd>
           <% if @todo.due_on %>

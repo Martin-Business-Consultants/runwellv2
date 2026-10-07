@@ -167,6 +167,7 @@ Rails.application.routes.draw do
   resources :todos, path: "work", only: %i[index show edit update destroy] do
     get :brief, on: :member
     resource :commitment, only: :create, module: :todos
+    resources :assignments, only: :create, module: :todos
   end
   get "todos(/*rest)", format: false, to: redirect { |params, request|
     [ "/work", params[:rest] ].compact.join("/") + (request.query_string.present? ? "?#{request.query_string}" : "")

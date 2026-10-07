@@ -35,9 +35,25 @@
       </div>
 
       <label class="flex flex-column gap-half txt-align-start">
-        <span class="record-form__label">Owner</span>
+        <span class="record-form__label">Lead</span>
         <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, class: "input input--select full-width" %>
       </label>
+
+      <fieldset class="flex flex-column gap-half txt-align-start owner-checklist">
+        <legend class="record-form__label">Also on it</legend>
+        <%= hidden_field_tag "todo[other_owner_ids][]", "", id: nil %>
+        <div class="flex flex-wrap gap-half">
+          <% others = @todo.other_owners.map(&:id) %>
+          <% todo_people.each do |person| %>
+            <%# herb:key person.id %>
+            <label class="owner-checklist__person">
+              <%= check_box_tag "todo[other_owner_ids][]", person.id, others.include?(person.id), id: "todo_other_owner_#{person.id}" %>
+              <%= person_tag person %>
+              <span><%= person.display_name %></span>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
 
       <label class="flex flex-column gap-half txt-align-start">
         <span class="record-form__label">Scope item</span>

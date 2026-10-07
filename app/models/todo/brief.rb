@@ -31,7 +31,7 @@ class Todo::Brief
         "Client: #{engagement.client.name}",
         "#{Setting.current.label_name(engagement.label)}: #{engagement.ref} #{engagement.title}",
         ("Scope item: #{todo.scope_item.description}" if todo.scope_item),
-        "Status: #{todo.status.humanize}" + (todo.owner ? " · Owner: #{todo.owner.display_name}" : " · Unassigned") + (todo.due_on ? " · Due: #{todo.due_on.iso8601}" : "") ]
+        "Status: #{todo.status.humanize}" + (todo.owner ? " · Lead: #{todo.owner.display_name}#{" · Also on it: #{todo.other_owners.map(&:display_name).to_sentence}" if todo.other_owners.any?}" : " · Unassigned") + (todo.due_on ? " · Due: #{todo.due_on.iso8601}" : "") ]
       lines.compact.join("\n")
     end
 

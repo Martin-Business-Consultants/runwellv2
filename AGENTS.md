@@ -63,7 +63,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    the client's decision (by link or recorded with evidence). Approving creates
    one `Todo` per scope item. Nothing is "billable": everything is a project,
    work order or service
-3. **What is happening** — `Todo`, at `/work` (old `/todos` links redirect; helpers stay `todo_*`) (owner, status: planned, in progress, in review, blocked,
+3. **What is happening** — `Todo`, at `/work` (old `/todos` links redirect; helpers stay `todo_*`) (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
    done; due; table or kanban; agents finish into in review for a person to mark done),
    `Commitment` (a promise by us or the client with a date; final once
    resolved), `Event` (append-only, every write of consequence), `Note`
@@ -253,8 +253,14 @@ in the Settings sidebar) uses `term()` for every name, and the `?` sheet links t
 
 People show as their avatar, never their name: `person_tag user` (name as the tooltip and
 for screen readers; `fallback: "Unassigned"` for nobody). Only a list of the people
-themselves (Settings > People) prints names beside the avatars. A todo's owner changes in
-place with `render "todos/owner_picker", todo:`, as its status does with `todos/status_dot`.
+themselves (Settings > People) prints names beside the avatars. Who's on a todo is Fizzy's
+assignments (`Assignment`, `Todo::Assignable`): `owner` is the lead and everyone on it, the lead
+too, has an assignment (`todo.owners`, lead first; `Todo.assigned_to(user)` for "mine"). It changes
+in place with `render "todos/owner_picker", todo:`, a menu where each click puts a person on or
+takes them off (`Todos::AssignmentsController`); the first on leads, and taking off the lead hands
+it on. Setting `owner_id` directly replaces the lead and keeps the rest; `other_owner_ids` sets the
+rest. Show them with `todo_owners_tag todo` (preload `assignments: :user`). A todo's status
+changes in place with `todos/status_dot`.
 
 Filters on an index page are Fizzy's quick filters above the list, not
 buttons inside the card: a row of

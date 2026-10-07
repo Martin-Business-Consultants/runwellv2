@@ -1,7 +1,7 @@
 # A piece of work under an engagement, usually one per approved scope item.
-# Small on purpose: an owner, a status and a date. No time, no money.
+# Small on purpose: who's on it (a lead and others), a status and a date. No time, no money.
 class Todo < ApplicationRecord
-  include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields
+  include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable
 
   mentionable_fields :description
 
@@ -33,7 +33,7 @@ class Todo < ApplicationRecord
   # What a piece of work keeps that converting moves (notes and documents, to its engagement) or
   # lets go with it (its own history, mentions and custom field values). Anything else on it came
   # from a plugin (logged time, a linked repository, a QA gate) and stops a conversion.
-  CONVERTIBLE_ASSOCIATIONS = %i[custom_values documents mentions mentionees notes events].freeze
+  CONVERTIBLE_ASSOCIATIONS = %i[custom_values documents mentions mentionees notes events assignments assignees].freeze
 
   # The board's columns, in Fizzy's anatomy: the planned stream, the doing columns, done.
   BOARD_COLUMNS = %w[in_progress in_review blocked].freeze
@@ -69,8 +69,8 @@ class Todo < ApplicationRecord
   end
 
   def self.filtered(owner: "any", engagement: "all")
-    scope = includes(:owner, engagement: :client)
-    scope = scope.where(owner_id: owner) unless owner == "any"
+    scope = includes(:owner, { assignments: :user }, engagement: :client)
+    scope = owner.nil? ? scope.where(owner_id: nil) : scope.assigned_to(owner) unless owner == "any"
     scope = scope.where(engagement: Engagement.find_by_ref!(engagement)) unless engagement == "all"
     scope
   end

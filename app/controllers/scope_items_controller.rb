@@ -11,7 +11,7 @@ class ScopeItemsController < ApplicationController
   def show
     @item = ScopeItem.includes(agreement_version: { engagement: :client }).find(params[:id])
     @engagement = @item.engagement
-    @todos = @item.todos.includes(:owner).order(:due_on, :position)
+    @todos = @item.todos.includes(:owner, assignments: :user).order(:due_on, :position)
   end
 
   def create

@@ -36,7 +36,7 @@
           <% overdue = todo.status != "done" && todo.due_on&.past? %>
           <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo.engagement.ref,
                 context: todo.engagement.client.name,
-                meta: [ person_tag(todo.owner, fallback: "Unassigned"), ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
+                meta: [ todo_owners_tag(todo, fallback: "Unassigned"), ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
                 status: overdue ? "Overdue" : todo.status.humanize, highlight: todo.status == "done" %>
         <% end %>
       <% end %>

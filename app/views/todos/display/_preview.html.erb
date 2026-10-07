@@ -42,9 +42,9 @@
       <% if todo.due_on %>
         <span class="card__meta-text card__meta-text--added">Due <%= l todo.due_on, format: :short %></span>
       <% end %>
-      <% if todo.owner %>
+      <% if todo.owners.any? %>
         <span class="card__meta-text card__meta-text--assignees overflow-ellipsis">
-          <%= person_tag todo.owner %>
+          <%= todo_owners_tag todo %>
         </span>
       <% end %>
     </div>

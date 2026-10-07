@@ -110,3 +110,75 @@
   .contact-avatar--17 { background-color: #3B3633; }
   .contact-avatar--18 { background-color: #67695E; }
 }
+
+/* Everyone on a piece of work (todo_owners_tag, todos/_owners): staff avatars overlapping like a
+/* client's contacts, the lead first and on top. */
+@layer components {
+  .owner-stack {
+    align-items: center;
+    display: inline-flex;
+    flex-shrink: 0;
+    vertical-align: middle;
+
+    > * + * {
+      margin-inline-start: -0.35rem;
+    }
+
+    > :first-child {
+      position: relative;
+      z-index: 1;
+    }
+
+    .person__avatar,
+    .owner-picker__avatar {
+      box-shadow: 0 0 0 2px var(--color-canvas);
+    }
+  }
+
+  .owner-stack__more {
+    background-color: var(--color-ink-lightest);
+    block-size: 1.6rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--color-canvas);
+    color: var(--color-ink-dark);
+    display: inline-grid;
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    font-weight: 600;
+    inline-size: 1.6rem;
+    place-items: center;
+  }
+
+  .owner-picker__hint {
+    padding-inline: var(--inline-space);
+  }
+}
+
+/* The edit page's "Also on it": the team as toggles, picked ones in the selection colour. */
+@layer components {
+  .owner-checklist {
+    border: 0;
+    margin: 0;
+    padding: 0;
+
+    legend {
+      margin-block-end: var(--block-space-half);
+      padding: 0;
+    }
+  }
+
+  .owner-checklist__person {
+    align-items: center;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--inline-space);
+    padding: calc(var(--block-space-half) / 2) var(--inline-space);
+
+    &:has(:checked) {
+      background: var(--color-selected);
+      border-color: var(--color-link);
+    }
+  }
+}

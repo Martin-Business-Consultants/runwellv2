@@ -4,13 +4,16 @@ class Bulk::TodosController < ApplicationController
   allow_staff
   require_permission :delete_records, only: :destroy
   agent_tool :bulk_update_work, on: :update, title: "Change several todos at once",
-    description: "ids: the todos. Give any of status, owner_id (a person's id or name; blank unassigns), due_on (blank clears) or client_visible, and each todo changes as update_work would.",
+    description: "ids: the todos. Give any of status, owner_id (the lead: a person's id or name, keeping anyone else on it; blank takes everyone off), due_on (blank clears) or client_visible, and each todo changes as update_work would.",
     params: { ids: "integer[]!", todo: { status: Todo::STATUSES, owner_id: "string", due_on: "date", client_visible: "boolean" } }
   agent_tool :bulk_delete_work, on: :destroy, title: "Remove several todos at once", params: { ids: "integer[]!" }
 
   def update
     changes = params.expect(todo: %i[status owner_id due_on client_visible]).to_h
-    changes["owner_id"] = owner_id(changes["owner_id"]) if changes.key?("owner_id")
+    if changes.key?("owner_id")
+      changes["owner_id"] = owner_id(changes["owner_id"])
+      changes["other_owner_ids"] = [] if changes["owner_id"].nil? # Unassigned: nobody on it at all
+    end
     return redirect_back(fallback_location: todos_path, alert: "Choose what to change.") if changes.empty?
 
     apply_to_each(selected(Todo.all), done: "Updated %{count} #{term_for(:work)}", fallback: todos_path) do |todo|

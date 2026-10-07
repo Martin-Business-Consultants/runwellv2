@@ -12,7 +12,7 @@
           options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
   </header>
 
-  <% todos = engagement.todos.includes(:owner, :scope_item, engagement: :client).order(:due_on, :position) %>
+  <% todos = engagement.todos.includes(:owner, :scope_item, { assignments: :user }, engagement: :client).order(:due_on, :position) %>
   <% todos = todos.where(scope_item: picked) if focus %>
   <% all_groups = todos.group_by(&:scope_item) %>
   <% shown = todos.select { |todo| state == "all" || (state == "done") == (todo.status == "done") } %>

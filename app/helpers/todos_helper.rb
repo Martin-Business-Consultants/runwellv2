@@ -31,25 +31,42 @@ module TodosHelper
     end
   end
 
-  # The owner picker's choices, on the page once (the first picker renders it); each picker copies
-  # them into its menu when it opens (picker#fill), where they submit that picker's form.
-  def todo_owner_options_template
-    return if @todo_owner_options_rendered
+  # The owners picker's people, on the page once like the others; each click puts that person on
+  # the work or takes them off (Todos::AssignmentsController).
+  def todo_assignee_options_template
+    return if @todo_assignee_options_rendered
 
-    @todo_owner_options_rendered = true
-    choices = [ [ "", tag.span(icon_tag("person"), class: "owner-picker__empty owner-picker__empty--small", aria: { hidden: true }), "Unassigned", tag.span(icon_tag("person-add"), class: "owner-picker__empty", aria: { hidden: true }) ] ] +
-      todo_people.map { |person| [ person.id.to_s, avatar_image_tag(person, class: "owner-picker__avatar owner-picker__avatar--small", alt: ""), person.display_name, avatar_image_tag(person, class: "owner-picker__avatar", alt: "") ] }
-
-    tag.template(id: "todo-owner-options") do
-      safe_join(choices.map do |value, icon, name, avatar|
-        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: value }) do
-          tag.button(type: "submit", name: "todo[owner_id]", value: value, class: "btn popup__btn full-width", data: { action: "picker#choose" }) do
-            safe_join([ icon, tag.span(name, class: "overflow-ellipsis flex-item-grow", data: { picker_part: "name" }),
-              icon_tag("check", class: "checked flex-item-justify-end"), tag.span(avatar, hidden: true, data: { picker_part: "avatar" }) ])
+    @todo_assignee_options_rendered = true
+    tag.template(id: "todo-assignee-options") do
+      safe_join(todo_people.map do |person|
+        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id }) do
+          tag.button(type: "submit", name: "assignee_id", value: person.id, class: "btn popup__btn full-width", data: { action: "picker#choose" }) do
+            safe_join([ avatar_image_tag(person, class: "owner-picker__avatar owner-picker__avatar--small", alt: ""),
+              tag.span(person.display_name, class: "overflow-ellipsis flex-item-grow"),
+              icon_tag("check", class: "checked flex-item-justify-end") ])
           end
         end
       end)
     end
+  end
+
+  # Everyone on a piece of work as overlapping avatars, the lead first (preload assignments: :user).
+  def todo_owners_tag(todo, limit: 3, fallback: nil)
+    owners = todo.owners
+    return (fallback ? tag.span(fallback, class: "person__none") : "".html_safe) if owners.empty?
+
+    shown = owners.first(limit)
+    rest = owners.size - shown.size
+    tag.span class: "owner-stack", title: todo_owners_label(todo) do
+      safe_join(shown.map { person_tag(it) } + [ (tag.span("+#{rest}", class: "owner-stack__more") if rest.positive?) ].compact)
+    end
+  end
+
+  def todo_owners_label(todo)
+    owners = todo.owners
+    return "Unassigned" if owners.empty?
+
+    ([ "#{owners.first.display_name}#{" (lead)" if owners.size > 1}" ] + owners.drop(1).map(&:display_name)).to_sentence
   end
 
   def todo_details(todo, with_engagement: false)

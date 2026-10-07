@@ -3,13 +3,14 @@ class TodosController < ApplicationController
   require_permission :delete_records, only: :destroy
   agent_tool :list_work, on: :index, title: "List work (todos)",
     params: { status: %w[open all], owner: "string", engagement: "string" },
-    description: "Todos across engagements. owner: me (the person you act for), none, any, or a person’s id or name; engagement: a ref or all."
+    description: "Todos across engagements. owner: me (the person you act for), none, any, or a person’s id or name (work they lead or are on); engagement: a ref or all."
   agent_tool :show_work, on: :show, title: "Show a todo"
   agent_tool :create_work, on: :create, title: "Add work (a todo) to an engagement",
-    params: { todo: { title: "string!", description: "text", owner_id: "integer", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
+    description: "owner_id: who leads it; other_owner_ids: anyone else on it.",
+    params: { todo: { title: "string!", description: "text", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
   agent_tool :update_work, on: :update, title: "Change a todo",
-    description: "Change its status (planned, in_progress, in_review when finished and waiting for a person to check, blocked, done), owner, due date or details. client_visible shows it in the client’s portal.",
-    params: { todo: { title: "string", description: "text", status: Todo::STATUSES, owner_id: "integer", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
+    description: "Change its status (planned, in_progress, in_review when finished and waiting for a person to check, blocked, done), owners, due date or details. owner_id is the lead (replacing the lead, keeping the others; blank hands the lead to whoever else is on it); other_owner_ids is everyone else on it (replaces them; [] for nobody else). Both blank: nobody. client_visible shows it in the client’s portal.",
+    params: { todo: { title: "string", description: "text", status: Todo::STATUSES, owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
   agent_tool :delete_work, on: :destroy, title: "Remove a todo"
   agent_tool :brief_work, on: :brief, title: "Get a brief for doing a todo",
     description: "Everything needed to do this todo and report back, as Markdown: the work, its engagement and agreed scope, recent notes, open commitments, repositories when the Code plugin is on, and how to update status and leave notes.",
@@ -90,14 +91,14 @@ class TodosController < ApplicationController
   end
 
   private
-    # A picker on a list (status or owner) saved: answer with that picker as it now stands, and the
+    # The status picker on a list saved: answer with that picker as it now stands, and the
     # due date beside it (Overdue depends on the status), not a reload of the whole page. Refused,
     # the picker goes back to what was saved, and the reason shows.
     def answer_in_place(saved)
       @todo.reload unless saved
       labelled = params[:labelled].present?
-      picker = params[:inline] == "owner" ? "todos/owner_picker" : "todos/status_dot"
-      id = helpers.dom_id(@todo, "#{params[:inline] == "owner" ? "owner" : "status"}#{"_labelled" if labelled}")
+      picker = "todos/status_dot"
+      id = helpers.dom_id(@todo, "status#{"_labelled" if labelled}")
       flash.now[:alert] = @todo.errors.full_messages.to_sentence unless saved
 
       locals = { todo: @todo, labelled: labelled, options_on_page: true } # the page has the choices already
@@ -119,5 +120,5 @@ class TodosController < ApplicationController
     end
 
   def set_todo = @todo = Todo.find(params[:id])
-  def todo_params = params.expect(todo: [ :title, :description, :status, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {} ])
+  def todo_params = params.expect(todo: [ :title, :description, :status, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {}, other_owner_ids: [] ])
 end

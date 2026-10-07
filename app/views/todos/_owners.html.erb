@@ -1,0 +1,25 @@
+<%# locals: (todo:, labelled: nil) %>
+<%# The owners picker's trigger: everyone on the work as overlapping avatars, the lead first (an
+    empty circle for nobody), with their names when labelled. Todos::AssignmentsController answers
+    each click in the menu by replacing this. %>
+<% owners = todo.owners %>
+<% label = todo_owners_label(todo) %>
+<button type="button" id="<%= dom_id(todo, labelled ? :owners_labelled : :owners) %>" class="owner-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
+  <% if owners.any? %>
+    <span class="owner-stack">
+      <% owners.first(3).each do |person| %>
+        <%# herb:key person.id %>
+        <%= avatar_image_tag person, class: "owner-picker__avatar", alt: "" %>
+      <% end %>
+      <% if owners.size > 3 %>
+        <span class="owner-stack__more">+<%= owners.size - 3 %></span>
+      <% end %>
+    </span>
+  <% else %>
+    <span class="owner-picker__empty" aria-hidden="true"><%= icon_tag "person-add" %></span>
+  <% end %>
+  <% if labelled %>
+    <span class="owner-picker__name overflow-ellipsis"><%= owners.any? ? owners.map(&:display_name).to_sentence : "Unassigned" %></span>
+  <% end %>
+  <span class="for-screen-reader">On it: <%= label %>. Change who’s on <%= todo.title %></span>
+</button>
