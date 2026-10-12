@@ -5,6 +5,10 @@ class ApplicationController < ActionController::Base
   include TableSorting
   include NPlusOneDetection
   allow_browser versions: :modern
+  # ReActionView registers its slots format, and Rails then answers a bare "*/*" (a plain fetch(),
+  # like Lexxy's @mention list) in it: JSON where HTML was wanted, so the list read "Nothing
+  # found". ReActionView's own requests name their type; a URL with a format keeps it.
+  before_action { request.format = :html if request.accept.to_s.strip == "*/*" && params[:format].blank? }
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
   before_action :remember_host
