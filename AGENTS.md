@@ -149,6 +149,9 @@ Reach for these in order, and stop at the first that fits:
    instead of touching the DOM
 3. **A new Stimulus controller** only when neither of the above fits
 
+Rows a form repeats (nested attributes, key/value pairs) use the `repeater` controller: a template
+row added and removed in the browser, `_destroy` set on saved rows (`docs/plugin-contract.md`).
+
 Every state change must run in the browser, never wait on the server: reads in the shapes the
 client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-reads`), in
 `<%# herb:slots client %>` templates. A branch holding Ruby output (a path, a form, a CSRF token)

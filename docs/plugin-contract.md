@@ -91,6 +91,14 @@ current page), with `section_nav_heading` over each group and
 `section_nav_link label, path, icon:, current:` for each page. Below 960px it runs across the top.
 The page itself then needs no links to its siblings. Since 2.21, stable.
 
+A form that repeats rows (nested attributes, key/value pairs) uses the core's `repeater` Stimulus
+controller, since a plugin ships no JavaScript of its own: `data-controller="repeater"` (with
+`data-repeater-placeholder-value`, default `NEW_ROW`) around a `data-repeater-target="list"` of
+rows, each `data-repeater-row`, and a `<template data-repeater-target="template">` holding one
+row with the placeholder where its index goes. `data-action="repeater#add"` adds a row,
+`repeater#remove` takes the row it sits in away (a saved one is hidden and its `[_destroy]` field
+set to 1). Repeaters nest, each with its own placeholder. Since 2.24.0.
+
 ## Home, permissions and the nightly run
 
 | Call | Since | Status |
