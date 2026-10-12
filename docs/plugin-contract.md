@@ -99,6 +99,14 @@ row with the placeholder where its index goes. `data-action="repeater#add"` adds
 `repeater#remove` takes the row it sits in away (a saved one is hidden and its `[_destroy]` field
 set to 1). Repeaters nest, each with its own placeholder. Since 2.24.0.
 
+A drop box for files is the core's `upload` Stimulus controller on a multipart form
+(`data-upload-url-value` the direct uploads URL, `data-upload-max-size-value` `Document::MAX_SIZE`),
+around a `label.btn.input--upload` holding a `data-upload-target="status"` text, a hidden
+`<progress data-upload-target="progress">` and a multiple file input
+(`data-upload-target="input"`, `data-action="change->upload#start"`). Dropped or chosen files go
+straight to storage, then the form posts their signed ids under the input's name; check each
+blob's size on the server too. Documented in 2.24.0, stable.
+
 ## Home, permissions and the nightly run
 
 | Call | Since | Status |
