@@ -78,8 +78,9 @@ module Runwell
       end
 
       # path: a lambda run in the view, returning nil to leave the link out.
-      def nav(key, label, path)
-        nav_items[key] = [ label, path ]
+      # icon: any core icon name (icon_tag), "grid" when none is given.
+      def nav(key, label, path, icon: nil)
+        nav_items[key] = [ label, path, icon ]
       end
 
       def briefing(key, title, partial:, items:)

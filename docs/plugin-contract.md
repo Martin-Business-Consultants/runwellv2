@@ -43,7 +43,7 @@ anything published: an owner switches a plugin on.
 | Call | Since | Status |
 | --- | --- | --- |
 | `Runwell::Plugins.slot name, key, partial` | 2.0 | Stable |
-| `Runwell::Plugins.nav key, label, -> { path or nil }` | 2.0 | Stable |
+| `Runwell::Plugins.nav key, label, -> { path or nil }, icon: "globe"` | 2.0 (`icon:` 2.25) | Stable |
 | `Runwell::Plugins.stylesheet key, "name"` | 2.0 | Stable |
 | `Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:` | 2.0 | Stable |
 | `Runwell::Plugins.settings key, label, -> { path }` | 2.0 | Stable |

@@ -76,9 +76,9 @@ module ApplicationHelper
 
   # The same links for the left nav, one list item each, under the core's sections.
   def plugin_sidenav_links
-    safe_join(Runwell::Plugins.enabled_nav_items.values.each_with_index.filter_map do |(label, path), index|
+    safe_join(Runwell::Plugins.enabled_nav_items.values.each_with_index.filter_map do |(label, path, icon), index|
       url = instance_exec(&path)
-      tag.li(sidenav_link_to(label, url, icon: "grid", keys: "g #{index + 1}")) if url
+      tag.li(sidenav_link_to(label, url, icon: icon || "grid", keys: "g #{index + 1}")) if url
     end)
   end
 
