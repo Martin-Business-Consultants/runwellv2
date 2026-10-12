@@ -1,12 +1,25 @@
 <%# locals: (home:) %>
-<%# One line: what's due today, this person's work and every open promise, each a link to the list. %>
+<%# One line: what's due today, this person's work and every open promise, and what of theirs is late,
+    each a link to the list. %>
 <% work = home.due_today_work %>
 <% promises = home.due_today_promises %>
+<% late_work = home.late_work %>
+<% late_promises = home.late_promises %>
 <section class="home-today panel" aria-label="Today">
   <span class="home-today__label">Today</span>
-  <% if work.zero? && promises.zero? %>
+  <% if work.zero? && promises.zero? && late_work.zero? && late_promises.zero? %>
     <span class="txt-subtle">Nothing due today</span>
   <% else %>
+    <% if late_work.positive? %>
+      <%= link_to todos_path(owner: "me", view: "table", sort: "due"), class: "home-today__item home-today__item--late" do %>
+        <%= icon_tag "history" %> <span><%= pluralize(late_work, "piece") %> of your <%= term(:work).downcase %> late</span>
+      <% end %>
+    <% end %>
+    <% if late_promises.positive? %>
+      <%= link_to commitments_path(owner_kind: "us"), class: "home-today__item home-today__item--late" do %>
+        <%= icon_tag "history" %> <span><%= pluralize(late_promises, term(:commitment).downcase) %> of yours late</span>
+      <% end %>
+    <% end %>
     <% if work.positive? %>
       <%= link_to todos_path(owner: "me", view: "table", sort: "due"), class: "home-today__item" do %>
         <%= icon_tag "check" %> <span><%= pluralize(work, "piece") %> of your <%= term(:work).downcase %> due</span>

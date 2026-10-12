@@ -73,6 +73,10 @@
     margin-inline-start: auto;
   }
 
+  .home-today__item--late {
+    color: var(--color-negative);
+  }
+
   /* A panel's heading with its link on the right, in place of the divider. */
   .home-panel__header {
     align-items: baseline;

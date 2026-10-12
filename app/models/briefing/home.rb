@@ -19,9 +19,12 @@ class Briefing::Home
     "Good #{part}, #{@user.display_name.split.first}."
   end
 
-  # What's due today: this person's work, and every open promise (ours or the client's).
+  # What's due today: this person's work, and every open promise (ours or the client's). Their own
+  # past due work and promises stay on the day too, until they're done or moved.
   def due_today_work = my_open_work.where(due_on: Date.current).count
   def due_today_promises = Commitment.open.where(due_on: Date.current).count
+  def late_work = my_open_work.where(due_on: ...Date.current).count
+  def late_promises = Commitment.open.where(user: @user, owner_kind: "us", due_on: ...Date.current).count
 
   # This person's open work and our promises they hold, due within the week (late ones too), soonest first.
   def coming_up

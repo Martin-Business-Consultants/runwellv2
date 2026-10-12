@@ -30,8 +30,9 @@
 
       <%# The first few of each, with the way to the rest: a large install has hundreds overdue. %>
       <ul class="settings__scrollable-list">
-        <% section.items.each do |item| %>
-          <%# herb:key "#{item.class.name}-#{item.id}" %>
+        <%# A plugin's items needn't be records (Account management's alerts are Data), so no id. %>
+        <% section.items.each_with_index do |item, index| %>
+          <%# herb:key "#{item.class.name}-#{item.respond_to?(:id) ? item.id : index}" %>
           <li data-filter-target="item" class="flex flex-column gap-half">
             <% if section.partial %>
               <%= render section.partial, item: item %>
