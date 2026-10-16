@@ -84,7 +84,9 @@ Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_ta
 and `section_nav_link` (2.21), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
 `quick_filter` and `index_toolbar` (2.0, stable), and `notes/section` (`subject:`, any record with notes:
 the composer and its notes, posting to the full page and back; `permanent: false` on a page that
-swaps one record's notes for another's in place; documented in 2.25.2, stable). Design tokens for its CSS are in
+swaps one record's notes for another's in place; documented in 2.25.2, stable), and
+`todos/owner_picker` (`todo:`, `labelled:`; who's on a todo, changed in place: since 2.22,
+documented in 2.25.4, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
@@ -108,6 +110,15 @@ around a `label.btn.input--upload` holding a `data-upload-target="status"` text,
 (`data-upload-target="input"`, `data-action="change->upload#start"`). Dropped or chosen files go
 straight to storage, then the form posts their signed ids under the input's name; check each
 blob's size on the server too. Documented in 2.24.0, stable.
+
+Picking rows to act on together is the core's `bulk` Stimulus controller, already on every staff
+page's `<main>`: a checkbox per row with `value` the record's id, `data-bulk-target="item"` and
+`data-action="bulk#update"` (add `data-keys="x"` inside a keyboard item, so `x` picks the row
+you're on), and the bar, from `BulkHelper`: `bulk_bar(delete:) { … }` around `bulk_menu`,
+`bulk_button`, `bulk_date` and `bulk_delete`. The bar shows while anything is picked, and each of
+its forms is sent with the picked ids as `ids[]`. For work, the core's own `bulk_todos_path`
+(PATCH `todo[status]`, `todo[owner_id]`, `todo[due_on]`, `todo[client_visible]`; DELETE) runs each
+todo's verbs and redirects back. Documented in 2.25.4, stable.
 
 Dragging items between lists is the core's `drag-and-drop` Stimulus controller (the Work board's):
 on a wrapper, `data-controller="drag-and-drop"` with
