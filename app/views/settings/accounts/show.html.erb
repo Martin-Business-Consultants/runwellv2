@@ -109,5 +109,48 @@
         </div>
       <% end %>
     </section>
+
+    <%# Your menu: the plugins that are on, in this person's order, each shown or hidden in their nav.
+        One form: the switches save as they change; ↑ and ↓ move one place (User::NavPlugins). %>
+    <% menu = @user.person.ordered_nav_items(Runwell::Plugins.enabled_nav_items) %>
+    <section class="settings__section flex flex-column gap-half" id="menu">
+      <header>
+        <h2 class="divider">Your menu</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">Which plugins show in the menu on the left, and in what order: yours alone. The first shown is <kbd>g</kbd> <kbd>1</kbd>, the next <kbd>g</kbd> <kbd>2</kbd>, and so on.</p>
+      <% if menu.empty? %>
+        <p class="txt-small txt-subtle margin-none">No plugin with a page is switched on.</p>
+      <% else %>
+        <%= form_with url: settings_menu_path, method: :patch, class: "menu-arranger", data: { controller: "form" } do %>
+          <ul class="settings__scrollable-list menu-arranger__list">
+            <% shown_index = 0 %>
+            <% menu.each_with_index do |(key, (label, _path, icon)), index| %>
+              <%# herb:key key %>
+              <% hidden = @user.person.nav_plugin_hidden?(key) %>
+              <% shown_index += 1 unless hidden %>
+              <li class="<%= class_names("menu-arranger__item txt-small", "menu-arranger__item--hidden": hidden) %>">
+                <input type="hidden" name="order[]" value="<%= key %>">
+                <%= icon_tag icon || "grid" %>
+                <strong class="overflow-ellipsis"><%= label %></strong>
+                <% unless hidden %>
+                  <span class="txt-x-small txt-subtle">g <%= shown_index %></span>
+                <% end %>
+                <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                <button type="submit" name="move" value="<%= key %>:up" class="btn btn--circle txt-small" title="Move <%= label %> up" <% if index.zero? %>disabled<% end %>>
+                  <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move <%= label %> up</span>
+                </button>
+                <button type="submit" name="move" value="<%= key %>:down" class="btn btn--circle txt-small menu-arranger__down" title="Move <%= label %> down" <% if index == menu.size - 1 %>disabled<% end %>>
+                  <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move <%= label %> down</span>
+                </button>
+                <label class="switch flex-item-no-shrink" title="Show <%= label %> in your menu">
+                  <input type="checkbox" name="shown[]" value="<%= key %>" class="switch__input" <% unless hidden %>checked<% end %> aria-label="Show <%= label %> in your menu" data-action="change->form#submit">
+                  <span class="switch__btn"></span>
+                </label>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      <% end %>
+    </section>
   </div>
 </section>

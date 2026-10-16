@@ -1148,4 +1148,27 @@
 /* Finishing an engagement, under its Details: Mark complete or Cancel, or Reopen once closed. */
 @layer components {
   .engagement-finish { margin-block-start: var(--block-space-half); }
+
+  /* Your menu (Settings > Your account): each plugin, its g key, ↑ ↓ and a switch to show it. */
+  .menu-arranger__item {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half);
+
+    .btn--circle[disabled] {
+      visibility: hidden;
+    }
+  }
+
+  .menu-arranger__item--hidden {
+    color: var(--color-ink-medium);
+
+    > .icon {
+      opacity: 0.5;
+    }
+  }
+
+  .menu-arranger__down .icon {
+    rotate: 180deg;
+  }
 }

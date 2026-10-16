@@ -194,7 +194,8 @@ marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and 
 
 Staff pages have a left nav (`layouts/shared/_sidenav`, `sidenav.css`): home and the core
 sections with icons (`sidenav_link_to`, which marks the current one), plugin links under
-Plugins, and at its foot the theme toggle, settings and sign out ("/" and `?` are keys only). Below
+Plugins (`nav_plugin_items`: each person's own order and choice of them, Settings > Your account >
+Your menu, `User::NavPlugins`; `g 1`… follow it), and at its foot the theme toggle, settings and sign out ("/" and `?` are keys only). Below
 800px it runs across the top. Every index shows its records as cards or a table, and has no
 heading: the nav marks the current section. The controller sets `@view = index_view`
 (Work adds `extra: %w[board]`), which reads `?view=` or the install's default (Settings >

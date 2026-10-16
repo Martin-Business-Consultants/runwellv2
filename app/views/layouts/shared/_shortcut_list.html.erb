@@ -26,7 +26,7 @@
       <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:work) %> board</dd>
       <dt><kbd>g</kbd><kbd>m</kbd></dt><dd>Commitments</dd>
       <dt><kbd>g</kbd><kbd>r</kbd></dt><dd>Requests</dd>
-      <% Runwell::Plugins.enabled_nav_items.values.each_with_index do |(label, _path), index| %>
+      <% nav_plugin_items.values.each_with_index do |(label, _path), index| %>
         <%# herb:key label %>
         <dt><kbd>g</kbd><kbd><%= index + 1 %></kbd></dt><dd><%= label %></dd>
       <% end %>

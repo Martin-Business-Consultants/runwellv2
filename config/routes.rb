@@ -63,6 +63,7 @@ Rails.application.routes.draw do
     resource :appearance, only: %i[show update]
     resource :theme_brief, only: :show
     resource :account, only: %i[show update]
+    resource :menu, only: :update
     resource :two_factor, only: %i[new create destroy] do
       resource :recovery_codes, only: :create, module: :two_factors
     end

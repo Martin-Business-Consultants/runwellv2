@@ -17,7 +17,7 @@
       <li><%= sidenav_link_to "Requests", requests_path, icon: "email", keys: "g r" %></li>
     </ul>
 
-    <% if Runwell::Plugins.enabled_nav_items.any? %>
+    <% if nav_plugin_items.any? %>
       <p class="sidenav__heading">Plugins</p>
       <ul class="sidenav__list">
         <%= plugin_sidenav_links %>

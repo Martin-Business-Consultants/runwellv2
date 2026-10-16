@@ -75,8 +75,15 @@ module ApplicationHelper
   end
 
   # The same links for the left nav, one list item each, under the core's sections.
+  # The plugins' nav items that are on, as the signed-in person arranges them (Settings > Your
+  # account: their order, without the ones they hide).
+  def nav_plugin_items
+    items = Runwell::Plugins.enabled_nav_items
+    (person = Current.user&.person) ? person.arrange_nav_items(items) : items
+  end
+
   def plugin_sidenav_links
-    safe_join(Runwell::Plugins.enabled_nav_items.values.each_with_index.filter_map do |(label, path, icon), index|
+    safe_join(nav_plugin_items.values.each_with_index.filter_map do |(label, path, icon), index|
       url = instance_exec(&path)
       tag.li(sidenav_link_to(label, url, icon: icon || "grid", keys: "g #{index + 1}")) if url
     end)
