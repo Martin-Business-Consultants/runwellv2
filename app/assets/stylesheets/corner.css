@@ -21,9 +21,15 @@
       position: absolute;
     }
 
-    /* Quick actions: no button, the fan opens from the corner on A. */
+    /* Quick actions: no button, the fan opens from the corner on A. Closed, it takes no clicks:
+       it sits over the bell, which it otherwise swallowed (A clicks its hidden toggle from the
+       keyboard, which pointer-events don't stop). */
     .tray--actions {
       inset-inline: auto var(--tray-margin);
+
+      &:not(:has(.tray__dialog[open])) {
+        pointer-events: none;
+      }
 
       > .tray__toggle {
         block-size: 1px;
