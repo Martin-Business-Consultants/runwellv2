@@ -82,7 +82,9 @@ Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_ta
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
 `can?`, `current_record` (the record on screen, or nil; 2.18), `section_nav`, `section_nav_heading`
 and `section_nav_link` (2.21), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
-`quick_filter` and `index_toolbar` (2.0, stable). Design tokens for its CSS are in
+`quick_filter` and `index_toolbar` (2.0, stable), and `notes/section` (`subject:`, any record with notes:
+the composer and its notes, posting to the full page and back; `permanent: false` on a page that
+swaps one record's notes for another's in place; documented in 2.25.2, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
@@ -106,6 +108,19 @@ around a `label.btn.input--upload` holding a `data-upload-target="status"` text,
 (`data-upload-target="input"`, `data-action="change->upload#start"`). Dropped or chosen files go
 straight to storage, then the form posts their signed ids under the input's name; check each
 blob's size on the server too. Documented in 2.24.0, stable.
+
+Dragging items between lists is the core's `drag-and-drop` Stimulus controller (the Work board's):
+on a wrapper, `data-controller="drag-and-drop"` with
+`data-drag-and-drop-dragged-item-class` (`drag-and-drop__dragged-item`) and
+`data-drag-and-drop-hover-container-class` (`drag-and-drop__hover-container`), and
+`data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver
+drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd"`. Each draggable element is
+`draggable="true"` with `data-drag-and-drop-target="item"` and `data-id`. Each list it can be
+dropped on is `data-drag-and-drop-target="container"` with `data-drag-and-drop-url` (its `__id__`
+becomes the item's id) and, inside, a `data-drag-drop-item-container` the item is moved into. A
+drop POSTs to that URL asking for a turbo stream; a container marked `data-drag-and-drop-sortable`
+also takes drops within itself and sends `before` (the id of the item it now sits before, blank at
+the end). Documented in 2.25.2, stable.
 
 ## Home, permissions and the nightly run
 
