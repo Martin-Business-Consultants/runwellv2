@@ -62,6 +62,14 @@ module BulkHelper
     end
   end
 
+  # A pill that copies text made from the picked rows: `path` is fetched (as text) with their ids
+  # as ids[] and the answer put on the clipboard (bulk#copy). For a brief of several todos for an AI.
+  def bulk_copy(path, label:, icon: "ai")
+    button_tag(type: "button", class: "btn input txt-x-small bulk-bar__pill bulk-bar__copy", data: { action: "bulk#copy", bulk_copy_url: path }) do
+      safe_join([ icon_tag(icon), tag.span(label), tag.span("Copied", class: "bulk-bar__copied-text") ])
+    end
+  end
+
   # A pill opening a date to set on every picked row; blank clears it.
   def bulk_date(path, method:, name:, label:)
     bulk_popup(label) do

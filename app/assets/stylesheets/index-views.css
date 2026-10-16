@@ -448,6 +448,16 @@
     --btn-border-radius: var(--radius-control);
   }
 
+  /* bulk_copy: says Copied once the text is on the clipboard. */
+  .bulk-bar__copied-text {
+    display: none;
+  }
+
+  .bulk-bar__copy.bulk-bar__copied {
+    > span:not(.bulk-bar__copied-text) { display: none; }
+    .bulk-bar__copied-text { display: inline; }
+  }
+
   .bulk-bar__end {
     margin-inline-start: auto;
   }

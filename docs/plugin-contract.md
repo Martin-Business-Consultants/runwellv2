@@ -88,7 +88,10 @@ and `section_nav_link` (2.21), and the shared partials `layouts/shared/card`, `d
 the composer and its notes, posting to the full page and back; `permanent: false` on a page that
 swaps one record's notes for another's in place; documented in 2.25.2, stable), and
 `todos/owner_picker` (`todo:`, `labelled:`; who's on a todo, changed in place: since 2.22,
-documented in 2.25.4, stable). Design tokens for its CSS are in
+documented in 2.25.4, stable), and `todos/ai_brief` (`todo:`, `labelled:`; copies the todo's brief for a
+local AI, `c` on a keyboard item: documented in 2.28, stable). The brief itself is
+`Todo::Brief.new(todo, base_url:, person:).to_s` (Markdown: the work, scope, notes, commitments,
+plugins' sections and the `runwell` commands to report back; documented in 2.28, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
@@ -117,7 +120,8 @@ Picking rows to act on together is the core's `bulk` Stimulus controller, alread
 page's `<main>`: a checkbox per row with `value` the record's id, `data-bulk-target="item"` and
 `data-action="bulk#update"` (add `data-keys="x"` inside a keyboard item, so `x` picks the row
 you're on), and the bar, from `BulkHelper`: `bulk_bar(delete:) { … }` around `bulk_menu`,
-`bulk_button`, `bulk_date` and `bulk_delete`. The bar shows while anything is picked, and each of
+`bulk_button`, `bulk_date`, `bulk_delete` and `bulk_copy(path, label:)` (copies the text `path` answers,
+fetched with the picked ids as `ids[]`; since 2.28). The bar shows while anything is picked, and each of
 its forms is sent with the picked ids as `ids[]`. For work, the core's own `bulk_todos_path`
 (PATCH `todo[status]`, `todo[owner_id]`, `todo[due_on]`, `todo[client_visible]`; DELETE) runs each
 todo's verbs and redirects back. Documented in 2.25.4, stable.
