@@ -191,20 +191,31 @@ module ApplicationHelper
 
   # "Back" with Esc; where it goes is in the title. (No aria-label: Fizzy styles a .btn with
   # one and an icon as an icon-only circle.)
-  # Every date field: a native <input type="date"> with the date-field controller (click opens
-  # the picker; t, +, - and Delete from the keyboard). With a form builder, or as a tag.
-  DATE_FIELD_DATA = { controller: "date-field", action: "click->date-field#open keydown->date-field#shortcut" }.freeze
+  # Every date field: a calendar (vanillajs-datepicker, through the date-field controller). The
+  # server renders both halves, so a morph never undoes it: a hidden field with the form's name and
+  # the date as YYYY-MM-DD (what's submitted), and a read-only field showing it ("Oct 20, 2026")
+  # that opens the calendar. Options (class, aria, data, required, autofocus, placeholder) go on the
+  # field people see; value: overrides the record's. t, +, - and Delete work from the keyboard.
+  DATE_FIELD_DATA = { date_field_target: "display", action: "keydown->date-field#shortcut" }.freeze
+  DATE_FIELD_FORMAT = "%b %-d, %Y" # the calendar's "M d, yyyy"
 
   def date_input(form, method, **options)
-    form.date_field(method, **date_input_options(options))
+    value = options.key?(:value) ? options.delete(:value) : form.object.try(method)
+    date_picker(form.field_name(method), value, id: options.delete(:id) || form.field_id(method), **options)
   end
 
   def date_input_tag(name, value = nil, **options)
-    date_field_tag(name, value, **date_input_options(options))
+    date_picker(name, value, id: options.delete(:id) || sanitize_to_id(name), **options)
   end
 
-  def date_input_options(options)
-    options.merge(data: DATE_FIELD_DATA.merge(options[:data] || {}) { |key, ours, theirs| key == :action ? "#{ours} #{theirs}" : theirs })
+  def date_picker(name, value, id:, **options)
+    date = value.is_a?(Date) ? value : (Date.iso8601(value.to_s) rescue nil)
+    data = DATE_FIELD_DATA.merge(options.delete(:data) || {}) { |key, ours, theirs| key == :action ? "#{ours} #{theirs}" : theirs }
+    tag.span(class: "date-picker", data: { controller: "date-field" }) do
+      hidden_field_tag(name, date&.iso8601, id: nil, data: { date_field_target: "value" }) +
+        text_field_tag(nil, date&.strftime(DATE_FIELD_FORMAT), id: id, readonly: true, autocomplete: "off",
+          placeholder: options.delete(:placeholder) || "Pick a date", data: data, **options)
+    end
   end
 
   # The page one level up (a record's list, a todo's engagement). Not a button: it's a

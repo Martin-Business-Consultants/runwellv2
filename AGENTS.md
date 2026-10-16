@@ -110,10 +110,11 @@ scope items).
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
   highlighter colours it as it does code blocks in rich text (`code.css`)
-- Every date is a native `<input type="date">` through `date_input form, :due_on` (or
-  `date_input_tag` without a form builder), which adds the `date-field` controller: a click
-  opens the browser's picker; `t` today, `+`/`-` a day, Delete clears. Never a text field for a
-  date, and no date-picker library
+- Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): a calendar
+  (vanillajs-datepicker, vendored in `vendor/javascript`, through the `date-field` controller) on a
+  read-only field showing "Oct 20, 2026", beside a hidden field holding YYYY-MM-DD, which is what's
+  sent. Both come from the server, so a morph can't undo it. `t` today, `+`/`-` a day, Delete
+  clears. Never a text field for a date, and no other date picker
 - Never inline CSS: no `style` attributes and no `<style>` tags in views. All
   styling lives in `app/assets/stylesheets`. The one exception is email, which can't load
   stylesheets: `layouts/mailer.html.erb` carries its own `<style>` (phones and dark mode only): the logo or
