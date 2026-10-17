@@ -66,7 +66,10 @@ export default class extends Controller {
   // A pill that copies text made from the picked rows (bulk_copy): its URL with each picked id
   // as ids[], fetched inside a ClipboardItem so Safari keeps the click's permission while it loads.
   // The same id picked twice (a row shown in two lists) goes once, in the order they're on the page.
+  // Deprecated in 2.29, gone in 3.0 (with BulkHelper#bulk_copy): a plugin copies with its own
+  // controller, reading the picked boxes.
   async copy(event) {
+    console.warn("Runwell: bulk#copy (bulk_copy) is deprecated since 2.29 and goes in 3.0. Copy from your plugin's own controller.")
     const button = event.currentTarget
     const url = new URL(button.dataset.bulkCopyUrl, window.location.href)
     ;[ ...new Set(this.#picked.map(item => item.value)) ].forEach(id => url.searchParams.append("ids[]", id))

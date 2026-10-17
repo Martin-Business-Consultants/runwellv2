@@ -31,6 +31,14 @@ module Runwellv2
     # with its own zone (Client#time_zone) sees its portal, approval pages and emails in that zone.
     config.time_zone = ENV.fetch("TIME_ZONE", "Eastern Time (US & Canada)")
 
+    # Plugins' own JavaScript (InstalledPlugins#javascript_dirs): served as assets, pinned in the
+    # import map by config/importmap_plugins.rb, and swept for changes in development.
+    InstalledPlugins.javascript_dirs.each_value do |dir|
+      config.assets.paths << dir.parent
+      config.importmap.cache_sweepers << dir
+    end
+    config.importmap.paths << root.join("config/importmap_plugins.rb")
+
     # Outgoing mail through the server saved in Settings > Email when the environment names none.
     config.action_mailer.interceptors = %w[Runwell::MailDelivery]
     # config.eager_load_paths << Rails.root.join("extras")

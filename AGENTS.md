@@ -150,8 +150,9 @@ Reach for these in order, and stop at the first that fits:
    instead of touching the DOM
 3. **A new Stimulus controller** only when neither of the above fits
 
-Rows a form repeats (nested attributes, key/value pairs) use the `repeater` controller: a template
-row added and removed in the browser, `_destroy` set on saved rows (`docs/plugin-contract.md`).
+The core keeps only the JavaScript it uses itself. A controller added for a plugin belongs in that
+plugin (`app/javascript/<key>/`, Plugin JavaScript in `docs/plugin-contract.md`); the `repeater`
+controller and `bulk_copy` are deprecated for that reason and go in 3.0.
 
 Every state change must run in the browser, never wait on the server: reads in the shapes the
 client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-reads`), in
@@ -431,7 +432,9 @@ server, like a WordPress plugin: Settings > Plugins downloads the repository's l
 into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
 `config/installed_plugins.rb` loads it at boot, outside Bundler, so it can use only the core's
 gems. Its migrations run after the core's on `db:migrate` / `db:prepare` (`plugins:migrate`), its
-tables stay out of `db/schema.rb`, and its stylesheets compile as production boots. Each plugin
+tables stay out of `db/schema.rb`, and its stylesheets and JavaScript (`app/javascript/<key>/`, pinned
+by `config/importmap_plugins.rb`, its controllers registered as `<key>--name`) compile as production
+boots. Each plugin
 updates only when someone presses its Update button (`PluginRelease`, checked nightly); Remove
 deletes its code and keeps its tables. An install whose plugin is on but missing puts it back
 on boot (`PluginRestoreJob`). From the shell: `plugins:install[owner/repo or key]`,

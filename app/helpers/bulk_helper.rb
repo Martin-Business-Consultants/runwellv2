@@ -63,7 +63,8 @@ module BulkHelper
   end
 
   # A pill that copies text made from the picked rows: `path` is fetched (as text) with their ids
-  # as ids[] and the answer put on the clipboard (bulk#copy). For a brief of several todos for an AI.
+  # as ids[] and the answer put on the clipboard (bulk#copy). Deprecated in 2.29, gone in 3.0: the
+  # core doesn't use it, and a plugin copies with its own controller (docs/plugin-contract.md).
   def bulk_copy(path, label:, icon: "ai")
     button_tag(type: "button", class: "btn input txt-x-small bulk-bar__pill bulk-bar__copy", data: { action: "bulk#copy", bulk_copy_url: path }) do
       safe_join([ icon_tag(icon), tag.span(label), tag.span("Copied", class: "bulk-bar__copied-text") ])

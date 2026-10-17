@@ -58,4 +58,11 @@ module InstalledPlugins
   end
 
   def migration_paths = loaded.values.map { it.join("db/migrate") }.select(&:directory?).map(&:to_s)
+
+  # Each loaded plugin's own JavaScript: app/javascript/<key>, by key. Only that folder, so a
+  # plugin's modules are named for it ("my_day/…") and its Stimulus controllers too
+  # ("my-day--copy-prompt"), and can't stand in for the core's (config/importmap_plugins.rb).
+  def javascript_dirs
+    loaded.filter_map { |name, path| [ name, path.join("app/javascript", name) ] if path.join("app/javascript", name).directory? }.to_h
+  end
 end

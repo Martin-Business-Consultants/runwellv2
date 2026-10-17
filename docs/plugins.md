@@ -10,7 +10,7 @@ with releases, installed onto a server from **Settings > Plugins** (or
 `bin/rails "plugins:install[owner/repo]"`). Runwell downloads the latest release into
 `RUNWELL_DATA_DIR/plugins/<name>` (beside the databases, so it outlasts deploys and core
 updates), restarts, and loads it at boot (`config/installed_plugins.rb`). Its migrations run
-after the core's, and its stylesheets compile as it boots. A plugin updates only when someone
+after the core's, and its stylesheets and JavaScript compile as it boots. A plugin updates only when someone
 presses its Update button, which appears when its repository has a newer release; Remove
 deletes its code and keeps its tables.
 
@@ -25,6 +25,7 @@ runwell-hello/
   lib/hello.rb              # require "hello/version"; require "hello/engine"
   lib/hello/version.rb      # Hello::VERSION = "0.1.0"
   lib/hello/engine.rb
+  app/javascript/hello/controllers/greeting_controller.js   # optional: data-controller="hello--greeting"
 ```
 
 ```ruby
@@ -46,6 +47,38 @@ core. Routes are appended to the app's from an initializer; migrations need noth
 core runs every installed plugin's `db/migrate`. `runwell-time-tracking` is the reference for
 each extension point, and [the plugin contract](plugin-contract.md) lists them all, with the
 core version each arrived in.
+
+## Building a good plugin
+
+Runwell is self-hosted and open: people install plugins on servers nobody else looks after, and
+they will mix plugins and versions in ways you didn't test. A plugin is good when it stays inside
+its own lines, so removing it, updating it or updating the core never breaks the rest.
+
+- **Read [the contract](plugin-contract.md) first, and use only it.** Core tables, columns, class
+  names, markup and JavaScript that aren't listed can change in any minor release.
+- **Keep it in the plugin.** Its own tables, routes, views, CSS and JavaScript do almost
+  everything. Ask the core only for a real extension point (a slot, a hook, an event, a helper
+  more than one plugin needs), by an issue or pull request that documents it in the contract; never
+  ask it to carry one plugin's code.
+- **Name everything for its key**: tables (`hello_*`), route names (`as: "hello"`), helpers
+  (`hello_…`), CSS classes (`.hello-…`), permissions, agent tools (`…_hello_…`). Its JavaScript is
+  named for it already (`hello--greeting`).
+- **Say which core it needs**, `requires: ">= x.y"`, the newest contract version it uses, and
+  check before using something newer than that (`Runwell::Plugins.method(:nav).parameters` is how
+  a plugin passes `icon:` only to cores that take it). A plugin that fails while registering stops
+  the whole install from booting.
+- **Leave the core alone**: no monkey patches, no `prepend` on core classes, no changes to core
+  rows except through their verbs, no overriding core views or CSS. Add associations through the
+  load hooks, and nothing else.
+- **Honour the switch.** Controllers, jobs and event subscribers check
+  `Runwell::Plugins.enabled?(key)`; a plugin that's off does nothing.
+- **Agents can do what people can**: every action declares its agent tool, so JavaScript only
+  ever adds convenience, never the only way to do something.
+- **Be careful with data**: authorize every action, find records through what the person may see,
+  keep secrets in `encrypts` columns and out of the browser, and never log them.
+- **Release like the core**: semantic versions, a tagged GitHub release per version, release notes
+  that say what changed and what it needs, and migrations safe on a live install (add now, remove
+  in a later release).
 
 ## Developing one
 

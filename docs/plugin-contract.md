@@ -28,6 +28,9 @@ methods, and anything under `Agent::`, `Upgrade`, `PluginChange` or `Setting`'s 
   as the core's do. Its migrations are safe on a live install.
 - Removing it leaves the core working: nothing in the core names a plugin.
 - It uses only the gems the core bundles (it is loaded outside Bundler).
+- Its JavaScript is its own, in `app/javascript/<key>/` (see Plugin JavaScript): it never patches,
+  replaces or reaches into the core's controllers, and the core's markup and CSS classes are not
+  an API to script against.
 
 ## Manifest
 
@@ -100,8 +103,9 @@ current page), with `section_nav_heading` over each group and
 `section_nav_link label, path, icon:, current:` for each page. Below 960px it runs across the top.
 The page itself then needs no links to its siblings. Since 2.21, stable.
 
-A form that repeats rows (nested attributes, key/value pairs) uses the core's `repeater` Stimulus
-controller, since a plugin ships no JavaScript of its own: `data-controller="repeater"` (with
+**Deprecated in 2.29, removed in 3.0:** the core's `repeater` controller. The core doesn't use it;
+a plugin that repeats rows ships its own (Websites' `website-checklist--repeater` is a working copy
+to start from). Until 3.0 it works as before: `data-controller="repeater"` (with
 `data-repeater-placeholder-value`, default `NEW_ROW`) around a `data-repeater-target="list"` of
 rows, each `data-repeater-row`, and a `<template data-repeater-target="template">` holding one
 row with the placeholder where its index goes. `data-action="repeater#add"` adds a row,
@@ -120,8 +124,9 @@ Picking rows to act on together is the core's `bulk` Stimulus controller, alread
 page's `<main>`: a checkbox per row with `value` the record's id, `data-bulk-target="item"` and
 `data-action="bulk#update"` (add `data-keys="x"` inside a keyboard item, so `x` picks the row
 you're on), and the bar, from `BulkHelper`: `bulk_bar(delete:) { … }` around `bulk_menu`,
-`bulk_button`, `bulk_date`, `bulk_delete` and `bulk_copy(path, label:)` (copies the text `path` answers,
-fetched with the picked ids as `ids[]`; since 2.28). The bar shows while anything is picked, and each of
+`bulk_button`, `bulk_date` and `bulk_delete`. (`bulk_copy`, added in 2.28, is **deprecated in 2.29
+and removed in 3.0**: copying is a plugin's own controller, reading the picked boxes,
+`[data-bulk-target~='item']:checked`; My day's `my-day--copy-prompt` does it.) The bar shows while anything is picked, and each of
 its forms is sent with the picked ids as `ids[]`. For work, the core's own `bulk_todos_path`
 (PATCH `todo[status]`, `todo[owner_id]`, `todo[due_on]`, `todo[client_visible]`; DELETE) runs each
 todo's verbs and redirects back. Documented in 2.25.4, stable.
@@ -138,6 +143,50 @@ becomes the item's id) and, inside, a `data-drag-drop-item-container` the item i
 drop POSTs to that URL asking for a turbo stream; a container marked `data-drag-and-drop-sortable`
 also takes drops within itself and sends `before` (the id of the item it now sits before, blank at
 the end). Documented in 2.25.2, stable.
+
+## Plugin JavaScript
+
+| What | Since | Status |
+| --- | --- | --- |
+| `app/javascript/<key>/controllers/*_controller.js`: Stimulus controllers, loaded on every page | 2.29 | Stable |
+| `app/javascript/<key>/**/*.js`: modules, imported as `"<key>/…"` | 2.29 | Stable |
+| Importing `@hotwired/stimulus`, `@hotwired/turbo-rails`, `@rails/request.js` | 2.29 | Stable |
+| The core controllers listed below, used from a plugin's markup | 2.29 | Stable |
+
+A plugin ships its own JavaScript, in `app/javascript/<key>/` (its key, with underscores). The
+core pins that folder in the import map under the key (`config/importmap_plugins.rb`), serves it as
+assets (compiled on boot in production, like its stylesheets), and registers everything in
+`controllers/` with Stimulus under the key: `app/javascript/my_day/controllers/copy_prompt_controller.js`
+is `data-controller="my-day--copy-prompt"`. Nothing to register, and no way to name a controller
+outside the plugin's key, so two plugins, or a plugin and the core, can't collide.
+
+What a plugin's JavaScript may lean on: the three packages in the table (pinned by the core, kept
+across 2.x), its own modules, and these core controllers from its markup, with the data attributes
+their own pages use: `form` (`submit`, `debouncedSubmit`, `cancel`, `form-target="submit"`),
+`dialog` (`open`, `close`, `toggle`, `dialog-target="dialog"`), `poll` (`poll-interval-value`: reloads
+the nearest turbo frame), `copy-to-clipboard` (`content` or `url` value, `success` class), `upload`,
+`drag-and-drop` and `bulk` (above), `pagination` (a list that loads its next page as you scroll:
+`paginate(records)` in the controller, `with_automatic_pagination` around a cards grid, or
+`pagination_frame_id_for` and `table_next_page_row` with `data-controller="pagination"` on a table,
+as the core's indexes do), `date-field` (through `date_input`), and the keyboard's
+`data-keys` and `data-filter-target="item"` (Keyboard shortcuts in the core's AGENTS.md). Anything
+else of the core's (its other controllers, helpers in `app/javascript/helpers`, `window` globals,
+markup and class names) is not the contract and may change in a minor release.
+
+Good practice, because people will run your plugin on installs you'll never see:
+
+- One job per controller, small, named for what it does, with a comment saying so and what it reads.
+  Do in the browser only what has to happen there; the rest stays on the server, so agents (which
+  never run JavaScript) can do everything a person can.
+- Work without it where you can: a form that still submits, a link that still goes somewhere.
+- Listen on the controller's own element, not `document` or `window`; if you must (a `turbo:morph`),
+  remove the listener in `disconnect()`. Never `preventDefault` an event the core handles.
+- Turbo morphs pages in place: build what you add from server markup where you can, and expect
+  `connect()` / `disconnect()` to run again.
+- No inline `<script>`, no `eval`, no third-party CDNs. A library goes in `app/javascript/<key>/vendor/`
+  (its license with it) and is imported as `"<key>/vendor/…"`.
+- Nothing secret in the browser: keys and tokens stay on the server.
+- A plugin whose JavaScript needs 2.29 says `requires: ">= 2.29.0"`; on an older core it isn't loaded.
 
 ## Home, permissions and the nightly run
 
