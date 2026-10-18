@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_180000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -289,6 +289,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_140000) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "kind", default: "data", null: false
     t.index ["user_id"], name: "index_exports_on_user_id"
   end
 

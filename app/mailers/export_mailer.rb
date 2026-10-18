@@ -2,6 +2,6 @@
 class ExportMailer < ApplicationMailer
   def ready
     @export = params[:export]
-    mail to: @export.user.email_address, subject: "Your Runwell export is ready"
+    mail to: @export.user.email_address, subject: "Your Runwell #{@export.backup? ? "backup" : "export"} is ready"
   end
 end

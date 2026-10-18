@@ -1,11 +1,20 @@
 require "csv"
 
 # Everything this install holds, as one .zip an owner downloads (Settings > Export, or the
-# create_export tool): every table, the core's and installed plugins', as JSON and CSV, and every
-# stored file. Secrets stay out: sign-in sessions, tokens, OAuth grants and the search index are
-# skipped, and columns holding passwords, secrets, tokens or keys are left out of every table.
+# create_export tool). Two kinds:
+#
+# - data: every table, the core's and installed plugins', as JSON and CSV, and every stored file.
+#   Secrets stay out: sign-in sessions, tokens, OAuth grants and the search index are skipped, and
+#   columns holding passwords, secrets, tokens or keys are left out of every table.
+# - backup: the database itself (a consistent copy, SQLite's VACUUM INTO) and every stored file
+#   where Active Storage keeps it, with a manifest: what Runwell Go's Settings > Import (or
+#   `runwell import`) restores, people's passwords included. It holds every secret the install
+#   does, so treat it like the server's own disk.
+#
 # Built in a job (ExportJob); kept for a week.
 class Export < ApplicationRecord
+  KINDS = %w[data backup].freeze
+  BACKUP_FORMAT = "runwell-backup"
   KEEP_FOR = 7.days
   SKIPPED_TABLES = %w[
     schema_migrations ar_internal_metadata sessions access_tokens oauth_clients oauth_grants portal_sessions
@@ -17,18 +26,21 @@ class Export < ApplicationRecord
   belongs_to :user
   has_one_attached :archive
 
+  validates :kind, inclusion: { in: KINDS }
+
   scope :ordered, -> { order(created_at: :desc) }
   scope :expired, -> { where(created_at: ...KEEP_FOR.ago) }
 
   def self.expire_old! = expired.find_each(&:destroy!)
 
   def ready? = state == "ready"
-  def filename = "runwell-export-#{created_at.strftime("%Y-%m-%d-%H%M")}.zip"
+  def backup? = kind == "backup"
+  def filename = "runwell-#{backup? ? "backup" : "export"}-#{created_at.strftime("%Y-%m-%d-%H%M")}.zip"
 
   def build!
     update!(state: "working")
     Tempfile.create([ "runwell-export", ".zip" ], binmode: true) do |file|
-      counts = write_zip(file.path)
+      counts = backup? ? write_backup_zip(file.path) : write_zip(file.path)
       archive.attach(io: File.open(file.path), filename: filename, content_type: "application/zip")
       update!(state: "ready", completed_at: Time.current, **counts)
     end
@@ -39,6 +51,63 @@ class Export < ApplicationRecord
   end
 
   private
+    # The blobs a .zip carries: every stored file but exports' own archives.
+    def stored_blobs = ActiveStorage::Blob.joins(:attachments).where.not(active_storage_attachments: { record_type: "Export" }).distinct
+
+    # The backup: manifest.json, the database as production.sqlite3, and each file at
+    # storage/<key[0,2]>/<key[2,2]>/<key>, the Disk service's own layout, so restoring is putting
+    # them back where they were.
+    def write_backup_zip(path)
+      connection = self.class.connection
+      tables = (connection.tables - %w[schema_migrations ar_internal_metadata]).sort
+      rows = tables.sum { connection.select_value("SELECT COUNT(*) FROM #{connection.quote_table_name(it)}").to_i }
+      files = 0
+
+      Dir.mktmpdir("runwell-backup") do |dir|
+        database = File.join(dir, "production.sqlite3")
+        connection.execute("VACUUM INTO #{connection.quote(database)}")
+
+        Zip::OutputStream.open(path) do |zip|
+          zip.put_next_entry("README.txt")
+          zip.write(backup_readme)
+
+          zip.put_next_entry("production.sqlite3")
+          File.open(database, "rb") { |db| IO.copy_stream(db, zip) }
+
+          stored_blobs.find_each do |blob|
+            zip.put_next_entry("storage/#{blob.key[0, 2]}/#{blob.key[2, 2]}/#{blob.key}")
+            blob.download { |chunk| zip.write(chunk) }
+            files += 1
+          rescue ActiveStorage::FileNotFoundError
+            next
+          end
+
+          zip.put_next_entry("manifest.json")
+          zip.write(JSON.pretty_generate(format: BACKUP_FORMAT, format_version: 1, runwell_version: Runwell::VERSION,
+            created_at: Time.current.utc.iso8601, host: Runwell.url, by: user.email_address,
+            database: "production.sqlite3", tables: tables.size, rows: rows, files: files))
+        end
+      end
+
+      { tables_count: tables.size, rows_count: rows, files_count: files }
+    end
+
+    def backup_readme
+      <<~TEXT
+        #{Setting.current.brand_name}: a backup of Runwell, made #{Time.current.to_fs(:long)} by #{user.display_name}.
+
+        production.sqlite3   the database, every table, as it was (a consistent copy).
+        storage/             every stored file, where Active Storage keeps it (<key[0,2]>/<key[2,2]>/<key>).
+        manifest.json        what this is, and the version that made it.
+
+        Restore it in Runwell Go with Settings > Import, or `runwell import <this file>`. It replaces
+        everything there, and people sign in with their passwords from here.
+
+        It holds every secret this install does: passwords (hashed), sign-in sessions, tokens and
+        settings. Keep it as safe as the server itself.
+      TEXT
+    end
+
     def write_zip(path)
       connection = self.class.connection
       tables = (connection.tables - SKIPPED_TABLES).sort
@@ -60,7 +129,7 @@ class Export < ApplicationRecord
           zip.write(CSV.generate { |csv| csv << columns; records.each { |record| csv << record.values_at(*columns) } })
         end
 
-        ActiveStorage::Blob.joins(:attachments).where.not(active_storage_attachments: { record_type: "Export" }).distinct.find_each do |blob|
+        stored_blobs.find_each do |blob|
           zip.put_next_entry("files/#{blob.id}-#{blob.filename.sanitized}")
           blob.download { |chunk| zip.write(chunk) }
           files += 1

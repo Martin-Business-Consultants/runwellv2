@@ -1,5 +1,5 @@
 <% content_for :reason, "You asked for an export in Settings > Export." %>
-Your export is ready: <%= number_with_delimiter(@export.rows_count) %> records from <%= @export.tables_count %> tables, and <%= pluralize(@export.files_count, "file") %>, as one .zip.
+Your <%= @export.backup? ? "backup" : "export" %> is ready: <%= number_with_delimiter(@export.rows_count) %> records from <%= @export.tables_count %> tables, and <%= pluralize(@export.files_count, "file") %>, as one .zip.
 
 Download it (sign-in needed): <%= settings_exports_url %>
 

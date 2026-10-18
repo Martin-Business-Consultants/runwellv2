@@ -19,6 +19,23 @@
       </div>
     </section>
 
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Back up for Runwell Go</h2>
+      </header>
+      <p class="txt-small txt-subtle margin-none">
+        One .zip of the database itself and every file, to restore with Settings › Import in Runwell Go
+        (or <code>runwell import</code>). Everyone signs in there with the passwords they use here.
+        It holds every secret this install does, so keep it as safe as the server.
+        It’s built in the background and emailed to you when ready, then kept for a week.
+      </p>
+      <div class="section-actions">
+        <%= button_to settings_exports_path, params: { kind: "backup" }, class: "btn txt-small" do %>
+          <%= icon_tag "lock" %> <span>Make a backup</span>
+        <% end %>
+      </div>
+    </section>
+
     <% if @exports.any? %>
       <section class="settings__section flex flex-column gap-half">
         <header>
@@ -29,7 +46,7 @@
             <%# herb:key export.id %>
             <li class="flex align-center gap-half txt-small" data-filter-target="item">
               <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= l export.created_at, format: :long %></strong>
+                <strong><%= export.backup? ? "Backup" : "Export" %> · <%= l export.created_at, format: :long %></strong>
                 <div class="txt-x-small txt-subtle">
                   By <%= export.user.display_name %>
                   <% if export.ready? %>
