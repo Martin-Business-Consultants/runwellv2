@@ -354,20 +354,27 @@ def mcp_bridge(args)
   read_only = args.include?("--read-only")
   $stdout.sync = true
   read_tools = nil
+  forward = lambda do |message|
+    response = http(:post, mcp_url, token: config["token"], body: message)
+    response = http(:post, mcp_url, token: config["token"], body: message) if response.code == "401" && refresh!
+    response
+  end
   $stdin.each_line do |line|
     next if line.strip.empty?
     message = JSON.parse(line)
     name = message.dig("params", "name")
-    if read_only && message["method"] == "tools/call" && read_tools && !read_tools.include?(name)
-      $stdout.puts(JSON.generate(jsonrpc: "2.0", id: message["id"], error: { code: -32000, message: "runwell: #{name} changes things, and this connection is read-only" }))
-      next
+    # Read-only fails closed: a client that never lists tools here (Claude Code reuses a cached
+    # list) still has every call checked, against a list this bridge asks for itself.
+    if read_only && message["method"] == "tools/call"
+      read_tools ||= (JSON.parse(forward.({ jsonrpc: "2.0", id: "runwell-read-only", method: "tools/list" }).body.to_s).dig("result", "tools") rescue nil)
+        &.select { it.dig("annotations", "readOnlyHint") }&.map { it["name"] }
+      unless read_tools&.include?(name)
+        $stdout.puts(JSON.generate(jsonrpc: "2.0", id: message["id"], error: { code: -32000, message: "runwell: #{name} changes things, and this connection is read-only" }))
+        next
+      end
     end
 
-    response = http(:post, mcp_url, token: config["token"], body: message)
-    if response.code == "401" && refresh!
-      response = http(:post, mcp_url, token: config["token"], body: message)
-    end
-    body = response.body.to_s
+    body = forward.(message).body.to_s
     if read_only && message["method"] == "tools/list" && (parsed = JSON.parse(body) rescue nil)&.dig("result", "tools")
       parsed["result"]["tools"].select! { it.dig("annotations", "readOnlyHint") }
       read_tools = parsed["result"]["tools"].map { it["name"] }
