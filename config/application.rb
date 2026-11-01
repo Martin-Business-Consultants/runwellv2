@@ -1,4 +1,5 @@
 require_relative "boot"
+require_relative "install_keys" # Generates or reads this install's keys (production, when not set).
 
 require "rails/all"
 

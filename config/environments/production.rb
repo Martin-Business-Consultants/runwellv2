@@ -31,9 +31,10 @@ Rails.application.configure do
   # Behind a proxy that terminates TLS (Kamal's, a load balancer), the app never sees https
   # itself: ASSUME_SSL=true says to trust that it happened. The Cloudflare plugin does this per
   # request instead. FORCE_SSL=false drops the redirect and secure cookies for an install that
-  # really runs plain http (a LAN, a tunnel).
-  config.assume_ssl = ENV["ASSUME_SSL"] == "true"
+  # really runs plain http (a LAN, a tunnel). The Docker image always sits behind one (kamal-proxy,
+  # Thruster with TLS_DOMAIN), so there it's on unless ASSUME_SSL=false or FORCE_SSL=false.
   config.force_ssl = ENV.fetch("FORCE_SSL", "true") != "false"
+  config.assume_ssl = ENV.fetch("ASSUME_SSL") { (ENV["RUNWELL_RUNTIME"] == "docker" && config.force_ssl).to_s } == "true"
 
   # Skip http-to-https redirect for the default health check endpoint.
   config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }

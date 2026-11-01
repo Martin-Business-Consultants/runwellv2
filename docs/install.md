@@ -26,6 +26,16 @@ installs the published image (`ghcr.io/martin-business-consultants/runwell`, `.g
 the secrets below generated for it. Don't set `RAILS_MASTER_KEY`: `config/credentials.yml.enc` is encrypted
 with a key no install has, and setting one fails the boot.
 
+**The fewest settings.** A Docker install needs no variables at all, only the volume on
+`/rails/storage`. Its first boot writes its four keys to `keys.env` in that volume
+(`config/install_keys.rb`) and reads them from there after; any set in the environment win. Jobs run
+inside Puma and SSL is assumed (a proxy in front terminated it), and the address comes from the
+first visit, or Settings > Address. So deploying the repository or the image anywhere (Hoster
+without its template, Coolify, a bare `docker run -v runwell:/rails/storage -p 80:80`) works as it
+is. Copy `keys.env` somewhere safe once it exists: without its three encryption keys a restored
+database can't read the API keys and tokens stored in it. A database whose keys are lost isn't
+given new ones; the boot stops and names the missing keys.
+
 ## Without Docker
 
 From a checkout of a release tag:
@@ -106,7 +116,8 @@ one, once nothing reads them.
 
 ## Settings
 
-All in `.env` (or the deploy's `env:`). Only the secrets are required. Runwell's address can be
+All in `.env` (or the deploy's `env:`). None is required: the keys a production install needs
+and doesn't find are generated once into `RUNWELL_DATA_DIR/keys.env`. Runwell's address can be
 set in the app instead (**Settings > Address**, the first step on home), which wins over `APP_HOST`;
 until either is set, links use the address people were last seen using.
 
@@ -116,14 +127,14 @@ until either is set, links use the address people were last seen using.
 | `PORT` | Puma's port (Thruster fronts it on `HTTP_PORT`) | 3000 |
 | `RUNWELL_DATA_DIR` | Databases and uploaded files, together | `storage/` |
 | `RUNWELL_MAX_UPLOAD_MB` | The largest file a document may hold, shown on every drop box. Cloudflare's Free and Pro plans refuse bigger requests, so raise it only on an install not behind its proxy | 100 |
-| `SECRET_KEY_BASE` | Signs sessions and links | from `config/credentials.yml.enc` |
-| `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | from credentials |
+| `SECRET_KEY_BASE` | Signs sessions and links | `keys.env` in the data directory, made on first boot |
+| `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | `keys.env`, as above |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_DOMAIN`, `SMTP_STARTTLS`, `SMTP_TLS` | Outbound mail. Without `SMTP_ADDRESS` nothing is sent | none |
 | `TIME_ZONE` | The install's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, approvals and emails in it | `Eastern Time (US & Canada)` |
 | `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@` the address `>` |
-| `ASSUME_SSL` | Trust that a proxy terminated TLS | `false` |
+| `ASSUME_SSL` | Trust that a proxy terminated TLS | `true` in Docker (unless `FORCE_SSL=false`), else `false` |
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
-| `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process | set by the installer |
+| `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process | `true` in Docker, else set by the installer |
 | `RAILS_MAX_THREADS`, `RAILS_LOG_LEVEL` | Puma threads, log level | 3, `info` |
 | `RUNWELL_UPDATES` | How Settings > Updates updates: `in_place` (a Docker install updating itself), `local` (bin/update), `github` (the Deploy workflow) or `manual` (shows the command) | worked out from the install |
 | `RUNWELL_RELEASES_REPO` | Where releases are published | `Martin-Business-Consultants/runwellv2` |
