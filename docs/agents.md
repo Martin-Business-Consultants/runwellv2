@@ -21,7 +21,7 @@ and the ways in:
   `curl -fsSL https://your-install/install/cli | sh`, then `runwell login`.
 
 What the assistant does is recorded as your agent ("Ted's agent via Muse"), with your role
-exactly. Anything that reaches a client (sending an agreement, emailing a link, showing
+exactly. Anything that reaches a client (an email, showing
 something in the portal) is previewed first and done only once you agree.
 
 ## For clients
@@ -34,12 +34,9 @@ or from **Connected apps** in the portal:
 - One that asks for a key (Muse does) gets a personal key made on that page.
 - On the command line: `runwell login https://your-install --client`.
 
-Their assistant can see their engagements (each agreement exactly as it was sent), the work and
-documents shared with them, and their requests; it can send a request, and, for a contact who
-can approve, decide on an agreement after showing it to them and taking their typed name. The
-decision says it came through their assistant. Settings > Connected apps has the switch that
-keeps agreement decisions to the portal and emailed links instead. It never sees anything of
-another client's, or anything internal.
+Their assistant can see their engagements, the work and documents shared with them, and their
+requests, and it can send a request. It never sees anything of another client's, or anything
+internal.
 
 ## What makes it dependable
 
@@ -48,7 +45,7 @@ another client's, or anything internal.
   (`ambiguous`) for the assistant to ask which.
 - **Catching up.** `changes` answers what happened since the last look, with a cursor to pass
   back, so a morning routine hears each change once.
-- **One-tap starts.** Prompts like plan my day, standup, triage requests, a weekly client update
+- **One-tap starts.** Prompts like plan my day, standup, go through requests, a weekly client update
   and catch me up; clients get where are things at and ask for something.
 - **Records as context.** `runwell://engagements/WO-12`, `runwell://clients/Bloom` and the
   like can be attached to a conversation.

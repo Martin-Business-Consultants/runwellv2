@@ -13,10 +13,11 @@ class Settings::EmailsController < Settings::BaseController
     @setting = Setting.current
 
     attributes = params.expect(setting: %i[mail_from_name mail_from_email requests_email])
+    tab = ("receiving" if attributes.key?(:requests_email))
     if @setting.update(attributes)
-      redirect_to settings_email_path, notice: attributes.key?(:requests_email) ? "Requests by email go to #{@setting.requests_email || "nowhere yet"}." : "Mail now comes from #{@setting.mail_sender}."
+      redirect_to settings_email_path(tab: tab), notice: attributes.key?(:requests_email) ? "Requests by email go to #{@setting.requests_email || "nowhere yet"}." : "Mail now comes from #{@setting.mail_sender}."
     else
-      redirect_to settings_email_path, alert: @setting.errors.full_messages.to_sentence
+      redirect_to settings_email_path(tab: tab), alert: @setting.errors.full_messages.to_sentence
     end
   end
 end

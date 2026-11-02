@@ -1,8 +1,8 @@
-# What we agreed with a client: scope, price, approval and every change since.
-# The engagement is the container; each AgreementVersion is what the client saw.
+# Something we run for a client: a project, a work order or a service. It holds its sections
+# (ScopeItem) and its work, and is active until closed.
 class Engagement < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
-  include Refs, Agreement, CustomFields
+  include Refs, CustomFields
 
   mentionable_fields :description, :estimate_notes
 
@@ -11,9 +11,8 @@ class Engagement < ApplicationRecord
 
   belongs_to :client
   belongs_to :created_by, class_name: "User", optional: true
-  has_many :agreement_versions, -> { order(:number) }, dependent: :destroy, inverse_of: :engagement
+  has_many :scope_items, -> { order(:position) }, dependent: :destroy, inverse_of: :engagement
   has_many :todos, -> { order(:position) }, dependent: :destroy
-  has_many :commitments, dependent: :destroy
 
   validates :title, presence: true
   validates :label, inclusion: { in: LABELS }
@@ -23,80 +22,64 @@ class Engagement < ApplicationRecord
   scope :closed, -> { where.not(closed_at: nil) }
   scope :ordered, -> { order(created_at: :desc) }
 
-  # What a list shows, by derived state: "approved" (the default: underway, so agreed or
-  # internal, and still open), "open" (every open one), "draft", "sent", "changes_requested",
-  # "internal", "closed" or "all".
-  FILTERS = %w[approved open draft sent changes_requested internal closed all].freeze
+  # What a list shows: "open" (the default), "internal" (open, on the business itself), "closed"
+  # or "all".
+  FILTERS = %w[open internal closed all].freeze
 
-  # The derived state (Engagement#state), worked out by the database so a list can filter and count
-  # by it without loading every engagement and its agreements: the same rules, in the same order.
-  STATE_JOINS = <<~SQL.squish.freeze
-    INNER JOIN clients state_clients ON state_clients.id = engagements.client_id
-    LEFT JOIN agreement_versions latest_versions ON latest_versions.engagement_id = engagements.id
-      AND latest_versions.number = (SELECT MAX(av.number) FROM agreement_versions av WHERE av.engagement_id = engagements.id)
-    LEFT JOIN approvals latest_approvals ON latest_approvals.agreement_version_id = latest_versions.id
-  SQL
-  STATE_SQL = <<~SQL.squish.freeze
-    CASE
-      WHEN engagements.closed_at IS NOT NULL THEN 'closed'
-      WHEN state_clients.internal THEN 'internal'
-      WHEN latest_versions.id IS NULL OR latest_versions.sent_at IS NULL THEN 'draft'
-      WHEN latest_approvals.id IS NULL AND latest_versions.superseded_by_id IS NULL THEN 'sent'
-      WHEN latest_approvals.decision = 'changes_requested' THEN 'changes_requested'
-      ELSE 'approved'
-    END
-  SQL
-
-  def self.in_states(*states) = joins(STATE_JOINS).where(Arel.sql("(#{STATE_SQL}) IN (?)"), states.flatten)
-
-  def self.filtered(state: "approved", label: "all", scope: all)
-    state = FILTERS.include?(state) ? state : "approved"
+  def self.filtered(state: "open", label: "all", scope: all)
+    state = FILTERS.include?(state) ? state : "open"
     scope = scope.where(label: label) if LABELS.include?(label)
     scope = case state
     when "all" then scope
     when "closed" then scope.closed
-    when "open" then scope.open
-    when "approved" then scope.where(id: in_states("approved", "internal").select(:id))
-    else scope.where(id: in_states(state).select(:id))
+    when "internal" then scope.open.where(client: Client.where(internal: true))
+    else scope.open
     end
-    # Each row shows its state and agreed amount: versions and their decisions, for that page only.
-    scope.ordered.includes(:client, agreement_versions: :approval)
+    scope.ordered.includes(:client).select("engagements.*", "EXISTS (SELECT 1 FROM todos WHERE todos.engagement_id = engagements.id) AS has_work")
   end
 
-  # The filter's choices, each with how many it holds when `counts` (from filter_counts) is
-  # given, so a draft is never lost behind the Approved default.
+  # The filter's choices, each with how many it holds when `counts` (from filter_counts) is given.
   def self.filter_options(counts = nil)
-    options = [ [ "Active", "approved" ], [ "All open", "open" ], [ "Draft", "draft" ], [ "Sent", "sent" ],
-      [ "Changes requested", "changes_requested" ], [ "Internal", "internal" ], [ "Closed", "closed" ], [ "All", "all" ] ]
+    options = [ [ "Open", "open" ], [ "Internal", "internal" ], [ "Closed", "closed" ], [ "All", "all" ] ]
     counts ? options.map { |text, value| [ "#{text} (#{counts.fetch(value, 0)})", value ] } : options
   end
 
-  # How many engagements each filter choice would show, by derived state: one grouped query.
+  # How many engagements each filter choice would show: one grouped query.
   def self.filter_counts(label: "all", scope: all)
     scope = scope.where(label: label) if LABELS.include?(label)
-    tally = scope.joins(STATE_JOINS).group(Arel.sql(STATE_SQL)).count
-    open = tally.except("closed").values.sum
-    tally.merge("approved" => tally.fetch("approved", 0) + tally.fetch("internal", 0), "open" => open, "closed" => tally.fetch("closed", 0), "all" => open + tally.fetch("closed", 0))
+    tally = scope.joins(:client).group(Arel.sql("engagements.closed_at IS NULL"), "clients.internal").count
+    open = tally.select { |(open, _), _| open == 1 || open == true }.values.sum
+    internal = tally.select { |(open, internal), _| (open == 1 || open == true) && (internal == 1 || internal == true) }.values.sum
+    closed = tally.values.sum - open
+    { "open" => open, "internal" => internal, "closed" => closed, "all" => open + closed }
   end
 
-  # The list filter from params, reading the old status=open|closed too.
+  # The list filter from params. Links from before 3.0 named derived states (approved, draft,
+  # sent…): every one of those was open.
   def self.filter_from(params, key = :state)
-    params[key].presence_in(FILTERS) || params[:status].presence_in(%w[open closed]) || "approved"
+    value = params[key].presence || params[:status].presence
+    value.presence_in(FILTERS) || "open"
   end
+
+  # Active until closed. An internal client's engagements are your own projects.
+  STATES = %w[active closed].freeze
+
+  def state = closed? ? "closed" : "active"
+  def active? = !closed?
+  def internal? = client&.internal? || false
 
   def closed? = closed_at.present?
 
-  # Only a draft nobody was ever sent can be deleted; anything sent is history, so close it.
-  def deletable? = agreement_versions.none?(&:sent?)
+  # Deleted only while nothing hangs on it; once work is under way, close it (or erase it).
+  def deletable? = has_attribute?(:has_work) ? !has_work : todos.none?
   def recurring? = shape == "recurring"
 
-  # Gone for good: a closed engagement with its agreements (sent ones too), the client's decisions,
-  # work, commitments, notes, documents and history. The one exception to "sent is forever", for an
-  # owner (erase_engagements) who types the ref to mean it; the client keeps one event saying so.
+  # Gone for good: a closed engagement with its sections, work, notes, documents and history, for
+  # an owner (erase_engagements) who types the ref to mean it; the client keeps one event saying so.
   def erase!(actor: Current.user, source: Current.source || "app")
     raise ArgumentError, "close it first" unless closed?
 
-    summary = { ref: ref, title: title, versions: agreement_versions.count(&:sent?), todos: todos.count }
+    summary = { ref: ref, title: title, todos: todos.count }
     transaction do
       Current.set(erasing: true) { destroy! }
       client.record_event!("engagement.erased", actor: actor, source: source, payload: summary)
@@ -126,16 +109,16 @@ class Engagement < ApplicationRecord
   def state_label
     return (close_outcome.presence || "closed").humanize if closed?
 
-    state.humanize
+    "Active"
   end
 
   def label_name = Setting.current.label_name(label)
 
-  # Every file the client may see for this engagement: its own, its scope items', its
-  # work's, and the client's.
+  # Every file the client may see for this engagement: its own, its sections', its work's, and
+  # the client's.
   def client_documents
     Document.client_visible.where(documentable: self)
-      .or(Document.client_visible.where(documentable_type: "ScopeItem", documentable_id: agreement_versions.select(:id).then { ScopeItem.where(agreement_version_id: it).select(:id) }))
+      .or(Document.client_visible.where(documentable_type: "ScopeItem", documentable_id: scope_items.select(:id)))
       .or(Document.client_visible.where(documentable_type: "Todo", documentable_id: todos.client_visible.select(:id)))
       .or(Document.client_visible.where(documentable: client))
       .recent.includes(file_attachment: :blob)

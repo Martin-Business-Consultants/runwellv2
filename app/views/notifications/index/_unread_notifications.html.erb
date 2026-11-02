@@ -12,9 +12,6 @@
   <% end %>
 
   <div id="notifications_list">
-    <% unread.each do |notification| %>
-      <%# herb:key notification.id %>
-      <%= render "notifications/notification", notification: notification %>
-    <% end %>
+    <%= render partial: "notifications/notification", collection: unread, as: :notification %>
   </div>
 </section>

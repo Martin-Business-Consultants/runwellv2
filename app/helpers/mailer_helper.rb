@@ -6,7 +6,7 @@
 #   <% content_for :reason, "Why this address got it" %>
 #   <%= mail_heading "Review the website rebuild" %>
 #   <p>…</p>
-#   <%= mail_button "Review and approve", approval_url(token) %>
+#   <%= mail_button "Open the portal", portal_root_url %>
 #
 # Plugins' mailers inherit the layout and use the same helpers.
 module MailerHelper

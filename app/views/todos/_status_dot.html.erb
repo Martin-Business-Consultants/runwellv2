@@ -19,8 +19,7 @@
     <span class="for-screen-reader">Status of <%= todo.title %>: <%= label %>. Change it</span>
   </button>
 
-  <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Status of <%= todo.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
-    <strong class="popup__title pad-inline-half">Status</strong>
+  <%= popup_menu label: "Status of #{todo.title}", title: "Status", fixed: true do %>
     <%= form_with url: todo_path(todo), method: :patch, class: "full-width" do %>
       <input type="hidden" name="inline" value="status">
       <% if labelled %>
@@ -28,5 +27,5 @@
       <% end %>
       <ul class="popup__list" role="group" data-picker-target="list"></ul>
     <% end %>
-  </dialog>
+  <% end %>
 </div>

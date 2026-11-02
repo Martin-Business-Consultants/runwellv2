@@ -1,0 +1,43 @@
+<% @page_title = "Roles" %>
+<%= render "settings/header", current: :roles %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <section class="settings__section flex flex-column gap">
+      <header>
+        <h2 class="divider">What each role can do</h2>
+      </header>
+      <dl class="people__roles txt-small margin-none">
+        <% User::ROLE_DESCRIPTIONS.each do |role, description| %>
+          <%# herb:key role %>
+          <dt class="font-weight-bold"><%= role.capitalize %></dt>
+          <dd class="txt-subtle margin-none"><%= description %></dd>
+        <% end %>
+      </dl>
+      <table class="data-table people__permissions txt-small">
+        <thead>
+          <tr><th>Permission</th><% User::ROLES.each do |role| %><%# herb:key role %><th class="txt-align-center"><%= role.capitalize %></th><% end %></tr>
+        </thead>
+        <tbody>
+          <% User.permissions.each do |key, permission| %>
+            <%# herb:key key %>
+            <tr>
+              <td><%= permission[:name] %></td>
+              <% User::ROLES.each do |role| %>
+                <%# herb:key role %>
+                <td class="txt-align-center">
+                  <% if permission[:roles].include?(role) %>
+                    <%= icon_tag "check" %><span class="for-screen-reader">Yes</span>
+                  <% else %>
+                    <span class="txt-subtle">—</span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p class="txt-x-small txt-subtle margin-none">Everyone can work on <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, notes and documents. Plugins that are on add their own permissions here.</p>
+    </section>
+  </div>
+</section>

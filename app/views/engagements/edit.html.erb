@@ -20,19 +20,8 @@
       <dl class="record-facts">
         <dt>Status</dt><dd><%= status_tag @engagement.state_label, highlight: @engagement.active? %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
-        <% unless @engagement.internal? %>
-          <dt>Versions</dt><dd><%= @engagement.agreement_versions.count %></dd>
-        <% end %>
         <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
-        <% unless @engagement.internal? %>
-          <% if priced_engagement?(@engagement) %>
-            <dt>Agreed</dt><dd><%= engagement_amount(@engagement) %></dd>
-          <% end %>
-        <% end %>
       </dl>
-      <% unless @engagement.internal? %>
-        <p class="txt-x-small txt-subtle margin-none">Scope and prices change on the agreement, not here: a sent version never changes.</p>
-      <% end %>
     </section>
   </aside>
 </section>

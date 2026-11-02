@@ -20,12 +20,11 @@ module Agent
 
     # The name columns each kind of record is called by.
     FIELDS = { "Client" => %w[name], "Contact" => %w[name email], "User" => %w[name email_address],
-               "Engagement" => %w[title], "Todo" => %w[title], "Request" => %w[subject],
-               "Commitment" => %w[description], "ScopeItem" => %w[description] }.freeze
+               "Engagement" => %w[title], "Todo" => %w[title], "ScopeItem" => %w[description] }.freeze
 
     # Parameters that hold an id, and the kind of record they name.
     PARAMS = { "client_id" => "Client", "contact_id" => "Contact", "engagement_id" => "Engagement", "owner_id" => "User",
-               "user_id" => "User", "todo_id" => "Todo", "scope_item_id" => "ScopeItem", "request_id" => "Request" }.freeze
+               "user_id" => "User", "todo_id" => "Todo", "scope_item_id" => "ScopeItem" }.freeze
 
     REF = /\A[A-Za-z]+-\d+\z/
 
@@ -79,8 +78,7 @@ module Agent
         def within(client, type)
           case type
           when "Engagement" then client.engagements
-          when "Todo" then Todo.client_visible.joins(:engagement).where(engagements: { client_id: client.id })
-          when "Request" then client.requests
+          when "Todo" then Todo.client_visible.where(client_id: client.id)
           end
         end
 

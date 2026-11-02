@@ -1,6 +1,5 @@
 <%# locals: () %>
-<%# Every key the keyboard controller answers to, grouped. Shown in the ? sheet and on
-    Settings > Help. Letters act outside inputs; a pair like g c is pressed in sequence. %>
+<%# Every key the keyboard controller answers to, grouped. Shown in the ? sheet. Letters act outside inputs; a pair like g c is pressed in sequence. %>
 <div class="shortcuts__groups txt-small txt-align-start">
   <section>
     <h3 class="txt-medium font-weight-bold margin-block-end-half">Move around</h3>
@@ -24,8 +23,7 @@
       <dt><kbd>g</kbd><kbd>e</kbd></dt><dd><%= term(:engagement, count: 2) %></dd>
       <dt><kbd>g</kbd><kbd>w</kbd></dt><dd><%= term(:work) %></dd>
       <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:work) %> board</dd>
-      <dt><kbd>g</kbd><kbd>m</kbd></dt><dd>Commitments</dd>
-      <dt><kbd>g</kbd><kbd>r</kbd></dt><dd>Requests</dd>
+      <dt><kbd>g</kbd><kbd>u</kbd></dt><dd>Users</dd>
       <% nav_plugin_items.values.each_with_index do |(label, _path), index| %>
         <%# herb:key label %>
         <dt><kbd>g</kbd><kbd><%= index + 1 %></kbd></dt><dd><%= label %></dd>
@@ -42,9 +40,8 @@
       <dt><kbd>v</kbd></dt><dd>Switch cards, table and board</dd>
       <dt><kbd>/</kbd></dt><dd>Filter what’s on the page</dd>
       <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
-      <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:commitment).downcase %> or time</dd>
-      <dt><kbd>p</kbd></dt><dd>Add a <%= term(:commitment).downcase %> (a promise with a date)</dd>
-      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add <%= term(:work).downcase %> to any <%= term(:engagement).downcase %></dd>
+      <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:work).downcase %> or time</dd>
+      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add <%= term(:work).downcase %> to any <%= term(:engagement).downcase %> or <%= term(:client).downcase %></dd>
       <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
         <%# herb:key shortcut.keys %>
         <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>

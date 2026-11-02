@@ -9,7 +9,6 @@ module QuickActionsHelper
       when "engagements" then Engagement.find_by(ref: params[:ref].to_s.upcase) if params[:ref]
       when "scope_items" then ScopeItem.find_by(id: params[:id])
       when "todos" then Todo.find_by(id: params[:id])
-      when "requests" then Request.find_by(id: params[:id])
       end
   end
 

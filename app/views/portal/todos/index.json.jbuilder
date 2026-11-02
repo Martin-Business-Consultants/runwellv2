@@ -3,5 +3,5 @@ json.work @todos do |todo|
   json.title todo.title
   json.status todo.status
   json.due_on todo.due_on
-  json.engagement portal_agent_ref(todo.engagement)
+  json.engagement(todo.engagement && portal_agent_ref(todo.engagement))
 end

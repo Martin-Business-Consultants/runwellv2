@@ -34,8 +34,8 @@ module NotificationsHelper
   def notification_target_label(record)
     case record
     when Engagement then [ record.ref, record.client.name ]
-    when Todo, AgreementVersion, ScopeItem then [ record.engagement.ref, record.engagement.title ]
-    when Request then [ "Request", record.subject ]
+    when Todo then record.engagement ? [ record.engagement.ref, record.engagement.title ] : [ Setting.current.term(:work), record.client&.name || record.title ]
+    when ScopeItem then [ record.engagement.ref, record.engagement.title ]
     when Note then notification_target_label(record.subject)
     when Client then [ "Client", record.name ]
     else [ record.model_name.human, record.try(:search_title) ]

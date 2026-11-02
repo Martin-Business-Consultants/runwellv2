@@ -30,7 +30,7 @@
     <span class="record-form__label">Description</span>
     <%= rich_text_field form, :description, staff: true %>
     <% unless engagement.internal? %>
-      <span class="txt-x-small txt-subtle">Shown to the client on the agreement.</span>
+      <span class="txt-x-small txt-subtle">Shown to the <%= term(:client).downcase %> in the portal.</span>
     <% end %>
   </label>
 

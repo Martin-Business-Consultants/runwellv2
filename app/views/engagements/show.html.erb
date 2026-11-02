@@ -1,14 +1,11 @@
 <% @page_title = "#{@engagement.ref} #{@engagement.title}" %>
-<%# An internal project has no agreement, so no Agreement tab. %>
 <% tabs = [
-     (record_tab("agreement", "Agreement", count: @engagement.agreement_versions.count) unless @engagement.internal?),
      record_tab("work", term(:work), count: @engagement.todos.open.count),
-     record_tab("commitments", term(:commitment, count: 2), count: @engagement.commitments.open.count),
      record_tab("notes", "Notes", count: @engagement.notes.count),
      record_tab("documents", "Documents", count: @engagement.documents.count),
      record_tab("history", "History")
    ].compact + plugin_record_tabs(:engagement_panel) %>
-<% tab = current_record_tab(tabs, @engagement.agreed_items.any? || @engagement.internal? ? "work" : "agreement") %>
+<% tab = current_record_tab(tabs, "work") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
 <% content_for :header do %>
@@ -31,11 +28,10 @@
       <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
       <%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %>
       <span><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></span>
-      <% unless @engagement.internal? %>
-        <% if priced_engagement?(@engagement) %>
-          <span>Agreed <strong><%= money @engagement.agreed_amount_cents %></strong><%= " / period" if @engagement.recurring? %></span>
-        <% end %>
+      <% if @engagement.internal? %>
+        <span>Internal</span>
       <% end %>
+      <%= plugin_slots(:engagement_meta, engagement: @engagement) %>
       <% if @engagement.closed? %>
         <span><%= @engagement.state_label %> <%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></span>
       <% end %>
@@ -60,12 +56,8 @@
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
         <div class="record-tabs__panel">
           <% case tab %>
-          <% when "agreement" %>
-            <%= render "agreement_versions/section", engagement: @engagement %>
           <% when "work" %>
             <%= render "todos/section", engagement: @engagement, state: @work_state, item: @work_item %>
-          <% when "commitments" %>
-            <%= render "commitments/section", subject: @engagement %>
           <% when "notes" %>
             <%= render "notes/section", subject: @engagement %>
           <% when "documents" %>
@@ -85,6 +77,7 @@
 
     <%= render "layouts/shared/sidebar_toggle" %>
     <%= render "engagements/sidebar", engagement: @engagement, current: (tab == "work" ? (@work_item || "all") : nil) %>
+    <%= plugin_slots(:engagement_aside, engagement: @engagement) %>
 
     <% if can?(:close_engagements) %>
       <section class="settings__section">

@@ -16,9 +16,7 @@ module AgentHelper
 
   def agent_label(record)
     case record
-    when AgreementVersion then "#{record.engagement.ref} #{record.label}"
     when ScopeItem then record.description
-    when Question then record.text
     when User then record.display_name
     else record.try(:search_title) || record.try(:label) || record.try(:name) || "#{record.class.name} #{record.id}"
     end
@@ -26,8 +24,7 @@ module AgentHelper
 
   def agent_url(record)
     path = case record
-    when Question then root_path
-    when User then nil
+    when User then (user_path(record) unless record.agent?)
     else search_result_path(record)
     end
     request.base_url + path if path

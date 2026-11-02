@@ -3,7 +3,7 @@
     Each scope item's "done of total" always counts all of its work. item: one scope item's work
     alone (an id, or "other" for work outside the scope), picked in the sidebar's scope list. %>
 <% state ||= "open" %>
-<% picked = item.is_a?(Integer) ? ScopeItem.joins(:agreement_version).where(agreement_versions: { engagement_id: engagement.id }).find_by(id: item) : nil %>
+<% picked = item.is_a?(Integer) ? engagement.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
 <section class="settings__section" id="work">
   <header>
@@ -12,12 +12,12 @@
           options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
   </header>
 
-  <% todos = engagement.todos.includes(:owner, :scope_item, { assignments: :user }, engagement: :client).order(:due_on, :position) %>
+  <% todos = engagement.todos.includes(:owner, :scope_item, :client, { assignments: :user }, :engagement).order(:due_on, :position) %>
   <% todos = todos.where(scope_item: picked) if focus %>
   <% all_groups = todos.group_by(&:scope_item) %>
   <% shown = todos.select { |todo| state == "all" || (state == "done") == (todo.status == "done") } %>
   <% groups = shown.group_by(&:scope_item) %>
-  <% items = (engagement.agreed_items + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
+  <% items = (engagement.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
 
   <% if focus %>
     <% done = todos.count { |todo| todo.status == "done" } %>
@@ -34,8 +34,8 @@
     </div>
   <% end %>
 
-  <%# One list of groups, tight together. A scope item whose only work is named the same (the usual
-      case: approval makes one todo per scope item) shows just that row, not the name twice. %>
+  <%# One list of groups, tight together. A section whose only work is named the same shows just
+      that row, not the name twice. %>
   <div class="work-groups">
   <% items.each do |item| %>
     <%# herb:key item.id %>
@@ -52,10 +52,7 @@
         </div>
       <% end %>
       <ul class="settings__scrollable-list">
-        <% group.each do |todo| %>
-          <%# herb:key todo.id %>
-          <%= render "todos/todo", todo: todo %>
-        <% end %>
+        <%= render partial: "todos/todo", collection: group, as: :todo %>
       </ul>
     </div>
   <% end %>
@@ -72,10 +69,7 @@
       </div>
       <% end %>
       <ul class="settings__scrollable-list">
-        <% other.each do |todo| %>
-          <%# herb:key todo.id %>
-          <%= render "todos/todo", todo: todo %>
-        <% end %>
+        <%= render partial: "todos/todo", collection: other, as: :todo %>
       </ul>
     </div>
   <% end %>
@@ -85,7 +79,7 @@
     <% if focus %>
       <p class="txt-subtle txt-small margin-none">No <%= term(:work).downcase %> here yet. Add the first below.</p>
     <% else %>
-      <p class="txt-subtle txt-small margin-none">No work yet. Approving the agreement adds a todo per scope item.</p>
+      <p class="txt-subtle txt-small margin-none">No <%= term(:work).downcase %> yet. Add the first below.</p>
     <% end %>
   <% elsif shown.none? %>
     <p class="txt-subtle txt-small margin-none">

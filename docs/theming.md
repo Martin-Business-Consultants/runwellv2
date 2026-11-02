@@ -37,13 +37,13 @@ for custom CSS when those choices aren't enough to make Runwell look like your o
 | Token | What it colors | Default (light) |
 | --- | --- | --- |
 | `--lch-canvas` | The page and panels | `100% 0 0` |
-| `--lch-ink-darkest` | Body text, headings | `24% 0.012 275` |
-| `--lch-ink-darker` | Secondary text | `38% 0.012 275` |
-| `--lch-ink-dark` | Muted text | `52% 0.01 275` |
-| `--lch-ink-medium` | Placeholder text, icons | `64% 0.008 275` |
-| `--lch-ink-light` | Input borders | `86% 0.005 275` |
-| `--lch-ink-lighter` | Hairlines, dividers | `92.5% 0.003 275` |
-| `--lch-ink-lightest` | Faint fills, hover rows | `97% 0.002 275` |
+| `--lch-ink-darkest` | Body text, headings | `14.1% 0.005 285.8` |
+| `--lch-ink-darker` | Secondary text | `37% 0.013 285.8` |
+| `--lch-ink-dark` | Muted text | `55.2% 0.016 285.9` |
+| `--lch-ink-medium` | Placeholder text, icons | `64% 0.015 286` |
+| `--lch-ink-light` | Input borders | `87.1% 0.006 286.3` |
+| `--lch-ink-lighter` | Hairlines, dividers | `92% 0.004 286.3` |
+| `--lch-ink-lightest` | Faint fills, hover rows | `96.7% 0.001 286.4` |
 | `--lch-ink-inverted` | Text on the accent | `100% 0 0` |
 | `--lch-accent` | Links, buttons, focus, the current item | `55% 0.16 277` |
 | `--lch-accent-light` | Strong selection | `84% 0.06 277` |
@@ -70,7 +70,7 @@ Families for status colors (`red`, `yellow`, `lime`, `green`, `aqua`, `blue`, `p
 | Token | What it sets | Default |
 | --- | --- | --- |
 | `--radius-scale` | Every container's corners, as a multiple | `1` |
-| `--radius-control` | Buttons, inputs, tags, toggles | `0.4rem` |
+| `--radius-control` | Buttons, inputs, tags, toggles | `0.5rem` |
 | `--radius-pill` | Pill shapes | `99rem` |
 | `--inline-space` | Horizontal rhythm | `1ch` |
 | `--block-space` | Vertical rhythm | `1rem` |

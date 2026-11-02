@@ -14,12 +14,11 @@
             <%# herb:key request_record.id %>
             <li class="flex align-center gap-half">
               <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= request_record.subject %></strong>
-                <div class="txt-x-small txt-subtle"><%= l request_record.received_at.in_time_zone, format: :long %></div>
+                <strong><%= request_record.title %></strong>
+                <div class="txt-x-small txt-subtle"><%= l request_record.created_at.in_time_zone, format: :long %></div>
               </div>
               <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <% label = request_record.status == "open" ? "Open" : (request_record.status == "promoted" ? "Taken on" : "Closed") %>
-              <%= status_tag label, highlight: request_record.status == "promoted" %>
+              <%= status_tag portal_request_status(request_record), highlight: request_record.status == "done" %>
             </li>
           <% end %>
         </ul>

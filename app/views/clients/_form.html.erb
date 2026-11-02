@@ -17,21 +17,12 @@
     <label class="record-form__field">
       <span class="record-form__label">Time zone</span>
       <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" }, class: "input input--select full-width" %>
-      <span class="record-form__hint">Their portal, approval pages and emails show times in it.</span>
+      <span class="record-form__hint">Their portal and emails show times in it.</span>
     </label>
   </div>
 
   <% unless internal_aside %>
-    <div class="record-form__toggle">
-      <div class="record-form__toggle-text">
-        <%= form.label :internal, "Internal", class: "record-form__label" %>
-        <span class="record-form__hint">This is us. Its engagements are our own projects, with no agreement to send.</span>
-      </div>
-      <label class="switch flex-item-no-shrink">
-        <%= form.check_box :internal, class: "switch__input" %>
-        <span class="switch__btn"></span>
-      </label>
-    </div>
+    <%= switch_field form, :internal, label: "Internal", hint: "This is us. Its engagements are our own projects." %>
   <% end %>
 
   <%= custom_field_inputs form, client %>

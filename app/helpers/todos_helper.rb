@@ -71,10 +71,24 @@ module TodosHelper
 
   def todo_details(todo, with_engagement: false)
     [
-      (todo.engagement.ref if with_engagement),
-      (todo.engagement.client.name if with_engagement),
+      (todo.engagement&.ref if with_engagement),
+      (todo.client&.name if with_engagement),
       (l(todo.due_on, format: :short) if todo.due_on),
       ("Internal" unless todo.client_visible?)
     ].compact.join(" · ")
+  end
+
+  # Where a piece of work sits, for a card or a row: its engagement's ref, else nothing.
+  def todo_ref(todo) = todo.engagement&.ref
+
+  # Its client's name, or that nobody matched (an email from an unknown sender).
+  def todo_client_name(todo) = todo.client&.name || "No #{term(:client).downcase} matched"
+
+  # How far a client's request has got, in the portal's words.
+  def portal_request_status(todo)
+    if todo.request? then "Waiting"
+    elsif todo.status == "done" then "Done"
+    else "Taken on"
+    end
   end
 end

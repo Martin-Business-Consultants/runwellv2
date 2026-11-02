@@ -1,9 +1,9 @@
-# Deleting a closed engagement for good, agreements and decisions included (Engagement#erase!):
+# Deleting a closed engagement for good, its work and history included (Engagement#erase!):
 # owners only, typing its ref to confirm.
 class Engagements::ErasuresController < ApplicationController
   require_permission :erase_engagements
-  agent_tool :erase_engagement, on: :create, title: "Delete a closed engagement permanently, with its agreements",
-    description: "Only a closed engagement. Removes it with its agreements (sent ones too), the client's decisions, work, commitments, notes, documents and history; the client keeps one event. confirm_ref must be the engagement's ref. Can't be undone: ask the person first.",
+  agent_tool :erase_engagement, on: :create, title: "Delete a closed engagement permanently",
+    description: "Only a closed engagement. Removes it with its sections, work, notes, documents and history (and whatever plugins keep on it); the client keeps one event. confirm_ref must be the engagement's ref. Can't be undone: ask the person first.",
     params: { confirm_ref: "string!" }, confirm: "It deletes the engagement and the record of what the client agreed to, for good."
 
   def create
@@ -14,6 +14,6 @@ class Engagements::ErasuresController < ApplicationController
     end
 
     engagement.erase!
-    redirect_to engagement.client, notice: "#{engagement.ref} #{engagement.title} is deleted, with its agreements and history."
+    redirect_to engagement.client, notice: "#{engagement.ref} #{engagement.title} is deleted, with its work and history."
   end
 end

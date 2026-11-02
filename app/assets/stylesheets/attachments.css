@@ -19,6 +19,7 @@
     textarea {
       --input-border-radius: calc(0.3em * var(--radius-scale, 1));
       --input-border-size: 0;
+      --input-shadow: none;
       --input-padding: 0;
 
       background-color: var(--input-background, transparent);

@@ -1,18 +1,18 @@
 <%# locals: (current:) %>
 <%# The Settings sidebar, beside every settings page (rendered through settings/header, which the
     application layout places): the install's own settings, plugins with each plugin's page
-    nested under them, people and apps, updates, and help with its pages. Only what the person may change. %>
+    nested under them, people and apps, and updates. Only what the person may change. %>
 <nav class="settings-nav" aria-label="Settings">
   <% if can?(:manage_settings) %>
     <p class="settings-nav__heading">Workspace</p>
     <ul class="settings-nav__list">
+      <li><%= settings_nav_link "Setup", settings_setup_path, icon: "check-circle", current: current == :setup %></li>
       <li><%= settings_nav_link "Address", settings_address_path, icon: "globe", current: current == :address %></li>
       <li><%= settings_nav_link "Appearance", settings_appearance_path, icon: "art", current: current == :appearance %></li>
       <li><%= settings_nav_link "Names", settings_names_path, icon: "rename", current: current == :names %></li>
       <li><%= settings_nav_link "Fields", settings_fields_path, icon: "tag-outline", current: current == :fields %></li>
       <li><%= settings_nav_link "Views", settings_views_path, icon: "grid", current: current == :views %></li>
       <li><%= settings_nav_link "Email", settings_email_path, icon: "email", current: current == :email %></li>
-      <li><%= settings_nav_link "Sign-in", settings_sign_in_path, icon: "lock", current: current == :sign_in %></li>
       <li><%= settings_nav_link "Webhooks", settings_webhooks_path, icon: "bolt", current: current == :webhooks %></li>
     </ul>
 
@@ -36,10 +36,11 @@
   <p class="settings-nav__heading">People</p>
   <ul class="settings-nav__list">
     <li><%= settings_nav_link "Your account", settings_account_path, icon: "person", current: current == :account %></li>
-    <% if can?(:manage_people) %>
-      <li><%= settings_nav_link "People", settings_people_path, icon: "everyone", current: current == :people %></li>
-    <% end %>
     <li><%= settings_nav_link "Connected apps", settings_connected_apps_path, icon: "ai", current: current == :connected_apps %></li>
+    <li><%= settings_nav_link "Roles", settings_roles_path, icon: "person", current: current == :roles %></li>
+    <% if can?(:manage_people) %>
+      <li><%= settings_nav_link "Security", settings_security_path, icon: "lock", current: current == :security %></li>
+    <% end %>
   </ul>
 
   <p class="settings-nav__heading">Runwell</p>
@@ -49,13 +50,5 @@
       <li><%= settings_nav_link "Export", settings_exports_path, icon: "share", current: current == :export %></li>
       <li><%= settings_nav_link "Audit log", settings_audit_log_path, icon: "history", current: current == :audit_log %></li>
     <% end %>
-    <li>
-      <%= settings_nav_link "Help", settings_help_path, icon: "lifebuoy", current: false %>
-      <ul class="settings-nav__list settings-nav__list--nested">
-        <li><%= settings_nav_link "Overview", settings_help_path, current: current == :help %></li>
-        <li><%= settings_nav_link "Connecting an MCP", settings_help_mcp_path, current: current == :help_mcp %></li>
-        <li><%= settings_nav_link "Using with AI", settings_help_ai_path, current: current == :help_ai %></li>
-      </ul>
-    </li>
   </ul>
 </nav>

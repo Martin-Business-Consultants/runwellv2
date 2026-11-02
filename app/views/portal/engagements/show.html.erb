@@ -11,9 +11,6 @@
       <div class="flex flex-wrap align-center gap">
         <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
         <span class="txt-small txt-subtle"><%= @engagement.label_name %></span>
-        <% if priced_engagement?(@engagement) %>
-          <strong class="txt-small">Agreed <%= engagement_amount(@engagement, per: " per period") %></strong>
-        <% end %>
       </div>
 
       <% if @engagement.description.present? %>
@@ -22,29 +19,12 @@
       <%= render "custom_fields/values", record: @engagement, client: true %>
     </section>
 
-    <% if @pending %>
-      <section class="settings__section">
-        <header>
-          <h2 class="divider">Awaiting your decision</h2>
-        </header>
-
-        <%= render "approvals/snapshot", version: @pending, compact: true %>
-
-        <% if current_contact.can_approve? %>
-          <p class="txt-small txt-subtle margin-none">Review the terms above. Approving records your name and the time.</p>
-          <%= render "approvals/decision_form", url: portal_engagement_approvals_path(@engagement) %>
-        <% else %>
-          <p class="txt-small txt-subtle margin-none">Someone at your company who can approve agreements needs to decide on this.</p>
-        <% end %>
-      </section>
-    <% end %>
-
     <section class="settings__section">
       <header>
-        <h2 class="divider">Scope in force</h2>
+        <h2 class="divider"><%= term(:scope_item, count: 2) %></h2>
       </header>
 
-      <% items = @engagement.agreed_items %>
+      <% items = @engagement.scope_items %>
       <% if items.any? %>
         <ul class="settings__scrollable-list">
           <% items.each do |item| %>
@@ -52,38 +32,12 @@
             <li class="flex align-center gap-half">
               <div class="txt-align-start overflow-ellipsis min-width"><%= item.description %></div>
               <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <% if priced_engagement?(@engagement) %>
-                <span class="txt-small txt-nowrap"><%= money item.price_cents %></span>
-              <% end %>
               <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="txt-subtle txt-small margin-none">Nothing approved yet.</p>
-      <% end %>
-    </section>
-
-    <section class="settings__section">
-      <header>
-        <h2 class="divider">Agreement history</h2>
-      </header>
-
-      <% versions = @engagement.agreement_versions.select(&:sent?).reverse %>
-      <% if versions.any? %>
-        <div class="flex flex-column gap">
-          <% versions.each do |version| %>
-            <%# herb:key version.id %>
-            <div class="fill-shade border-radius pad flex flex-column gap-half">
-              <%= render "approvals/snapshot", version: version %>
-              <% if version.approval %>
-                <%= render "approvals/record", approval: version.approval %>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-      <% else %>
-        <p class="txt-subtle txt-small margin-none">Nothing has been sent yet.</p>
+        <p class="txt-subtle txt-small margin-none">Nothing listed yet.</p>
       <% end %>
     </section>
   </div>
@@ -117,33 +71,6 @@
     </section>
 
     <%= render "portal/engagements/documents", documents: @engagement.client_documents %>
-
-    <section class="settings__section">
-      <header>
-        <h2 class="divider">Commitments</h2>
-      </header>
-
-      <% commitments = @engagement.commitments.open.ordered.includes(:user, :contact) %>
-      <% if commitments.any? %>
-        <ul class="settings__scrollable-list">
-          <% commitments.each do |commitment| %>
-            <%# herb:key commitment.id %>
-            <li class="flex align-center gap-half">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= commitment.description %></strong>
-                <div class="txt-x-small txt-subtle"><%= commitment.owner_name %> · due <%= l commitment.due_on, format: :short %></div>
-              </div>
-              <% if commitment.overdue? %>
-                <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-                <%= status_tag "Overdue", highlight: true %>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="txt-subtle txt-small margin-none">No open commitments.</p>
-      <% end %>
-    </section>
 
     <%= plugin_slots(:portal_engagement_panel, engagement: @engagement) %>
   </div>

@@ -117,7 +117,7 @@ module Agent
             Resolver.id_for(type, value, client: client_scope)
           elsif Resolver::PARAMS[key] == "User" && value.downcase.in?(%w[me none])
             value.downcase == "me" ? (access_token&.user&.id || value) : ""
-          elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Engagement Todo Request]))
+          elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Engagement Todo]))
             Resolver.id_for(type, value, client: client_scope)
           elsif key == "record" && (match = value.match(/\A(\w+):(.+)\z/)) && match[1].in?(Resolver.types) && !Resolver.id?(match[2])
             "#{match[1]}:#{Resolver.resolve(match[1], match[2], client: client_scope).id}"

@@ -9,14 +9,11 @@ en:
       one: "Engagement"
       other: "Engagements"
     scope_item:
-      one: "Scope item"
-      other: "Scope items"
+      one: "Section"
+      other: "Sections"
     work:
       one: "Work"
       other: "Work"
-    commitment:
-      one: "Commitment"
-      other: "Commitments"
     labels:
       project:
         one: "Project"

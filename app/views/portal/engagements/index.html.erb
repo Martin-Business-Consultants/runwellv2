@@ -8,7 +8,7 @@
   <section class="settings">
     <div class="settings__panel panel shadow">
       <section class="settings__section">
-        <p class="txt-small txt-subtle margin-none">Everything we have agreed with you, and where each one stands.</p>
+        <p class="txt-small txt-subtle margin-none">Everything we run for you, and where each one stands.</p>
         <ul class="settings__scrollable-list">
           <% @engagements.each do |engagement| %>
             <%# herb:key engagement.id %>
@@ -22,9 +22,6 @@
 
               <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
 
-              <% if priced_engagement?(engagement) %>
-                <span class="txt-small txt-nowrap"><%= engagement_amount(engagement) %></span>
-              <% end %>
               <%= status_tag engagement.state_label, highlight: engagement.active? %>
             </li>
           <% end %>
@@ -34,7 +31,7 @@
   </section>
 <% else %>
   <div class="panel panel--centered">
-    <div class="blank-slate">No agreements yet.</div>
+    <%= render "layouts/shared/empty", text: "Nothing here yet." %>
   </div>
 <% end %>
 

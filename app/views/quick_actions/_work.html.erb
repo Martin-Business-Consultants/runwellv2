@@ -1,6 +1,6 @@
 <%# locals: (form_id:) %>
 <%# Work from anywhere (g w n, or the tray): what needs doing, who leads it and who else is on it,
-    and when, on the engagement picked above. %>
+    and when, on the engagement or client picked above. Nobody leading it makes it a request. %>
 <% me = Current.user.person %>
 <%= form_with model: Todo.new, url: todos_path, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
   <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What needs doing…", autofocus: true, aria: { label: "What" } %>

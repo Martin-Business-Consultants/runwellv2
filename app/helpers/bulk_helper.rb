@@ -62,15 +62,6 @@ module BulkHelper
     end
   end
 
-  # A pill that copies text made from the picked rows: `path` is fetched (as text) with their ids
-  # as ids[] and the answer put on the clipboard (bulk#copy). Deprecated in 2.29, gone in 3.0: the
-  # core doesn't use it, and a plugin copies with its own controller (docs/plugin-contract.md).
-  def bulk_copy(path, label:, icon: "ai")
-    button_tag(type: "button", class: "btn input txt-x-small bulk-bar__pill bulk-bar__copy", data: { action: "bulk#copy", bulk_copy_url: path }) do
-      safe_join([ icon_tag(icon), tag.span(label), tag.span("Copied", class: "bulk-bar__copied-text") ])
-    end
-  end
-
   # A pill opening a date to set on every picked row; blank clears it.
   def bulk_date(path, method:, name:, label:)
     bulk_popup(label) do
@@ -110,9 +101,7 @@ module BulkHelper
       tag.div(class: "quick-filter", data: { filter_show: true, controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" }) do
         safe_join([
           tag.button(type: "button", class: "btn input input--select flex-inline txt-x-small", data: { action: "click->dialog#toggle:stop" }) { tag.span(label, class: "overflow-ellipsis") },
-          tag.dialog(class: "margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small", aria: { label: label }, data: { dialog_target: "dialog" }) do
-            safe_join([ tag.strong(label, class: "popup__title pad-inline-half"), capture(&block) ])
-          end
+          popup_menu(label: label, title: label, &block)
         ])
       end
     end

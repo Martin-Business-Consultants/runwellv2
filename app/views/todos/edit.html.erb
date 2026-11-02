@@ -55,18 +55,32 @@
         </div>
       </fieldset>
 
-      <label class="flex flex-column gap-half txt-align-start">
-        <span class="record-form__label">Scope item</span>
-        <%= form.select :scope_item_id, @todo.engagement.agreed_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, class: "input input--select full-width" %>
-      </label>
-
-      <div class="flex align-center gap-half txt-align-start">
-        <label class="switch flex-item-no-shrink">
-          <%= form.check_box :client_visible, class: "switch__input" %>
-          <span class="switch__btn"></span>
+      <% if @todo.engagement %>
+        <label class="flex flex-column gap-half txt-align-start">
+          <span class="record-form__label"><%= term(:scope_item) %></span>
+          <%= form.select :scope_item_id, @todo.engagement.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, class: "input input--select full-width" %>
         </label>
-        <%= form.label :client_visible, "Visible to the client in the portal", class: "txt-small" %>
+      <% else %>
+        <label class="flex flex-column gap-half txt-align-start">
+          <span class="record-form__label"><%= term(:client) %></span>
+          <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" }, class: "input input--select full-width" %>
+        </label>
+      <% end %>
+
+      <div class="flex gap">
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="record-form__label">Requested by</span>
+          <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,
+                { include_blank: "Nobody in particular" }, class: "input input--select full-width" %>
+        </label>
+
+        <label class="flex flex-column gap-half txt-align-start flex-item-grow">
+          <span class="record-form__label">Came in by</span>
+          <%= form.text_field :source, required: true, class: "input full-width", autocomplete: "off", placeholder: "app, email, phone…" %>
+        </label>
       </div>
+
+      <%= switch_field form, :client_visible, label: "Visible to the client in the portal" %>
 
       <%= custom_field_inputs form, @todo %>
 
@@ -88,8 +102,12 @@
         <h2 class="divider">Details</h2>
       </header>
       <dl class="record-facts">
-        <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %></dd>
-        <dt><%= term(:client) %></dt><dd><%= link_to @todo.engagement.client.name, @todo.engagement.client, class: "txt-link" %></dd>
+        <% if @todo.engagement %>
+          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %></dd>
+        <% end %>
+        <% if @todo.client %>
+          <dt><%= term(:client) %></dt><dd><%= link_to @todo.client.name, @todo.client, class: "txt-link" %></dd>
+        <% end %>
         <dt>Added</dt><dd><%= l @todo.created_at.to_date, format: :long %><%= " by #{@todo.created_by.display_name}" if @todo.created_by %></dd>
         <% if @todo.completed_at %>
           <dt>Done</dt><dd><%= l @todo.completed_at.to_date, format: :long %></dd>
@@ -97,13 +115,9 @@
       </dl>
     </section>
 
-    <% if @todo.status_was != "done" %>
-      <%= render "todos/make_commitment", todo: @todo %>
-    <% end %>
-
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Remove this work", title: "Remove #{@todo.title_was}?",
-            body: "It comes off the engagement and the client’s portal. Its history stays.",
+            body: "It comes off the #{term(:engagement).downcase} and the #{term(:client).downcase}’s portal. Its history stays.",
             button: "Remove", path: todo_path(@todo) %>
     <% end %>
   </aside>

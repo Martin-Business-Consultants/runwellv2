@@ -2,32 +2,34 @@ source "https://rubygems.org"
 
 gem "bcrypt"
 gem "bootsnap", require: false
-
-# Deploy with Kamal; Thruster fronts Puma in the image (gzip, asset caching, X-Sendfile).
-gem "kamal", require: false
-gem "thruster", require: false
+gem "csv"
+gem "geared_pagination"
 gem "herb"
 gem "image_processing"
 gem "importmap-rails"
 gem "jbuilder"
+gem "kamal", require: false
 gem "lexxy"
 gem "mcp"
 gem "positioning"
+gem "prawn"
 gem "propshaft"
 gem "puma"
 gem "rails"
 gem "rails-active_search"
 gem "reactionview"
+gem "rotp"
+gem "rqrcode"
+gem "ruby_llm"
+gem "rubyzip", require: "zip"
 gem "solid_cable"
 gem "solid_cache"
 gem "solid_queue"
 gem "sqlite3"
 gem "stimulus-rails"
+gem "thruster", require: false
 gem "turbo-rails"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
-
-# Plugins aren't gems here: they're installed on the server (RUNWELL_DATA_DIR/plugins) and
-# loaded at boot by config/installed_plugins.rb, so they may use only what's bundled above.
 
 group :development do
   gem "letter_opener_web"
@@ -48,24 +50,3 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
-
-gem "geared_pagination", "~> 1.2"
-
-# Two-factor sign-in: authenticator codes (TOTP) and the QR code that sets them up
-gem "rotp"
-gem "rqrcode"
-
-# Signing in with Google, Microsoft or GitHub (Settings > Sign-in)
-gem "omniauth"
-gem "omniauth-rails_csrf_protection"
-gem "omniauth-google-oauth2"
-gem "omniauth-github"
-gem "omniauth-entra-id"
-gem "omniauth_openid_connect"
-
-# Exports (Settings > Export): everything as one .zip
-gem "rubyzip", require: "zip"
-gem "csv"
-
-# In-app AI (Settings > AI): one interface to Anthropic, OpenAI, Gemini, Ollama and more
-gem "ruby_llm", "~> 2.0"

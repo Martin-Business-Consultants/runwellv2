@@ -6,8 +6,9 @@ class Client < ApplicationRecord
   # Restrictions first, so a client with agreed work is refused before anything is destroyed.
   has_many :engagements, dependent: :restrict_with_error
   has_many :contacts, dependent: :destroy
-  has_many :commitments, dependent: :destroy
-  has_many :requests, dependent: :nullify
+  # Its work, on its engagements or straight on it. A client with engagements can't be deleted, so
+  # only work straight on it goes with it.
+  has_many :todos, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }
@@ -30,7 +31,7 @@ class Client < ApplicationRecord
   def zone = time_zone ? ActiveSupport::TimeZone[time_zone] : Setting.zone
   def own_time_zone? = time_zone.present? && zone.name != Setting.zone.name
 
-  # Runs the block with times shown in the client's zone: its portal, approval pages and emails.
+  # Runs the block with times shown in the client's zone: its portal, its client-facing pages and emails.
   def in_time_zone(&) = Time.use_zone(zone, &)
 
   def approvers = contacts.where(can_approve: true, archived_at: nil)

@@ -1,6 +1,10 @@
 # The plugins Runwell's authors publish, offered in Settings > Plugins. Each is its own public
 # repository with releases; any other repository holding a Runwell plugin installs the same way,
 # by name. Nothing here is installed until someone installs it.
+- key: agreements
+  repo: Martin-Business-Consultants/runwell-agreements
+  name: Agreements
+  description: "Agreements on engagements: a title and rich text under your logo, sent to the client as a PDF and signed by typed name, kept with the engagement."
 - key: ai
   repo: Martin-Business-Consultants/runwell-ai
   name: AI
@@ -49,7 +53,7 @@
 - key: stripe_billing
   repo: Martin-Business-Consultants/runwell-stripe-billing
   name: Stripe
-  description: Payment links for approved agreements, on the approval page and by email; a subscription for a service, a one-time payment for fixed work, each marked paid by Stripe or by hand.
+  description: Payment links for engagements, by email; a subscription for a service, a one-time payment for fixed work, each marked paid by Stripe or by hand.
 - key: time_tracking
   repo: Martin-Business-Consultants/runwell-time-tracking
   name: Time tracking

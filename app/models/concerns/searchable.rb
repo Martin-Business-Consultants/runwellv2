@@ -4,7 +4,7 @@ module Searchable
   extend ActiveSupport::Concern
 
   # Every searchable model, for rebuilding the index (search:reindex, an import).
-  MODELS = %w[Client Contact Engagement Request Todo Commitment Note Document].freeze
+  MODELS = %w[Client Contact Engagement Todo Note Document].freeze
 
   # Indexed from a job after each save (ActiveSearch's ReindexJob and RemoveJob), so a save never
   # waits on the index; a new record shows in search a moment later.

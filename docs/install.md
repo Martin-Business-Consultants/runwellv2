@@ -130,7 +130,7 @@ until either is set, links use the address people were last seen using.
 | `SECRET_KEY_BASE` | Signs sessions and links | `keys.env` in the data directory, made on first boot |
 | `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `…_DETERMINISTIC_KEY`, `…_KEY_DERIVATION_SALT` | Encrypt stored API keys and tokens | `keys.env`, as above |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_DOMAIN`, `SMTP_STARTTLS`, `SMTP_TLS` | Outbound mail. Without `SMTP_ADDRESS` nothing is sent | none |
-| `TIME_ZONE` | The install's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, approvals and emails in it | `Eastern Time (US & Canada)` |
+| `TIME_ZONE` | The install's time zone, a Rails name or IANA id. Times are stored in UTC; a client with its own zone sees its portal, client pages and emails in it | `Eastern Time (US & Canada)` |
 | `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@` the address `>` |
 | `ASSUME_SSL` | Trust that a proxy terminated TLS | `true` in Docker (unless `FORCE_SSL=false`), else `false` |
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
@@ -157,14 +157,13 @@ visitors' real addresses are recorded and `ASSUME_SSL` isn't needed.
 ### Requests by email
 
 Clients can email a request instead of signing in to the portal. Mail to the requests address
-becomes a request to triage (the subject its title, the message its description, attachments its
-documents); a known contact gets a short reply, and their replies to it become notes on the same
-request. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
+becomes a request: work on the sender's client that nobody has taken on yet (the subject its
+title, the message its description, attachments its documents); a known contact gets a short
+reply, and their replies to it become notes on the same work. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
 
 1. Choose the address in Settings > Email (for example `requests@yourcompany.com`).
 2. Set up inbound mail for it at Postmark, Mailgun, SendGrid or Mandrill, or on your own mail server
-   (Postfix or Exim piping into `bin/rails action_mailbox:ingress:postfix` or `:exim`), including
-   plus addresses (`requests+anything@…`), which carry replies.
+   (Postfix or Exim piping into `bin/rails action_mailbox:ingress:postfix` or `:exim`).
 3. On the server set `INBOUND_EMAIL_INGRESS` to the service, and its secret:
    `RAILS_INBOUND_EMAIL_PASSWORD` for Postmark, SendGrid and a relay, `MAILGUN_INGRESS_SIGNING_KEY`
    for Mailgun, `MANDRILL_INGRESS_API_KEY` for Mandrill. Restart.

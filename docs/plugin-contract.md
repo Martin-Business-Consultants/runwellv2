@@ -27,7 +27,7 @@ methods, and anything under `Agent::`, `Upgrade`, `PluginChange` or `Setting`'s 
 - Its controllers declare an authorization rule and an agent tool (or `agent_exempt`) per action,
   as the core's do. Its migrations are safe on a live install.
 - Removing it leaves the core working: nothing in the core names a plugin.
-- It uses only the gems the core bundles (it is loaded outside Bundler).
+- It uses only the gems the core bundles (it is loaded outside Bundler). Among them for plugins: `ruby_llm` (AI providers) and, since 3.0, `prawn` (PDFs).
 - Its JavaScript is its own, in `app/javascript/<key>/` (see Plugin JavaScript): it never patches,
   replaces or reaches into the core's controllers, and the core's markup and CSS classes are not
   an API to script against.
@@ -62,19 +62,25 @@ Slots, and the locals each partial gets:
 | `:nav_actions` | A button in the nav's foot | none | 2.0 |
 | `:portal_home` | The client portal's home | `client:` | 2.0 |
 | `:portal_engagement_panel` | An engagement in the portal | `engagement:` | 2.0 |
-| `:approval_page` | The client's approval page | `version:`, `link:` | 2.1 |
 | `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
 | `:home_top` | Home, above the briefing | none | 2.18 |
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
-| `:request_aside` | An open request's sidebar, above triage | `request_record:` | 2.18 |
-| `:scope_item_aside` | A scope item's sidebar, above Details | `scope_item:` | 2.18 |
-| `:draft_version` | Under a draft agreement version | `version:` | 2.18 |
+| `:engagement_aside` | An engagement's sidebar, under its sections and details | `engagement:` | 3.0 |
+| `:engagement_meta` | The line under an engagement's title: a status badge or a short fact (an inline element) | `engagement:` | 3.0 |
+| `:todo_aside` | A piece of work's sidebar, above Details (requests are work, so this replaces `:request_aside`) | `todo:` | 3.0 |
+| `:scope_item_aside` | A section's (scope item's) sidebar, above Details | `scope_item:` | 2.18 |
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
-| `:commitment_row` | Inside each commitment row | `commitment:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
 
-A slot partial declares strict locals on its first line, like every core partial. The row slots
-(`:note_row`, `:commitment_row`) render once per row: work out anything shared once a request (a
+**Removed in 3.0:** `:request_aside` and `:commitment_row`, with the `Commitment` and `Request`
+models: commitments and requests became work (see Models). A plugin that filled `:request_aside`
+fills `:todo_aside` instead (`todo.request?` says whether nobody has taken it on yet). Also
+`:approval_page` and `:draft_version`, with agreements, which left the core for the Agreements
+plugin: an engagement's own tab is `:engagement_panel`, its sidebar `:engagement_aside` and its
+title line `:engagement_meta`.
+
+A slot partial declares strict locals on its first line, like every core partial. The row slot
+(`:note_row`) renders once per row: work out anything shared once a request (a
 `CurrentAttributes` of the plugin's own), never a query per row. A shortcut only lists a key on the
 `?` sheet; the plugin's control declares it with `data-keys`, which is what makes it work. A nav or
 settings path lambda runs in the view and may return nil to hide the link. Since 2.26 each person
@@ -86,16 +92,24 @@ controller says `require_permission :manage_settings` and starts its view with
 Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
 `can?`, `current_record` (the record on screen, or nil; 2.18), `section_nav`, `section_nav_heading`
-and `section_nav_link` (2.21), and the shared partials `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
+and `section_nav_link` (2.21), `popup_menu` (`label:`, `title:`, `fixed:`, a block: the popup a
+pill or badge opens below itself; 3.0), `switch_field` (`form, :attr, label:, hint:,
+submit_on_change:`) and `switch_tag` (`title:`, `screen_reader_label:`, a block holding any
+checkbox) for on/off switches (3.0), and the shared partials `layouts/shared/empty` (`text:`,
+`action_text:`, `action_path:`; an empty list's line; 3.0), `layouts/shared/card`, `delete_dialog`, `confirm`, `row_actions`,
 `quick_filter` and `index_toolbar` (2.0, stable), and `notes/section` (`subject:`, any record with notes:
 the composer and its notes, posting to the full page and back; `permanent: false` on a page that
 swaps one record's notes for another's in place; documented in 2.25.2, stable), and
 `todos/owner_picker` (`todo:`, `labelled:`; who's on a todo, changed in place: since 2.22,
 documented in 2.25.4, stable), and `todos/ai_brief` (`todo:`, `labelled:`; copies the todo's brief for a
 local AI, `c` on a keyboard item: documented in 2.28, stable). The brief itself is
-`Todo::Brief.new(todo, base_url:, person:).to_s` (Markdown: the work, scope, notes, commitments,
+`Todo::Brief.new(todo, base_url:, person:).to_s` (Markdown: the work, scope, notes, other dated work,
 plugins' sections and the `runwell` commands to report back; documented in 2.28, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
+
+Any other core helper is not part of this contract and may go without notice. Two plugins used
+were removed in 3.0 with agreements: `contact_options` and `default_approver`; keep a copy in the
+plugin (QuickBooks has `quickbooks_contact_options` and `quickbooks_default_contact`).
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
 each page calls `section_nav "Its name" do … end` once (a partial of the plugin's, given the
@@ -103,14 +117,8 @@ current page), with `section_nav_heading` over each group and
 `section_nav_link label, path, icon:, current:` for each page. Below 960px it runs across the top.
 The page itself then needs no links to its siblings. Since 2.21, stable.
 
-**Deprecated in 2.29, removed in 3.0:** the core's `repeater` controller. The core doesn't use it;
-a plugin that repeats rows ships its own (Websites' `website-checklist--repeater` is a working copy
-to start from). Until 3.0 it works as before: `data-controller="repeater"` (with
-`data-repeater-placeholder-value`, default `NEW_ROW`) around a `data-repeater-target="list"` of
-rows, each `data-repeater-row`, and a `<template data-repeater-target="template">` holding one
-row with the placeholder where its index goes. `data-action="repeater#add"` adds a row,
-`repeater#remove` takes the row it sits in away (a saved one is hidden and its `[_destroy]` field
-set to 1). Repeaters nest, each with its own placeholder. Since 2.24.0.
+**Removed in 3.0** (deprecated in 2.29): the core's `repeater` controller. A plugin that repeats
+rows ships its own (Websites' `website-checklist--repeater` is a working copy to start from).
 
 A drop box for files is the core's `upload` Stimulus controller on a multipart form
 (`data-upload-url-value` the direct uploads URL, `data-upload-max-size-value` `Document::MAX_SIZE`),
@@ -124,8 +132,8 @@ Picking rows to act on together is the core's `bulk` Stimulus controller, alread
 page's `<main>`: a checkbox per row with `value` the record's id, `data-bulk-target="item"` and
 `data-action="bulk#update"` (add `data-keys="x"` inside a keyboard item, so `x` picks the row
 you're on), and the bar, from `BulkHelper`: `bulk_bar(delete:) { … }` around `bulk_menu`,
-`bulk_button`, `bulk_date` and `bulk_delete`. (`bulk_copy`, added in 2.28, is **deprecated in 2.29
-and removed in 3.0**: copying is a plugin's own controller, reading the picked boxes,
+`bulk_button`, `bulk_date` and `bulk_delete`. (`bulk_copy`, added in 2.28, is **removed in 3.0**:
+copying is a plugin's own controller, reading the picked boxes,
 `[data-bulk-target~='item']:checked`; My day's `my-day--copy-prompt` does it.) The bar shows while anything is picked, and each of
 its forms is sent with the picked ids as `ids[]`. For work, the core's own `bulk_todos_path`
 (PATCH `todo[status]`, `todo[owner_id]`, `todo[due_on]`, `todo[client_visible]`; DELETE) runs each
@@ -210,9 +218,28 @@ doesn't stop the others.
 | `ActiveSupport.on_load(:runwell_user) { … }` | 2.0 | Stable |
 
 Add associations, scopes and validations there; never columns. Core models a plugin may read and
-call verbs on: `Client`, `Contact`, `Engagement`, `AgreementVersion`, `ScopeItem`, `Approval`,
-`Todo`, `Commitment`, `Request`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
+call verbs on: `Client`, `Contact`, `Engagement`, `ScopeItem`, `Todo`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
 `Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
+
+**Changed in 3.0:** `Commitment` and `Request` are gone; both are work. A todo may sit straight on
+a client: `todo.engagement` can be nil, and `todo.client` (a column now, `client_id`) is the one
+to read, nil only for an email from an unmatched sender. A request is a todo nobody has taken on
+or started, `Todo.requests` (`todo.request?`), with who asked (`todo.contact`, `sender_name`,
+`sender_email`, `requester_name`) and how (`todo.source`). A promise is a todo with a due date,
+owned by whoever it's assigned to.
+
+**Changed in 3.0, agreements:** `AgreementVersion`, `Approval` and `ApprovalLink` are gone from the
+core, with sending, snapshots, client decisions and approval links (the Agreements plugin keeps its
+own). Their tables (`agreement_versions`, `approvals`, `approval_links`) stay, unread, for that
+plugin to import from, until a later release drops them; events, notes and documents that pointed
+at a version or a decision now point at its engagement. An engagement is active until closed
+(`engagement.state` is "active" or "closed", `active?`, `closed?`, `internal?`); nothing about it
+waits on a client. `engagement.agreed_amount_cents`, `current_version`, `draft_version`,
+`agreed_items` and the rest are gone, and approving creates no work. A `ScopeItem` is a section of
+its engagement (`belongs_to :engagement`, `engagement.scope_items` in order; `description`,
+`position`, `delivery_state` from its work); it has no price or estimate. `contact.can_approve?`
+stays: who may say yes for their company, for a plugin to use. Times a client reads go inside
+`client.in_time_zone { … }` (stable since 2.0).
 
 A todo can have several people on it (2.22, stable): `todo.owner` stays the one who leads it, as
 before, and `todo.owners` (lead first), `todo.other_owners` and `Todo.assigned_to(user)` (work
@@ -230,10 +257,16 @@ Every `Event` is published from a job after it's saved, never inside the request
 
 `client.created`, `engagement.created`, `engagement.closed` (payload `outcome`: completed or
 cancelled, since 2.17), `engagement.reopened` (2.17), `engagement.erased`, `todo.converted` (2.17),
-`agreement.sent`, `agreement.emailed`, `agreement.approved`, `agreement.changes_requested`,
-`todo.created`, `todo.status`, `commitment.added`, `commitment.done`, `commitment.missed`,
-`commitment.dropped`, `request.received`, `request.replied`, `request.promoted`,
-`request.dismissed`, `question.answered`, `note.added`, `note.deleted`, `document.added`.
+`todo.created`, `todo.status`, `todo.requested` (3.0: a client asked for it, from the portal or by
+email, or someone logged it; the subject is the todo), `note.added`, `note.deleted`, `document.added`.
+
+**Removed in 3.0:** `commitment.added`, `commitment.done`, `commitment.missed`,
+`commitment.dropped`, `request.received` (now `todo.requested`), `request.replied` (replies
+to the acknowledgement are no longer taken in), `request.promoted`, `request.dismissed`, and
+`agreement.sent`, `agreement.emailed`, `agreement.approved` and `agreement.changes_requested`
+(the Agreements plugin records its own kinds on the engagement), and `question.answered` (the
+`Question` model and its `answer_question` / `dismiss_question` tools are gone). Events recorded before keep their
+kind, re-pointed at the work (or engagement, or client) they became.
 
 New kinds may be added in any minor release; existing kinds keep their name and payload keys.
 
@@ -265,7 +298,7 @@ a `summary`. A write needs nothing extra: its redirect and notice become the too
 
 The assistant itself is the AI plugin (2.18; before, the core). A one-click question in its Ask
 panel, on the given record types (`Client`, `Engagement`, `Todo`,
-`Request`, `ScopeItem`) or every page. The assistant answers through the agent tools, so a plugin's
+`ScopeItem`; `Request` until 3.0) or every page. The assistant answers through the agent tools, so a plugin's
 declared tools are already within its reach while the plugin is on.
 
 ## Portal
@@ -277,6 +310,18 @@ declared tools are already within its reach while the plugin is on.
 
 A portal page sees only the signed-in contact's client, and shows a client only what is marked
 for them (`client_visible`).
+
+## Public pages
+
+| Call | Since | Status |
+| --- | --- | --- |
+| A controller inheriting `ApplicationController` with `allow_unauthenticated_access` and `layout "public"` | 2.0 (documented 3.0) | Stable |
+
+A page someone opens from an emailed link without signing in (a client reading and signing
+something): `allow_unauthenticated_access` skips sign-in and the authorization rules, and agent
+tools ignore it. It finds its record by a signed or random token in the path, never an id, and
+shows times inside `client.in_time_zone { … }` (an `around_action`). The portal's custom CSS rule
+(Settings › Appearance) doesn't apply: the install's theme is on every page outside the portal.
 
 ## Email
 

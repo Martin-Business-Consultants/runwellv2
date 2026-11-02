@@ -18,10 +18,10 @@
     <input type="hidden" name="record" form="<%= form_id %>">
   </template>
 
-  <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Where it goes" data-dialog-target="dialog">
+  <%= popup_menu label: "Where it goes" do %>
     <input type="search" class="input input--transparent txt-small full-width" placeholder="Find a <%= records.map { record_type_term(it.class.name) }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ").downcase %>…" autocomplete="off" aria-label="Find a record" data-1p-ignore="true" data-record-search-target="input" data-dialog-target="focusMouse" data-action="input->record-search#search keydown.enter->record-search#chooseFirst:prevent">
     <turbo-frame id="<%= list_id %>" data-record-search-target="frame">
       <%= render "quick_actions/records", records: records, record: record %>
     </turbo-frame>
-  </dialog>
+  <% end %>
 </div>

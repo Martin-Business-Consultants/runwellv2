@@ -1,5 +1,5 @@
 # Human refs like WO-12, P-3, S-4: one sequence per label. The prefix comes from Settings >
-# Names; changing it applies to new refs only, since sent agreements carry their ref.
+# Names; changing it applies to new refs only, since refs already given are in emails and links.
 module Engagement::Refs
   extend ActiveSupport::Concern
 

@@ -15,9 +15,10 @@
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
 # :engagement_panel (engagement:), :todo_panel (todo:), :email_inbound (no locals; Settings > Email,
 # where requests' mail comes in), :home_top (no locals; home, above the briefing), :client_aside
-# (client:), :request_aside (request_record:, while it's open), :scope_item_aside (scope_item:),
-# :draft_version (version:, under a draft agreement), :note_row (note:) and :commitment_row
-# (commitment:), inside each row; in the client portal, :portal_home (client:),
+# (client:), :engagement_aside (engagement:, its sidebar), :engagement_meta (engagement:, the line under
+# its title: a status badge or a short fact), :todo_aside (todo:, a piece of work's sidebar),
+# :scope_item_aside (scope_item:) and :note_row (note:), inside each row; in the
+# client portal, :portal_home (client:),
 # :portal_engagement_panel (engagement:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
@@ -44,8 +45,8 @@ module Runwell
 
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
       email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel",
-      home_top: "Home", client_aside: "Client sidebar", request_aside: "Request sidebar", scope_item_aside: "Scope item sidebar",
-      draft_version: "Draft agreement", note_row: "Notes", commitment_row: "Commitments", portal_actions: "Portal header" }.freeze
+      home_top: "Home", client_aside: "Client sidebar", engagement_aside: "Engagement sidebar", engagement_meta: "Engagement title line",
+      todo_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header" }.freeze
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }
@@ -115,7 +116,7 @@ module Runwell
       end
 
       # A question for the in-app AI's Ask panel, offered on the given record types (Client,
-      # Engagement, Todo, Request, ScopeItem) or, with none, on every page.
+      # Engagement, Todo, ScopeItem) or, with none, on every page.
       def ai_prompt(key, label, types: nil)
         ai_prompts[key] |= [ AiPrompt.new(label: label, types: types) ]
       end
@@ -132,7 +133,7 @@ module Runwell
       end
 
       # A permission for User#can?, held by the given roles (owner, manager, member). It shows
-      # on Settings > People with the core's.
+      # on Users with the core's.
       def permission(key, permission, name:, roles:)
         permissions[key][permission.to_sym] = { name: name, roles: roles }
       end

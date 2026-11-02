@@ -7,11 +7,9 @@ class Portal::McpController < Portal::BaseController
   skip_forgery_protection
 
   INSTRUCTIONS = <<~TEXT
-    You act for a client of a business (or of whoever runs this Runwell), through its portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for, their company, and whether they can decide agreements.
+    You act for a client of a business (or of whoever runs this Runwell), through its portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for and their company.
 
-    `portal_engagements` lists the work agreed with them (engagements, named by ref like WO-12, or by title); `portal_engagement` shows one: what was agreed, the work shared with them, documents, and any agreement awaiting their decision exactly as it was sent. `portal_work` lists all shared work; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
-
-    Deciding an agreement (`portal_decide`) is binding, as if they clicked it themselves. Show the person the agreement, get their decision and their typed name, and only then call it; the first call answers with a preview (needs_confirmation) and you call again with confirm: true. Never decide for them on your own judgement.
+    `portal_engagements` lists what we run for them (engagements, named by ref like WO-12, or by title); `portal_engagement` shows one: its sections, the work shared with them, and documents. `portal_work` lists all shared work; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
 
     Errors carry a stable `code` (usage, not_found, ambiguous, auth, refused, invalid, read_only, paused, rate_limited, failed) and a `hint`; branch on the code.
   TEXT

@@ -8,7 +8,7 @@
       <%= render "documents/file", document: document, meta: meta %>
     </button>
     <dialog class="dialog document-preview panel fill-white shadow" data-dialog-target="dialog" aria-label="<%= document.filename %>">
-      <img class="document-preview__image" src="<%= rails_blob_path(document.file, disposition: :inline) %>" alt="<%= document.filename %>" loading="lazy">
+      <%= image_tag rails_blob_path(document.file, disposition: :inline), class: "document-preview__image", alt: document.filename, loading: "lazy" %>
       <footer class="flex align-center justify-space-between gap flex-wrap">
         <strong class="txt-small overflow-ellipsis"><%= document.filename %></strong>
         <div class="flex align-center gap-half">

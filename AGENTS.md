@@ -1,13 +1,15 @@
 # Runwell v2 — Project Guide
 
 The core of project management, for a business or anything someone runs (a home, a wedding, a
-trip): who we work for, what we agreed,
-what is happening against it, what came in, and what needs a person now. No
+trip): who we work for, what we run for them,
+what is happening on it, what came in, and what needs a person now. No
 money, no time tracking; see `docs/future_apps.md` for everything left out.
 
 ## Stack
 
 - Rails 8.1, Ruby (see `.ruby-version`), SQLite, single tenant
+- Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
+  gems); the core itself makes none
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
   `app/assets/stylesheets` served by Propshaft, modelled on Fizzy (`../fizzy`)
 - Search: ActiveSearch (`rails-active_search`) over SQLite FTS5, one polymorphic
@@ -17,10 +19,10 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
   and reactive template state
 - Staff auth: Rails' generated authentication (`Session`, `User`). Sign-up only makes
   the first owner; everyone else joins by invitation. Clients never have passwords:
-  portal sign-in and approvals are signed, expiring links
+  portal sign-in is a signed, expiring link
 - Time zones: stored in UTC, shown in the install's zone (`Setting.zone`: Settings > Address, else
   `TIME_ZONE`, else Eastern; `ApplicationController` and `ApplicationJob` run inside it). A client may have its own (`Client#time_zone`, blank = ours); its
-  portal (`Portal::BaseController`), approval pages and emails run inside `client.in_time_zone`.
+  portal (`Portal::BaseController`), plugins' client pages and emails run inside `client.in_time_zone`.
   Staff pages and agent input stay in the install's zone. A record read before the zone switched
   keeps the old zone, so client-facing templates call `.in_time_zone` on times they show
 - Solid Queue for everything slow: mail, plugin changes, updates, search indexing, events
@@ -53,49 +55,59 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 
 1. **Who we work for, and who can say yes** — `Client`, `Contact` (`portal_access`,
    `can_approve`)
-2. **What we agreed** — `Engagement` (ref like WO-12, P-3, S-4; label project /
-   work_order / service; shape fixed / recurring) holds `AgreementVersion`s
-   (initial, change_order, revision, add_on). A client marked `internal` is the
-   business itself: its engagements are internal projects (state `internal`, `Engagement#internal?`)
-   with no agreement to send, price or approval, and work goes on them directly; any draft
-   is a plan, never sent. A version is a draft until sent;
-   sending snapshots and hashes it and freezes it forever. `Approval` records
-   the client's decision (by link or recorded with evidence). Approving creates
-   one `Todo` per scope item. Nothing is "billable": everything is a project,
-   work order or service
+2. **What we run for them** — `Engagement` (ref like WO-12, P-3, S-4; label project /
+   work_order / service; shape fixed / recurring), active from the start until closed
+   (`Engagement#state`: active or closed). Its sections are `ScopeItem`s (the term `scope_item`,
+   "Sections" by default; `engagement.scope_items`, positioned), each grouping work and showing
+   how it's going (`delivery_state`); no price or estimate. A client marked `internal` is the
+   business itself: its engagements are internal projects (`Engagement#internal?`). Nothing is
+   "billable": everything is a project, work order or service. Agreements (a document the client
+   signs) are a plugin's (`runwell-agreements`), not the core's
 3. **What is happening** — `Todo`, at `/work` (old `/todos` links redirect; helpers stay `todo_*`) (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
-   done; due; table or kanban; agents finish into in review for a person to mark done),
-   `Commitment` (a promise by us or the client with a date; final once
-   resolved), `Event` (append-only, every write of consequence), `Note`
-4. **What came in** — `Request`: a client ask with a source. Triage promotes it
-   to a new engagement, a scope item on a draft, a todo, or a commitment, or
-   dismisses it. Portal contacts create requests
-5. **What needs a human** — `Briefing` builds the home page from named queries:
-   questions, requests to triage, awaiting client, drafts ready, overdue and due
-   commitments, blocked and overdue work. `Question`
-   is what an agent asks a person. Above it, until the required steps are done or the owner
-   hides it, the first-run checklist (`Setup`, `briefings/_setup`) checks itself off from what
+   done; due; table or kanban; agents finish into in review for a person to mark done). A todo
+   sits on an engagement (its client follows) or straight on a client (`todos.client_id`;
+   `engagement_id` optional), and nil client only for an email from an unmatched sender. A promise
+   is work with a due date: whoever it's assigned to owns it (there are no client-owned promises).
+   `Event` (append-only, every write of consequence), `Note`
+4. **What came in** — a request is work nobody has taken on or started (`Todo.requests`:
+   unassigned and planned, derived, whoever added it), at `/requests`. A todo keeps who asked
+   (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
+   Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
+   emails create them (`todo.requested`)
+5. **What needs a human** — `Briefing` builds the home page for one person: a line of counts,
+   **Your work** (their open work: overdue, due today, the week after, in progress with no date
+   that close) and **Waiting on you** (work in review they lead, blocked work they're on, unread
+   mentions, plugins' briefing items). Each count links to Work filtered the same way (`due:`,
+   `status:`, `owner: "me"`). An agent that needs a person assigns them work or mentions them in a
+   note; there is no separate question inbox. The first-run checklist (`Setup`) is Settings > Setup, where
+   owners land from the gear until its required steps are done; it checks itself off from what
    exists
 
 An engagement ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
 `Engagement#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
-(`reopen!`, `engagement.reopened`) puts it back. Work that was really a promise converts to a
-commitment (`Todo#convert_to_commitment!`, refused while a plugin keeps records on it).
+(`reopen!`, `engagement.reopened`) puts it back.
 
-Rules the code enforces: sent versions, approvals and events are immutable (the one exception:
-an owner erasing a closed engagement for good, `Engagement#erase!`, typing its ref; the client
-keeps an `engagement.erased` event);
-every event has a source; internal estimates and estimate notes never reach a
-client (portal and approval pages render `AgreementVersion#snapshot`, never live
-scope items).
+Commitments and the `Request` model were folded into work in 3.0, and `Question` removed. Their
+tables (`commitments`, `requests`, `questions`) are left, unread, for a later release to drop; the 3.0 migrations moved their rows and
+history onto todos (or, for a client's promise, its engagement or client).
+
+Agreements left the core in 3.0 for the Agreements plugin. Their tables (`agreement_versions`,
+`approvals`, `approval_links`, and `scope_items.agreement_version_id`, `price_cents`,
+`internal_estimate`, `settings.client_agent_approvals`) are left, unread, for the plugin to import
+from and a later release to drop; the 3.0 migration put each scope item on its engagement and
+re-pointed versions' and decisions' events, notes and documents at their engagement.
+
+Rules the code enforces: events are immutable (the one exception: an owner erasing a closed
+engagement for good, `Engagement#erase!`, typing its ref; the client keeps an `engagement.erased`
+event); every event has a source; estimate notes never reach a client.
 
 ## Conventions
 
 - Rich models, skinny controllers, no service objects. Domain verbs are model
-  methods (`send!`, `decide!`, `promote_to_change!`, `resolve!`)
+  methods (`close!`, `reopen!`, `move!`, `assign!`)
 - State is derived, never typed in (`Engagement#state`, `ScopeItem#delivery_state`)
 - Views are ERB templates rendering models directly; no serializers
-- Money is integer cents everywhere: columns, params, agent tools (`price_cents: "integer"`)
+- The core keeps no money, but plugins do, the same way: integer cents everywhere: columns, params, agent tools (`price_cents: "integer"`)
   and JSON (`*_cents` beside the formatted dollars). Dollars exist only on screen: a form
   field is `money_field form, :price_cents`, whose `money` Stimulus controller shows and
   takes dollars and submits whole cents; `money(cents)` formats for display
@@ -152,7 +164,7 @@ Reach for these in order, and stop at the first that fits:
 
 The core keeps only the JavaScript it uses itself. A controller added for a plugin belongs in that
 plugin (`app/javascript/<key>/`, Plugin JavaScript in `docs/plugin-contract.md`); the `repeater`
-controller and `bulk_copy` are deprecated for that reason and go in 3.0.
+controller and `bulk_copy` went in 3.0 for that reason.
 
 Every state change must run in the browser, never wait on the server: reads in the shapes the
 client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-reads`), in
@@ -160,8 +172,7 @@ client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-re
 makes every toggle re-run the whole controller action and page, so a form opened in place is
 always rendered and only hidden: `<div hidden="<%= !open %>">` around it,
 `hidden="<%= open %>"` on its trigger, and `aria-pressed="<%= tab == "todo" %>"` for a pressed
-choice, never a class picked by `if` (`layouts/shared/_confirm`, `engagements/_close`,
-`requests/_triage`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
+choice, never a class picked by `if` (`layouts/shared/_confirm`, `engagements/_close`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
 wrapper carries `data-controller="state-focus" data-state-focus-state-value="open"`, which focuses
 it when the state changes (the guide's `useState` pattern). Esc closes it, even from a field: its
 Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
@@ -174,6 +185,16 @@ controller or a document listener.
 `<Async>` / `<Lazy>` (deferred content) re-run the controller action and render only their block,
 which the server finds in the action's own template: they work only there, never in a partial or
 a loop, and pay off only when the block is slow (measure; the History timeline isn't).
+
+Shared pieces, so the same markup is never written twice (all helpers, so they work inside
+`form_with`): a menu a pill or badge opens is `popup_menu label:, title:, fixed: do … end`
+(`PopupHelper`; `fixed: true` for one in a scrolling row, with the `fixed-popup` controller); an
+on/off switch is `switch_field form, :attr, label:, hint:, submit_on_change:` (with a hint, the
+settings row; without, the switch beside its label), or `switch_tag(title:, screen_reader_label:) { check_box_tag … }`
+around a checkbox with no form method; an empty list is
+`render "layouts/shared/empty", text:, action_text:, action_path:` (where its records come from).
+A list of the same partial is `render partial:, collection:, as:` (herb lint's
+`actionview-prefer-collection-render`), not a loop.
 
 Every trash icon opens Fizzy's modal delete dialog,
 `render "layouts/shared/delete_dialog", name:, path:, message:` — never a native
@@ -210,8 +231,7 @@ spanning the page's column. Then either a `cards cards--grid` grid of
 (Fizzy's card markup, colored by status) or a `<table class="data-table">` in
 `panel shadow center index-table`, whose last cell per row is
 `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
-action the record doesn't allow: engagements delete only while never sent, commitments
-and requests only while open). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
+action the record doesn't allow: engagements delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
 column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
 index toolbar with `content_for :index_bulk`) takes the toolbar's row while rows are picked, in the
 filters' own pills and menus (`bulk_menu`, `bulk_button`, `bulk_date`, and `delete:` `bulk_delete`
@@ -242,8 +262,9 @@ in the working column: `record_tab(key, label, count:)` plus `plugin_record_tabs
 A tab is a `?tab=` link that only reloads the frame; the first heading in a tab is hidden
 since the tab names it. The sidebar keeps Details, the few things always needed (contacts),
 History, and destructive actions. An engagement is the exception: its facts are one line under
-the title (`record-meta`), History is a tab, and the sidebar is its scope (`engagements/_scope`):
-all work, each scope item with done of total, and other work, each a `?item=` link that shows just
+the title (`record-meta`, with plugins' `:engagement_meta`), History is a tab, and the sidebar is
+its sections (`engagements/_scope`, where they're added): all work, each section with done of
+total, and other work, each a `?item=` link that shows just
 that work in the Work tab, where its todos are added. A section's add action is one small outlined button
 (`btn txt-small` with the add icon) in a `section-actions` row after its list, a `<details>`
 when it opens a form; the one filled button on a page is its next step. A record page names
@@ -253,13 +274,13 @@ header block: a `<link rel="up">` that Esc follows, never a Back button.
 
 Guide people through the hierarchy rather than documenting it. A record page says what happens
 next (`engagement_next_step` under the engagement's state). An empty list says where its records
-come from and links there (`todos/_blank`), since Work and Commitments are added on the
-engagement or client (or from anywhere with the quick actions, `g w n` and `p`), never from their index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
+come from and links there (`todos/_blank`), since Work is added on the
+engagement or client (or from anywhere with the quick action, `g w n`), never from its index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
 in the Settings sidebar) uses `term()` for every name, and the `?` sheet links to it.
 
 People show as their avatar, never their name: `person_tag user` (name as the tooltip and
 for screen readers; `fallback: "Unassigned"` for nobody). Only a list of the people
-themselves (Settings > People) prints names beside the avatars. Who's on a todo is Fizzy's
+themselves (Users) prints names beside the avatars. Who's on a todo is Fizzy's
 assignments (`Assignment`, `Todo::Assignable`): `owner` is the lead and everyone on it, the lead
 too, has an assignment (`todo.owners`, lead first; `Todo.assigned_to(user)` for "mine"). It changes
 in place with `render "todos/owner_picker", todo:`, a menu where each click puts a person on or
@@ -305,17 +326,17 @@ ReActionView rules:
   (`<%= note.presence || tag.span("None") %>`): it rendered the fallback even with a note.
   Write `<% if note.present? %> … <% else %> … <% end %>`
 - Don't mix a Ruby condition and a state read in one `if`/`elsif` chain
-  (`if engagement.draft_version … elsif starting`): the state change is
+  (`if engagement.closed? … elsif starting`): the state change is
   never sent. Nest the state `if` inside the Ruby one
 - State in attributes is reactive: `hidden="<%= !open %>"` (dropped while false),
   `aria-pressed="<%= tab == "todo" %>"` and `<% if open %>hidden<% end %>` update in the browser;
   `class="<%= "x" if tab == "todo" %>"` updates too, but only by asking the server. Never render a
   partial with state more than once on a page: ReActionView 0.6 sends the server only the first
   copy's state (`steering()` keys by file), so the others' toggles do nothing
-  (`agreement_versions/_sent`, once per version; `settings/plugins/_plugin` shows its switch by
+  (`settings/plugins/_plugin` shows its switch by
   CSS `:has(:checked)` instead). For a per-row or inline "add / resolve" form, use a native
   `<details>` with a button-styled `<summary>`, which the morph after submit
-  closes again (`commitments/_commitment`)
+  closes again (`todos/_add`)
 - Several forms for the same model on one page take
   `form_with …, namespace: dom_id(record)` so field ids stay unique
 - Default optional locals to `nil` (`<%# locals: (icon: nil) %>`) and apply
@@ -371,11 +392,11 @@ one place they are documented for people: add a new key there.
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (always asks first): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
-| `g` + `h c e w b m r n s` | Home, clients, engagements, work, board, commitments, requests, notifications, settings; `g 1`… plugin pages |
+| `g` + `h c e w b u n s` | Home, clients, engagements, work, board, users, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
-| `p`, `i` | Add a commitment (the quick action, on the record on screen), ask AI (the AI plugin) |
-| `g w n` | Add work (the quick action) to an engagement picked in it, the one on screen to start; `g w` waits a moment for the `n`, vim style |
+| `i` | Ask AI (the AI plugin) |
+| `g w n` | Add work (the quick action) to an engagement or client picked in it, the one on screen to start; `g w` waits a moment for the `n`, vim style |
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
@@ -472,7 +493,7 @@ described in `docs/plugins.md`.
 The tray at the bottom right (`A`, `quick_actions/_tray`) is Fizzy's tray. At the top of the
 fan is a record picker (Fizzy's filter + combobox) set to the record on screen
 (`current_record`) and able to pick any other; below it, one entry per action: Note,
-Document, Commitment and Work in the core (`p` opens Commitment's straight away, `g w n` Work's), plus any a plugin registers
+Document and Work in the core (`g w n` opens Work's straight away, on an engagement or a client), plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal
 (`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. Documents
@@ -490,19 +511,19 @@ An inbound service forwards the address in Settings > Email
 (`Setting#requests_email`): the server's `INBOUND_EMAIL_INGRESS` / `RAILS_INBOUND_EMAIL_PASSWORD`, or else
 the install's own `Setting.inbound_ingress` / `inbound_password` (Settings > Email, or a plugin such as
 Cloudflare via `Setting#receive_mail_through!`; `config/initializers/action_mailbox.rb` reads them
-per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: the
-subject becomes the title, the message the description (`Request::EmailBody` cuts quoted mail and
-signatures, preferring the text part), attachments its documents (internal until shared), and the
-sender is matched to a contact, or left for triage unmatched. A known contact gets
-`RequestMailer#received`, whose Reply-To is the request's plus address (`requests+r42-<token>@`)
-and Message-ID carries the same token (`Request#reply_token`, from the app's secret); a reply by
-either becomes an email note on that request. Automatic replies and our own mail are dropped.
+per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: each message
+becomes a request, work nobody has taken on (`source` "email"): the subject its title, the message
+its description (`Todo::EmailBody` cuts quoted mail and signatures, preferring the text part),
+attachments its documents (internal until shared), and the sender matched to a contact (and so a
+client), or left with no client until someone picks one. A known contact gets
+`RequestMailer#received`, a short acknowledgement with no reply address of its own: anything new
+they send is a request of its own. Automatic replies and our own mail are dropped.
 
 ## Clients and the portal
 
 Clients are `Contact`s, never `User`s: no password, no staff role. Two switches per contact:
 `portal_access` (sign in by emailed link, see the client's shared work and documents, send
-requests) and `can_approve` (decide on agreements). `Contact#portal?` is checked on every
+requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
 a client sees is decided per record (`client_visible` on work and documents); there are no
 client roles.
@@ -515,7 +536,7 @@ model rules) is in `docs/plugins.md`. Read it before changing a contract they us
 ## People and permissions
 
 Three fixed roles (`User::Role`): owner (everything, including settings, plugins and
-people), manager (sends agreements, records decisions, triages, closes, deletes) and member
+people), manager (closes engagements, deletes) and member
 (does the work). Each permission in `User::Role::PERMISSIONS` names the roles that have it;
 plugins add theirs with `Runwell::Plugins.permission key, :name, name:, roles:`. No custom
 roles or permission builder. Check with `user.can?(:delete_records)`, and in views `can?`.
@@ -528,30 +549,22 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
   (`Document#deletable_by?`: its uploader, or anyone who may delete records)
 - Hide what someone can't do (`can?` around the button or form); the controller still
   enforces it. Nest ReActionView state reads inside the `can?` check, never in one chain
-- People join by invitation (`Invitation`, Settings > People): an emailed, signed link
+- People join by invitation (`Invitation`, Users): an emailed, signed link
   that works once and expires in 7 days. Sign-up (`/signup`) only works while there are no
   users, and makes the first owner
 - Two-factor sign-in (`User::TwoFactor`, `rotp`): a code from an authenticator app after the
   password (`Sessions::TwoFactorsController`, the pending sign-in in the session cookie for five
   minutes and five tries), or one of ten single-use recovery codes (HMAC digests, shown once). Set
   up and turned off (password) in Settings > Your account; an owner requires it for everyone
-  (`Setting#require_two_factor`, Settings > People), which sends anyone without it to set it up
+  (`Setting#require_two_factor`, Users), which sends anyone without it to set it up
   (`Authentication#require_two_factor_setup`, browser sessions only), and resets someone's who
   lost their phone. Tokens and the portal are untouched; agents can't change any of it
-- Other ways in, ported from authentication-zero onto this sign-in (not regenerated over it):
-  an emailed link for anyone who switches it on (`User#passwordless`, Settings > Your account;
-  `Sessions::LinksController`, a button page so mail scanners can't use it, once, 15 minutes), and
-  Google, Microsoft (Entra ID) or GitHub through OmniAuth (`SignInProvider`, keys saved encrypted in
-  Settings > Sign-in and read in each provider's setup phase, so no restart). A person connects their
-  accounts in Your account (`Identity`), or is matched by an address Google or GitHub verified.
-  Single sign-on is a fourth provider, `openid_connect` (any OpenID Connect directory: Okta, Auth0,
-  Keycloak…), configured by issuer with discovery and PKCE, named by the owner (`label`), whose
-  addresses count as verified. `Setting#providers_only` (Only sign in through these) turns off
-  passwords and links for everyone but owners (`Setting#password_sign_in_for?`).
-  Nobody joins this way, and every way in ends in `Authentication#sign_in_after_first_step`, so
-  two-factor sign-in still follows
+- The one other way in is an emailed link for anyone who switches it on (`User#passwordless`,
+  Settings > Your account; `Sessions::LinksController`, a button page so mail scanners can't use it,
+  once, 15 minutes). No sign-in through Google, Microsoft, GitHub or single sign-on. It ends in
+  `Authentication#sign_in_after_first_step`, so two-factor sign-in still follows
 - People are deactivated, never deleted (`deactivate!` ends their sessions; their name stays
-  on their history). Each has a page in Settings > People (`settings/people/show`): their name,
+  on their history). Each has a page in Users (`users/show`): their name,
   address and role, a password reset email or a password set for them (`User::Access`), their
   sessions (sign out everywhere), their connected apps (cut them all off), two-factor, recent
   sign-ins, and deactivation. Your own password and two-factor stay in Your account. Pickers and
@@ -590,7 +603,7 @@ do, through the same controllers: there is no separate API.
   mentions (`User.people`). Agent writes carry `Current.source = "agent"` and the app's name as
   the event's actor label. Model verbs default `source:` to `Current.source`, never `"app"`
 - The AI button on work (`todos/_ai_brief`, key `c`) copies `Todo::Brief` from
-  `/todos/:id/brief` (also the `brief_work` tool): the work, agreed scope, notes, commitments and
+  `/todos/:id/brief` (also the `brief_work` tool): the work, agreed scope, notes, other dated work and
   the `runwell` commands to report back. Plugins add sections with
   `Runwell::Plugins.agent_brief key, ->(todo, base_url) { markdown }` (Code adds repos and a branch)
 - Auth: `AccessToken` (personal from Settings > Connected apps, or OAuth), digests only.
@@ -628,12 +641,11 @@ do, through the same controllers: there is no separate API.
   surfaces take staff tokens only (`authenticate_staff`); the portal takes a contact's
   (`Portal::BaseController#require_contact_token`), and `/portal/mcp` (`Portal::McpController`)
   offers only portal tools (`Agent::Catalogue.for_contact`), declared in the portal controllers
-  like any other (`portal_*`) with JSON views that show what the portal shows: agreements only as
-  `AgreementVersion#snapshot`, links to portal pages (`portal_agent_ref`). Names resolve within
+  like any other (`portal_*`) with JSON views that show what the portal shows, with links to
+  portal pages (`portal_agent_ref`). Names resolve within
   the contact's client. OAuth for a request naming the portal resource or scope goes to
   `Portal::OauthAuthorizationsController`, which signs the contact in by emailed link.
-  `portal_decide` confirms first and records `method: "agent"`; `Setting#client_agent_approvals`
-  (Settings > Connected apps) lets the owner turn that off. `docs/agents.md` is the guide
+  `docs/agents.md` is the guide
 
 ## In-app AI
 
@@ -641,8 +653,8 @@ The third way to use AI with Runwell, beside a local harness over MCP (coding be
 chat app over MCP, is an assistant inside the app: the AI plugin
 (`Martin-Business-Consultants/runwell-ai`, key `ai`; its AGENTS.md is the guide). Until 2.18 it was
 in the core. The core keeps only what the plugin reaches it through: the slots it fills (the nav's
-Ask button, home, the client, request and scope item sidebars, under a draft, each note and
-commitment row, the portal's header), `Runwell::Plugins.shortcut` for its `i` key,
+Ask button, home, the client, work and section sidebars, each note row, the
+portal's header), `Runwell::Plugins.shortcut` for its `i` key,
 `Runwell::Plugins.ai_prompt` (other plugins' questions for it), and `Agent::Dispatch.run_as`, which
 runs a tool as the person with a one-call `assistant` token. `ruby_llm` stays in the Gemfile, since
 plugins use only the core's gems; its tables (`ruby_llm_*`) are the plugin's (`tables:` in
@@ -671,9 +683,9 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 (`Setting`) as their subject: `user.signed_in` (method, two_factor, ip, browser),
 `user.sign_in_failed`, `user.two_factor_enabled / _disabled / _reset`, `user.recovery_codes_renewed`,
 `user.role_changed`, `user.profile_changed`, `user.password_set`, `user.password_reset_sent`,
-`user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`, `user.identity_connected / _disconnected`,
+`user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`,,
 `user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
-`settings.sign_in_provider`, `settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
+`settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
 
 ## Webhooks
@@ -721,15 +733,13 @@ release, once no code reads them. No migration may depend on a person running a 
 
 ## Settings and names
 
-Settings (the gear, `/settings`) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `settings-nav.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`) has Setup (the first-run checklist), Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `settings-nav.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, engagement, scope item and work, and each engagement type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,
 `term(:engagement, count: 2)`, `label_term(label)` and `label_options(current)` — never
 hard-code "Engagement", "Project", "Client" or "Work". Keys (`project`, `work_order`,
-`service`) never change. A new prefix applies to new refs only. Sign-up asks what the install will run (`Setting::Start`: a business,
-a team, personal life) and starts its names and prices switch from that; Settings > Names > Start
-from puts one back (`apply_starting_setup`). Only words and that switch differ between them.
+`service`) never change. A new prefix applies to new refs only.
 
 ## Appearance
 
@@ -754,7 +764,7 @@ Schemes and fonts override Fizzy's unlayered tokens, so they are unlayered too.
 Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: values for the design tokens
 in `docs/theming.md`, the contract (tokens stable across releases, class names not). It is served
 from `/theme/:digest` (`ThemesController`, never a `<style>`), linked last and unlayered on staff
-pages, and on the portal and approvals only with `custom_css_everywhere`; `?theme=off` skips it.
+pages, and on the portal only with `custom_css_everywhere`; `?theme=off` skips it.
 No `@import`, no `url()` but `data:`. `ThemeBrief` (Copy brief for AI, the `theme_brief` tool) is
 that guide with the install's current choices, for an AI to write one; `update_appearance` takes
 `custom_css`. A new token worth theming goes in the guide's tables.

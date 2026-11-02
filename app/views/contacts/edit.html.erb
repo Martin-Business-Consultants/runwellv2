@@ -17,7 +17,7 @@
 
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Archive this contact", title: "Archive #{@contact.name_was}?",
-            body: "They drop off the client’s contacts and can no longer sign in to the portal or approve. Their past approvals and requests stay.",
+            body: "They drop off the client’s contacts and can no longer sign in to the portal or approve. Their past requests stay.",
             button: "Archive contact", path: contact_path(@contact), icon: "remove" %>
     <% end %>
   </aside>

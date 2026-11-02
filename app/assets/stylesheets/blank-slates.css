@@ -8,7 +8,6 @@
     font-weight: 500;
     margin-block-start: 2dvh;
     padding: 1.5ch 2ch;
-    rotate: -3deg;
   }
 
   .blank-slate--drag {
@@ -16,6 +15,5 @@
     border-color: color-mix(in srgb, transparent, var(--card-color) 10%);
     color: color-mix(in srgb, transparent, var(--card-color) 75%);
     margin-block-start: 0;
-    rotate: 0deg;
   }
 }

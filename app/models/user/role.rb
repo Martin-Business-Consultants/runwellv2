@@ -8,17 +8,15 @@ module User::Role
 
   ROLE_DESCRIPTIONS = {
     "owner" => "Everything, including settings, plugins and people",
-    "manager" => "Sends agreements, records decisions, triages, closes and deletes",
-    "member" => "Does the work: todos, notes, documents and commitments"
+    "manager" => "Closes engagements and deletes records",
+    "member" => "Does the work: takes it on, notes and documents"
   }.freeze
 
   PERMISSIONS = {
     manage_settings: { name: "Change settings and plugins", roles: %w[owner] },
     manage_people: { name: "Invite people and change their roles", roles: %w[owner] },
-    send_agreements: { name: "Send agreements and record client decisions", roles: %w[owner manager] },
     close_engagements: { name: "Close engagements", roles: %w[owner manager] },
-    erase_engagements: { name: "Delete closed engagements permanently, agreements and all", roles: %w[owner] },
-    triage_requests: { name: "Triage requests", roles: %w[owner manager] },
+    erase_engagements: { name: "Delete closed engagements permanently, with their work and history", roles: %w[owner] },
     delete_records: { name: "Delete records", roles: %w[owner manager] }
   }.freeze
 

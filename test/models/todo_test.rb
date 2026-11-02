@@ -3,7 +3,7 @@ require "test_helper"
 class TodoTest < ActiveSupport::TestCase
   setup do
     @landing = engagements(:landing)
-    approve!(@landing)
+    work_per_section!(@landing)
     @design, @build = @landing.todos.order(:id).to_a
   end
 

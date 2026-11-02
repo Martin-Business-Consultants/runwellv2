@@ -1,21 +1,25 @@
 module BriefingsHelper
-  def question_subject_label(subject)
-    subject.is_a?(Engagement) ? "#{subject.ref} #{subject.title}" : subject.name
-  end
-
   # How many of each section home shows; the rest are a link away (briefing_more_path).
   def briefing_shown = 8
 
-  # Where a section's whole list is.
+  # Where a section's whole list is: the person's work, filtered the same way.
   def briefing_more_path(key)
     case key
-    when "requests" then requests_path
-    when "awaiting_client" then engagements_path(state: "sent")
-    when "drafts" then engagements_path(state: "draft")
-    when "waiting_on_them", "you_promised" then commitments_path
-    when "review", "blocked" then todos_path(view: "board")
-    when "overdue_todos" then todos_path(view: "table", sort: "due")
+    when "overdue", "today", "week" then todos_path(owner: "me", due: key, view: "table", sort: "due")
+    when "in_progress", "in_review", "blocked" then todos_path(owner: "me", status: key, view: "table")
+    when "review" then todos_path(owner: "me", status: "in_review", view: "table")
+    when "mentions" then notifications_path
     end
+  end
+
+  # The line at the top of home: each count that isn't zero, linking to its list.
+  def briefing_summary(briefing)
+    parts = { "overdue" => "overdue", "today" => "due today", "week" => "this week", "review" => "in review", "blocked" => "blocked", "mentions" => "unread mentions" }
+    links = parts.filter_map do |key, words|
+      count = briefing.count(key)
+      link_to("#{count} #{words}", briefing_more_path(key), class: class_names("home-summary__item", "home-summary__item--late": key == "overdue")) if count.positive?
+    end
+    safe_join(links, tag.span(" · ", class: "txt-subtle", aria: { hidden: true }))
   end
 
   # When something is due, the way a person says it: "today", "tomorrow", "Friday", "Oct 20", or
@@ -30,13 +34,8 @@ module BriefingsHelper
     end
   end
 
-  # A note's subject in a few words, for the discussion on home.
-  def home_subject_label(subject)
-    case subject
-    when Engagement then subject.ref
-    when Todo then subject.title
-    when Request then subject.subject
-    else subject.try(:name) || subject.try(:description) || subject.model_name.human
-    end
+  # Where a piece of work belongs, in a few words: the client, then the engagement's ref.
+  def home_work_where(todo)
+    [ todo.client&.name, todo.engagement&.ref ].compact.join(" · ")
   end
 end

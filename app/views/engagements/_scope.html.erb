@@ -1,17 +1,16 @@
 <%# locals: (engagement:, current: nil) %>
-<%# The engagement's scope down the sidebar: all its work, each agreed scope item, and work outside
-    the scope, each with how much is done. Picking one shows just its work in the Work tab
+<%# The engagement's sections down the sidebar: all its work, each section, and work in none, each
+    with how much is done. Picking one shows just its work in the Work tab
     (?item=), where its todos are added. current: the one shown ("all", an id, "other"), nil off
     the Work tab. Counted in one query, not one per item. %>
 <% statuses = engagement.todos.pluck(:scope_item_id, :status).group_by(&:first).transform_values { |rows| rows.map(&:last) } %>
-<% items = engagement.agreed_items %>
-<% extra = ScopeItem.where(id: statuses.keys.compact - items.map(&:id)).order(:id).to_a %>
-<% rows = (items + extra).map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
+<% items = engagement.scope_items.to_a %>
+<% rows = items.map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
 <% rows << [ "other", "Other work", statuses[nil] ] if statuses[nil] %>
 <% everything = statuses.values.flatten %>
 <% filters = request.query_parameters.slice("work") %>
 
-<%# Under the sidebar's Scope items tab (engagements/_sidebar), which names it. %>
+<%# Under the sidebar's sections tab (engagements/_sidebar), which names it. %>
 <section class="settings__section flex flex-column gap-half">
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= engagement_path(engagement, filters.merge(tab: "work")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
@@ -36,11 +35,16 @@
   </nav>
   <% if rows.empty? %>
     <p class="txt-subtle txt-small margin-none">
-      <% if engagement.internal? %>
-        No <%= term(:work).downcase %> yet: add it in the <%= term(:work) %> tab.
-      <% else %>
-        Nothing agreed yet. Approving the agreement lists its <%= term(:scope_item, count: 2).downcase %> here.
-      <% end %>
+      No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:work).downcase %>, or add <%= term(:work).downcase %> straight in the <%= term(:work) %> tab.
     </p>
   <% end %>
 </section>
+
+<% unless engagement.closed? %>
+  <div class="section-actions">
+    <details>
+      <summary class="btn txt-small"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
+      <%= render "scope_items/new", engagement: engagement %>
+    </details>
+  </div>
+<% end %>

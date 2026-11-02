@@ -23,11 +23,7 @@
         <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
 
         <%= form_with model: document, namespace: dom_id(document), class: "flex align-center gap-half txt-x-small", data: { controller: "form" } do |form| %>
-          <label class="switch" title="Visible to the client">
-            <%= form.check_box :client_visible, class: "switch__input", data: { action: "change->form#submit" } %>
-            <span class="switch__btn"></span>
-            <span class="for-screen-reader">Visible to the client</span>
-          </label>
+          <%= switch_tag(title: "Visible to the client", screen_reader_label: "Visible to the client") { form.check_box :client_visible, class: "switch__input", data: { action: "change->form#submit" } } %>
         <% end %>
         <% if document.deletable_by?(Current.user) %>
           <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), trigger_class: "txt-small", keys: "d",

@@ -5,6 +5,8 @@
     background-color: var(--input-background, transparent);
     border-radius: var(--input-border-radius, calc(0.5em * var(--radius-scale, 1)));
     border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-ink-light));
+    /* shadcn/ui's shadow-xs; inputs without a border set --input-shadow: none. */
+    box-shadow: var(--input-shadow, 0 1px 2px 0 oklch(var(--lch-black) / 5%));
     color: var(--input-color, var(--color-ink));
     /* 14px on a desk, matching the text around it; at least 16px on phones so iOS doesn't
     /* zoom into the field. */
@@ -34,7 +36,7 @@
     /* Focus as Linear shows it: the accent on the border and a soft halo, not a hard ring. */
     &:where(input, textarea, select):focus-visible {
       border-color: var(--color-link);
-      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-link) 22%, transparent);
+      box-shadow: var(--input-shadow, 0 1px 2px 0 oklch(var(--lch-black) / 5%)), 0 0 0 3px color-mix(in oklch, var(--color-link) 22%, transparent);
       outline: none;
     }
 
@@ -81,6 +83,7 @@
     input[type="file"] {
       --hover-size: 0;
       --input-border-color: transparent;
+      --input-shadow: none;
       --input-border-radius: calc(8px * var(--radius-scale, 1));
 
       block-size: 100%;
@@ -292,6 +295,7 @@
       --input-border-radius: 0;
       --input-background: transparent;
       --input-border-size: 0;
+      --input-shadow: none;
 
       inline-size: 100%;
       outline: 0;
@@ -317,6 +321,7 @@
   .input.boost__input {
     --input-border-radius: 0;
     --input-border-size: 0;
+    --input-shadow: none;
     --input-padding: 0;
 
     color: inherit;

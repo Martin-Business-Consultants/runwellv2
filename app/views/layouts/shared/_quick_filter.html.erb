@@ -6,8 +6,7 @@
     <span class="overflow-ellipsis"><%= options.to_h.invert.fetch(current, options.first.first) %></span>
   </button>
 
-  <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="<%= title %>" data-dialog-target="dialog">
-    <strong class="popup__title pad-inline-half"><%= title %></strong>
+  <%= popup_menu label: title, title: title do %>
     <ul class="popup__list" role="listbox">
       <% options.each do |text, value| %>
         <%# herb:key value %>
@@ -19,5 +18,5 @@
         </li>
       <% end %>
     </ul>
-  </dialog>
+  <% end %>
 </div>

@@ -14,11 +14,11 @@
     <header class="card__header">
       <div class="card__board">
         <div class="card__id">
-          <span class="for-screen-reader">Engagement</span>
-          <%= todo.engagement.ref %>
+          <span class="for-screen-reader"><%= term(:engagement) %></span>
+          <%= todo_ref(todo) %>
         </div>
         <div class="card__board-name">
-          <span class="overflow-ellipsis"><%= todo.engagement.client.name %></span>
+          <span class="overflow-ellipsis"><%= todo_client_name(todo) %></span>
         </div>
       </div>
     </header>

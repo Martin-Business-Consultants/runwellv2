@@ -1,83 +1,54 @@
-/* Home (briefings/show): a greeting with the day, a line for today, what needs a person, then what's
-/* coming up and the latest notes side by side, the person's engagements as cards, and the team. One
-/* column wider than a panel, two side by side where there's room. */
+/* Home (briefings/show): one line of counts, then the person's work as a dense table beside what's
+/* waiting on them. Two columns where there's room, one below 960px. */
 @layer components {
   .home {
     display: flex;
     flex-direction: column;
     gap: var(--block-space);
-    inline-size: min(100%, 72rem);
+    inline-size: min(100%, 80rem);
     margin-inline: auto;
     text-align: start;
 
-    /* Every panel takes the column's width, over panel--wide's own. */
+    /* Every panel takes its column's width, over panel--wide's own. */
     .panel {
       --panel-size: 100%;
+
+      margin: 0;
     }
   }
 
-  .home-greeting {
+  /* The counts, each a link to its list; overdue in red. */
+  .home-summary {
+    font-size: var(--text-normal);
+    margin: 0;
+
+    a { color: var(--color-ink); }
+    a.home-summary__item--late { color: var(--color-negative); }
+  }
+
+  .home-empty {
+    margin: 0;
+    padding-block: var(--block-space);
+  }
+
+  .home-grid {
+    align-items: start;
+    display: grid;
+    gap: var(--block-space);
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (min-width: 960px) {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+
+  .home-side {
     display: flex;
     flex-direction: column;
-    gap: 0.25em;
-    padding-block: var(--block-space) var(--block-space-half);
+    gap: var(--block-space);
   }
 
-  .home-greeting__date {
-    color: var(--color-ink-dark);
-    font-size: var(--text-small);
-    margin: 0;
-  }
-
-  .home-greeting__title {
-    font-size: clamp(var(--text-xx-large), 5vw, 2.75rem);
-    font-weight: 600;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
-    margin: 0;
-  }
-
-  .home-greeting__summary {
-    color: var(--color-ink-dark);
-    margin: 0;
-  }
-
-  /* Today: one line, the label, what's due, and the way to the list at the end. */
-  .home-today {
-    --panel-padding: var(--block-space-half) var(--inline-space);
-
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    font-size: var(--text-small);
-    gap: var(--inline-space-half) var(--inline-space);
-  }
-
-  .home-today__label {
-    color: var(--color-ink-dark);
-    font-size: var(--text-x-small);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .home-today__item,
-  .home-today__end {
-    align-items: center;
-    color: var(--color-link);
-    display: inline-flex;
-    gap: 0.35em;
-  }
-
-  .home-today__end {
-    margin-inline-start: auto;
-  }
-
-  .home-today__item--late {
-    color: var(--color-negative);
-  }
-
-  /* A panel's heading with its link on the right, in place of the divider. */
+  /* A panel's heading with its link on the right. Plugins' home panels use these too. */
   .home-panel__header {
     align-items: baseline;
     display: flex;
@@ -87,74 +58,80 @@
   }
 
   .home-panel__title {
-    font-size: var(--text-large);
+    font-size: var(--text-medium);
     font-weight: 600;
-    letter-spacing: -0.01em;
     margin: 0;
   }
 
-  .home-grid {
-    align-items: start;
-    display: grid;
-    gap: var(--block-space);
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  /* Your work: status, title, where, due, grouped by when it's due. */
+  .home-work__table {
+    table-layout: fixed;
+    inline-size: 100%;
 
-    /* Side by side, both start on the same line (a first child with a heading is otherwise pulled
-    /* up a third of a line). */
-    .home & > .panel {
-      margin: 0;
-    }
+    td { padding-block: 0.375rem; }
   }
 
-  /* A row of coming up: what, where, and when, the date at the end. */
-  .home-item {
-    align-items: baseline;
-    display: flex;
-    gap: var(--inline-space-half);
-    min-inline-size: 0;
+  .home-work__group th {
+    block-size: auto;
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    padding-block: var(--block-space-half) 0.25rem;
   }
 
-  .home-item__title {
-    flex: 1 1 auto;
-    min-inline-size: 0;
+  tbody:first-child .home-work__group th {
+    padding-block-start: 0;
+  }
+
+  .home-work__more {
+    font-weight: 400;
+    margin-inline-start: var(--inline-space-half);
+  }
+
+  .home-work__status { inline-size: 2rem; }
+  .home-work__where { inline-size: 32%; }
+  .home-work__due { inline-size: 7rem; text-align: end; white-space: nowrap; }
+
+  .home-work__title,
+  .home-work__where {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .home-item__meta {
-    color: var(--color-ink-dark);
-    font-size: var(--text-x-small);
-    white-space: nowrap;
-  }
-
-  .home-item__due {
-    color: var(--color-ink-dark);
-    font-size: var(--text-small);
-    white-space: nowrap;
-  }
-
-  .home-item__due--late {
-    color: var(--color-negative);
-  }
-
-  /* A note or a person: the avatar, then the words. */
-  .home-note {
-    align-items: flex-start;
+  /* Waiting on you: one line each, who, what, where. */
+  .home-list {
     display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .home-list__item + .home-list__item {
+    border-block-start: 1px solid var(--color-ink-lighter);
+  }
+
+  .home-list__link {
+    align-items: center;
+    color: var(--color-ink);
+    display: flex;
+    font-size: var(--text-small);
     gap: var(--inline-space-half);
+    min-inline-size: 0;
+    padding-block: 0.375rem;
   }
 
-  .home-note__body {
-    display: flex;
+  .home-list__title {
     flex: 1 1 auto;
-    flex-direction: column;
-    font-size: var(--text-small);
-    gap: 0.15em;
+    font-weight: 500;
+    min-inline-size: 0;
   }
 
-  .home-section {
-    display: flex;
-    flex-direction: column;
+  .home-list__meta {
+    flex: 0 1 auto;
+    font-size: var(--text-x-small);
+    max-inline-size: 45%;
+    white-space: nowrap;
   }
 }

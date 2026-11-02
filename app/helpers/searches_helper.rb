@@ -5,10 +5,8 @@ module SearchesHelper
     when Contact then client_path(record.client)
     when Todo then todo_path(record)
     when ScopeItem then scope_item_path(record)
-    when Commitment then record.engagement ? engagement_path(record.engagement) : client_path(record.client)
     when Note then search_result_path(record.subject)
     when Document then search_result_path(record.documentable)
-    when AgreementVersion then engagement_path(record.engagement)
     else polymorphic_path(record)
     end
   end

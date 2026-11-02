@@ -9,9 +9,9 @@ class Settings::Emails::SmtpsController < Settings::BaseController
 
     if setting.update(attributes)
       message = setting.smtp_address ? "Mail goes out through #{setting.smtp_address}. Send a test email to check it." : "No mail server is saved."
-      redirect_to settings_email_path, notice: message
+      redirect_to settings_email_path(tab: "server"), notice: message
     else
-      redirect_to settings_email_path, alert: setting.errors.full_messages.to_sentence
+      redirect_to settings_email_path(tab: "server"), alert: setting.errors.full_messages.to_sentence
     end
   end
 end

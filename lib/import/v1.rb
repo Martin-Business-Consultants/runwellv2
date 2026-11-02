@@ -1,14 +1,14 @@
 # Brings one Runwell v1 tenant into an empty v2 install: a copy of the tenant's SQLite file
 # (storage/tenants/production/<tenant>/main.sqlite3 in v1) and, optionally, the files it
 # attached (v1's storage/<tenant> tree). It reads v1's tables directly and writes through v2's
-# models and verbs, so refs, snapshots, approvals, events and the search index come out as if
+# models and verbs, so refs, events and the search index come out as if
 # the work had been entered here. It prints what it carried over and what it left behind.
 #
 #   bin/rails "import:v1[path/to/main.sqlite3,path/to/files]"
 #
 # What maps to what: partners → clients; partner users → contacts; staff → users with their
-# passwords; projects, services and work orders → engagements, each with an initial agreement
-# (milestones and work order items as scope items) sent and recorded as approved; todos → work;
+# passwords; projects, services and work orders → engagements (milestones and work order items
+# as their sections; v1's prices stay behind, since the core keeps no money); todos → work;
 # tickets → requests; notes, time entries and todo and ticket files; client addresses (custom
 # fields) and links (a note). Everything else in v1 (invoices, milestone health, specs,
 # questionnaires, daily reports, groups, tags, files whose records v1 no longer has) stays
@@ -18,7 +18,6 @@ require "sqlite3"
 module Import
   class V1
     SOURCE = "import"
-    EVIDENCE = "Imported from Runwell v1"
 
     TODO_STATUSES = { "open" => "planned", "in_progress" => "in_progress", "in_review" => "in_review",
                       "clarity_needed" => "blocked", "on_hold" => "blocked", "completed" => "done", "cancelled" => "done" }.freeze
@@ -37,7 +36,7 @@ module Import
       @engagements = {}  # "project:3", "service:1", "work_order:1" → Engagement
       @items = {}        # "milestone:5", "item:2" → ScopeItem
       @todos = {}        # v1 todo id → Todo
-      @requests = {}     # v1 ticket id → Request
+      @requests = {}     # v1 ticket id → Todo (a request, or the work it became)
       @counts = Hash.new(0)
       @skipped = Hash.new { |hash, key| hash[key] = [] }
     end
@@ -158,14 +157,10 @@ module Import
       @engagements["project:#{row["id"]}"] = engagement
       @counts[:projects] += 1
 
-      version = engagement.draft_version!(actor: actor)
-      version.scope_items.create!(description: row["name"], price_cents: row["total_value"].to_i) if row["total_value"].to_i > 0
       @db.execute("SELECT * FROM milestones WHERE project_id = ? ORDER BY position", [ row["id"] ]).each do |milestone|
-        @items["milestone:#{milestone["id"]}"] = version.scope_items.create!(description: milestone["name"], price_cents: 0)
+        @items["milestone:#{milestone["id"]}"] = engagement.scope_items.create!(description: milestone["name"])
       end
-      version.scope_items.create!(description: "#{row["name"]} work", price_cents: 0) if version.scope_items.none?
-
-      agree!(version, todos: todos_where("project_id = ?", row["id"]))
+      todos_where("project_id = ?", row["id"]).each { import_todo(it, engagement) }
       close!(engagement, "Completed in Runwell v1", at: time(row["completed_at"]) || time(row["updated_at"])) if row["completed"] == 1
     end
 
@@ -180,9 +175,7 @@ module Import
       @engagements["service:#{row["id"]}"] = engagement
       @counts[:services] += 1
 
-      version = engagement.draft_version!(actor: actor)
-      version.scope_items.create!(description: row["name"], price_cents: row["recurring_value"].to_i)
-      agree!(version, todos: todos_where("service_id = ? AND #{NO_PROJECT}", row["id"]))
+      todos_where("service_id = ? AND #{NO_PROJECT}", row["id"]).each { import_todo(it, engagement) }
       close!(engagement, "Ended in Runwell v1", at: time(row["updated_at"])) if row["completed"] == 1 || row["status"] != "active"
     end
 
@@ -199,9 +192,7 @@ module Import
         @engagements["general:#{partner_id}"] = engagement
         @counts[:general_engagements] += 1
 
-        version = engagement.draft_version!(actor: actor)
-        item = version.scope_items.create!(description: "General work", price_cents: 0)
-        agree!(version, todos: todos, item: item)
+        todos.each { import_todo(it, engagement) }
       end
     end
 
@@ -217,37 +208,13 @@ module Import
       @engagements["work_order:#{row["id"]}"] = engagement
       @counts[:work_orders] += 1
 
-      version = engagement.draft_version!(actor: actor)
       @db.execute("SELECT * FROM work_order_items WHERE work_order_id = ? ORDER BY position", [ row["id"] ]).each do |item|
         description = [ item["name"], plain(item["description"]) ].compact_blank.join(": ")
-        estimate = item["estimated_minutes"].to_i > 0 ? "#{(item["estimated_minutes"] / 60.0).round(1)}h" : nil
-        @items["item:#{item["id"]}"] = version.scope_items.create!(description: description, price_cents: item["total_cents"].to_i, internal_estimate: estimate)
+        @items["item:#{item["id"]}"] = engagement.scope_items.create!(description: description)
       end
-      version.scope_items.create!(description: row["title"], price_cents: row["quote_amount_cents"].to_i) if version.scope_items.none?
 
-      todos = todos_where("work_order_item_id IN (SELECT id FROM work_order_items WHERE work_order_id = ?)", row["id"])
-      if row["approved"] == 1
-        agree!(version, todos: todos)
-      elsif row["sent_at"].present?
-        agree!(version, todos: todos, approve: false)
-      else
-        todos.each { import_todo(it, engagement) }
-      end
+      todos_where("work_order_item_id IN (SELECT id FROM work_order_items WHERE work_order_id = ?)", row["id"]).each { import_todo(it, engagement) }
       close!(engagement, "Fulfilled in Runwell v1", at: time(row["fulfilled_at"])) if row["fulfilled_at"].present?
-    end
-
-    # Send the version, create its work, then record the approval: approving spawns a todo only
-    # for items that have none, and those placeholders are removed again.
-    def agree!(version, todos:, item: nil, approve: true)
-      engagement = version.engagement
-      version.send!(actor: actor, source: SOURCE)
-      todos.each { import_todo(it, engagement, item: item) }
-      return unless approve
-
-      before = engagement.todos.pluck(:id)
-      version.decide!(decision: "approved", method: "recorded", approver_name: engagement.client.name,
-                      evidence: EVIDENCE, recorded_by: actor, source: SOURCE)
-      engagement.todos.where.not(id: before).destroy_all
     end
 
     def close!(engagement, reason, at:)
@@ -257,10 +224,10 @@ module Import
 
     # --- Work ----------------------------------------------------------------------------
 
-    def import_todo(row, engagement, item: nil)
+    def import_todo(row, engagement)
       return if @todos.key?(row["id"])
 
-      scope_item = @items["milestone:#{row["milestone_id"]}"] || @items["item:#{row["work_order_item_id"]}"] || item
+      scope_item = @items["milestone:#{row["milestone_id"]}"] || @items["item:#{row["work_order_item_id"]}"]
       scope_item = nil if scope_item && scope_item.engagement != engagement
       owners = todo_owners[row["id"]] || []
       status = TODO_STATUSES.fetch(row["status"], "planned")
@@ -288,25 +255,25 @@ module Import
 
     # --- Requests, notes, time, files ----------------------------------------------------
 
-    # A ticket that became a todo is a promoted request; a closed one with no todo was dismissed.
+    # A ticket is a request: work on its client nobody has taken on. One that already became a todo
+    # is that todo (its notes and files join it); a closed one with no todo was let go, so it
+    # isn't brought over.
     def import_requests
       promoted = @db.execute("SELECT id, originating_ticket_id FROM todos WHERE originating_ticket_id IS NOT NULL ORDER BY id")
                     .group_by { it["originating_ticket_id"] }
       rows("tickets").each do |row|
-        request = Request.new(
-          client: @clients[row["partner_id"]], subject: row["subject"].presence || "(no subject)",
-          body: rich("Ticket", row["id"], "body") || row["body_html"].presence || row["body"].presence,
-          sender_name: row["sender_name"], sender_email: row["sender_email"],
-          source: row["message_id"].present? ? "email" : "portal",
-          received_at: time(row["created_at"]), created_at: time(row["created_at"]))
-        if (todo = promoted[row["id"]]&.filter_map { @todos[it["id"]] }&.first)
-          request.assign_attributes(status: "promoted", promoted: todo, triaged_by: @users[row["assigned_to_id"]] || actor, triaged_at: todo.created_at)
-        elsif row["status"] == "closed"
-          request.assign_attributes(status: "dismissed", dismissed_reason: "Closed in Runwell v1", triaged_by: actor, triaged_at: time(row["updated_at"]))
+        request = promoted[row["id"]]&.filter_map { @todos[it["id"]] }&.first
+        if request.nil?
+          next if row["status"] == "closed"
+
+          request = Todo.create!(
+            client: @clients[row["partner_id"]], title: row["subject"].presence || "(no subject)",
+            description: rich("Ticket", row["id"], "body") || row["body_html"].presence || row["body"].presence,
+            sender_name: row["sender_name"], sender_email: row["sender_email"],
+            source: row["message_id"].present? ? "email" : "portal", created_at: time(row["created_at"]))
+          @counts[:requests] += 1
         end
-        request.save!
         @requests[row["id"]] = request
-        @counts[:requests] += 1
         attach_files("Ticket", row["id"], request, client_visible: true)
       end
     end

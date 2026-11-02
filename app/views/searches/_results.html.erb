@@ -3,7 +3,7 @@
   <div class="search__results">
     <% if query.nil? %>
       <div class="search__blank-slate blank-slate">
-        Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, requests, work, commitments, notes and documents
+        Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, notes and documents
       </div>
     <% elsif results.empty? %>
       <div class="search__blank-slate blank-slate">

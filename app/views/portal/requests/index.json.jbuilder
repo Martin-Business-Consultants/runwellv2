@@ -1,11 +1,7 @@
-json.summary "#{pluralize @requests.size, "request"}, #{@requests.count(&:open?)} still open"
+json.summary "#{pluralize @requests.size, "request"}, #{@requests.count(&:request?)} not taken on yet"
 json.requests @requests do |request_record|
   json.id request_record.id
-  json.subject request_record.subject
-  json.received_at request_record.received_at
-  json.status(case request_record.status
-  when "open" then "open: not dealt with yet"
-  when "promoted" then "taken on"
-  else "closed#{": #{request_record.dismissed_reason}" if request_record.dismissed_reason.present?}"
-  end)
+  json.subject request_record.title
+  json.received_at request_record.created_at
+  json.status portal_request_status(request_record).downcase
 end

@@ -1,10 +1,10 @@
-# Settings > Address: where people reach this install. Every link Runwell sends (approval links,
+# Settings > Address: where people reach this install. Every link Runwell sends (sign-in links,
 # portal sign-ins, invitations, notifications) points here. APP_HOST in the environment is the
 # default for installs that set it; this wins once saved.
 class Settings::AddressesController < Settings::BaseController
   agent_tool :show_address, on: :show, title: "Show the address links in Runwell's email point to"
   agent_tool :update_address, on: :update, title: "Set the address people reach Runwell at, or its time zone",
-    description: "app_url: the install's address, like https://runwell.example.com (a bare host means https). Every link in email (approvals, portal sign-ins, invitations, notifications) points there. time_zone: the install's zone, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\").",
+    description: "app_url: the install's address, like https://runwell.example.com (a bare host means https). Every link in email (portal sign-ins, invitations, notifications) points there. time_zone: the install's zone, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\").",
     params: { setting: { app_url: "string", time_zone: "string" } }
 
   def show

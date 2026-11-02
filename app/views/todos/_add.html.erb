@@ -1,7 +1,9 @@
-<%# locals: (engagement:, scope_item: nil) %>
+<%# locals: (engagement: nil, client: nil, scope_item: nil) %>
+<%# Adds work on an engagement (under one of its scope items, or other work), or straight on a client. %>
+<% home = engagement || client %>
 <details class="section-actions">
   <summary class="btn txt-small"><%= icon_tag "add" %> Add a todo</summary>
-  <%= form_with model: Todo.new, url: engagement_todos_path(engagement), namespace: dom_id(scope_item || engagement, :new_todo),
+  <%= form_with model: Todo.new, url: (engagement ? engagement_todos_path(engagement) : client_todos_path(client)), namespace: dom_id(scope_item || home, :new_todo),
         class: "flex flex-column gap txt-small", data: { controller: "form" } do |form| %>
     <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What needs doing…" %>
     <div class="flex flex-wrap gap-half">
@@ -9,8 +11,8 @@
       <%= date_input form, :due_on, class: "input flex-item-grow", aria: { label: "Due" } %>
       <% if scope_item %>
         <%= form.hidden_field :scope_item_id, value: scope_item.id %>
-      <% else %>
-        <%= form.select :scope_item_id, engagement.agreed_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other work" }, class: "input input--select flex-item-grow", aria: { label: "Scope item" } %>
+      <% elsif engagement %>
+        <%= form.select :scope_item_id, engagement.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other work" }, class: "input input--select flex-item-grow", aria: { label: term(:scope_item) } %>
       <% end %>
     </div>
     <div class="flex gap-half justify-center">

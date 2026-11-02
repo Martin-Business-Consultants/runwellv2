@@ -1,4 +1,4 @@
-# What happened since an agent last looked: every event (work moved, requests in, agreements sent
+# What happened since an agent last looked: every event (work moved, requests in, engagements closed
 # and decided, notes and documents added…) after a cursor, oldest first. A scheduled bot keeps the
 # cursor it was given and passes it back next time, so it hears each change once.
 class ChangesController < ApplicationController

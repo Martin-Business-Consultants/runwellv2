@@ -7,10 +7,10 @@ class Settings::Emails::InboundsController < Settings::BaseController
     ingress = params.dig(:inbound, :ingress).presence_in(%w[relay postmark sendgrid])
     if ingress
       Setting.current.receive_mail_through!(ingress)
-      redirect_to settings_email_path(anchor: "requests_by_email"), notice: "Requests’ mail comes in through #{helpers.inbound_ingress_name(ingress)}. Give it the address and password shown."
+      redirect_to settings_email_path(tab: "receiving"), notice: "Requests’ mail comes in through #{helpers.inbound_ingress_name(ingress)}. Give it the address and password shown."
     else
       Setting.current.update!(inbound_ingress: nil)
-      redirect_to settings_email_path(anchor: "requests_by_email"), notice: "Runwell isn’t receiving requests by email."
+      redirect_to settings_email_path(tab: "receiving"), notice: "Runwell isn’t receiving requests by email."
     end
   end
 end

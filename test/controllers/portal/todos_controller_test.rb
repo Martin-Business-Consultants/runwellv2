@@ -2,8 +2,8 @@ require "test_helper"
 
 class Portal::TodosControllerTest < ActionDispatch::IntegrationTest
   test "index lists the client's visible work only" do
-    approve!(engagements(:landing))
-    approve!(engagements(:globex_site))
+    work_per_section!(engagements(:landing))
+    work_per_section!(engagements(:globex_site))
     engagements(:landing).todos.last.update!(client_visible: false)
     contacts(:ann).update!(portal_access: true)
     get portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))

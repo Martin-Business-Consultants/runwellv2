@@ -17,13 +17,11 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show" do
-    approve!(@landing)
+    work_per_section!(@landing)
     get engagement_path(@landing)
     assert_response :success
     assert_select "h1.page-title", "WO-1 Spring landing page"
-    assert_select ".record-meta", /Approved/
-    assert_select ".record-meta strong", "$4,000.00"
-    assert_select ".record-tabs__tab", text: /Agreement\s*1/
+    assert_select ".record-meta", /Active/
     assert_select "#work .work-group > ul > li", 2
     assert_select ".scope-nav__item", 3
 
@@ -46,14 +44,14 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
     assert_select "select[name='engagement[client_id]'] option[selected][value='#{clients(:acme).id}']"
   end
 
-  test "create drafts an engagement with an empty first version" do
-    assert_difference([ "Engagement.count", "AgreementVersion.count" ]) do
+  test "create starts an active engagement" do
+    assert_difference("Engagement.count") do
       post engagements_path, params: { engagement: { client_id: clients(:acme).id, label: "project", title: "Rebrand", estimate_notes: "2 weeks" } }
     end
     engagement = Engagement.last
     assert_redirected_to engagement_path(engagement)
     assert_equal "P-2", engagement.ref
-    assert engagement.draft_version.present?
+    assert_equal "active", engagement.state
     assert_equal "engagement.created", engagement.events.first.kind
   end
 

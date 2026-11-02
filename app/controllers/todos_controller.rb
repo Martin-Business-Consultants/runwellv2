@@ -2,55 +2,64 @@ class TodosController < ApplicationController
   allow_staff
   require_permission :delete_records, only: :destroy
   agent_tool :list_work, on: :index, title: "List work (todos)",
-    params: { status: %w[open all], owner: "string", engagement: "string" },
-    description: "Todos across engagements. owner: me (the person you act for), none, any, or a person’s id or name (work they lead or are on); engagement: a ref or all."
+    params: { status: %w[open all planned in_progress in_review blocked], owner: "string", engagement: "string", due: %w[overdue today week] },
+    description: "Todos across engagements. status: open (default), all, or one status; owner: me (the person you act for), none (nobody's on it), any, or a person’s id or name (work they lead or are on); engagement: a ref or all; due: overdue, today or week (the seven days after today)."
   agent_tool :show_work, on: :show, title: "Show a todo"
-  agent_tool :create_work, on: :create, title: "Add work (a todo) to an engagement",
-    description: "owner_id: who leads it; other_owner_ids: anyone else on it.",
-    params: { todo: { title: "string!", description: "text", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
+  agent_tool :create_work, on: :create, title: "Add work (a todo) to an engagement or a client",
+    description: "Give engagement_ref for work on an engagement, or todo.client_id for work straight on a client. owner_id: who leads it; other_owner_ids: anyone else on it. Work with nobody on it is a request until someone takes it on. A promise with a date is work with a due date. contact_id: the client contact who asked for it; source: how it came in (app, phone, email…).",
+    params: { engagement_ref: "string", todo: { title: "string!", description: "text", client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
   agent_tool :update_work, on: :update, title: "Change a todo",
     description: "Change its status (planned, in_progress, in_review when finished and waiting for a person to check, blocked, done), owners, due date or details. owner_id is the lead (replacing the lead, keeping the others; blank hands the lead to whoever else is on it); other_owner_ids is everyone else on it (replaces them; [] for nobody else). Both blank: nobody. client_visible shows it in the client’s portal.",
-    params: { todo: { title: "string", description: "text", status: Todo::STATUSES, owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
+    params: { todo: { title: "string", description: "text", status: Todo::STATUSES, client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", custom_fields: {} } }
   agent_tool :delete_work, on: :destroy, title: "Remove a todo"
   agent_tool :brief_work, on: :brief, title: "Get a brief for doing a todo",
-    description: "Everything needed to do this todo and report back, as Markdown: the work, its engagement and agreed scope, recent notes, open commitments, repositories when the Code plugin is on, and how to update status and leave notes.",
+    description: "Everything needed to do this todo and report back, as Markdown: the work, its engagement and agreed scope, recent notes, other open work with a date, repositories when the Code plugin is on, and how to update status and leave notes.",
     next_tools: %i[update_work add_note]
 
   before_action :set_todo, only: %i[show edit update destroy brief]
 
   sortable_columns title: "todos.title",
     engagement: [ "engagements.ref", ->(scope) { scope.left_joins(:engagement) } ],
-    client: [ "clients.name", ->(scope) { scope.left_joins(engagement: :client) } ],
+    client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ],
     owner: [ "owners.name", ->(scope) { scope.joins("LEFT JOIN users owners ON owners.id = todos.owner_id") } ],
     due: "todos.due_on",
     status: "CASE todos.status #{Todo::STATUSES.each_with_index.map { |status, index| "WHEN '#{status}' THEN #{index}" }.join(" ")} END"
 
+  STATUS_FILTERS = %w[open all planned in_progress in_review blocked].freeze
+
   def index
     @view = index_view(extra: %w[board])
-    @status = params[:status].presence_in(%w[open all]) || "open"
+    @status = params[:status].presence_in(STATUS_FILTERS) || "open"
     @owner = params[:owner].presence || "any"
     @engagement = params[:engagement].presence || "all"
+    @due = params[:due].presence_in(Todo::DUE_FILTERS.keys) || "any"
 
     scope = Todo.filtered(owner: owner_filter, engagement: @engagement)
+    scope = scope.public_send(Todo::DUE_FILTERS[@due]) unless @due == "any"
     @board = scope
-    scope = scope.open unless @status == "all"
+    scope = scope.open if @status == "open"
+    scope = scope.where(status: @status) unless @status.in?(%w[open all])
     @column_widths = column_widths(scope, :title, :engagement, :client) if @view == "table"
     @todos = paginate sorted(scope.includes(:custom_values).order(:due_on, :position, :id))
   end
 
+  # On an engagement (its ref in the path), a client (client_id, or the client's page), or the record
+  # picked in the quick action modal (g w n).
   def create
-    engagement =
+    home =
       if params[:engagement_ref] then Engagement.find_by_ref!(params[:engagement_ref])
-      elsif params[:record].present? then QuickAction.locate(params[:record], %w[Engagement]) # the quick action modal (g w n)
+      elsif params[:client_id] then Client.find(params[:client_id])
+      elsif params[:record].present? then QuickAction.locate(params[:record], %w[Engagement Client])
+      elsif params.dig(:todo, :client_id).present? then Client.find(params.dig(:todo, :client_id))
       end
-    return redirect_back(fallback_location: todos_path, alert: "Choose the #{Setting.current.term(:engagement).downcase} it’s for.") unless engagement
+    return redirect_back(fallback_location: todos_path, alert: "Choose the #{Setting.current.term(:engagement).downcase} or #{Setting.current.term(:client).downcase} it’s for.") unless home
 
-    todo = engagement.todos.new(todo_params.merge(created_by: current_user))
+    todo = home.todos.new(todo_params.merge(created_by: current_user))
     if todo.save
       todo.record_event!("todo.created")
-      redirect_back fallback_location: engagement, notice: params[:record].present? ? "Added “#{todo.title}” to #{engagement.ref} #{engagement.title}." : "Added."
+      redirect_back fallback_location: home, notice: params[:record].present? ? "Added “#{todo.title}” to #{home_name(home)}." : "Added."
     else
-      redirect_back fallback_location: engagement, alert: todo.errors.full_messages.to_sentence
+      redirect_back fallback_location: home, alert: todo.errors.full_messages.to_sentence
     end
   end
 
@@ -68,12 +77,12 @@ class TodosController < ApplicationController
       if params[:from_edit]
         redirect_to @todo, notice: "Saved."
       else
-        redirect_back fallback_location: @todo.engagement
+        redirect_back fallback_location: todo_home
       end
     elsif params[:from_edit]
       render :edit, status: :unprocessable_entity
     else
-      redirect_back fallback_location: @todo.engagement, alert: @todo.errors.full_messages.to_sentence
+      redirect_back fallback_location: todo_home, alert: @todo.errors.full_messages.to_sentence
     end
   end
 
@@ -89,9 +98,9 @@ class TodosController < ApplicationController
     @todo.destroy
     # From a list, stay on it; from the todo's own pages (now gone), go to its engagement.
     if request.referer.to_s.include?(todo_path(@todo))
-      redirect_to @todo.engagement, notice: "Removed."
+      redirect_to todo_home, notice: "Removed."
     else
-      redirect_back fallback_location: @todo.engagement, notice: "Removed."
+      redirect_back fallback_location: todo_home, notice: "Removed."
     end
   end
 
@@ -124,6 +133,11 @@ class TodosController < ApplicationController
       end
     end
 
+    def home_name(home) = home.is_a?(Engagement) ? "#{home.ref} #{home.title}" : home.name
+
+    # Where the work lives: its engagement, else its client, else the requests it's among.
+    def todo_home = @todo.engagement || @todo.client || todos_path(owner: "none")
+
   def set_todo = @todo = Todo.find(params[:id])
-  def todo_params = params.expect(todo: [ :title, :description, :status, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {}, other_owner_ids: [] ])
+  def todo_params = params.expect(todo: [ :title, :description, :status, :client_id, :contact_id, :source, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {}, other_owner_ids: [] ])
 end

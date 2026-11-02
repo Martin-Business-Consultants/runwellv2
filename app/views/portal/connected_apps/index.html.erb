@@ -26,13 +26,6 @@
       <p class="txt-small txt-subtle margin-none">
         Your own assistant (Muse, Claude, ChatGPT and the like) can see what you see here and ask us for things, as you.
         Everything it does is recorded as done through it.
-        <% if current_contact.can_approve? %>
-          <% if Setting.current.client_agent_approvals? %>
-            It can decide on an agreement too, but only after showing it to you and taking your typed name.
-          <% else %>
-            Agreements are decided here in the portal, not by an assistant.
-          <% end %>
-        <% end %>
       </p>
       <% if @tokens.any? %>
         <ul class="settings__scrollable-list">

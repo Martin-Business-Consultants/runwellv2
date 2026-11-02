@@ -63,30 +63,6 @@ export default class extends Controller {
     this.itemTargets.forEach(item => item.closest("tr")?.toggleAttribute("data-picked", item.checked))
   }
 
-  // A pill that copies text made from the picked rows (bulk_copy): its URL with each picked id
-  // as ids[], fetched inside a ClipboardItem so Safari keeps the click's permission while it loads.
-  // The same id picked twice (a row shown in two lists) goes once, in the order they're on the page.
-  // Deprecated in 2.29, gone in 3.0 (with BulkHelper#bulk_copy): a plugin copies with its own
-  // controller, reading the picked boxes.
-  async copy(event) {
-    console.warn("Runwell: bulk#copy (bulk_copy) is deprecated since 2.29 and goes in 3.0. Copy from your plugin's own controller.")
-    const button = event.currentTarget
-    const url = new URL(button.dataset.bulkCopyUrl, window.location.href)
-    ;[ ...new Set(this.#picked.map(item => item.value)) ].forEach(id => url.searchParams.append("ids[]", id))
-    button.classList.remove("bulk-bar__copied")
-
-    const text = fetch(url, { headers: { Accept: "text/plain" }, credentials: "same-origin" })
-      .then(response => { if (!response.ok) throw new Error(response.statusText); return response.text() })
-    try {
-      if (window.ClipboardItem && navigator.clipboard.write) {
-        await navigator.clipboard.write([ new ClipboardItem({ "text/plain": text.then(t => new Blob([ t ], { type: "text/plain" })) }) ])
-      } else {
-        await navigator.clipboard.writeText(await text)
-      }
-      button.classList.add("bulk-bar__copied")
-    } catch {}
-  }
-
   get #picked() {
     return this.itemTargets.filter(item => item.checked)
   }

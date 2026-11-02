@@ -3,44 +3,31 @@ require "test_helper"
 class ScopeItemsControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as(users(:ted))
-    @version = agreement_versions(:landing_v1)
+    @landing = engagements(:landing)
   end
 
-  test "create takes the price in cents" do
+  test "create adds a section to the engagement" do
     assert_difference("ScopeItem.count") do
-      post agreement_version_scope_items_path(@version), params: { scope_item: { description: "QA", price_cents: 150_000, internal_estimate: "1 day" } }
+      post engagement_scope_items_path(@landing), params: { scope_item: { description: "QA" } }
     end
-    item = @version.scope_items.last
-    assert_equal 150_000, item.price_cents
-    assert_equal 3, item.position
-    assert_redirected_to engagement_path(engagements(:landing))
+    assert_redirected_to engagement_path(@landing)
+    assert_equal "QA", @landing.scope_items.last.description
   end
 
-  test "create needs a description" do
+  test "create with errors" do
     assert_no_difference("ScopeItem.count") do
-      post agreement_version_scope_items_path(@version), params: { scope_item: { description: "", price_cents: 100 } }
+      post engagement_scope_items_path(@landing), params: { scope_item: { description: "" } }
     end
-    assert_redirected_to engagement_path(engagements(:landing))
-    assert_match(/Description/, flash[:alert])
+    assert_redirected_to engagement_path(@landing)
   end
 
-  test "update and destroy a draft item" do
+  test "rename and remove a section, keeping its work" do
     item = scope_items(:design)
-    patch scope_item_path(item), params: { scope_item: { price_cents: 200_050 } }
-    assert_equal 200_050, item.reload.price_cents
+    todo = @landing.todos.create!(title: "Wireframes", scope_item: item)
+    patch scope_item_path(item), params: { scope_item: { description: "Design" } }
+    assert_equal "Design", item.reload.description
     delete scope_item_path(item)
-    assert_nil ScopeItem.find_by(id: item.id)
-  end
-
-  test "a sent version's items are refused" do
-    @version.send!(actor: users(:ted))
-    assert_no_difference("ScopeItem.count") do
-      post agreement_version_scope_items_path(@version), params: { scope_item: { description: "Late", price_cents: 100 } }
-    end
-    patch scope_item_path(scope_items(:design)), params: { scope_item: { price_cents: 100 } }
-    assert_match(/immutable/, flash[:alert])
-    assert_equal 150_000, scope_items(:design).reload.price_cents
-    delete scope_item_path(scope_items(:design))
-    assert ScopeItem.exists?(scope_items(:design).id)
+    assert_not ScopeItem.exists?(item.id)
+    assert_nil todo.reload.scope_item_id
   end
 end

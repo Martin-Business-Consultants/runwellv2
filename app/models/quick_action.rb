@@ -2,7 +2,7 @@
 # registers, to the record on screen or to another one picked from a list. Notes, documents
 # and plugin records are polymorphic, so each action names the record types it takes.
 class QuickAction
-  RECORD_TYPES = %w[Client Engagement ScopeItem Todo Request].freeze
+  RECORD_TYPES = %w[Client Engagement ScopeItem Todo].freeze
   STARTING = 12 # records a picker shows before anything is typed
 
   attr_reader :key, :label, :title, :icon, :partial, :types
@@ -17,14 +17,10 @@ class QuickAction
   CORE = [
     new(key: :note, label: "Note", icon: "comment", partial: "quick_actions/note"),
     new(key: :document, label: "Document", icon: "attachment", partial: "quick_actions/document"),
-    # A promise with a date (p): on a client or engagement; work, a scope item or a request take
-    # its engagement, or its client.
-    new(key: :commitment, label: "Commitment", title: "Add a commitment", icon: "bookmark", partial: "quick_actions/commitment",
-      types: %w[Client Engagement], context: ->(record) { record.try(:engagement) || record.try(:client) }),
-    # Work from anywhere (g w n): on an engagement; work, a scope item or a request on screen take
-    # theirs.
+    # Work from anywhere (g w n): on an engagement or straight on a client; work or a scope item on
+    # screen take its engagement, else its client.
     new(key: :work, label: "Work", title: "Add work", icon: "check-circle", partial: "quick_actions/work",
-      types: %w[Engagement], context: ->(record) { record.try(:engagement) })
+      types: %w[Engagement Client], context: ->(record) { record.try(:engagement) || record.try(:client) })
   ].freeze
 
   class << self
@@ -59,7 +55,7 @@ class QuickAction
       case type
       when "Client" then Client.all
       when "Engagement" then Engagement.includes(:client)
-      when "Todo" then Todo.includes(engagement: :client)
+      when "Todo" then Todo.includes(:engagement, :client)
       else type.constantize.all
       end
     end

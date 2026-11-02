@@ -1,12 +1,8 @@
-<%# locals: (version:) %>
+<%# locals: (engagement:) %>
 <div class="scope-item-fields txt-small">
-  <%= form_with model: [ version, ScopeItem.new ], namespace: dom_id(version, :new_item) do |form| %>
-    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", placeholder: "New item", aria: { label: "New item" } %>
-    <% if prices_on? %>
-      <%= money_field form, :price_cents, value: 0, class: "input", placeholder: "Price", aria: { label: "Price" } %>
-    <% end %>
-    <%= form.text_field :internal_estimate, class: "input", autocomplete: "off", placeholder: "Internal est.", aria: { label: "Internal estimate" } %>
-    <button type="submit" class="btn btn--link scope-item-fields__add" title="Add item">
+  <%= form_with model: [ engagement, ScopeItem.new ], namespace: dom_id(engagement, :new_item) do |form| %>
+    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
+    <button type="submit" class="btn btn--link scope-item-fields__add" title="Add">
       <span>Add</span>
       <%= icon_tag "add" %>
     </button>

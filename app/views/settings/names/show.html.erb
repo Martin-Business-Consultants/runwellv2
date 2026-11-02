@@ -31,12 +31,7 @@
           <%# herb:key label %>
           <% field = "terminology[labels][" + label + "]" %>
           <div class="flex align-center gap-half">
-            <label class="switch flex-item-no-shrink" title="Use this type">
-              <%= hidden_field_tag field + "[enabled]", "0", id: nil %>
-              <%= check_box_tag field + "[enabled]", "1", @setting.label_enabled?(label), class: "switch__input", id: nil %>
-              <span class="switch__btn"></span>
-              <span class="for-screen-reader">Use <%= t("terms.labels.#{label}.one") %></span>
-            </label>
+            <%= switch_tag(title: "Use this type", screen_reader_label: "Use #{t("terms.labels.#{label}.one")}") { hidden_field_tag(field + "[enabled]", "0", id: nil) + check_box_tag(field + "[enabled]", "1", @setting.label_enabled?(label), class: "switch__input", id: nil) } %>
             <%= text_field_tag field + "[one]", @setting.terminology.dig("labels", label, "one"), id: nil, placeholder: t("terms.labels.#{label}.one"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Singular" } %>
             <%= text_field_tag field + "[other]", @setting.terminology.dig("labels", label, "other"), id: nil, placeholder: t("terms.labels.#{label}.other"), class: "input flex-item-grow", autocomplete: "off", aria: { label: "Plural" } %>
             <%= text_field_tag field + "[prefix]", @setting.terminology.dig("labels", label, "prefix"), id: nil, placeholder: t("terms.labels.#{label}.prefix"), class: "input names-prefix", autocomplete: "off", maxlength: 4, aria: { label: "Ref prefix" } %>
@@ -45,44 +40,6 @@
 
         <button type="submit" class="btn btn--link center" data-form-target="submit">Save names</button>
       <% end %>
-    </section>
-
-    <section class="settings__section flex flex-column gap" id="prices">
-      <header>
-        <h2 class="divider">Prices</h2>
-      </header>
-      <%= form_with model: @setting, url: settings_prices_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
-        <div class="record-form__toggle-text">
-          <%= form.label :prices, "Agreements have prices", class: "record-form__label" %>
-          <span class="record-form__hint">
-            On, <%= term(:scope_item, count: 2).downcase %> take a price and agreements show totals, wherever they have some: one with no prices reads as a plain list of what’s agreed.
-            Off, money is hidden everywhere, for planning without it: a home, a wedding, internal work.
-          </span>
-        </div>
-        <label class="switch flex-item-no-shrink">
-          <%= form.check_box :prices, class: "switch__input", data: { action: "change->form#submit" } %>
-          <span class="switch__btn"></span>
-        </label>
-      <% end %>
-    </section>
-
-    <section class="settings__section flex flex-column gap-half" id="start">
-      <header>
-        <h2 class="divider">Start from</h2>
-      </header>
-      <p class="txt-small txt-subtle margin-none">Replace every name above, and the prices switch, with a starting setup’s. Your records stay as they are; only the words change.</p>
-      <div class="start-choices">
-        <% Setting::STARTS.each do |key, start| %>
-          <%# herb:key key %>
-          <div class="start-choice">
-            <span>
-              <strong><%= start[:name] %></strong>
-              <span class="txt-small txt-subtle"><%= start[:description] %></span>
-            </span>
-            <%= button_to "Use these", settings_start_path, method: :patch, params: { start: key }, class: "btn txt-small" %>
-          </div>
-        <% end %>
-      </div>
     </section>
   </div>
 </section>

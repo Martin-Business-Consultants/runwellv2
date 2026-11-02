@@ -33,7 +33,7 @@ module Authentication
       end
     end
 
-    # The install requires two-factor sign-in (Settings > People) and this person, signed in
+    # The install requires two-factor sign-in (Users) and this person, signed in
     # with a browser, hasn't set it up: every staff page sends them to set it up first. Tokens
     # already made keep working; a new OAuth connection goes through the browser, so it waits too.
     def require_two_factor_setup

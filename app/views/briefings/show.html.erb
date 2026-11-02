@@ -1,62 +1,84 @@
 <% @page_title = "Needs you" %>
 
-<% needs = @sections.sum(&:count) %>
 <div class="home">
-  <%= render "briefings/home/greeting", home: @home, needs: needs %>
-
   <% if @release&.newer? %>
     <%= render "briefings/update", release: @release %>
   <% end %>
 
-  <% if @setup.show? %>
-    <%= render "briefings/setup", setup: @setup %>
-  <% end %>
-
   <%= plugin_slots(:home_top) %>
 
-  <%= render "briefings/home/today", home: @home %>
+  <% if @briefing.empty? %>
+    <p class="home-empty txt-subtle">Nothing needs you right now.</p>
+  <% else %>
+    <p class="home-summary"><%= briefing_summary(@briefing) %></p>
 
-  <div class="home-grid">
-    <%= render "briefings/home/coming_up", home: @home %>
-    <%= render "briefings/home/discussion", home: @home %>
-  </div>
-
-  <% @sections.each do |section| %>
-    <%# herb:key section.key %>
-    <section class="panel shadow txt-align-start settings__section home-panel">
-      <header class="home-panel__header">
-        <h2 class="home-panel__title"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
-      </header>
-
-      <%# The first few of each, with the way to the rest: a large install has hundreds overdue. %>
-      <ul class="settings__scrollable-list">
-        <%# A plugin's items needn't be records (Account management's alerts are Data), so no id. %>
-        <% section.items.each_with_index do |item, index| %>
-          <%# herb:key "#{item.class.name}-#{item.respond_to?(:id) ? item.id : index}" %>
-          <li data-filter-target="item" class="flex flex-column gap-half">
-            <% if section.partial %>
-              <%= render section.partial, item: item %>
-            <% else %>
-              <%= render "briefings/item", key: section.key, item: item %>
+    <div class="home-grid">
+      <section class="panel shadow home-panel home-work" aria-labelledby="home-work-title">
+        <header class="home-panel__header">
+          <h2 class="home-panel__title" id="home-work-title">Your <%= term(:work).downcase %></h2>
+          <%= link_to "All of it", todos_path(owner: "me", view: "table", sort: "due"), class: "txt-link txt-small" %>
+        </header>
+        <% if @briefing.work_sections.any? %>
+          <table class="data-table home-work__table">
+            <% @briefing.work_sections.each do |section| %>
+              <%# herb:key section.key %>
+              <tbody>
+                <tr class="home-work__group">
+                  <th colspan="4" scope="rowgroup">
+                    <%= section.title %> <span class="txt-subtle"><%= section.count %></span>
+                    <% if section.count > section.items.size %>
+                      <%= link_to "See all", briefing_more_path(section.key), class: "txt-link home-work__more" %>
+                    <% end %>
+                  </th>
+                </tr>
+                <% section.items.each do |todo| %>
+                  <%# herb:key todo.id %>
+                  <tr data-filter-target="item">
+                    <td class="home-work__status"><%= render "todos/status_dot", todo: todo %></td>
+                    <td class="home-work__title"><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
+                    <td class="home-work__where txt-subtle"><%= home_work_where(todo) %></td>
+                    <td class="<%= class_names("home-work__due", "txt-negative": todo.due_on&.past?, "txt-subtle": !todo.due_on&.past?) %>"><%= home_due(todo.due_on) if todo.due_on %></td>
+                  </tr>
+                <% end %>
+              </tbody>
             <% end %>
-          </li>
+          </table>
+        <% else %>
+          <p class="txt-small txt-subtle margin-none">Nothing of yours is due this week or in progress.</p>
         <% end %>
-      </ul>
-      <% if section.count > section.items.size %>
-        <% more_path = briefing_more_path(section.key) %>
-        <p class="txt-small txt-subtle margin-none">
-          And <%= section.count - section.items.size %> more.
-          <% if more_path %>
-            <%= link_to "See all #{section.count}", more_path, class: "txt-link" %>
+      </section>
+
+      <% if @briefing.waiting_sections.any? %>
+        <div class="home-side">
+          <% @briefing.waiting_sections.each do |section| %>
+            <%# herb:key section.key %>
+            <section class="panel shadow home-panel">
+              <header class="home-panel__header">
+                <h2 class="home-panel__title"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
+                <% if section.count > section.items.size %>
+                  <% more_path = briefing_more_path(section.key) %>
+                  <% if more_path %>
+                    <%= link_to "See all", more_path, class: "txt-link txt-small" %>
+                  <% end %>
+                <% end %>
+              </header>
+              <ul class="home-list">
+                <%# A plugin's items needn't be records (Account management's alerts are Data), so no id. %>
+                <% section.items.each_with_index do |item, index| %>
+                  <%# herb:key "#{item.class.name}-#{item.respond_to?(:id) ? item.id : index}" %>
+                  <li class="home-list__item" data-filter-target="item">
+                    <% if section.partial %>
+                      <%= render section.partial, item: item %>
+                    <% else %>
+                      <%= render "briefings/item", item: item %>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </section>
           <% end %>
-        </p>
+        </div>
       <% end %>
-    </section>
-  <% end %>
-
-  <%= render "briefings/home/engagements", home: @home %>
-
-  <% if can?(:triage_requests) %>
-    <%= render "briefings/home/team", home: @home %>
+    </div>
   <% end %>
 </div>

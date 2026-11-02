@@ -10,13 +10,9 @@ module ActiveSupport
 
     setup { Current.source = "test" }
 
-    # Send and approve a fixture draft so a test starts from agreed terms.
-    def approve!(engagement, actor: users(:ted), contact: nil)
-      version = engagement.draft_version
-      version.send!(actor: actor)
-      contact ||= engagement.client.approvers.first
-      version.decide!(decision: "approved", method: "recorded", contact: contact, evidence: "email on file", recorded_by: actor)
-      version
+    # One piece of work per section of a fixture engagement, named after it.
+    def work_per_section!(engagement)
+      engagement.scope_items.map { engagement.todos.create!(title: it.description, scope_item: it) }
     end
   end
 end

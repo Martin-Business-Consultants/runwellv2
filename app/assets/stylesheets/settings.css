@@ -178,7 +178,7 @@
   }
 }
 
-/* Settings > People */
+/* Users */
 @layer components {
   .people__avatar {
     --avatar-size: 2em;
@@ -186,7 +186,7 @@
     flex-shrink: 0;
   }
 
-  /* A person's page (settings/people/show): their avatar, larger, beside their name and tags. */
+  /* A person's page (users/show): their avatar, larger, beside their name and tags. */
   .person-heading {
     align-items: center;
     display: flex;
@@ -199,16 +199,6 @@
 
     .page-title {
       margin-block-end: 0.2em;
-    }
-  }
-
-  .people__invite {
-    display: grid;
-    gap: var(--inline-space-half);
-    grid-template-columns: 1fr auto auto;
-
-    @media (max-width: 639px) {
-      grid-template-columns: 1fr;
     }
   }
 
@@ -658,126 +648,12 @@
 
   .record-form__cancel {
     --btn-color: var(--color-ink-dark);
-    --btn-padding: 0.45em 0.85em;
+    --btn-padding: 0.6em 1.15em;
 
     border-radius: var(--radius-control);
 
     @media (any-hover: hover) {
       &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
-    }
-  }
-
-  /* A commitment (commitments/_commitment): its text, its state and Resolve on one row. The text
-  /* takes the room, so the state and the button sit at the end. Opened, Resolve takes a line of
-  /* its own: the button stays at the end and the form runs the full width beneath it. */
-  .commitment-row {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-
-    > :first-child { flex: 1 1 12rem; }
-  }
-
-  .commitment-row > .commitment-row__resolve {
-    flex-shrink: 0;
-    margin-block-end: 0;
-
-    &[open] > summary.btn { margin-block-end: 0; }
-
-    &[open] {
-      flex-basis: 100%;
-      inline-size: 100%;
-      text-align: end;
-
-      > form {
-        flex-wrap: nowrap;
-        margin-block-start: 0.5rem;
-        text-align: start;
-
-        .input {
-          flex: 1 1 auto;
-          inline-size: auto;
-          min-inline-size: 0;
-        }
-
-        .btn { flex-shrink: 0; }
-      }
-    }
-  }
-
-  /* A question for a person (questions/_question): the close button in the top right, clear of
-  /* the text, and the answers on one row below. */
-  .question {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    position: relative;
-  }
-
-  .question__text {
-    padding-inline-end: 2rem;
-  }
-
-  .question__dismiss-form {
-    inset: -0.15rem -0.25rem auto auto;
-    position: absolute;
-  }
-
-  .question__dismiss {
-    --icon-size: 0.85rem;
-
-    block-size: 1.75rem;
-    border-radius: var(--radius-control);
-    color: var(--color-ink-medium);
-    display: grid;
-    inline-size: 1.75rem;
-    place-items: center;
-
-    @media (any-hover: hover) {
-      &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
-    }
-  }
-
-  .question__answers {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-
-    .input-action { flex: 1 1 14rem; }
-  }
-
-  /* A field with its submit inside it: the arrow sits at the field's end. */
-  .input-action {
-    display: flex;
-    position: relative;
-
-    .input {
-      padding-inline-end: 2.4rem;
-    }
-  }
-
-  .input-action__submit {
-    --icon-size: 0.95rem;
-
-    block-size: 1.75rem;
-    border-radius: calc(var(--radius-control) - 0.1rem);
-    color: var(--color-ink-medium);
-    display: grid;
-    inline-size: 1.75rem;
-    inset: 50% 0.3rem auto auto;
-    place-items: center;
-    position: absolute;
-    translate: 0 -50%;
-
-    @media (any-hover: hover) {
-      &:hover { background-color: var(--color-hover); color: var(--color-ink); filter: none; }
-    }
-
-    .input-action:has(.input:not(:placeholder-shown)) & {
-      background-color: var(--color-link);
-      color: var(--color-white);
     }
   }
 
@@ -831,6 +707,7 @@
     .input {
       --input-border-color: transparent;
       --input-background: transparent;
+      --input-shadow: none;
 
       font-size: var(--text-x-small);
       inline-size: auto;
@@ -1112,39 +989,6 @@
   }
 }
 
-/* Starting setups (sign-up, Settings > Names > Start from): one row each, the choice beside its
-/* words. */
-@layer components {
-  .start-choices {
-    border: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--block-space-half);
-    margin: 0;
-    padding: 0;
-
-    legend { margin-block-end: var(--block-space-half); padding: 0; }
-  }
-
-  .start-choice {
-    align-items: center;
-    border: 1px solid var(--color-ink-lighter);
-    border-radius: calc(0.5rem * var(--radius-scale, 1));
-    cursor: pointer;
-    display: flex;
-    gap: var(--inline-space);
-    padding: var(--block-space-half) var(--inline-space);
-    text-align: start;
-
-    > span { display: flex; flex: 1 1 auto; flex-direction: column; gap: 0.15em; min-inline-size: 0; }
-
-    &:has(input:checked) {
-      background: var(--color-selected-light);
-      border-color: var(--color-link);
-    }
-  }
-}
-
 /* Finishing an engagement, under its Details: Mark complete or Cancel, or Reopen once closed. */
 @layer components {
   .engagement-finish { margin-block-start: var(--block-space-half); }
@@ -1170,5 +1014,35 @@
 
   .menu-arranger__down .icon {
     rotate: 180deg;
+  }
+}
+
+/* A section's name on one line with its round buttons (save, remove); adding one has the same
+/* columns, its Add button across both, so the rows line up. Forms are display: contents so their
+/* fields join the row's grid. */
+@layer components {
+  .scope-item-fields {
+    align-items: center;
+    display: grid;
+    gap: var(--inline-space-half);
+    grid-template-columns: minmax(0, 1fr) var(--btn-size) var(--btn-size);
+    inline-size: 100%;
+
+    form {
+      display: contents;
+    }
+
+    .input {
+      min-inline-size: 0;
+    }
+  }
+
+  .scope-item-fields__add {
+    --btn-gap: 0.25em;
+
+    grid-column: span 2;
+    justify-content: center;
+    padding-inline: 0;
+    white-space: nowrap;
   }
 }

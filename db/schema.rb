@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_18_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_140000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -455,14 +455,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_180000) do
   end
 
   create_table "scope_items", force: :cascade do |t|
-    t.integer "agreement_version_id", null: false
+    t.integer "agreement_version_id"
     t.string "description", null: false
     t.string "internal_estimate"
     t.integer "price_cents", default: 0, null: false
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "engagement_id"
     t.index ["agreement_version_id"], name: "index_scope_items_on_agreement_version_id"
+    t.index ["engagement_id"], name: "index_scope_items_on_engagement_id"
   end
 
   create_table "searchable_documents", force: :cascade do |t|
@@ -545,7 +547,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_180000) do
   end
 
   create_table "todos", force: :cascade do |t|
-    t.integer "engagement_id", null: false
+    t.integer "engagement_id"
     t.integer "scope_item_id"
     t.string "title", null: false
     t.text "description"
@@ -559,6 +561,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_180000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "board_position", null: false
+    t.integer "client_id"
+    t.integer "contact_id"
+    t.string "source", default: "app", null: false
+    t.string "sender_name"
+    t.string "sender_email"
+    t.index ["client_id"], name: "index_todos_on_client_id"
+    t.index ["contact_id"], name: "index_todos_on_contact_id"
     t.index ["created_by_id"], name: "index_todos_on_created_by_id"
     t.index ["engagement_id", "status", "position"], name: "index_todos_on_engagement_id_and_status_and_position"
     t.index ["engagement_id"], name: "index_todos_on_engagement_id"

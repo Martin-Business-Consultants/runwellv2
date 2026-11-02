@@ -20,20 +20,9 @@
     </button>
   <% end %>
 
-  <% providers = SignInProvider.usable_keys %>
   <div class="sign-in-options margin-block-start">
-    <% providers.each do |key| %>
-      <%# herb:key key %>
-      <%= button_to "/auth/#{key}", class: "btn full-width", data: { turbo: false } do %>
-        <span>Continue with <%= SignInProvider.name_for(key) %></span>
-      <% end %>
-    <% end %>
-    <% if Setting.current.providers_only? %>
-      <p class="txt-x-small txt-subtle margin-none">This install signs in through <%= providers.map { SignInProvider.name_for(it) }.to_sentence(last_word_connector: " or ") %>. The password is for owners.</p>
-    <% else %>
-      <%= link_to new_session_link_path(email_address: params[:email_address]), class: "btn full-width" do %>
-        <%= icon_tag "email" %> <span>Email me a sign-in link</span>
-      <% end %>
+    <%= link_to new_session_link_path(email_address: params[:email_address]), class: "btn full-width" do %>
+      <%= icon_tag "email" %> <span>Email me a sign-in link</span>
     <% end %>
   </div>
 

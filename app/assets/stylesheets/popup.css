@@ -8,7 +8,8 @@
     --popup-item-padding-inline: 0.4rem;
     --popup-display: flex;
 
-    inset: 0 auto auto 50%;
+    /* Below its trigger (the positioned wrapper around both), never over it. */
+    inset: 100% auto auto 50%;
     max-block-size: 70dvh;
     max-inline-size: min(55ch, calc(100vw - (var(--panel-padding))));
     min-inline-size: min(25ch, calc(100vw - (var(--panel-padding))));

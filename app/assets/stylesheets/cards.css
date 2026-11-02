@@ -403,7 +403,6 @@
     padding: 1ch;
     pointer-events: none;
     position: absolute;
-    rotate: 5deg;
     transform-origin: top right;
     z-index: 2;
 

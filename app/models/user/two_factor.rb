@@ -18,7 +18,7 @@ module User::TwoFactor
 
   def two_factor? = otp_enabled_at.present?
 
-  # The install requires it (Settings > People) and this person hasn't set it up yet.
+  # The install requires it (Users) and this person hasn't set it up yet.
   def two_factor_setup_required? = !two_factor? && !agent? && Setting.current.require_two_factor?
 
   # The otpauth:// address an authenticator app reads from the QR code.

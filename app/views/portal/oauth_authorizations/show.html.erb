@@ -4,7 +4,7 @@
   <h1 class="txt-x-large font-weight-black margin-none">Connect <%= @client.name %>?</h1>
   <p class="txt-medium margin-none">
     <strong><%= @client.name %></strong> will act as you, <strong><%= current_contact.name %></strong>, in <%= Setting.current.brand_name %>’s portal for <%= current_contact.client.name %>:
-    seeing your engagements, agreements, work and documents, and sending requests<% if current_contact.can_approve? && Setting.current.client_agent_approvals? %>, and deciding agreements once you’ve seen them and given your name<% end %>.
+    seeing your engagements, work and documents, and sending requests.
   </p>
   <p class="txt-small txt-subtle margin-none">
     It sees only what you see here. What it does is marked as done through <%= @client.name %>. You can disconnect it any time under Connected apps.

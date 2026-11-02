@@ -10,12 +10,12 @@
         data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
     <label class="flex flex-column gap-half txt-align-start">
       <span class="record-form__label">Subject</span>
-      <%= form.text_field :subject, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
+      <%= form.text_field :subject, value: @request_record.title, required: true, class: "input full-width", autofocus: true, autocomplete: "off" %>
     </label>
 
     <label class="flex flex-column gap-half txt-align-start">
       <span class="record-form__label">Details</span>
-      <%= rich_text_field form, :body %>
+      <%= rich_text_field_tag form.field_name(:body), @request_record.description, id: form.field_id(:body) %>
     </label>
 
     <button type="submit" class="btn btn--link center" data-form-target="submit">

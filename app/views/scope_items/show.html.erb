@@ -29,10 +29,7 @@
           </header>
 
           <ul class="settings__scrollable-list">
-            <% @todos.each do |todo| %>
-              <%# herb:key todo.id %>
-              <%= render "todos/todo", todo: todo %>
-            <% end %>
+            <%= render partial: "todos/todo", collection: @todos, as: :todo %>
           </ul>
 
           <% if @todos.none? %>
@@ -66,14 +63,14 @@
         <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
         <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement, class: "txt-link" %></dd>
         <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
-        <dt>Agreement</dt><dd><%= @item.agreement_version.label %> (<%= @item.agreement_version.status.humanize.downcase %>)</dd>
-        <% if prices_on? %>
-          <dt>Price</dt><dd><%= money @item.price_cents %></dd>
-        <% end %>
-        <% if @item.internal_estimate.present? %>
-          <dt>Estimate</dt><dd><%= @item.internal_estimate %> <span class="txt-subtle">(internal)</span></dd>
-        <% end %>
       </dl>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Rename or remove</h2>
+      </header>
+      <%= render "scope_items/item", item: @item %>
     </section>
 
   </aside>

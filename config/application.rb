@@ -29,7 +29,7 @@ module Runwellv2
     #
     # Times are stored in UTC and shown in the agency's zone: Eastern unless TIME_ZONE names another
     # (a Rails name like "Pacific Time (US & Canada)" or an IANA one like "America/Chicago"). A client
-    # with its own zone (Client#time_zone) sees its portal, approval pages and emails in that zone.
+    # with its own zone (Client#time_zone) sees its portal, client-facing pages and emails in that zone.
     config.time_zone = ENV.fetch("TIME_ZONE", "Eastern Time (US & Canada)")
 
     # Plugins' own JavaScript (InstalledPlugins#javascript_dirs): served as assets, pinned in the

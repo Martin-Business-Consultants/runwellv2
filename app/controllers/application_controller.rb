@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
   private
 
   # The install's time zone (Settings > Address), unless the environment's default stands. The
-  # portal and approval pages switch to the client's own inside this.
+  # portal and client-facing pages switch to the client's own inside this.
   def in_install_time_zone(&) = Time.use_zone(Setting.zone, &)
 
   public

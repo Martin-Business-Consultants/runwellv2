@@ -29,21 +29,22 @@
     inline-size: 100%;
     text-align: start;
 
+    /* shadcn/ui's table: text-sm throughout, headers h-10 px-2 font-medium, cells p-2. */
     th {
-      background-color: var(--color-ink-lightest);
+      block-size: 2.5rem;
       border-block-end: 1px solid var(--color-ink-lighter);
-      color: var(--color-ink-dark);
-      font-size: var(--text-x-small);
+      color: var(--color-ink);
+      font-size: var(--text-small);
       font-weight: 500;
-      padding: 0.6em 0.9em;
+      padding: 0 0.5rem;
       text-align: start;
       white-space: nowrap;
     }
 
     td {
       border-block-end: 1px solid var(--color-ink-lighter);
-      color: var(--color-ink-darker);
-      padding: 0.55em 0.9em;
+      color: var(--color-ink);
+      padding: 0.5rem;
       vertical-align: middle;
 
       /* On a phone each row stays one line and the table scrolls sideways. */
@@ -446,16 +447,6 @@
 
   .bulk-bar__pill {
     --btn-border-radius: var(--radius-control);
-  }
-
-  /* bulk_copy: says Copied once the text is on the clipboard. */
-  .bulk-bar__copied-text {
-    display: none;
-  }
-
-  .bulk-bar__copy.bulk-bar__copied {
-    > span:not(.bulk-bar__copied-text) { display: none; }
-    .bulk-bar__copied-text { display: inline; }
   }
 
   .bulk-bar__end {

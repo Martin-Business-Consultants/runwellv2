@@ -1,8 +1,8 @@
 # Everything a local AI needs to do one piece of work and report back, as Markdown: what the
-# work is and where it sits, what the client agreed, what's been said, what's promised, how to
+# work is and where it sits, the section it belongs to, what's been said, what else is due, how to
 # update Runwell with the `runwell` command (or MCP), and whatever plugins add (the Code plugin
 # adds repositories and a branch). Copied by the AI button on a todo, and served to agents by
-# the brief_work tool. Staff only: it includes internal notes, never estimates.
+# the brief_work tool. Staff only: it includes internal notes.
 class Todo::Brief
   attr_reader :todo, :base_url, :person
 
@@ -22,15 +22,16 @@ class Todo::Brief
     def plain(html) = html.present? ? ActionText::Content.new(html.to_s).to_plain_text.strip : nil
 
     def sections
-      [ heading, the_work, agreed_scope, notes, commitments, *plugin_sections, working_with_runwell, rules ]
+      [ heading, the_work, agreed_scope, notes, due_alongside, *plugin_sections, working_with_runwell, rules ]
     end
 
     def heading
       lines = [ "# #{todo.title}", "",
         "Runwell work item #{record}: #{base_url}/work/#{todo.id}",
-        "Client: #{engagement.client.name}",
-        "#{Setting.current.label_name(engagement.label)}: #{engagement.ref} #{engagement.title}",
-        ("Scope item: #{todo.scope_item.description}" if todo.scope_item),
+        "Client: #{todo.client&.name || "none matched yet"}",
+        ("#{Setting.current.label_name(engagement.label)}: #{engagement.ref} #{engagement.title}" if engagement),
+        ("Requested by: #{todo.requester_name} (#{todo.source})" if todo.requester_name.present?),
+        ("#{Setting.current.term(:scope_item)}: #{todo.scope_item.description}" if todo.scope_item),
         "Status: #{todo.status.humanize}" + (todo.owner ? " · Lead: #{todo.owner.display_name}#{" · Also on it: #{todo.other_owners.map(&:display_name).to_sentence}" if todo.other_owners.any?}" : " · Unassigned") + (todo.due_on ? " · Due: #{todo.due_on.iso8601}" : "") ]
       lines.compact.join("\n")
     end
@@ -40,13 +41,14 @@ class Todo::Brief
       "## The work\n\n#{text.presence || "(No description. Read the notes below, and ask if it's unclear.)"}"
     end
 
-    # What the client approved, as they saw it: the measure for whether this is in scope.
+    # The engagement's sections, so the work is read against the rest of what it delivers.
     def agreed_scope
-      version = engagement.current_version or return "## Agreed scope\n\nNothing approved yet for #{engagement.ref}: treat the scope as unsettled."
+      return unless engagement
 
-      items = Array(version.snapshot&.dig("items")).map { "- #{it["description"]}" }
-      summary = version.snapshot&.dig("summary").presence
-      [ "## Agreed scope (#{engagement.ref}, as the client approved it)", summary, items.join("\n").presence ].compact.join("\n\n")
+      sections = engagement.scope_items.map { "- #{it.description}#{" (this one)" if it.id == todo.scope_item_id}" }
+      return if sections.empty?
+
+      "## #{Setting.current.term(:scope_item, count: 2)} of #{engagement.ref}\n\n#{sections.join("\n")}"
     end
 
     def notes
@@ -58,11 +60,15 @@ class Todo::Brief
       }.join("\n")
     end
 
-    def commitments
-      open = engagement.commitments.open.ordered.to_a
+    # Other open work with a date alongside this one (on its engagement, else its client): what else
+    # has been promised.
+    def due_alongside
+      home = engagement || todo.client or return
+      open = home.todos.open.where.not(id: todo.id).where.not(due_on: nil).includes(:owner).order(:due_on).limit(10).to_a
       return if open.empty?
 
-      "## Open commitments on #{engagement.ref}\n\n" + open.map { "- #{it.description} · #{it.owner_name} · due #{it.due_on.iso8601}" }.join("\n")
+      "## Other dated work on #{engagement ? engagement.ref : home.name}\n\n" +
+        open.map { "- #{it.title} · #{it.owner&.display_name || "unassigned"} · due #{it.due_on.iso8601}" }.join("\n")
     end
 
     def plugin_sections

@@ -4,7 +4,7 @@ class TodosControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as(users(:ted))
     @landing = engagements(:landing)
-    approve!(@landing)
+    work_per_section!(@landing)
     @design = @landing.todos.first
   end
 

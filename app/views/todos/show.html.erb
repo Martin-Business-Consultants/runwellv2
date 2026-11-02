@@ -1,5 +1,5 @@
 <% @page_title = @todo.title %>
-<% home = @todo.scope_item || @todo.engagement %>
+<% home = @todo.scope_item || @todo.engagement || @todo.client %>
 <% tabs = [
      record_tab("notes", "Notes", count: @todo.notes.count),
      record_tab("documents", "Documents", count: @todo.documents.count)
@@ -8,7 +8,11 @@
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
 <% content_for :header do %>
-  <%= parent_page(@todo.scope_item ? @todo.scope_item.description : @todo.engagement.ref, home) %>
+  <% if home %>
+    <%= parent_page(@todo.scope_item&.description || @todo.engagement&.ref || @todo.client.name, home) %>
+  <% else %>
+    <%= parent_page term(:work), todos_path(owner: "none") %>
+  <% end %>
 
 <% end %>
 
@@ -27,11 +31,17 @@
     </div>
     <section class="settings__section flex flex-column gap-half">
       <div class="txt-small">
-        <%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %>
-        <% if @todo.scope_item %>
-          › <%= link_to @todo.scope_item.description, @todo.scope_item, class: "txt-link" %>
+        <% if @todo.engagement %>
+          <%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %>
+          <% if @todo.scope_item %>
+            › <%= link_to @todo.scope_item.description, @todo.scope_item, class: "txt-link" %>
+          <% else %>
+            › <span class="txt-subtle">Other work</span>
+          <% end %>
+        <% elsif @todo.client %>
+          <%= link_to @todo.client.name, @todo.client, class: "txt-link" %> › <span class="txt-subtle">Not on any <%= term(:engagement).downcase %></span>
         <% else %>
-          › <span class="txt-subtle">Other work</span>
+          <span class="txt-subtle">No <%= term(:client).downcase %> matched yet: edit it to choose one.</span>
         <% end %>
       </div>
 
@@ -64,6 +74,7 @@
   <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
 
     <%= render "layouts/shared/sidebar_toggle" %>
+    <%= plugin_slots(:todo_aside, todo: @todo) %>
     <section class="settings__section flex flex-column gap-half">
       <header>
         <h2 class="divider">Details</h2>
@@ -82,17 +93,24 @@
             <span class="txt-subtle">No date</span>
           <% end %>
         </dd>
-        <dt><%= term(:client) %></dt><dd><%= link_to @todo.engagement.client.name, @todo.engagement.client, class: "txt-link" %></dd>
+        <dt><%= term(:client) %></dt>
+        <dd>
+          <% if @todo.client %>
+            <%= link_to @todo.client.name, @todo.client, class: "txt-link" %>
+          <% else %>
+            <span class="txt-subtle">None matched</span>
+          <% end %>
+        </dd>
+        <% if @todo.requester_name.present? %>
+          <dt>Requested by</dt><dd><%= @todo.requester_name %><% if @todo.sender_email.present? && @todo.contact.nil? %> <span class="txt-subtle">(<%= @todo.sender_email %>)</span><% end %></dd>
+        <% end %>
+        <dt>Came in</dt><dd><%= @todo.source.humanize %>, <%= l @todo.created_at.to_date, format: :short %></dd>
         <dt>Client sees it</dt><dd><%= @todo.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>
         <% if @todo.completed_at %>
           <dt>Done</dt><dd><%= l @todo.completed_at.to_date, format: :short %></dd>
         <% end %>
       </dl>
     </section>
-
-    <% if @todo.status != "done" %>
-      <%= render "todos/make_commitment", todo: @todo %>
-    <% end %>
 
     <%= render "events/timeline", subject: @todo %>
   </aside>

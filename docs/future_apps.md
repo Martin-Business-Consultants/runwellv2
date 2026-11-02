@@ -1,7 +1,7 @@
 # Future apps
 
-Runwell v2 is the core: who we work for, what we agreed, what is happening
-against it, what came in, and what needs a person now. Everything below was in
+Runwell v2 is the core: who we work for, what we run for them, what is happening
+on it, what came in, and what needs a person now. Everything below was in
 the first Runwell and was left out on purpose. Each is a candidate for a separate
 app or a plugin that talks to the core through its API, events and
 identifiers, never through the core's tables.
@@ -9,10 +9,9 @@ identifiers, never through the core's tables.
 ## Money (QuickBooks)
 
 Runwell never holds money and has no notion of "billable": everything is a
-project, work order or service. When an approval fires, the core records an
-`agreement.approved` event on the engagement. A QuickBooks tool can follow those
-events, read the approved version's frozen snapshot (amount, client, engagement)
-and invoice from it, keeping its own record of what it has invoiced.
+project, work order or service. Agreements, with any price in their text, are the Agreements
+plugin's (3.0); a QuickBooks or Stripe plugin keeps its own amounts per engagement and its own
+record of what it has invoiced or charged.
 
 Left out with it: invoices, invoice items, payments, recurring invoices,
 expenses, financials (daily brief, losses, revenue), customer billing and costs,
@@ -32,7 +31,7 @@ reading engagements and todos by id. Estimates stay internal inputs to pricing.
 ## Dashboards, daily reports, weekly work
 
 Dropped. The briefing ("Needs you") is the one home page. Boards over the core
-queries (overdue commitments, awaiting client, blocked work) can be generated as
+queries (overdue work, awaiting client, blocked work) can be generated as
 read-only views later; they must not carry state of their own.
 
 ## Recipes
@@ -43,12 +42,12 @@ creates todos through the API from a stored template.
 ## Specs
 
 Spec documents with sources, revisions, reviews and questions. A separate app
-that links to an engagement by ref and may push scope items into a draft version.
+that links to an engagement by ref and may add sections (scope items) to it.
 
 ## Questionnaires
 
 Client intake forms with templates and public links. A separate app whose
-answers arrive in the core as a Request with source "questionnaire: <name>".
+answers arrive in the core as a request (work nobody has taken on) with source "questionnaire: <name>".
 
 ## Prospecting
 
@@ -58,16 +57,15 @@ converts.
 
 ## Generic documents
 
-Rich documents with blocks, tags, public links and signing. Removed. The only
-document the core renders is the agreement snapshot, which is frozen and hashed.
-Document signing outside an agreement is a separate concern.
+Rich documents with blocks, tags, public links and signing. Removed from the core. Agreements
+the client signs are the Agreements plugin's (3.0).
 
 ## Agents and GitHub
 
 The first Runwell had AI tasks, workers, PR review, GitHub App installs and
 infrastructure records on partners, projects and services. In v2 an agent is an
-actor: it writes events, notes, requests, questions and drafts with a source,
-and cannot send agreements, record approvals or resolve commitments. Code
+actor: it writes events, notes, requests and questions with a source, with its person's
+permissions. Code
 hosting integrations (repos, PRs, deploy previews) are a peer tool that logs
 events against an engagement or todo by id.
 
@@ -86,7 +84,7 @@ change the domain model.
 
 ## Also dropped
 
-Notifications inbox and thread digests (email is sent for approval links and
+Notifications inbox and thread digests (email is sent for
 portal sign-in only), impersonation, device authorizations, API tokens, MCP and
 CLI front doors (to be re-added over the same controllers), Rails Pulse, search
 across records, record panels, tags and categories, builder and

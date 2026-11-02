@@ -31,7 +31,7 @@
             <% end %>
           </ul>
         <% else %>
-          <div class="blank-slate">No plugins installed yet. Add one below.</div>
+          <%= render "layouts/shared/empty", text: "No plugins installed yet. Add one below." %>
         <% end %>
 
         <% InstalledPlugins.failed.each do |name, error| %>

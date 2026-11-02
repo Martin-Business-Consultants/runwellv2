@@ -30,7 +30,7 @@
 /* containers (panels, cards, dialogs, the editor) multiply by --radius-scale, pill shapes
 /* use --radius-pill, and true circles (50%) stay circles. Every control (buttons, inputs,
 /* selects, toggles, tags) shares one --radius-control so they always match each other. */
-:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: 0.4rem; }
+:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: 0.5rem; }
 :root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; --radius-control: 0.2em; }
 :root[data-radius="round"] { --radius-scale: 1.6; --radius-control: 99rem; }
 

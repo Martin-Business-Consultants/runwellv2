@@ -21,12 +21,7 @@
       <span class="for-screen-reader"><%= plugin.name %> settings</span>
     <% end %>
     <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "flex align-center flex-item-no-shrink", data: { controller: "form", turbo_action: "advance" } do |form| %>
-      <label class="switch" title="Switch on or off">
-        <%= form.hidden_field :enabled, value: "0", id: nil %>
-        <%= check_box_tag "plugin[enabled]", "1", enabled, class: "switch__input", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" } %>
-        <span class="switch__btn"></span>
-        <span class="for-screen-reader">Switch <%= plugin.name %> on or off</span>
-      </label>
+      <%= switch_tag(title: "Switch on or off", screen_reader_label: "Switch #{plugin.name} on or off") { form.hidden_field(:enabled, value: "0", id: nil) + check_box_tag("plugin[enabled]", "1", enabled, class: "switch__input", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" }) } %>
     <% end %>
   </div>
 

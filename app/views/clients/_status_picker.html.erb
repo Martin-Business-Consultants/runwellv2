@@ -10,8 +10,7 @@
     <span class="for-screen-reader">Status of <%= client.name %>: <%= label %>. Change it</span>
   </button>
 
-  <dialog class="margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small" aria-label="Status of <%= client.name %>" data-dialog-target="dialog" data-fixed-popup-target="popup">
-    <strong class="popup__title pad-inline-half">Status</strong>
+  <%= popup_menu label: "Status of #{client.name}", title: "Status", fixed: true do %>
     <%= form_with url: client_path(client), method: :patch, class: "full-width" do %>
       <input type="hidden" name="from_list" value="1">
       <ul class="popup__list" role="group">
@@ -27,5 +26,5 @@
         <% end %>
       </ul>
     <% end %>
-  </dialog>
+  <% end %>
 </div>

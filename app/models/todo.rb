@@ -1,5 +1,8 @@
-# A piece of work under an engagement, usually one per approved scope item.
-# Small on purpose: who's on it (a lead and others), a status and a date. No time, no money.
+# A piece of work: under an engagement (often in one of its sections), or straight on a
+# client. Small on purpose: who's on it (a lead and others), a status and a date. No time, no money.
+# Work nobody has taken on or started is a request (`Todo.requests`): what a client asked for by
+# email or the portal arrives that way, with who asked (`contact`, or an unmatched sender) and how
+# (`source`). A promise with a date is work with a due date; whoever it's assigned to owns it.
 class Todo < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable
 
@@ -9,7 +12,9 @@ class Todo < ApplicationRecord
   # mark it done.
   STATUSES = %w[planned in_progress in_review blocked done].freeze
 
-  belongs_to :engagement
+  belongs_to :engagement, optional: true
+  belongs_to :client, optional: true
+  belongs_to :contact, optional: true
   belongs_to :scope_item, optional: true
   belongs_to :owner, class_name: "User", optional: true
   belongs_to :created_by, class_name: "User", optional: true
@@ -19,63 +24,42 @@ class Todo < ApplicationRecord
 
   validates :title, presence: true
   validates :status, inclusion: { in: STATUSES }
+  validates :source, presence: true
+  validate :client_matches
+
+  before_validation :take_client
+  before_validation :match_sender
 
   scope :open, -> { where.not(status: "done") }
   scope :overdue, -> { open.where("due_on < ?", Date.current) }
   scope :client_visible, -> { where(client_visible: true) }
   scope :board_ordered, -> { order(:board_position) }
+  scope :due_soon, -> { open.where(due_on: Date.current..(Date.current + 7)) }
+  # When open work is due, as home and the Work list's Due filter split it: late, today, or in
+  # the seven days after today.
+  scope :due_today, -> { open.where(due_on: Date.current) }
+  scope :due_this_week, -> { open.where(due_on: (Date.current + 1)..(Date.current + 7)) }
+  DUE_FILTERS = { "overdue" => :overdue, "today" => :due_today, "week" => :due_this_week }.freeze
+  # Nobody has taken it on or started it: a request, waiting for someone to be assigned.
+  scope :requests, -> { where(owner_id: nil, status: "planned") }
 
   after_update_commit :record_status_change, if: :saved_change_to_status?
   before_save :stamp_completion
 
-  class ConversionRefused < StandardError; end
-
-  # What a piece of work keeps that converting moves (notes and documents, to its engagement) or
-  # lets go with it (its own history, mentions and custom field values). Anything else on it came
-  # from a plugin (logged time, a linked repository, a QA gate) and stops a conversion.
-  CONVERTIBLE_ASSOCIATIONS = %i[custom_values documents mentions mentionees notes events assignments assignees].freeze
-
   # The board's columns, in Fizzy's anatomy: the planned stream, the doing columns, done.
   BOARD_COLUMNS = %w[in_progress in_review blocked].freeze
 
-  # Work that was really a promise ("Send the invoice by Friday"): becomes a commitment on the
-  # engagement's client, ours (its owner's, else the actor's) or the client's, due when it was due
-  # (or the date given, else in a week). Its notes and documents move to the engagement, the
-  # engagement's history records the change, and the work goes. Refused while a plugin keeps
-  # something on it, or once it's done.
-  def convert_to_commitment!(owner_kind: "us", due_on: nil, actor: Current.user)
-    raise ConversionRefused, "It’s done; a commitment is for what’s still to come." if status == "done"
-    if (kept = conversion_blockers).any?
-      raise ConversionRefused, "It has #{kept.to_sentence} on it, which a commitment can’t keep. Leave it as #{Setting.current.term(:work).downcase}."
-    end
-
-    transaction do
-      commitment = engagement.client.commitments.create!(
-        engagement: engagement, description: title, owner_kind: owner_kind.presence_in(Commitment::OWNER_KINDS) || "us",
-        user: (owner_kind == "client" ? nil : owner || actor&.person), due_on: due_on.presence || self.due_on || 1.week.from_now.to_date,
-        source: "work")
-      commitment.record_event!("commitment.added", actor: actor, payload: { from_work: id })
-      notes.update_all(subject_type: "Engagement", subject_id: engagement_id)
-      documents.update_all(documentable_type: "Engagement", documentable_id: engagement_id)
-      engagement.record_event!("todo.converted", actor: actor, payload: { title: title, commitment: commitment.id })
-      destroy!
-      commitment
-    end
-  end
-
-  def conversion_blockers
-    self.class.reflect_on_all_associations(:has_many).reject { it.name.in?(CONVERTIBLE_ASSOCIATIONS) }
-      .select { public_send(it.name).exists? }.map { it.name.to_s.humanize.downcase }
-  end
-
   def self.filtered(owner: "any", engagement: "all")
-    scope = includes(:owner, { assignments: :user }, engagement: :client)
+    scope = includes(:owner, :client, { assignments: :user }, :engagement)
     scope = owner.nil? ? scope.where(owner_id: nil) : scope.assigned_to(owner) unless owner == "any"
     scope = scope.where(engagement: Engagement.find_by_ref!(engagement)) unless engagement == "all"
     scope
   end
 
-  def client = engagement.client
+  def request? = owner_id.nil? && status == "planned"
+
+  def requester_name = contact&.name || sender_name.presence || sender_email
+
 
   # Moves the todo to a status (a board column), and on the board to just before `before` (a
   # todo id in that column) or, without one, to the end of it.
@@ -84,10 +68,25 @@ class Todo < ApplicationRecord
   end
 
   def search_title = title
-  def search_content = description
-  def search_client_id = engagement.client_id
+  def search_content = [ description, sender_name, sender_email ].compact_blank.join(" ")
+  def search_client_id = client_id
 
   private
+
+  def take_client
+    self.client_id = engagement.client_id if engagement
+  end
+
+  def match_sender
+    return if contact || sender_email.blank?
+
+    self.contact = Contact.find_by(email: sender_email.strip.downcase)
+    self.client ||= contact&.client
+  end
+
+  def client_matches
+    errors.add(:contact, "must belong to the #{Setting.current.term(:client).downcase}") if contact && client_id && contact.client_id != client_id
+  end
 
   def board_placement(status, before)
     neighbour = Todo.where(status: status).where.not(id: id).find_by(id: before) if before.present?

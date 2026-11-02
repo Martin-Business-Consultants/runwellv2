@@ -67,7 +67,7 @@
         <%= form.text_area :custom_css, class: "input custom-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --lch-accent: 58% 0.14 40;\n  --radius-scale: 1.4;\n}", aria: { label: "Custom CSS" } %>
         <label class="flex align-center gap-half txt-small">
           <%= form.check_box :custom_css_everywhere %>
-          <span>Use it on <%= term(:client).downcase %> pages too: the portal and approvals</span>
+          <span>Use it on <%= term(:client).downcase %> pages too: the portal</span>
         </label>
         <div><button type="submit" class="btn btn--link txt-small">Save CSS</button></div>
       <% end %>

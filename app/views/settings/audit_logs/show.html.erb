@@ -8,7 +8,7 @@
       <header>
         <h2 class="divider">Audit log</h2>
       </header>
-      <p class="txt-small txt-subtle margin-none">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, agreements and <%= term(:work).downcase %>. Nothing here can be edited or deleted.</p>
+      <p class="txt-small txt-subtle margin-none">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work).downcase %>. Nothing here can be edited or deleted.</p>
       <div class="filters flex flex-wrap gap-half">
         <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.map { |key, label| [ label, key ] } %>
         <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days, options: Settings::AuditLogsController::PERIODS.map { |key, label| [ label, key ] } %>
@@ -39,7 +39,7 @@
       </table>
       <%= table_pagination @page %>
     <% else %>
-      <div class="blank-slate">Nothing in this area and period.</div>
+      <%= render "layouts/shared/empty", text: "Nothing in this area and period." %>
     <% end %>
   </div>
 </section>

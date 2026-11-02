@@ -29,25 +29,13 @@ if Client.none?
   as = ->(user, &block) { Current.set(session: Session.new(user: user), source: "seed", &block) }
   mention = ->(user) { ActionText::Attachment.from_attachable(user).to_html }
 
-  # A version with items, sent and (optionally) decided. Returns the version.
-  agree = lambda do |engagement, items, by:, summary: nil, reason: nil, kind: nil, decision: nil, contact: nil, evidence: nil, comment: nil, sent: true|
-    version = engagement.draft_version!(kind: kind, summary: summary, reason: reason, actor: by)
-    version.update!(cadence: "monthly") if engagement.recurring? && version.cadence.nil?
-    items.each { |description, price, estimate| version.scope_items.create!(description: description, price_cents: price, internal_estimate: estimate) }
-    if sent
-      version.send!(actor: by, source: "seed")
-      if decision
-        version.decide!(decision: decision, method: "recorded", contact: contact, evidence: evidence, comment: comment,
-                        recorded_by: by, source: "seed")
-      end
-    end
-    version
-  end
+  # An engagement's sections, by name.
+  sections = ->(engagement, names) { names.each { engagement.scope_items.create!(description: it) } }
 
+  # Work on an engagement, under the section of the same name when there is one.
   work = lambda do |engagement, title, owner: nil, due: nil, status: "planned", description: nil|
-    todo = engagement.todos.find_by(title: title) || engagement.todos.create!(title: title, created_by: ted)
-    todo.update!(owner: owner, due_on: due, status: status, description: description)
-    todo
+    engagement.todos.create!(title: title, created_by: ted, owner: owner, due_on: due, status: status, description: description,
+                             scope_item: engagement.scope_items.find_by(description: title))
   end
 
   note = lambda do |subject, body, author:, kind: "internal", days_ago: 0, source: "app"|
@@ -66,10 +54,7 @@ if Client.none?
   site = harbor.engagements.create!(label: "project", title: "Website rebuild", created_by: ted,
     description: "<p>A new site for all three offices: service pages, a provider directory, online booking and location pages that support local search.</p>",
     estimate_notes: "<p>Booking widget is their existing Dentrix integration. Budget allows 2 rounds of design revisions.</p>")
-  agree.(site, [ [ "Discovery and sitemap", 180_000, "2 days" ], [ "Design: home and 4 templates", 420_000, "6 days" ],
-                 [ "Build and content migration", 650_000, "9 days" ], [ "Launch and redirects", 150_000, "2 days" ] ],
-    by: ted, summary: "Website rebuild for Harbor Dental's three offices", decision: "approved", contact: lena,
-    evidence: "Signed proposal returned by email from Dr. Ortiz")
+  sections.(site, [ "Discovery and sitemap", "Design: home and 4 templates", "Build and content migration", "Launch and redirects" ])
   work.(site, "Discovery and sitemap", owner: sarah, due: today - 20, status: "done")
   work.(site, "Design: home and 4 templates", owner: marcus, due: today - 2, status: "in_progress",
         description: "<p>Home is approved. Service, provider, location and blog templates in review.</p>")
@@ -77,22 +62,18 @@ if Client.none?
   work.(site, "Launch and redirects", owner: marcus, due: today + 30)
   work.(site, "Collect provider headshots", owner: sarah, due: today - 4, status: "blocked",
         description: "<p>Waiting on Mia to schedule the photographer.</p>")
-  agree.(site, [ [ "Spanish-language versions of service pages", 280_000, "4 days" ] ], by: ted,
-    kind: "change_order", summary: "Add Spanish service pages",
-    reason: "<p>Mia asked for Spanish pages after the design review: about 30% of new patients prefer Spanish.</p>")
+  sections.(site, [ "Spanish-language versions of service pages" ])
 
   gbp = harbor.engagements.create!(label: "service", shape: "recurring", title: "Local search: 3 offices", created_by: ted,
     description: "<p>Google Business Profile management, citations, review requests and monthly ranking reports for all three offices.</p>")
-  agree.(gbp, [ [ "Profile management, 3 locations", 60_000, "4 hrs/mo" ], [ "Citations and review requests", 30_000, "2 hrs/mo" ] ],
-    by: priya, summary: "Monthly local search for three offices", decision: "approved", contact: lena, evidence: "Approved on the kickoff call")
+  sections.(gbp, [ "Profile management, 3 locations", "Citations and review requests" ])
   work.(gbp, "Profile management, 3 locations", owner: priya, due: today + 6, status: "in_progress")
   work.(gbp, "Citations and review requests", owner: priya, due: today + 10)
   work.(gbp, "Fix duplicate listing for the Bayview office", owner: priya, due: today - 1, status: "in_progress")
 
-  harbor.commitments.create!(description: "Send provider bios and headshots", due_on: today - 3, owner_kind: "client", contact: mia, engagement: site, source: "seed")
-  harbor.commitments.create!(description: "Share the template review link", due_on: today + 2, owner_kind: "us", user: marcus, engagement: site, source: "seed")
-  harbor.commitments.create!(description: "Monthly ranking report", due_on: today + 5, owner_kind: "us", user: priya, engagement: gbp, source: "seed")
-  as.(sarah) { harbor.commitments.create!(description: "Sitemap sign-off", due_on: today - 15, owner_kind: "client", contact: lena, engagement: site, source: "seed").resolve!("done", note: "Signed off in the discovery meeting", actor: sarah, source: "seed") }
+  # Promises are work with a date, owned by whoever it's assigned to.
+  work.(site, "Share the template review link", owner: marcus, due: today + 2)
+  work.(gbp, "Monthly ranking report", owner: priya, due: today + 5)
 
   note.(site, "<p>Design review with Lena and Mia. Home page approved. They want the provider pages to lead with insurance accepted. #{mention.(marcus)} can you add that to the template before Thursday?</p>",
         author: sarah, kind: "meeting", days_ago: 3)
@@ -109,64 +90,48 @@ if Client.none?
   ads = summit.engagements.create!(label: "service", shape: "recurring", title: "Google Ads management", created_by: ted,
     description: "<p>Search campaigns for roof repair and replacement across the metro area, with call tracking and a monthly report.</p>",
     estimate_notes: "<p>Management fee only. Ad spend is billed to their card directly.</p>")
-  agree.(ads, [ [ "Campaign management", 120_000, "8 hrs/mo" ], [ "Call tracking and reporting", 20_000, "1 hr/mo" ] ],
-    by: jordan, summary: "Monthly Google Ads management", decision: "approved", contact: greg, evidence: "Greg replied 'let's go' by email")
+  sections.(ads, [ "Campaign management", "Call tracking and reporting" ])
   work.(ads, "Campaign management", owner: jordan, due: today + 4, status: "in_progress")
   work.(ads, "Call tracking and reporting", owner: jordan, due: today + 9)
   work.(ads, "Add hail-damage ad group", owner: jordan, due: today + 1)
-  agree.(ads, [ [ "Local Services Ads setup and management", 40_000, "2 hrs/mo" ] ], by: jordan, kind: "add_on",
-    summary: "Local Services Ads", reason: "<p>Greg wants the Google Guaranteed badge before storm season.</p>",
-    decision: "approved", contact: greg, evidence: "Approved on the monthly call")
+  sections.(ads, [ "Local Services Ads setup and management" ])
 
   storm = summit.engagements.create!(label: "work_order", title: "Storm season landing pages", created_by: ted,
     description: "<p>Three landing pages for hail, wind and emergency tarping, built for the ads campaigns.</p>")
-  agree.(storm, [ [ "Copy for 3 landing pages", 90_000, "1.5 days" ], [ "Design and build", 160_000, "2.5 days" ] ],
-    by: ted, summary: "Storm season landing pages", sent: false)
+  sections.(storm, [ "Copy for 3 landing pages", "Design and build" ])
 
-  summit.commitments.create!(description: "Send before/after project photos", due_on: today + 6, owner_kind: "client", contact: tasha, engagement: ads, source: "seed")
-  summit.commitments.create!(description: "Monthly ads report", due_on: today + 3, owner_kind: "us", user: jordan, engagement: ads, source: "seed")
-  note.(ads, "<p>Cost per lead down 18% since we paused broad match. Greg happy. #{mention.(ted)} he asked about storm pages, the draft is ready to send.</p>",
+  work.(ads, "Monthly ads report", owner: jordan, due: today + 3)
+  note.(ads, "<p>Cost per lead down 18% since we paused broad match. Greg happy. #{mention.(ted)} he asked about storm pages, the plan is ready to walk him through.</p>",
         author: jordan, kind: "call", days_ago: 2, source: "phone")
 
-  # --- Bloom & Vine Florist: a holiday work order waiting on the client ---------------------
+  # --- Bloom & Vine Florist: a holiday work order ----------------------------------------------
   bloom = Client.create!(name: "Bloom & Vine Florist", custom_fields: { "website" => "https://bloomandvine.example" })
   rosa = bloom.contacts.create!(portal_access: true, name: "Rosa Delgado", role: "Owner", email: "rosa@bloomandvine.example", can_approve: true)
   holiday = bloom.engagements.create!(label: "work_order", title: "Holiday ordering updates", created_by: sarah,
     description: "<p>Holiday collections, delivery cut-off banners and a same-day delivery page.</p>")
-  version = agree.(holiday, [ [ "Holiday collection pages", 60_000, "1 day" ], [ "Delivery cut-off banners", 25_000, "3 hrs" ] ],
-    by: sarah, summary: "Holiday ordering updates")
-  version.issue_link!(rosa)
-  bloom.commitments.create!(description: "Approve the holiday work order", due_on: today + 1, owner_kind: "client", contact: rosa, engagement: holiday, source: "seed")
+  sections.(holiday, [ "Holiday collection pages", "Delivery cut-off banners" ])
 
-  # --- Northside Physical Therapy: local search, and a revision the client pushed back on ---
+  # --- Northside Physical Therapy: local search, with a second location on hold --------------
   northside = Client.create!(name: "Northside Physical Therapy", custom_fields: { "website" => "https://northsidept.example" })
   omar = northside.contacts.create!(portal_access: true, name: "Omar Haddad", role: "Clinic director", email: "omar@northsidept.example", can_approve: true)
   local = northside.engagements.create!(label: "service", shape: "recurring", title: "Local search and reviews", created_by: priya,
     description: "<p>Google Business Profile, review generation and a monthly report for the clinic.</p>")
-  agree.(local, [ [ "Profile management", 35_000, "3 hrs/mo" ], [ "Review generation", 15_000, "1 hr/mo" ] ],
-    by: priya, summary: "Monthly local search", decision: "approved", contact: omar, evidence: "Signed agreement on file")
+  sections.(local, [ "Profile management", "Review generation" ])
   work.(local, "Profile management", owner: priya, due: today + 8, status: "in_progress")
   work.(local, "Review generation", owner: priya, due: today - 5, status: "blocked",
         description: "<p>Their EMR export is needed to send review requests.</p>")
-  revision = local.draft_version!(kind: "revision", summary: "Add a second location", actor: priya,
-    reason: "<p>Northside is opening a Westgate clinic in the spring.</p>")
-  revision.update!(amount_cents: 80_000)
-  revision.send!(actor: priya, source: "seed")
-  revision.decide!(decision: "changes_requested", method: "recorded", contact: omar, evidence: "Call with Omar",
-    comment: "Hold until the Westgate lease is signed.", recorded_by: priya, source: "seed")
-  northside.commitments.create!(description: "Send the EMR patient export", due_on: today - 6, owner_kind: "client", contact: omar, engagement: local, source: "seed")
   note.(local, "<p>Omar asked us to hold the second location until the lease is signed. #{mention.(sarah)} can you check back with him next month?</p>",
         author: priya, kind: "call", days_ago: 4, source: "phone")
 
-  # --- Coastal Kitchen & Bath: a prospect with a first draft --------------------------------
+  # --- Coastal Kitchen & Bath: a prospect --------------------------------------------------
   coastal = Client.create!(name: "Coastal Kitchen & Bath", custom_fields: { "website" => "https://coastalkb.example" })
   dana = coastal.contacts.create!(portal_access: true, name: "Dana Whitfield", role: "Co-owner", email: "dana@coastalkb.example", phone: "555-0190", can_approve: true)
   proposal = coastal.engagements.create!(label: "project", title: "New website and portfolio", created_by: ted,
     description: "<p>A portfolio-led site with project galleries, a consultation request form and showroom location pages.</p>",
     estimate_notes: "<p>They have about 60 project photos; galleries need a simple CMS.</p>")
-  agree.(proposal, [ [ "Design", 350_000, "5 days" ], [ "Build with project galleries", 480_000, "7 days" ], [ "Launch", 90_000, "1 day" ] ],
-    by: ted, summary: "New website and portfolio", sent: false)
-  coastal.commitments.create!(description: "Send the proposal", due_on: today + 2, owner_kind: "us", user: ted, engagement: proposal, source: "seed")
+  sections.(proposal, [ "Design", "Build with project galleries", "Launch" ])
+  # Work straight on the client, not on its engagement.
+  coastal.todos.create!(title: "Send the proposal", owner: ted, due_on: today + 2, created_by: ted)
   note.(coastal, "<p>Met Dana at the showroom. They lose leads because the current site has no photos. Decision by the end of the month.</p>",
         author: ted, kind: "meeting", days_ago: 6)
 
@@ -175,38 +140,27 @@ if Client.none?
   alan = riverbend.contacts.create!(portal_access: true, name: "Alan Brooks", role: "Managing partner", email: "alan@riverbendlaw.example", can_approve: true)
   done = riverbend.engagements.create!(label: "project", title: "Practice area pages", created_by: ted,
     description: "<p>Twelve practice area pages and attorney bios.</p>")
-  agree.(done, [ [ "Practice area pages", 240_000, "4 days" ] ], by: ted, summary: "Practice area pages",
-    decision: "approved", contact: alan, evidence: "Signed proposal")
+  sections.(done, [ "Practice area pages" ])
   work.(done, "Practice area pages", owner: marcus, due: today - 60, status: "done")
   as.(ted) { done.close!(reason: "Delivered; client moved in-house", actor: ted, source: "seed") }
 
-  # --- Requests: what came in ----------------------------------------------------------------
-  Request.create!(client: harbor, contact: mia, sender_name: mia.name, sender_email: mia.email, source: "portal",
-    subject: "Can we add a new-patient special to the home page?", received_at: 5.hours.ago,
-    body: "<p>We're running $99 exams for new patients through the end of next month.</p>")
-  Request.create!(client: summit, contact: tasha, sender_name: tasha.name, sender_email: tasha.email, source: "email",
-    subject: "Pause ads in the north suburbs?", received_at: 1.day.ago,
-    body: "<p>Our crew is booked solid up north for two weeks. Can we pause those areas?</p>")
-  Request.create!(sender_name: "Kim Park", sender_email: "kim@parkvet.example", source: "phone",
-    subject: "Veterinary clinic asking about local search", received_at: 2.days.ago,
-    body: "<p>Two-location vet clinic, not showing up in the map pack. Wants a call this week.</p>")
-  Request.create!(sender_email: "sales@linkfarm.example", source: "email", subject: "Guest post opportunity",
-    received_at: 3.days.ago).dismiss!(reason: "Spam", actor: ted)
-  as.(sarah) do
-    Request.create!(client: bloom, contact: rosa, sender_name: rosa.name, sender_email: rosa.email, source: "portal",
-      subject: "Update our Valentine's hours", received_at: 4.days.ago)
-      .promote_to_todo!(engagement: holiday, actor: sarah, owner: sarah, due_on: today + 3)
-  end
-
-  # --- Questions for Ted ---------------------------------------------------------------------
-  Question.create!(user: ted, subject: site, asked_by: "agent", source: "email: Spanish pages",
-    text: "Mia asked for Spanish service pages. Is that in the current scope or a change order?", choices: [ "In scope", "Change order" ])
-  Question.create!(user: ted, subject: ads, asked_by: "agent", source: "email: Pause ads",
-    text: "Tasha wants to pause the north-suburb campaigns for two weeks. Pause them?", choices: [ "Pause", "Keep running" ])
+  # --- Requests: what came in, work nobody has taken on yet -----------------------------------
+  harbor.todos.create!(contact: mia, sender_name: mia.name, sender_email: mia.email, source: "portal",
+    title: "Can we add a new-patient special to the home page?", created_at: 5.hours.ago,
+    description: "<p>We're running $99 exams for new patients through the end of next month.</p>")
+  summit.todos.create!(contact: tasha, sender_name: tasha.name, sender_email: tasha.email, source: "email",
+    title: "Pause ads in the north suburbs?", created_at: 1.day.ago,
+    description: "<p>Our crew is booked solid up north for two weeks. Can we pause those areas?</p>")
+  Todo.create!(sender_name: "Kim Park", sender_email: "kim@parkvet.example", source: "phone",
+    title: "Veterinary clinic asking about local search", created_at: 2.days.ago,
+    description: "<p>Two-location vet clinic, not showing up in the map pack. Wants a call this week.</p>")
+  # One a client asked for that someone has taken on.
+  holiday.todos.create!(contact: rosa, sender_name: rosa.name, sender_email: rosa.email, source: "portal",
+    title: "Update our Valentine's hours", owner: sarah, due_on: today + 3, created_by: sarah, created_at: 4.days.ago)
 end
 
 # Indexing runs in jobs; build the index now so search works straight after seeding.
 Searchable.reindex_all
 
 puts "Seeded: #{User.count} users, #{Client.count} clients, #{Engagement.count} engagements, #{Todo.count} todos, " \
-     "#{Note.count} notes, #{Mention.count} mentions, #{Request.count} requests"
+     "#{Note.count} notes, #{Mention.count} mentions, #{Todo.requests.count} requests"

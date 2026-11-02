@@ -41,13 +41,13 @@ module Runwell
         say("Anything new since yesterday?", "changes", since: "24h") { it["cursor"].is_a?(Integer) }
         cursor = @last["cursor"]
         say("…and since then?", "changes", after: cursor) { it["changes"] == [] }
-        request = { subject: "Scenario: add a holiday banner", source: "chat", client_id: client.id }
-        say("Log that request (sent twice, as after a timeout)", "create_request", request: request, idempotency_key: "scenario-1") { it["status"] == "ok" }
-        say("(the retry)", "create_request", request: request, idempotency_key: "scenario-1") { it["replayed"] == true }
+        asked = { title: "Scenario: add a holiday banner", source: "chat" }
+        say("Add that ask as work nobody's on yet (sent twice, as after a timeout)", "create_work", client_id: client.id, todo: asked, idempotency_key: "scenario-1") { it["status"] == "ok" }
+        say("(the retry)", "create_work", client_id: client.id, todo: asked, idempotency_key: "scenario-1") { it["replayed"] == true }
         say("Find “a”", "resolve", q: "a") { it["candidates"].size > 1 }
-        draft = AgreementVersion.where(sent_at: nil).includes(:engagement, :scope_items).find { !it.engagement.internal? && it.scope_items.any? }
-        if draft
-          say("Send the #{draft.engagement.ref} draft", "send_agreement", engagement_ref: draft.engagement.ref, id: draft.id) { it["status"] == "needs_confirmation" }
+        engagement = Engagement.open.first
+        if engagement
+          say("Add a section to #{engagement.ref}", "add_scope_item", engagement_ref: engagement.ref, scope_item: { description: "Scenario: launch" }) { it["status"] == "ok" }
         end
       end
 
@@ -69,9 +69,6 @@ module Runwell
         engagement = contact.client.engagements.order(:id).first
         if engagement
           say("Show me #{engagement.title}", "portal_engagement", ref: engagement.title) { it.dig("engagement", "ref") == engagement.ref || it["code"] == "ambiguous" }
-          if engagement.pending_version && contact.can_approve?
-            say("Approve it", "portal_decide", engagement_ref: engagement.ref, decision: "approved", approver_name: contact.name) { it["status"] == "needs_confirmation" }
-          end
         end
         other = Engagement.where.not(client_id: contact.client_id).where.not(ref: nil).first
         say("Show me #{other.ref} (another client's)", "portal_engagement", ref: other.ref) { it["code"] == "not_found" } if other

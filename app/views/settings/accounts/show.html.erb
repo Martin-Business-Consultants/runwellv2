@@ -8,44 +8,9 @@
       <header>
         <h2 class="divider">Ways to sign in</h2>
       </header>
-      <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "record-form__toggle txt-small", data: { controller: "form" } do |form| %>
-        <div class="record-form__toggle-text">
-          <%= form.label :passwordless, "Sign in with an emailed link", class: "record-form__label" %>
-          <span class="record-form__hint">“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too.</span>
-        </div>
-        <label class="switch flex-item-no-shrink">
-          <%= form.check_box :passwordless, class: "switch__input", data: { action: "change->form#submit" } %>
-          <span class="switch__btn"></span>
-        </label>
-      <% end %>
-      <% providers = SignInProvider.usable_keys %>
-      <% identities = @user.identities.index_by(&:provider) %>
-      <% if providers.any? || identities.any? %>
-        <ul class="settings__scrollable-list">
-          <% (providers | identities.keys).each do |key| %>
-            <%# herb:key key %>
-            <% identity = identities[key] %>
-            <li class="flex align-center gap-half txt-small">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= SignInProvider.name_for(key) %></strong>
-                <div class="txt-x-small txt-subtle overflow-ellipsis">
-                  <% if identity %>
-                    Connected<%= " as #{identity.email}" if identity.email.present? %><% if identity.last_used_at %> · last used <%= time_ago_in_words(identity.last_used_at) %> ago<% end %>
-                  <% else %>
-                    Not connected
-                  <% end %>
-                </div>
-              </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <% if identity %>
-                <%= render "layouts/shared/delete_dialog", name: "the connection to " + identity.provider_name, path: settings_identity_path(identity), trigger_class: "txt-small",
-                      message: "You won’t be able to sign in with this account until you connect it again." %>
-              <% elsif providers.include?(key) %>
-                <%= button_to "Connect", "/auth/#{key}", class: "btn txt-small", data: { turbo: false } %>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
+      <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "txt-small", data: { controller: "form" } do |form| %>
+        <%= switch_field form, :passwordless, label: "Sign in with an emailed link", submit_on_change: true,
+              hint: "“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too." %>
       <% end %>
     </section>
 
@@ -56,25 +21,7 @@
       <% if @user.two_factor? %>
         <p class="margin-none"><span class="status-tag status-tag--positive">On</span> since <%= l @user.otp_enabled_at.to_date, format: :long %>. After your password, Runwell asks for a code from your authenticator app.</p>
         <p class="txt-small txt-subtle margin-none"><%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
-        <details>
-          <summary class="btn txt-small">New recovery codes</summary>
-          <%= form_with url: settings_two_factor_recovery_codes_path, class: "flex flex-wrap align-center gap-half txt-small", namespace: "recovery" do |form| %>
-            <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", aria: { label: "Your password" } %>
-            <button type="submit" class="btn btn--link">Show new codes</button>
-          <% end %>
-          <p class="txt-x-small txt-subtle margin-none margin-block-start-half">Your old codes stop working.</p>
-        </details>
-        <% if Setting.current.require_two_factor? %>
-          <p class="txt-x-small txt-subtle margin-none">This install requires two-factor sign-in, so it stays on.</p>
-        <% else %>
-          <details>
-            <summary class="btn txt-small">Turn off</summary>
-            <%= form_with url: settings_two_factor_path, method: :delete, class: "flex flex-wrap align-center gap-half txt-small", namespace: "disable" do |form| %>
-              <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", aria: { label: "Your password" } %>
-              <button type="submit" class="btn txt-negative">Turn off two-factor sign-in</button>
-            <% end %>
-          </details>
-        <% end %>
+        <%= render "settings/accounts/two_factor_changes", required: Setting.current.require_two_factor? %>
       <% else %>
         <p class="margin-none">Off. Turn it on and Runwell asks for a code from an app on your phone after your password, so a stolen password isn’t enough to get in.</p>
         <div class="section-actions">
@@ -142,10 +89,7 @@
                 <button type="submit" name="move" value="<%= key %>:down" class="btn btn--circle txt-small menu-arranger__down" title="Move <%= label %> down" <% if index == menu.size - 1 %>disabled<% end %>>
                   <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move <%= label %> down</span>
                 </button>
-                <label class="switch flex-item-no-shrink" title="Show <%= label %> in your menu">
-                  <input type="checkbox" name="shown[]" value="<%= key %>" class="switch__input" <% unless hidden %>checked<% end %> aria-label="Show <%= label %> in your menu" data-action="change->form#submit">
-                  <span class="switch__btn"></span>
-                </label>
+                <%= switch_tag(title: "Show #{label} in your menu") { check_box_tag "shown[]", key, !hidden, id: nil, class: "switch__input", aria: { label: "Show #{label} in your menu" }, data: { action: "change->form#submit" } } %>
               </li>
             <% end %>
           </ul>

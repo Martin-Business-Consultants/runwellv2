@@ -5,7 +5,7 @@
 
 # The Debian release is pinned with the base (RUNWELL_BASE): the Ruby each release carries is built
 # on it, so an install updating in place keeps a system it runs on.
-ARG RUBY_VERSION=4.0.7
+ARG RUBY_VERSION=4.0.9
 FROM docker.io/library/ruby:$RUBY_VERSION-slim-trixie AS base
 
 WORKDIR /rails

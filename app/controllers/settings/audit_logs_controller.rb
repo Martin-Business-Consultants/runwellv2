@@ -1,22 +1,22 @@
 require "csv"
 
 # Settings > Audit log, for owners: every event in the install, newest first, from sign-ins and
-# security changes to agreements and work, filtered by area, person and period, and downloadable
+# security changes to engagements and work, filtered by area, person and period, and downloadable
 # as CSV for whoever keeps the records.
 class Settings::AuditLogsController < Settings::BaseController
   AREAS = {
     "all" => "Everything",
     "security" => "Sign-in and settings",
-    "agreements" => "Agreements",
+    "engagements" => "Engagements",
     "work" => "Work and notes",
-    "requests" => "Requests and questions",
+    "requests" => "Requests",
     "clients" => "Clients"
   }.freeze
   PERIODS = { "7" => "Last 7 days", "30" => "Last 30 days", "90" => "Last 90 days", "all" => "All time" }.freeze
   CSV_LIMIT = 50_000
 
   agent_tool :audit_log, on: :show, title: "Read the audit log",
-    description: "Every event (sign-ins, security and settings changes, agreements, work, requests), newest first. area: #{AREAS.keys.join(", ")}; person: a user id; days: 7, 30, 90 or all.",
+    description: "Every event (sign-ins, security and settings changes, engagements, work, requests), newest first. area: #{AREAS.keys.join(", ")}; person: a user id; days: 7, 30, 90 or all.",
     params: { area: AREAS.keys, person: "integer", days: PERIODS.keys }
 
   def show
@@ -39,9 +39,9 @@ class Settings::AuditLogsController < Settings::BaseController
       scope = scope.where(actor_user: [ @person, @person.agent ].compact) if @person
       case @area
       when "security" then scope.where(subject_type: Event::SECURITY_SUBJECTS)
-      when "agreements" then scope.where("kind LIKE 'agreement.%' OR kind LIKE 'engagement.%'")
+      when "engagements" then scope.where("kind LIKE 'agreement.%' OR kind LIKE 'engagement.%'")
       when "work" then scope.where("kind LIKE 'todo.%' OR kind LIKE 'commitment.%' OR kind LIKE 'note.%' OR kind LIKE 'document.%'")
-      when "requests" then scope.where("kind LIKE 'request.%' OR kind LIKE 'question.%'")
+      when "requests" then scope.where("kind = 'todo.requested' OR kind LIKE 'request.%' OR kind LIKE 'question.%'")
       when "clients" then scope.where("kind LIKE 'client.%'")
       else scope
       end

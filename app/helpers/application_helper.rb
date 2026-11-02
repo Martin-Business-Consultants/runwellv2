@@ -37,13 +37,13 @@ module ApplicationHelper
 
   # Settings > Appearance, as attributes on <html> so CSS (appearance.css) and a live preview
   # can both use them.
-  # Custom CSS (Settings > Appearance) on this page: staff pages always, the portal and approval
-  # pages when the owner says so, and nowhere with ?theme=off.
+  # Custom CSS (Settings > Appearance) on this page: everywhere but the portal always, the portal
+  # when the owner says so, and nowhere with ?theme=off.
   def custom_theme?
     setting = Setting.current
     return false if setting.custom_css.blank? || params[:theme] == "off"
 
-    setting.custom_css_everywhere? || !request.path.start_with?("/portal", "/approve")
+    setting.custom_css_everywhere? || !request.path.start_with?("/portal")
   end
 
   def appearance_data
@@ -147,6 +147,33 @@ module ApplicationHelper
             tag.span("Show or hide", class: "for-screen-reader") ])
         end
       ])
+    end
+  end
+
+  # An on/off switch for a boolean, in one of two shapes: with a hint, the settings row (label and
+  # hint on the left, the switch on the right, record-form__toggle); without, the switch beside its
+  # label. submit_on_change saves it as it's flipped (the form controller on the form). A helper,
+  # not a partial, so it works inside form_with.
+  #
+  #   switch_field form, :require_two_factor, label: "Require it for everyone", hint: "…", submit_on_change: true
+  def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
+    data = submit_on_change ? { action: "change->form#submit" } : {}
+    switch = switch_tag { form.check_box(method, class: "switch__input", data: data, **options) }
+
+    if hint
+      tag.div(class: "record-form__toggle") do
+        safe_join([ tag.div(class: "record-form__toggle-text") { safe_join([ form.label(method, label, class: "record-form__label"), tag.span(hint, class: "record-form__hint") ]) }, switch ])
+      end
+    else
+      tag.div(class: "flex align-center gap-half txt-align-start") { safe_join([ switch, form.label(method, label, class: "txt-small") ]) }
+    end
+  end
+
+  # The switch itself around any checkbox (check_box_tag, a plain input): its track, and a label
+  # for screen readers when nothing beside it says what it does.
+  def switch_tag(title: nil, screen_reader_label: nil, &block)
+    tag.label(class: "switch flex-item-no-shrink", title: title) do
+      safe_join([ capture(&block), tag.span(class: "switch__btn"), (tag.span(screen_reader_label, class: "for-screen-reader") if screen_reader_label) ])
     end
   end
 

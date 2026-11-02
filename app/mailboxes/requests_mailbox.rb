@@ -1,62 +1,31 @@
-# A client's email, as a request. A reply to one of ours (by its plus address, or the thread's
-# Message-ID) becomes a note on that request instead. The subject is the title, the body the
-# description, cleaned of quoted mail and signatures (Request::EmailBody), and attachments become
-# its documents. Automatic replies and our own mail are dropped. A known contact gets a short
-# acknowledgement they can reply to.
+# A client's email, as a request: work on the sender's client (matched by their address, else
+# none until someone picks one) that nobody has taken on yet. The subject is the title, the body the description, cleaned of quoted mail and signatures (Todo::EmailBody), and
+# attachments become its documents. Automatic replies and our own mail are dropped. A known contact gets a short
+# acknowledgement.
 class RequestsMailbox < ApplicationMailbox
-  REPLY_ADDRESS = /\+r(\d+)-(\h{12})@/i
-  REPLY_MESSAGE_ID = /request-(\d+)-(\h{12})@/i
-
   def process
     return if automatic? || from_ourselves?
 
-    Current.set(source: "email") do
-      if (request = replied_to)
-        add_reply(request)
-      else
-        receive_request
-      end
-    end
+    Current.set(source: "email") { receive_request }
   end
 
   private
     def sender_email = mail.from_address&.address.to_s.downcase
     def sender_name = mail.from_address&.display_name.presence || mail[:from]&.display_names&.first.presence
-    def body = @body ||= Request::EmailBody.new(mail)
+    def body = @body ||= Todo::EmailBody.new(mail)
 
     def receive_request
-      request = Request.create!(subject: title, body: body.to_html, sender_name: sender_name, sender_email: sender_email,
-                                source: "email", received_at: mail.date || Time.current)
+      request = Todo.create!(title: title, description: body.to_html, sender_name: sender_name, sender_email: sender_email,
+                             source: "email", created_at: mail.date || Time.current)
       attach_files(request)
-      request.record_event!("request.received", actor: nil, source: "email", actor_label: request.requester_name)
+      request.record_event!("todo.requested", actor: nil, source: "email", actor_label: request.requester_name)
 
       if request.contact && Setting.current.requests_email.present?
-        RequestMailer.with(request: request, in_reply_to: mail.message_id).received.deliver_later
+        RequestMailer.with(todo: request, in_reply_to: mail.message_id).received.deliver_later
       end
     end
 
-    def add_reply(request)
-      files = attach_files(request)
-      text = body.to_html.presence || "<p>Sent #{files.size == 1 ? "a file" : "#{files.size} files"}.</p>"
-      request.notes.create!(body: text, kind: "email", source: "email from #{sender_name || sender_email}", occurred_at: mail.date || Time.current)
-      request.record_event!("request.replied", actor: nil, source: "email", actor_label: sender_name || sender_email)
-    end
-
-    # The request a reply belongs to: its plus address (requests+r42-…@) on any recipient, else
-    # the acknowledgement's Message-ID in In-Reply-To or References.
-    def replied_to
-      addresses = [ mail.to, mail.cc, mail["X-Original-To"]&.value, mail["Delivered-To"]&.value ].flatten.compact.join(" ")
-      threads = [ mail.in_reply_to, mail.references ].flatten.compact.join(" ")
-
-      [ addresses[REPLY_ADDRESS], threads[REPLY_MESSAGE_ID] ].compact.each do |match|
-        id, token = match.match(Regexp.union(REPLY_ADDRESS, REPLY_MESSAGE_ID)).captures.compact
-        request = Request.find_by_reply_token(id, token)
-        return request if request
-      end
-      nil
-    end
-
-    # Files the sender attached, as the request's documents (internal until someone shares them).
+    # Files the sender attached, as the work's documents (internal until someone shares them).
     # Pictures inline in the message (signature logos) are skipped, and so is a file over the limit.
     def attach_files(request)
       mail.attachments.reject(&:inline?).filter_map do |attachment|

@@ -1,0 +1,36 @@
+<%# locals: (required:) %>
+<%# herb:slots client %>
+<%# herb:state (changing: "") %>
+<%# New recovery codes, or turning two-factor off (unless the install requires it), each asking for
+    the password. Both forms are always on the page and state only shows one. %>
+<div class="flex flex-column gap-half" data-controller="state-focus" data-state-focus-state-value="changing">
+  <div class="flex flex-wrap gap-half" hidden="<%= changing != "" %>">
+    <button type="button" class="btn txt-small" data-herb-set="changing=codes">New recovery codes</button>
+    <% unless required %>
+      <button type="button" class="btn txt-small" data-herb-set="changing=off">Turn off</button>
+    <% end %>
+  </div>
+
+  <div hidden="<%= changing != "codes" %>">
+    <%= form_with url: settings_two_factor_recovery_codes_path, class: "flex flex-wrap align-center gap-half txt-small", namespace: "recovery" do |form| %>
+      <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
+      <button type="submit" class="btn btn--link">Show new codes</button>
+      <button type="button" class="btn btn--plain" data-keys="esc" data-herb-reset="changing">Cancel</button>
+    <% end %>
+    <p class="txt-x-small txt-subtle margin-none margin-block-start-half">Your old codes stop working.</p>
+  </div>
+
+  <% unless required %>
+    <div hidden="<%= changing != "off" %>">
+      <%= form_with url: settings_two_factor_path, method: :delete, class: "flex flex-wrap align-center gap-half txt-small", namespace: "disable" do |form| %>
+        <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
+        <button type="submit" class="btn txt-negative">Turn off two-factor sign-in</button>
+        <button type="button" class="btn btn--plain" data-keys="esc" data-herb-reset="changing">Cancel</button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if required %>
+    <p class="txt-x-small txt-subtle margin-none">This install requires two-factor sign-in, so it stays on.</p>
+  <% end %>
+</div>

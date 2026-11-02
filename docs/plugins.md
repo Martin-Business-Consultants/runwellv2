@@ -116,6 +116,17 @@ engagements and todos (a polymorphic `trackable`, like notes and documents, with
 client kept alongside so totals roll up), totals on engagements, a weekly timesheet, and "Log time"
 in the quick action tray. No live timers.
 
+`runwell-agreements` (Agreements, 3.0) holds what the core no longer does: an agreement on an
+engagement (a title and rich text, any price written in it) under the install's logo, sent to the
+client's approvers as a PDF (Prawn, bundled by the core for plugins) and signed on a public page by
+typed name, the signed PDF stamped with the name, date and address and kept with the engagement.
+Approving records the yes; it creates no work. It fills the engagement's tab, sidebar and title
+line (`:engagement_panel`, `:engagement_aside`, `:engagement_meta`) and the portal's engagement
+panel, and imports the agreements the core kept before 3.0 (`agreement_versions`, `approvals`).
+Until Stripe, QuickBooks, Reporting and Factory are updated for 3.0, the parts of them that read
+agreement versions and approvals (payment links on approval, a service's amount, approved but not
+invoiced, queueing on approval) don't work.
+
 `runwell-ai` (AI) is the reference for a plugin that runs agent tools for a person and fills the
 row and sidebar slots: an assistant inside the app (Ask, `i`) and one-click suggestions on records,
 through RubyLLM and the install's own provider key, with a monthly budget. It offers the catalogue's
@@ -144,7 +155,7 @@ a Cloudflare range (bundled list, refreshed nightly) and marks the request https
 linked to clients, engagements and todos (`Coding::Repository`, a polymorphic `linkable`; a
 todo inherits its engagement's repos and an engagement its client's). `checkout_work` hands an
 agent the clone commands, branch (`p-4/58-slug`) and agreed scope; `log_progress`,
-`finish_work` and `flag_out_of_scope` (a request to triage) report back. Connected to GitHub in
+`finish_work` and `flag_out_of_scope` (a request for someone to take on) report back. Connected to GitHub in
 Settings > Code (OAuth), a signed public endpoint (`/code/github/webhooks`) brings in pull
 requests and checks on work (a merge can mark the todo done), deploys (production ones on the
 engagement timeline, and in the portal when shared), labelled issues as requests, and commits,
@@ -206,7 +217,7 @@ records (`Meeting::AgendaDraft`), on rhythms (`MeetingSeries`, planned nightly).
 harness debriefs a call (the plugin's agent workflow): `debrief_call` gives the client's open
 engagements and agreed scope, its people, and the team with each person's expertise tags
 (`Expertise`, set in its settings) and open work; `record_call` (preview first) makes the call note,
-the contact, todos on the right engagements with owners, commitments, requests and health at once
+the contact, todos on the right engagements with owners and dates, requests and health at once
 (`Call::Plan`). Home (`Attention`) warns before a standard is missed. Its guide is `docs/guide.md`
 in its repository, and Accounts > Guide.
 

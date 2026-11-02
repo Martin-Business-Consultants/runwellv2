@@ -2,7 +2,7 @@
 <% contacts = @client.contacts.active.ordered.to_a %>
 <% tabs = [
      record_tab("engagements", term(:engagement, count: 2), count: @client.engagements.count),
-     record_tab("commitments", term(:commitment, count: 2), count: @client.commitments.open.count),
+     record_tab("work", term(:work), count: @client.todos.open.count),
      record_tab("notes", "Notes", count: @client.notes.count),
      record_tab("documents", "Documents", count: @client.documents.count)
    ] + plugin_record_tabs(:client_panel) %>
@@ -47,7 +47,7 @@
                     <li data-filter-target="item" class="flex align-center gap-half">
                       <%= link_to engagement, class: "txt-ink txt-align-start overflow-ellipsis min-width" do %>
                         <strong><%= engagement.ref %></strong> <%= engagement.title %>
-                        <span class="txt-x-small txt-subtle"><%= [ engagement.label_name, engagement_amount(engagement) ].compact.join(" · ") %></span>
+                        <span class="txt-x-small txt-subtle"><%= engagement.label_name %></span>
                       <% end %>
                       <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
                       <%= status_tag engagement.state_label, highlight: engagement.active? %>
@@ -70,8 +70,8 @@
                 <% end %>
               </div>
             </section>
-          <% when "commitments" %>
-            <%= render "commitments/section", subject: @client %>
+          <% when "work" %>
+            <%= render "todos/client_section", client: @client, state: @work_state %>
           <% when "notes" %>
             <%= render "notes/section", subject: @client %>
           <% when "documents" %>
@@ -96,7 +96,7 @@
       <dl class="record-facts">
         <dt>Status</dt><dd><%= status_tag @client.status, highlight: @client.status == "active" %></dd>
         <% if @client.internal? %>
-          <dt>Internal</dt><dd>This is us: our own projects, no agreements</dd>
+          <dt>Internal</dt><dd>This is us: our own projects</dd>
         <% end %>
         <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
         <dt>Time zone</dt>
@@ -128,7 +128,7 @@
                 <span class="contact-row__mark" title="Can sign in to the portal"><%= icon_tag "globe" %><span class="for-screen-reader">Portal</span></span>
               <% end %>
               <% if contact.can_approve? %>
-                <span class="contact-row__mark contact-row__mark--approve" title="Can approve agreements"><%= icon_tag "check-circle" %><span class="for-screen-reader">Can approve</span></span>
+                <span class="contact-row__mark contact-row__mark--approve" title="Can approve"><%= icon_tag "check-circle" %><span class="for-screen-reader">Can approve</span></span>
               <% end %>
             </span>
           </li>

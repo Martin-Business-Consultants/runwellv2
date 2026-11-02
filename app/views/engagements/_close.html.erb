@@ -2,7 +2,7 @@
 <%# herb:slots client %>
 <%# herb:state (closing: "") %>
 <%# Finishing an engagement: Mark complete (delivered) or Cancel (stopped before then), each with an
-    optional note. Either closes it: off the open list, its agreement and history kept. Both forms
+    optional note. Either closes it: off the open list, its work and history kept. Both forms
     are always on the page and state only shows one, so opening them never waits on the server. %>
 <div class="engagement-finish" data-controller="state-focus" data-state-focus-state-value="closing">
   <div class="flex align-center gap-half justify-space-between" hidden="<%= closing != "" %>">
@@ -16,7 +16,7 @@
   <div hidden="<%= closing != "completed" %>">
     <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :complete), class: "flex flex-column gap-half txt-small" do |form| %>
       <strong>Mark <%= engagement.ref %> complete?</strong>
-      <span class="txt-subtle">Delivered and done. It leaves the open list; the agreement and its history stay, and it can be reopened.</span>
+      <span class="txt-subtle">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="completed">
       <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
       <div class="flex gap-half">
@@ -29,7 +29,7 @@
   <div hidden="<%= closing != "cancelled" %>">
     <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :cancel), class: "flex flex-column gap-half txt-small" do |form| %>
       <strong>Cancel <%= engagement.ref %>?</strong>
-      <span class="txt-subtle">Stopped before it was delivered. It leaves the open list; the agreement and its history stay, and it can be reopened.</span>
+      <span class="txt-subtle">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="cancelled">
       <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
       <div class="flex gap-half">

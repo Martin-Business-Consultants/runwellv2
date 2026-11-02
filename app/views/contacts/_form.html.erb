@@ -23,22 +23,10 @@
     <%= form.telephone_field :phone, class: "input full-width", autocomplete: "off" %>
   </label>
 
-  <div class="flex align-center gap-half txt-align-start">
-    <label class="switch flex-item-no-shrink">
-      <%= form.check_box :portal_access, class: "switch__input" %>
-      <span class="switch__btn"></span>
-    </label>
-    <%= form.label :portal_access, "Can sign in to the client portal", class: "txt-small" %>
-  </div>
+  <%= switch_field form, :portal_access, label: "Can sign in to the client portal" %>
 
-  <div class="flex align-center gap-half txt-align-start">
-    <label class="switch flex-item-no-shrink">
-      <%= form.check_box :can_approve, class: "switch__input" %>
-      <span class="switch__btn"></span>
-    </label>
-    <%= form.label :can_approve, "Can approve agreements", class: "txt-small" %>
-  </div>
-  <p class="txt-x-small txt-subtle txt-align-start margin-none">Portal contacts sign in with an emailed link, see this client’s shared work and documents, and send requests. Approvers also decide on agreements, in the portal or from an emailed approval link.</p>
+  <%= switch_field form, :can_approve, label: "Can approve" %>
+  <p class="txt-x-small txt-subtle txt-align-start margin-none">Portal contacts sign in with an emailed link, see this client’s shared work and documents, and send requests. Approvers can say yes for their company when something needs their approval.</p>
 
   <button type="submit" class="btn btn--link center" data-form-target="submit">
     <span><%= contact.new_record? ? "Add contact" : "Save changes" %></span>

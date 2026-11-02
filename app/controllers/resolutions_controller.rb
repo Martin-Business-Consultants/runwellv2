@@ -1,4 +1,4 @@
-# Looks up what a person called something ("Bloom", "Priya", "the Spanish pages change order"),
+# Looks up what a person called something ("Bloom", "Priya", "the Spanish pages section"),
 # for an agent: the matching records of one kind, or of every kind, best first (Agent::Resolver).
 # Most tools take the name directly; this is for checking first, or choosing among several.
 class ResolutionsController < ApplicationController

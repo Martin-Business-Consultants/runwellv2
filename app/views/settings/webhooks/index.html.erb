@@ -8,7 +8,7 @@
         <h2 class="divider">Webhooks</h2>
       </header>
       <p class="txt-small txt-subtle margin-none">
-        Send each event (a <%= term(:client).downcase %> added, an agreement approved, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
+        Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
         Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
         Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
       </p>
@@ -36,7 +36,7 @@
           <%= form.label :secret, "Secret", class: "record-form__label" %>
           <%= secret_field form, :secret, readonly: true %>
           <%= form.label :kinds_text, "Only these kinds", class: "record-form__label" %>
-          <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. agreement.approved, todo.*", autocomplete: "off" %>
+          <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
           <label class="flex align-center gap-half"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
           <label class="flex align-center gap-half"><%= form.check_box :active %> <span>On</span></label>
           <div class="flex flex-wrap gap-half">
@@ -83,9 +83,9 @@
         <%= form.label :url, "Address", class: "record-form__label" %>
         <%= form.url_field :url, class: "input full-width", placeholder: "https://hooks.example.com/runwell", required: true, autocomplete: "off" %>
         <%= form.label :description, "Name (optional)", class: "record-form__label" %>
-        <%= form.text_field :description, class: "input full-width", placeholder: "Zapier: approvals to the sales sheet", autocomplete: "off" %>
+        <%= form.text_field :description, class: "input full-width", placeholder: "Zapier: closed engagements to the sales sheet", autocomplete: "off" %>
         <%= form.label :kinds_text, "Only these kinds (optional)", class: "record-form__label" %>
-        <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. agreement.approved, todo.*", autocomplete: "off" %>
+        <%= form.text_field :kinds_text, class: "input full-width", placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
         <label class="flex align-center gap-half"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
         <div><button type="submit" class="btn btn--link txt-small">Add webhook</button></div>
       <% end %>

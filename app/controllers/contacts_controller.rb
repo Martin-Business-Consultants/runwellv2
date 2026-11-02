@@ -8,7 +8,7 @@ class ContactsController < ApplicationController
     params: { contact: { name: "string", role: "string", email: "string", phone: "string", portal_access: "boolean", can_approve: "boolean" } },
     confirm: "Portal access and approval rights decide what this person at the client can see and sign off."
   agent_tool :archive_contact, on: :destroy, title: "Archive a contact",
-    description: "They drop off the client’s contacts and lose portal access and approval rights. Past approvals and requests stay."
+    description: "They drop off the client’s contacts and lose portal access and approval rights. Their past requests stay."
 
   before_action :set_client, only: %i[new create]
   before_action :set_contact, only: %i[edit update destroy]

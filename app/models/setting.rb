@@ -1,9 +1,9 @@
 # This install's settings: what it calls things, who its mail comes from, and which plugins
 # are switched on. One row: one install is one business (or household, or whatever it runs).
 class Setting < ApplicationRecord
-  include CustomCss, Start, Eventful
+  include CustomCss, Eventful
 
-  TERMS = %w[client engagement scope_item work commitment].freeze
+  TERMS = %w[client engagement scope_item work].freeze
   INDEX_VIEWS = %w[cards table].freeze
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
@@ -92,14 +92,9 @@ class Setting < ApplicationRecord
     self.class.inbound_password
   end
 
-  # Where clients email requests (RequestsMailbox), and each request's reply address on it.
+  # Where clients email requests (RequestsMailbox).
   normalizes :requests_email, with: ->(value) { value.to_s.strip.downcase.presence }
   validates :requests_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "should be an email address" }, allow_nil: true
-
-  def requests_reply_address(request)
-    local, domain = requests_email.split("@", 2)
-    "#{local.split("+").first}+r#{request.id}-#{request.reply_token}@#{domain}"
-  end
 
   def brand_color = SCHEME_COLORS.fetch(scheme, SCHEME_COLORS["fizzy"])
 
@@ -138,9 +133,6 @@ class Setting < ApplicationRecord
   def label_enabled?(label)
     terminology.dig("labels", label.to_s, "enabled") != false
   end
-
-  # Settings > Sign-in > Only sign in through these: passwords and emailed links are for owners alone.
-  def password_sign_in_for?(user) = !providers_only? || user.owner?
 
   def enabled_labels
     Engagement::LABELS.select { label_enabled?(it) }

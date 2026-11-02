@@ -1,4 +1,4 @@
-# What an owner does about someone's way in (Settings > People > a person): their name and address,
+# What an owner does about someone's way in (Users > a person): their name and address,
 # a new password or an emailed link to choose one, signing them out everywhere, and cutting off the
 # apps they've connected. Each is a security event in the audit log (Event::SECURITY_SUBJECTS), and
 # a new password or address signs them out, so whoever had the old one is out too.

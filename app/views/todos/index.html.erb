@@ -5,10 +5,12 @@
 <% content_for :index_filters do %>
   <% unless @view == "board" %>
     <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
-          options: [ [ "Open work", "open" ], [ "All work", "all" ] ] %>
+          options: [ [ "Open work", "open" ], [ "All work", "all" ], [ "In progress", "in_progress" ], [ "In review", "in_review" ], [ "Blocked", "blocked" ] ] %>
   <% end %>
+  <%= render "layouts/shared/quick_filter", title: "Due…", param: :due, current: @due,
+        options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
-        options: [ [ "Anyone", "any" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
+        options: [ [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
   <%= render "layouts/shared/quick_filter", title: "Engagement…", param: :engagement, current: @engagement,
         options: [ [ "All engagements", "all" ] ] + todo_engagement_filter_options(@engagement) %>
 <% end %>
@@ -19,7 +21,6 @@
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + todo_owner_options %>
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
     <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due date" %>
-    <%= bulk_menu bulk_todos_commitments_path, method: :post, name: "owner_kind", label: "Make #{term(:commitment, count: 2).downcase}", choices: [ [ "We promised", "us" ], [ "They promised", "client" ] ] %>
   <% end %>
   <% end %>
 <% end %>
@@ -34,8 +35,8 @@
         <% @todos.each do |todo| %>
           <%# herb:key todo.id %>
           <% overdue = todo.status != "done" && todo.due_on&.past? %>
-          <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo.engagement.ref,
-                context: todo.engagement.client.name,
+          <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo_ref(todo),
+                context: todo_client_name(todo),
                 meta: [ todo_owners_tag(todo, fallback: "Unassigned"), ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
                 status: overdue ? "Overdue" : todo.status.humanize, highlight: todo.status == "done" %>
         <% end %>
@@ -59,8 +60,12 @@
           <tr data-filter-target="item">
             <%= bulk_select_cell todo, todo.title %>
             <td><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
-            <td class="txt-nowrap"><%= link_to todo.engagement.ref, todo.engagement, class: "txt-ink" %></td>
-            <td class="txt-subtle"><%= todo.engagement.client.name %></td>
+            <td class="txt-nowrap">
+              <% if todo.engagement %>
+                <%= link_to todo.engagement.ref, todo.engagement, class: "txt-ink" %>
+              <% end %>
+            </td>
+            <td class="txt-subtle"><%= todo.client&.name %></td>
             <td class="txt-subtle"><%= render "todos/owner_picker", todo: todo %></td>
             <td class="txt-nowrap"><%= render "todos/due", todo: todo %></td>
             <td class="txt-align-center"><%= render "todos/status_dot", todo: todo %></td>

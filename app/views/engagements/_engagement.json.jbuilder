@@ -5,8 +5,6 @@ json.state engagement.state
 json.state_label engagement.state_label
 json.close_outcome engagement.close_outcome if engagement.closed?
 json.internal engagement.internal?
-json.agreed_amount money(engagement.agreed_amount_cents)
-json.agreed_amount_cents engagement.agreed_amount_cents
 json.client agent_ref(engagement.client)
 json.closed engagement.closed?
 json.custom_fields engagement.custom_field_hash

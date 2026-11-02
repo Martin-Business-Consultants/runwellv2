@@ -3,10 +3,10 @@ require "test_helper"
 class BriefingsControllerTest < ActionDispatch::IntegrationTest
   setup { sign_in_as(users(:ted)) }
 
-  test "home greets the signed in user" do
+  test "home says when nothing needs the person" do
     get root_path
     assert_response :success
-    assert_select "h1", /Ted/
+    assert_select ".home-empty", /Nothing needs you/
   end
 
   test "requires sign in" do

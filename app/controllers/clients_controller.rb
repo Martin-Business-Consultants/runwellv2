@@ -5,15 +5,15 @@ class ClientsController < ApplicationController
     description: "Active clients unless status says otherwise: active (the default), dormant, former or all.",
     params: { status: "string" }
   agent_tool :show_client, on: :show, title: "Show a client",
-    description: "A client with its contacts, engagements, commitments, notes and documents.", next_tools: %i[create_contact create_engagement add_note]
+    description: "A client with its contacts, engagements, open work, notes and documents.", next_tools: %i[create_contact create_engagement add_note]
   agent_tool :create_client, on: :create, title: "Add a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects with no agreement to send.",
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects.",
     params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }, next_tools: %i[create_contact create_engagement]
   agent_tool :update_client, on: :update, title: "Change a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, approval pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects with no agreement to send.",
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects.",
     params: { client: { name: "string", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }
   agent_tool :delete_client, on: :destroy, title: "Delete a client",
-    description: "Removes the client with its contacts, commitments and notes. A client with engagements can’t be deleted: set its status to former instead."
+    description: "Removes the client with its contacts, work and notes. A client with engagements can’t be deleted: set its status to former instead."
 
   before_action :set_client, only: %i[show edit update destroy]
 
@@ -29,6 +29,7 @@ class ClientsController < ApplicationController
 
   def show
     @engagement_state = Engagement.filter_from(params, :engagements)
+    @work_state = params[:work].presence_in(%w[open done all]) || "open"
   end
 
   def new

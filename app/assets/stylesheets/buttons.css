@@ -17,7 +17,8 @@
     gap: var(--btn-gap, 0.45em);
     justify-content: center;
     line-height: 1.2;
-    padding: var(--btn-padding, 0.45em 0.85em);
+    /* shadcn/ui's h-9 px-4: 36px tall at 14px. */
+    padding: var(--btn-padding, 0.6em 1.15em);
     pointer-events: auto;
     position: relative;
     text-decoration: none;
