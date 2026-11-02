@@ -12,6 +12,7 @@ gem "kamal", require: false
 gem "lexxy"
 gem "mcp"
 gem "positioning"
+gem "matrix" # prawn needs it and doesn't say so; not a default gem since Ruby 3.1
 gem "prawn"
 gem "propshaft"
 gem "puma"

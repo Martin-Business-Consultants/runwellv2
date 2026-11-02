@@ -509,6 +509,7 @@ DEPENDENCIES
   kamal
   letter_opener_web
   lexxy
+  matrix
   mcp
   pg_query
   positioning
