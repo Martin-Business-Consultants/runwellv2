@@ -1,6 +1,9 @@
 <%# locals: () %>
+<%# The bell in the bottom right corner (g n) and its Popover: a header with the way to every
+    notification and Clear all, over the newest few as Items (notifications/trays/show). %>
 <section class="tray tray--notifications" data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:render#update" data-dialog-sizing-value="false">
   <dialog class="tray__dialog"
+      aria-label="Notifications"
       data-controller="navigable-list"
       data-dialog-target="dialog"
       data-navigable-list-actionable-items-value="true"
@@ -8,20 +11,22 @@
       data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset turbo-visit->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
     <turbo-frame id="notifications" src="<%= notifications_tray_path %>" refresh="morph" data-controller="frame-reloader" data-action="focus@window->frame-reloader#reload"></turbo-frame>
 
-    <div class="tray__item tray__item--hat txt-x-small gap-half">
-      <div data-navigable-list-target="item" class="full-width">
-        <%= link_to notifications_path, class: "btn borderless flex-item-grow position-relative overflow-ellipsis", data: { action: "click->dialog#close" } do %>
-          <%= icon_tag "bell" %>
-          <span class="tray__new-notifications">See more new items</span>
-          <span class="tray__old-notifications">See older items</span>
+    <p class="tray__empty">You’re all caught up.</p>
+
+    <div class="tray__item tray__item--hat">
+      <h2 class="tray__title">Notifications</h2>
+      <div data-navigable-list-target="item" class="tray__hat-action">
+        <%= link_to notifications_path, class: "ui-button ui-button--ghost ui-button--sm tray__see-all", data: { action: "click->dialog#close" } do %>
+          <span class="tray__new-notifications">See all new</span>
+          <span class="tray__old-notifications">View all</span>
         <% end %>
       </div>
 
       <%= button_to bulk_reading_path(from_tray: true),
-            class: "btn borderless tray__clear-notifications",
+            class: "ui-button ui-button--ghost ui-button--sm tray__clear-notifications",
             title: "Mark all notifications as read",
             data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
-            form: { class: "full-width", data: { navigable_list_target: "item" } } do %>
+            form: { class: "tray__hat-action", data: { navigable_list_target: "item" } } do %>
         <%= icon_tag "check" %>
         <span>Clear all</span>
       <% end %>
@@ -29,9 +34,9 @@
   </dialog>
 
   <button class="tray__toggle" data-action="dialog#toggle" data-keys="g n" aria-label="Toggle notifications stack" aria-haspopup="true">
-    <div class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
+    <span class="tray__toggle-btn">
       <%= icon_tag "bell" %>
       <span class="tray__toggle-text">Notifications</span>
-    </div>
+    </span>
   </button>
 </section>

@@ -1,0 +1,9 @@
+<%# locals: (event:) %>
+<%# One event in the audit log's data table (ui/_data_table). %>
+<tr data-filter-target="item">
+  <td class="txt-nowrap" data-column="when" title="<%= event.occurred_at.utc.iso8601 %>"><%= l event.occurred_at, format: :short %></td>
+  <td data-column="what"><%= event_title(event) %></td>
+  <td data-column="who"><%= event.actor_name %><% if event.source == "agent" %> <span class="txt-subtle"><%= event.source_label %></span><% end %></td>
+  <td data-column="on"><%= audit_subject_name(event) %></td>
+  <td class="txt-subtle" data-column="details"><%= event_details(event) %></td>
+</tr>

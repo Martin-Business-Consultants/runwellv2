@@ -1,9 +1,12 @@
-<%# locals: (title:, count:, column_id:) %>
-<button class="cards__expander btn btn--plain" data-collapsible-columns-target="button" data-css-variable-counter-target="counter" data-action="click->collapsible-columns#toggle click->navigable-list#selectCurrentOrReset"
+<%# locals: (title:, count:, column_id:, status: nil) %>
+<%# A column's header (Fizzy's expander): the status as its small dot, the name and a count badge.
+    Clicking it opens or folds the column. %>
+<button type="button" class="cards__expander app-lane__toggle" data-collapsible-columns-target="button" data-css-variable-counter-target="counter" data-action="click->collapsible-columns#toggle click->navigable-list#selectCurrentOrReset"
   aria-controls="<%= column_id %>" aria-expanded="false">
-  <span class="cards__expander-count" data-drag-and-drop-counter="true"><%= count > 99 ? "99+" : count %></span>
-  <h2 class="cards__expander-title" data-collapsible-columns-target="title">
-    <%= title %>
-    <%= icon_tag "collapse" %>
-  </h2>
+  <% if status %>
+    <%= tag.span class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true } %>
+  <% end %>
+  <h2 class="cards__expander-title" data-collapsible-columns-target="title"><%= title %></h2>
+  <span class="cards__expander-count ui-badge ui-badge--count" data-drag-and-drop-counter="true"><%= count > 99 ? "99+" : count %></span>
+  <%= icon_tag "collapse", class: "app-lane__collapse" %>
 </button>

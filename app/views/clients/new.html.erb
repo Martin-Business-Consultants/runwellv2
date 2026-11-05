@@ -5,41 +5,53 @@
   <%= parent_page term(:client, count: 2), clients_path %>
 <% end %>
 
-<section class="settings settings--split">
-  <div class="settings__panel panel shadow txt-align-start">
-    <h1 class="page-title"><%= @page_title %></h1>
+<section class="settings settings--split record-page">
+  <header class="record-page__header page-heading">
+    <div class="record-page__heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="record-page__description">Someone you work for. Contacts, <%= term(:engagement, count: 2).downcase %> and <%= term(:work).downcase %> come next.</p>
+    </div>
+    <div class="page-heading__actions">
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="settings__panel record-page__main">
     <%= render "clients/form", client: @client %>
   </div>
 
-  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
-
-    <%= render "layouts/shared/sidebar_toggle" %>
-    <section class="settings__section">
-      <header>
-        <h2 class="divider">What comes next</h2>
+  <aside class="settings__panel settings__panel--side record-page__aside">
+    <section class="ui-card record-card">
+      <header class="ui-card__header">
+        <h2 class="ui-card__title">What comes next</h2>
       </header>
-      <ol class="record-steps txt-small">
-        <li>Add the people you deal with as contacts. Switch on portal access for those who should see their work.</li>
-        <li>Start a <%= term(:engagement).downcase %>: something you run for them, in <%= term(:scope_item, count: 2).downcase %> if it has parts.</li>
-        <li>Add its <%= term(:work).downcase %>, with who’s on it and when it’s due.</li>
-      </ol>
+      <div class="ui-card__content">
+        <ol class="record-steps">
+          <li>Add the people you deal with as contacts. Switch on portal access for those who should see their work.</li>
+          <li>Start a <%= term(:engagement).downcase %>: something you run for them, in <%= term(:scope_item, count: 2).downcase %> if it has parts.</li>
+          <li>Add its <%= term(:work).downcase %>, with who’s on it and when it’s due.</li>
+        </ol>
+      </div>
     </section>
 
     <% if recent.any? %>
-      <section class="settings__section">
-        <header>
-          <h2 class="divider">Recently added</h2>
+      <section class="ui-card record-card">
+        <header class="ui-card__header">
+          <h2 class="ui-card__title">Recently added</h2>
         </header>
-        <ul class="settings__scrollable-list">
-          <% recent.each do |client| %>
-            <%# herb:key client.id %>
-            <li class="flex align-center gap-half txt-small" data-filter-target="item">
-              <%= link_to client.name, client, class: "txt-ink overflow-ellipsis min-width" %>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <span class="txt-subtle txt-nowrap"><%= l client.created_at.to_date, format: :short %></span>
-            </li>
-          <% end %>
-        </ul>
+        <div class="ui-card__content">
+          <ul class="record-list record-list--compact">
+            <% recent.each do |client| %>
+              <%# herb:key client.id %>
+              <li data-filter-target="item">
+                <%= link_to client, class: "record-list__row" do %>
+                  <span class="record-list__main"><span class="record-list__title"><%= client.name %></span></span>
+                  <span class="record-list__meta"><%= l client.created_at.to_date, format: :short %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
       </section>
     <% end %>
   </aside>

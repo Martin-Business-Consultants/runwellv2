@@ -6,11 +6,11 @@
   <%= parent_page term(:engagement, count: 2), engagements_path %>
 <% end %>
 
-<section class="settings settings--split">
-  <div class="settings__panel panel shadow txt-align-start">
-    <div class="flex flex-column gap-half">
+<section class="settings settings--split record-page">
+  <header class="record-page__header page-heading">
+    <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="txt-small txt-subtle margin-none">
+      <p class="record-page__description">
         <% if client&.internal? %>
           <%= client.name %> is internal: one of your own projects.
         <% else %>
@@ -18,46 +18,53 @@
         <% end %>
       </p>
     </div>
+    <div class="page-heading__actions">
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="settings__panel record-page__main">
     <%= render "engagements/form", engagement: @engagement %>
   </div>
 
-  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
-
-    <%= render "layouts/shared/sidebar_toggle" %>
-    <section class="settings__section">
-      <header>
-        <h2 class="divider">How it goes</h2>
+  <aside class="settings__panel settings__panel--side record-page__aside">
+    <section class="ui-card record-card">
+      <header class="ui-card__header">
+        <h2 class="ui-card__title">How it goes</h2>
       </header>
-      <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:work).downcase}.",
-           "Add #{term(:work).downcase} as it comes up, with owners and due dates.", "Track it on the #{term(:work)} table or board like any other.",
-           "Close the #{term(:engagement).downcase} when it’s done." ] %>
-      <ol class="record-steps txt-small">
-        <% steps.each do |step| %>
-          <%# herb:key step %>
-          <li><%= step %></li>
-        <% end %>
-      </ol>
+      <div class="ui-card__content">
+        <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:work).downcase}.",
+             "Add #{term(:work).downcase} as it comes up, with owners and due dates.", "Track it on the #{term(:work)} table or board like any other.",
+             "Close the #{term(:engagement).downcase} when it’s done." ] %>
+        <ol class="record-steps">
+          <% steps.each do |step| %>
+            <%# herb:key step %>
+            <li><%= step %></li>
+          <% end %>
+        </ol>
+      </div>
     </section>
 
     <% if client %>
-      <section class="settings__section">
-        <header>
-          <h2 class="divider"><%= client.name %>’s <%= term(:engagement, count: 2).downcase %> <span class="txt-subtle"><%= existing.size %></span></h2>
+      <section class="ui-card record-card">
+        <header class="ui-card__header">
+          <h2 class="ui-card__title"><%= client.name %>’s <%= term(:engagement, count: 2).downcase %></h2>
+          <p class="ui-card__description"><%= existing.empty? ? "This is their first." : pluralize(existing.size, "so far", plural: "so far") %></p>
         </header>
-        <ul class="settings__scrollable-list">
-          <% existing.each do |engagement| %>
-            <%# herb:key engagement.id %>
-            <li class="flex align-center gap-half txt-small" data-filter-target="item">
-              <%= link_to engagement, class: "txt-ink overflow-ellipsis min-width" do %>
-                <strong><%= engagement.ref %></strong> <%= engagement.title %>
+        <% if existing.any? %>
+          <div class="ui-card__content">
+            <ul class="record-list record-list--compact">
+              <% existing.each do |engagement| %>
+                <%# herb:key engagement.id %>
+                <li data-filter-target="item">
+                  <%= link_to engagement, class: "record-list__row" do %>
+                    <span class="record-list__main"><span class="record-list__title"><span class="record-list__ref"><%= engagement.ref %></span> <%= engagement.title %></span></span>
+                    <%= status_tag engagement.state_label, highlight: engagement.active? %>
+                  <% end %>
+                </li>
               <% end %>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <%= status_tag engagement.state_label, highlight: engagement.active? %>
-            </li>
-          <% end %>
-        </ul>
-        <% if existing.empty? %>
-          <p class="txt-subtle txt-small margin-none">This is their first.</p>
+            </ul>
+          </div>
         <% end %>
       </section>
     <% end %>

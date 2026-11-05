@@ -1,34 +1,40 @@
 <% @page_title = "Sign in" %>
 
-<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
-  <h1 class="txt-x-large font-weight-black margin-block-end">Get into Runwell</h1>
+<div class="auth">
+  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
+    <header class="ui-card__header auth__header">
+      <h1 class="ui-card__title auth__title">Welcome back</h1>
+      <p class="ui-card__description">Sign in with your email address and password</p>
+    </header>
 
-  <%= form_with url: session_path, class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
-    <label class="flex align-center gap input input--actor">
-      <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…", value: params[:email_address] %>
-    </label>
+    <div class="ui-card__content auth__content">
+      <%= form_with url: session_path, class: "auth__form", data: { controller: "form" } do |form| %>
+        <div class="ui-field">
+          <%= form.label :email_address, "Email", class: "ui-label" %>
+          <%= form.email_field :email_address, required: true, class: "ui-input", autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
+        </div>
 
-    <label class="flex align-center gap input input--actor">
-      <%= form.password_field :password, required: true, class: "input txt-large full-width", autocomplete: "current-password", placeholder: "Enter your password…", maxlength: 72 %>
-    </label>
+        <div class="ui-field">
+          <div class="auth__label-row">
+            <%= form.label :password, "Password", class: "ui-label" %>
+            <%= link_to "Forgot your password?", new_password_path, class: "auth__aside-link" %>
+          </div>
+          <%= form.password_field :password, required: true, class: "ui-input", autocomplete: "current-password", maxlength: 72 %>
+        </div>
 
-    <p class="txt-small txt-subtle">Joining a team? Ask an owner for an invitation.</p>
+        <button type="submit" id="log_in" class="ui-button ui-button--block" data-form-target="submit">Sign in</button>
+      <% end %>
 
-    <button type="submit" id="log_in" class="btn btn--link center txt-medium" data-form-target="submit">
-      <span>Let’s go</span>
-      <%= icon_tag "arrow-right" %>
-    </button>
-  <% end %>
+      <p class="ui-separator ui-separator--label auth__separator">Or</p>
 
-  <div class="sign-in-options margin-block-start">
-    <%= link_to new_session_link_path(email_address: params[:email_address]), class: "btn full-width" do %>
-      <%= icon_tag "email" %> <span>Email me a sign-in link</span>
-    <% end %>
-  </div>
+      <%= link_to new_session_link_path(email_address: params[:email_address]), class: "ui-button ui-button--outline ui-button--block" do %>
+        <%= icon_tag "email" %>
+        <span>Email me a sign-in link</span>
+      <% end %>
+    </div>
+  </section>
 
-  <div class="margin-block-start">
-    <%= link_to "Forgot your password?", new_password_path, class: "btn btn--plain txt-link center txt-small" %>
-  </div>
+  <p class="auth__note">Joining a team? Ask an owner for an invitation.</p>
 </div>
 
 <% content_for :footer do %>

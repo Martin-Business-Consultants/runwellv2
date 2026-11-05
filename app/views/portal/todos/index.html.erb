@@ -2,33 +2,45 @@
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
+  <p class="portal-page-header__description">What we are working on for you.</p>
 <% end %>
 
 <% if @todos.any? %>
-  <section class="settings">
-    <div class="settings__panel panel shadow">
-      <section class="settings__section">
-        <p class="txt-small txt-subtle margin-none">What we are working on for you.</p>
-        <ul class="settings__scrollable-list">
+  <section class="ui-card ui-card--flush portal-card">
+    <div class="ui-table-container">
+      <table class="ui-table portal-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th class="portal-table__secondary"><%= term(:engagement) %></th>
+            <th class="portal-table__date">Due</th>
+            <th class="portal-table__status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
           <% @todos.each do |todo| %>
             <%# herb:key todo.id %>
-            <li class="flex align-center gap-half">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= todo.title %></strong>
-                <div class="txt-x-small txt-subtle">
-                  <% if todo.engagement %><%= todo.engagement.ref %> <%= todo.engagement.title %><% else %>General<% end %><% if todo.due_on %> · due <%= l todo.due_on, format: :short %><% end %>
-                </div>
-              </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <%= status_tag todo.status.humanize, highlight: todo.status == "done" %>
-            </li>
+            <tr>
+              <td class="font-weight-medium"><%= todo.title %></td>
+              <td class="portal-table__secondary txt-subtle">
+                <% if todo.engagement %>
+                  <%= link_to "#{todo.engagement.ref} #{todo.engagement.title}", portal_engagement_path(todo.engagement), class: "portal-table__link" %>
+                <% else %>
+                  General
+                <% end %>
+              </td>
+              <td class="portal-table__date txt-subtle txt-nowrap">
+                <% if todo.due_on %>
+                  <%= l todo.due_on, format: :short %>
+                <% end %>
+              </td>
+              <td class="portal-table__status"><%= status_tag todo.status.humanize, highlight: todo.status == "done" %></td>
+            </tr>
           <% end %>
-        </ul>
-      </section>
+        </tbody>
+      </table>
     </div>
   </section>
 <% else %>
-  <div class="panel panel--centered">
-    <%= render "layouts/shared/empty", text: "No work to show yet." %>
-  </div>
+  <%= render "layouts/shared/empty", text: "No work to show yet." %>
 <% end %>

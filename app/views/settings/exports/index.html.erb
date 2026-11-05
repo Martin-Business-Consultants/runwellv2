@@ -2,52 +2,59 @@
 <%= render "settings/header", current: :export %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Export everything</h2>
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Export</h2>
+        <p class="settings__description">Everything Runwell holds, as a .zip that’s built in the background and emailed to you when ready, then kept for a week.</p>
       </header>
-      <p class="txt-small txt-subtle margin-none">
-        One .zip of everything Runwell holds: every table (yours and your plugins’) as JSON and CSV, and every file.
-        It’s yours to keep, move or open in a spreadsheet. Passwords, tokens and other secrets are left out.
-        It’s built in the background and emailed to you when ready, then kept for a week.
-      </p>
-      <div class="section-actions">
-        <%= button_to settings_exports_path, class: "btn btn--link txt-small" do %>
-          <%= icon_tag "share" %> <span>Make an export</span>
-        <% end %>
-      </div>
-    </section>
 
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Back up for Runwell Go</h2>
-      </header>
-      <p class="txt-small txt-subtle margin-none">
-        One .zip of the database itself and every file, to restore with Settings › Import in Runwell Go
-        (or <code>runwell import</code>). Everyone signs in there with the passwords they use here.
-        It holds every secret this install does, so keep it as safe as the server.
-        It’s built in the background and emailed to you when ready, then kept for a week.
-      </p>
-      <div class="section-actions">
-        <%= button_to settings_exports_path, params: { kind: "backup" }, class: "btn txt-small" do %>
-          <%= icon_tag "lock" %> <span>Make a backup</span>
-        <% end %>
+      <div class="settings__list">
+        <div class="ui-item">
+          <div class="ui-item__media"><%= icon_tag "share" %></div>
+          <div class="ui-item__content">
+            <p class="ui-item__title">Export everything</p>
+            <p class="ui-item__description">
+              Every table (yours and your plugins’) as JSON and CSV, and every file. It’s yours to keep, move or open in a spreadsheet.
+              Passwords, tokens and other secrets are left out.
+            </p>
+          </div>
+          <div class="ui-item__actions">
+            <%= button_to settings_exports_path, class: "ui-button ui-button--sm" do %>
+              <span>Make an export</span>
+            <% end %>
+          </div>
+        </div>
+        <div class="ui-item">
+          <div class="ui-item__media"><%= icon_tag "lock" %></div>
+          <div class="ui-item__content">
+            <p class="ui-item__title">Back up for Runwell Go</p>
+            <p class="ui-item__description">
+              The database itself and every file, to restore with Settings › Import in Runwell Go (or <code>runwell import</code>).
+              Everyone signs in there with the passwords they use here. It holds every secret this install does, so keep it as safe as the server.
+            </p>
+          </div>
+          <div class="ui-item__actions">
+            <%= button_to settings_exports_path, params: { kind: "backup" }, class: "ui-button ui-button--outline ui-button--sm" do %>
+              <span>Make a backup</span>
+            <% end %>
+          </div>
+        </div>
       </div>
     </section>
 
     <% if @exports.any? %>
-      <section class="settings__section flex flex-column gap-half">
-        <header>
-          <h2 class="divider">Recent exports</h2>
+      <section class="settings__section">
+        <header class="settings__heading">
+          <h2>Recent exports</h2>
         </header>
-        <ul class="settings__scrollable-list">
+        <ul class="settings__list settings__list--scroll">
           <% @exports.each do |export| %>
             <%# herb:key export.id %>
-            <li class="flex align-center gap-half txt-small" data-filter-target="item">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= export.backup? ? "Backup" : "Export" %> · <%= l export.created_at, format: :long %></strong>
-                <div class="txt-x-small txt-subtle">
+            <li class="ui-item ui-item--sm" data-filter-target="item">
+              <div class="ui-item__content">
+                <p class="ui-item__title"><%= export.backup? ? "Backup" : "Export" %> · <%= l export.created_at, format: :long %></p>
+                <p class="ui-item__description">
                   By <%= export.user.display_name %>
                   <% if export.ready? %>
                     · <%= number_with_delimiter(export.rows_count) %> records, <%= pluralize(export.files_count, "file") %>, <%= number_to_human_size(export.archive.byte_size) %>
@@ -56,11 +63,12 @@
                   <% else %>
                     · being made…
                   <% end %>
-                </div>
+                </p>
               </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
               <% if export.ready? %>
-                <%= link_to "Download", settings_export_path(export), class: "btn txt-small", data: { turbo: false } %>
+                <div class="ui-item__actions">
+                  <%= link_to "Download", settings_export_path(export), class: "ui-button ui-button--outline ui-button--sm", data: { turbo: false } %>
+                </div>
               <% end %>
             </li>
           <% end %>

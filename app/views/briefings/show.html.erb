@@ -5,46 +5,99 @@
     <%= render "briefings/update", release: @release %>
   <% end %>
 
+  <header class="home-heading">
+    <div class="home-heading__text">
+      <h1 class="home-heading__title"><%= briefing_greeting(Current.user) %></h1>
+      <p class="home-heading__description">
+        <% if @briefing.empty? %>
+          Nothing needs you right now.
+        <% else %>
+          Here’s what needs you today.
+        <% end %>
+      </p>
+    </div>
+    <div class="home-heading__actions">
+      <%= link_to todos_path(owner: "me", view: "table", sort: "due"), class: ui_button_classes(:outline) do %>
+        <%= icon_tag "board" %> All your <%= term(:work).downcase %>
+      <% end %>
+      <%= link_to new_quick_action_path(kind: "work"), class: ui_button_classes, data: { turbo_frame: "quick_action" } do %>
+        <%= icon_tag "add" %> Add <%= term(:work).downcase %>
+      <% end %>
+    </div>
+  </header>
+
   <%= plugin_slots(:home_top) %>
 
-  <% if @briefing.empty? %>
-    <p class="home-empty txt-subtle">Nothing needs you right now.</p>
-  <% else %>
-    <p class="home-summary"><%= briefing_summary(@briefing) %></p>
+  <div class="home-stats">
+    <% briefing_stats(@briefing).each do |stat| %>
+      <%# herb:key stat[:key] %>
+      <%= link_to stat[:path], class: class_names("ui-card home-stat", "home-stat--alert": stat[:alert]) do %>
+        <span class="ui-card__header">
+          <span class="ui-card__description"><%= stat[:label] %></span>
+          <span class="ui-card__title home-stat__value"><%= stat[:count] %></span>
+          <span class="ui-card__action"><%= icon_tag stat[:icon], class: "home-stat__icon" %></span>
+        </span>
+        <span class="ui-card__footer home-stat__footer"><%= stat[:note] %></span>
+      <% end %>
+    <% end %>
+  </div>
 
+  <% if @briefing.empty? %>
+    <div class="ui-empty home-empty">
+      <div class="ui-empty__media"><%= icon_tag "check-circle" %></div>
+      <h2 class="ui-empty__title">You’re all caught up</h2>
+      <p class="ui-empty__description">Nothing needs you right now. <%= term(:work) %> that’s due, waiting on you or mentions you shows up here.</p>
+    </div>
+  <% else %>
     <div class="home-grid">
-      <section class="panel shadow home-panel home-work" aria-labelledby="home-work-title">
-        <header class="home-panel__header">
-          <h2 class="home-panel__title" id="home-work-title">Your <%= term(:work).downcase %></h2>
-          <%= link_to "All of it", todos_path(owner: "me", view: "table", sort: "due"), class: "txt-link txt-small" %>
+      <section class="ui-card ui-card--flush home-work" aria-labelledby="home-work-title">
+        <header class="ui-card__header home-card__header">
+          <h2 class="ui-card__title" id="home-work-title">Your <%= term(:work).downcase %></h2>
+          <p class="ui-card__description">Due this week, or in progress.</p>
+          <div class="ui-card__action">
+            <%= link_to "View all", todos_path(owner: "me", view: "table", sort: "due"), class: ui_button_classes(:outline, size: :sm) %>
+          </div>
         </header>
         <% if @briefing.work_sections.any? %>
-          <table class="data-table home-work__table">
-            <% @briefing.work_sections.each do |section| %>
-              <%# herb:key section.key %>
-              <tbody>
-                <tr class="home-work__group">
-                  <th colspan="4" scope="rowgroup">
-                    <%= section.title %> <span class="txt-subtle"><%= section.count %></span>
-                    <% if section.count > section.items.size %>
-                      <%= link_to "See all", briefing_more_path(section.key), class: "txt-link home-work__more" %>
-                    <% end %>
-                  </th>
-                </tr>
-                <% section.items.each do |todo| %>
-                  <%# herb:key todo.id %>
-                  <tr data-filter-target="item">
-                    <td class="home-work__status"><%= render "todos/status_dot", todo: todo %></td>
-                    <td class="home-work__title"><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
-                    <td class="home-work__where txt-subtle"><%= home_work_where(todo) %></td>
-                    <td class="<%= class_names("home-work__due", "txt-negative": todo.due_on&.past?, "txt-subtle": !todo.due_on&.past?) %>"><%= home_due(todo.due_on) if todo.due_on %></td>
+          <div class="ui-table-container">
+            <table class="ui-table home-work__table">
+              <colgroup>
+                <col class="home-work__col--status">
+                <col>
+                <col class="home-work__col--where">
+                <col class="home-work__col--due">
+              </colgroup>
+              <% @briefing.work_sections.each do |section| %>
+                <%# herb:key section.key %>
+                <tbody>
+                  <tr class="home-work__group">
+                    <th colspan="4" scope="rowgroup">
+                      <span class="home-work__group-label">
+                        <%= section.title %>
+                        <span class="ui-badge ui-badge--count"><%= section.count %></span>
+                        <% if section.count > section.items.size %>
+                          <%= link_to "See all", briefing_more_path(section.key), class: "home-work__more" %>
+                        <% end %>
+                      </span>
+                    </th>
                   </tr>
-                <% end %>
-              </tbody>
-            <% end %>
-          </table>
+                  <% section.items.each do |todo| %>
+                    <%# herb:key todo.id %>
+                    <tr data-filter-target="item">
+                      <td class="home-work__status"><%= render "todos/status_dot", todo: todo %></td>
+                      <td class="home-work__title"><%= link_to todo.title, todo_path(todo), class: "ui-table__row-link" %></td>
+                      <td class="home-work__where"><%= home_work_where(todo) %></td>
+                      <td class="<%= class_names("home-work__due", "home-work__due--late": todo.due_on&.past?) %>"><%= home_due(todo.due_on) if todo.due_on %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              <% end %>
+            </table>
+          </div>
         <% else %>
-          <p class="txt-small txt-subtle margin-none">Nothing of yours is due this week or in progress.</p>
+          <div class="ui-card__content home-card__empty">
+            <p>Nothing of yours is due this week or in progress.</p>
+          </div>
         <% end %>
       </section>
 
@@ -52,17 +105,19 @@
         <div class="home-side">
           <% @briefing.waiting_sections.each do |section| %>
             <%# herb:key section.key %>
-            <section class="panel shadow home-panel">
-              <header class="home-panel__header">
-                <h2 class="home-panel__title"><%= section.title %> <span class="txt-subtle"><%= section.count %></span></h2>
+            <section class="ui-card ui-card--flush home-panel">
+              <header class="ui-card__header home-card__header home-panel__header">
+                <h2 class="ui-card__title home-panel__title"><%= section.title %> <span class="ui-badge ui-badge--count"><%= section.count %></span></h2>
                 <% if section.count > section.items.size %>
                   <% more_path = briefing_more_path(section.key) %>
                   <% if more_path %>
-                    <%= link_to "See all", more_path, class: "txt-link txt-small" %>
+                    <div class="ui-card__action">
+                      <%= link_to "See all", more_path, class: ui_button_classes(:ghost, size: :sm) %>
+                    </div>
                   <% end %>
                 <% end %>
               </header>
-              <ul class="home-list">
+              <ul class="ui-item-group home-list">
                 <%# A plugin's items needn't be records (Account management's alerts are Data), so no id. %>
                 <% section.items.each_with_index do |item, index| %>
                   <%# herb:key "#{item.class.name}-#{item.respond_to?(:id) ? item.id : index}" %>

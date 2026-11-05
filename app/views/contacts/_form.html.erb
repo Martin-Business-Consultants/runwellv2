@@ -2,36 +2,48 @@
 <%= render "layouts/shared/errors", record: contact %>
 
 <%= form_with model: contact, url: contact.new_record? ? client_contacts_path(contact.client) : contact_path(contact),
-      class: "flex flex-column gap txt-medium", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="record-form__label">Name</span>
-    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
-  </label>
+      class: "ui-card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <header class="ui-card__header">
+    <h2 class="ui-card__title">Contact</h2>
+    <p class="ui-card__description">Someone at <%= contact.client.name %> you deal with.</p>
+  </header>
 
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="record-form__label">Role</span>
-    <%= form.text_field :role, class: "input full-width", autocomplete: "off", placeholder: "Marketing lead" %>
-  </label>
+  <div class="ui-card__content record-form__body">
+    <div class="ui-field-row">
+      <label class="ui-field">
+        <span class="ui-label">Name</span>
+        <%= form.text_field :name, required: true, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
+      </label>
 
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="record-form__label">Email</span>
-    <%= form.email_field :email, class: "input full-width", autocomplete: "off", placeholder: "ann@acme.example" %>
-  </label>
+      <label class="ui-field">
+        <span class="ui-label">Role</span>
+        <%= form.text_field :role, class: "ui-input", autocomplete: "off", placeholder: "Marketing lead" %>
+      </label>
+    </div>
 
-  <label class="flex flex-column gap-half txt-align-start">
-    <span class="record-form__label">Phone</span>
-    <%= form.telephone_field :phone, class: "input full-width", autocomplete: "off" %>
-  </label>
+    <div class="ui-field-row">
+      <label class="ui-field">
+        <span class="ui-label">Email</span>
+        <%= form.email_field :email, class: "ui-input", autocomplete: "off", placeholder: "ann@acme.example" %>
+      </label>
 
-  <%= switch_field form, :portal_access, label: "Can sign in to the client portal" %>
+      <label class="ui-field">
+        <span class="ui-label">Phone</span>
+        <%= form.telephone_field :phone, class: "ui-input", autocomplete: "off" %>
+      </label>
+    </div>
 
-  <%= switch_field form, :can_approve, label: "Can approve" %>
-  <p class="txt-x-small txt-subtle txt-align-start margin-none">Portal contacts sign in with an emailed link, see this client’s shared work and documents, and send requests. Approvers can say yes for their company when something needs their approval.</p>
+    <fieldset class="ui-fieldset record-form__switches">
+      <legend class="ui-label">Access</legend>
+      <%= switch_field form, :portal_access, label: "Can sign in to the client portal", hint: "Signs in with an emailed link, sees this client’s shared work and documents, and sends requests." %>
+      <%= switch_field form, :can_approve, label: "Can approve", hint: "Can say yes for their company when something needs their approval." %>
+    </fieldset>
+  </div>
 
-  <button type="submit" class="btn btn--link center" data-form-target="submit">
-    <span><%= contact.new_record? ? "Add contact" : "Save changes" %></span>
-    <%= icon_tag "arrow-right" %>
-  </button>
-
-  <%= link_to "Cancel and go back", client_path(contact.client), data: { form_target: "cancel" }, hidden: true %>
+  <footer class="ui-card__footer ui-card__footer--bordered ui-card__footer--end">
+    <%= link_to "Cancel", client_path(contact.client), class: "ui-button ui-button--outline", data: { form_target: "cancel" } %>
+    <button type="submit" class="ui-button" data-form-target="submit">
+      <span><%= contact.new_record? ? "Add contact" : "Save changes" %></span>
+    </button>
+  </footer>
 <% end %>

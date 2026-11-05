@@ -22,6 +22,41 @@ module BriefingsHelper
     safe_join(links, tag.span(" · ", class: "txt-subtle", aria: { hidden: true }))
   end
 
+  # The greeting at the top of home, by the time of day in the install's zone.
+  def briefing_greeting(user)
+    part = case Time.current.hour
+    when 5..11 then "Good morning"
+    when 12..17 then "Good afternoon"
+    else "Good evening"
+    end
+    name = user&.person&.first_name
+    name.present? ? "#{part}, #{name}" : part
+  end
+
+  # Home's summary cards (shadcn's dashboard SectionCards): the counts that matter most, each
+  # linking to its list. Waiting on you adds up everything in the side column.
+  def briefing_stats(briefing)
+    waiting = briefing.waiting_sections.sum(&:count)
+    [
+      { key: "overdue", label: "Overdue", count: briefing.count("overdue"), icon: "bell-alert", alert: briefing.count("overdue").positive?,
+        note: briefing.count("overdue").positive? ? "Past their due date" : "Nothing late", path: briefing_more_path("overdue") },
+      { key: "today", label: "Due today", count: briefing.count("today"), icon: "check-circle", note: "Yours to finish today", path: briefing_more_path("today") },
+      { key: "week", label: "This week", count: briefing.count("week"), icon: "history", note: "Due in the next seven days", path: briefing_more_path("week") },
+      { key: "waiting", label: "Waiting on you", count: waiting, icon: "bell", note: briefing_waiting_note(briefing),
+        path: briefing.count("mentions").positive? ? notifications_path : briefing_more_path("review") }
+    ]
+  end
+
+  def briefing_waiting_note(briefing)
+    parts = { "review" => "in review", "blocked" => "blocked", "mentions" => nil }.filter_map do |key, words|
+      count = briefing.count(key)
+      next unless count.positive?
+
+      words ? "#{count} #{words}" : pluralize(count, "mention")
+    end
+    parts.any? ? parts.join(" · ") : "Reviews, blocks and mentions"
+  end
+
   # When something is due, the way a person says it: "today", "tomorrow", "Friday", "Oct 20", or
   # "3 days late".
   def home_due(date)

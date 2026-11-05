@@ -2,44 +2,42 @@
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
+  <p class="portal-page-header__description">Everything we run for you, and where each one stands.</p>
 <% end %>
 
 <% if @engagements.any? %>
-  <section class="settings">
-    <div class="settings__panel panel shadow">
-      <section class="settings__section">
-        <p class="txt-small txt-subtle margin-none">Everything we run for you, and where each one stands.</p>
-        <ul class="settings__scrollable-list">
+  <section class="ui-card ui-card--flush portal-card">
+    <div class="ui-table-container">
+      <table class="ui-table portal-table">
+        <thead>
+          <tr>
+            <th class="portal-table__ref">Ref</th>
+            <th>Title</th>
+            <th class="portal-table__secondary">Type</th>
+            <th class="portal-table__status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
           <% @engagements.each do |engagement| %>
             <%# herb:key engagement.id %>
-            <li class="flex align-center gap-half">
-              <%= link_to portal_engagement_path(engagement), class: "txt-ink flex gap-half align-center min-width" do %>
-                <div class="txt-align-start overflow-ellipsis">
-                  <strong><%= engagement.ref %></strong> <%= engagement.title %>
-                  <div class="txt-x-small txt-subtle"><%= engagement.label_name %></div>
-                </div>
-              <% end %>
-
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-
-              <%= status_tag engagement.state_label, highlight: engagement.active? %>
-            </li>
+            <tr>
+              <td class="portal-table__ref txt-nowrap"><%= engagement.ref %></td>
+              <td><%= link_to engagement.title, portal_engagement_path(engagement), class: "ui-table__row-link" %></td>
+              <td class="portal-table__secondary txt-subtle"><%= engagement.label_name %></td>
+              <td class="portal-table__status"><%= status_tag engagement.state_label, highlight: engagement.active? %></td>
+            </tr>
           <% end %>
-        </ul>
-      </section>
+        </tbody>
+      </table>
     </div>
   </section>
 <% else %>
-  <div class="panel panel--centered">
-    <%= render "layouts/shared/empty", text: "Nothing here yet." %>
-  </div>
+  <%= render "layouts/shared/empty", text: "Nothing here yet." %>
 <% end %>
 
 <% plugins = plugin_slots(:portal_home, client: current_contact.client) %>
 <% if plugins.present? %>
-  <section class="settings margin-block-start">
-    <div class="settings__panel panel shadow txt-align-start">
-      <%= plugins %>
-    </div>
+  <section class="ui-card portal-card portal-slot">
+    <%= plugins %>
   </section>
 <% end %>

@@ -1,63 +1,59 @@
 <%# locals: (plugin:, enabled:) %>
 <%# One plugin as a card, once per plugin. The switch shows Active or Dormant at once by CSS
-    (.plugin-card:has(:checked)), not state: a server-mode partial rendered more than once only
-    sends its first copy's state. The save then renders the page fresh, with whatever the plugin
-    adds or hides. %>
+    (.settings-plugins .ui-card:has(:checked)), not state: a server-mode partial rendered more than
+    once only sends its first copy's state. The save then renders the page fresh, with whatever the
+    plugin adds or hides. %>
 <% settings = Runwell::Plugins.settings_pages[plugin.key] %>
 <% page_path = enabled && settings ? instance_exec(&settings.last) : settings_plugin_path(plugin.key) %>
 <% gear_title = plugin.name + (enabled && settings ? " settings" : " details") %>
 <% name = plugin.key.to_s %>
 <% source = InstalledPlugins.metadata(name)["repo"] %>
 <% newer = PluginRelease.newer(name) %>
-<li class="plugin-card panel flex flex-column gap-half txt-align-start" data-filter-target="item">
-  <div class="flex align-center gap-half">
-    <div class="flex flex-column min-width">
-      <strong><%= plugin.name %></strong>
-      <span class="txt-x-small txt-subtle"><%= [ plugin.version, plugin.author, source ].compact.join(" · ") %></span>
+<li class="ui-card plugin-card" data-filter-target="item">
+  <header class="ui-card__header">
+    <h3 class="ui-card__title"><%= plugin.name %></h3>
+    <p class="ui-card__description"><%= [ plugin.version, plugin.author, source ].compact.join(" · ") %></p>
+    <div class="ui-card__action">
+      <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "flex align-center", data: { controller: "form", turbo_action: "advance" } do |form| %>
+        <%= switch_tag(title: "Switch on or off", screen_reader_label: "Switch #{plugin.name} on or off") { form.hidden_field(:enabled, value: "0", id: nil) + check_box_tag("plugin[enabled]", "1", enabled, class: "switch__input", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" }) } %>
+      <% end %>
     </div>
+  </header>
 
-    <%= link_to page_path, class: "btn btn--circle btn--plain txt-small flex-item-no-shrink flex-item-justify-end", title: gear_title do %>
+  <div class="ui-card__content settings__form settings__form--tight">
+    <p class="margin-none"><%= plugin.description %></p>
+    <% unless plugin.compatible? %>
+      <p class="settings__error">Needs Runwell <%= plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
+    <% end %>
+    <div class="settings__chips">
+      <span class="plugin-card__active"><%= ui_badge "Active", :positive %></span>
+      <span class="plugin-card__dormant"><%= ui_badge "Dormant", :neutral %></span>
+      <% Runwell::Plugins.additions(plugin.key).each do |addition| %>
+        <%# herb:key addition %>
+        <span class="ui-badge ui-badge--secondary"><%= addition %></span>
+      <% end %>
+    </div>
+  </div>
+
+  <footer class="ui-card__footer">
+    <%= link_to page_path, class: "ui-button ui-button--outline ui-button--sm", title: gear_title do %>
       <%= icon_tag "settings-outline" %>
-      <span class="for-screen-reader"><%= plugin.name %> settings</span>
+      <span><%= enabled && settings ? "Settings" : "Details" %></span>
     <% end %>
-    <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "flex align-center flex-item-no-shrink", data: { controller: "form", turbo_action: "advance" } do |form| %>
-      <%= switch_tag(title: "Switch on or off", screen_reader_label: "Switch #{plugin.name} on or off") { form.hidden_field(:enabled, value: "0", id: nil) + check_box_tag("plugin[enabled]", "1", enabled, class: "switch__input", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" }) } %>
+    <% if plugin.homepage.present? %>
+      <%= link_to "About", plugin.homepage, class: "ui-button ui-button--ghost ui-button--sm", target: "_blank", rel: "noopener" %>
     <% end %>
-  </div>
-
-  <div class="flex flex-wrap align-center gap-half">
-    <span class="plugin-card__active"><%= status_tag "Active" %></span>
-    <span class="plugin-card__dormant"><%= status_tag "Dormant" %></span>
-  </div>
-
-  <p class="txt-small margin-none flex-item-grow"><%= plugin.description %></p>
-
-  <% unless plugin.compatible? %>
-    <p class="txt-x-small txt-negative margin-none">Needs Runwell <%= plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
-  <% end %>
-  <% if plugin.homepage.present? %>
-    <p class="txt-x-small margin-none"><%= link_to "About this plugin", plugin.homepage, class: "txt-link", target: "_blank", rel: "noopener" %></p>
-  <% end %>
-
-  <div class="flex flex-wrap gap-half">
-    <% Runwell::Plugins.additions(plugin.key).each do |addition| %>
-      <%# herb:key addition %>
-      <span class="txt-x-small border-radius pad-inline-half fill-shade"><%= addition %></span>
-    <% end %>
-  </div>
-
-  <% if source %>
-    <div class="flex align-center gap-half">
+    <% if source %>
       <% if newer %>
-        <%= button_to settings_plugin_upgrade_path(plugin.key), class: "btn btn--link txt-small" do %>
+        <%= button_to settings_plugin_upgrade_path(plugin.key), class: "ui-button ui-button--sm" do %>
           <%= icon_tag "refresh" %>
           <span>Update to <%= newer %></span>
         <% end %>
       <% end %>
-      <div class="flex-item-justify-end">
+      <div class="settings-plugins__end">
         <%= render "layouts/shared/delete_dialog", name: plugin.name, path: settings_plugin_path(plugin.key),
           message: "Its code comes off this server and Runwell restarts. Its tables and data stay, so installing it again brings them back." %>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+  </footer>
 </li>

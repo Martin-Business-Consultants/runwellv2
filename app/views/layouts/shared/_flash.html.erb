@@ -1,10 +1,18 @@
 <%# locals: () %>
 <%= turbo_frame_tag :flash do %>
-  <% if notice = flash[:notice] || flash[:alert] %>
-    <div class="flash" data-controller="element-removal" data-action="animationend->element-removal#remove">
-      <div class="flash__inner shadow">
-        <%= notice %>
-      </div>
+  <% if flash[:notice] || flash[:alert] %>
+    <div class="ui-toaster">
+      <% if flash[:alert] %>
+        <div class="ui-toast ui-toast--error" role="alert" data-controller="element-removal" data-action="animationend->element-removal#remove">
+          <%= icon_tag "close-circle" %>
+          <span><%= flash[:alert] %></span>
+        </div>
+      <% else %>
+        <div class="ui-toast" role="status" data-controller="element-removal" data-action="animationend->element-removal#remove">
+          <%= icon_tag "check-circle" %>
+          <span><%= flash[:notice] %></span>
+        </div>
+      <% end %>
     </div>
   <% end %>
 <% end %>

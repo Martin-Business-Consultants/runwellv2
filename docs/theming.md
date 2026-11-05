@@ -55,6 +55,21 @@ for custom CSS when those choices aren't enough to make Runwell look like your o
 Families for status colors (`red`, `yellow`, `lime`, `green`, `aqua`, `blue`, `purple`) each run
 `-darkest` to `-lightest`; change them only to retune the palette.
 
+### Component tokens
+
+The components follow shadcn/ui and read its token names. Each is built from the tokens above, so
+a theme normally leaves them alone; set one only to change that role on its own (a theme in both
+modes sets it in both blocks).
+
+| Token | What it colors | Built from |
+| --- | --- | --- |
+| `--primary`, `--primary-foreground` | Primary buttons, switches, checked boxes | the accent, `--lch-ink-inverted` |
+| `--card`, `--popover` | Cards, menus and popovers (a step lighter than the page in dark) | `--lch-canvas` |
+| `--muted`, `--muted-foreground` | Tab tracks, counts, secondary text | the ink steps |
+| `--accent` | Hover and selected rows, menu items | `--lch-ink-lightest` |
+| `--destructive` | Delete buttons, errors | `--lch-red-dark` |
+| `--border`, `--input`, `--ring` | Hairlines, field borders, focus rings | the ink steps and accent |
+
 ### Type
 
 | Token | What it sets | Default |

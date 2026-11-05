@@ -28,34 +28,13 @@
     </div>
   </section>
 <% elsif @clients.any? %>
-  <section class="panel center index-table">
-
-    <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:name], "Name" ], :status, :avatars, :number, *listed.map { :text }, :actions %>
-      <thead>
-        <tr><%= bulk_select_all_header %><%= sortable_th "Name", :name %><%= sortable_th "Status", :status %><th>Contacts</th><th class="data-table__number">Open <%= term(:engagement, count: 2).downcase %></th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
-      </thead>
-      <tbody id="<%= pagination_frame_id_for(:clients_rows, @page.number) %>">
-        <% @clients.each do |client| %>
-          <%# herb:key client.id %>
-          <tr data-filter-target="item">
-            <%= bulk_select_cell client, client.name %>
-            <td><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
-            <td><%= render "clients/status_picker", client: client %></td>
-            <td><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>
-            <td class="data-table__number"><%= client.engagements.count { !it.closed? } %></td>
-            <% listed.each do |field| %>
-              <%# herb:key field.id %>
-              <td class="txt-subtle"><%= custom_field_text(field, client.custom_value(field)) %></td>
-            <% end %>
-            <%= render "layouts/shared/row_actions", name: client.name, edit_path: edit_client_path(client), delete_path: client_path(client),
-                  delete_message: "This removes its contacts, " + term(:work).downcase + " and notes. A " + term(:client).downcase + " with " + term(:engagement, count: 2).downcase + " can’t be deleted." %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
-  <%= table_pagination @page %>
+  <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
+                 ui_column(:status, "Status", sort: :status, width: :status),
+                 ui_column(:contacts, "Contacts", width: :avatars),
+                 ui_column(:engagements, "Open " + term(:engagement, count: 2).downcase, width: :number, align: :end),
+                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+  <%= render "ui/data_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client, row_locals: { listed: listed },
+        page: @page, selectable: true, actions: true %>
 <% elsif Client.exists? %>
   <%= render "layouts/shared/empty", text: "No #{@status} #{term(:client, count: 2).downcase}.", action_text: "Show all", action_path: clients_path(status: "all", view: params[:view]) %>
 <% else %>

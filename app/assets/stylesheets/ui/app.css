@@ -1,0 +1,588 @@
+/* Runwell UI over the app's own chrome: the sidebar, the inset header, headings, links, status
+/* tags, filters and keys drawn as shadcn/ui draws them. In the `ui` layer, so these win over the
+/* Fizzy-era rules in `components` without touching them; the markup keeps its classes, which
+/* plugins may use. Each area of the app has its own file beside this one (ui/app-*.css). */
+@layer ui {
+  /* Sidebar (shadcn's Sidebar, variant "inset") */
+
+  body.with-sidenav {
+    background-color: var(--sidebar);
+    --sidenav-width: 16rem;
+  }
+
+  html[data-theme="dark"] body.with-sidenav {
+    background-color: var(--background);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) body.with-sidenav {
+      background-color: var(--background);
+    }
+  }
+
+  .ui-sidebar.sidenav {
+    color: var(--sidebar-foreground);
+    gap: 0.5rem;
+    padding: calc(0.5rem + var(--custom-safe-inset-top)) 0.5rem 0.5rem calc(0.5rem + var(--custom-safe-inset-left));
+  }
+
+  .ui-sidebar__brand {
+    align-items: center;
+    border-radius: var(--radius-md);
+    color: inherit;
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    text-decoration: none;
+
+    &:hover {
+      background-color: var(--sidebar-accent);
+    }
+  }
+
+  .ui-sidebar__brand-mark {
+    align-items: center;
+    aspect-ratio: 1;
+    background-color: var(--primary);
+    block-size: 2rem;
+    border-radius: var(--radius-lg);
+    color: var(--primary-foreground);
+    display: flex;
+    flex-shrink: 0;
+    font-size: var(--text-normal);
+    font-weight: 600;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      block-size: 100%;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .ui-sidebar__brand-text,
+  .ui-sidebar__user-text {
+    display: grid;
+    flex: 1;
+    line-height: 1.25;
+    min-inline-size: 0;
+    text-align: start;
+  }
+
+  .ui-sidebar__brand-name {
+    font-size: var(--text-normal);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .header__logo-image {
+      block-size: 1.1rem;
+    }
+  }
+
+  .ui-sidebar__brand-sub,
+  .ui-sidebar__user-email {
+    color: var(--muted-foreground);
+    font-size: var(--text-x-small);
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-sidebar .sidenav__nav {
+    gap: 0;
+  }
+
+  .ui-sidebar__group {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+  }
+
+  .ui-sidebar .sidenav__heading {
+    align-items: center;
+    block-size: 2rem;
+    color: color-mix(in oklch, var(--sidebar-foreground) 70%, transparent);
+    display: flex;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    margin: 0;
+    padding-inline: 0.5rem;
+  }
+
+  .ui-sidebar .sidenav__list {
+    gap: 0.25rem;
+  }
+
+  /* SidebarMenuButton: h-8, text-sm, a 16px icon, the accent when current. */
+  .ui-sidebar .sidenav__link {
+    --icon-size: 1rem;
+
+    block-size: 2rem;
+    border-radius: var(--radius-md);
+    color: var(--sidebar-foreground);
+    font-size: var(--text-normal);
+    font-weight: 400;
+    gap: 0.5rem;
+    padding: 0.5rem;
+
+    .icon {
+      color: inherit;
+      opacity: 1;
+    }
+
+    &:hover {
+      background-color: var(--sidebar-accent);
+      color: var(--sidebar-accent-foreground);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+
+    &[aria-current="page"] {
+      background-color: var(--sidebar-accent);
+      color: var(--sidebar-accent-foreground);
+      font-weight: 500;
+    }
+  }
+
+  .ui-sidebar .sidenav__foot {
+    border-block-start: 0;
+    gap: 0;
+    padding-block-start: 0;
+  }
+
+  .ui-sidebar .sidenav__tools:not(:has(> :not(.display-contents), > .display-contents > :not([data-keys="?"], dialog))) {
+    display: none;
+  }
+
+  /* NavUser: the person at the foot, their menu above it. */
+  .ui-sidebar__user-button {
+    --icon-size: 1rem;
+
+    align-items: center;
+    background: none;
+    block-size: 3rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    gap: 0.5rem;
+    inline-size: 100%;
+    padding: 0.5rem;
+    text-align: start;
+
+    &:hover,
+    &[aria-expanded="true"] {
+      background-color: var(--sidebar-accent);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+
+    > .icon {
+      color: var(--muted-foreground);
+    }
+  }
+
+  .ui-sidebar__avatar {
+    block-size: 2rem !important;
+    border-radius: var(--radius-lg) !important;
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    inline-size: 2rem !important;
+  }
+
+  .ui-sidebar__user-name {
+    font-size: var(--text-normal);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-sidebar__user-menu {
+    min-inline-size: 14rem;
+
+    .ui-menu__label {
+      display: grid;
+      font-weight: 400;
+      line-height: 1.25;
+    }
+  }
+
+  /* Collapsed ([): icons only, as shadcn's collapsible="icon". */
+  html[data-sidenav="collapsed"] body.with-sidenav {
+    --sidenav-width: 3rem;
+
+    @media (min-width: 800px) {
+      .ui-sidebar.sidenav {
+        padding-inline: 0.5rem;
+      }
+
+      .ui-sidebar__brand,
+      .ui-sidebar__user-button {
+        justify-content: center;
+        padding: 0;
+      }
+
+      .ui-sidebar__brand {
+        block-size: 2rem;
+        inline-size: 2rem;
+      }
+
+      .ui-sidebar .sidenav__link {
+        block-size: 2rem;
+        inline-size: 2rem;
+        padding: 0.5rem;
+      }
+
+      .ui-sidebar__group {
+        padding-block: 0.25rem;
+      }
+    }
+  }
+
+  /* Phones: the sidebar runs across the top. */
+  @media (max-width: 799px) {
+    .ui-sidebar__brand-text,
+    .ui-sidebar__user-text,
+    .ui-sidebar__user-button > .icon,
+    .ui-sidebar .sidenav__heading {
+      display: none;
+    }
+
+    .ui-sidebar__group {
+      padding: 0;
+    }
+
+    .ui-sidebar__user-button {
+      block-size: 2.5rem;
+      inline-size: 2.5rem;
+      justify-content: center;
+      padding: 0;
+    }
+  }
+
+  /* The page sheet (SidebarInset) */
+
+  @media (min-width: 800px) {
+    body.with-sidenav::before {
+      background-color: var(--background);
+      border: 0;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      inset: 0.5rem 0.5rem 0.5rem var(--sidenav-width);
+    }
+
+    html[data-theme="dark"] body.with-sidenav::before {
+      background-color: var(--background);
+      box-shadow: 0 0 0 1px var(--border);
+    }
+  }
+
+  /* The sheet's header: h-16, the toggle, a rule, the breadcrumb. */
+  .ui-inset-header {
+    align-items: center;
+    block-size: 3rem;
+    display: flex;
+    gap: 0.5rem;
+    grid-column: 1 / -1;
+    text-align: start;
+
+    .sidenav__collapse {
+      margin-inline-start: -0.25rem;
+    }
+
+    @media (max-width: 799px) {
+      .sidenav__collapse,
+      .ui-inset-header__rule {
+        display: none;
+      }
+    }
+  }
+
+  /* The board's page header stays in the sheet's column (header.css widens it for Fizzy's
+  /* centred card columns). */
+  body.with-sidenav #header:has(~ #main .card-columns) {
+    inline-size: auto;
+    margin-inline: 0;
+    max-inline-size: 100%;
+  }
+
+  .ui-inset-header nav {
+    grid-area: auto;
+    margin-inline: 0;
+  }
+
+  .ui-inset-header__rule {
+    align-self: center;
+    block-size: 1rem;
+    margin-inline-end: 0.5rem;
+  }
+
+  body.with-sidenav #header {
+    @media (min-width: 800px) {
+      padding-block-start: 0.5rem;
+    }
+  }
+
+  html[data-sidenav="collapsed"] .ui-inset-header .sidenav__collapse .icon {
+    transform: scaleX(-1);
+  }
+
+  /* Type */
+
+  /* A page's title: shadcn's text-2xl font-semibold tracking-tight. */
+  .page-title,
+  .header__title {
+    font-size: var(--text-x-large);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  /* A section's heading: Fizzy's rule-flanked divider becomes a plain title (CardTitle). */
+  :is(h1, h2, h3, h4).divider {
+    display: block;
+    font-size: var(--text-medium);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+
+    &::before,
+    &::after {
+      content: none;
+    }
+
+    .txt-subtle,
+    .ui-badge--count {
+      color: var(--muted-foreground);
+      font-weight: 400;
+      margin-inline-start: 0.25rem;
+    }
+  }
+
+  .txt-subtle {
+    color: var(--muted-foreground);
+  }
+
+  .txt-negative {
+    color: var(--destructive);
+  }
+
+  /* Links in text: the foreground, underlined, offset (shadcn's prose links). */
+  .txt-link,
+  .txt-current:is(a),
+  :where(#main) :where(p, li, dd, td) > a:not([class]) {
+    color: var(--foreground);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+    text-underline-offset: 4px;
+
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* Keys: shadcn's Kbd. */
+  :where(kbd):not(.ui-kbd, .ui-menu__shortcut) {
+    background-color: var(--muted);
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    line-height: 1.25rem;
+    min-inline-size: 1.25rem;
+    opacity: 1;
+    padding: 0 0.25rem;
+    text-transform: none;
+
+    .btn--link &,
+    .ui-button:not(.ui-button--outline, .ui-button--ghost, .ui-button--secondary) & {
+      background-color: color-mix(in oklch, currentColor 15%, transparent);
+      color: inherit;
+    }
+  }
+
+  /* Status tags: shadcn's outline Badge, a dot in the status's colour. */
+  .status-tag {
+    background-color: transparent;
+    border-color: var(--border);
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-size: var(--text-x-small);
+    gap: 0.375rem;
+    line-height: 1rem;
+    padding: 0.125rem 0.5rem;
+  }
+
+  .status-tag--negative {
+    color: var(--destructive);
+  }
+
+  .status-tag--neutral {
+    color: var(--muted-foreground);
+  }
+
+  /* Filters: shadcn's faceted filter, a small dashed outline button opening a menu. */
+  .quick-filter > .btn.input--select {
+    --btn-border-radius: var(--radius-md);
+
+    background-color: var(--background);
+    background-image: none;
+    block-size: 2rem;
+    border: 1px dashed var(--input);
+    box-shadow: var(--shadow-xs);
+    color: var(--foreground);
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+
+    &::after {
+      block-size: 0.75rem;
+      background-color: var(--muted-foreground);
+      content: "";
+      flex-shrink: 0;
+      inline-size: 0.75rem;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    &:hover {
+      background-color: var(--accent);
+    }
+  }
+
+  /* A filter set to something other than its default: a solid border, as a chosen facet. */
+  .quick-filter:not(.quick-filter--with-default):has([aria-checked="true"]) > .btn.input--select {
+    background-color: var(--accent);
+    border-style: solid;
+  }
+
+  /* Blank slates: shadcn's Empty, a dashed box with muted text. */
+  .blank-slate {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    padding: 2rem 1.5rem;
+  }
+
+  /* Facts lists (dt/dd): muted labels. */
+  .record-facts dt {
+    color: var(--muted-foreground);
+  }
+
+
+  /* Page skeleton: record pages and Settings are cards (settings__panel) of sections. */
+  .settings__panel {
+    --panel-padding: 1.5rem;
+  }
+
+  .settings__panel--side {
+    --panel-padding: 1.5rem;
+  }
+
+  .settings__section > header h2.divider {
+    flex: 1;
+  }
+
+  .page-heading__actions {
+    font-size: var(--text-normal);
+    gap: 0.5rem;
+  }
+
+  /* Form fields drawn as Runwell UI's Input, Select, Textarea and Label. */
+  .input {
+    --input-border-radius: var(--radius-md);
+
+    border-color: var(--input-border-color, var(--input));
+    border-radius: var(--radius-md);
+    box-shadow: var(--input-shadow, var(--shadow-xs));
+    font-size: max(16px, var(--text-normal));
+    padding: var(--input-padding, 0.25rem 0.75rem);
+
+    @media (min-width: 768px) {
+      font-size: var(--text-normal);
+    }
+
+    &:where(input:not([type="checkbox"], [type="radio"], [type="file"]), select) {
+      min-block-size: 2.25rem;
+    }
+
+    &::placeholder {
+      color: var(--muted-foreground);
+    }
+
+    &:where(input, textarea, select):focus-visible {
+      border-color: var(--ring);
+      box-shadow: var(--shadow-xs), var(--ring-focus);
+    }
+
+    &[aria-invalid="true"],
+    .field_with_errors & {
+      border-color: var(--destructive);
+    }
+  }
+
+  .input.input--select {
+    --input-padding: 0.25rem 2.25rem 0.25rem 0.75rem;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.625rem center;
+    background-size: 1rem;
+  }
+
+  .input.input--textarea {
+    --input-padding: 0.5rem 0.75rem;
+
+    min-block-size: 4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  html[data-theme="dark"] .input:where(input, textarea, select) {
+    background-color: color-mix(in oklch, var(--input) 30%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .input:where(input, textarea, select) {
+      background-color: color-mix(in oklch, var(--input) 30%, transparent);
+    }
+  }
+
+  .record-form__label {
+    color: var(--foreground);
+    font-size: var(--text-normal);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .record-form__hint {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+  }
+
+  /* Native checkboxes and radios outside the kit take the primary colour. */
+  input:where([type="checkbox"], [type="radio"]):not(.ui-checkbox, .ui-radio, .ui-switch) {
+    accent-color: var(--primary);
+  }
+
+  /* Native selection and focus follow the ring. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 20%, transparent);
+  }
+}

@@ -2,15 +2,19 @@
 <%= render "settings/header", current: :account %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Save your recovery codes</h2>
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Save your recovery codes</h2>
+        <p class="settings__description">If you lose your phone, each of these signs you in once in place of a code. Keep them somewhere safe, like your password manager.</p>
       </header>
-      <p class="margin-none">If you lose your phone, each of these signs you in once in place of a code. Keep them somewhere safe, like your password manager. <strong>They won’t be shown again.</strong></p>
+      <div class="ui-alert ui-alert--warning" role="status">
+        <%= icon_tag "lock", class: "ui-alert__icon" %>
+        <p class="ui-alert__title">They won’t be shown again.</p>
+      </div>
       <%= code_block @recovery_codes.join("\n"), language: "plain" %>
-      <div class="flex gap-half">
-        <%= link_to "I’ve saved them", settings_account_path, class: "btn btn--link" %>
+      <div class="settings__actions">
+        <%= link_to "I’ve saved them", settings_account_path, class: "ui-button" %>
       </div>
     </section>
   </div>

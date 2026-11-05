@@ -1,8 +1,8 @@
 <%# locals: (item:) %>
 <div class="scope-item-fields txt-small">
   <%= form_with model: item, namespace: dom_id(item) do |form| %>
-    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", aria: { label: "Name" } %>
-    <button type="submit" class="btn btn--circle" title="Save">
+    <%= form.text_field :description, required: true, class: "ui-input", autocomplete: "off", aria: { label: "Name" } %>
+    <button type="submit" class="ui-button ui-button--outline ui-button--icon" title="Save">
       <%= icon_tag "check" %>
       <span class="for-screen-reader">Save</span>
     </button>

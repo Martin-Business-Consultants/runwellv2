@@ -1,17 +1,20 @@
 <%# locals: (unread:) %>
-<section class="notifications-list panel panel--wide center borderless unpad flex flex-column gap-half">
-  <% if unread.any? %>
-    <div class="flex align-center justify-space-between margin-block-start margin-block-end-half">
-      <h2 class="txt-medium txt-uppercase txt-alert">New for you</h2>
-      <%= button_to "Mark all as read", bulk_reading_path, class: "btn txt-small", form: { data: { turbo: false } }, data: { action: "badge#clear" } %>
-    </div>
-  <% else %>
-    <div class="notifications-list__blank-slate blank-slate align-self-center">
-      Nothing new for you
-    </div>
-  <% end %>
+<section class="ui-card ui-card--flush notifications-list" aria-labelledby="notifications-new-title">
+  <header class="ui-card__header notifications-list__header">
+    <h2 class="ui-card__title" id="notifications-new-title">New for you</h2>
+    <p class="ui-card__description">Mentions you haven’t opened yet.</p>
+    <% if unread.any? %>
+      <div class="ui-card__action">
+        <%= button_to "Mark all as read", bulk_reading_path, class: ui_button_classes(:outline, size: :sm), form: { data: { turbo: false } }, data: { action: "badge#clear" } %>
+      </div>
+    <% end %>
+  </header>
 
-  <div id="notifications_list">
+  <div class="notifications-list__blank-slate">
+    Nothing new for you.
+  </div>
+
+  <div id="notifications_list" class="notifications-list__items">
     <%= render partial: "notifications/notification", collection: unread, as: :notification %>
   </div>
 </section>

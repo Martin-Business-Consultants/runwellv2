@@ -8,7 +8,7 @@
     action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
   } do %>
   <header class="cards__header">
-    <%= render "todos/board/expander", title: status.humanize, count: count, column_id: "todos-#{status}" %>
+    <%= render "todos/board/expander", title: status.humanize, count: count, column_id: "todos-#{status}", status: status %>
     <%= render "todos/board/maximize", column_path: todos_column_path(status, todo_board_filters) %>
   </header>
   <%= column_frame_tag "#{status}_cards", src: todos_column_path(status, todo_board_filters) %>

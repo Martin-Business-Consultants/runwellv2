@@ -11,10 +11,30 @@ module SearchesHelper
     end
   end
 
+  # The client a result belongs to, on the right of its row (its group names its kind).
   def search_result_context(record)
-    client_name = search_client_names[record.search_client_id] unless record.is_a?(Client)
-    [ record.model_name.human, client_name ].compact.join(" · ")
+    search_client_names[record.search_client_id] unless record.is_a?(Client)
   end
+
+  # Results in groups by kind, the kinds in the order of their best match: [[label, records], …].
+  def search_result_groups(results)
+    Array(results).group_by { search_result_kind(it) }.to_a
+  end
+
+  def search_result_kind(record)
+    case record
+    when Client then term(:client, count: 2)
+    when Engagement then term(:engagement, count: 2)
+    when Todo then term(:work)
+    when ScopeItem then term(:scope_item, count: 2)
+    else record.model_name.human.pluralize
+    end
+  end
+
+  SEARCH_ICONS = { "Client" => "everyone", "Contact" => "person", "Engagement" => "clipboard", "Todo" => "check-circle",
+    "ScopeItem" => "board", "Note" => "comment", "Document" => "attachment" }.freeze
+
+  def search_result_icon(record) = SEARCH_ICONS.fetch(record.class.name, "search")
 
   # The clients of every result on the page, looked up once rather than per result.
   def search_client_names

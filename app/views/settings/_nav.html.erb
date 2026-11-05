@@ -2,7 +2,7 @@
 <%# The Settings sidebar, beside every settings page (rendered through settings/header, which the
     application layout places): the install's own settings, plugins with each plugin's page
     nested under them, people and apps, and updates. Only what the person may change. %>
-<nav class="settings-nav" aria-label="Settings">
+<nav class="settings-nav settings-nav--settings" aria-label="Settings">
   <% if can?(:manage_settings) %>
     <p class="settings-nav__heading">Workspace</p>
     <ul class="settings-nav__list">

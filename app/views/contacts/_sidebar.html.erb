@@ -1,36 +1,46 @@
 <%# locals: (client:, contact:) %>
-<%# Beside a contact's form: who else is at the client, and what the two switches allow. %>
+<%# Beside a contact's form: who else is at the client (what the two switches allow is under each
+    switch in the form). %>
 <% others = client.contacts.active.ordered.where.not(id: contact.id).to_a %>
-<section class="settings__section">
-  <header>
-    <h2 class="divider">At <%= client.name %> <span class="txt-subtle"><%= others.size %></span></h2>
+<section class="ui-card record-card">
+  <header class="ui-card__header">
+    <h2 class="ui-card__title">At <%= client.name %></h2>
+    <p class="ui-card__description">
+      <% if others.empty? %>
+        No one else yet.
+      <% else %>
+        <%= pluralize others.size, "other contact" %>
+      <% end %>
+    </p>
   </header>
-  <ul class="settings__scrollable-list">
-    <% others.each do |other| %>
-      <%# herb:key other.id %>
-      <li class="flex align-center gap-half txt-small" data-filter-target="item">
-        <%= link_to other.name, edit_contact_path(other), class: "txt-ink overflow-ellipsis min-width" %>
-        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-        <% if other.portal? %>
-          <%= status_tag "Portal" %>
+  <% if others.any? %>
+    <div class="ui-card__content">
+      <ul class="record-list record-list--compact">
+        <% others.each do |other| %>
+          <%# herb:key other.id %>
+          <li data-filter-target="item">
+            <%= link_to edit_contact_path(other), class: "record-list__row" do %>
+              <%= ui_avatar other.name %>
+              <span class="record-list__main">
+                <span class="record-list__title"><%= other.name %></span>
+                <% if other.role.present? %>
+                  <span class="record-list__description"><%= other.role %></span>
+                <% end %>
+                <% if other.portal? || other.can_approve? %>
+                  <span class="record-list__badges">
+                    <% if other.portal? %>
+                      <%= status_tag "Portal" %>
+                    <% end %>
+                    <% if other.can_approve? %>
+                      <%= status_tag "Can approve", highlight: true %>
+                    <% end %>
+                  </span>
+                <% end %>
+              </span>
+            <% end %>
+          </li>
         <% end %>
-        <% if other.can_approve? %>
-          <%= status_tag "Can approve", highlight: true %>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
-  <% if others.empty? %>
-    <p class="txt-subtle txt-small margin-none">No one else yet.</p>
+      </ul>
+    </div>
   <% end %>
-</section>
-
-<section class="settings__section">
-  <header>
-    <h2 class="divider">The two switches</h2>
-  </header>
-  <dl class="record-facts">
-    <dt>Portal</dt><dd>Signs in with an emailed link; sees the client’s shared work and documents, and sends requests.</dd>
-    <dt>Approve</dt><dd>Says yes for their company when something needs their approval.</dd>
-  </dl>
 </section>

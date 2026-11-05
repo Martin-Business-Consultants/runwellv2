@@ -11,7 +11,7 @@
 <% filters = request.query_parameters.slice("work") %>
 
 <%# Under the sidebar's sections tab (engagements/_sidebar), which names it. %>
-<section class="settings__section flex flex-column gap-half">
+<section class="scope-section">
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= engagement_path(engagement, filters.merge(tab: "work")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
       <span class="scope-nav__name">All <%= term(:work).downcase %></span>
@@ -34,7 +34,7 @@
     <% end %>
   </nav>
   <% if rows.empty? %>
-    <p class="txt-subtle txt-small margin-none">
+    <p class="record-card__empty">
       No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:work).downcase %>, or add <%= term(:work).downcase %> straight in the <%= term(:work) %> tab.
     </p>
   <% end %>
@@ -42,8 +42,8 @@
 
 <% unless engagement.closed? %>
   <div class="section-actions">
-    <details>
-      <summary class="btn txt-small"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
+    <details class="record-add">
+      <summary class="ui-button ui-button--outline ui-button--sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
       <%= render "scope_items/new", engagement: engagement %>
     </details>
   </div>

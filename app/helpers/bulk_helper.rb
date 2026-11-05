@@ -6,14 +6,14 @@
 module BulkHelper
   def bulk_select_all_header
     tag.th(class: "data-table__select") do
-      check_box_tag(nil, nil, false, id: nil, class: "data-table__checkbox", aria: { label: "Select every row on this page" },
+      check_box_tag(nil, nil, false, id: nil, class: "data-table__checkbox ui-checkbox", aria: { label: "Select every row on this page" },
         data: { bulk_target: "all", action: "bulk#toggleAll" })
     end
   end
 
   def bulk_select_cell(record, label)
     tag.td(class: "data-table__select") do
-      check_box_tag(nil, record.id, false, id: nil, class: "data-table__checkbox", aria: { label: "Select #{label}" },
+      check_box_tag(nil, record.id, false, id: nil, class: "data-table__checkbox ui-checkbox", aria: { label: "Select #{label}" },
         data: { bulk_target: "item", action: "bulk#update", keys: "x" })
     end
   end
@@ -79,14 +79,18 @@ module BulkHelper
     tag.div(class: "display-contents", data: { controller: "dialog", dialog_modal_value: true, action: "keydown.esc->dialog#close:stop" }) do
       safe_join([
         button_tag(type: "button", class: "btn txt-x-small txt-negative bulk-bar__delete", data: { action: "dialog#open" }) { safe_join([ icon_tag("trash"), tag.span("Delete") ]) },
-        tag.dialog(class: "dialog dialog--action panel fill-white shadow gap flex-column txt-align-start", data: { dialog_target: "dialog" }) do
+        tag.dialog(class: "ui-dialog", aria: { label: "Delete the selected #{noun}?" }, data: { dialog_target: "dialog" }) do
           safe_join([
-            tag.h3("Delete the selected #{noun}?", class: "dialog__title"),
-            tag.p(message || "This can’t be undone. Any that can’t be deleted are skipped and named.", class: "dialog__message"),
-            tag.div(class: "dialog__actions") do
+            tag.header(class: "ui-dialog__header") do
               safe_join([
-                button_tag("Cancel", type: "button", class: "btn", data: { action: "dialog#close" }),
-                form_tag(path, method: :delete, class: "display-contents") { button_tag(type: "submit", class: "btn txt-negative") { safe_join([ icon_tag("trash"), tag.span("Delete") ]) } }
+                tag.h3("Delete the selected #{noun}?", class: "ui-dialog__title"),
+                tag.p(message || "This can’t be undone. Any that can’t be deleted are skipped and named.", class: "ui-dialog__description")
+              ])
+            end,
+            tag.footer(class: "ui-dialog__footer") do
+              safe_join([
+                button_tag("Cancel", type: "button", class: "ui-button ui-button--outline", data: { action: "dialog#close" }),
+                form_tag(path, method: :delete, class: "display-contents") { button_tag(type: "submit", class: "ui-button ui-button--destructive") { safe_join([ icon_tag("trash"), tag.span("Delete") ]) } }
               ])
             end
           ])

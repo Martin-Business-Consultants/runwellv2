@@ -77,9 +77,11 @@ module TableSortingHelper
   end
 
   def table_page_link(label, number, disabled: false, current: false, rel: nil)
-    classes = class_names("table-pagination__page", "table-pagination__page--current": current)
+    # Runwell UI's pagination: the current page an outline button, the others ghost ones.
+    numeric = label.to_s.match?(/\A\d+\z/)
+    classes = ui_button_classes(current ? :outline : :ghost, size: numeric ? :icon_sm : :sm, class: "table-pagination__page")
     if disabled
-      tag.span(label, class: class_names(classes, "table-pagination__page--disabled"), "aria-disabled": true)
+      tag.span(label, class: classes, "aria-disabled": true)
     else
       link_to label, url_for(request.query_parameters.merge("page" => number)), class: classes, rel: rel,
         "aria-current": (current ? "page" : nil)

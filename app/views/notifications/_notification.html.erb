@@ -1,5 +1,6 @@
 <%# locals: (notification:) %>
+<%# A notification as shadcn's Item: who, what, where; the time, read toggle and unread dot on the right. %>
 <%= notification_tag notification do %>
-  <%= render "notifications/notification/header", notification: notification %>
   <%= render "notifications/notification/body", notification: notification %>
+  <%= render "notifications/notification/header", notification: notification %>
 <% end %>

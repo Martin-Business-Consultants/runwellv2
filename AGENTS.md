@@ -11,7 +11,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
   gems); the core itself makes none
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
-  `app/assets/stylesheets` served by Propshaft, modelled on Fizzy (`../fizzy`)
+  `app/assets/stylesheets` served by Propshaft, no build step. Components are Runwell UI, a
+  port of shadcn/ui (`app/assets/stylesheets/ui`, below); the rest is modelled on Fizzy (`../fizzy`)
 - Search: ActiveSearch (`rails-active_search`) over SQLite FTS5, one polymorphic
   `:searchable` index (`config/search.rb`, `SearchableDocument`)
 - ReActionView (https://reactionview.dev) compiles every `.html.erb` through
@@ -215,11 +216,15 @@ styles; and cards keep a manual order (`Todo#board_position`, positioned per sta
 marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
 `before` (the card it now sits before) for `Todo#move!`.
 
-Staff pages have a left nav (`layouts/shared/_sidenav`, `sidenav.css`): home and the core
-sections with icons (`sidenav_link_to`, which marks the current one), plugin links under
-Plugins (`nav_plugin_items`: each person's own order and choice of them, Settings > Your account >
-Your menu, `User::NavPlugins`; `g 1`… follow it), and at its foot the theme toggle, settings and sign out ("/" and `?` are keys only). Below
-800px it runs across the top. Every index shows its records as cards or a table, and has no
+Staff pages have a left nav, shadcn's Sidebar (`layouts/shared/_sidenav`, `sidenav.css` and
+`ui/app.css`): the install at the top, home and the core sections with icons under Workspace
+(`sidenav_link_to`, which marks the current one), plugin links under Plugins (`nav_plugin_items`:
+each person's own order and choice of them, Settings > Your account > Your menu,
+`User::NavPlugins`; `g 1`… follow it), and at its foot the signed-in person, whose menu holds
+their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
+too). The page sheet beside it opens with the inset header (`layouts/shared/_inset_header`): the
+sidebar toggle (`[`) and a breadcrumb from `parent_page` and `@page_title`. Below 800px the nav
+runs across the top. Every index shows its records as cards or a table, and has no
 heading: the nav marks the current section. The controller sets `@view = index_view`
 (Work adds `extra: %w[board]`), which reads `?view=` or the install's default (Settings >
 Views). The page starts with
@@ -266,11 +271,13 @@ the title (`record-meta`, with plugins' `:engagement_meta`), History is a tab, a
 its sections (`engagements/_scope`, where they're added): all work, each section with done of
 total, and other work, each a `?item=` link that shows just
 that work in the Work tab, where its todos are added. A section's add action is one small outlined button
-(`btn txt-small` with the add icon) in a `section-actions` row after its list, a `<details>`
-when it opens a form; the one filled button on a page is its next step. A record page names
-itself at the top left of its first panel, `<h1 class="page-title"><%= @page_title %></h1>`, not in the header, which
-keeps only the actions (Edit, Copy for AI). Up a level is `parent_page label, path` in the
-header block: a `<link rel="up">` that Esc follows, never a Back button.
+(`ui-button ui-button--outline ui-button--sm` with the add icon) in a `section-actions` row after its list, a `<details>`
+when it opens a form; the one filled button on a page is its next step. A record page (`settings settings--split record-page`, `ui/app-records.css`) opens with a
+header row across both columns: `<h1 class="page-title"><%= @page_title %></h1>`, a muted
+description, and its actions as outline buttons (Edit, Copy for AI) beside the sidebar toggle
+(`]`); below it the working column and the sidebar are stacks of `ui-card`s. Up a level is
+`parent_page label, path` in the header block: a `<link rel="up">` that Esc follows and the inset
+header's breadcrumb shows, never a Back button.
 
 Guide people through the hierarchy rather than documenting it. A record page says what happens
 next (`engagement_next_step` under the engagement's state). An empty list says where its records
@@ -297,11 +304,40 @@ swaps one query param, so filters are bookmarkable and Back works; the
 controller reads the params (`engagements#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
-Styling works the same way: use Fizzy's CSS and utility classes (copy the
-stylesheet from `../fizzy/app/assets/stylesheets` when it isn't here yet) and
-write new CSS only when Fizzy has nothing that fits. Copy Fizzy's view
-patterns too (`account/settings` lists, `panel`, `settings__section`,
-`divider`).
+Styling: components come from **Runwell UI**, a no-build port of shadcn/ui in plain CSS
+(`app/assets/stylesheets/ui`, the styleguide at `/ui` in development). Build new markup with it
+and move markup you touch onto it:
+
+- Tokens (`ui/tokens.css`) are shadcn's names — `--background`, `--foreground`, `--card`,
+  `--popover`, `--primary`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`,
+  `--destructive`, `--border`, `--input`, `--ring`, `--radius-sm/md/lg/xl`, `--shadow-xs/sm/md/lg`
+  — built from the theming tokens (`docs/theming.md`), so Appearance and custom CSS reach them.
+  New CSS reads these, not the `--color-ink-*` steps
+- Components are `ui-` classes in shadcn's names and variants: `ui-button` (`--secondary`,
+  `--outline`, `--ghost`, `--link`, `--destructive`; `--sm`, `--lg`, `--icon`, `--icon-sm`),
+  `ui-badge`, `ui-card` (`__header`, `__title`, `__description`, `__action`, `__content`,
+  `__footer`), `ui-input`, `ui-select`, `ui-textarea`, `ui-label`, `ui-field`, `ui-checkbox`,
+  `ui-radio`, `ui-switch`, `ui-tabs` (links with `aria-current`, or state with `aria-pressed`;
+  `--line`, `--icons`), `ui-dialog`, `ui-sheet`, `ui-menu`, `ui-popover`, `ui-tooltip`, `ui-toast`,
+  `ui-table`, `ui-alert`, `ui-avatar`, `ui-separator`, `ui-skeleton`, `ui-kbd`, `ui-progress`,
+  `ui-breadcrumb`, `ui-empty`, `ui-item`. They live in the `ui` layer, after `components`
+- `UiHelper` spells the common ones: `ui_button`, `ui_link_button`, `ui_button_classes` (for
+  `link_to`, `button_to`, `form.submit`), `ui_badge`, `ui_status_badge`, `ui_kbd`, `ui_avatar`
+- Native elements over JavaScript: `<dialog>` (opened by the `dialog` controller), the `popover`
+  attribute (placed and given menu keys by `ui--popover`), `<details>`, real checkboxes and
+  radios. A new component's CSS uses descendant or class selectors, not child ones: in
+  development ReActionView wraps every ERB output in a `display: contents` span
+- Index tables are the **data table** (`ui/_data_table`, `ui/data-table.css`): describe the
+  columns with `ui_column(key, label, sort:, width:, align:, hideable:)` and pass a row partial
+  (`clients/_row`: `bulk_select_cell`, then `<td data-column="key">` per column in order, then
+  `layouts/shared/row_actions`). It brings sortable headers (TableSorting), the checkbox column
+  (bulk actions), a Columns menu that hides columns (`ui--data-table`, per browser), fixed widths
+  (`table_colgroup`) and `table_pagination`. What every row shares goes in `row_locals:` so it's
+  read once (Prosopite)
+- The older Fizzy components (`btn`, `panel`, `popup`, `input`, `status-tag`) are drawn with the
+  same tokens so the app looks one way; plugins may still use them. Utility classes (`flex`,
+  `gap`, `txt-*`, `margin-*`) stay. Copy Fizzy's view patterns where Runwell UI has nothing
+  (`settings__section`, `record-facts`, cards and the board)
 
 ReActionView rules:
 
@@ -733,7 +769,7 @@ release, once no code reads them. No migration may depend on a person running a 
 
 ## Settings and names
 
-Settings (the gear, `/settings`) has Setup (the first-run checklist), Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `settings-nav.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`) has Setup (the first-run checklist), Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, engagement, scope item and work, and each engagement type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,

@@ -2,44 +2,54 @@
 <%= render "settings/header", current: :address %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Where people reach Runwell</h2>
-      </header>
-      <p class="txt-small txt-subtle margin-none">
-        Every link Runwell sends points here: portal sign-ins, invitations and notifications.
-        Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
-      </p>
-      <% if !Runwell.host_set? %>
-        <p class="txt-small txt-negative margin-none">
-          Not set yet, so links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Where people reach Runwell</h2>
+        <p class="settings__description">
+          Every link Runwell sends points here: portal sign-ins, invitations and notifications.
+          Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
         </p>
+      </header>
+      <% if !Runwell.host_set? %>
+        <div class="ui-alert ui-alert--warning" role="status">
+          <%= icon_tag "globe", class: "ui-alert__icon" %>
+          <p class="ui-alert__title">Not set yet</p>
+          <p class="ui-alert__description">
+            Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
+          </p>
+        </div>
       <% end %>
 
-      <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "flex flex-wrap gap-half txt-small" do |form| %>
-        <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
-              class: "input flex-item-grow", autocomplete: "off", aria: { label: "Runwell’s address" } %>
-        <button type="submit" class="btn btn--link">Save</button>
-      <% end %>
-      <% if ENV["APP_HOST"].present? %>
-        <p class="txt-x-small txt-subtle margin-none">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
+      <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "ui-field" do |form| %>
+        <%= form.label :app_url, "Runwell’s address", class: "ui-label" %>
+        <div class="settings__inline">
+          <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
+                class: "ui-input", autocomplete: "off" %>
+          <button type="submit" class="ui-button">Save</button>
+        </div>
+        <% if ENV["APP_HOST"].present? %>
+          <p class="ui-field__description">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
+        <% end %>
       <% end %>
     </section>
 
-    <section class="settings__section flex flex-column gap" id="time_zone">
-      <header>
-        <h2 class="divider">Your time zone</h2>
+    <section class="settings__section" id="time_zone">
+      <header class="settings__heading">
+        <h2>Your time zone</h2>
+        <p class="settings__description">
+          Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
+        </p>
       </header>
-      <p class="txt-small txt-subtle margin-none">
-        Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
-      </p>
-      <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "flex flex-wrap gap-half txt-small" do |form| %>
-        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name }, class: "input input--select flex-item-grow", aria: { label: "Time zone" } %>
-        <button type="submit" class="btn btn--link">Save</button>
-      <% end %>
-      <% if @setting.time_zone.blank? %>
-        <p class="txt-x-small txt-subtle margin-none">Not saved yet: <%= Setting.zone.name %> is the <%= ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default" %>.</p>
+      <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "ui-field" do |form| %>
+        <%= form.label :time_zone, "Time zone", class: "ui-label" %>
+        <div class="settings__inline">
+          <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name }, class: "ui-select" %>
+          <button type="submit" class="ui-button">Save</button>
+        </div>
+        <% if @setting.time_zone.blank? %>
+          <p class="ui-field__description">Not saved yet: <%= Setting.zone.name %> is the <%= ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default" %>.</p>
+        <% end %>
       <% end %>
     </section>
   </div>

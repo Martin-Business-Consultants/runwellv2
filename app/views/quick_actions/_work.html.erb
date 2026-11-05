@@ -2,28 +2,41 @@
 <%# Work from anywhere (g w n, or the tray): what needs doing, who leads it and who else is on it,
     and when, on the engagement or client picked above. Nobody leading it makes it a request. %>
 <% me = Current.user.person %>
-<%= form_with model: Todo.new, url: todos_path, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
-  <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: "What needs doing…", autofocus: true, aria: { label: "What" } %>
-  <%= rich_text_field form, :description, placeholder: "Details (optional)" %>
-  <div class="flex flex-wrap gap-half">
-    <label class="flex align-center gap-half flex-item-grow"><span>Lead</span> <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned", selected: me.id }, class: "input input--select flex-item-grow" %></label>
-    <label class="flex align-center gap-half flex-item-grow"><span>Due</span> <%= date_input form, :due_on, class: "input flex-item-grow" %></label>
+<%= form_with model: Todo.new, url: todos_path, id: form_id, namespace: "quick_action", class: "quick-action__form", data: { turbo_frame: "_top" } do |form| %>
+  <div class="ui-field">
+    <%= form.label :title, "What needs doing", class: "ui-label" %>
+    <%= form.text_field :title, required: true, class: "ui-input", autocomplete: "off", placeholder: "Send the proposal…", autofocus: true %>
+  </div>
+  <div class="ui-field">
+    <span class="ui-label">Details <span class="quick-action__optional">Optional</span></span>
+    <%= rich_text_field form, :description, placeholder: "Anything that helps…" %>
+  </div>
+  <div class="ui-field-row">
+    <div class="ui-field">
+      <%= form.label :owner_id, "Lead", class: "ui-label" %>
+      <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned", selected: me.id }, class: "ui-select" %>
+    </div>
+    <div class="ui-field">
+      <%= form.label :due_on, "Due", class: "ui-label" %>
+      <%= date_input form, :due_on, class: "input" %>
+    </div>
   </div>
   <details class="quick-action__more">
-    <summary class="txt-subtle">Also on it</summary>
-    <div class="flex flex-wrap gap-half margin-block-start-half">
+    <summary class="quick-action__more-toggle"><%= icon_tag "caret-down" %> Also on it</summary>
+    <div class="quick-action__people">
       <%= hidden_field_tag "todo[other_owner_ids][]", "", id: nil, form: form_id %>
       <% todo_people.each do |person| %>
         <%# herb:key person.id %>
         <label class="owner-checklist__person">
-          <%= check_box_tag "todo[other_owner_ids][]", person.id, false, id: "quick_action_other_owner_#{person.id}", form: form_id %>
+          <%= check_box_tag "todo[other_owner_ids][]", person.id, false, id: "quick_action_other_owner_#{person.id}", form: form_id, class: "ui-checkbox" %>
           <%= person_tag person %>
           <span><%= person.display_name %></span>
         </label>
       <% end %>
     </div>
   </details>
-  <div class="flex gap-half justify-center">
-    <button type="submit" class="btn btn--link">Add <%= term(:work).downcase %></button>
+  <div class="ui-dialog__footer">
+    <button type="button" class="ui-button ui-button--outline" data-action="dialog#close">Cancel</button>
+    <button type="submit" class="ui-button">Add <%= term(:work).downcase %></button>
   </div>
 <% end %>

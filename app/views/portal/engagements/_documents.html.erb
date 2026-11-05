@@ -1,14 +1,15 @@
 <%# locals: (documents:) %>
+<%# The engagement's documents shared with the client, as a card of rows (portal/engagements/show). %>
 <% if documents.any? %>
-  <section class="settings__section">
-    <header>
-      <h2 class="divider">Documents</h2>
+  <section class="ui-card ui-card--flush portal-card">
+    <header class="ui-card__header ui-card__header--bordered">
+      <h2 class="ui-card__title">Documents</h2>
     </header>
 
-    <ul class="settings__scrollable-list">
+    <ul class="ui-item-group portal-documents">
       <% documents.each do |document| %>
         <%# herb:key document.id %>
-        <li class="flex align-center gap-half">
+        <li class="ui-item ui-item--sm">
           <%= render "documents/link", document: document, meta: "#{number_to_human_size(document.byte_size)} · #{l document.created_at.to_date, format: :long}" %>
         </li>
       <% end %>

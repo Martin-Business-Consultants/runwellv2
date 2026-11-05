@@ -2,29 +2,32 @@
 <%= render "settings/header", current: :views %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">How lists open</h2>
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>How lists open</h2>
+        <p class="settings__description">
+          <%= term(:client, count: 2) %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %> and requests open as cards or as a table.
+          Anyone can switch a list with its View menu; this sets where it starts.
+        </p>
       </header>
-      <p class="txt-small txt-subtle margin-none">
-        <%= term(:client, count: 2) %>, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %> and requests open as cards or as a table.
-        Anyone can switch a list with its View menu; this sets where it starts.
-      </p>
 
       <%= form_with url: settings_views_path, method: :patch, data: { controller: "form" } do %>
-        <div class="theme-switcher flex gap max-width justify-center txt-small">
-          <label class="btn theme-switcher__btn">
-            <%= icon_tag "grid" %>
-            <span class="overflow-ellipsis">Cards</span>
-            <%= radio_button_tag :index_view, "cards", @setting.index_view == "cards", data: { action: "change->form#submit" } %>
-          </label>
-          <label class="btn theme-switcher__btn">
-            <%= icon_tag "column-left" %>
-            <span class="overflow-ellipsis">Table</span>
-            <%= radio_button_tag :index_view, "table", @setting.index_view == "table", data: { action: "change->form#submit" } %>
-          </label>
-        </div>
+        <fieldset class="settings__fieldset">
+          <legend class="ui-label">Default view</legend>
+          <div class="settings-choices settings-choices--wide">
+            <label class="settings-choice">
+              <span class="settings-choice__preview" aria-hidden="true"><%= icon_tag "grid" %></span>
+              <span class="settings-choice__label">Cards</span>
+              <%= radio_button_tag :index_view, "cards", @setting.index_view == "cards", data: { action: "change->form#submit" } %>
+            </label>
+            <label class="settings-choice">
+              <span class="settings-choice__preview" aria-hidden="true"><%= icon_tag "column-left" %></span>
+              <span class="settings-choice__label">Table</span>
+              <%= radio_button_tag :index_view, "table", @setting.index_view == "table", data: { action: "change->form#submit" } %>
+            </label>
+          </div>
+        </fieldset>
       <% end %>
     </section>
   </div>

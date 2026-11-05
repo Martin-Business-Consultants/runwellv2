@@ -2,19 +2,21 @@
 <%# Fizzy's delete: a trash button opening a modal that names what goes and asks once. %>
 <% title = "Delete " + name + "?" %>
 <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="<%= class_names("btn btn--circle borderless txt-negative", trigger_class) %>" title="<%= title %>" data-keys="<%= keys %>" data-action="dialog#open">
+  <button type="button" class="<%= class_names("ui-button ui-button--ghost ui-button--icon-sm txt-negative", trigger_class) %>" title="<%= title %>" data-keys="<%= keys %>" data-action="dialog#open">
     <%= icon_tag "trash" %>
     <span class="for-screen-reader"><%= title %></span>
   </button>
-  <dialog class="dialog dialog--action panel fill-white shadow gap flex-column txt-align-start" data-dialog-target="dialog">
-    <h3 class="dialog__title"><%= title %></h3>
-    <p class="dialog__message"><%= message || "This can’t be undone." %></p>
-    <div class="dialog__actions">
-      <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-      <%= button_to path, method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+  <dialog class="ui-dialog" aria-label="<%= title %>" data-dialog-target="dialog">
+    <header class="ui-dialog__header">
+      <h3 class="ui-dialog__title"><%= title %></h3>
+      <p class="ui-dialog__description"><%= message || "This can’t be undone." %></p>
+    </header>
+    <footer class="ui-dialog__footer">
+      <button type="button" class="ui-button ui-button--outline" data-action="dialog#close">Cancel</button>
+      <%= button_to path, method: :delete, class: "ui-button ui-button--destructive", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "trash" %>
         <span>Delete</span>
       <% end %>
-    </div>
+    </footer>
   </dialog>
 </div>

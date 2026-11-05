@@ -2,44 +2,28 @@
 <%= render "settings/header", current: :audit_log %>
 <% filters = { area: @area, days: @days, person: @person&.id } %>
 
-<section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Audit log</h2>
+<section class="settings settings--wide">
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Audit log</h2>
+        <p class="settings__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work).downcase %>. Nothing here can be edited or deleted.</p>
       </header>
-      <p class="txt-small txt-subtle margin-none">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work).downcase %>. Nothing here can be edited or deleted.</p>
-      <div class="filters flex flex-wrap gap-half">
+      <div class="filters flex flex-wrap align-center gap-half">
         <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.map { |key, label| [ label, key ] } %>
         <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days, options: Settings::AuditLogsController::PERIODS.map { |key, label| [ label, key ] } %>
         <%= render "layouts/shared/quick_filter", title: "Who…", param: :person, current: @person&.id&.to_s, options: [ [ "Anyone", "" ] ] + User.people.ordered.map { [ it.display_name, it.id.to_s ] } %>
-        <%= link_to settings_audit_log_path(filters.merge(format: :csv)), class: "btn txt-small", data: { turbo: false } do %>
+        <%= link_to settings_audit_log_path(filters.merge(format: :csv)), class: "ui-button ui-button--outline ui-button--sm settings-plugins__end", data: { turbo: false } do %>
           <%= icon_tag "share" %> <span>Download CSV</span>
         <% end %>
       </div>
-    </section>
 
-    <% if @events.any? %>
-      <table class="data-table txt-small audit-log">
-        <thead>
-          <tr><th>When</th><th>What</th><th>Who</th><th>On</th><th>Details</th></tr>
-        </thead>
-        <tbody id="<%= pagination_frame_id_for(:audit_rows, @page.number) %>">
-          <% @events.each do |event| %>
-            <%# herb:key event.id %>
-            <tr data-filter-target="item">
-              <td class="txt-nowrap" title="<%= event.occurred_at.utc.iso8601 %>"><%= l event.occurred_at, format: :short %></td>
-              <td><%= event_title(event) %></td>
-              <td><%= event.actor_name %><% if event.source == "agent" %> <span class="txt-subtle"><%= event.source_label %></span><% end %></td>
-              <td><%= audit_subject_name(event) %></td>
-              <td class="txt-subtle"><%= event_details(event) %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <%= table_pagination @page %>
-    <% else %>
-      <%= render "layouts/shared/empty", text: "Nothing in this area and period." %>
-    <% end %>
+      <% if @events.any? %>
+        <% columns = [ ui_column(:when, "When", hideable: false), ui_column(:what, "What", hideable: false), ui_column(:who, "Who", hideable: false), ui_column(:on, "On", hideable: false), ui_column(:details, "Details", hideable: false) ] %>
+        <%= render "ui/data_table", id: "audit", columns: columns, rows: @events, row: "settings/audit_logs/row", as: :event, page: @page, fixed: false %>
+      <% else %>
+        <%= render "layouts/shared/empty", text: "Nothing in this area and period." %>
+      <% end %>
+    </section>
   </div>
 </section>

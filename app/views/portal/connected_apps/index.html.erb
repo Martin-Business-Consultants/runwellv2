@@ -2,71 +2,77 @@
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
+  <p class="portal-page-header__description">Your own assistant (Muse, Claude, ChatGPT and the like) can see what you see here and ask us for things, as you.</p>
 <% end %>
 
-<section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <% if @new_token %>
-      <section class="settings__section flex flex-column gap">
-        <header>
-          <h2 class="divider">Your new token</h2>
-        </header>
-        <p class="txt-small margin-none">Copy it now: it won’t be shown again. It acts as you, in this portal only, until you disconnect it.</p>
-        <div class="copy-row">
-          <code class="input full-width txt-small overflow-ellipsis"><%= @new_token.plaintext %></code>
-          <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
-        </div>
-      </section>
-    <% end %>
-
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Your AI, connected</h2>
+<div class="portal-stack">
+  <% if @new_token %>
+    <section class="ui-card portal-card portal-card--highlight">
+      <header class="ui-card__header">
+        <h2 class="ui-card__title">Your new token</h2>
+        <p class="ui-card__description">Copy it now: it won’t be shown again. It acts as you, in this portal only, until you disconnect it.</p>
       </header>
-      <p class="txt-small txt-subtle margin-none">
-        Your own assistant (Muse, Claude, ChatGPT and the like) can see what you see here and ask us for things, as you.
-        Everything it does is recorded as done through it.
-      </p>
-      <% if @tokens.any? %>
-        <ul class="settings__scrollable-list">
-          <% @tokens.each do |token| %>
-            <%# herb:key token.id %>
-            <li class="flex align-center gap-half txt-small">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= token.name %></strong>
+      <div class="ui-card__content">
+        <div class="copy-row portal-copy-row">
+          <code class="ui-input portal-copy-row__value"><%= @new_token.plaintext %></code>
+          <button type="button" class="ui-button ui-button--outline" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">
+            <%= icon_tag "copy-paste" %>
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="ui-card ui-card--flush portal-card">
+    <header class="ui-card__header ui-card__header--bordered">
+      <h2 class="ui-card__title">Your AI, connected</h2>
+      <p class="ui-card__description">Everything it does is recorded as done through it.</p>
+    </header>
+    <% if @tokens.any? %>
+      <ul class="ui-item-group">
+        <% @tokens.each do |token| %>
+          <%# herb:key token.id %>
+          <li class="ui-item ui-item--sm">
+            <div class="ui-item__content">
+              <p class="ui-item__title">
+                <span class="overflow-ellipsis"><%= token.name %></span>
                 <% if token.paused? %>
                   <%= status_tag "Paused" %>
                 <% end %>
-                <div class="txt-x-small txt-subtle">
-                  <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
-                </div>
-              </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+              </p>
+              <p class="ui-item__description">
+                <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
+              </p>
+            </div>
+            <div class="ui-item__actions">
               <%= render "layouts/shared/delete_dialog", name: token.name, path: portal_connected_app_path(token), trigger_class: "txt-small",
                     message: "It stops working at once. Anything it already did stays." %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="txt-small txt-subtle margin-none">Nothing is connected yet.</p>
-      <% end %>
-    </section>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="portal-card__empty">Nothing is connected yet.</p>
+    <% end %>
+  </section>
 
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Connect one</h2>
-      </header>
-      <p class="txt-small margin-none">Give your assistant this address. If it can sign in by itself, it sends you here to approve it, after the usual emailed sign-in link.</p>
+  <section class="ui-card portal-card">
+    <header class="ui-card__header">
+      <h2 class="ui-card__title">Connect one</h2>
+      <p class="ui-card__description">Give your assistant this address. If it can sign in by itself, it sends you here to approve it, after the usual emailed sign-in link.</p>
+    </header>
+    <div class="ui-card__content portal-stack portal-stack--tight">
       <%= code_block portal_mcp_url %>
-      <p class="txt-small margin-none">If it asks for a key instead (Muse does, for a server you describe to it), make one here and paste it in.</p>
-      <%= form_with url: portal_connected_apps_path, scope: :access_token, class: "flex flex-wrap gap-half txt-small" do |form| %>
-        <%= form.text_field :name, class: "input flex-item-grow", autocomplete: "off", placeholder: "Name it, like “Muse”", aria: { label: "Token name" } %>
-        <label class="flex align-center gap-half">
-          <%= form.check_box :read_only %>
+      <p class="portal-muted">If it asks for a key instead (Muse does, for a server you describe to it), make one here and paste it in.</p>
+      <%= form_with url: portal_connected_apps_path, scope: :access_token, class: "portal-token-form" do |form| %>
+        <%= form.text_field :name, class: "ui-input portal-token-form__name", autocomplete: "off", placeholder: "Name it, like “Muse”", aria: { label: "Token name" } %>
+        <label class="ui-label portal-token-form__check">
+          <%= form.check_box :read_only, class: "ui-checkbox" %>
           <span>Read only</span>
         </label>
-        <button type="submit" class="btn btn--link">Make a key</button>
+        <button type="submit" class="ui-button">Make a key</button>
       <% end %>
-    </section>
-  </div>
-</section>
+    </div>
+  </section>
+</div>

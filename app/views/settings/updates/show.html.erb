@@ -3,35 +3,34 @@
 
 <turbo-frame id="updates" target="_top">
   <section class="settings">
-    <div class="settings__panel panel shadow txt-align-start">
-      <div class="page-heading">
-        <h1 class="page-title"><%= @page_title %></h1>
+    <div class="settings__panel">
+      <section class="settings__section">
+      <header class="settings__heading">
+        <h1>Updates</h1>
+        <p class="settings__description">Which Runwell this is, and whether a newer release is out.</p>
         <% if @failed_count.positive? %>
-          <div class="page-heading__actions" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-            <button type="button" class="btn txt-negative" data-action="dialog#open">
+          <div class="settings__heading-actions" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+            <button type="button" class="ui-button ui-button--outline ui-button--sm txt-negative" data-action="dialog#open">
               <%= icon_tag "trash" %>
               <span>Clear failed updates</span>
             </button>
-            <dialog class="dialog dialog--action panel fill-white shadow gap flex-column txt-align-start" data-dialog-target="dialog">
-              <h3 class="dialog__title">Clear <%= pluralize(@failed_count, "failed update") %>?</h3>
-              <p class="dialog__message">They leave Past updates, with what went wrong. Updates that worked stay.</p>
-              <div class="dialog__actions">
-                <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-                <%= button_to settings_updates_failures_path, method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+            <dialog class="ui-dialog" data-dialog-target="dialog">
+              <header class="ui-dialog__header">
+                <h3 class="ui-dialog__title">Clear <%= pluralize(@failed_count, "failed update") %>?</h3>
+                <p class="ui-dialog__description">They leave Past updates, with what went wrong. Updates that worked stay.</p>
+              </header>
+              <footer class="ui-dialog__footer">
+                <button type="button" class="ui-button ui-button--outline" data-action="dialog#close">Cancel</button>
+                <%= button_to settings_updates_failures_path, method: :delete, class: "ui-button ui-button--destructive", data: { turbo_frame: "_top" } do %>
                   <%= icon_tag "trash" %>
                   <span>Clear</span>
                 <% end %>
-              </div>
+              </footer>
             </dialog>
           </div>
         <% end %>
-      </div>
-
-      <section class="settings__section flex flex-column gap">
-        <header>
-          <h2 class="divider">This install</h2>
-        </header>
-        <dl class="record-facts">
+      </header>
+        <dl class="settings-facts">
           <dt>Running</dt>
           <dd>Runwell <%= Runwell::VERSION %></dd>
           <dt>Newest release</dt>
@@ -55,12 +54,12 @@
           <dd><%= update_method_description %></dd>
         </dl>
         <% if Release.check_pending? %>
-          <p class="txt-small txt-subtle margin-none" data-controller="poll" data-poll-interval-value="2">Checking GitHub for a newer release…</p>
+          <p class="settings__note" data-controller="poll" data-poll-interval-value="2">Checking GitHub for a newer release…</p>
         <% elsif Release.check_error.present? %>
-          <p class="txt-small txt-negative margin-none">Couldn’t check: <%= Release.check_error %></p>
+          <p class="settings__error">Couldn’t check: <%= Release.check_error %></p>
         <% end %>
-        <div class="section-actions">
-          <%= button_to settings_updates_check_path, class: "btn txt-small" do %>
+        <div class="settings__actions">
+          <%= button_to settings_updates_check_path, class: "ui-button ui-button--outline ui-button--sm" do %>
             <%= icon_tag "refresh" %>
             <span>Check now</span>
           <% end %>
@@ -68,46 +67,46 @@
       </section>
 
       <% if @upgrade %>
-        <section class="settings__section flex flex-column gap" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
-          <header>
-            <h2 class="divider">Updating to <%= @upgrade.to_version %></h2>
+        <section class="settings__section" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
+          <header class="settings__heading">
+            <h2>Updating to <%= @upgrade.to_version %></h2>
           </header>
-          <p class="txt-small margin-none">
+          <p class="settings__text">
             Started <%= time_ago_in_words(@upgrade.created_at) %> ago by <%= person_tag @upgrade.requested_by %>.
             The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running.
             This page checks every few seconds.
           </p>
           <% if @upgrade.external_url %>
-            <p class="txt-small margin-none"><%= link_to "Follow the deploy on GitHub", @upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %></p>
+            <p class="settings__text"><%= link_to "Follow the deploy on GitHub", @upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %></p>
           <% end %>
         </section>
       <% elsif @release&.newer? %>
-        <section class="settings__section flex flex-column gap">
-          <header>
-            <h2 class="divider">Runwell <%= @release.version %></h2>
+        <section class="settings__section">
+          <header class="settings__heading">
+            <h2>Runwell <%= @release.version %></h2>
+            <% if @release.published_at %>
+              <p class="settings__description">Released <%= l @release.published_at.to_date, format: :long %>.</p>
+            <% end %>
           </header>
-          <% if @release.published_at %>
-            <p class="txt-small txt-subtle margin-none">Released <%= l @release.published_at.to_date, format: :long %>.</p>
-          <% end %>
           <% if @release.notes.present? %>
-            <div class="txt-small release-notes"><%= simple_format @release.notes %></div>
+            <div class="settings__text release-notes"><%= simple_format @release.notes %></div>
           <% end %>
 
           <% if Upgrade.available? %>
             <details class="txt-align-start">
-              <summary class="btn btn--link">Update to <%= @release.version %></summary>
-              <div class="flex flex-column gap-half margin-block-start">
-                <p class="txt-small margin-none">
+              <summary class="ui-button">Update to <%= @release.version %></summary>
+              <div class="settings__form settings__form--tight settings__subform">
+                <p class="settings__text">
                   Runwell backs up its databases, updates and restarts. It’s unavailable for a minute or two; nobody is signed out.
                   If anything fails, <%= Runwell::VERSION %> keeps running and this page says why.
                 </p>
-                <%= button_to "Update now", settings_updates_path, class: "btn btn--link" %>
+                <div><%= button_to "Update now", settings_updates_path, class: "ui-button" %></div>
               </div>
             </details>
           <% else %>
-            <p class="txt-small margin-none">Updating from here isn’t set up on this install. On the server:</p>
+            <p class="settings__text">Updating from here isn’t set up on this install. On the server:</p>
             <%= code_block manual_update_command(@release) %>
-            <p class="txt-small txt-subtle margin-none">
+            <p class="settings__note">
               Runwell updates itself from here when it runs in its Docker image (from 2.0.3 on: deploy once more to get there) or from a checkout made by <code>bin/install</code>. See <code>docs/install.md</code>.
             </p>
           <% end %>
@@ -115,23 +114,25 @@
       <% end %>
 
       <% if @upgrades.any? %>
-        <section class="settings__section flex flex-column gap">
-          <header>
-            <h2 class="divider">Past updates</h2>
+        <section class="settings__section">
+          <header class="settings__heading">
+            <h2>Past updates</h2>
           </header>
-          <ul class="settings__scrollable-list">
+          <ul class="settings__list settings__list--scroll">
             <% @upgrades.each do |upgrade| %>
               <%# herb:key upgrade.id %>
-              <li class="flex align-start gap-half txt-small">
-                <%= person_tag upgrade.requested_by %>
-                <div class="txt-align-start min-width flex-item-grow">
-                  <strong><%= upgrade.from_version %> → <%= upgrade.to_version %></strong>
-                  <span class="txt-subtle">· <%= upgrade.status %> · <%= time_ago_in_words(upgrade.created_at) %> ago</span>
-                  <% if upgrade.external_url %>
-                    · <%= link_to "Deploy log", upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %>
-                  <% end %>
+              <li class="ui-item ui-item--sm">
+                <div class="ui-item__media"><%= person_tag upgrade.requested_by %></div>
+                <div class="ui-item__content">
+                  <p class="ui-item__title"><%= upgrade.from_version %> → <%= upgrade.to_version %> <%= ui_status_badge upgrade.status %></p>
+                  <p class="ui-item__description">
+                    <%= time_ago_in_words(upgrade.created_at) %> ago
+                    <% if upgrade.external_url %>
+                      · <%= link_to "Deploy log", upgrade.external_url, class: "txt-link", target: "_blank", rel: "noopener" %>
+                    <% end %>
+                  </p>
                   <% if upgrade.message.present? %>
-                    <pre class="txt-x-small margin-none upgrade-message"><%= upgrade.message %></pre>
+                    <pre class="settings-log upgrade-message"><%= upgrade.message %></pre>
                   <% end %>
                 </div>
               </li>

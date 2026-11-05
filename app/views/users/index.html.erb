@@ -23,51 +23,18 @@
           <%# herb:key person.id %>
           <%= render "layouts/shared/card", path: user_path(person), title: person.display_name + (person == Current.user ? " (you)" : ""), id_label: person.role.capitalize,
                 context: person.email_address, meta: [ ("Two-factor" if person.two_factor?) ],
-                status: (person.active? ? "active" : "deactivated"), highlight: person.active? %>
+                status: (person.active? ? "active" : "deactivated"), highlight: person.active?, people: person_tag(person) %>
         <% end %>
       <% end %>
     </div>
   </section>
 <% elsif @people.any? %>
-  <section class="panel center index-table">
-    <table class="data-table data-table--fixed">
-      <%= table_colgroup(*([ :select ] if manage), [ @column_widths[:name], "Name" ], [ @column_widths[:email], "Email address" ], :pill, :status, :actions) %>
-      <thead>
-        <tr><% if manage %><%= bulk_select_all_header %><% end %><%= sortable_th "Name", :name %><%= sortable_th "Email address", :email %><%= sortable_th "Role", :role %><th>Status</th><th></th></tr>
-      </thead>
-      <tbody id="<%= pagination_frame_id_for(:users_rows, @page.number) %>">
-        <% @people.each do |person| %>
-          <%# herb:key person.id %>
-          <tr data-filter-target="item">
-            <% if manage %>
-              <%= bulk_select_cell person, person.display_name %>
-            <% end %>
-            <td>
-              <span class="flex align-center gap-half">
-                <%= avatar_preview_tag person, hidden_for_screen_reader: true, class: "people__avatar" %>
-                <%= link_to person.display_name, user_path(person), class: "txt-ink font-weight-bold" %><%= " (you)" if person == Current.user %>
-              </span>
-            </td>
-            <td class="txt-subtle"><%= person.email_address %></td>
-            <td><%= person.role.capitalize %></td>
-            <td>
-              <% if person.deactivated? %>
-                <%= status_tag "Deactivated" %>
-              <% elsif person.two_factor? %>
-                <span class="status-tag status-tag--positive" title="Signs in with a code from an authenticator app">Two-factor</span>
-              <% elsif Setting.current.require_two_factor? %>
-                <span class="status-tag status-tag--waiting" title="Sets it up on their next page">Two-factor pending</span>
-              <% else %>
-                <%= status_tag "Active" %>
-              <% end %>
-            </td>
-            <%= render "layouts/shared/row_actions", name: person.display_name, edit_path: (user_path(person) if manage) %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
-  <%= table_pagination @page %>
+  <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
+                 ui_column(:email, "Email address", sort: :email, width: [ @column_widths[:email], "Email address" ]),
+                 ui_column(:role, "Role", sort: :role, width: :pill),
+                 ui_column(:status, "Status", width: :status) ] %>
+  <%= render "ui/data_table", id: "users", columns: columns, rows: @people, row: "users/row", as: :person,
+        row_locals: { manage: manage }, page: @page, selectable: manage, actions: true %>
 <% else %>
   <%= render "layouts/shared/empty", text: "No #{@status} users.", action_text: "Show all", action_path: users_path(status: "all", view: params[:view]) %>
 <% end %>

@@ -2,13 +2,14 @@
   .btn {
     --icon-size: var(--btn-icon-size, 1.1em);
     --btn-border-radius: var(--radius-pill, 99rem);
-    --btn-hover-brightness: 0.96;
 
+    /* Drawn as Runwell UI's outline button (ui/button.css): the shadcn tokens, an accent wash
+    /* on hover. Variants with a fill set --btn-hover-background to a 90% tint of it. */
     align-items: center;
-    background-color: var(--btn-background, var(--color-canvas));
+    background-color: var(--btn-background, var(--background));
     border-radius: var(--btn-border-radius);
-    border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-ink-lighter));
-    box-shadow: var(--btn-shadow, 0 1px 1px oklch(var(--lch-black) / 4%));
+    border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--border));
+    box-shadow: var(--btn-shadow, var(--shadow-xs));
     color: var(--btn-color, var(--color-ink));
     cursor: pointer;
     display: inline-flex;
@@ -27,17 +28,28 @@
 
     @media (any-hover: hover) {
       &:hover {
-        filter: brightness(var(--btn-hover-brightness));
+        background-color: var(--btn-hover-background, var(--accent));
       }
     }
 
+    &:focus-visible {
+      border-color: var(--ring);
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+
+    /* Dark: on the input tint, as Runwell UI's outline button. */
     html[data-theme="dark"] & {
-      --btn-hover-brightness: 1.15;
+      --btn-background-dark: color-mix(in oklch, var(--input) 30%, transparent);
+      background-color: var(--btn-background, var(--btn-background-dark));
+      border-color: var(--btn-border-color, var(--input));
     }
 
     @media (prefers-color-scheme: dark) {
       html:not([data-theme]) & {
-        --btn-hover-brightness: 1.15;
+        --btn-background-dark: color-mix(in oklch, var(--input) 30%, transparent);
+        background-color: var(--btn-background, var(--btn-background-dark));
+        border-color: var(--btn-border-color, var(--input));
       }
     }
 
@@ -46,7 +58,7 @@
     [disabled] &[type=submit],
     &[type=submit]:disabled {
       cursor: not-allowed;
-      opacity: 0.3;
+      opacity: 0.5;
       pointer-events: none;
     }
 
@@ -81,6 +93,7 @@
 
   .btn--plain {
     --btn-background: transparent;
+    --btn-hover-background: transparent;
     --btn-border-radius: 0;
     --btn-border-size: 0;
     --btn-shadow: none;
@@ -89,11 +102,12 @@
     --btn-padding: 0;
   }
 
+  /* The primary button. */
   .btn--link {
-    --btn-background: var(--color-link);
-    --btn-border-color: color-mix(in oklch, var(--color-link) 85%, black);
-    --btn-color: var(--color-white);
-    --btn-shadow: 0 1px 2px oklch(var(--lch-black) / 12%), inset 0 1px 0 oklch(var(--lch-white) / 12%);
+    --btn-background: var(--primary);
+    --btn-border-color: var(--primary);
+    --btn-color: var(--primary-foreground);
+    --btn-hover-background: color-mix(in oklch, var(--primary) 90%, transparent);
     --focus-ring-color: var(--color-link);
 
     kbd {
@@ -144,16 +158,18 @@
   }
 
   .btn--negative {
-    --btn-background: var(--color-negative);
-    --btn-border-color: var(--color-negative);
-    --btn-color: var(--color-ink-inverted);
+    --btn-background: var(--destructive);
+    --btn-border-color: var(--destructive);
+    --btn-color: var(--destructive-foreground);
+    --btn-hover-background: color-mix(in oklch, var(--destructive) 90%, transparent);
     --focus-ring-color: var(--color-negative);
   }
 
   .btn--positive {
-    --btn-background: var(--color-positive);
-    --btn-border-color: var(--color-canvas);
-    --btn-color: var(--color-ink-inverted);
+    --btn-background: var(--success);
+    --btn-border-color: var(--success);
+    --btn-color: var(--destructive-foreground);
+    --btn-hover-background: color-mix(in oklch, var(--success) 90%, transparent);
     --focus-ring-color: var(--color-positive);
   }
 
@@ -177,11 +193,13 @@
   }
 
   /* A pressed toggle (aria-pressed, e.g. the triage choices) looks reversed. */
+  /* Pressed: shadcn's toggle, an accent wash, not an inverted fill. */
   .btn--reversed,
   .btn[aria-pressed="true"] {
-    --btn-background: var(--color-ink);
-    --btn-border-color: var(--color-ink);
-    --btn-color: var(--color-canvas);
+    --btn-background: var(--accent);
+    --btn-border-color: var(--border);
+    --btn-color: var(--accent-foreground);
+    --btn-hover-background: var(--accent);
     --focus-ring-color: var(--color-ink);
   }
 
@@ -213,9 +231,10 @@
     }
 
     &:has(input:checked)  {
-      --btn-background: var(--color-ink);
-      --btn-border-color: var(--color-ink);
-      --btn-color: var(--color-ink-inverted);
+      --btn-background: var(--accent);
+      --btn-border-color: var(--border);
+      --btn-color: var(--accent-foreground);
+      --btn-hover-background: var(--accent);
       --focus-ring-color: var(--color-ink);
 
       .checked {

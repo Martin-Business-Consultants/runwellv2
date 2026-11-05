@@ -1,0 +1,15 @@
+<%# locals: (client:, listed:) %>
+<%# One client in the index's data table (ui/_data_table): the cells in the columns' order. %>
+<tr data-filter-target="item">
+  <%= bulk_select_cell client, client.name %>
+  <td data-column="name"><%= link_to client.name, client, class: "txt-ink font-weight-bold" %></td>
+  <td data-column="status"><%= render "clients/status_picker", client: client %></td>
+  <td data-column="contacts"><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>
+  <td class="data-table__number" data-column="engagements"><%= client.engagements.count { !it.closed? } %></td>
+  <% listed.each do |field| %>
+    <%# herb:key field.id %>
+    <td class="txt-subtle" data-column="field_<%= field.id %>"><%= custom_field_text(field, client.custom_value(field)) %></td>
+  <% end %>
+  <%= render "layouts/shared/row_actions", name: client.name, edit_path: edit_client_path(client), delete_path: client_path(client),
+        delete_message: "This removes its contacts, " + term(:work).downcase + " and notes. A " + term(:client).downcase + " with " + term(:engagement, count: 2).downcase + " can’t be deleted." %>
+</tr>

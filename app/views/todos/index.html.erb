@@ -37,7 +37,8 @@
           <% overdue = todo.status != "done" && todo.due_on&.past? %>
           <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo_ref(todo),
                 context: todo_client_name(todo),
-                meta: [ todo_owners_tag(todo, fallback: "Unassigned"), ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
+                meta: [ ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
+                people: todo_owners_tag(todo, fallback: "Unassigned"),
                 status: overdue ? "Overdue" : todo.status.humanize, highlight: todo.status == "done" %>
         <% end %>
       <% end %>
@@ -47,40 +48,16 @@
     <%= render "todos/blank" %>
   <% end %>
 <% else %>
-  <section class="panel center index-table">
-
-    <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:title], term(:work) ], [ @column_widths[:engagement], term(:engagement) ], [ @column_widths[:client], term(:client) ], :avatar, [ 28, "Due" ], :status, *listed.map { :text }, :actions %>
-      <thead>
-        <tr><%= bulk_select_all_header %><%= sortable_th term(:work), :title %><%= sortable_th term(:engagement), :engagement %><%= sortable_th term(:client), :client %><%= sortable_th "Owner", :owner %><%= sortable_th "Due", :due %><%= sortable_th "Status", :status, class: "txt-align-center" %><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
-      </thead>
-      <tbody id="<%= pagination_frame_id_for(:todos_rows, @page.number) %>">
-        <% @todos.each do |todo| %>
-          <%# herb:key todo.id %>
-          <tr data-filter-target="item">
-            <%= bulk_select_cell todo, todo.title %>
-            <td><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
-            <td class="txt-nowrap">
-              <% if todo.engagement %>
-                <%= link_to todo.engagement.ref, todo.engagement, class: "txt-ink" %>
-              <% end %>
-            </td>
-            <td class="txt-subtle"><%= todo.client&.name %></td>
-            <td class="txt-subtle"><%= render "todos/owner_picker", todo: todo %></td>
-            <td class="txt-nowrap"><%= render "todos/due", todo: todo %></td>
-            <td class="txt-align-center"><%= render "todos/status_dot", todo: todo %></td>
-            <% listed.each do |field| %>
-              <%# herb:key field.id %>
-              <td class="txt-subtle"><%= custom_field_text(field, todo.custom_value(field)) %></td>
-            <% end %>
-            <%= render "layouts/shared/row_actions", name: todo.title, edit_path: edit_todo_path(todo), delete_path: todo_path(todo), todo: todo %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <% if @todos.none? %>
-      <%= render "todos/blank" %>
-    <% end %>
-  </section>
-  <%= table_pagination @page %>
+  <% columns = [ ui_column(:title, term(:work), sort: :title, width: [ @column_widths[:title], term(:work) ], hideable: false),
+                 ui_column(:engagement, term(:engagement), sort: :engagement, width: [ @column_widths[:engagement], term(:engagement) ]),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
+                 ui_column(:owner, "Owner", sort: :owner, width: :avatar),
+                 ui_column(:due, "Due", sort: :due, width: [ 28, "Due" ]),
+                 ui_column(:status, "Status", sort: :status, width: :status, align: :center),
+                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+  <%= render "ui/data_table", id: "todos", columns: columns, rows: @todos, row: "todos/row", as: :todo,
+        row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+  <% if @todos.none? %>
+    <%= render "todos/blank" %>
+  <% end %>
 <% end %>

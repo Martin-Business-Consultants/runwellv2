@@ -1,10 +1,10 @@
 <%# locals: (notification:) %>
-<div class="card__body">
-  <div class="avatar txt-x-small">
-    <%= avatar_image_tag notification.creator %>
-  </div>
+<% ref, name = notification_target_label(notification.notifiable_target) %>
+<span class="ui-item__media notification__avatar">
+  <%= avatar_image_tag notification.creator %>
+</span>
 
-  <h3 class="flex flex-column min-width flex-item-grow font-weight-normal">
-    <%= render "notifications/notification/mention/body", notification: notification %>
-  </h3>
-</div>
+<span class="ui-item__content notification__content">
+  <%= render "notifications/notification/mention/body", notification: notification %>
+  <span class="notification__context overflow-ellipsis"><%= [ ref, name ].compact_blank.join(" · ") %></span>
+</span>

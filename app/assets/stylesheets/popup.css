@@ -1,7 +1,10 @@
 @layer components {
+  /* Runwell UI's menu (ui/overlays.css): popover colours, rounded-md, shadow-md. */
   .popup {
     --btn-background: transparent;
-    --panel-border-radius: calc(0.6rem * var(--radius-scale, 1));
+    --panel-bg: var(--popover);
+    --panel-border-radius: var(--radius-md);
+    --panel-shadow: var(--shadow-md);
     --panel-padding: 0.35rem;
     --panel-size: auto;
     --popup-icon-size: 24px;
@@ -13,7 +16,7 @@
     max-block-size: 70dvh;
     max-inline-size: min(55ch, calc(100vw - (var(--panel-padding))));
     min-inline-size: min(25ch, calc(100vw - (var(--panel-padding))));
-    box-shadow: var(--shadow-popover);
+    box-shadow: var(--shadow-md);
     overflow: auto;
     position: absolute;
     translate: -50%;

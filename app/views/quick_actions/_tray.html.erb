@@ -1,5 +1,5 @@
 <%# locals: () %>
-<%# The quick action tray, bottom right (A): Fizzy's tray fanning up a record picker (the
+<%# The quick action tray, bottom right (A): a popover menu: a record picker (the
     record on screen, or any other) over an entry per action. The entries submit one GET form
     carrying the picked record; each action's form opens in a modal (quick_actions#new).
     Plugins add actions with Runwell::Plugins.quick_action. %>
@@ -13,19 +13,22 @@
     <% QuickAction.all.each do |action| %>
       <%# herb:key action.key %>
       <div class="tray__item tray__item--action">
-        <button type="submit" form="quick_actions_form" name="kind" value="<%= action.key %>" class="quick-action__item" data-action="dialog#close">
+        <button type="submit" form="quick_actions_form" name="kind" value="<%= action.key %>" class="ui-menu__item quick-action__item" data-action="dialog#close">
           <%= icon_tag action.icon %>
-          <strong><%= action.label %></strong>
+          <span><%= action.title %></span>
         </button>
       </div>
     <% end %>
     <div class="tray__item tray__item--picker">
       <%= render "quick_actions/picker", records: QuickAction.records(record), record: record, form_id: "quick_actions_form", prefix: "On" %>
     </div>
+    <div class="tray__item tray__item--label">
+      <span class="ui-menu__label">Quick actions</span>
+    </div>
   </dialog>
 
   <button type="button" class="tray__toggle" aria-label="Quick actions" aria-haspopup="true" data-keys="a" data-action="dialog#toggle">
-    <span class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
+    <span class="tray__toggle-btn">
       <%= icon_tag "add" %>
       <span class="tray__toggle-text">Add <kbd class="hide-on-touch">A</kbd></span>
     </span>

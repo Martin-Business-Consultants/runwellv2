@@ -1,16 +1,18 @@
 <%# locals: (engagement:, current: nil) %>
 <%# herb:slots client %>
 <%# herb:state (pane: "scope") %>
-<%# An engagement's sidebar: its sections (engagements/_scope) by default, or General, its facts
-    and custom fields. Both are always on the page and state shows one, so switching never waits on
-    the server. current: the scope item whose work is shown (engagements/_scope). %>
-<nav class="record-tabs__nav sidebar-tabs" aria-label="Sidebar">
-  <button type="button" class="record-tabs__tab" aria-pressed="<%= pane == "general" %>" data-herb-set="pane=general">General</button>
-  <button type="button" class="record-tabs__tab" aria-pressed="<%= pane == "scope" %>" data-herb-set="pane=scope"><%= term(:scope_item, count: 2) %></button>
-</nav>
+<%# An engagement's sidebar card: its sections (engagements/_scope) by default, or General, its
+    facts and custom fields. Both are always on the page and state shows one, so switching never
+    waits on the server. current: the scope item whose work is shown (engagements/_scope). %>
+<section class="ui-card record-card engagement-sidebar">
+  <header class="ui-card__header">
+    <nav class="ui-tabs sidebar-tabs" aria-label="Sidebar">
+      <button type="button" class="ui-tabs__trigger" aria-pressed="<%= pane == "scope" %>" data-herb-set="pane=scope"><%= term(:scope_item, count: 2) %></button>
+      <button type="button" class="ui-tabs__trigger" aria-pressed="<%= pane == "general" %>" data-herb-set="pane=general">General</button>
+    </nav>
+  </header>
 
-<div hidden="<%= pane != "general" %>">
-  <section class="settings__section flex flex-column gap-half">
+  <div class="ui-card__content record-card__stack" hidden="<%= pane != "general" %>">
     <dl class="record-facts">
       <dt>Status</dt><dd><%= status_tag engagement.state_label, highlight: engagement.active? %></dd>
       <dt><%= term(:client) %></dt><dd><%= link_to engagement.client.name, engagement.client, class: "txt-link" %></dd>
@@ -21,9 +23,9 @@
       <% end %>
     </dl>
     <%= render "custom_fields/values", record: engagement %>
-  </section>
-</div>
+  </div>
 
-<div hidden="<%= pane != "scope" %>">
-  <%= render "engagements/scope", engagement: engagement, current: current %>
-</div>
+  <div class="ui-card__content record-card__stack" hidden="<%= pane != "scope" %>">
+    <%= render "engagements/scope", engagement: engagement, current: current %>
+  </div>
+</section>

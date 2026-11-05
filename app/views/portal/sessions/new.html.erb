@@ -1,18 +1,24 @@
 <% @page_title = "Client sign in" %>
 
-<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
-  <h1 class="txt-x-large font-weight-black margin-block-end">Client sign in</h1>
+<div class="auth">
+  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
+    <header class="ui-card__header auth__header">
+      <h1 class="ui-card__title auth__title">Client sign in</h1>
+      <p class="ui-card__description">Enter the email we have on file and we’ll send you a sign-in link. No password needed.</p>
+    </header>
 
-  <%= form_with url: portal_session_path, class: "flex flex-column gap txt-medium" do |form| %>
-    <label class="flex align-center gap input input--actor">
-      <%= form.email_field :email, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "email", placeholder: "Enter your email address…" %>
-    </label>
+    <div class="ui-card__content auth__content">
+      <%= form_with url: portal_session_path, class: "auth__form" do |form| %>
+        <div class="ui-field">
+          <%= form.label :email, "Email", class: "ui-label" %>
+          <%= form.email_field :email, required: true, class: "ui-input", autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
+        </div>
 
-    <p>Enter the email we have on file and we’ll send you a sign-in link. No password needed.</p>
-
-    <button type="submit" class="btn btn--link center txt-medium">
-      <span>Email me a link</span>
-      <%= icon_tag "arrow-right" %>
-    </button>
-  <% end %>
+        <button type="submit" class="ui-button ui-button--block">
+          <%= icon_tag "email" %>
+          <span>Email me a link</span>
+        </button>
+      <% end %>
+    </div>
+  </section>
 </div>

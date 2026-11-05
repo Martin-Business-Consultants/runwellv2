@@ -1,0 +1,1147 @@
+/* Runwell UI over record pages and their forms: a client, an engagement, a piece of work, a
+/* section, a contact, and their new and edit pages (`.record-page` on the page's root). Drawn
+/* as shadcn/ui draws a detail page: a header row (title, muted description, actions), the
+/* working column's Tabs above Cards, a sidebar of Cards (Details as a description list), lists
+/* as Item rows, notes and history as an activity feed, and forms as a Card of Fields with
+/* Cancel and the primary action at its foot. Also the rich text editor (framed as a Textarea)
+/* and the date picker (a Popover), wherever they appear. Reads only the kit's tokens. */
+@layer ui {
+  /* Page skeleton */
+
+  .settings.settings--split.record-page {
+    align-items: start;
+    gap: 1.5rem;
+    max-inline-size: min(160ch, 100%);
+
+    @media (min-width: 960px) {
+      column-gap: 1.5rem;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      row-gap: 1.5rem;
+    }
+  }
+
+  .record-page [hidden] {
+    display: none !important;
+  }
+
+  .record-page__header,
+  .record-page__main,
+  .record-page__aside {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .record-page .record-page__main,
+  .record-page .record-page__aside {
+    --panel-padding: 1.5rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-block-size: 0;
+    padding: 0;
+  }
+
+  /* The header row: title and description at the start, actions at the end. */
+  .record-page__header {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    text-align: start;
+  }
+
+  .record-page__heading {
+    display: flex;
+    flex: 1 1 20rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-inline-size: 0;
+
+    .page-title {
+      margin: 0;
+    }
+  }
+
+  .record-page__description,
+  .record-page .record-meta {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--text-normal);
+    gap: 0.375rem 0.75rem;
+    margin: 0;
+  }
+
+  .record-page__description .txt-link {
+    color: var(--foreground);
+  }
+
+  .record-page .page-heading__actions {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Hiding the sidebar (]): its toggle sits in the header as a ghost icon button. */
+  .record-page__header .sidebar-toggle {
+    --icon-size: 1rem;
+
+    align-items: center;
+    background: transparent;
+    block-size: 2.25rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    color: var(--muted-foreground);
+    display: inline-flex;
+    inline-size: 2.25rem;
+    inset: auto;
+    justify-content: center;
+    padding: 0;
+    position: static;
+
+    &:hover {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+      filter: none;
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+  }
+
+  html[data-sidebar="collapsed"] .settings.settings--split.record-page {
+    @media (min-width: 960px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .record-page__aside {
+      display: none;
+    }
+
+    .record-page__header .sidebar-toggle .icon {
+      transform: scaleX(-1);
+    }
+  }
+
+  /* Cards */
+
+  .record-card {
+    text-align: start;
+  }
+
+  .record-card__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .record-card__empty {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+  }
+
+  .record-card__prose {
+    font-size: var(--text-normal);
+    line-height: 1.6;
+  }
+
+  .record-card__aside-note {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .record-card__aside-label {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .record-page .engagement-next-step {
+    border: 0;
+    padding: 0;
+  }
+
+  .record-card .ui-card__footer:has(.record-add[open]) {
+    align-items: stretch;
+  }
+
+  /* Tabs: shadcn's TabsList above the tab's card. */
+  .record-page .record-tabs,
+  .record-page .record-tabs__panel {
+    gap: 1rem;
+  }
+
+  .record-page .record-tabs__panel {
+    gap: 1.5rem;
+  }
+
+  /* Facts: a description list, muted labels beside their values. */
+  .record-page .record-facts {
+    align-items: center;
+    font-size: var(--text-normal);
+    gap: 0.75rem 1.5rem;
+
+    dt {
+      color: var(--muted-foreground);
+    }
+
+    dd {
+      color: var(--foreground);
+    }
+  }
+
+  .record-page .custom-fields {
+    border-block-start: 1px solid var(--border);
+    font-size: var(--text-normal);
+    gap: 0.75rem 1.5rem;
+    grid-template-columns: max-content minmax(0, 1fr);
+    padding-block-start: 1rem;
+    text-align: start;
+
+    .custom-fields__row {
+      display: contents;
+    }
+
+    dt {
+      color: var(--muted-foreground);
+    }
+  }
+
+  .record-page .record-steps {
+    color: var(--muted-foreground);
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-normal);
+    gap: 0.5rem;
+    line-height: 1.5;
+    padding-inline-start: 1.25rem;
+  }
+
+  /* Lists (shadcn's Item rows): a hairline between, a quiet tint under the pointer. */
+  .record-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+
+    li + li {
+      border-block-start: 1px solid var(--border);
+    }
+  }
+
+  .record-list__row {
+    align-items: center;
+    border-radius: var(--radius-md);
+    color: inherit;
+    display: flex;
+    gap: 0.75rem;
+    margin-inline: -0.5rem;
+    min-inline-size: 0;
+    padding: 0.75rem 0.5rem;
+    text-decoration: none;
+    transition: background-color 100ms;
+
+    &:is(a):hover {
+      background-color: color-mix(in oklch, var(--accent) 60%, transparent);
+    }
+  }
+
+  /* A row that is the list item itself (work, documents) keeps to the column. */
+  li.record-list__row {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .record-list--compact .record-list__row {
+    padding-block: 0.5rem;
+  }
+
+  .record-list__main {
+    color: inherit;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-inline-size: 0;
+    text-decoration: none;
+  }
+
+  .record-list__title {
+    font-size: var(--text-normal);
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .record-list__ref {
+    color: var(--muted-foreground);
+    margin-inline-end: 0.25rem;
+  }
+
+  .record-list__description,
+  .record-list__meta {
+    color: var(--muted-foreground);
+    font-size: var(--text-x-small);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .record-list__meta {
+    flex-shrink: 0;
+  }
+
+  .record-list__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-block-start: 0.25rem;
+  }
+
+  .record-list__actions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+  }
+
+  .record-list .contact-row__marks {
+    color: var(--muted-foreground);
+  }
+
+  .record-list .contact-row__mark--approve {
+    color: var(--success);
+  }
+
+  /* A piece of work: the status circle leads, like a task list's checkbox. */
+  .todo-item .status-dot-picker__trigger {
+    margin-inline-start: -0.25rem;
+  }
+
+  .todo-item .record-list__main:hover .record-list__title {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+    text-underline-offset: 4px;
+  }
+
+  /* An engagement's work, grouped by section. */
+  .record-page .work-groups {
+    gap: 0;
+  }
+
+  .work-group + .work-group {
+    border-block-start: 1px solid var(--border);
+  }
+
+  .work-group__header {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    padding-block: 1rem 0.25rem;
+  }
+
+  .work-group:first-child .work-group__header {
+    padding-block-start: 0;
+  }
+
+  .work-group__name {
+    color: var(--foreground);
+    flex: 1;
+    font-size: var(--text-normal);
+    font-weight: 600;
+    min-inline-size: 0;
+    text-decoration: none;
+
+    &:is(a):hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  .work-group__count,
+  .work-focus__count {
+    color: var(--muted-foreground);
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .record-page .work-focus {
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.75rem 1rem;
+  }
+
+  .work-focus__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-inline-size: 0;
+  }
+
+  .record-page .work-focus__title {
+    font-size: var(--text-normal);
+    font-weight: 600;
+  }
+
+  /* Adding work or a section in place: a small outline button that opens its form. */
+  .record-page .record-add {
+    align-items: flex-start;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+
+    > summary {
+      list-style: none;
+    }
+
+    &[open] > summary {
+      background-color: var(--accent);
+    }
+  }
+
+  .record-add__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    inline-size: 100%;
+  }
+
+  .record-add__fields {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+  }
+
+  .record-add__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .record-page .section-actions {
+    margin: 0;
+  }
+
+  /* Activity feed: notes and history. */
+  .record-feed {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+  }
+
+  .record-feed__item {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.75rem;
+    padding-block: 1rem;
+
+    &:first-child {
+      padding-block-start: 0;
+    }
+
+    &:last-child {
+      padding-block-end: 0;
+    }
+
+    & + & {
+      border-block-start: 1px solid var(--border);
+    }
+  }
+
+  .record-feed__avatar {
+    display: inline-flex;
+    flex-shrink: 0;
+
+    .person {
+      block-size: 2rem;
+      inline-size: 2rem;
+    }
+
+    .ui-avatar {
+      --ui-avatar-size: 2rem;
+    }
+  }
+
+  .record-feed__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-inline-size: 0;
+  }
+
+  .record-feed__head {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    min-block-size: 2rem;
+  }
+
+  .record-feed__title {
+    font-size: var(--text-normal);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .record-feed__meta {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--text-x-small);
+    gap: 0.375rem;
+    margin: 0;
+  }
+
+  .record-feed__details {
+    color: var(--muted-foreground);
+    font-size: var(--text-x-small);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .record-feed__text {
+    font-size: var(--text-normal);
+    line-height: 1.6;
+  }
+
+  /* History in the sidebar is narrower: smaller avatars, tighter rows. */
+  .record-page__aside .record-feed__item {
+    padding-block: 0.75rem;
+  }
+
+  .record-page__aside .record-feed__avatar {
+    .person {
+      block-size: 1.5rem;
+      inline-size: 1.5rem;
+    }
+
+    .ui-avatar {
+      --ui-avatar-size: 1.5rem;
+    }
+  }
+
+  /* History folds into its card's header. */
+  .record-timeline__summary {
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &:focus-visible {
+      border-radius: var(--radius-md);
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+  }
+
+  .record-timeline__chevron {
+    --icon-size: 1rem;
+
+    color: var(--muted-foreground);
+    transition: rotate 150ms;
+
+    .record-timeline__details[open] & {
+      rotate: 180deg;
+    }
+  }
+
+  .record-timeline__details .ui-card__content {
+    margin-block-start: 1.5rem;
+  }
+
+  /* Notes: the composer, framed as one Textarea with its controls along the foot. */
+  .record-page .note-composer {
+    background-color: transparent;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+
+    &:focus-within {
+      border-color: var(--ring);
+      box-shadow: var(--shadow-xs), var(--ring-focus);
+    }
+
+    lexxy-editor.lexxy-content,
+    lexxy-editor.lexxy-content:focus-within {
+      background-color: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0 0.75rem;
+
+      lexxy-toolbar {
+        inline-size: calc(100% + 1.5rem);
+        margin-inline: -0.75rem;
+      }
+
+      .lexxy-editor__content {
+        min-block-size: 3lh;
+      }
+    }
+  }
+
+  .record-page .note-composer__footer {
+    border-block-start: 1px solid var(--border);
+    gap: 0.25rem;
+    padding: 0.375rem;
+
+    :is(.ui-select, .ui-input) {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      font-size: var(--text-x-small);
+
+      &:hover {
+        background-color: var(--accent);
+      }
+
+      &:focus-visible {
+        border-color: var(--ring);
+        box-shadow: var(--ring-focus);
+      }
+    }
+
+    .note-composer__kind {
+      flex: 0 0 auto;
+      inline-size: auto;
+    }
+
+    .note-composer__source {
+      flex: 1 1 10rem;
+    }
+  }
+
+  html[data-theme="dark"] .record-page .note-composer {
+    background-color: color-mix(in oklch, var(--input) 30%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .record-page .note-composer {
+      background-color: color-mix(in oklch, var(--input) 30%, transparent);
+    }
+  }
+
+  /* Documents: a dashed drop zone (shadcn's Empty / file upload), then the files as rows. */
+  .record-page .document-drop__target {
+    --icon-size: 1rem;
+
+    background: transparent;
+    block-size: auto;
+    border: 1px dashed var(--input);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    font-weight: 400;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+
+    &:hover,
+    &:has(input:focus-visible),
+    &.drag-and-drop__hover-container {
+      background-color: color-mix(in oklch, var(--accent) 50%, transparent);
+      border-color: var(--ring);
+      color: var(--foreground);
+      filter: none;
+    }
+  }
+
+  .document-list .document-link {
+    color: inherit;
+    cursor: pointer;
+    flex: 1;
+    gap: 0.75rem;
+    min-inline-size: 0;
+    text-decoration: none;
+
+    strong {
+      font-size: var(--text-normal);
+      font-weight: 500;
+    }
+
+    &:hover strong {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  .document-link .attachment__icon {
+    aspect-ratio: auto;
+    background-color: var(--muted);
+    block-size: 2.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--muted-foreground);
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    inline-size: 2.25rem;
+    padding: 0;
+  }
+
+  .document-list__visible {
+    align-items: center;
+    display: flex;
+  }
+
+  .document-preview__name {
+    font-size: var(--text-normal);
+    font-weight: 500;
+  }
+
+  .document-preview footer > div {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Switches on record pages: shadcn's Switch. */
+  .record-page .switch {
+    block-size: 1.15rem;
+    border-radius: 99rem;
+    inline-size: 2rem;
+  }
+
+  .record-page .switch__btn {
+    background-color: var(--input);
+    border-radius: 99rem;
+    box-shadow: var(--shadow-xs);
+
+    &::before {
+      background-color: var(--background);
+      block-size: 1rem;
+      border-radius: 50%;
+      inline-size: 1rem;
+      inset-block-end: calc((1.15rem - 1rem) / 2);
+      inset-inline-start: 0.075rem;
+    }
+  }
+
+  .record-page .switch__input:checked + .switch__btn {
+    background-color: var(--primary);
+
+    &::before {
+      background-color: var(--primary-foreground);
+      transform: translateX(calc(2rem - 1rem - 0.15rem));
+    }
+  }
+
+  .record-page .switch:has(:focus-visible) .switch__btn {
+    box-shadow: var(--ring-focus);
+    outline: none;
+  }
+
+  html[data-theme="dark"] .record-page .switch__input:not(:checked) + .switch__btn::before {
+    background-color: var(--foreground);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .record-page .switch__input:not(:checked) + .switch__btn::before {
+      background-color: var(--foreground);
+    }
+  }
+
+  /* Forms: a Card of Fields, Cancel and the primary action at its foot. */
+  .record-page .record-form {
+    gap: 1.5rem;
+    text-align: start;
+  }
+
+  .record-form__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .record-form .record-form__field {
+    gap: 0.5rem;
+
+    .record-form__label {
+      font-size: var(--text-normal);
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .input {
+      min-block-size: 2.25rem;
+    }
+  }
+
+  .record-form .record-form__row {
+    align-items: start;
+  }
+
+  /* A time zone list has disabled separator options; the field itself isn't disabled. */
+  .record-form .ui-field.record-form__tz .ui-label {
+    cursor: default;
+    opacity: 1;
+  }
+
+  .record-form__separator {
+    margin: 0;
+  }
+
+  .record-form .ui-fieldset > legend {
+    font-weight: 600;
+  }
+
+  .record-form .record-form__switches {
+    gap: 0.75rem;
+  }
+
+  .record-form .ui-field > .ui-label {
+    line-height: 1.2;
+  }
+
+  /* A switch with its explanation: shadcn's bordered switch row. */
+  .record-page .record-form__toggle {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .record-page .record-form__toggle-text {
+    gap: 0.25rem;
+  }
+
+  /* "Also on it": the team as toggle chips. */
+  .record-page .owner-checklist legend {
+    margin-block-end: 0.5rem;
+  }
+
+  .owner-checklist__people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .record-page .owner-checklist__person {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+    font-size: var(--text-normal);
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem 0.375rem 0.5rem;
+
+    &:hover {
+      background-color: var(--accent);
+    }
+
+    &:has(:checked) {
+      background-color: color-mix(in oklch, var(--primary) 6%, transparent);
+      border-color: var(--primary);
+    }
+  }
+
+  /* An engagement's sidebar: Sections / General as full-width tabs, the sections as a nav. */
+  .engagement-sidebar .sidebar-tabs {
+    inline-size: 100%;
+    margin: 0;
+  }
+
+  .record-page .scope-nav {
+    gap: 0.125rem;
+    margin-inline: -0.5rem;
+  }
+
+  .record-page .scope-nav__item {
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-size: var(--text-normal);
+    padding: 0.5rem;
+    row-gap: 0.375rem;
+
+    &:hover {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+
+    &[aria-current="page"] {
+      background-color: var(--accent);
+      font-weight: 500;
+    }
+  }
+
+  .record-page .scope-nav__count {
+    color: var(--muted-foreground);
+  }
+
+  .record-page .scope-nav__dot--in_progress { --scope-dot: var(--primary); }
+
+  .record-page .scope-nav__progress {
+    background-color: var(--muted);
+    block-size: 2px;
+
+    &::-webkit-progress-bar { background-color: var(--muted); }
+    &::-webkit-progress-value { background-color: var(--primary); }
+    &::-moz-progress-bar { background-color: var(--primary); }
+  }
+
+  .record-page .scope-item-fields {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+
+    form {
+      display: contents;
+    }
+
+    .ui-input {
+      flex: 1;
+    }
+  }
+
+  .record-page .scope-item-fields__add {
+    grid-column: auto;
+    padding-inline: 0.75rem;
+  }
+
+  .record-page .scope-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Finishing, reopening and erasing an engagement. */
+  .record-page .engagement-finish {
+    margin: 0;
+  }
+
+  .engagement-finish__choices {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .engagement-finish__form {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-normal);
+    gap: 0.75rem;
+    text-align: start;
+  }
+
+  .engagement-finish__text {
+    color: var(--muted-foreground);
+  }
+
+  .engagement-finish__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .erase-engagement {
+    text-align: start;
+  }
+
+  .erase-engagement__form {
+    border: 1px solid color-mix(in oklch, var(--destructive) 40%, var(--border));
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+  }
+
+  /* An inline confirmation (delete, archive) at the foot of a record's sidebar. */
+  /* !important: the confirm's wrapper centres itself with utility classes, a later layer. */
+  .record-page__aside [data-controller="state-focus"]:has(.ui-confirm) {
+    margin: 0 !important;
+    text-align: start !important;
+  }
+
+  .record-page__aside .ui-confirm {
+    margin-inline: 0;
+    max-inline-size: none;
+  }
+
+  /* The rich text editor, everywhere: framed as shadcn's Textarea, its toolbar a row of ghost
+  /* icon buttons ruled off from the text. */
+  lexxy-editor.lexxy-content {
+    background-color: transparent;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+    font-size: var(--text-normal);
+    padding: 0 0.75rem 0.5rem;
+    transition: border-color 150ms, box-shadow 150ms;
+
+    &:focus-within {
+      border-color: var(--ring);
+      box-shadow: var(--shadow-xs), var(--ring-focus);
+      outline: none;
+    }
+
+    lexxy-toolbar {
+      border-block-end: 1px solid var(--border);
+      color: var(--muted-foreground);
+      inline-size: calc(100% + 1.5rem);
+      margin-inline: -0.75rem;
+      padding: 0.25rem 0.375rem;
+    }
+
+    .lexxy-editor__content {
+      min-block-size: 6lh;
+    }
+  }
+
+  .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) {
+    border-radius: var(--radius-sm);
+
+    &[aria-pressed="true"],
+    &[aria-expanded="true"] {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+
+    @media (any-hover: hover) {
+      &:hover:not([aria-pressed="true"]) {
+        background-color: var(--accent);
+        color: var(--accent-foreground);
+      }
+    }
+  }
+
+  html[data-theme="dark"] lexxy-editor.lexxy-content {
+    background-color: color-mix(in oklch, var(--input) 30%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) lexxy-editor.lexxy-content {
+      background-color: color-mix(in oklch, var(--input) 30%, transparent);
+    }
+  }
+
+  /* The date picker's calendar: shadcn's Calendar in a Popover. */
+  .datepicker-picker {
+    background-color: var(--popover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    color: var(--popover-foreground);
+    font-size: var(--text-normal);
+    padding: 0.75rem;
+  }
+
+  .datepicker-controls .button {
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+
+    &:hover {
+      background-color: var(--accent);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+  }
+
+  .datepicker-controls .view-switch {
+    font-weight: 500;
+  }
+
+  .datepicker-controls :is(.prev-button, .next-button) {
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xs);
+    color: var(--muted-foreground);
+    flex-basis: 1.75rem;
+    min-block-size: 1.75rem;
+  }
+
+  .datepicker-footer {
+    border-block-start-color: var(--border);
+
+    .datepicker-controls .button {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
+      font-weight: 500;
+
+      &:hover {
+        background-color: var(--accent);
+      }
+    }
+  }
+
+  .datepicker .dow {
+    color: var(--muted-foreground);
+    font-weight: 400;
+  }
+
+  .datepicker .datepicker-cell {
+    border-radius: var(--radius-md);
+
+    &:not(.disabled):hover {
+      background-color: var(--accent);
+    }
+
+    &.prev:not(.disabled),
+    &.next:not(.disabled),
+    &.disabled {
+      color: color-mix(in oklch, var(--muted-foreground) 60%, transparent);
+    }
+
+    &.today:not(.selected) {
+      background-color: var(--accent);
+      box-shadow: none;
+      color: var(--accent-foreground);
+      font-weight: 500;
+    }
+
+    &.focused:not(.selected) {
+      background-color: var(--accent);
+    }
+
+    &.selected,
+    &.selected:hover {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      font-weight: 500;
+    }
+  }
+}

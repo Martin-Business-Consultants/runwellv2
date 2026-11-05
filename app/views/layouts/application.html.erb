@@ -10,6 +10,9 @@
       <% end %>
       <header class="header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <% if authenticated? %>
+          <%= render "layouts/shared/inset_header" %>
+        <% end %>
         <% unless authenticated? %>
           <%= link_to root_path, class: "header__logo txt-large font-weight-black txt-current", title: "Home" do %>
             <%= render "layouts/shared/logo" %>

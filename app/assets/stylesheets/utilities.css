@@ -29,7 +29,7 @@
   .txt-uppercase { text-transform: uppercase; }
   .txt-capitalize { text-transform: capitalize; }
   .txt-capitalize-first-letter::first-letter { text-transform: capitalize; }
-  .txt-link { color: var(--color-link); text-decoration: underline; }
+  .txt-link { color: var(--foreground, var(--color-ink)); font-weight: 500; text-decoration: underline; text-decoration-color: color-mix(in oklch, currentColor 40%, transparent); text-underline-offset: 4px; }
 
   .font-weight-normal { font-weight: 400; }
   .font-weight-medium { font-weight: 500; }

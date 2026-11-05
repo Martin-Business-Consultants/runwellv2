@@ -1,5 +1,5 @@
 <%# locals: (column_path:) %>
-<%= link_to column_path, class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
-  <%= icon_tag "grid", class: "translucent" %>
+<%= link_to column_path, class: "cards__maximize-button ui-button ui-button--ghost ui-button--icon-sm", title: "Expand column", data: { turbo_frame: "_top" } do %>
+  <%= icon_tag "maximize" %>
   <span class="for-screen-reader">Expand column</span>
 <% end %>

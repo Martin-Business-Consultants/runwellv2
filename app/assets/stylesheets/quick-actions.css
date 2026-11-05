@@ -1,13 +1,6 @@
+/* The quick action picker (quick_actions/_picker): Fizzy's combobox, in the tray and the modal.
+/* The tray and modal themselves are drawn in ui/app-overlays.css. */
 @layer components {
-  /* The quick action modal (quick_actions#new) */
-  .quick-action {
-    /* Width from .dialog--action (dialog.css), shared with the delete dialog. */
-
-    .popup {
-      max-inline-size: min(30rem, 100dvw - 4rem);
-    }
-  }
-
   .quick-action__picker {
     position: relative;
 
@@ -16,6 +9,10 @@
       justify-content: space-between;
       max-inline-size: 100%;
     }
+
+    .popup {
+      max-inline-size: min(30rem, 100dvw - 4rem);
+    }
   }
 
   .quick-action__records {
@@ -23,25 +20,9 @@
     overflow-y: auto;
   }
 
-  /* In the modal the picker spans the form, with room before the fields */
-  .quick-action__picker--full {
-    margin-block-end: var(--block-space);
-
-    > .btn {
-      inline-size: 100%;
-    }
-  }
-
-  .quick-action__close {
-    --btn-size: 2em;
-    --btn-icon-size: 1em;
-
-    font-size: var(--text-small);
-  }
-
-  /* The modal focuses itself on open, not the close button */
-  .quick-action:focus-visible {
-    outline: 0;
+  /* In the modal the picker spans the form. */
+  .quick-action__picker--full > .btn {
+    inline-size: 100%;
   }
 
   .quick-action__upload {

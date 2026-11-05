@@ -10,21 +10,21 @@
     <dialog class="dialog document-preview panel fill-white shadow" data-dialog-target="dialog" aria-label="<%= document.filename %>">
       <%= image_tag rails_blob_path(document.file, disposition: :inline), class: "document-preview__image", alt: document.filename, loading: "lazy" %>
       <footer class="flex align-center justify-space-between gap flex-wrap">
-        <strong class="txt-small overflow-ellipsis"><%= document.filename %></strong>
+        <strong class="document-preview__name overflow-ellipsis"><%= document.filename %></strong>
         <div class="flex align-center gap-half">
-          <%= link_to "Open", rails_blob_path(document.file, disposition: :inline), class: "btn txt-small", target: "_blank", rel: "noopener" %>
-          <%= link_to "Download", rails_blob_path(document.file, disposition: :attachment), class: "btn txt-small", download: document.filename.to_s %>
-          <button type="button" class="btn txt-small" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+          <%= link_to "Open", rails_blob_path(document.file, disposition: :inline), class: "ui-button ui-button--outline ui-button--sm", target: "_blank", rel: "noopener" %>
+          <%= link_to "Download", rails_blob_path(document.file, disposition: :attachment), class: "ui-button ui-button--outline ui-button--sm", download: document.filename.to_s %>
+          <button type="button" class="ui-button ui-button--sm" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
         </div>
       </footer>
     </dialog>
   </div>
 <% elsif kind == :tab %>
-  <%= link_to rails_blob_path(document.file, disposition: :inline), class: "txt-ink flex gap-half align-center min-width", title: "Open #{document.filename} in a new tab", target: "_blank", rel: "noopener" do %>
+  <%= link_to rails_blob_path(document.file, disposition: :inline), class: "document-link txt-ink flex gap-half align-center min-width", title: "Open #{document.filename} in a new tab", target: "_blank", rel: "noopener" do %>
     <%= render "documents/file", document: document, meta: meta %>
   <% end %>
 <% else %>
-  <%= link_to rails_blob_path(document.file, disposition: :attachment), class: "txt-ink flex gap-half align-center min-width", title: "Download #{document.filename}", download: document.filename.to_s do %>
+  <%= link_to rails_blob_path(document.file, disposition: :attachment), class: "document-link txt-ink flex gap-half align-center min-width", title: "Download #{document.filename}", download: document.filename.to_s do %>
     <%= render "documents/file", document: document, meta: meta %>
   <% end %>
 <% end %>

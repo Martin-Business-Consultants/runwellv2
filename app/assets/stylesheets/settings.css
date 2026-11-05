@@ -510,58 +510,8 @@
     gap: var(--block-space);
   }
 
-  .record-tabs__nav {
-    border-block-end: 1px solid var(--color-ink-lighter);
-    display: flex;
-    gap: 0.25em;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .record-tabs__tab {
-    align-items: center;
-    border-block-end: 2px solid transparent;
-    color: var(--color-ink-dark);
-    display: inline-flex;
-    font-size: var(--text-small);
-    font-weight: 600;
-    gap: 0.4em;
-    margin-block-end: -1px;
-    padding: 0.5em 0.7em;
-    text-decoration: none;
-    white-space: nowrap;
-
-    &:hover { color: var(--color-ink); }
-
-    &[aria-current="page"],
-    &[aria-pressed="true"] {
-      border-block-end-color: var(--color-link);
-      color: var(--color-ink);
-    }
-  }
-
-  /* Tabs that switch in place (ReActionView state) rather than by link: an engagement's sidebar. */
-  button.record-tabs__tab {
-    background: none;
-    border-block-start: 0;
-    border-inline: 0;
-    border-radius: 0;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
   .sidebar-tabs {
     margin-block-end: calc(var(--block-space-half) * -1);
-  }
-
-  .record-tabs__count {
-    background-color: var(--color-ink-lightest);
-    border-radius: var(--radius-pill, 99rem);
-    color: var(--color-ink-dark);
-    font-size: var(--text-x-small);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-    padding: 0.25em 0.55em;
   }
 
   .record-tabs__panel {
@@ -751,52 +701,6 @@
 
   .document-drop + .settings__scrollable-list {
     margin-block-start: var(--block-space-half);
-  }
-
-  /* A section's filter (layouts/shared/_segmented_filter): its choices side by side in one
-  /* hairline track, each with a muted count, the current one raised like the view toggle.
-  /* In a tab the section's heading is hidden, so the control leads the section. */
-  .segmented-filter {
-    background-color: var(--color-ink-lightest);
-    border: 1px solid var(--color-ink-lighter);
-    border-radius: var(--radius-control);
-    display: inline-flex;
-    flex-shrink: 0;
-    gap: 0.1em;
-    max-inline-size: 100%;
-    overflow-x: auto;
-    padding: 0.15em;
-    scrollbar-width: none;
-  }
-
-  .segmented-filter__option {
-    align-items: center;
-    border-radius: calc(var(--radius-control) - 0.15em);
-    color: var(--color-ink-dark);
-    display: inline-flex;
-    font-size: var(--text-x-small);
-    font-weight: 500;
-    gap: 0.45em;
-    padding: 0.3em 0.7em;
-    text-decoration: none;
-    white-space: nowrap;
-
-    @media (any-hover: hover) {
-      &:hover { color: var(--color-ink); }
-    }
-
-    &[aria-current="true"] {
-      background-color: var(--color-canvas);
-      box-shadow: 0 0 0 1px var(--color-ink-lighter), 0 1px 2px oklch(var(--lch-black) / 6%);
-      color: var(--color-ink);
-    }
-  }
-
-  .segmented-filter__count {
-    color: var(--color-ink-medium);
-    font-variant-numeric: tabular-nums;
-
-    [aria-current="true"] > & { color: var(--color-ink-dark); }
   }
 
   /* A section's add action: one small button at the start of the row after the list, the same

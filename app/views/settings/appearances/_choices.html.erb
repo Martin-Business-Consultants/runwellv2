@@ -1,14 +1,26 @@
-<%# locals: (form:, attribute:, choices:, current:, icons: nil, sample_class: nil) %>
-<div class="theme-switcher appearance-choices flex flex-wrap gap max-width justify-center txt-small">
+<%# locals: (form:, attribute:, choices:, current:, icons: nil, sample_class: nil, mock: nil) %>
+<%# One Appearance choice as shadcn's radio cards: a bordered preview of what it does, its name
+    under it. The radio covers the card, invisibly, and previews the choice at once. %>
+<div class="settings-choices">
   <% choices.each do |value, label| %>
     <%# herb:key value %>
-    <label class="btn theme-switcher__btn">
-      <% if icons %>
-        <%= icon_tag icons.fetch(value) %>
-      <% elsif sample_class %>
-        <span class="appearance-sample <%= sample_class %>--<%= value %>" aria-hidden="true">Aa</span>
-      <% end %>
-      <span class="overflow-ellipsis"><%= label %></span>
+    <label class="settings-choice">
+      <span class="settings-choice__preview" aria-hidden="true">
+        <% if mock %>
+          <% mock_class = "theme-mock theme-mock--" + value %>
+          <span class="<%= mock_class %>">
+            <span class="theme-mock__card"><span class="theme-mock__line theme-mock__line--short"></span><span class="theme-mock__line"></span></span>
+            <span class="theme-mock__card"><span class="theme-mock__dot"></span><span class="theme-mock__line"></span></span>
+            <span class="theme-mock__card"><span class="theme-mock__dot"></span><span class="theme-mock__line"></span></span>
+          </span>
+        <% elsif icons %>
+          <%= icon_tag icons.fetch(value) %>
+        <% elsif sample_class %>
+          <% sample = "appearance-sample " + sample_class + "--" + value %>
+          <span class="<%= sample %>">Aa</span>
+        <% end %>
+      </span>
+      <span class="settings-choice__label"><%= label %></span>
       <%= form.radio_button attribute, value, checked: value == current, data: { action: "click->appearance#preview" } %>
     </label>
   <% end %>

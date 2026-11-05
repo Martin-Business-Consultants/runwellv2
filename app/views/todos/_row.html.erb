@@ -1,0 +1,20 @@
+<%# locals: (todo:, listed:) %>
+<%# One piece of work in the index's data table (ui/_data_table): the cells in the columns' order. %>
+<tr data-filter-target="item">
+  <%= bulk_select_cell todo, todo.title %>
+  <td data-column="title"><%= link_to todo.title, todo_path(todo), class: "txt-ink font-weight-bold" %></td>
+  <td class="txt-nowrap" data-column="engagement">
+    <% if todo.engagement %>
+      <%= link_to todo.engagement.ref, todo.engagement, class: "txt-ink" %>
+    <% end %>
+  </td>
+  <td class="txt-subtle" data-column="client"><%= todo.client&.name %></td>
+  <td class="txt-subtle" data-column="owner"><%= render "todos/owner_picker", todo: todo %></td>
+  <td class="txt-nowrap" data-column="due"><%= render "todos/due", todo: todo %></td>
+  <td class="txt-align-center" data-column="status"><%= render "todos/status_dot", todo: todo %></td>
+  <% listed.each do |field| %>
+    <%# herb:key field.id %>
+    <td class="txt-subtle" data-column="field_<%= field.id %>"><%= custom_field_text(field, todo.custom_value(field)) %></td>
+  <% end %>
+  <%= render "layouts/shared/row_actions", name: todo.title, edit_path: edit_todo_path(todo), delete_path: todo_path(todo), todo: todo %>
+</tr>

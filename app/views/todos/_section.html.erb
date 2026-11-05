@@ -5,11 +5,20 @@
 <% state ||= "open" %>
 <% picked = item.is_a?(Integer) ? engagement.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
-<section class="settings__section" id="work">
-  <header>
-    <h2 class="divider"><%= term(:work) %></h2>
-    <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
-          options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+<section class="ui-card record-card" id="work">
+  <header class="ui-card__header">
+    <h2 class="ui-card__title"><%= term(:work) %></h2>
+    <p class="ui-card__description">
+      <% if focus %>
+        Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.
+      <% else %>
+        By <%= term(:scope_item).downcase %>, soonest due first.
+      <% end %>
+    </p>
+    <div class="ui-card__action">
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
+            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+    </div>
   </header>
 
   <% todos = engagement.todos.includes(:owner, :scope_item, :client, { assignments: :user }, :engagement).order(:due_on, :position) %>
@@ -19,76 +28,80 @@
   <% groups = shown.group_by(&:scope_item) %>
   <% items = (engagement.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
 
-  <% if focus %>
-    <% done = todos.count { |todo| todo.status == "done" } %>
-    <div class="work-focus flex align-center gap-half">
-      <h3 class="work-focus__title overflow-ellipsis"><%= picked ? picked.description : "Other work" %></h3>
-      <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-      <span class="txt-subtle txt-small txt-nowrap"><%= done %> of <%= todos.size %> done</span>
-      <% if picked %>
-        <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>
-        <%= link_to picked, class: "btn txt-small", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
-          <%= icon_tag "arrow-right" %> <span>Open</span>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
-
-  <%# One list of groups, tight together. A section whose only work is named the same shows just
-      that row, not the name twice. %>
-  <div class="work-groups">
-  <% items.each do |item| %>
-    <%# herb:key item.id %>
-    <% group = groups.fetch(item, []) %>
-    <% everything = all_groups.fetch(item, []) %>
-    <% single = everything.size == 1 && group.size == 1 && group.first.title.strip.casecmp?(item.description.strip) %>
-    <div class="work-group">
-      <% unless single || focus %>
-        <div class="flex align-center gap-half txt-small">
-          <%= link_to item.description, engagement_path(engagement, request.query_parameters.merge("tab" => "work", "item" => item.id)), class: "txt-ink font-weight-bold overflow-ellipsis" %>
-          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-          <span class="txt-subtle txt-nowrap"><%= everything.count { |todo| todo.status == "done" } %> of <%= everything.size %></span>
-          <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+  <div class="ui-card__content record-card__stack">
+    <% if focus %>
+      <% done = todos.count { |todo| todo.status == "done" } %>
+      <div class="work-focus">
+        <div class="work-focus__text">
+          <h3 class="work-focus__title overflow-ellipsis"><%= picked ? picked.description : "Other work" %></h3>
+          <span class="work-focus__count"><%= done %> of <%= todos.size %> done</span>
         </div>
-      <% end %>
-      <ul class="settings__scrollable-list">
-        <%= render partial: "todos/todo", collection: group, as: :todo %>
-      </ul>
-    </div>
-  <% end %>
-
-  <% other = groups.fetch(nil, []) %>
-  <% other_all = all_groups.fetch(nil, []) %>
-  <% if other.any? %>
-    <div class="work-group">
-      <% unless focus %>
-      <div class="flex align-center gap-half txt-small">
-        <span class="font-weight-bold">Other work</span>
-        <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-        <span class="txt-subtle txt-nowrap"><%= other_all.count { |todo| todo.status == "done" } %> of <%= other_all.size %></span>
+        <% if picked %>
+          <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>
+          <%= link_to picked, class: "ui-button ui-button--outline ui-button--sm", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
+            <span>Open</span>
+            <%= icon_tag "arrow-right" %>
+          <% end %>
+        <% end %>
       </div>
-      <% end %>
-      <ul class="settings__scrollable-list">
-        <%= render partial: "todos/todo", collection: other, as: :todo %>
-      </ul>
+    <% end %>
+
+    <%# One list of groups, tight together. A section whose only work is named the same shows just
+        that row, not the name twice. %>
+    <div class="work-groups">
+    <% items.each do |item| %>
+      <%# herb:key item.id %>
+      <% group = groups.fetch(item, []) %>
+      <% everything = all_groups.fetch(item, []) %>
+      <% single = everything.size == 1 && group.size == 1 && group.first.title.strip.casecmp?(item.description.strip) %>
+      <div class="work-group">
+        <% unless single || focus %>
+          <div class="work-group__header">
+            <%= link_to item.description, engagement_path(engagement, request.query_parameters.merge("tab" => "work", "item" => item.id)), class: "work-group__name overflow-ellipsis" %>
+            <span class="work-group__count"><%= everything.count { |todo| todo.status == "done" } %> of <%= everything.size %></span>
+            <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+          </div>
+        <% end %>
+        <ul class="record-list">
+          <%= render partial: "todos/todo", collection: group, as: :todo %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% other = groups.fetch(nil, []) %>
+    <% other_all = all_groups.fetch(nil, []) %>
+    <% if other.any? %>
+      <div class="work-group">
+        <% unless focus %>
+        <div class="work-group__header">
+          <span class="work-group__name">Other work</span>
+          <span class="work-group__count"><%= other_all.count { |todo| todo.status == "done" } %> of <%= other_all.size %></span>
+        </div>
+        <% end %>
+        <ul class="record-list">
+          <%= render partial: "todos/todo", collection: other, as: :todo %>
+        </ul>
+      </div>
+    <% end %>
     </div>
-  <% end %>
+
+    <% if todos.none? %>
+      <% if focus %>
+        <p class="record-card__empty">No <%= term(:work).downcase %> here yet. Add the first below.</p>
+      <% else %>
+        <p class="record-card__empty">No <%= term(:work).downcase %> yet. Add the first below.</p>
+      <% end %>
+    <% elsif shown.none? %>
+      <p class="record-card__empty">
+        <%= state == "open" ? "Nothing open: all #{todos.size} done." : "Nothing done yet." %>
+        <%= link_to "Show all", engagement_path(engagement, request.query_parameters.merge("work" => "all")), class: "txt-link" %>
+      </p>
+    <% end %>
   </div>
 
-  <% if todos.none? %>
-    <% if focus %>
-      <p class="txt-subtle txt-small margin-none">No <%= term(:work).downcase %> here yet. Add the first below.</p>
-    <% else %>
-      <p class="txt-subtle txt-small margin-none">No <%= term(:work).downcase %> yet. Add the first below.</p>
-    <% end %>
-  <% elsif shown.none? %>
-    <p class="txt-subtle txt-small margin-none">
-      <%= state == "open" ? "Nothing open: all #{todos.size} done." : "Nothing done yet." %>
-      <%= link_to "Show all", engagement_path(engagement, request.query_parameters.merge("work" => "all")), class: "txt-link" %>
-    </p>
-  <% end %>
-
   <% unless engagement.closed? %>
-    <%= render "todos/add", engagement: engagement, scope_item: picked %>
+    <footer class="ui-card__footer">
+      <%= render "todos/add", engagement: engagement, scope_item: picked %>
+    </footer>
   <% end %>
 </section>

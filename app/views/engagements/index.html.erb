@@ -33,35 +33,14 @@
     </div>
   </section>
 <% elsif @engagements.any? %>
-  <section class="panel center index-table">
-
-    <table class="data-table data-table--fixed">
-      <%= table_colgroup :select, [ @column_widths[:ref], "Ref" ], [ @column_widths[:title], "Title" ], [ @column_widths[:client], term(:client) ], :pill, :status, *listed.map { :text }, :actions %>
-      <thead>
-        <tr><%= bulk_select_all_header %><%= sortable_th "Ref", :ref %><%= sortable_th "Title", :title %><%= sortable_th term(:client), :client %><%= sortable_th "Type", :type %><th>State</th><% listed.each do |field| %><%# herb:key field.id %><th><%= field.label %></th><% end %><th></th></tr>
-      </thead>
-      <tbody id="<%= pagination_frame_id_for(:engagements_rows, @page.number) %>">
-        <% @engagements.each do |engagement| %>
-          <%# herb:key engagement.id %>
-          <tr data-filter-target="item">
-            <%= bulk_select_cell engagement, engagement.ref %>
-            <td class="txt-nowrap"><%= link_to engagement.ref, engagement, class: "txt-ink font-weight-bold" %></td>
-            <td><%= link_to engagement.title, engagement, class: "txt-ink" %></td>
-            <td><%= link_to engagement.client.name, engagement.client, class: "txt-ink txt-subtle" %></td>
-            <td class="txt-subtle"><%= engagement.label_name %></td>
-            <td><%= status_tag engagement.state_label, highlight: engagement.active? %></td>
-            <% listed.each do |field| %>
-              <%# herb:key field.id %>
-              <td class="txt-subtle"><%= custom_field_text(field, engagement.custom_value(field)) %></td>
-            <% end %>
-            <%= render "layouts/shared/row_actions", name: engagement.ref, edit_path: edit_engagement_path(engagement), delete_path: (engagement_path(engagement) if engagement.deletable?),
-                  delete_message: "Nothing has been done on it yet, so its notes and documents go with it." %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
-  <%= table_pagination @page %>
+  <% columns = [ ui_column(:ref, "Ref", sort: :ref, width: [ @column_widths[:ref], "Ref" ], hideable: false),
+                 ui_column(:title, "Title", sort: :title, width: [ @column_widths[:title], "Title" ]),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
+                 ui_column(:type, "Type", sort: :type, width: :pill),
+                 ui_column(:state, "State", width: :status),
+                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+  <%= render "ui/data_table", id: "engagements", columns: columns, rows: @engagements, row: "engagements/row", as: :engagement,
+        row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
 <% end %>
 
 <% if @engagements.none? %>

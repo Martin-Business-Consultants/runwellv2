@@ -1,13 +1,16 @@
-<%# locals: (tabs:, current:) %>
-<%# A record page's tabs: each a link that swaps ?tab= inside the record_tab frame. %>
-<nav class="record-tabs__nav" aria-label="Sections">
+<%# locals: (tabs:, current:, variant: nil) %>
+<%# A record page's tabs (ui-tabs): each a link that swaps ?tab= inside the record_tab frame.
+    variant: "pill" draws shadcn's TabsList above a record page's cards; the underlined line
+    otherwise (Settings). %>
+<% nav_class = variant == "pill" ? "ui-tabs record-tabs__list" : "ui-tabs ui-tabs--line" %>
+<nav class="<%= nav_class %>" aria-label="Sections">
   <% tabs.each do |tab| %>
     <%# herb:key tab.key %>
-    <%= link_to record_tab_path(tab.key), class: "record-tabs__tab", aria: { current: ("page" if tab.key == current) },
+    <%= link_to record_tab_path(tab.key), class: "ui-tabs__trigger", aria: { current: ("page" if tab.key == current) },
           data: { turbo_frame: "record_tab", turbo_action: "advance" } do %>
       <span><%= tab.label %></span>
       <% if tab.count.to_i.positive? %>
-        <span class="record-tabs__count"><%= tab.count %></span>
+        <span class="ui-badge ui-badge--count"><%= tab.count %></span>
       <% end %>
     <% end %>
   <% end %>

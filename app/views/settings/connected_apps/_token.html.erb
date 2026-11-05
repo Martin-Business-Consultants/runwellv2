@@ -1,35 +1,36 @@
 <%# locals: (token:, holder: nil) %>
-<%# One connection: what it is, whose (holder: for an owner's list of everyone's), whether it's
-    paused, and its recent calls (AgentCall) under Activity. %>
-<li class="flex flex-column gap-half txt-small" data-filter-target="item">
-  <div class="flex align-center gap-half">
-    <div class="txt-align-start overflow-ellipsis min-width">
-      <strong><%= token.name %></strong>
+<%# One connection as an Item: what it is, whose (holder: for an owner's list of everyone's),
+    whether it's paused, and its recent calls (AgentCall) under Activity. %>
+<li class="ui-item ui-item--sm" data-filter-target="item">
+  <div class="ui-item__content">
+    <p class="ui-item__title">
+      <%= token.name %>
       <% if token.paused? %>
-        <%= status_tag "Paused" %>
+        <span class="ui-badge ui-badge--warning">Paused</span>
       <% end %>
-      <div class="txt-x-small txt-subtle">
-        <% if holder %>
-          <%= token.client? ? "#{token.contact.name} (#{token.contact.client.name})" : token.holder_name %> ·
-        <% end %>
-        <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
-      </div>
-    </div>
-    <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+    </p>
+    <p class="ui-item__description">
+      <% if holder %>
+        <%= token.client? ? "#{token.contact.name} (#{token.contact.client.name})" : token.holder_name %> ·
+      <% end %>
+      <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
+    </p>
+  </div>
+  <div class="ui-item__actions">
     <% if token.paused? %>
-      <%= button_to "Resume", settings_connected_app_pause_path(token), method: :delete, class: "btn txt-x-small" %>
+      <%= button_to "Resume", settings_connected_app_pause_path(token), method: :delete, class: "ui-button ui-button--outline ui-button--sm" %>
     <% else %>
-      <%= button_to "Pause", settings_connected_app_pause_path(token), class: "btn txt-x-small" %>
+      <%= button_to "Pause", settings_connected_app_pause_path(token), class: "ui-button ui-button--outline ui-button--sm" %>
     <% end %>
-    <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token), trigger_class: "txt-small",
+    <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token),
           message: "It stops working at once. Anything it already did stays, marked with its name." %>
   </div>
 
   <% calls = token.agent_calls.recent.limit(20) %>
   <% if calls.any? %>
-    <details class="connected-app__activity">
-      <summary class="txt-x-small txt-subtle">Activity: the last <%= pluralize calls.size, "call" %></summary>
-      <ul class="connected-app__calls txt-x-small">
+    <details class="settings-activity">
+      <summary>Activity: the last <%= pluralize calls.size, "call" %></summary>
+      <ul class="settings-activity__calls">
         <% calls.each do |call| %>
           <%# herb:key call.id %>
           <li class="flex align-center gap-half">

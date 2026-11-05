@@ -248,8 +248,15 @@ module ApplicationHelper
   # The page one level up (a record's list, a todo's engagement). Not a button: it's a
   # <link rel="up"> in the head (layouts/shared/_head), and Esc goes there (keyboard_controller).
   def parent_page(label, url)
+    @breadcrumb_parent = [ label, url_for(url) ]
     content_for :parent_page, tag.link(rel: "up", href: url_for(url), title: label)
     nil
+  end
+
+  # The inset header's breadcrumb (layouts/shared/_inset_header): the page's parent, when it
+  # named one (parent_page), then the page itself.
+  def breadcrumb_items
+    [ @breadcrumb_parent, ([ @page_title, nil ] if @page_title.present?) ].compact
   end
 
   private

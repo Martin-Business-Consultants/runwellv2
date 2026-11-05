@@ -2,58 +2,64 @@
 <%= render "settings/header", current: :connected_apps %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
+  <div class="settings__panel">
     <% if @new_token %>
-      <section class="settings__section flex flex-column gap">
-        <header>
-          <h2 class="divider">Your new token</h2>
-        </header>
-        <p class="txt-small margin-none">Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
+      <section class="settings__section">
+        <div class="ui-alert" role="status">
+          <%= icon_tag "lock", class: "ui-alert__icon" %>
+          <p class="ui-alert__title">Your new token</p>
+          <div class="ui-alert__description">
+            <p>Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
+          </div>
+        </div>
         <div class="copy-row">
-          <code class="input full-width txt-small overflow-ellipsis" id="new_token"><%= @new_token.plaintext %></code>
-          <button type="button" class="btn txt-small" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">Copy</button>
+          <code class="ui-input overflow-ellipsis" id="new_token"><%= @new_token.plaintext %></code>
+          <button type="button" class="ui-button ui-button--outline" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">Copy</button>
         </div>
       </section>
     <% end %>
 
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Apps acting as your agent</h2>
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Apps acting as your agent</h2>
+        <p class="settings__description">
+          Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
+        </p>
       </header>
-      <p class="txt-small txt-subtle margin-none">
-        Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
-      </p>
       <% if @tokens.any? %>
-        <ul class="settings__scrollable-list connected-apps">
+        <ul class="settings__list">
           <%= render partial: "settings/connected_apps/token", collection: @tokens, as: :token %>
         </ul>
       <% else %>
-        <p class="txt-small txt-subtle margin-none">Nothing is connected yet.</p>
+        <%= render "layouts/shared/empty", text: "Nothing is connected yet." %>
       <% end %>
     </section>
 
     <% if can?(:manage_settings) %>
-      <section class="settings__section flex flex-column gap">
-        <header>
-          <h2 class="divider"><%= term(:client, count: 2) %>’ AI</h2>
+      <section class="settings__section">
+        <header class="settings__heading">
+          <h2><%= term(:client, count: 2) %>’ AI</h2>
+          <p class="settings__description">
+            A contact with portal access can connect their own assistant under Connected apps in the portal, or by giving it <code><%= portal_mcp_url %></code>.
+            It sees what they see and can send requests, as them.
+          </p>
         </header>
-        <p class="txt-small txt-subtle margin-none">
-          A contact with portal access can connect their own assistant under Connected apps in the portal, or by giving it <code class="txt-small"><%= portal_mcp_url %></code>.
-          It sees what they see and can send requests, as them.
-        </p>
       </section>
     <% end %>
 
     <% if @everyone&.any? %>
-      <section class="settings__section flex flex-column gap">
-        <header>
-          <h2 class="divider">Everyone’s connections <span class="txt-subtle"><%= @everyone.size %></span></h2>
+      <section class="settings__section">
+        <header class="settings__heading">
+          <h2>Everyone’s connections</h2>
+          <p class="settings__description">
+            Every app and token connected to Runwell by your team and by <%= term(:client, count: 2).downcase %>’ contacts. Pause one to stop it at once, or disconnect it.
+            Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
+          </p>
+          <div class="settings__heading-actions">
+            <span class="ui-badge ui-badge--outline"><%= @everyone.size %></span>
+          </div>
         </header>
-        <p class="txt-small txt-subtle margin-none">
-          Every app and token connected to Runwell by your team and by <%= term(:client, count: 2).downcase %>’ contacts. Pause one to stop it at once, or disconnect it.
-          Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
-        </p>
-        <ul class="settings__scrollable-list connected-apps">
+        <ul class="settings__list settings__list--scroll">
           <% @everyone.each do |token| %>
             <%# herb:key token.id %>
             <%= render "settings/connected_apps/token", token: token, holder: true %>
@@ -62,32 +68,57 @@
       </section>
     <% end %>
 
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Connect an AI app</h2>
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Connect an AI app</h2>
+        <p class="settings__description">Runwell speaks MCP at <code><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
       </header>
-      <p class="txt-small margin-none">Runwell speaks MCP at <code class="txt-small"><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
-      <ul class="txt-small flex flex-column gap-half margin-none">
-        <li><strong>Claude or ChatGPT:</strong> add a custom connector with that URL. You’ll be asked to approve it here.</li>
-        <li><strong>Muse, Grok and assistants that build their own connection:</strong> describe Runwell to it as an MCP server at that URL, and make a personal token below when it asks for a key.</li>
-        <li class="flex flex-column gap-half">
-          <span><strong>Claude Code:</strong> add it, then run <code class="txt-x-small">/mcp</code> in Claude Code to sign in.</span>
-          <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
+      <ul class="settings__list">
+        <li class="ui-item ui-item--sm">
+          <div class="ui-item__content">
+            <p class="ui-item__title">Claude or ChatGPT</p>
+            <p class="ui-item__description">Add a custom connector with that URL. You’ll be asked to approve it here.</p>
+          </div>
         </li>
-        <li class="flex flex-column gap-half">
-          <span><strong>The command line:</strong> install it, then sign in.</span>
-          <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
+        <li class="ui-item ui-item--sm">
+          <div class="ui-item__content">
+            <p class="ui-item__title">Muse, Grok and assistants that build their own connection</p>
+            <p class="ui-item__description">Describe Runwell to it as an MCP server at that URL, and make a personal token below when it asks for a key.</p>
+          </div>
+        </li>
+        <li class="ui-item ui-item--sm">
+          <div class="ui-item__content">
+            <p class="ui-item__title">Claude Code</p>
+            <p class="ui-item__description">Add it, then run <code>/mcp</code> in Claude Code to sign in.</p>
+            <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
+          </div>
+        </li>
+        <li class="ui-item ui-item--sm">
+          <div class="ui-item__content">
+            <p class="ui-item__title">The command line</p>
+            <p class="ui-item__description">Install it, then sign in.</p>
+            <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
+          </div>
         </li>
       </ul>
-      <%= form_with url: settings_connected_apps_path, scope: :access_token, class: "flex flex-wrap gap-half txt-small" do |form| %>
-        <%= form.text_field :name, class: "input flex-item-grow", autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”", aria: { label: "Token name" } %>
-        <label class="flex align-center gap-half">
-          <%= form.check_box :read_only %>
+    </section>
+
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Personal tokens</h2>
+        <p class="settings__description">For scripts and tools that can’t sign in through the browser.</p>
+      </header>
+      <%= form_with url: settings_connected_apps_path, scope: :access_token, class: "settings__form settings__form--tight" do |form| %>
+        <div class="ui-field">
+          <%= form.label :name, "Token name", class: "ui-label" %>
+          <%= form.text_field :name, class: "ui-input", autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”" %>
+        </div>
+        <label class="settings__check">
+          <%= form.check_box :read_only, class: "ui-checkbox" %>
           <span>Read only</span>
         </label>
-        <button type="submit" class="btn btn--link">Make a personal token</button>
+        <div><button type="submit" class="ui-button">Make a personal token</button></div>
       <% end %>
-      <p class="txt-x-small txt-subtle margin-none">A personal token is for scripts and tools that can’t sign in through the browser.</p>
     </section>
   </div>
 </section>

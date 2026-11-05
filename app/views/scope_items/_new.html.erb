@@ -1,8 +1,8 @@
 <%# locals: (engagement:) %>
 <div class="scope-item-fields txt-small">
   <%= form_with model: [ engagement, ScopeItem.new ], namespace: dom_id(engagement, :new_item) do |form| %>
-    <%= form.text_field :description, required: true, class: "input", autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
-    <button type="submit" class="btn btn--link scope-item-fields__add" title="Add">
+    <%= form.text_field :description, required: true, class: "ui-input", autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
+    <button type="submit" class="ui-button scope-item-fields__add" title="Add">
       <span>Add</span>
       <%= icon_tag "add" %>
     </button>

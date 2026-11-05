@@ -4,15 +4,22 @@
   <%= parent_page @contact.client.name, @contact.client %>
 <% end %>
 
-<section class="settings settings--split">
-  <div class="settings__panel panel shadow txt-align-start">
-    <h1 class="page-title"><%= @page_title %></h1>
+<section class="settings settings--split record-page">
+  <header class="record-page__header page-heading">
+    <div class="record-page__heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="record-page__description">A contact at <%= link_to @contact.client.name, @contact.client, class: "txt-link" %></p>
+    </div>
+    <div class="page-heading__actions">
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="settings__panel record-page__main">
     <%= render "contacts/form", contact: @contact %>
   </div>
 
-  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
-
-    <%= render "layouts/shared/sidebar_toggle" %>
+  <aside class="settings__panel settings__panel--side record-page__aside">
     <%= render "contacts/sidebar", client: @contact.client, contact: @contact %>
 
     <% if can?(:delete_records) %>

@@ -1,8 +1,9 @@
 <%# locals: (record:) %>
 <% if record.errors.any? %>
-  <div class="margin-block-half txt-negative txt-small txt-align-start">
-    <p class="margin-block-none font-weight-bold">That didn’t work:</p>
-    <ul class="margin-block-none">
+  <div class="ui-alert ui-alert--destructive margin-block-half" role="alert">
+    <%= icon_tag "close-circle", class: "ui-alert__icon" %>
+    <p class="ui-alert__title">That didn’t work</p>
+    <ul class="ui-alert__description margin-block-none">
       <% record.errors.full_messages.each do |message| %>
         <%# herb:key message %>
         <li><%= message %></li>

@@ -1,18 +1,18 @@
 <%# locals: (todo:, with_engagement: nil) %>
-<li data-filter-target="item" class="flex align-center gap-half">
-  <%= link_to todo_path(todo), class: "txt-ink flex gap-half align-center min-width" do %>
-    <div class="txt-align-start overflow-ellipsis">
-      <strong><%= todo.title %></strong>
-      <div class="txt-x-small txt-subtle"><%= todo_details(todo, with_engagement: with_engagement) %></div>
-    </div>
-  <% end %>
-
-  <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-
-  <% if todo.status != "done" && todo.due_on&.past? %>
-    <%= status_tag "Overdue", highlight: true %>
-  <% end %>
-  <%= render "todos/owner_picker", todo: todo %>
+<%# A piece of work in a record's Work card: its status to change in place, its title and details
+    (the link), then Overdue, who's on it and Copy for AI. %>
+<li data-filter-target="item" class="record-list__row todo-item">
   <%= render "todos/status_dot", todo: todo %>
-  <%= render "todos/ai_brief", todo: todo %>
+  <%= link_to todo_path(todo), class: "record-list__main" do %>
+    <span class="record-list__title"><%= todo.title %></span>
+    <span class="record-list__description"><%= todo_details(todo, with_engagement: with_engagement) %></span>
+  <% end %>
+
+  <span class="record-list__actions">
+    <% if todo.status != "done" && todo.due_on&.past? %>
+      <%= status_tag "Overdue", highlight: true %>
+    <% end %>
+    <%= render "todos/owner_picker", todo: todo %>
+    <%= render "todos/ai_brief", todo: todo %>
+  </span>
 </li>

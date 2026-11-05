@@ -2,18 +2,18 @@
 <%= render "settings/header", current: :account %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Set up two-factor sign-in</h2>
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Set up two-factor sign-in</h2>
+        <p class="settings__description">After your password, Runwell will ask for a code from an app on your phone, so a stolen password isn’t enough to get in.</p>
       </header>
-      <p class="margin-none">After your password, Runwell will ask for a code from an app on your phone, so a stolen password isn’t enough to get in.</p>
-      <ol class="two-factor__steps">
+      <ol class="settings-steps">
         <li>Open an authenticator app: 1Password, Google Authenticator, Microsoft Authenticator, Authy or your phone’s built-in passwords app.</li>
         <li>
           Scan this code with it.
-          <div class="two-factor__qr-frame"><%= @qr_code %></div>
-          <details class="txt-small">
+          <div class="settings-steps__qr two-factor__qr-frame"><%= @qr_code %></div>
+          <details>
             <summary class="txt-subtle">Can’t scan? Enter this key instead</summary>
             <div class="copy-row margin-block-start-half">
               <code><%= @secret.scan(/.{4}/).join(" ") %></code>
@@ -21,17 +21,19 @@
           </details>
         </li>
         <li>
-          Enter the 6-digit code it shows.
-          <%= form_with url: settings_two_factor_path, class: "flex align-center gap-half margin-block-start-half", data: { controller: "form" } do |form| %>
-            <%= form.text_field :code, required: true, class: "input two-factor__code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7, aria: { label: "Code" } %>
-            <button type="submit" class="btn btn--link">Turn on</button>
+          <%= form_with url: settings_two_factor_path, class: "ui-field", data: { controller: "form" } do |form| %>
+            <%= form.label :code, "Enter the 6-digit code it shows.", class: "ui-label" %>
+            <div class="settings__actions">
+              <%= form.text_field :code, required: true, class: "ui-input settings-code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7 %>
+              <button type="submit" class="ui-button">Turn on</button>
+            </div>
           <% end %>
         </li>
       </ol>
       <% if Setting.current.require_two_factor? && can?(:manage_people) %>
-        <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "txt-small" do |form| %>
+        <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch do |form| %>
           <%= form.hidden_field :require_two_factor, value: "0" %>
-          <p class="txt-subtle margin-none">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="btn btn--plain txt-link">Stop requiring it</button></p>
+          <p class="settings__note">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="ui-button ui-button--link">Stop requiring it</button></p>
         <% end %>
       <% end %>
     </section>

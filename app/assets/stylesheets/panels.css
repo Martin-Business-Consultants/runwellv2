@@ -1,9 +1,11 @@
 @layer components {
   .panel {
-    background-color: var(--panel-bg, var(--color-canvas));
-    border: var(--panel-border-size, 1px) solid var(--panel-border-color, var(--color-ink-lighter));
-    border-radius: var(--panel-border-radius, calc(0.875rem * var(--radius-scale, 1)));
-    color: var(--color-ink);
+    /* Runwell UI's card (ui/card.css): card colours, rounded-xl, shadow-sm. */
+    background-color: var(--panel-bg, var(--card));
+    border: var(--panel-border-size, 1px) solid var(--panel-border-color, var(--border));
+    border-radius: var(--panel-border-radius, var(--radius-xl));
+    box-shadow: var(--panel-shadow, var(--shadow-sm));
+    color: var(--card-foreground);
     inline-size: var(--panel-size, 60ch);
     max-inline-size: 100%;
     padding: var(--panel-padding, var(--block-space));
@@ -25,6 +27,7 @@
 
   .panel--centered {
     --panel-border-size: 0;
+    --panel-shadow: none;
     --panel-size: 100%;
 
     @media (min-width: 640px) {

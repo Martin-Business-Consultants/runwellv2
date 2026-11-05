@@ -4,58 +4,57 @@
 <%= render "settings/header", current: @plugin.key %>
 
 <section class="settings">
-  <div class="settings__panel panel shadow txt-align-start">
-    <h1 class="page-title"><%= @plugin.name %></h1>
-    <section class="settings__section flex flex-column gap-half">
-      <div class="flex flex-wrap align-center gap-half">
-        <% if on %>
-          <%= status_tag "Active" %>
-        <% else %>
-          <%= status_tag "Dormant" %>
-        <% end %>
-        <span class="txt-small txt-subtle"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></span>
-      </div>
-      <p class="txt-small margin-none"><%= @plugin.description %></p>
+  <div class="settings__panel">
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h1><%= @plugin.name %></h1>
+        <p class="settings__description"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></p>
+        <div class="settings__heading-actions">
+          <% if on %>
+            <%= ui_badge "Active", :positive %>
+          <% else %>
+            <%= ui_badge "Dormant", :neutral %>
+          <% end %>
+        </div>
+      </header>
+      <p class="settings__text"><%= @plugin.description %></p>
       <% unless @plugin.compatible? %>
-        <p class="txt-small txt-negative margin-none">Needs Runwell <%= @plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
+        <p class="settings__error">Needs Runwell <%= @plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
       <% end %>
       <% if @plugin.homepage.present? %>
-        <p class="txt-small margin-none"><%= link_to "About this plugin", @plugin.homepage, class: "txt-link", target: "_blank", rel: "noopener" %></p>
+        <p class="settings__text"><%= link_to "About this plugin", @plugin.homepage, class: "txt-link", target: "_blank", rel: "noopener" %></p>
       <% end %>
     </section>
 
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">What it adds</h2>
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>What it adds</h2>
       </header>
-      <div class="flex flex-wrap gap-half">
+      <div class="settings__chips">
         <% Runwell::Plugins.additions(@plugin.key).each do |addition| %>
           <%# herb:key addition %>
-          <span class="txt-x-small border-radius pad-inline-half fill-shade"><%= addition %></span>
+          <span class="ui-badge ui-badge--secondary"><%= addition %></span>
         <% end %>
       </div>
     </section>
-  </div>
 
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section flex flex-column gap">
-      <header>
-        <h2 class="divider">Settings</h2>
+    <section class="settings__section">
+      <header class="settings__heading">
+        <h2>Settings</h2>
+        <% settings_note = if on && settings then "#{@plugin.name} has its own settings." elsif settings then "Switch it on to set it up." else "Nothing to set up: switching it on is all it needs." end %>
+        <p class="settings__description"><%= settings_note %></p>
       </header>
-      <% if on && settings %>
-        <p class="txt-small margin-none"><%= @plugin.name %> has its own settings.</p>
-        <%= link_to instance_exec(&settings.last), class: "btn btn--link txt-small center" do %>
-          <%= icon_tag "settings-outline" %>
-          <span>Open <%= @plugin.name %> settings</span>
+      <div class="settings__actions">
+        <% if on && settings %>
+          <%= link_to instance_exec(&settings.last), class: "ui-button" do %>
+            <%= icon_tag "settings-outline" %>
+            <span>Open <%= @plugin.name %> settings</span>
+          <% end %>
         <% end %>
-      <% elsif settings %>
-        <p class="txt-small txt-subtle margin-none">Switch it on to set it up.</p>
-      <% else %>
-        <p class="txt-small txt-subtle margin-none">Nothing to set up: switching it on is all it needs.</p>
-      <% end %>
-      <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: class_names("btn txt-small center", "btn--link": !on) do %>
-        <span><%= on ? "Switch #{@plugin.name} off" : "Switch #{@plugin.name} on" %></span>
-      <% end %>
+        <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: class_names("ui-button", "ui-button--outline": on) do %>
+          <span><%= on ? "Switch #{@plugin.name} off" : "Switch #{@plugin.name} on" %></span>
+        <% end %>
+      </div>
     </section>
   </div>
 </section>

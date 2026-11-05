@@ -1,0 +1,737 @@
+/* Runwell UI over the signed-out pages and the client portal.
+/*
+/* Auth (layouts/public): shadcn/ui's login blocks (login-03/04). A muted page, the install's
+/* brand centered above one Card (ui-card auth__card) whose header names the step, fields as
+/* Label over Input, a full-width primary button, an "Or" separator and the other way in as an
+/* outline button, small muted links under the card.
+/*
+/* Portal (layouts/portal): shadcn/ui's dashboard example. A sticky top bar (the client, the
+/* sections as ghost buttons, New request, the contact's avatar menu) over a centered column:
+/* a page header (title, description), then Cards holding Tables and Items.
+/*
+/* Scoped to the two layouts' body classes; reads only the kit's tokens. */
+@layer ui {
+  /* Auth */
+
+  body.auth-layout {
+    align-items: center;
+    background-color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-block-size: 100dvh;
+    padding:
+      calc(1.5rem + var(--custom-safe-inset-top, 0px)) 1.5rem
+      calc(1.5rem + var(--custom-safe-inset-bottom, 0px));
+
+    @media (min-width: 768px) {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  html[data-theme="dark"] body.auth-layout {
+    background-color: var(--background);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) body.auth-layout {
+      background-color: var(--background);
+    }
+  }
+
+  .auth-layout__header {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-block-start: auto;
+    padding: 0;
+  }
+
+  .auth-layout__theme {
+    inset-block-start: calc(1rem + var(--custom-safe-inset-top, 0px));
+    inset-inline-end: 1rem;
+    position: fixed;
+  }
+
+  /* The brand row: the logo square and the install's name (or its uploaded logo). */
+  .auth-layout__brand {
+    align-items: center;
+    color: var(--foreground);
+    display: flex;
+    font-size: var(--text-normal);
+    font-weight: 500;
+    gap: 0.5rem;
+
+    .header__logo-image {
+      block-size: 2rem;
+      max-inline-size: 12rem;
+    }
+  }
+
+  .auth-layout__brand-mark {
+    align-items: center;
+    aspect-ratio: 1;
+    background-color: var(--primary);
+    block-size: 1.5rem;
+    border-radius: var(--radius-md);
+    color: var(--primary-foreground);
+    display: flex;
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      block-size: 100%;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  body.auth-layout #main {
+    inline-size: 100%;
+    max-inline-size: 24rem;
+    padding: 0;
+    text-align: start;
+
+    &:has(.auth--wide, .panel--centered) {
+      max-inline-size: 28rem;
+    }
+  }
+
+  body.auth-layout #footer {
+    inline-size: 100%;
+    margin-block-start: auto;
+    max-inline-size: 24rem;
+  }
+
+  .auth {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .auth__header {
+    text-align: center;
+  }
+
+  .auth__title {
+    font-size: var(--text-large);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .auth__content,
+  .auth__form {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .auth__form {
+    margin: 0;
+  }
+
+  .auth__content .ui-alert {
+    margin: 0;
+  }
+
+  .auth__label-row {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .auth__aside-link {
+    color: var(--foreground);
+    font-size: var(--text-normal);
+    text-decoration: none;
+    text-underline-offset: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .auth__separator {
+    margin: 0;
+  }
+
+  .auth__code {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.2em;
+  }
+
+  .auth__strong {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  .auth__muted {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+  }
+
+  .auth__muted--xs {
+    font-size: var(--text-x-small);
+    text-align: center;
+  }
+
+  .auth__actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .ui-button {
+      flex: 1;
+    }
+  }
+
+  /* Small muted lines under the card: another way in, and what Runwell is. */
+  .auth__note,
+  .auth-footer {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+    text-align: center;
+    text-wrap: balance;
+
+    a {
+      color: var(--foreground);
+      font-weight: 400;
+      text-decoration: underline;
+      text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+      text-underline-offset: 4px;
+
+      &:hover {
+        text-decoration-color: currentColor;
+      }
+    }
+  }
+
+  .auth-footer {
+    font-size: var(--text-x-small);
+  }
+
+  /* Pages on this layout still in Fizzy's centered panel (the staff OAuth approval, plugins'
+  /* client pages) read as the same card. */
+  body.auth-layout .panel--centered {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    color: var(--card-foreground);
+    padding: 1.5rem;
+    text-align: start;
+
+    h1 {
+      font-size: var(--text-large);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  /* Portal */
+
+  body.portal-layout {
+    background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100dvh;
+  }
+
+  .portal-topbar {
+    backdrop-filter: blur(8px);
+    background-color: color-mix(in oklch, var(--background) 92%, transparent);
+    border-block-end: 1px solid var(--border);
+    inset-block-start: 0;
+    padding-block-start: var(--custom-safe-inset-top, 0px);
+    position: sticky;
+    z-index: var(--z-nav);
+
+    &:has(dialog[open], :popover-open) {
+      z-index: var(--z-nav-open);
+    }
+  }
+
+  .portal-topbar__inner {
+    align-items: center;
+    column-gap: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    margin-inline: auto;
+    max-inline-size: 72rem;
+    min-block-size: 3.5rem;
+    padding-inline: 1rem;
+    row-gap: 0;
+
+    @media (min-width: 768px) {
+      flex-wrap: nowrap;
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .portal-topbar__brand {
+    align-items: center;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    display: flex;
+    flex-shrink: 1;
+    gap: 0.5rem;
+    min-inline-size: 0;
+    text-decoration: none;
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+  }
+
+  .portal-topbar__brand-mark {
+    align-items: center;
+    aspect-ratio: 1;
+    background-color: var(--primary);
+    block-size: 1.75rem;
+    border-radius: var(--radius-md);
+    color: var(--primary-foreground);
+    display: flex;
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      block-size: 100%;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .portal-topbar .portal-topbar__brand-name {
+    color: inherit;
+    font-size: var(--text-normal);
+    font-weight: 600;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The sections: ghost buttons, the current one on the accent. Below 768px they take a row of
+  /* their own under the brand, scrolling sideways. */
+  .portal-nav {
+    align-items: center;
+    display: flex;
+    gap: 0.25rem;
+    margin: 0;
+    order: 3;
+    overflow-x: auto;
+    padding-block: 0.25rem 0.5rem;
+    scrollbar-width: none;
+    inline-size: 100%;
+
+    @media (min-width: 768px) {
+      inline-size: auto;
+      order: 0;
+      padding-block: 0;
+    }
+  }
+
+  .portal-nav__link {
+    align-items: center;
+    block-size: 2rem;
+    border-radius: var(--radius-md);
+    color: var(--muted-foreground);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: var(--text-normal);
+    font-weight: 500;
+    padding-inline: 0.75rem;
+    text-decoration: none;
+    transition: background-color 150ms, color 150ms;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+
+    &[aria-current="page"] {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+  }
+
+  .portal-topbar__actions {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+    min-block-size: 3.5rem;
+  }
+
+  .portal-topbar__new {
+    @media (max-width: 479px) {
+      span:not(.icon) {
+        display: none;
+      }
+    }
+  }
+
+  .portal-user__button {
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    padding: 0;
+
+    &:focus-visible {
+      box-shadow: var(--ring-focus);
+      outline: none;
+    }
+  }
+
+  .portal-user__avatar {
+    --ui-avatar-size: 2rem;
+  }
+
+  .portal-user__menu {
+    min-inline-size: 14rem;
+  }
+
+  .portal-user__label {
+    display: grid;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  .portal-user__name {
+    font-size: var(--text-normal);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .portal-user__email {
+    color: var(--muted-foreground);
+    font-size: var(--text-x-small);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.portal-layout #main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    inline-size: 100%;
+    margin-inline: auto;
+    max-inline-size: 72rem;
+    padding:
+      1.5rem calc(1rem + var(--custom-safe-inset-right, 0px)) 3rem calc(1rem + var(--custom-safe-inset-left, 0px));
+    text-align: start;
+
+    @media (min-width: 768px) {
+      padding: 2rem 1.5rem 4rem;
+    }
+  }
+
+  body.portal-layout #footer {
+    inline-size: 100%;
+    margin-inline: auto;
+    max-inline-size: 72rem;
+  }
+
+  /* The page's header: breadcrumb, title, description, and its actions on the right. */
+  .portal-page-header {
+    display: grid;
+    gap: 0.375rem;
+
+    &:not(:has(h1, h2, nav, p)) {
+      display: none;
+    }
+
+    .header__title,
+    .page-title {
+      grid-area: auto;
+      grid-column: auto;
+      margin: 0;
+      text-align: start;
+    }
+
+    .ui-breadcrumb {
+      margin-block-end: 0.5rem;
+    }
+  }
+
+  .portal-page-header__description {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+  }
+
+  .portal-page-header__meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--text-normal);
+    gap: 0.5rem;
+    margin-block-start: 0.25rem;
+  }
+
+  /* A record's page: the main column and a narrower side one. */
+  .portal-grid {
+    align-items: start;
+    display: grid;
+    gap: 1.5rem;
+
+    @media (min-width: 1024px) {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+
+  .portal-grid__main,
+  .portal-grid__side,
+  .portal-stack {
+    display: grid;
+    gap: 1.5rem;
+    min-inline-size: 0;
+  }
+
+  .portal-stack--tight {
+    gap: 1rem;
+  }
+
+  .portal-card {
+    .ui-item {
+      padding-inline: 1.5rem;
+    }
+
+    .ui-card__header--bordered {
+      padding-block-end: 1rem;
+    }
+  }
+
+  .portal-card__empty {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+    padding: 1.5rem;
+  }
+
+  .portal-card--highlight {
+    border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  }
+
+  .portal-muted {
+    color: var(--muted-foreground);
+    font-size: var(--text-normal);
+    margin: 0;
+  }
+
+  .portal-prose {
+    font-size: var(--text-normal);
+    line-height: 1.6;
+
+    :is(p, ul, ol):first-child {
+      margin-block-start: 0;
+    }
+
+    :is(p, ul, ol):last-child {
+      margin-block-end: 0;
+    }
+  }
+
+  /* Tables inside a flush card: the card's padding at the row ends. */
+  .portal-table {
+    th {
+      color: var(--muted-foreground);
+    }
+
+    th,
+    td {
+      padding-inline: 0.75rem;
+    }
+
+    td {
+      padding-block: 0.75rem;
+    }
+
+    :is(th, td):first-child {
+      padding-inline-start: 1.5rem;
+    }
+
+    :is(th, td):last-child {
+      padding-inline-end: 1.5rem;
+    }
+
+    thead tr {
+      background-color: color-mix(in oklch, var(--muted) 50%, transparent);
+    }
+
+    .ui-table__row-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  .portal-table__ref {
+    font-weight: 500;
+    inline-size: 1px;
+  }
+
+  .portal-table__date {
+    inline-size: 1px;
+  }
+
+  .portal-table :is(th, td).portal-table__status {
+    inline-size: 1px;
+    text-align: end;
+  }
+
+  .portal-table__secondary {
+    @media (max-width: 639px) {
+      display: none;
+    }
+  }
+
+  .portal-table__link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--foreground);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  /* Facts (dt/dd) in a card: label left, value right. */
+  .portal-facts {
+    display: grid;
+    font-size: var(--text-normal);
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .portal-facts__row {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+
+    dt {
+      color: var(--muted-foreground);
+    }
+
+    dd {
+      font-weight: 500;
+      margin: 0;
+      text-align: end;
+    }
+  }
+
+  .portal-grid__side .custom-fields {
+    border-block-start: 1px solid var(--border);
+    font-size: var(--text-normal);
+    gap: 0.75rem;
+    grid-template-columns: 1fr;
+    margin-block-start: 0.75rem;
+    padding-block-start: 0.75rem;
+  }
+
+  .portal-documents .ui-item {
+    font-size: var(--text-normal);
+
+    .document-link,
+    a {
+      color: var(--foreground);
+      inline-size: 100%;
+      text-decoration: none;
+    }
+  }
+
+  /* What plugins add to the portal's pages, in Fizzy's settings sections: the card's padding. */
+  .portal-slot {
+    padding-inline: 1.5rem;
+
+    .settings__section {
+      padding-inline: 0;
+    }
+  }
+
+  /* Forms */
+
+  .portal-form-card {
+    max-inline-size: 42rem;
+  }
+
+  .portal-form {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+
+    lexxy-editor {
+      border-color: var(--input);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-xs);
+      font-size: var(--text-normal);
+      min-block-size: 10rem;
+    }
+  }
+
+  .portal-form__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .portal-token-form {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .portal-token-form__name {
+    flex: 1 1 12rem;
+    inline-size: auto;
+  }
+
+  .portal-token-form__check {
+    cursor: pointer;
+    font-weight: 400;
+  }
+
+  .portal-copy-row {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+
+    .btn--reversed {
+      --ui-button-bg: var(--primary);
+      --ui-button-fg: var(--primary-foreground);
+    }
+  }
+
+  .portal-copy-row__value {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-x-small);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

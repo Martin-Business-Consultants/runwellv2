@@ -1,47 +1,81 @@
 <%# locals: () %>
-<%# The staff nav, down the left: Needs You (home) and the core sections, then what plugins add, then the
-    page filter, help, theme, settings and signing out at the foot. The current section is
-    marked (aria-current). Below 800px it runs across the top instead. %>
-<aside class="sidenav" id="sidenav" aria-label="Main">
-  <%= link_to root_path, class: "sidenav__logo txt-current", title: "Needs You (g h)", data: { keys: "g h" } do %>
-    <%= render "layouts/shared/logo" %>
+<%# The staff nav, down the left, as shadcn/ui's Sidebar: the install at the top, Needs You and the
+    core sections, then what plugins add, and the signed-in person at the foot, whose menu holds
+    their account, settings, the theme, help and signing out. The current section is marked
+    (aria-current). Below 800px it runs across the top instead. The page filter (/) and the
+    shortcut sheet (?) stay here for their keys, out of sight until used. %>
+<aside class="sidenav ui-sidebar" id="sidenav" aria-label="Main">
+  <%= link_to root_path, class: "ui-sidebar__brand", title: "Needs You (g h)", data: { keys: "g h" } do %>
+    <span class="ui-sidebar__brand-mark"><%= render "layouts/shared/logo_mark" %></span>
+    <span class="ui-sidebar__brand-text sidenav__label">
+      <span class="ui-sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
+      <span class="ui-sidebar__brand-sub"><%= Setting.current.term(:client, count: 2) %> and work</span>
+    </span>
   <% end %>
 
   <nav class="sidenav__nav">
-    <ul class="sidenav__list">
-      <li><%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %></li>
-      <li><%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %></li>
-      <li><%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %></li>
-      <li><%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %></li>
-      <li><%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %></li>
-    </ul>
+    <div class="ui-sidebar__group">
+      <p class="sidenav__heading">Workspace</p>
+      <ul class="sidenav__list">
+        <li><%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %></li>
+        <li><%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %></li>
+        <li><%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %></li>
+        <li><%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %></li>
+        <li><%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %></li>
+      </ul>
+    </div>
 
     <% if nav_plugin_items.any? %>
-      <p class="sidenav__heading">Plugins</p>
-      <ul class="sidenav__list">
-        <%= plugin_sidenav_links %>
-      </ul>
+      <div class="ui-sidebar__group">
+        <p class="sidenav__heading">Plugins</p>
+        <ul class="sidenav__list">
+          <%= plugin_sidenav_links %>
+        </ul>
+      </div>
     <% end %>
   </nav>
 
   <div class="sidenav__foot">
     <%= render "layouts/shared/nav_filter" %>
     <div class="sidenav__tools">
-      <button type="button" class="btn btn--plain sidenav__collapse" title="Collapse or expand the menu ([)" data-keys="[" data-pane="sidenav" data-action="panes#toggleNav" aria-expanded="true">
-        <%= icon_tag "column-left" %>
-        <span class="for-screen-reader">Collapse or expand the menu</span>
-      </button>
       <%= plugin_slots(:nav_actions) %>
-      <%= render "layouts/shared/theme_toggle" %>
       <%= render "layouts/shared/shortcuts" %>
-      <%= link_to settings_path, class: "btn btn--plain", title: "Settings and help (g s)", data: { keys: "g s" }, aria: { current: ("page" if request.path.start_with?(settings_path)) } do %>
-        <%= icon_tag "settings-outline" %>
-        <span class="for-screen-reader">Settings and help</span>
-      <% end %>
-      <%= button_to session_path, method: :delete, class: "btn btn--plain", title: "Sign out" do %>
-        <%= icon_tag "logout" %>
-        <span class="for-screen-reader">Sign out</span>
-      <% end %>
+    </div>
+
+    <div class="ui-sidebar__user" data-controller="ui--popover" data-ui--popover-side-value="top">
+      <button type="button" class="ui-sidebar__user-button" popovertarget="sidenav_user_menu" title="<%= Current.user.display_name %>">
+        <%= avatar_preview_tag Current.user, hidden_for_screen_reader: true, class: "ui-sidebar__avatar" %>
+        <span class="ui-sidebar__user-text sidenav__label">
+          <span class="ui-sidebar__user-name"><%= Current.user.display_name %></span>
+          <span class="ui-sidebar__user-email"><%= Current.user.email_address %></span>
+        </span>
+        <%= icon_tag "menu-dots-vertical", class: "sidenav__label" %>
+      </button>
+      <div class="ui-menu ui-sidebar__user-menu" id="sidenav_user_menu" popover data-ui--popover-target="popover">
+        <div class="ui-menu__label">
+          <span class="ui-sidebar__user-name"><%= Current.user.display_name %></span>
+          <span class="ui-sidebar__user-email"><%= Current.user.email_address %></span>
+        </div>
+        <hr class="ui-menu__separator">
+        <%= link_to settings_account_path, class: "ui-menu__item" do %>
+          <%= icon_tag "person" %> <span>Your account</span>
+        <% end %>
+        <%= link_to settings_path, class: "ui-menu__item", data: { keys: "g s" }, aria: { current: ("page" if request.path.start_with?(settings_path)) } do %>
+          <%= icon_tag "settings-outline" %> <span>Settings and help</span> <kbd class="ui-menu__shortcut">G S</kbd>
+        <% end %>
+        <button type="button" class="ui-menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
+          <%= icon_tag "moon", class: "theme-toggle__moon" %>
+          <%= icon_tag "sun", class: "theme-toggle__sun" %>
+          <span>Light or dark</span>
+        </button>
+        <button type="button" class="ui-menu__item" data-controller="ui--proxy" data-action="ui--proxy#click" data-ui--proxy-selector-param="[data-keys='?']">
+          <%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd class="ui-menu__shortcut">?</kbd>
+        </button>
+        <hr class="ui-menu__separator">
+        <%= button_to session_path, method: :delete, class: "ui-menu__item", form: { class: "display-contents" } do %>
+          <%= icon_tag "logout" %> <span>Sign out</span>
+        <% end %>
+      </div>
     </div>
   </div>
 </aside>

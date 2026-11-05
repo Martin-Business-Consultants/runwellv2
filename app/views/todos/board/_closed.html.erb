@@ -7,7 +7,7 @@
     action: "focus->collapsible-columns#focusOnColumn"
   } do %>
   <header class="cards__header">
-    <%= render "todos/board/expander", title: "Done", count: count, column_id: "done-todos" %>
+    <%= render "todos/board/expander", title: "Done", count: count, column_id: "done-todos", status: "done" %>
     <%= render "todos/board/maximize", column_path: todos_column_path("done", todo_board_filters) %>
   </header>
   <%= column_frame_tag "done_cards", src: todos_column_path("done", todo_board_filters) %>

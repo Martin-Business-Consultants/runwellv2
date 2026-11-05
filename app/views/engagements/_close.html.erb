@@ -5,36 +5,36 @@
     optional note. Either closes it: off the open list, its work and history kept. Both forms
     are always on the page and state only shows one, so opening them never waits on the server. %>
 <div class="engagement-finish" data-controller="state-focus" data-state-focus-state-value="closing">
-  <div class="flex align-center gap-half justify-space-between" hidden="<%= closing != "" %>">
-    <button type="button" class="btn txt-small" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-    <button type="button" class="btn btn--circle borderless txt-small txt-negative" title="Cancel <%= engagement.ref %>" data-herb-set="closing=cancelled">
+  <div class="engagement-finish__choices" hidden="<%= closing != "" %>">
+    <button type="button" class="ui-button ui-button--outline ui-button--sm" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
+    <button type="button" class="ui-button ui-button--ghost ui-button--sm txt-negative" title="Cancel <%= engagement.ref %>" data-herb-set="closing=cancelled">
       <%= icon_tag "close-circle" %>
-      <span class="for-screen-reader">Cancel <%= engagement.ref %></span>
+      <span>Cancel it</span>
     </button>
   </div>
 
   <div hidden="<%= closing != "completed" %>">
-    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :complete), class: "flex flex-column gap-half txt-small" do |form| %>
+    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :complete), class: "engagement-finish__form" do |form| %>
       <strong>Mark <%= engagement.ref %> complete?</strong>
-      <span class="txt-subtle">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
+      <span class="engagement-finish__text">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="completed">
-      <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
-      <div class="flex gap-half">
-        <button type="submit" class="btn btn--link txt-small">Mark complete</button>
-        <button type="button" class="btn btn--plain txt-small" data-keys="esc" data-herb-reset="closing">Not now</button>
+      <%= form.text_field :reason, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
+      <div class="engagement-finish__actions">
+        <button type="submit" class="ui-button ui-button--sm">Mark complete</button>
+        <button type="button" class="ui-button ui-button--ghost ui-button--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
       </div>
     <% end %>
   </div>
 
   <div hidden="<%= closing != "cancelled" %>">
-    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :cancel), class: "flex flex-column gap-half txt-small" do |form| %>
+    <%= form_with url: close_engagement_path(engagement), namespace: dom_id(engagement, :cancel), class: "engagement-finish__form" do |form| %>
       <strong>Cancel <%= engagement.ref %>?</strong>
-      <span class="txt-subtle">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
+      <span class="engagement-finish__text">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="cancelled">
-      <%= form.text_field :reason, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
-      <div class="flex gap-half">
-        <button type="submit" class="btn txt-small txt-negative">Cancel it</button>
-        <button type="button" class="btn btn--plain txt-small" data-keys="esc" data-herb-reset="closing">Not now</button>
+      <%= form.text_field :reason, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
+      <div class="engagement-finish__actions">
+        <button type="submit" class="ui-button ui-button--destructive ui-button--sm">Cancel it</button>
+        <button type="button" class="ui-button ui-button--ghost ui-button--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
       </div>
     <% end %>
   </div>

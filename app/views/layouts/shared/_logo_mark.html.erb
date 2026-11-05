@@ -1,0 +1,8 @@
+<%# locals: () %>
+<%# The install's logo in a square (the sidebar's brand), or its first letter. %>
+<% logo = Setting.current.logo %>
+<% if logo.attached? %>
+  <%= image_tag rails_blob_path(logo, disposition: :inline), alt: "" %>
+<% else %>
+  R
+<% end %>

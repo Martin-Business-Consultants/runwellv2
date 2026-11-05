@@ -3,26 +3,38 @@
 <html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-text-size="<%= appearance[:text_size] %>" data-default-theme="<%= appearance[:default_theme] %>">
   <%= render "layouts/shared/head" %>
 
-  <body class="public">
+  <%# Signed-out and client-facing pages, as shadcn/ui's login blocks: a muted page, the install's
+      brand centered above one card, the theme toggle in the corner (ui/app-public.css). %>
+  <body class="public auth-layout">
     <div id="global-container">
-      <header class="header" id="header">
+      <header class="auth-layout__header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-        <nav class="flex align-center justify-center gap">
-          <span class="header__logo txt-large font-weight-black"><%= render "layouts/shared/logo" %></span>
-          <%= render "layouts/shared/theme_toggle" %>
-        </nav>
+        <button type="button" class="ui-button ui-button--ghost ui-button--icon-sm theme-toggle auth-layout__theme" data-controller="theme" data-action="theme#toggle" title="Switch between light and dark">
+          <%= icon_tag "moon", class: "theme-toggle__moon" %>
+          <%= icon_tag "sun", class: "theme-toggle__sun" %>
+          <span class="for-screen-reader">Switch between light and dark</span>
+        </button>
+        <% logo = Setting.current.logo %>
+        <div class="auth-layout__brand">
+          <% if logo.attached? %>
+            <%= render "layouts/shared/logo" %>
+          <% else %>
+            <span class="auth-layout__brand-mark"><%= render "layouts/shared/logo_mark" %></span>
+            <span class="auth-layout__brand-name"><%= Setting.current.brand_name %></span>
+          <% end %>
+        </div>
 
         <%= yield :header %>
       </header>
 
       <%= render "layouts/shared/flash" %>
 
-      <main id="main">
+      <main id="main" class="auth-layout__main">
         <%= yield %>
       </main>
     </div>
 
-    <footer id="footer">
+    <footer id="footer" class="auth-layout__footer">
       <%= yield :footer %>
     </footer>
   </body>

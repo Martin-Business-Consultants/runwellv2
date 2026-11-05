@@ -1,0 +1,27 @@
+<%# locals: (person:, manage:) %>
+<%# One person in the users index's data table (ui/_data_table): the cells in the columns' order. %>
+<tr data-filter-target="item">
+  <% if manage %>
+    <%= bulk_select_cell person, person.display_name %>
+  <% end %>
+  <td data-column="name">
+    <span class="flex align-center gap-half">
+      <%= avatar_preview_tag person, hidden_for_screen_reader: true, class: "people__avatar" %>
+      <%= link_to person.display_name, user_path(person), class: "txt-ink font-weight-bold" %><%= " (you)" if person == Current.user %>
+    </span>
+  </td>
+  <td class="txt-subtle" data-column="email"><%= person.email_address %></td>
+  <td data-column="role"><%= person.role.capitalize %></td>
+  <td data-column="status">
+    <% if person.deactivated? %>
+      <%= status_tag "Deactivated" %>
+    <% elsif person.two_factor? %>
+      <span class="status-tag status-tag--positive" title="Signs in with a code from an authenticator app">Two-factor</span>
+    <% elsif Setting.current.require_two_factor? %>
+      <span class="status-tag status-tag--waiting" title="Sets it up on their next page">Two-factor pending</span>
+    <% else %>
+      <%= status_tag "Active" %>
+    <% end %>
+  </td>
+  <%= render "layouts/shared/row_actions", name: person.display_name, edit_path: (user_path(person) if manage) %>
+</tr>

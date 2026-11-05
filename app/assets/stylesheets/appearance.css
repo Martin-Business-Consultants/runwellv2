@@ -37,7 +37,7 @@
 /* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
 .btn { --btn-border-radius: var(--radius-control); }
 .input, .input--select, .input--upload, .input--actor { --input-border-radius: var(--radius-control); }
-.input--upload, .view-toggle, .view-toggle__option, .popup__btn { border-radius: var(--radius-control); }
+.input--upload, .popup__btn { border-radius: var(--radius-control); }
 
 /* An uploaded logo sits where the wordmark was, at the wordmark's height. */
 @layer components {
@@ -50,18 +50,15 @@
   }
 }
 
-/* Settings > Appearance: each choice shows what it does. */
-@layer components {
-  .appearance-choices .theme-switcher__btn {
-    flex: 1 1 7em;
-  }
-
+/* Settings > Appearance: each choice shows what it does, inside its radio card
+/* (ui/app-settings.css). */
+@layer ui {
   .appearance-sample {
-    block-size: 2em;
+    block-size: 2.25rem;
     display: inline-grid;
-    font-size: 1.1em;
-    font-weight: 700;
-    inline-size: 2em;
+    font-size: 1.25rem;
+    font-weight: 600;
+    inline-size: 2.25rem;
     place-items: center;
   }
 
@@ -72,18 +69,25 @@
   .appearance-swatch--graphite { background: oklch(var(--lch-ink-darker)); }
 
   [class*="appearance-swatch--"] {
+    block-size: 2rem;
     border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--background), 0 0 0 4px var(--border);
     color: transparent;
+    inline-size: 2rem;
   }
 
   [class*="appearance-corner--"] {
-    border: 2px solid var(--color-ink);
+    background-color: var(--muted);
+    border: 2px solid var(--foreground);
+    border-block-end: 0;
+    border-inline-end: 0;
     color: transparent;
+    translate: 0.375rem 0.375rem;
   }
 
-  .appearance-corner--sharp { border-radius: 0.15em; }
-  .appearance-corner--fizzy { border-radius: 0.5em; }
-  .appearance-corner--round { border-radius: 0.9em; }
+  .appearance-corner--sharp { border-start-start-radius: 0.15rem; }
+  .appearance-corner--fizzy { border-start-start-radius: 0.5rem; }
+  .appearance-corner--round { border-start-start-radius: 1rem; }
 
   .appearance-font--system { font-family: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .appearance-font--humanist { font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, sans-serif; }
@@ -91,32 +95,92 @@
   .appearance-font--serif { font-family: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", Georgia, serif; }
   .appearance-font--mono { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; }
 
-  .appearance-size--small { font-size: 0.85em; }
-  .appearance-size--default { font-size: 1em; }
-  .appearance-size--large { font-size: 1.15em; }
-  .appearance-size--larger { font-size: 1.3em; }
+  .appearance-size--small { font-size: 0.875rem; }
+  .appearance-size--default { font-size: 1.125rem; }
+  .appearance-size--large { font-size: 1.375rem; }
+  .appearance-size--larger { font-size: 1.625rem; }
+
+  /* The theme's preview: a little page of cards, light or dark whatever the page is now, and
+  /* System half of each. */
+  .theme-mock {
+    --mock-page: oklch(93% 0.005 260);
+    --mock-card: oklch(100% 0 0);
+    --mock-line: oklch(90% 0.005 260);
+
+    background: var(--mock-page);
+    block-size: 100%;
+    border-radius: calc(var(--radius-md) - 2px);
+    display: grid;
+    gap: 0.25rem;
+    grid-auto-rows: 1fr;
+    inline-size: 100%;
+    padding: 0.375rem;
+  }
+
+  .theme-mock--dark {
+    --mock-page: oklch(21% 0.02 265);
+    --mock-card: oklch(30% 0.02 265);
+    --mock-line: oklch(42% 0.02 265);
+  }
+
+  .theme-mock--system {
+    --mock-line: oklch(60% 0.01 265 / 45%);
+
+    background: linear-gradient(90deg, var(--mock-page) 50%, oklch(21% 0.02 265) 50%);
+
+    /* Cards sit evenly inside the page, so their middle is the page's. */
+    .theme-mock__card {
+      background: linear-gradient(90deg, var(--mock-card) 50%, oklch(30% 0.02 265) 50%);
+    }
+  }
+
+  .theme-mock__card {
+      background: linear-gradient(90deg, var(--mock-card) calc(50% + 0.375rem - 0.375rem), var(--mock-dark-card) 50%);
+      background-attachment: local;
+    }
+
+    .theme-mock__line,
+    .theme-mock__dot {
+      background: linear-gradient(90deg, var(--mock-line) 50%, var(--mock-dark-line) 50%);
+    }
+  }
+
+  .theme-mock__card {
+    align-items: center;
+    background: var(--mock-card);
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 2px oklch(0% 0 0 / 8%);
+    display: flex;
+    gap: 0.25rem;
+    padding: 0 0.375rem;
+  }
+
+  .theme-mock__line {
+    background: var(--mock-line);
+    block-size: 0.25rem;
+    border-radius: 99rem;
+    flex: 1;
+  }
+
+  .theme-mock__line--short {
+    flex: 0 0 40%;
+  }
+
+  .theme-mock__dot {
+    aspect-ratio: 1;
+    background: var(--mock-line);
+    block-size: 0.5rem;
+    border-radius: 50%;
+  }
 
   .appearance-upload {
-    block-size: 2.5em;
+    block-size: 2.5rem;
     inline-size: auto;
-    max-inline-size: 14em;
+    max-inline-size: 14rem;
     object-fit: contain;
   }
 
   .appearance-upload--favicon {
-    inline-size: 2.5em;
-  }
-}
-
-/* Settings > Appearance > Custom CSS: a code box, not a rich text editor. */
-@layer components {
-  .input.custom-css {
-    font-family: var(--font-mono);
-    font-size: var(--text-small);
-    line-height: 1.5;
-    min-block-size: 14lh;
-    resize: vertical;
-    tab-size: 2;
-    white-space: pre;
+    inline-size: 2.5rem;
   }
 }

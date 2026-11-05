@@ -1,15 +1,19 @@
+<%# The quick action as shadcn's Dialog: a title, where it goes (the picker), the action's own form. %>
 <turbo-frame id="quick_action">
   <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
-    <dialog class="dialog dialog--action panel fill-white shadow flex-column gap txt-align-start quick-action" aria-label="<%= @action.title %>" data-dialog-target="dialog">
-      <header class="flex align-center gap-half margin-block-end-half">
-        <%= icon_tag @action.icon %>
-        <h3 class="txt-large font-weight-bold margin-none flex-item-grow"><%= @action.title %></h3>
-        <button type="button" class="btn btn--circle borderless quick-action__close" title="Close" data-action="dialog#close">
-          <%= icon_tag "close" %>
-          <span class="for-screen-reader">Close</span>
-        </button>
+    <dialog class="ui-dialog ui-dialog--lg quick-action" aria-labelledby="quick_action_title" data-dialog-target="dialog">
+      <header class="ui-dialog__header quick-action__header">
+        <h2 class="ui-dialog__title" id="quick_action_title"><%= @action.title %></h2>
+        <p class="ui-dialog__description">Choose where it goes, then fill it in. <kbd class="ui-kbd hide-on-touch">⌘</kbd><kbd class="ui-kbd hide-on-touch">↵</kbd> saves.</p>
       </header>
-      <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
+      <button type="button" class="ui-dialog__close ui-button ui-button--ghost ui-button--icon-sm quick-action__close" title="Close" data-action="dialog#close">
+        <%= icon_tag "close" %>
+        <span class="for-screen-reader">Close</span>
+      </button>
+      <div class="ui-field quick-action__where">
+        <span class="ui-label">Where it goes</span>
+        <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
+      </div>
       <%= render @action.partial, form_id: "quick_action_form" %>
     </dialog>
   </div>

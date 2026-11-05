@@ -1,38 +1,44 @@
 <% @page_title = "Connect " + @client.name %>
 
-<div class="panel panel--centered flex flex-column gap">
-  <h1 class="txt-x-large font-weight-black margin-none">Connect <%= @client.name %>?</h1>
-  <p class="txt-medium margin-none">
-    <strong><%= @client.name %></strong> will act as you, <strong><%= current_contact.name %></strong>, in <%= Setting.current.brand_name %>’s portal for <%= current_contact.client.name %>:
-    seeing your engagements, work and documents, and sending requests.
-  </p>
-  <p class="txt-small txt-subtle margin-none">
-    It sees only what you see here. What it does is marked as done through <%= @client.name %>. You can disconnect it any time under Connected apps.
-  </p>
-  <p class="txt-x-small txt-subtle margin-none">
-    Returning to
-    <% if OauthClient.loopback?(@redirect_uri) %>
-      <%= @client.name %> on this computer
-    <% else %>
-      <%= URI(@redirect_uri).host %>
-    <% end %>
-  </p>
+<div class="auth auth--wide">
+  <section class="ui-card auth__card">
+    <header class="ui-card__header auth__header">
+      <h1 class="ui-card__title auth__title">Connect <%= @client.name %>?</h1>
+      <p class="ui-card__description">
+        <strong class="auth__strong"><%= @client.name %></strong> will act as you, <strong class="auth__strong"><%= current_contact.name %></strong>, in <%= Setting.current.brand_name %>’s portal for <%= current_contact.client.name %>:
+        seeing your engagements, work and documents, and sending requests.
+      </p>
+    </header>
 
-  <%= form_with url: portal_oauth_authorization_path, method: :post, class: "flex flex-column gap align-center", data: { turbo: false } do %>
-    <label class="flex align-center gap-half txt-small">
-      <%= check_box_tag :read_only, "1", params[:scope].to_s.split.include?("runwell:read"), id: "read_only" %>
-      <span>Read only: it can look, and change nothing</span>
-    </label>
-    <% %w[client_id redirect_uri response_type code_challenge code_challenge_method state scope resource].each do |key| %>
-      <%# herb:key key %>
-      <input type="hidden" name="<%= key %>" value="<%= params[key] %>">
-    <% end %>
-    <div class="flex gap-half justify-center">
-      <button type="submit" name="approve" value="0" class="btn">Cancel</button>
-      <button type="submit" name="approve" value="1" class="btn btn--link">
-        <span>Connect</span>
-        <%= icon_tag "arrow-right" %>
-      </button>
+    <div class="ui-card__content auth__content">
+      <p class="auth__muted">
+        It sees only what you see here. What it does is marked as done through <%= @client.name %>. You can disconnect it any time under Connected apps.
+      </p>
+
+      <%= form_with url: portal_oauth_authorization_path, method: :post, class: "auth__form", data: { turbo: false } do %>
+        <div class="ui-field ui-field--inline">
+          <%= check_box_tag :read_only, "1", params[:scope].to_s.split.include?("runwell:read"), id: "read_only", class: "ui-checkbox" %>
+          <label class="ui-label" for="read_only">Read only</label>
+          <p class="ui-field__description">It can look, and change nothing.</p>
+        </div>
+        <% %w[client_id redirect_uri response_type code_challenge code_challenge_method state scope resource].each do |key| %>
+          <%# herb:key key %>
+          <input type="hidden" name="<%= key %>" value="<%= params[key] %>">
+        <% end %>
+        <div class="auth__actions">
+          <button type="submit" name="approve" value="0" class="ui-button ui-button--outline">Cancel</button>
+          <button type="submit" name="approve" value="1" class="ui-button">Connect</button>
+        </div>
+      <% end %>
+
+      <p class="auth__muted auth__muted--xs">
+        Returning to
+        <% if OauthClient.loopback?(@redirect_uri) %>
+          <%= @client.name %> on this computer
+        <% else %>
+          <%= URI(@redirect_uri).host %>
+        <% end %>
+      </p>
     </div>
-  <% end %>
+  </section>
 </div>

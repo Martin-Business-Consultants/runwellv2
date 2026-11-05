@@ -1,9 +1,11 @@
 <%# locals: (read:) %>
 <% if read.any? %>
-  <section class="notifications-list notifications-list--read panel panel--wide center borderless unpad flex flex-column gap-half margin-block-start">
-    <h2 class="txt-medium margin-block-start-double margin-block-end-half txt-uppercase translucent">Previously seen</h2>
+  <section class="ui-card ui-card--flush notifications-list notifications-list--read" aria-labelledby="notifications-read-title">
+    <header class="ui-card__header notifications-list__header">
+      <h2 class="ui-card__title" id="notifications-read-title">Previously seen</h2>
+    </header>
 
-    <div id="notifications_list_read">
+    <div id="notifications_list_read" class="notifications-list__items">
       <%= render partial: "notifications/notification", collection: read, as: :notification %>
     </div>
   </section>

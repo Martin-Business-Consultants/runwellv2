@@ -1,19 +1,28 @@
 @layer components {
+  /* The card being dragged: a dashed ghost of itself. */
   .drag-and-drop__dragged-item {
+    border-radius: var(--radius-xl);
     box-shadow: none;
-    filter: grayscale(1) brightness(0.97);
-    opacity: 0.6;
-    outline: 2px dashed var(--color-selected-dark);
+    opacity: 0.5;
+    outline: 2px dashed var(--ring);
   }
 
+  /* The column it would land in: a faint primary wash inside a dashed ring. */
   .drag-and-drop__hover-container {
-    --dnd-bg-color: var(--color-selected-light);
-    --dnd-border-color: var(--color-selected-dark);
+    --dnd-bg-color: color-mix(in oklch, var(--primary) 6%, transparent);
+    --dnd-border-color: var(--ring);
 
     background-color: var(--dnd-bg-color);
     outline: 2px dashed var(--dnd-border-color);
     outline-offset: -2px;
     transition: background-color 200ms;
     z-index: 1;
+  }
+
+  /* On the board the column's inner container draws it (ui/app-cards.css), so the lane's own
+  /* rounded corners show. */
+  .card-columns .cards.drag-and-drop__hover-container {
+    background-color: transparent;
+    outline: 0;
   }
 }

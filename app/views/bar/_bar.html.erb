@@ -1,8 +1,13 @@
 <%# locals: () %>
-<div class="bar full-width" data-controller="bar" data-bar-dialog-outlet="#bar-modal"
+<%# Search, opened with S or ⌘K: shadcn's Command dialog. The input sits at the top, the results
+    (searches/_results, loaded into bar_content) below it, and the keys at the foot. The backdrop
+    closes it, as Esc and the ✕ do. %>
+<div class="bar" data-controller="bar" data-bar-dialog-outlet="#bar-modal"
     data-bar-search-url-value="<%= search_path %>">
+  <div class="bar__backdrop" aria-hidden="true" data-action="click->bar#reset"></div>
+
   <div class="flex justify-center bar__placeholder" data-bar-target="buttonsContainer">
-    <%= tag.button class: "btn btn--plain", title: "Search (S or ⌘K)", data: { keys: "s, mod+k", action: "bar#search" } do %>
+    <%= tag.button class: "ui-button ui-button--ghost ui-button--sm", title: "Search (S or ⌘K)", data: { keys: "s, mod+k", action: "bar#search" } do %>
       <span class="display-contents">Search <kbd class="hide-on-touch">S</kbd></span>
     <% end %>
   </div>
@@ -15,4 +20,9 @@
         controller: "dialog", dialog_target: "dialog", action: "keydown.esc@document->bar#reset:stop" } do %>
     <%= turbo_frame_tag "bar_content", data: { bar_target: "turboFrame" } %>
   <% end %>
+
+  <footer class="bar__footer hide-on-touch" aria-hidden="true">
+    <span class="bar__footer-key"><kbd class="ui-kbd">↵</kbd> Search</span>
+    <span class="bar__footer-key"><kbd class="ui-kbd">Esc</kbd> Close</span>
+  </footer>
 </div>
