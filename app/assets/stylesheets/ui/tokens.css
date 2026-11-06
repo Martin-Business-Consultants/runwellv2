@@ -1,14 +1,14 @@
-/* Runwell UI: a no-build port of shadcn/ui (https://ui.shadcn.com), in plain CSS.
+/* Runwell UI is nobuild_ui (the nobuild_ui gem: shadcn/ui in plain CSS, no build step), drawn
+/* in Runwell's theme. The gem's tokens are shadcn's neutral ones, in the base layer; these
+/* re-point them at Runwell's theming tokens (docs/theming.md), unlayered, so Settings >
+/* Appearance and a custom theme reach every ui- component without knowing about them:
+/* --lch-canvas is shadcn's background, the ink steps its foreground, muted and border, the
+/* accent (or the Appearance scheme) its primary.
 /*
-/* These are shadcn's semantic tokens under shadcn's names (--background, --primary, --muted…),
-/* built from Runwell's theming tokens (docs/theming.md), so Settings > Appearance and a custom
-/* theme reach every ui- component without knowing about them: --lch-canvas is shadcn's
-/* background, the ink steps its foreground, muted and border, the accent (or the Appearance
-/* scheme) its primary. Unlayered, like the tokens they read.
-/*
-/* Components (ui/*.css) live in the `ui` layer, after Fizzy's `components`, and read only
-/* these tokens. In views, reach for them by their shadcn names: ui-button, ui-card, ui-badge,
-/* ui-input… (app/views/ui/index.html.erb shows each one; UiHelper builds the common ones). */
+/* The components themselves (ui-button, ui-card, ui-menu…) come from the gem, in the `ui`
+/* layer, and read only these tokens. The files here (app*.css, data-table.css) are Runwell's
+/* own pieces built from them. The styleguide at /ui shows each one; UiHelper and the gem's
+/* NobuildUi::Helper build the common ones. */
 
 :root {
   --background: var(--color-canvas);

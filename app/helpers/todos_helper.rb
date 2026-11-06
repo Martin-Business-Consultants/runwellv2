@@ -21,10 +21,10 @@ module TodosHelper
     tag.template(id: "todo-status-options") do
       safe_join(Todo::STATUSES.map do |status|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { picker_value: status }) do
-          tag.button(type: "submit", name: "todo[status]", value: status, class: "btn popup__btn full-width", data: { action: "picker#choose" }) do
+          tag.button(type: "submit", name: "todo[status]", value: status, class: "popup__btn", data: { action: "picker#choose" }) do
             safe_join([ tag.span(tag.span(class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true }), class: "display-contents", data: { picker_part: "dot" }),
               tag.span(status.humanize, class: "overflow-ellipsis flex-item-grow", data: { picker_part: "label" }),
-              icon_tag("check", class: "checked flex-item-justify-end") ])
+              icon_tag("check", class: "checked") ])
           end
         end
       end)
@@ -40,10 +40,10 @@ module TodosHelper
     tag.template(id: "todo-assignee-options") do
       safe_join(todo_people.map do |person|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id }) do
-          tag.button(type: "submit", name: "assignee_id", value: person.id, class: "btn popup__btn full-width", data: { action: "picker#choose" }) do
+          tag.button(type: "submit", name: "assignee_id", value: person.id, class: "popup__btn", data: { action: "picker#choose" }) do
             safe_join([ avatar_image_tag(person, class: "owner-picker__avatar owner-picker__avatar--small", alt: ""),
               tag.span(person.display_name, class: "overflow-ellipsis flex-item-grow"),
-              icon_tag("check", class: "checked flex-item-justify-end") ])
+              icon_tag("check", class: "checked") ])
           end
         end
       end)

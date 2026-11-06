@@ -6,9 +6,9 @@
 #   <%= popup_menu label: "Status of #{client.name}", title: "Status", fixed: true do %> … <% end %>
 module PopupHelper
   def popup_menu(label:, title: nil, fixed: false, &block)
-    tag.dialog(class: "margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small",
+    tag.dialog(class: "popup",
                aria: { label: label }, data: { dialog_target: "dialog", fixed_popup_target: ("popup" if fixed) }) do
-      safe_join([ (tag.strong(title, class: "popup__title pad-inline-half") if title), capture(&block) ])
+      safe_join([ (tag.strong(title, class: "popup__title") if title), capture(&block) ])
     end
   end
 end

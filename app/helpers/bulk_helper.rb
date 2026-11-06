@@ -44,7 +44,7 @@ module BulkHelper
         tag.ul(class: "popup__list", role: "listbox") do
           safe_join(choices.map do |text, value|
             tag.li(class: "popup__item") do
-              button_tag(type: "submit", name: name, value: value, class: "btn popup__btn", data: { action: "dialog#close" }) do
+              button_tag(type: "submit", name: name, value: value, class: "popup__btn", data: { action: "dialog#close" }) do
                 tag.span(text, class: "overflow-ellipsis flex-item-grow")
               end
             end
@@ -104,7 +104,9 @@ module BulkHelper
     def bulk_popup(label, &block)
       tag.div(class: "quick-filter", data: { filter_show: true, controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" }) do
         safe_join([
-          tag.button(type: "button", class: "btn input input--select flex-inline txt-x-small", data: { action: "click->dialog#toggle:stop" }) { tag.span(label, class: "overflow-ellipsis") },
+          tag.button(type: "button", class: "ui-button ui-button--outline ui-button--sm ui-dropdown__trigger", aria: { haspopup: "menu" }, data: { action: "click->dialog#toggle:stop" }) do
+            safe_join([ tag.span(label, class: "overflow-ellipsis"), tag.span(class: "ui-dropdown__chevron", aria: { hidden: true }) ])
+          end,
           popup_menu(label: label, title: label, &block)
         ])
       end

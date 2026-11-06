@@ -11,8 +11,9 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
   gems); the core itself makes none
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
-  `app/assets/stylesheets` served by Propshaft, no build step. Components are Runwell UI, a
-  port of shadcn/ui (`app/assets/stylesheets/ui`, below); the rest is modelled on Fizzy (`../fizzy`)
+  `app/assets/stylesheets` served by Propshaft, no build step. Components are Runwell UI: the
+  `nobuild_ui` gem (shadcn/ui in plain CSS, shared with Lumin Ads, `../nobuild-ui`) plus
+  Runwell's own pieces in `app/assets/stylesheets/ui` (below); the rest is modelled on Fizzy (`../fizzy`)
 - Search: ActiveSearch (`rails-active_search`) over SQLite FTS5, one polymorphic
   `:searchable` index (`config/search.rb`, `SearchableDocument`)
 - ReActionView (https://reactionview.dev) compiles every `.html.erb` through
@@ -304,11 +305,15 @@ swaps one query param, so filters are bookmarkable and Back works; the
 controller reads the params (`engagements#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
-Styling: components come from **Runwell UI**, a no-build port of shadcn/ui in plain CSS
-(`app/assets/stylesheets/ui`, the styleguide at `/ui` in development). Build new markup with it
-and move markup you touch onto it:
+Styling: components come from **Runwell UI**, a no-build port of shadcn/ui in plain CSS: the
+`nobuild_ui` gem (`Martin-Business-Consultants/nobuild-ui`, also used by Lumin Ads) holds the
+components, their tokens, the `ui--popover` / `ui--proxy` controllers and `NobuildUi::Helper`;
+`app/assets/stylesheets/ui` holds Runwell's mapping and its own pieces (app*.css, the data table).
+The styleguide is at `/ui` in development. A fix to a component goes in the gem (work on it
+with `bundle config set local.nobuild_ui ../nobuild-ui`), so both apps get it. Build new markup
+with it and move markup you touch onto it:
 
-- Tokens (`ui/tokens.css`) are shadcn's names — `--background`, `--foreground`, `--card`,
+- Tokens are shadcn's names (the gem's `tokens.css`, re-pointed by `ui/tokens.css`) — `--background`, `--foreground`, `--card`,
   `--popover`, `--primary`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`,
   `--destructive`, `--border`, `--input`, `--ring`, `--radius-sm/md/lg/xl`, `--shadow-xs/sm/md/lg`
   — built from the theming tokens (`docs/theming.md`), so Appearance and custom CSS reach them.
@@ -321,8 +326,12 @@ and move markup you touch onto it:
   `--line`, `--icons`), `ui-dialog`, `ui-sheet`, `ui-menu`, `ui-popover`, `ui-tooltip`, `ui-toast`,
   `ui-table`, `ui-alert`, `ui-avatar`, `ui-separator`, `ui-skeleton`, `ui-kbd`, `ui-progress`,
   `ui-breadcrumb`, `ui-empty`, `ui-item`. They live in the `ui` layer, after `components`
-- `UiHelper` spells the common ones: `ui_button`, `ui_link_button`, `ui_button_classes` (for
-  `link_to`, `button_to`, `form.submit`), `ui_badge`, `ui_status_badge`, `ui_kbd`, `ui_avatar`
+- The gem's helpers spell the common ones: `ui_button`, `ui_link_button`, `ui_button_classes`
+  (for `link_to`, `button_to`, `form.submit`), `ui_badge`, `ui_kbd`, `ui_avatar`, and a dropdown
+  menu `ui_dropdown` with `ui_menu_item` / `ui_menu_label` / `ui_menu_separator`; `UiHelper` adds
+  `ui_status_badge` and the data table's. Fizzy's popups (`popup_menu`, quick filters, pickers)
+  are drawn as shadcn's dropdown menu (`popup.css`), their triggers `ui-dropdown__trigger`
+  outline buttons
 - Native elements over JavaScript: `<dialog>` (opened by the `dialog` controller), the `popover`
   attribute (placed and given menu keys by `ui--popover`), `<details>`, real checkboxes and
   radios. A new component's CSS uses descendant or class selectors, not child ones: in

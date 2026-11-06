@@ -11,8 +11,9 @@
   <% if prefix %>
     <span class="txt-small txt-subtle"><%= prefix %></span>
   <% end %>
-  <button type="button" class="btn input input--select flex-inline txt-small min-width" data-action="click->dialog#toggle:stop">
+  <button type="button" class="ui-button ui-button--outline ui-dropdown__trigger min-width" aria-haspopup="listbox" data-action="click->dialog#toggle:stop">
     <span class="overflow-ellipsis" data-combobox-target="label"><%= record ? record_label(record) : "Choose…" %></span>
+    <span class="ui-dropdown__chevron" aria-hidden="true"></span>
   </button>
   <template data-combobox-target="hiddenFieldTemplate">
     <input type="hidden" name="record" form="<%= form_id %>">

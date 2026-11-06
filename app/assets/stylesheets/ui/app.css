@@ -438,39 +438,10 @@
     color: var(--muted-foreground);
   }
 
-  /* Filters: shadcn's faceted filter, a small dashed outline button opening a menu. */
-  .quick-filter > .btn.input--select {
-    --btn-border-radius: var(--radius-md);
-
-    background-color: var(--background);
-    background-image: none;
-    block-size: 2rem;
-    border: 1px dashed var(--input);
-    box-shadow: var(--shadow-xs);
-    color: var(--foreground);
-    font-size: var(--text-x-small);
-    font-weight: 500;
-    gap: 0.5rem;
-    padding: 0 0.75rem;
-
-    &::after {
-      block-size: 0.75rem;
-      background-color: var(--muted-foreground);
-      content: "";
-      flex-shrink: 0;
-      inline-size: 0.75rem;
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
-    }
-
-    &:hover {
-      background-color: var(--accent);
-    }
-  }
-
-  /* A filter set to something other than its default: a solid border, as a chosen facet. */
-  .quick-filter:not(.quick-filter--with-default):has([aria-checked="true"]) > .btn.input--select {
+  /* Filters: shadcn's dropdown menu, a small outline button with a chevron (nobuild_ui's
+  /* ui-dropdown__trigger). One set to something other than its default sits on the accent. */
+  .quick-filter:not(.quick-filter--with-default):has([aria-checked="true"]) > .ui-dropdown__trigger {
     background-color: var(--accent);
-    border-style: solid;
   }
 
   /* Blank slates: shadcn's Empty, a dashed box with muted text. */

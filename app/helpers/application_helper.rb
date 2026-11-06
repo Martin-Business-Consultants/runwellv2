@@ -7,6 +7,7 @@ module ApplicationHelper
   # Plugin stylesheets get their own tag: Propshaft's :app expansion drops other names.
   def app_stylesheet_tags
     safe_join([
+      nobuild_ui_stylesheet_tags(font: false, "data-turbo-track": "reload"),
       stylesheet_link_tag(:app, "data-turbo-track": "reload"),
       (stylesheet_link_tag(*Runwell::Plugins.enabled_stylesheets, "data-turbo-track": "reload") if Runwell::Plugins.enabled_stylesheets.any?)
     ].compact, "\n")

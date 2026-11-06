@@ -21,7 +21,7 @@
   }
 
   /* In the modal the picker spans the form. */
-  .quick-action__picker--full > .btn {
+  .quick-action__picker--full > .ui-button {
     inline-size: 100%;
   }
 
