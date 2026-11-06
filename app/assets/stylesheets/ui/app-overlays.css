@@ -64,20 +64,35 @@
     }
   }
 
+  /* dashboard-01's SectionCards: from-primary/5 to-card, shadow-xs beside the card's ring, a
+  /* plain bg-card in dark. */
   .home-stat {
+    --home-stat-ring: color-mix(in oklch, var(--foreground) 10%, transparent);
+
     background-image: linear-gradient(to top, color-mix(in oklch, var(--primary) 5%, var(--card)), var(--card));
+    box-shadow: 0 0 0 1px var(--home-stat-ring), var(--shadow-xs);
     color: var(--card-foreground);
     gap: 1rem;
     text-decoration: none;
-    transition: border-color 150ms, box-shadow 150ms;
+    transition: box-shadow 150ms;
 
     &:hover {
-      border-color: color-mix(in oklch, var(--foreground) 20%, var(--border));
+      --home-stat-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
     }
 
     &:focus-visible {
-      box-shadow: var(--shadow-sm), var(--ring-focus);
+      box-shadow: 0 0 0 1px var(--ring), var(--ring-focus);
       outline: none;
+    }
+
+    html[data-theme="dark"] & {
+      background-image: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) & {
+        background-image: none;
+      }
     }
 
     .ui-card__header {
@@ -270,44 +285,60 @@
   /* Search: shadcn's Command dialog
   /* ------------------------------------------------------------------------ */
 
+  /* DialogContent and PopoverContent open fading and zooming in from 95%, in 100ms. */
   @keyframes app-overlay-in {
     from {
       opacity: 0;
-      scale: 0.96;
+      scale: 0.95;
     }
   }
 
-  /* Open (the placeholder hides once S is pressed): a centred dialog over a dimmed page. */
+  /* Open (the placeholder hides once S is pressed): CommandDialog (base-nova) — DialogContent
+  /* (bg-popover, ring-1 ring-foreground/10, rounded-xl, max-w-sm from sm, a third of the way
+  /* down) holding a Command (p-1), over DialogOverlay (bg-black/10, a 4px blur). */
   body .bar:has(.bar__placeholder[hidden]) {
-    animation: app-overlay-in 150ms ease-out;
+    animation: app-overlay-in 100ms ease-out;
     background-color: var(--popover);
     block-size: auto;
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg), 0 0 0 100vmax oklch(var(--lch-black) / 50%);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
     color: var(--popover-foreground);
     display: flex;
     flex-direction: column;
-    font-size: var(--text-normal);
-    inline-size: min(40rem, 100vw - 2rem);
-    inset: max(1rem, 12dvh) 0 auto 0;
+    font-size: var(--text-sm);
+    inline-size: calc(100% - 2rem);
+    inset: 33.333% 0 auto 0;
+    line-height: 1.25rem;
     margin-inline: auto;
-    max-block-size: calc(100dvh - max(1rem, 12dvh) - 1rem);
-    padding: 0;
+    max-block-size: calc(66.666dvh - 1rem);
+    overflow: hidden;
+    padding: 0.25rem;
     pointer-events: auto;
     text-align: start;
     z-index: calc(var(--z-tray) + 10);
 
+    @media (min-width: 640px) {
+      inline-size: 24rem;
+    }
+
     .bar__backdrop {
+      background-color: rgb(0 0 0 / 10%);
       display: block;
       inset: 0;
       position: fixed;
       z-index: -1;
+
+      @supports (backdrop-filter: blur(4px)) {
+        backdrop-filter: blur(4px);
+      }
     }
 
+    /* CommandInput's wrapper: p-1 pb-0. */
     .bar__input {
-      border-block-end: 1px solid var(--border);
+      border: 0;
       flex-shrink: 0;
+      padding: 0.25rem 0.25rem 0;
     }
 
     /* The results under the input, whether or not the dialog is open: before a search it holds
@@ -321,13 +352,19 @@
       inline-size: auto;
       inset: auto;
       margin: 0;
-      max-block-size: min(24rem, 60dvh);
+      max-block-size: 18rem;
       max-inline-size: none;
       overflow-y: auto;
       overscroll-behavior: contain;
       padding: 0;
       position: static;
+      scroll-padding-block: 0.25rem;
+      scrollbar-width: none;
       z-index: auto;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
 
       &:not(:has(.search)) {
         display: none;
@@ -340,9 +377,10 @@
       color: var(--muted-foreground);
       display: flex;
       flex-shrink: 0;
-      font-size: var(--text-x-small);
+      font-size: var(--text-xs);
       gap: 1rem;
       justify-content: flex-end;
+      margin: 0.25rem -0.25rem -0.25rem;
       padding: 0.5rem 0.75rem;
 
       @media (any-hover: none) {
@@ -357,37 +395,44 @@
     gap: 0.375rem;
   }
 
-  /* CommandInput: an icon, the field, a bottom border (on the wrapper). */
+  /* CommandInput: an InputGroup (h-8, rounded-lg, bg-input/30 with a border of the same, no
+  /* shadow), the search icon at its start (pl-2, size-4, half opacity), the field text-sm. */
   .search__form {
     align-items: center;
+    background-color: color-mix(in oklch, var(--input) 30%, transparent);
+    block-size: 2rem;
+    border: 1px solid color-mix(in oklch, var(--input) 30%, transparent);
+    border-radius: var(--radius-control, var(--radius-lg));
+    box-shadow: none;
+    color: var(--muted-foreground);
     display: flex;
-    gap: 0.5rem;
-    min-block-size: 3rem;
-    padding-inline: 0.75rem 0.5rem;
+    padding-inline: 0.5rem 0.125rem;
   }
 
   .search__icon {
     --icon-size: 1rem;
 
-    color: var(--muted-foreground);
+    color: var(--foreground);
     flex-shrink: 0;
+    opacity: 0.5;
   }
 
   .search__input {
     background: transparent;
-    block-size: 2.75rem;
+    block-size: 100%;
     border: 0;
     box-shadow: none;
     color: var(--foreground);
     flex: 1;
     font: inherit;
-    font-size: max(16px, var(--text-normal));
+    font-size: max(16px, var(--text-sm));
+    line-height: 1.25rem;
     min-inline-size: 0;
     outline: none;
-    padding: 0;
+    padding: 0 0.625rem 0 0.375rem;
 
     @media (min-width: 768px) {
-      font-size: var(--text-normal);
+      font-size: var(--text-sm);
     }
 
     &::placeholder {
@@ -399,42 +444,51 @@
     }
   }
 
-  .search__reset {
+  /* Clearing the field: an InputGroupButton at icon-xs (size-6). */
+  .search__reset.ui-button {
+    block-size: 1.5rem;
+    border-radius: min(var(--radius-md), 10px);
     color: var(--muted-foreground);
     flex-shrink: 0;
+    inline-size: 1.5rem;
 
     .icon {
-      --icon-size: 1rem;
+      --icon-size: 0.75rem;
     }
   }
 
-  /* CommandList */
+  /* CommandList (the Command's p-1 is the dialog's own padding). */
   .search {
     display: block;
-    padding: 0.25rem;
+    padding: 0;
   }
 
+  /* CommandEmpty: py-6, centred, text-sm. */
   .search__blank-slate {
     color: var(--muted-foreground);
-    font-size: var(--text-normal);
-    padding: 1.5rem 1rem;
+    font-size: var(--text-sm);
+    padding: 1.5rem 0.5rem;
     text-align: center;
   }
 
+  /* CommandGroup: p-1; CommandSeparator (bg-border -mx-1 h-px) between groups. */
   .search__group {
-    padding: 0.25rem 0;
+    color: var(--foreground);
+    overflow: hidden;
+    padding: 0.25rem;
 
     & + & {
       border-block-start: 1px solid var(--border);
       margin-inline: -0.25rem;
-      padding-inline: 0.25rem;
+      padding-inline: 0.5rem;
     }
   }
 
   .search__group-heading {
     color: var(--muted-foreground);
-    font-size: var(--text-x-small);
+    font-size: var(--text-xs);
     font-weight: 500;
+    line-height: 1rem;
     padding: 0.375rem 0.5rem;
   }
 
@@ -446,21 +500,28 @@
     padding: 0;
   }
 
-  /* CommandItem */
+  /* CommandItem: gap-2 px-2 py-1.5, text-sm, rounded-lg in a dialog, bg-muted when selected. */
   .search__result {
     align-items: center;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-lg);
     color: var(--foreground);
+    cursor: default;
     display: flex;
-    gap: 0.625rem;
+    font-size: var(--text-sm);
+    gap: 0.5rem;
     outline: none;
-    padding: 0.5rem;
+    padding: 0.375rem 0.5rem;
     text-decoration: none;
+    user-select: none;
 
     &:hover,
     &:focus-visible {
-      background-color: var(--accent);
-      color: var(--accent-foreground);
+      background-color: var(--muted);
+      color: var(--foreground);
+
+      .search__result-icon {
+        color: var(--foreground);
+      }
     }
   }
 
@@ -491,13 +552,13 @@
 
   .search__excerpt {
     color: var(--muted-foreground);
-    font-size: var(--text-x-small);
+    font-size: var(--text-xs);
   }
 
   .search__context {
     color: var(--muted-foreground);
     flex-shrink: 0;
-    font-size: var(--text-x-small);
+    font-size: var(--text-xs);
     max-inline-size: 35%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -517,19 +578,23 @@
     }
   }
 
-  /* /search: the same Command, as a card on the page. */
+  /* /search: the same Command on the page, as the docs show one (bg-popover, rounded-xl, p-1,
+  /* in a ring-1 ring-foreground/10 frame). */
   .search-perma {
-    background-color: var(--card);
-    border: 1px solid var(--border);
+    background-color: var(--popover);
+    border: 0;
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
+    color: var(--popover-foreground);
+    font-size: var(--text-sm);
     inline-size: min(100%, 42rem);
     margin: 1rem auto 2rem;
     overflow: hidden;
+    padding: 0.25rem;
     text-align: start;
 
     .search__form {
-      border-block-end: 1px solid var(--border);
+      margin: 0.25rem 0.25rem 0;
     }
 
     .search__form:has(.search__input:placeholder-shown) .search__reset {
@@ -561,12 +626,15 @@
   .tray__dialog {
     display: none;
 
+    /* PopoverContent (base-nova): bg-popover, ring-1 ring-foreground/10 (no border), rounded-lg,
+    /* shadow-md, text-sm, in 100ms. */
     &[open] {
-      animation: app-overlay-in 120ms ease-out;
+      animation: app-overlay-in 100ms ease-out;
       background-color: var(--popover);
-      border: 1px solid var(--border);
+      border: 0;
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-md), 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
+      font-size: var(--text-sm);
       color: var(--popover-foreground);
       display: flex;
       flex-direction: column-reverse;

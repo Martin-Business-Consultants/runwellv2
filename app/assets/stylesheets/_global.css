@@ -54,7 +54,7 @@
                     0 4px 6px -4px oklch(var(--lch-black) / 10%);
 
   /* Components */
-  --btn-size: 2.55em;
+  --btn-size: 2.2857em; /* shadcn's size-8 at text-sm */
   --footer-height: 2.65rem;
   --tray-size: clamp(12rem, 25dvw, 24rem);
 

@@ -29,15 +29,16 @@
 /* Corners. Every radius in the app's stylesheets is written against these variables:
 /* containers (panels, cards, dialogs, the editor) multiply by --radius-scale, pill shapes
 /* use --radius-pill, and true circles (50%) stay circles. Every control (buttons, inputs,
-/* selects, toggles, tags) shares one --radius-control so they always match each other. */
-:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: 0.5rem; }
+/* selects, toggles, tags) reads var(--radius-control, var(--radius-lg)) so they always match
+/* each other: shadcn's rounded-lg by default, and whatever Sharp or Round sets. */
+:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: var(--radius-lg); }
 :root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; --radius-control: 0.2em; }
 :root[data-radius="round"] { --radius-scale: 1.6; --radius-control: 99rem; }
 
 /* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
-.btn { --btn-border-radius: var(--radius-control); }
-.input, .input--select, .input--upload, .input--actor { --input-border-radius: var(--radius-control); }
-.input--upload, .popup__btn { border-radius: var(--radius-control); }
+.btn { --btn-border-radius: var(--radius-control, var(--radius-lg)); }
+.input, .input--select, .input--upload, .input--actor { --input-border-radius: var(--radius-control, var(--radius-lg)); }
+.input--upload { border-radius: var(--radius-control, var(--radius-lg)); }
 
 /* An uploaded logo sits where the wordmark was, at the wordmark's height. */
 @layer components {
@@ -131,17 +132,6 @@
     /* Cards sit evenly inside the page, so their middle is the page's. */
     .theme-mock__card {
       background: linear-gradient(90deg, var(--mock-card) 50%, oklch(30% 0.02 265) 50%);
-    }
-  }
-
-  .theme-mock__card {
-      background: linear-gradient(90deg, var(--mock-card) calc(50% + 0.375rem - 0.375rem), var(--mock-dark-card) 50%);
-      background-attachment: local;
-    }
-
-    .theme-mock__line,
-    .theme-mock__dot {
-      background: linear-gradient(90deg, var(--mock-line) 50%, var(--mock-dark-line) 50%);
     }
   }
 

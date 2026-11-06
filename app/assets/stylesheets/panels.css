@@ -1,19 +1,19 @@
 @layer components {
   .panel {
-    /* Runwell UI's card (ui/card.css): card colours, rounded-xl, shadow-sm. */
+    /* shadcn's Card (base-nova, the gem's ui-card): bg-card, a 1px ring-foreground/10 rather
+    /* than a border or a shadow, rounded-xl, 1rem spacing, text-sm. */
     background-color: var(--panel-bg, var(--card));
-    border: var(--panel-border-size, 1px) solid var(--panel-border-color, var(--border));
+    border: var(--panel-border-size, 0) solid var(--panel-border-color, var(--border));
     border-radius: var(--panel-border-radius, var(--radius-xl));
-    box-shadow: var(--panel-shadow, var(--shadow-sm));
+    box-shadow: var(--panel-shadow, 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent));
     color: var(--card-foreground);
+    font-size: var(--text-sm);
     inline-size: var(--panel-size, 60ch);
     max-inline-size: 100%;
-    padding: var(--panel-padding, var(--block-space));
+    padding: var(--panel-padding, 1rem);
 
     @media (min-width: 640px) {
       --panel-size: 100%;
-
-      padding: var(--panel-padding, calc(var(--block-space) * 1.5));
     }
   }
 

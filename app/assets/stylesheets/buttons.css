@@ -3,33 +3,43 @@
     --icon-size: var(--btn-icon-size, 1.1em);
     --btn-border-radius: var(--radius-pill, 99rem);
 
-    /* Drawn as Runwell UI's outline button (ui/button.css): the shadcn tokens, an accent wash
-    /* on hover. Variants with a fill set --btn-hover-background to a 90% tint of it. */
+    /* Drawn as shadcn's outline Button (base-nova, the gem's ui-button--outline): border-border
+    /* on bg-background, rounded-lg, no shadow, font-medium, h-8 px-2.5 gap-1.5 at text-sm (in
+    /* em, so a .btn in smaller text shrinks with it), bg-muted on hover, border-ring and a 3px
+    /* ring on focus, pressed down 1px. Filled variants set --btn-hover-background to 80% of
+    /* their fill (hover:bg-primary/80). */
     align-items: center;
+    background-clip: padding-box;
     background-color: var(--btn-background, var(--background));
     border-radius: var(--btn-border-radius);
     border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--border));
-    box-shadow: var(--btn-shadow, var(--shadow-xs));
-    color: var(--btn-color, var(--color-ink));
+    box-shadow: var(--btn-shadow, none);
+    color: var(--btn-color, var(--foreground));
     cursor: pointer;
     display: inline-flex;
     font-size: 1em;
     font-weight: var(--btn-font-weight, 500);
-    gap: var(--btn-gap, 0.45em);
+    gap: var(--btn-gap, 0.4286em);
     justify-content: center;
-    line-height: 1.2;
-    /* shadcn/ui's h-9 px-4: 36px tall at 14px. */
-    padding: var(--btn-padding, 0.6em 1.15em);
+    line-height: 1.4286;
+    /* h-8 px-2.5 at 14px: (32px − 20px line − 2px border) / 2 = 5px, and 10px. */
+    padding: var(--btn-padding, 0.3571em 0.7143em);
     pointer-events: auto;
     position: relative;
     text-decoration: none;
-    transition: 100ms ease-out;
-    transition-property: background-color, border, box-shadow, color, opacity, scale;
+    transition: 150ms;
+    transition-property: background-color, border-color, box-shadow, color, opacity, transform;
+    white-space: nowrap;
 
     @media (any-hover: hover) {
       &:hover {
-        background-color: var(--btn-hover-background, var(--accent));
+        background-color: var(--btn-hover-background, var(--muted));
+        color: var(--btn-hover-color, var(--btn-color, var(--foreground)));
       }
+    }
+
+    &:active:not([aria-haspopup]) {
+      transform: translateY(1px);
     }
 
     &:focus-visible {
@@ -38,18 +48,33 @@
       outline: none;
     }
 
-    /* Dark: on the input tint, as Runwell UI's outline button. */
+    &[aria-invalid="true"] {
+      border-color: var(--ui-control-invalid-border, var(--destructive));
+      box-shadow: var(--ui-control-invalid-ring, var(--ring-invalid));
+    }
+
+    /* Dark: dark:bg-input/30 dark:border-input dark:hover:bg-input/50. */
     html[data-theme="dark"] & {
-      --btn-background-dark: color-mix(in oklch, var(--input) 30%, transparent);
-      background-color: var(--btn-background, var(--btn-background-dark));
+      background-color: var(--btn-background, color-mix(in oklch, var(--input) 30%, transparent));
       border-color: var(--btn-border-color, var(--input));
+
+      @media (any-hover: hover) {
+        &:hover {
+          background-color: var(--btn-hover-background, color-mix(in oklch, var(--input) 50%, transparent));
+        }
+      }
     }
 
     @media (prefers-color-scheme: dark) {
       html:not([data-theme]) & {
-        --btn-background-dark: color-mix(in oklch, var(--input) 30%, transparent);
-        background-color: var(--btn-background, var(--btn-background-dark));
+        background-color: var(--btn-background, color-mix(in oklch, var(--input) 30%, transparent));
         border-color: var(--btn-border-color, var(--input));
+
+        @media (any-hover: hover) {
+          &:hover {
+            background-color: var(--btn-hover-background, color-mix(in oklch, var(--input) 50%, transparent));
+          }
+        }
       }
     }
 
@@ -102,12 +127,13 @@
     --btn-padding: 0;
   }
 
-  /* The primary button. */
+  /* The primary button: shadcn's default Button, bg-primary with a transparent border,
+  /* hover:bg-primary/80. */
   .btn--link {
     --btn-background: var(--primary);
-    --btn-border-color: var(--primary);
+    --btn-border-color: transparent;
     --btn-color: var(--primary-foreground);
-    --btn-hover-background: color-mix(in oklch, var(--primary) 90%, transparent);
+    --btn-hover-background: color-mix(in oklch, var(--primary) 80%, transparent);
     --focus-ring-color: var(--color-link);
 
     kbd {
@@ -116,11 +142,12 @@
     }
   }
 
+  /* Icon buttons: shadcn's size="icon" (size-8, a size-4 icon at text-sm). */
   .btn--circle,
   .btn[aria-label]:where(:has(.icon)),
   .btn:where(:has(.for-screen-reader):has(.icon)) {
     --btn-padding: 0;
-    --icon-size: 75%;
+    --icon-size: 1.1429em;
 
     aspect-ratio: 1;
     block-size: var(--btn-size);
@@ -157,19 +184,39 @@
     }
   }
 
+  /* shadcn's destructive Button (base-nova): a destructive/10 wash (dark: /20) in the
+  /* destructive colour, /20 on hover (dark: /30), its own ring. */
   .btn--negative {
-    --btn-background: var(--destructive);
-    --btn-border-color: var(--destructive);
-    --btn-color: var(--destructive-foreground);
-    --btn-hover-background: color-mix(in oklch, var(--destructive) 90%, transparent);
+    --btn-background: color-mix(in oklch, var(--destructive) 10%, transparent);
+    --btn-border-color: transparent;
+    --btn-color: var(--destructive);
+    --btn-hover-background: color-mix(in oklch, var(--destructive) 20%, transparent);
     --focus-ring-color: var(--color-negative);
+
+    &:focus-visible {
+      border-color: color-mix(in oklch, var(--destructive) 40%, transparent);
+      box-shadow: var(--ring-invalid);
+    }
+
+    html[data-theme="dark"] & {
+      --btn-background: color-mix(in oklch, var(--destructive) 20%, transparent);
+      --btn-hover-background: color-mix(in oklch, var(--destructive) 30%, transparent);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) & {
+        --btn-background: color-mix(in oklch, var(--destructive) 20%, transparent);
+        --btn-hover-background: color-mix(in oklch, var(--destructive) 30%, transparent);
+      }
+    }
   }
 
+  /* Not a shadcn variant: a filled success button, drawn like the default one. */
   .btn--positive {
     --btn-background: var(--success);
-    --btn-border-color: var(--success);
+    --btn-border-color: transparent;
     --btn-color: var(--destructive-foreground);
-    --btn-hover-background: color-mix(in oklch, var(--success) 90%, transparent);
+    --btn-hover-background: color-mix(in oklch, var(--success) 80%, transparent);
     --focus-ring-color: var(--color-positive);
   }
 
@@ -192,14 +239,13 @@
     --btn-icon-size: 0.7em;
   }
 
-  /* A pressed toggle (aria-pressed, e.g. the triage choices) looks reversed. */
-  /* Pressed: shadcn's toggle, an accent wash, not an inverted fill. */
+  /* Pressed: shadcn's outline Toggle on (aria-pressed:bg-muted), not an inverted fill. */
   .btn--reversed,
   .btn[aria-pressed="true"] {
-    --btn-background: var(--accent);
-    --btn-border-color: var(--border);
-    --btn-color: var(--accent-foreground);
-    --btn-hover-background: var(--accent);
+    --btn-background: var(--muted);
+    --btn-border-color: var(--input);
+    --btn-color: var(--foreground);
+    --btn-hover-background: var(--muted);
     --focus-ring-color: var(--color-ink);
   }
 
@@ -231,10 +277,10 @@
     }
 
     &:has(input:checked)  {
-      --btn-background: var(--accent);
-      --btn-border-color: var(--border);
-      --btn-color: var(--accent-foreground);
-      --btn-hover-background: var(--accent);
+      --btn-background: var(--muted);
+      --btn-border-color: var(--input);
+      --btn-color: var(--foreground);
+      --btn-hover-background: var(--muted);
       --focus-ring-color: var(--color-ink);
 
       .checked {
@@ -243,8 +289,8 @@
     }
 
     &:has(input:focus-visible)  {
-      outline: var(--focus-ring-size) solid var(--focus-ring-color);
-      outline-offset: var(--focus-ring-offset);
+      border-color: var(--ring);
+      box-shadow: var(--ring-focus);
     }
   }
 

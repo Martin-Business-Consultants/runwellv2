@@ -218,11 +218,12 @@
   /* client pages) read as the same card. */
   body.auth-layout .panel--centered {
     background-color: var(--card);
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
     color: var(--card-foreground);
-    padding: 1.5rem;
+    font-size: var(--text-sm);
+    padding: 1rem;
     text-align: start;
 
     h1 {
@@ -339,26 +340,29 @@
     }
   }
 
+  /* Ghost Buttons (h-8 px-2.5 rounded-lg text-sm font-medium, hover:bg-muted). */
   .portal-nav__link {
     align-items: center;
     block-size: 2rem;
-    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    border-radius: var(--radius-control, var(--radius-lg));
     color: var(--muted-foreground);
     display: inline-flex;
     flex-shrink: 0;
-    font-size: var(--text-normal);
+    font-size: var(--text-sm);
     font-weight: 500;
-    padding-inline: 0.75rem;
+    padding-inline: 0.625rem;
     text-decoration: none;
-    transition: background-color 150ms, color 150ms;
+    transition: background-color 150ms, border-color 150ms, box-shadow 150ms, color 150ms;
     white-space: nowrap;
 
     &:hover {
-      background-color: var(--accent);
-      color: var(--accent-foreground);
+      background-color: var(--muted);
+      color: var(--foreground);
     }
 
     &:focus-visible {
+      border-color: var(--ring);
       box-shadow: var(--ring-focus);
       outline: none;
     }
@@ -681,10 +685,6 @@
     margin: 0;
 
     lexxy-editor {
-      border-color: var(--input);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-xs);
-      font-size: var(--text-normal);
       min-block-size: 10rem;
     }
   }

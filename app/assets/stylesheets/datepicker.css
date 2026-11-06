@@ -54,7 +54,7 @@
       align-items: center;
       background: none;
       border: 0;
-      border-radius: var(--radius-control);
+      border-radius: var(--radius-control, var(--radius-lg));
       color: var(--color-ink);
       cursor: pointer;
       display: inline-flex;
@@ -145,7 +145,7 @@
 
   .datepicker span {
     align-items: center;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-control, var(--radius-lg));
     cursor: default;
     display: flex;
     justify-content: center;

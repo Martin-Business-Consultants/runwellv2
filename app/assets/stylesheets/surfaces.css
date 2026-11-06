@@ -2,10 +2,9 @@
 /* border and shadow as every other panel, the rich text editor reads as a field, and the
 /* top nav sits on a hairline. Public pages (sign in, plugins' client pages) stay as flat as Fizzy's. */
 @layer components {
+  /* On staff pages a centred panel is a Card: its 1px ring (panels.css). */
   body:not(.public) .panel--centered {
-    --panel-border-size: 1px;
-
-    box-shadow: var(--shadow);
+    --panel-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
   }
 
   body:not(.public) #header > nav {
@@ -16,7 +15,7 @@
 
   lexxy-editor.lexxy-content {
     border: 1px solid var(--color-ink-light);
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-control, var(--radius-lg));
     padding: 0 0.75em 0.5em;
 
     &:focus-within {
@@ -47,7 +46,7 @@
     align-items: center;
     background-color: var(--color-canvas);
     border: 1px solid var(--color-ink-lighter);
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-control, var(--radius-lg));
     color: var(--color-ink-darker);
     display: inline-flex;
     font-size: var(--text-x-small);
@@ -164,29 +163,6 @@
       }
     }
 
-    /* The New button matches the pills and the view toggle in height. */
-    .btn--labelled {
-      block-size: 1.9rem;
-      font-size: var(--text-small);
-      padding-block: 0;
-    }
-
-    /* Filters are small controls with the same corners as every other control: a hairline, the
-    /* current choice, a caret. */
-    .quick-filter > button {
-      --input-background: var(--color-canvas);
-      --input-border-color: var(--color-ink-lighter);
-      --input-padding: 0 1.75em 0 0.9em;
-
-      block-size: 1.9rem;
-      border-radius: var(--radius-control);
-      box-shadow: 0 1px 1px oklch(var(--lch-black) / 4%);
-      color: var(--color-ink-darker);
-      font-size: var(--text-x-small);
-      font-weight: 500;
-
-      &:hover { background-color: var(--color-ink-lightest); }
-    }
   }
 }
 

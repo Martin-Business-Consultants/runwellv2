@@ -85,7 +85,7 @@ modes sets it in both blocks).
 | Token | What it sets | Default |
 | --- | --- | --- |
 | `--radius-scale` | Every container's corners, as a multiple | `1` |
-| `--radius-control` | Buttons, inputs, tags, toggles | `0.5rem` |
+| `--radius-control` | Buttons, inputs, tags, toggles | `var(--radius-lg)` (0.625rem, shadcn's rounded-lg) |
 | `--radius-pill` | Pill shapes | `99rem` |
 | `--inline-space` | Horizontal rhythm | `1ch` |
 | `--block-space` | Vertical rhythm | `1rem` |

@@ -104,7 +104,7 @@
   .status-tag-picker__trigger {
     background: none;
     border: 0;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-4xl);
     cursor: pointer;
     padding: 0;
 

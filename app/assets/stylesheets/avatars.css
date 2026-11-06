@@ -170,7 +170,7 @@
   .owner-checklist__person {
     align-items: center;
     border: 1px solid var(--color-ink-lighter);
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-control, var(--radius-lg));
     cursor: pointer;
     display: inline-flex;
     gap: var(--inline-space);

@@ -41,19 +41,25 @@
   --input: var(--color-ink-light);
   --ring: color-mix(in oklch, var(--primary) 70%, var(--color-ink-medium));
 
-  /* shadcn's --radius (0.625rem) and its steps, through Corners. Controls share
-  /* --radius-control (appearance.css) so they always match each other. */
+  /* shadcn's --radius (0.625rem) and its current steps (r × 0.6, 0.8, 1, 1.4, 1.8, 2.2, 2.6), as
+  /* the gem has them, through Corners. Controls (rounded-lg in base-nova) share
+  /* --radius-control (appearance.css: var(--radius-lg) unless Corners says otherwise);
+  /* rounded-md stays its own step, so menu items and small buttons keep shadcn's corners. */
   --radius: calc(0.625rem * var(--radius-scale, 1));
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: var(--radius-control, calc(var(--radius) - 2px));
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 
   --sidebar: oklch(var(--lch-ink-lightest) / 60%);
   --sidebar-foreground: var(--color-ink);
   --sidebar-accent: var(--color-ink-lightest);
   --sidebar-accent-foreground: var(--color-ink);
   --sidebar-border: var(--color-ink-lighter);
+  --sidebar-ring: var(--ring);
 
   /* Tailwind's shadow-xs / sm / md / lg, which shadcn's components use. */
   --shadow-xs: 0 1px 2px 0 oklch(var(--lch-black) / 5%);

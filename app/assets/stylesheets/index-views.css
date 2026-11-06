@@ -377,7 +377,7 @@
   .bulk-bar__count {
     --btn-background: var(--color-selected);
     --btn-border-color: var(--color-selected-dark);
-    --btn-border-radius: var(--radius-control);
+    --btn-border-radius: var(--radius-control, var(--radius-lg));
     --icon-size: 0.85em;
 
     font-weight: 600;
@@ -385,7 +385,7 @@
   }
 
   .bulk-bar__pill {
-    --btn-border-radius: var(--radius-control);
+    --btn-border-radius: var(--radius-control, var(--radius-lg));
   }
 
   .bulk-bar__end {
@@ -394,6 +394,6 @@
 
   .bulk-bar__delete {
     --btn-border-color: var(--color-ink-medium);
-    --btn-border-radius: var(--radius-control);
+    --btn-border-radius: var(--radius-control, var(--radius-lg));
   }
 }

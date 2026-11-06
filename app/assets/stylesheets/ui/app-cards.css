@@ -1,8 +1,9 @@
 /* Record cards and the Work board, in Runwell UI.
 /*
-/* Cards (layouts/shared/_card, todos/display/_preview) are shadcn's Card: a rounded-xl tile on a
-/* hairline with shadow-sm, a muted line for the ref and client, the title, and a footer of
-/* outline badges with the people on it. The status is a badge with a dot, never a tint.
+/* Cards (layouts/shared/_card, todos/display/_preview) are shadcn's Card (base-nova): a rounded-xl
+/* tile on a 1px ring-foreground/10 (no border, no shadow), 1rem spacing, text-sm; a muted line
+/* for the ref and client, the title (CardTitle: text-base font-medium leading-snug), and a
+/* footer of outline badges with the people on it. The status is a badge with a dot, never a tint.
 /*
 /* The board (todos/board/*) keeps Fizzy's anatomy and behaviour (collapsible columns, column
 /* frames, drag and drop) but is drawn like shadcn's kanban examples: each column a muted
@@ -15,37 +16,38 @@
   /* ------------------------------------------------------------------------ */
 
   .app-card {
+    --app-card-ring: color-mix(in oklch, var(--foreground) 10%, transparent);
+
     aspect-ratio: auto;
     background-color: var(--card);
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 0 0 1px var(--app-card-ring);
     color: var(--card-foreground);
     display: flex;
     flex-direction: column;
-    font-size: var(--text-normal);
+    font-size: var(--text-sm);
     gap: 1rem;
     inline-size: auto;
     justify-content: space-between;
-    line-height: 1.5;
+    line-height: 1.25rem;
     min-inline-size: 0;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem;
     position: relative;
     text-align: start;
-    transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
+    transition: box-shadow 150ms ease-out;
     z-index: 1;
 
+    /* Not shadcn's (its Card isn't a link): the ring darkens under the pointer. */
     @media (any-hover: hover) {
       &:hover {
-        border-color: color-mix(in oklch, var(--foreground) 15%, var(--border));
-        box-shadow: var(--shadow-md);
+        --app-card-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
       }
     }
 
     &:focus-visible,
     &:has(.app-card__link:focus-visible) {
-      border-color: var(--ring);
-      box-shadow: var(--ring-focus);
+      box-shadow: 0 0 0 1px var(--ring), var(--ring-focus);
       outline: none;
     }
   }
@@ -102,10 +104,9 @@
     -webkit-line-clamp: 2;
     color: var(--card-foreground);
     display: -webkit-box;
-    font-size: var(--text-medium);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.35;
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: 1.375;
     margin: 0;
     overflow: hidden;
     overflow-wrap: anywhere;
@@ -155,16 +156,16 @@
     }
   }
 
-  /* On the board: a smaller card, the title in text-sm. */
+  /* On the board: Card size="sm" (0.75rem spacing, the title in text-sm). */
   .app-card--compact {
     gap: 0.75rem;
-    padding: 0.875rem 1rem;
+    padding: 0.75rem;
 
     .app-card__title {
       -webkit-line-clamp: 3;
-      font-size: var(--text-normal);
+      font-size: var(--text-sm);
       font-weight: 500;
-      line-height: 1.4;
+      line-height: 1.375;
     }
 
     .app-card__people .person {
@@ -461,15 +462,13 @@
 
   /* The card the keyboard is on. */
   .card-columns [aria-selected] .cards__list .app-card[aria-selected] {
-    border-color: var(--ring);
-    box-shadow: var(--ring-focus);
+    box-shadow: 0 0 0 1px var(--ring), var(--ring-focus);
     outline: none;
   }
 
   /* A card being dragged: a dashed ghost of itself. */
   .app-card.drag-and-drop__dragged-item {
-    border-style: dashed;
-    border-color: var(--ring);
+    border: 1px dashed var(--ring);
     box-shadow: none;
     filter: none;
     opacity: 0.5;

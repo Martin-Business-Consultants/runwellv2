@@ -6,7 +6,7 @@
   .nav-filter {
     align-items: center;
     border: 1px solid transparent;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-control, var(--radius-lg));
     cursor: text;
     display: inline-flex;
     gap: 0.4em;
@@ -15,13 +15,21 @@
       display: none;
     }
 
+    /* Open, it's shadcn's Input: h-8, border-input, px-2.5, input/30 in dark, the ring on focus. */
     &:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) {
-      background-color: var(--color-canvas);
-      border-color: var(--color-ink-light);
+      background-color: var(--ui-control-bg, transparent);
+      block-size: 2rem;
+      border-color: var(--input);
+      padding-inline: 0.625rem;
 
       .nav-filter__input {
         inline-size: 20ch;
       }
+    }
+
+    &:focus-within {
+      border-color: var(--ring);
+      box-shadow: var(--ring-focus);
     }
   }
 

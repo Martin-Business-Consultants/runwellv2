@@ -4,10 +4,14 @@
     overflow: hidden;
   }
 
+  /* Fizzy's dialog, opening as shadcn's (base-nova) does: fading and zooming in from 95% in
+  /* 100ms over a bg-black/10 overlay blurred 4px. */
   :is(.dialog) {
+    --dialog-duration: 100ms;
+
     border: 0;
     opacity: 0;
-    transform: scale(0.85);
+    transform: scale(0.95);
     transform-origin: center;
     transition-behavior: allow-discrete;
     transition-duration: calc(var(--dialog-duration) / 2); /* Faster closing */
@@ -15,7 +19,7 @@
     transition-timing-function: ease-out;
 
     &::backdrop {
-      background-color: var(--color-black);
+      background-color: rgb(0 0 0 / 10%);
       opacity: 0;
       transition-behavior: allow-discrete;
       transition-duration: calc(var(--dialog-duration) / 2);
@@ -29,15 +33,21 @@
       transition-duration: var(--dialog-duration); /* Normal opening speed */
 
       &::backdrop {
-        opacity: 0.5;
+        opacity: 1;
         transition-duration: var(--dialog-duration);
+      }
+    }
+
+    @supports (backdrop-filter: blur(4px)) {
+      &::backdrop {
+        backdrop-filter: blur(4px);
       }
     }
 
     @starting-style {
       &[open] {
         opacity: 0;
-        transform: scale(0.85);
+        transform: scale(0.95);
       }
 
       &[open]::backdrop {
@@ -49,13 +59,18 @@
   /* Ensure padding from viewport edges */
   /* A dialog sets its own padding: one opened from a table row would otherwise inherit the
   /* table's (none). */
+  /* DialogContent (base-nova): bg-popover, ring-1 ring-foreground/10 instead of a border or a
+  /* shadow, rounded-xl, p-4, text-sm. */
   .dialog.panel {
-    --panel-bg: var(--background);
-    --panel-border-radius: var(--radius-lg);
-    --panel-padding: 1.5rem;
+    --panel-bg: var(--popover);
+    --panel-border-radius: var(--radius-xl);
+    --panel-border-size: 0;
+    --panel-padding: 1rem;
+    --panel-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
 
-    box-shadow: var(--shadow-lg);
-    max-inline-size: calc(100vw - var(--inline-space-double) * 2);
+    color: var(--popover-foreground);
+    font-size: var(--text-sm);
+    max-inline-size: calc(100% - 2rem);
   }
 
   /* A modal that asks for something (delete, a quick action): one width for all of them. */
