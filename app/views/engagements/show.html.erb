@@ -1,6 +1,6 @@
 <% @page_title = "#{@engagement.ref} #{@engagement.title}" %>
 <% tabs = [
-     record_tab("work", term(:work), count: @engagement.todos.open.count),
+     record_tab("work", term(:work, count: 2), count: @engagement.todos.open.count),
      record_tab("notes", "Notes", count: @engagement.notes.count),
      record_tab("documents", "Documents", count: @engagement.documents.count),
      record_tab("history", "History")
@@ -84,7 +84,7 @@
         <header class="card__head">
           <% if @engagement.closed? %>
             <h2 class="card__title"><%= @engagement.state_label %></h2>
-            <p class="card__hint">Off the open list. Its <%= term(:work).downcase %> and history stay.</p>
+            <p class="card__hint">Off the open list. Its <%= term(:work, count: 2).downcase %> and history stay.</p>
           <% else %>
             <h2 class="card__title">Finish</h2>
             <p class="card__hint">Mark it complete once it’s delivered, or cancel it.</p>

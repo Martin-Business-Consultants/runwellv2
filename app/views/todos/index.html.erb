@@ -1,4 +1,4 @@
-<% @page_title = term(:work) %>
+<% @page_title = term(:work, count: 2) %>
 <% listed = CustomField.for("Todo").listed.to_a %>
 <% @body_class = "contained-scrolling" if @view == "board" %>
 
@@ -16,7 +16,7 @@
 <% end %>
 <% if @view == "table" %>
   <% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_todos_path, noun: term(:work).downcase) : nil) do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_todos_path, noun: term(:work, count: 2).downcase) : nil) do %>
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: Todo::STATUSES.map { [ it.humanize, it ] } %>
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + todo_owner_options %>
     <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>

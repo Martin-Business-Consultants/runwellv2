@@ -21,8 +21,8 @@
       <dt><kbd>g</kbd><kbd>h</kbd></dt><dd>Home</dd>
       <dt><kbd>g</kbd><kbd>c</kbd></dt><dd><%= term(:client, count: 2) %></dd>
       <dt><kbd>g</kbd><kbd>e</kbd></dt><dd><%= term(:engagement, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>w</kbd></dt><dd><%= term(:work) %></dd>
-      <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:work) %> board</dd>
+      <dt><kbd>g</kbd><kbd>w</kbd></dt><dd><%= term(:work, count: 2) %></dd>
+      <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:work, count: 2) %> board</dd>
       <dt><kbd>g</kbd><kbd>u</kbd></dt><dd>Users</dd>
       <% nav_plugin_items.values.each_with_index do |(label, _path), index| %>
         <%# herb:key label %>
@@ -41,7 +41,7 @@
       <dt><kbd>/</kbd></dt><dd>Filter what’s on the page</dd>
       <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
       <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:work).downcase %> or time</dd>
-      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add <%= term(:work).downcase %> to any <%= term(:engagement).downcase %> or <%= term(:client).downcase %></dd>
+      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add a <%= term(:work).downcase %> to any <%= term(:engagement).downcase %> or <%= term(:client).downcase %></dd>
       <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
         <%# herb:key shortcut.keys %>
         <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>

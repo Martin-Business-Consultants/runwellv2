@@ -1,7 +1,7 @@
 <% @page_title = @item.description %>
 <% done, total = @item.progress %>
 <% tabs = [
-     record_tab("work", term(:work), count: @todos.size),
+     record_tab("work", term(:work, count: 2), count: @todos.size),
      record_tab("notes", "Notes", count: @item.notes.count),
      record_tab("documents", "Documents", count: @item.documents.count)
    ] %>
@@ -32,7 +32,7 @@
           <% when "work" %>
             <section class="card record-card" id="work">
               <header class="card__head">
-                <h2 class="card__title"><%= term(:work) %></h2>
+                <h2 class="card__title"><%= term(:work, count: 2) %></h2>
                 <p class="card__hint"><%= done %> of <%= total %> done</p>
               </header>
 
@@ -81,7 +81,7 @@
     <section class="card record-card">
       <header class="card__head">
         <h2 class="card__title">Rename or remove</h2>
-        <p class="card__hint">Removing it keeps its <%= term(:work).downcase %> on the <%= term(:engagement).downcase %>.</p>
+        <p class="card__hint">Removing it keeps its <%= term(:work, count: 2).downcase %> on the <%= term(:engagement).downcase %>.</p>
       </header>
       <div class="card__content">
         <%= render "scope_items/item", item: @item %>

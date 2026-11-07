@@ -53,7 +53,7 @@ module Agent
         end
 
         model = type.constantize
-        Search.new(text).results.select { it.is_a?(model) && (client.nil? || scope.exists?(it.id)) }.first(limit)
+        Search.new(text, fuzzy: false).results.select { it.is_a?(model) && (client.nil? || scope.exists?(it.id)) }.first(limit)
       end
 
       # The one record text names, or Ambiguous / Missing.

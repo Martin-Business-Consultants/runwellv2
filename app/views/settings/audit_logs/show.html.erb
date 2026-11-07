@@ -6,10 +6,10 @@
   <section class="settings-section">
     <header class="settings-section__head">
       <h2>Audit log</h2>
-      <p class="settings-section__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work).downcase %>. Nothing here can be edited or deleted.</p>
+      <p class="settings-section__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work, count: 2).downcase %>. Nothing here can be edited or deleted.</p>
     </header>
     <div class="filters">
-      <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.map { |key, label| [ label, key ] } %>
+      <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.keys.map { |key| [ Settings::AuditLogsController.area_label(key), key ] } %>
       <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days, options: Settings::AuditLogsController::PERIODS.map { |key, label| [ label, key ] } %>
       <%= render "layouts/shared/quick_filter", title: "Who…", param: :person, current: @person&.id&.to_s, options: [ [ "Anyone", "" ] ] + User.people.ordered.map { [ it.display_name, it.id.to_s ] } %>
       <%= link_to settings_audit_log_path(filters.merge(format: :csv)), class: "btn btn--secondary btn--sm settings-end", data: { turbo: false } do %>

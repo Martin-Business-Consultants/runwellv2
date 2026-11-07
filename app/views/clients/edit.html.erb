@@ -48,7 +48,7 @@
 
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Delete this client", title: "Delete #{@client.name_was}?",
-            body: "This removes the client with its contacts, work and notes. A client with engagements can’t be deleted.",
+            body: "This removes the #{term(:client).downcase} with its contacts, #{term(:work, count: 2).downcase} and notes. One with #{term(:engagement, count: 2).downcase} can’t be deleted.",
             button: "Delete client", path: client_path(@client) %>
     <% end %>
   </aside>

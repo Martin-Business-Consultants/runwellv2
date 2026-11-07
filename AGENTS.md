@@ -425,10 +425,12 @@ ReActionView rules:
 - Add the model to `Searchable::MODELS` and to `search_result_path` in
   `SearchesHelper`, then run `bin/rails search:reindex`
 - `Search.new(terms).results` cleans the terms and returns records ranked by
-  relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe
+  relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe. It's fuzzy: exact
+  matches first, then words starting with what was typed or a typo or two from it, taken from the
+  index's vocabulary (`Search::Vocabulary`, fts5vocab). Agent name resolution passes `fuzzy: false`
 - The search bar is Fizzy's (`bar/_bar`, `bar_controller`), rendered in the
   application layout footer for signed-in staff. It shows only once opened (`s`, ⌘K): the
-  bottom of staff pages stays clear but for the notification bell (`runwell/home.css`)
+  bottom of staff pages stays clear but for the quick actions' + and the notification bell (`runwell/home.css`)
 
 ## Keyboard shortcuts
 
@@ -554,8 +556,8 @@ and time are added only here; notes also have a composer at the top of every Not
 (`notes/_section`: the Lexxy editor, kind, source), posting `record` to the same `notes#create`.
 The picker writes `record` ("Client:12") into the form through the `form` attribute; the
 receiving controller reads it with `QuickAction.locate(params[:record], types)`. Forms post
-with `data-turbo-frame="_top"` so the page redirects back as usual. The tray has no button on staff pages: `A` opens it
-from the bottom right corner, above the notification bell.
+with `data-turbo-frame="_top"` so the page redirects back as usual. Its button is a round + just left of the notification
+bell, bottom right; `A` clicks it.
 
 ## Requests by email
 

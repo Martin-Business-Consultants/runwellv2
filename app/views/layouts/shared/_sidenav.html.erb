@@ -6,7 +6,6 @@
 <nav class="sidebar" id="sidenav" aria-label="Main">
   <div class="sidebar__top">
     <%= link_to root_path, class: "sidebar__brand", title: "Needs You (g h)", data: { keys: "g h" } do %>
-      <span class="sidebar__logo"><%= render "layouts/shared/logo_mark" %></span>
       <span class="sidebar__brand-text">
         <span class="sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
         <span class="sidebar__brand-sub"><%= term(:client, count: 2) %> and work</span>
@@ -18,7 +17,7 @@
   <%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %>
   <%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %>
   <%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %>
-  <%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %>
+  <%= sidenav_link_to term(:work, count: 2), todos_path, icon: "board", keys: "g w" %>
   <%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %>
 
   <% if nav_plugin_items.any? %>

@@ -14,7 +14,7 @@
 <section class="scope-section">
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= engagement_path(engagement, filters.merge(tab: "work")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
-      <span class="scope-nav__name">All <%= term(:work).downcase %></span>
+      <span class="scope-nav__name">All <%= term(:work, count: 2).downcase %></span>
       <span class="scope-nav__count"><%= everything.count("done") %>/<%= everything.size %></span>
       <progress class="scope-nav__progress" value="<%= everything.count("done") %>" max="<%= [ everything.size, 1 ].max %>"></progress>
     </a>
@@ -35,7 +35,7 @@
   </nav>
   <% if rows.empty? %>
     <p class="record-card__empty">
-      No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:work).downcase %>, or add <%= term(:work).downcase %> straight in the <%= term(:work) %> tab.
+      No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:work, count: 2).downcase %>, or add <%= term(:work, count: 2).downcase %> straight in the <%= term(:work, count: 2) %> tab.
     </p>
   <% end %>
 </section>

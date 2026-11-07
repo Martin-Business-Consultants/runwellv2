@@ -12,7 +12,7 @@
         <% if client&.internal? %>
           <%= client.name %> is internal: one of your own projects.
         <% else %>
-          It’s active from the start: add its <%= term(:scope_item, count: 2).downcase %> and <%= term(:work).downcase %> next.
+          It’s active from the start: add its <%= term(:scope_item, count: 2).downcase %> and <%= term(:work, count: 2).downcase %> next.
         <% end %>
       </p>
     </div>
@@ -31,8 +31,8 @@
         <h2 class="card__title">How it goes</h2>
       </header>
       <div class="card__content">
-        <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:work).downcase}.",
-             "Add #{term(:work).downcase} as it comes up, with owners and due dates.", "Track it on the #{term(:work)} table or board like any other.",
+        <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:work, count: 2).downcase}.",
+             "Add #{term(:work, count: 2).downcase} with owners and due dates, whenever something needs doing.", "Track it on the #{term(:work, count: 2)} table or board like any other.",
              "Close the #{term(:engagement).downcase} when it’s done." ] %>
         <ol class="record-steps">
           <% steps.each do |step| %>

@@ -7,10 +7,10 @@ class Settings::AuditLogsController < Settings::BaseController
   AREAS = {
     "all" => "Everything",
     "security" => "Sign-in and settings",
-    "engagements" => "Engagements",
-    "work" => "Work and notes",
+    "engagements" => :engagement,
+    "work" => :work,
     "requests" => "Requests",
-    "clients" => "Clients"
+    "clients" => :client
   }.freeze
   PERIODS = { "7" => "Last 7 days", "30" => "Last 30 days", "90" => "Last 90 days", "all" => "All time" }.freeze
   CSV_LIMIT = 50_000
@@ -18,6 +18,14 @@ class Settings::AuditLogsController < Settings::BaseController
   agent_tool :audit_log, on: :show, title: "Read the audit log",
     description: "Every event (sign-ins, security and settings changes, engagements, work, requests), newest first. area: #{AREAS.keys.join(", ")}; person: a user id; days: 7, 30, 90 or all.",
     params: { area: AREAS.keys, person: "integer", days: PERIODS.keys }
+
+  # An area's label, in this install's names (Settings > Names).
+  def self.area_label(key)
+    label = AREAS.fetch(key)
+    return label if label.is_a?(String)
+    name = Setting.current.term(label, count: 2)
+    label == :work ? "#{name} and notes" : name
+  end
 
   def show
     @view = "table"

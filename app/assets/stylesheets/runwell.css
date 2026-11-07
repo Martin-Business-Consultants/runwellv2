@@ -14,6 +14,11 @@
 /* contents, as Fizzy's base had it. */
 turbo-frame { display: contents; }
 
+/* No visible scrollbars anywhere: a bar appearing as content grows shifted the layout. Everything
+/* still scrolls by wheel, touch and keys. */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+
 /* The nav's width is the token Runwell has always had for it. */
 :root { --sidebar-width: 16rem; }
 

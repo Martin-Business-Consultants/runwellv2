@@ -10,7 +10,7 @@
 <% if home %>
   <%= parent_page(@todo.scope_item&.description || @todo.engagement&.ref || @todo.client.name, home) %>
 <% else %>
-  <%= parent_page term(:work), todos_path(owner: "none") %>
+  <%= parent_page term(:work, count: 2), todos_path(owner: "none") %>
 <% end %>
 
 <section class="record-page">

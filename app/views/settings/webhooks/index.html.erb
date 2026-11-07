@@ -6,7 +6,7 @@
     <header class="settings-section__head">
       <h2>Webhooks</h2>
       <p class="settings-section__description">
-        Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
+        Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work, count: 2).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
         Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
         Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
       </p>

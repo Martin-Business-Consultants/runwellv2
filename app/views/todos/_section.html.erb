@@ -7,7 +7,7 @@
 <% focus = picked || item == "other" %>
 <section class="card record-card" id="work">
   <header class="card__head">
-    <h2 class="card__title"><%= term(:work) %></h2>
+    <h2 class="card__title"><%= term(:work, count: 2) %></h2>
     <p class="card__hint">
       <% if focus %>
         Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.
@@ -16,7 +16,7 @@
       <% end %>
     </p>
     <div class="card__action">
-      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :work, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
     </div>
   </header>
@@ -87,9 +87,9 @@
 
     <% if todos.none? %>
       <% if focus %>
-        <p class="record-card__empty">No <%= term(:work).downcase %> here yet. Add the first below.</p>
+        <p class="record-card__empty">No <%= term(:work, count: 2).downcase %> here yet. Add the first below.</p>
       <% else %>
-        <p class="record-card__empty">No <%= term(:work).downcase %> yet. Add the first below.</p>
+        <p class="record-card__empty">No <%= term(:work, count: 2).downcase %> yet. Add the first below.</p>
       <% end %>
     <% elsif shown.none? %>
       <p class="record-card__empty">

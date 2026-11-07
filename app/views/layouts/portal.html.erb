@@ -17,7 +17,7 @@
 
           <nav class="portal-nav" aria-label="Portal">
             <%= link_to term(:engagement, count: 2), portal_root_path, class: "portal-nav__link", aria: { current: (request.path == portal_root_path || request.path.start_with?("/portal/engagements")) ? "page" : "false" } %>
-            <%= link_to term(:work), portal_todos_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_todos_path)) ? "page" : "false" } %>
+            <%= link_to term(:work, count: 2), portal_todos_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_todos_path)) ? "page" : "false" } %>
             <%= plugin_portal_nav_links(class: "portal-nav__link") %>
             <%= link_to "Requests", portal_requests_path, class: "portal-nav__link", aria: { current: (request.path == portal_requests_path) ? "page" : "false" } %>
           </nav>

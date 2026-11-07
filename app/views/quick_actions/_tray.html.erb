@@ -2,8 +2,8 @@
 <%# The quick action tray, bottom right (A): a popover menu: a record picker (the
     record on screen, or any other) over an entry per action. The entries submit one GET form
     carrying the picked record; each action's form opens in a modal (quick_actions#new).
-    Plugins add actions with Runwell::Plugins.quick_action. Its toggle is out of sight (A clicks
-    it), and the menu stacks in reverse, so the picker sits above the actions. %>
+    Plugins add actions with Runwell::Plugins.quick_action. Its toggle is a round + beside the
+    bell (A clicks it), and the menu stacks in reverse, so the picker sits above the actions. %>
 <% record = current_record %>
 <section class="tray tray--actions" data-controller="dialog" data-dialog-sizing-value="false" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>
@@ -28,7 +28,7 @@
     </div>
   </dialog>
 
-  <button type="button" class="tray__toggle" aria-label="Quick actions" aria-haspopup="true" data-keys="a" data-action="dialog#toggle">
+  <button type="button" class="tray__toggle" aria-label="Quick actions" title="Quick actions (A)" aria-haspopup="true" data-keys="a" data-action="dialog#toggle">
     <span class="tray__toggle-btn">
       <%= icon_tag "add" %>
       <span class="tray__toggle-text">Add <kbd class="hide-on-touch">A</kbd></span>

@@ -1,6 +1,6 @@
 <% @page_title = "Column: #{@status.humanize}" %>
 <%# The breadcrumb names the page ("Work › Column: Planned"), and Esc goes back to the board. %>
-<%= parent_page "Work", todos_path(todo_board_filters.merge(view: "board")) %>
+<%= parent_page term(:work, count: 2), todos_path(todo_board_filters.merge(view: "board")) %>
 
 <section class="cards cards--grid">
   <turbo-frame id="<%= @status %>_cards">

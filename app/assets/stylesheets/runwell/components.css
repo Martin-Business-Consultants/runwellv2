@@ -123,9 +123,11 @@
 .data-table__sort--active .data-table__sort-arrow { opacity: 1; }
 .data-table__sort-arrow--desc { rotate: 180deg; }
 
-/* The checkbox column: header and rows the same width, so the boxes stack. */
-.data-table :is(th, td).data-table__select { width: 1%; padding-right: var(--s-1); text-align: center; }
-.data-table__checkbox { display: block; margin: 0 auto; cursor: pointer; }
+/* The checkbox column: header and rows the same width, so the boxes stack. Its width is a share of
+/* the table, which differs from table to table, so the box keeps to the column's left edge: it sits
+/* in the same place on every index, never shifting between pages. */
+.data-table :is(th, td).data-table__select { width: 1%; padding-right: var(--s-1); text-align: left; }
+.data-table__checkbox { display: block; margin: 0; cursor: pointer; }
 
 /* Edit and delete, quiet until the row is hovered. */
 .data-table__actions, .data-table__actions-header { width: 1%; white-space: nowrap; text-align: right; }

@@ -6,10 +6,10 @@
 <% shown = all.select { |todo| state == "all" || (state == "done") == (todo.status == "done") } %>
 <section class="card record-card" id="work">
   <header class="card__head">
-    <h2 class="card__title"><%= term(:work) %></h2>
+    <h2 class="card__title"><%= term(:work, count: 2) %></h2>
     <p class="card__hint">On their <%= term(:engagement, count: 2).downcase %> and straight on <%= client.name %>.</p>
     <div class="card__action">
-      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :work, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
     </div>
   </header>
@@ -28,7 +28,7 @@
         <%= link_to "Show all", client_path(client, request.query_parameters.merge("tab" => "work", "work" => "all")) %>
       </p>
     <% else %>
-      <p class="record-card__empty">No <%= term(:work).downcase %> yet. Add it here, on one of their <%= term(:engagement, count: 2).downcase %>, or it arrives as a request.</p>
+      <p class="record-card__empty">No <%= term(:work, count: 2).downcase %> yet. Add it here, on one of their <%= term(:engagement, count: 2).downcase %>, or it arrives as a request.</p>
     <% end %>
   </div>
 

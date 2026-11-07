@@ -26,7 +26,7 @@
         <dl class="details">
           <dt>Status</dt><dd><%= status_tag @engagement.state_label, highlight: @engagement.active? %></dd>
           <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client %></dd>
-          <dt><%= term(:work) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
+          <dt><%= term(:work, count: 2) %></dt><dd><%= @engagement.todos.count %> (<%= @engagement.todos.open.count %> open)</dd>
         </dl>
       </div>
     </section>

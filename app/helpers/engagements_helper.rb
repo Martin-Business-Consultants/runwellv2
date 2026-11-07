@@ -6,7 +6,7 @@ module EngagementsHelper
     else
       done, open = engagement.todos.partition { it.status == "done" }.map(&:size)
       work = engagement.todos.none? ? "nothing yet, so add it below" : (open.zero? ? "all done" : "#{open} open, #{done} done")
-      "#{term(:work)}: #{work}.#{finish_hint(engagement, open)}"
+      "#{term(:work, count: 2)}: #{work}.#{finish_hint(engagement, open)}"
     end
   end
 

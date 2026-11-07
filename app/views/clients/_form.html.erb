@@ -28,7 +28,7 @@
     </div>
 
     <% unless internal_aside %>
-      <%= switch_field form, :internal, label: "Internal", hint: "This is us. Its engagements are our own projects." %>
+      <%= switch_field form, :internal, label: "Internal", hint: "This is us. Its #{term(:engagement, count: 2).downcase} is our own." %>
     <% end %>
 
     <%= custom_field_inputs form, client %>

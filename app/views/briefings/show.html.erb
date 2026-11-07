@@ -20,10 +20,10 @@
     </div>
     <div class="button-row">
       <%= link_to todos_path(owner: "me", view: "table", sort: "due"), class: button_classes(variant: :secondary) do %>
-        <%= icon_tag "board" %> All your <%= term(:work).downcase %>
+        <%= icon_tag "board" %> All your <%= term(:work, count: 2).downcase %>
       <% end %>
       <%= link_to new_quick_action_path(kind: "work"), class: button_classes(variant: :primary), data: { turbo_frame: "quick_action" } do %>
-        <%= icon_tag "add" %> Add <%= term(:work).downcase %>
+        <%= icon_tag "add" %> Add <%= term(:work, count: 2).downcase %>
       <% end %>
     </div>
   </header>
@@ -48,13 +48,13 @@
     <div class="empty home-empty">
       <span class="home-empty__icon"><%= icon_tag "check-circle" %></span>
       <h2>You’re all caught up</h2>
-      <p>Nothing needs you right now. <%= term(:work) %> that’s due, waiting on you or mentions you shows up here.</p>
+      <p>Nothing needs you right now. Anything due, waiting on you or mentioning you shows up here.</p>
     </div>
   <% else %>
     <div class="home-grid">
       <section class="card card--flush home-work" aria-labelledby="home-work-title">
         <header class="card__head">
-          <h2 class="card__title" id="home-work-title">Your <%= term(:work).downcase %></h2>
+          <h2 class="card__title" id="home-work-title">Your <%= term(:work, count: 2).downcase %></h2>
           <p class="card__hint">Due this week, or in progress.</p>
           <div class="card__action">
             <%= link_to "View all", todos_path(owner: "me", view: "table", sort: "due"), class: button_classes(variant: :secondary, size: :sm) %>

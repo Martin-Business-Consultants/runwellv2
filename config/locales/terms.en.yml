@@ -6,14 +6,14 @@ en:
       one: "Client"
       other: "Clients"
     engagement:
-      one: "Engagement"
-      other: "Engagements"
+      one: "Work"
+      other: "Work"
     scope_item:
       one: "Section"
       other: "Sections"
     work:
-      one: "Work"
-      other: "Work"
+      one: "Task"
+      other: "Tasks"
     labels:
       project:
         one: "Project"
