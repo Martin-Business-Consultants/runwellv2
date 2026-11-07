@@ -12,15 +12,15 @@
   data-picker-current-value="<%= todo.status %>" data-picker-options-value="todo-status-options"
   data-action="keydown.esc->dialog#close picker:chosen->dialog#close click@document->dialog#closeOnClickOutside dialog:show->picker#fill dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
   <button type="button" class="status-dot-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
-    <span class="display-contents" data-picker-target="display" data-picker-part="dot"><span class="status-dot status-dot--<%= todo.status.dasherize %>" aria-hidden="true"></span></span>
+    <span class="status-dot-picker__dot" data-picker-target="display" data-picker-part="dot"><%= tag.span class: "status-dot status-dot--#{todo.status.dasherize}", aria: { hidden: true } %></span>
     <% if labelled %>
       <span class="status-dot-picker__label" data-picker-target="display" data-picker-part="label"><%= label %></span>
     <% end %>
-    <span class="for-screen-reader">Status of <%= todo.title %>: <%= label %>. Change it</span>
+    <span class="visually-hidden">Status of <%= todo.title %>: <%= label %>. Change it</span>
   </button>
 
   <%= popup_menu label: "Status of #{todo.title}", title: "Status", fixed: true do %>
-    <%= form_with url: todo_path(todo), method: :patch, class: "full-width" do %>
+    <%= form_with url: todo_path(todo), method: :patch do %>
       <input type="hidden" name="inline" value="status">
       <% if labelled %>
         <input type="hidden" name="labelled" value="1">

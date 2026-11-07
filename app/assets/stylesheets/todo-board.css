@@ -1,7 +1,0 @@
-/* Fizzy colors each column with an inline style; views here carry no inline CSS, so the
-/* Work board's doing columns get theirs from classes. */
-@layer components {
-  .cards--in-progress { --card-color: var(--color-todo-in-progress); }
-  .cards--in-review { --card-color: var(--color-todo-in-review); }
-  .cards--blocked { --card-color: var(--color-todo-blocked); }
-}

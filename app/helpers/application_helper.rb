@@ -3,18 +3,27 @@ module ApplicationHelper
     tag.title [ @page_title, "Runwell" ].compact.join(" | ")
   end
 
-  # Herb compiles stylesheet_link_tag into a single <link>, which skips Propshaft's :app expansion.
-  # Plugin stylesheets get their own tag: Propshaft's :app expansion drops other names.
+  # Runwell's own stylesheets, after rune_ui's (which are all in the `rune` layer, so these win):
+  # the palette and its settings (_global, appearance, font-face: the theming contract,
+  # docs/theming.md), the bridge that points rune's tokens at it (rune-theme), the shell
+  # (runwell), the pieces every area shares (runwell/components) and each area's own.
+  RUNWELL_STYLESHEETS = %w[_global appearance font-face rune-theme runwell runwell/components runwell/home runwell/work runwell/records runwell/settings runwell/public].freeze
+
+  # Herb compiles stylesheet_link_tag into a single <link>, so each list is spelled out.
+  # Plugin stylesheets get their own tag.
   def app_stylesheet_tags
     safe_join([
-      nobuild_ui_stylesheet_tags(font: false, "data-turbo-track": "reload"),
-      stylesheet_link_tag(:app, "data-turbo-track": "reload"),
+      rune_ui_stylesheet_tags(fonts: false),
+      stylesheet_link_tag(*RUNWELL_STYLESHEETS, "data-turbo-track": "reload"),
       (stylesheet_link_tag(*Runwell::Plugins.enabled_stylesheets, "data-turbo-track": "reload") if Runwell::Plugins.enabled_stylesheets.any?)
     ].compact, "\n")
   end
 
+  # Runwell's icons are rune_ui's (config/initializers/rune_ui.rb registers them): an inline SVG,
+  # hidden from screen readers. A name nobody registered (a plugin's) draws a dot, not an error.
   def icon_tag(name, **options)
-    tag.span class: class_names("icon icon--#{name}", options.delete(:class)), "aria-hidden": true, **options
+    name = RuneUi.icons.key?(name.to_s.to_sym) ? name : "dot"
+    icon(name, css: class_names("icon--#{name}", options.delete(:class)).presence)
   end
 
   STATUS_TONES = {
@@ -29,10 +38,8 @@ module ApplicationHelper
     STATUS_TONES.fetch(label.to_s.downcase) { highlight ? "progress" : "neutral" }
   end
 
-  # A status label tinted by what it means, in Fizzy's palette.
-  def status_tag(label, highlight: false)
-    tag.span label, class: "status-tag status-tag--#{status_tone(label, highlight: highlight)} txt-nowrap"
-  end
+  # A status label tinted by what it means (a rune_ui badge in its tone).
+  def status_tag(label, highlight: false) = ui_status_badge(label, highlight: highlight)
 
   def money(cents) = Money.format(cents)
 
@@ -86,7 +93,7 @@ module ApplicationHelper
   def plugin_sidenav_links
     safe_join(nav_plugin_items.values.each_with_index.filter_map do |(label, path, icon), index|
       url = instance_exec(&path)
-      tag.li(sidenav_link_to(label, url, icon: icon || "grid", keys: "g #{index + 1}")) if url
+      sidenav_link_to(label, url, icon: icon || "grid", keys: "g #{index + 1}") if url
     end)
   end
 
@@ -109,8 +116,8 @@ module ApplicationHelper
   # A section in the left nav: its icon and name, marked current like nav_link_to.
   def sidenav_link_to(label, path, icon:, keys: nil, current: nil)
     current = request.path == path || request.path.start_with?(path.chomp("/") + "/") if current.nil?
-    link_to path, class: "sidenav__link", title: (keys ? "#{label} (#{keys})" : label), data: { keys: keys }.compact, aria: { current: ("page" if current) } do
-      icon_tag(icon) + tag.span(label, class: "sidenav__label")
+    link_to path, class: "sidebar__link", title: (keys ? "#{label} (#{keys})" : label), data: { keys: keys }.compact, aria: { current: ("page" if current) } do
+      icon_tag(icon) + tag.span(label, class: "sidebar__label")
     end
   end
 
@@ -140,41 +147,41 @@ module ApplicationHelper
   def secret_field(form, method, placeholder: nil, **options)
     tag.span class: "secret-field", data: { controller: "reveal" } do
       safe_join([
-        form.password_field(method, value: form.object.try(method), class: "input full-width", autocomplete: "off",
+        form.password_field(method, value: form.object.try(method), autocomplete: "off",
           spellcheck: false, placeholder: placeholder, data: { reveal_target: "input", "1p-ignore": true }, **options),
-        tag.button(type: "button", class: "btn btn--circle btn--plain secret-field__eye", title: "Show", aria: { pressed: false, label: nil },
+        tag.button(type: "button", class: "icon-button secret-field__eye", title: "Show", aria: { pressed: false, label: nil },
           data: { reveal_target: "button", action: "reveal#toggle" }) do
           safe_join([ icon_tag("eye", class: "secret-field__show"), icon_tag("eye-off", class: "secret-field__hide"),
-            tag.span("Show or hide", class: "for-screen-reader") ])
+            tag.span("Show or hide", class: "visually-hidden") ])
         end
       ])
     end
   end
 
-  # An on/off switch for a boolean, in one of two shapes: with a hint, the settings row (label and
-  # hint on the left, the switch on the right, record-form__toggle); without, the switch beside its
-  # label. submit_on_change saves it as it's flipped (the form controller on the form). A helper,
+  # An on/off switch for a boolean (rune_ui's switch), in one of two shapes: with a hint, a
+  # setting row (label and hint on the left, the switch on the right); without, the switch beside
+  # its label. submit_on_change saves it as it's flipped (the form controller on the form). A helper,
   # not a partial, so it works inside form_with.
   #
   #   switch_field form, :require_two_factor, label: "Require it for everyone", hint: "…", submit_on_change: true
   def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
     data = submit_on_change ? { action: "change->form#submit" } : {}
-    switch = switch_tag { form.check_box(method, class: "switch__input", data: data, **options) }
+    switch = switch_tag { form.check_box(method, role: "switch", data: data, **options) }
 
     if hint
-      tag.div(class: "record-form__toggle") do
-        safe_join([ tag.div(class: "record-form__toggle-text") { safe_join([ form.label(method, label, class: "record-form__label"), tag.span(hint, class: "record-form__hint") ]) }, switch ])
+      tag.div(class: "setting-row setting-row--field") do
+        safe_join([ tag.div(class: "setting-row__text") { safe_join([ form.label(method, label, class: "setting-row__label"), tag.span(hint, class: "setting-row__hint") ]) }, switch ])
       end
     else
-      tag.div(class: "flex align-center gap-half txt-align-start") { safe_join([ switch, form.label(method, label, class: "txt-small") ]) }
+      tag.div(class: "field--inline") { safe_join([ switch, form.label(method, label) ]) }
     end
   end
 
   # The switch itself around any checkbox (check_box_tag, a plain input): its track, and a label
   # for screen readers when nothing beside it says what it does.
   def switch_tag(title: nil, screen_reader_label: nil, &block)
-    tag.label(class: "switch flex-item-no-shrink", title: title) do
-      safe_join([ capture(&block), tag.span(class: "switch__btn"), (tag.span(screen_reader_label, class: "for-screen-reader") if screen_reader_label) ])
+    tag.label(class: "switch", title: title) do
+      safe_join([ capture(&block), tag.span(class: "switch__track", aria: { hidden: true }), (tag.span(screen_reader_label, class: "visually-hidden") if screen_reader_label) ])
     end
   end
 

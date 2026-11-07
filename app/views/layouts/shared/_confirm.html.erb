@@ -3,20 +3,20 @@
 <%# herb:state (confirming: false) %>
 <%# Both halves are always on the page and state only hides one, so asking and cancelling never
     wait on the server. %>
-<div class="txt-align-center margin-block-start" data-controller="state-focus" data-state-focus-state-value="confirming">
-  <div class="ui-card ui-card--sm ui-confirm center" role="alertdialog" aria-label="<%= title %>" hidden="<%= !confirming %>">
-    <header class="ui-card__header">
-      <h3 class="ui-card__title"><%= title %></h3>
-      <p class="ui-card__description"><%= body %></p>
+<div class="confirm" data-controller="state-focus" data-state-focus-state-value="confirming">
+  <div class="card card--sm card--danger confirm__card" role="alertdialog" aria-label="<%= title %>" hidden="<%= !confirming %>">
+    <header class="card__head">
+      <h3 class="card__title"><%= title %></h3>
+      <p class="card__hint"><%= body %></p>
     </header>
-    <footer class="ui-card__footer ui-card__footer--end">
-      <button type="button" class="ui-button ui-button--outline" data-keys="esc" data-herb-reset="confirming" autofocus>Cancel</button>
-      <%= button_to path, method: method || :delete, class: "ui-button ui-button--destructive" do %>
+    <footer class="card__footer">
+      <button type="button" class="btn btn--ghost" data-keys="esc" data-herb-reset="confirming" autofocus>Cancel</button>
+      <%= button_to path, method: method || :delete, class: "btn btn--danger" do %>
         <span><%= button %></span>
       <% end %>
     </footer>
   </div>
-  <button type="button" class="ui-button ui-button--ghost ui-button--sm txt-negative" data-keys="d" data-herb-toggle="confirming" hidden="<%= confirming %>">
+  <button type="button" class="btn btn--ghost btn--sm confirm__trigger" data-keys="d" data-herb-toggle="confirming" hidden="<%= confirming %>">
     <%= icon_tag icon || "trash" %>
     <span><%= trigger %></span>
   </button>

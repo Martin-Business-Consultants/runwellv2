@@ -46,7 +46,7 @@ class EngagementsControllerTest < ActionDispatch::IntegrationTest
 
   test "create starts an active engagement" do
     assert_difference("Engagement.count") do
-      post engagements_path, params: { engagement: { client_id: clients(:acme).id, label: "project", title: "Rebrand", estimate_notes: "2 weeks" } }
+      post engagements_path, params: { engagement: { client_id: clients(:acme).id, label: "project", title: "Rebrand" } }
     end
     engagement = Engagement.last
     assert_redirected_to engagement_path(engagement)

@@ -24,9 +24,9 @@
       <a href="<%= engagement_path(engagement, filters.merge(tab: "work", item: id)) %>" class="scope-nav__item"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
         <span class="scope-nav__name" title="<%= name %>">
           <% if state %>
-            <span class="scope-nav__dot scope-nav__dot--<%= state %>" title="<%= state.humanize %>"></span>
+            <%= status_dot({ "in_progress" => :accent, "blocked" => :danger, "done" => :ok }.fetch(state, :neutral), label: state.humanize) %>
           <% end %>
-          <span class="overflow-ellipsis"><%= name %></span>
+          <span class="scope-nav__label"><%= name %></span>
         </span>
         <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>
         <progress class="scope-nav__progress" value="<%= item_statuses.count("done") %>" max="<%= [ item_statuses.size, 1 ].max %>"></progress>
@@ -41,10 +41,8 @@
 </section>
 
 <% unless engagement.closed? %>
-  <div class="section-actions">
-    <details class="record-add">
-      <summary class="ui-button ui-button--outline ui-button--sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
-      <%= render "scope_items/new", engagement: engagement %>
-    </details>
-  </div>
+  <details class="record-add">
+    <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
+    <%= render "scope_items/new", engagement: engagement %>
+  </details>
 <% end %>

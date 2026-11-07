@@ -1,81 +1,59 @@
 <%# locals: () %>
-<%# The staff nav, down the left, as shadcn/ui's Sidebar: the install at the top, Needs You and the
-    core sections, then what plugins add, and the signed-in person at the foot, whose menu holds
-    their account, settings, the theme, help and signing out. The current section is marked
-    (aria-current). Below 800px it runs across the top instead. The page filter (/) and the
-    shortcut sheet (?) stay here for their keys, out of sight until used. %>
-<aside class="sidenav ui-sidebar" id="sidenav" aria-label="Main">
-  <%= link_to root_path, class: "ui-sidebar__brand", title: "Needs You (g h)", data: { keys: "g h" } do %>
-    <span class="ui-sidebar__brand-mark"><%= render "layouts/shared/logo_mark" %></span>
-    <span class="ui-sidebar__brand-text sidenav__label">
-      <span class="ui-sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
-      <span class="ui-sidebar__brand-sub"><%= Setting.current.term(:client, count: 2) %> and work</span>
-    </span>
+<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, Needs You and the
+    core sections, then what plugins add, and at the foot the page filter (/), plugins' actions,
+    the shortcut sheet (?) and the signed-in person, whose menu holds their account, settings,
+    the theme, help and signing out. The current section is marked (aria-current). %>
+<nav class="sidebar" id="sidenav" aria-label="Main">
+  <div class="sidebar__top">
+    <%= link_to root_path, class: "sidebar__brand", title: "Needs You (g h)", data: { keys: "g h" } do %>
+      <span class="sidebar__logo"><%= render "layouts/shared/logo_mark" %></span>
+      <span class="sidebar__brand-text">
+        <span class="sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
+        <span class="sidebar__brand-sub"><%= term(:client, count: 2) %> and work</span>
+      </span>
+    <% end %>
+  </div>
+
+  <%= sidebar_section "Workspace" %>
+  <%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %>
+  <%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %>
+  <%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %>
+  <%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %>
+  <%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %>
+
+  <% if nav_plugin_items.any? %>
+    <%= sidebar_section "Plugins" %>
+    <%= plugin_sidenav_links %>
   <% end %>
 
-  <nav class="sidenav__nav">
-    <div class="ui-sidebar__group">
-      <p class="sidenav__heading">Workspace</p>
-      <ul class="sidenav__list">
-        <li><%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %></li>
-        <li><%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %></li>
-        <li><%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %></li>
-        <li><%= sidenav_link_to term(:work), todos_path, icon: "board", keys: "g w" %></li>
-        <li><%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %></li>
-      </ul>
-    </div>
-
-    <% if nav_plugin_items.any? %>
-      <div class="ui-sidebar__group">
-        <p class="sidenav__heading">Plugins</p>
-        <ul class="sidenav__list">
-          <%= plugin_sidenav_links %>
-        </ul>
-      </div>
-    <% end %>
-  </nav>
-
-  <div class="sidenav__foot">
+  <div class="sidebar__tools">
     <%= render "layouts/shared/nav_filter" %>
-    <div class="sidenav__tools">
-      <%= plugin_slots(:nav_actions) %>
-      <%= render "layouts/shared/shortcuts" %>
-    </div>
-
-    <div class="ui-sidebar__user" data-controller="ui--popover" data-ui--popover-side-value="top">
-      <button type="button" class="ui-sidebar__user-button" popovertarget="sidenav_user_menu" title="<%= Current.user.display_name %>">
-        <%= avatar_preview_tag Current.user, hidden_for_screen_reader: true, class: "ui-sidebar__avatar" %>
-        <span class="ui-sidebar__user-text sidenav__label">
-          <span class="ui-sidebar__user-name"><%= Current.user.display_name %></span>
-          <span class="ui-sidebar__user-email"><%= Current.user.email_address %></span>
-        </span>
-        <%= icon_tag "menu-dots-vertical", class: "sidenav__label" %>
-      </button>
-      <div class="ui-menu ui-sidebar__user-menu" id="sidenav_user_menu" popover data-ui--popover-target="popover">
-        <div class="ui-menu__label">
-          <span class="ui-sidebar__user-name"><%= Current.user.display_name %></span>
-          <span class="ui-sidebar__user-email"><%= Current.user.email_address %></span>
-        </div>
-        <hr class="ui-menu__separator">
-        <%= link_to settings_account_path, class: "ui-menu__item" do %>
-          <%= icon_tag "person" %> <span>Your account</span>
-        <% end %>
-        <%= link_to settings_path, class: "ui-menu__item", data: { keys: "g s" }, aria: { current: ("page" if request.path.start_with?(settings_path)) } do %>
-          <%= icon_tag "settings-outline" %> <span>Settings and help</span> <kbd class="ui-menu__shortcut">G S</kbd>
-        <% end %>
-        <button type="button" class="ui-menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
-          <%= icon_tag "moon", class: "theme-toggle__moon" %>
-          <%= icon_tag "sun", class: "theme-toggle__sun" %>
-          <span>Light or dark</span>
-        </button>
-        <button type="button" class="ui-menu__item" data-controller="ui--proxy" data-action="ui--proxy#click" data-ui--proxy-selector-param="[data-keys='?']">
-          <%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd class="ui-menu__shortcut">?</kbd>
-        </button>
-        <hr class="ui-menu__separator">
-        <%= button_to session_path, method: :delete, class: "ui-menu__item", form: { class: "display-contents" } do %>
-          <%= icon_tag "logout" %> <span>Sign out</span>
-        <% end %>
-      </div>
-    </div>
+    <%= plugin_slots(:nav_actions) %>
+    <%= render "layouts/shared/shortcuts" %>
   </div>
-</aside>
+
+  <div class="sidebar__footer">
+    <% account = capture do %>
+      <%= avatar_preview_tag Current.user, hidden_for_screen_reader: true, class: "sidebar__avatar" %>
+      <span class="sidebar__account-text">
+        <span class="sidebar__label"><%= Current.user.display_name %></span>
+        <span class="sidebar__account-email"><%= Current.user.email_address %></span>
+      </span>
+    <% end %>
+    <%= menu account, up: true, trigger_class: "sidebar__account" do %>
+      <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), settings_account_path %>
+      <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Settings and help"), tag.kbd("G S") ]), settings_path,
+            data: { keys: "g s" }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
+      <button type="button" class="menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
+        <%= icon_tag "moon", class: "theme-toggle__moon" %>
+        <%= icon_tag "sun", class: "theme-toggle__sun" %>
+        <span>Light or dark</span>
+      </button>
+      <button type="button" class="menu__item" data-controller="rune-proxy" data-action="rune-proxy#click" data-rune-proxy-selector-param="[data-keys='?']">
+        <%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd>?</kbd>
+      </button>
+      <%= menu_divider %>
+      <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), session_path, method: :delete %>
+    <% end %>
+  </div>
+</nav>

@@ -1,25 +1,23 @@
 <% @page_title = "Edit #{@contact.name_was}" %>
 
-<% content_for :header do %>
-  <%= parent_page @contact.client.name, @contact.client %>
-<% end %>
+<%= parent_page @contact.client.name, @contact.client %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">A contact at <%= link_to @contact.client.name, @contact.client, class: "txt-link" %></p>
+      <p class="record-page__description">A contact at <%= link_to @contact.client.name, @contact.client %></p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <%= render "contacts/form", contact: @contact %>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= render "contacts/sidebar", client: @contact.client, contact: @contact %>
 
     <% if can?(:delete_records) %>

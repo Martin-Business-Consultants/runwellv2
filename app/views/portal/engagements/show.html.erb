@@ -2,13 +2,12 @@
 
 <% content_for :header do %>
   <%= parent_page term(:engagement, count: 2), portal_root_path %>
-  <nav aria-label="Breadcrumb">
-    <ol class="ui-breadcrumb">
-      <li><%= link_to term(:engagement, count: 2), portal_root_path %></li>
-      <li><span aria-current="page"><%= @engagement.ref %></span></li>
-    </ol>
+  <nav class="crumbs portal-page-header__crumbs" aria-label="Breadcrumb">
+    <%= link_to term(:engagement, count: 2), portal_root_path %>
+    <span class="crumbs__sep" aria-hidden="true">/</span>
+    <span class="crumbs__current" aria-current="page"><%= @engagement.ref %></span>
   </nav>
-  <h1 class="page-title"><%= @page_title %></h1>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <div class="portal-page-header__meta">
     <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
   </div>
@@ -21,79 +20,77 @@
 <div class="portal-grid">
   <div class="portal-grid__main">
     <% if @engagement.description.present? %>
-      <section class="ui-card portal-card">
-        <header class="ui-card__header">
-          <h2 class="ui-card__title">Overview</h2>
+      <section class="card portal-card">
+        <header class="card__head">
+          <h2 class="card__title">Overview</h2>
         </header>
-        <div class="ui-card__content portal-prose">
+        <div class="card__content portal-prose">
           <%= rich_text @engagement.description %>
         </div>
       </section>
     <% end %>
 
-    <section class="ui-card ui-card--flush portal-card">
-      <header class="ui-card__header ui-card__header--bordered">
-        <h2 class="ui-card__title"><%= term(:scope_item, count: 2) %></h2>
-        <p class="ui-card__description">What this covers, and how far along each part is.</p>
+    <section class="card card--flush portal-card">
+      <header class="card__head card__head--bordered">
+        <h2 class="card__title"><%= term(:scope_item, count: 2) %></h2>
+        <p class="card__hint">What this covers, and how far along each part is.</p>
       </header>
       <% if items.any? %>
-        <ul class="ui-item-group">
+        <ul class="list">
           <% items.each do |item| %>
             <%# herb:key item.id %>
-            <li class="ui-item ui-item--sm">
-              <div class="ui-item__content">
-                <p class="ui-item__title"><%= item.description %></p>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= item.description %></p>
               </div>
-              <div class="ui-item__actions">
+              <div class="list-row__actions">
                 <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
               </div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="portal-card__empty">Nothing listed yet.</p>
+        <%= empty_state "Nothing listed yet.", compact: true %>
       <% end %>
     </section>
 
-    <section class="ui-card ui-card--flush portal-card">
-      <header class="ui-card__header ui-card__header--bordered">
-        <h2 class="ui-card__title"><%= term(:work) %></h2>
-        <p class="ui-card__description">What we’re doing on it for you.</p>
+    <section class="card card--flush portal-card">
+      <header class="card__head card__head--bordered">
+        <h2 class="card__title"><%= term(:work) %></h2>
+        <p class="card__hint">What we’re doing on it for you.</p>
       </header>
       <% if todos.any? %>
-        <ul class="ui-item-group">
+        <ul class="list">
           <% todos.each do |todo| %>
             <%# herb:key todo.id %>
-            <li class="ui-item ui-item--sm">
-              <div class="ui-item__content">
-                <p class="ui-item__title"><%= todo.title %></p>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= todo.title %></p>
                 <% if todo.due_on %>
-                  <p class="ui-item__description">Due <%= l todo.due_on, format: :short %></p>
+                  <p class="list-row__desc">Due <%= l todo.due_on, format: :short %></p>
                 <% end %>
               </div>
-              <div class="ui-item__actions">
+              <div class="list-row__actions">
                 <%= status_tag todo.status.humanize, highlight: todo.status == "done" %>
               </div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="portal-card__empty">No work to show yet.</p>
+        <%= empty_state "No work to show yet.", compact: true %>
       <% end %>
     </section>
   </div>
 
   <aside class="portal-grid__side">
-    <section class="ui-card portal-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+    <section class="card portal-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content">
-        <dl class="portal-facts">
-          <div class="portal-facts__row">
-            <dt>Type</dt>
-            <dd><%= @engagement.label_name %></dd>
-          </div>
+      <div class="card__content">
+        <dl class="details portal-details">
+          <dt>Type</dt>
+          <dd><%= @engagement.label_name %></dd>
         </dl>
         <%= render "custom_fields/values", record: @engagement, client: true %>
       </div>
@@ -102,7 +99,7 @@
     <%= render "portal/engagements/documents", documents: @engagement.client_documents %>
 
     <% if panels.present? %>
-      <section class="ui-card portal-card portal-slot">
+      <section class="card portal-card portal-slot">
         <%= panels %>
       </section>
     <% end %>

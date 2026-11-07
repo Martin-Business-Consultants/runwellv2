@@ -5,17 +5,17 @@
 <% state ||= "open" %>
 <% picked = item.is_a?(Integer) ? engagement.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
-<section class="ui-card record-card" id="work">
-  <header class="ui-card__header">
-    <h2 class="ui-card__title"><%= term(:work) %></h2>
-    <p class="ui-card__description">
+<section class="card record-card" id="work">
+  <header class="card__head">
+    <h2 class="card__title"><%= term(:work) %></h2>
+    <p class="card__hint">
       <% if focus %>
         Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.
       <% else %>
         By <%= term(:scope_item).downcase %>, soonest due first.
       <% end %>
     </p>
-    <div class="ui-card__action">
+    <div class="card__action">
       <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work).downcase, param: :work, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
     </div>
@@ -28,17 +28,17 @@
   <% groups = shown.group_by(&:scope_item) %>
   <% items = (engagement.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
 
-  <div class="ui-card__content record-card__stack">
+  <div class="card__content record-card__stack">
     <% if focus %>
       <% done = todos.count { |todo| todo.status == "done" } %>
-      <div class="work-focus">
-        <div class="work-focus__text">
-          <h3 class="work-focus__title overflow-ellipsis"><%= picked ? picked.description : "Other work" %></h3>
-          <span class="work-focus__count"><%= done %> of <%= todos.size %> done</span>
+      <div class="list-row list-row--outline work-focus">
+        <div class="list-row__content">
+          <h3 class="list-row__title work-focus__title"><%= picked ? picked.description : "Other work" %></h3>
+          <span class="list-row__desc work-focus__count"><%= done %> of <%= todos.size %> done</span>
         </div>
         <% if picked %>
           <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>
-          <%= link_to picked, class: "ui-button ui-button--outline ui-button--sm", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
+          <%= link_to picked, class: "btn btn--secondary btn--sm", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
             <span>Open</span>
             <%= icon_tag "arrow-right" %>
           <% end %>
@@ -57,7 +57,7 @@
       <div class="work-group">
         <% unless single || focus %>
           <div class="work-group__header">
-            <%= link_to item.description, engagement_path(engagement, request.query_parameters.merge("tab" => "work", "item" => item.id)), class: "work-group__name overflow-ellipsis" %>
+            <%= link_to item.description, engagement_path(engagement, request.query_parameters.merge("tab" => "work", "item" => item.id)), class: "work-group__name" %>
             <span class="work-group__count"><%= everything.count { |todo| todo.status == "done" } %> of <%= everything.size %></span>
             <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
           </div>
@@ -94,13 +94,13 @@
     <% elsif shown.none? %>
       <p class="record-card__empty">
         <%= state == "open" ? "Nothing open: all #{todos.size} done." : "Nothing done yet." %>
-        <%= link_to "Show all", engagement_path(engagement, request.query_parameters.merge("work" => "all")), class: "txt-link" %>
+        <%= link_to "Show all", engagement_path(engagement, request.query_parameters.merge("work" => "all")) %>
       </p>
     <% end %>
   </div>
 
   <% unless engagement.closed? %>
-    <footer class="ui-card__footer">
+    <footer class="card__footer">
       <%= render "todos/add", engagement: engagement, scope_item: picked %>
     </footer>
   <% end %>

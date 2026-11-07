@@ -1,17 +1,17 @@
 <%# locals: (query_terms:, target_turbo_frame:, turbo_action: nil, cancel_path: nil) %>
-<%# The Command input: a search icon, the field on a bottom border, and ✕ to clear or close. %>
+<%# The search box: a search icon, the field, and ✕ to clear or close. %>
 <%= form_with url: search_path, method: :get,
-  class: "search__form",
+  class: "search-box",
   data: {
     controller: class_names("search-form", form: cancel_path),
     action: class_names("search-form:reset->bar#reset", "keydown.esc->form#cancel": cancel_path),
     bar_target: "form",
     turbo_action: turbo_action,
     turbo_frame: target_turbo_frame } do |form| %>
-  <span class="icon icon--search search__icon" aria-hidden="true"></span>
-  <%= form.label :q, "Search Runwell", class: "for-screen-reader" %>
+  <%= icon_tag "search", class: "search-box__icon" %>
+  <%= form.label :q, "Search Runwell", class: "visually-hidden" %>
   <%= text_field_tag :q, query_terms,
-        class: "search__input",
+        class: "search-box__input",
         type: "search",
         placeholder: "Search #{term(:client, count: 2).downcase}, #{term(:work).downcase}, notes…",
         autocomplete: "off",
@@ -21,9 +21,8 @@
           bar_target: "searchInput",
           action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
   <button hidden>Search</button>
-  <button type="button" class="search__reset ui-button ui-button--ghost ui-button--icon-sm" data-action="search-form#clearInput">
-    <span class="icon icon--close" aria-hidden="true"></span>
-    <span class="for-screen-reader">Close search</span>
+  <button type="button" class="icon-button search-box__reset" title="Close search" aria-label="Close search" data-action="search-form#clearInput">
+    <%= icon_tag "close" %>
   </button>
 
   <% if cancel_path %>

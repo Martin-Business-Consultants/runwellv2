@@ -1,20 +1,24 @@
-<%# The quick action as shadcn's Dialog: a title, where it goes (the picker), the action's own form. %>
+<%# The quick action as a modal dialog: a title, where it goes (the picker), the action's own form. %>
 <turbo-frame id="quick_action">
   <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
-    <dialog class="ui-dialog ui-dialog--lg quick-action" aria-labelledby="quick_action_title" data-dialog-target="dialog">
-      <header class="ui-dialog__header quick-action__header">
-        <h2 class="ui-dialog__title" id="quick_action_title"><%= @action.title %></h2>
-        <p class="ui-dialog__description">Choose where it goes, then fill it in. <kbd class="ui-kbd hide-on-touch">⌘</kbd><kbd class="ui-kbd hide-on-touch">↵</kbd> saves.</p>
-      </header>
-      <button type="button" class="ui-dialog__close ui-button ui-button--ghost ui-button--icon-sm quick-action__close" title="Close" data-action="dialog#close">
-        <%= icon_tag "close" %>
-        <span class="for-screen-reader">Close</span>
-      </button>
-      <div class="ui-field quick-action__where">
-        <span class="ui-label">Where it goes</span>
-        <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
+    <dialog class="dialog dialog--lg quick-action" aria-labelledby="quick_action_title" data-dialog-target="dialog">
+      <div class="dialog__box">
+        <header class="dialog__header quick-action__header">
+          <div class="quick-action__heading">
+            <h2 class="dialog__title" id="quick_action_title"><%= @action.title %></h2>
+            <p class="dialog__hint">Choose where it goes, then fill it in. <kbd class="hide-on-touch">⌘</kbd><kbd class="hide-on-touch">↵</kbd> saves.</p>
+          </div>
+          <button type="button" class="icon-button" title="Close" data-action="dialog#close">
+            <%= icon_tag "close" %>
+            <span class="visually-hidden">Close</span>
+          </button>
+        </header>
+        <div class="field">
+          <span class="field__label">Where it goes</span>
+          <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
+        </div>
+        <%= render @action.partial, form_id: "quick_action_form" %>
       </div>
-      <%= render @action.partial, form_id: "quick_action_form" %>
     </dialog>
   </div>
 </turbo-frame>

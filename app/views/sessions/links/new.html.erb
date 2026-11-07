@@ -1,20 +1,20 @@
 <% @page_title = "Sign in by link" %>
 
 <div class="auth">
-  <section class="ui-card auth__card">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title">Email me a link</h1>
-      <p class="ui-card__description">If you’ve switched on sign-in by link (Settings › Your account), we’ll email you one. No password needed.</p>
+  <section class="card auth__card">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title">Email me a link</h1>
+      <p class="card__hint">If you’ve switched on sign-in by link (Settings › Your account), we’ll email you one. No password needed.</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: session_link_request_path, class: "auth__form", data: { controller: "form" } do |form| %>
-        <div class="ui-field">
-          <%= form.label :email_address, "Email", class: "ui-label" %>
-          <%= form.email_field :email_address, required: true, class: "ui-input", autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
+        <div class="field">
+          <%= form.label :email_address, "Email", class: "field__label" %>
+          <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
         </div>
 
-        <button type="submit" class="ui-button ui-button--block" data-form-target="submit">Send the link</button>
+        <button type="submit" class="btn btn--primary btn--block" data-form-target="submit">Send the link</button>
       <% end %>
     </div>
   </section>

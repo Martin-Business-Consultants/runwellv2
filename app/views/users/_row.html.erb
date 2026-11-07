@@ -5,20 +5,20 @@
     <%= bulk_select_cell person, person.display_name %>
   <% end %>
   <td data-column="name">
-    <span class="flex align-center gap-half">
-      <%= avatar_preview_tag person, hidden_for_screen_reader: true, class: "people__avatar" %>
-      <%= link_to person.display_name, user_path(person), class: "txt-ink font-weight-bold" %><%= " (you)" if person == Current.user %>
+    <span class="users-table__name">
+      <%= avatar_preview_tag person, hidden_for_screen_reader: true %>
+      <span><%= link_to person.display_name, user_path(person) %><%= " (you)" if person == Current.user %></span>
     </span>
   </td>
-  <td class="txt-subtle" data-column="email"><%= person.email_address %></td>
+  <td class="muted" data-column="email"><%= person.email_address %></td>
   <td data-column="role"><%= person.role.capitalize %></td>
   <td data-column="status">
     <% if person.deactivated? %>
       <%= status_tag "Deactivated" %>
     <% elsif person.two_factor? %>
-      <span class="status-tag status-tag--positive" title="Signs in with a code from an authenticator app">Two-factor</span>
+      <%= badge "Two-factor", tone: :ok, title: "Signs in with a code from an authenticator app" %>
     <% elsif Setting.current.require_two_factor? %>
-      <span class="status-tag status-tag--waiting" title="Sets it up on their next page">Two-factor pending</span>
+      <%= badge "Two-factor pending", tone: :attention, title: "Sets it up on their next page" %>
     <% else %>
       <%= status_tag "Active" %>
     <% end %>

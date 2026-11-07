@@ -5,7 +5,7 @@
     asks for the ref so it can't happen by accident. It's always on the page and state only shows
     it, so opening it never waits on the server. %>
 <div class="erase-engagement" data-controller="state-focus" data-state-focus-state-value="erasing">
-  <button type="button" class="ui-button ui-button--ghost ui-button--sm txt-negative" data-herb-set="erasing=true" hidden="<%= erasing %>">
+  <button type="button" class="btn btn--ghost btn--sm engagement-finish__danger" data-herb-set="erasing=true" hidden="<%= erasing %>">
     <%= icon_tag "trash" %>
     <span>Delete permanently</span>
   </button>
@@ -16,13 +16,13 @@
         It removes the <%= term(:engagement).downcase %> with its <%= term(:scope_item, count: 2).downcase %>, its <%= term(:work).downcase %>,
         notes, documents and history. There’s no undo; the <%= term(:client).downcase %> keeps one note that it was deleted.
       </span>
-      <label class="ui-field">
-        <span class="ui-label">Type <strong><%= engagement.ref %></strong> to confirm</span>
-        <%= form.text_field :confirm_ref, class: "ui-input", autocomplete: "off", required: true, autofocus: true, aria: { label: "Type #{engagement.ref} to confirm" } %>
+      <label class="field">
+        <span class="field__label">Type <strong><%= engagement.ref %></strong> to confirm</span>
+        <%= form.text_field :confirm_ref, autocomplete: "off", required: true, autofocus: true, aria: { label: "Type #{engagement.ref} to confirm" } %>
       </label>
       <div class="engagement-finish__actions">
-        <button type="submit" class="ui-button ui-button--destructive ui-button--sm">Delete <%= engagement.ref %> permanently</button>
-        <button type="button" class="ui-button ui-button--ghost ui-button--sm" data-keys="esc" data-herb-reset="erasing">Cancel</button>
+        <button type="submit" class="btn btn--danger btn--sm">Delete <%= engagement.ref %> permanently</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="erasing">Cancel</button>
       </div>
     <% end %>
   </div>

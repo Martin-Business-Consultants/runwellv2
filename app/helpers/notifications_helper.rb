@@ -2,7 +2,7 @@ module NotificationsHelper
   def notification_tag(notification, &)
     tag.div id: dom_id(notification), class: "tray__item tray__item--notification notification", data: { navigable_list_target: "item", filter_target: "item" } do
       link_to(notification_path(notification),
-        class: [ "ui-item ui-item--sm notification__link card--notification", { "unread": !notification.read? } ],
+        class: class_names("list-row notification__link", unread: !notification.read?),
         data: { turbo_frame: "_top", badge_target: "unread", action: "badge#update dialog#close" },
         &)
     end
@@ -12,7 +12,7 @@ module NotificationsHelper
     if notification.read?
       button_to url,
           method: :delete,
-          class: "notification__toggle ui-button ui-button--ghost ui-button--icon-sm",
+          class: "notification__toggle icon-button",
           title: "Mark as unread",
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
@@ -20,12 +20,12 @@ module NotificationsHelper
       end
     else
       button_to url,
-          class: "notification__toggle ui-button ui-button--ghost ui-button--icon-sm",
+          class: "notification__toggle icon-button",
           title: "Mark as read",
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("check"))
-        concat(tag.span(notification.unread_count, class: "badge-count")) if notification.unread_count > 1
+        concat(tag.span(notification.unread_count, class: "count notification__count")) if notification.unread_count > 1
       end
     end
   end

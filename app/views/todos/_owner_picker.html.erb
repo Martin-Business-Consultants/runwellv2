@@ -13,14 +13,14 @@
   <%= render "todos/owners", todo: todo, labelled: labelled %>
 
   <%= popup_menu label: "Who’s on #{todo.title}", fixed: true do %>
-    <input type="search" class="input input--transparent txt-small full-width owner-picker__search" placeholder="Who’s on it…" autocomplete="off" aria-label="Find a person" data-1p-ignore="true"
+    <input type="search" class="owner-picker__search" placeholder="Who’s on it…" autocomplete="off" aria-label="Find a person" data-1p-ignore="true"
       data-filter-target="input" data-dialog-target="focusMouse" data-action="input->filter#filter">
-    <%= form_with url: todo_assignments_path(todo), method: :post, class: "full-width" do %>
+    <%= form_with url: todo_assignments_path(todo), method: :post do %>
       <% if labelled %>
         <input type="hidden" name="labelled" value="1">
       <% end %>
       <ul class="popup__list" role="group" data-picker-target="list"></ul>
     <% end %>
-    <p class="owner-picker__hint txt-x-small txt-subtle margin-none">The first on leads.</p>
+    <p class="owner-picker__hint">The first on leads.</p>
   <% end %>
 </div>

@@ -2,18 +2,19 @@
 <%# The quick action tray, bottom right (A): a popover menu: a record picker (the
     record on screen, or any other) over an entry per action. The entries submit one GET form
     carrying the picked record; each action's form opens in a modal (quick_actions#new).
-    Plugins add actions with Runwell::Plugins.quick_action. %>
+    Plugins add actions with Runwell::Plugins.quick_action. Its toggle is out of sight (A clicks
+    it), and the menu stacks in reverse, so the picker sits above the actions. %>
 <% record = current_record %>
 <section class="tray tray--actions" data-controller="dialog" data-dialog-sizing-value="false" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>
   <%# g w n opens the work form, on the engagement or client on screen (or the work's). %>
-  <a href="<%= new_quick_action_path(kind: "work", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g w n" class="for-screen-reader">Add <%= term(:work).downcase %></a>
+  <a href="<%= new_quick_action_path(kind: "work", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g w n" class="visually-hidden">Add <%= term(:work).downcase %></a>
 
   <dialog class="tray__dialog" aria-label="Quick actions" data-dialog-target="dialog">
     <% QuickAction.all.each do |action| %>
       <%# herb:key action.key %>
-      <div class="tray__item tray__item--action">
-        <button type="submit" form="quick_actions_form" name="kind" value="<%= action.key %>" class="ui-menu__item quick-action__item" data-action="dialog#close">
+      <div class="tray__item">
+        <button type="submit" form="quick_actions_form" name="kind" value="<%= action.key %>" class="menu__item" data-action="dialog#close">
           <%= icon_tag action.icon %>
           <span><%= action.title %></span>
         </button>
@@ -22,8 +23,8 @@
     <div class="tray__item tray__item--picker">
       <%= render "quick_actions/picker", records: QuickAction.records(record), record: record, form_id: "quick_actions_form", prefix: "On" %>
     </div>
-    <div class="tray__item tray__item--label">
-      <span class="ui-menu__label">Quick actions</span>
+    <div class="tray__item">
+      <span class="menu__label">Quick actions</span>
     </div>
   </dialog>
 

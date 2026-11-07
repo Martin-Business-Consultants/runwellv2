@@ -9,17 +9,15 @@
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 <% next_step = engagement_next_step(@engagement) %>
 
-<% content_for :header do %>
-  <%= parent_page term(:engagement, count: 2), engagements_path %>
-<% end %>
+<%= parent_page term(:engagement, count: 2), engagements_path %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-meta record-page__description">
         <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
-        <%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %>
+        <%= link_to @engagement.client.name, @engagement.client %>
         <span><%= @engagement.label_name %> · <%= @engagement.recurring? ? "Recurring" : "Fixed scope" %></span>
         <% if @engagement.internal? %>
           <span>Internal</span>
@@ -30,8 +28,8 @@
         <% end %>
       </p>
     </div>
-    <div class="page-heading__actions">
-      <%= link_to edit_engagement_path(@engagement), class: "ui-button ui-button--outline", data: { keys: "e" } do %>
+    <div class="button-row">
+      <%= link_to edit_engagement_path(@engagement), class: "btn btn--secondary", data: { keys: "e" } do %>
         <%= icon_tag "pencil" %>
         <span>Edit</span>
         <kbd class="hide-on-touch">E</kbd>
@@ -40,26 +38,17 @@
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Overview</h2>
+  <div class="record-page__main">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Overview</h2>
         <% if next_step %>
-          <p class="ui-card__description engagement-next-step"><%= next_step %></p>
+          <p class="card__hint"><%= next_step %></p>
         <% end %>
       </header>
-      <% if @engagement.description.present? || @engagement.estimate_notes.present? %>
-        <div class="ui-card__content record-card__stack">
-          <% if @engagement.description.present? %>
-            <div class="record-card__prose"><%= rich_text @engagement.description %></div>
-          <% end %>
-
-          <% if @engagement.estimate_notes.present? %>
-            <div class="record-card__aside-note">
-              <p class="record-card__aside-label">Estimate notes <span class="ui-badge ui-badge--outline">Internal</span></p>
-              <div class="record-card__prose"><%= rich_text @engagement.estimate_notes %></div>
-            </div>
-          <% end %>
+      <% if @engagement.description.present? %>
+        <div class="card__content">
+          <div class="record-card__prose"><%= rich_text @engagement.description %></div>
         </div>
       <% end %>
     </section>
@@ -86,25 +75,25 @@
     </turbo-frame>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= render "engagements/sidebar", engagement: @engagement, current: (tab == "work" ? (@work_item || "all") : nil) %>
     <%= plugin_slots(:engagement_aside, engagement: @engagement) %>
 
     <% if can?(:close_engagements) || (@engagement.closed? && can?(:erase_engagements)) %>
-      <section class="ui-card record-card">
-        <header class="ui-card__header">
+      <section class="card record-card">
+        <header class="card__head">
           <% if @engagement.closed? %>
-            <h2 class="ui-card__title"><%= @engagement.state_label %></h2>
-            <p class="ui-card__description">Off the open list. Its <%= term(:work).downcase %> and history stay.</p>
+            <h2 class="card__title"><%= @engagement.state_label %></h2>
+            <p class="card__hint">Off the open list. Its <%= term(:work).downcase %> and history stay.</p>
           <% else %>
-            <h2 class="ui-card__title">Finish</h2>
-            <p class="ui-card__description">Mark it complete once it’s delivered, or cancel it.</p>
+            <h2 class="card__title">Finish</h2>
+            <p class="card__hint">Mark it complete once it’s delivered, or cancel it.</p>
           <% end %>
         </header>
-        <div class="ui-card__content record-card__stack">
+        <div class="card__content record-card__stack">
           <% if can?(:close_engagements) %>
             <% if @engagement.closed? %>
-              <%= button_to reopen_engagement_path(@engagement), class: "ui-button ui-button--outline ui-button--sm", form_class: "engagement-finish" do %>
+              <%= button_to reopen_engagement_path(@engagement), class: "btn btn--secondary btn--sm" do %>
                 <%= icon_tag "refresh" %> <span>Reopen</span>
               <% end %>
             <% else %>

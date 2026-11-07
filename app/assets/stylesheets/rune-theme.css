@@ -1,0 +1,66 @@
+/* rune_ui in Runwell's theme. rune_ui's tokens (in the `rune.tokens` layer) are pointed at
+/* Runwell's palette (_global.css, the --lch-* steps of docs/theming.md), unlayered, so Settings >
+/* Appearance (schemes, corners, font, text size) and a custom theme reach every rune component
+/* without knowing about it. Tokens the two share by name (--font-sans, --font-mono,
+/* --main-width, --shadow-popover, --radius-scale, --radius-control, --radius-pill, --text-scale)
+/* need nothing here: Runwell's values already apply.
+/*
+/* Depth follows rune's: the page (behind the nav) a step off the panel: lighter than it in
+/* light, darker in dark. */
+
+:root {
+  --page: oklch(var(--lch-ink-lightest));
+  --panel: oklch(var(--lch-canvas));
+  --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 70%, oklch(var(--lch-canvas)));
+  --layer-2: oklch(var(--lch-ink-lightest));
+  --layer-3: oklch(var(--lch-ink-lighter));
+  --text: oklch(var(--lch-ink-darkest));
+  --text-muted: oklch(var(--lch-ink-dark));
+  --text-faint: oklch(var(--lch-ink-medium));
+  --line: oklch(var(--lch-ink-lighter));
+  --line-strong: oklch(var(--lch-ink-light));
+  --hover: color-mix(in oklch, oklch(var(--lch-ink-lighter)) 55%, transparent);
+  --accent: oklch(var(--lch-accent));
+  --accent-hover: color-mix(in oklch, oklch(var(--lch-accent)) 85%, oklch(var(--lch-ink-darkest)));
+  --accent-ink: oklch(var(--lch-ink-inverted));
+  --accent-soft: oklch(var(--lch-accent-lightest));
+  --attention: oklch(var(--lch-yellow-dark));
+  --danger: var(--color-negative);
+  --ok: var(--color-positive);
+}
+
+html[data-theme="dark"] {
+  --page: oklch(var(--lch-canvas) / 100%);
+  --panel: oklch(var(--lch-ink-lightest));
+  --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+  --layer-2: oklch(var(--lch-ink-lighter));
+  --layer-3: oklch(var(--lch-ink-light));
+  --line: oklch(var(--lch-white) / 9%);
+  --line-strong: oklch(var(--lch-white) / 15%);
+  --hover: oklch(var(--lch-white) / 5%);
+  --attention: oklch(var(--lch-yellow-medium));
+  --danger: oklch(var(--lch-red-medium));
+  --ok: oklch(var(--lch-green-medium));
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --page: oklch(var(--lch-canvas) / 100%);
+    --panel: oklch(var(--lch-ink-lightest));
+    --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+    --layer-2: oklch(var(--lch-ink-lighter));
+    --layer-3: oklch(var(--lch-ink-light));
+    --line: oklch(var(--lch-white) / 9%);
+    --line-strong: oklch(var(--lch-white) / 15%);
+    --hover: oklch(var(--lch-white) / 5%);
+    --attention: oklch(var(--lch-yellow-medium));
+    --danger: oklch(var(--lch-red-medium));
+    --ok: oklch(var(--lch-green-medium));
+  }
+}
+
+/* Text size (Settings > Appearance, or a person's own): rune_ui sizes everything in rem from
+/* html's calc(1rem * --text-scale). */
+:root[data-text-size="small"] { --text-scale: 0.875; }
+:root[data-text-size="large"] { --text-scale: 1.125; }
+:root[data-text-size="larger"] { --text-scale: 1.25; }

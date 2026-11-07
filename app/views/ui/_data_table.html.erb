@@ -1,5 +1,5 @@
 <%# locals: (id:, columns:, rows:, row:, as:, row_locals: nil, page: nil, selectable: nil, actions: nil, fixed: nil, empty: nil) %>
-<%# Runwell UI's data table (shadcn/ui's data-table, on the server): sortable headers, a checkbox
+<%# Runwell's data table (on rune_ui's .table): sortable headers, a checkbox
     column for bulk actions, a Columns menu and pages underneath.
 
       columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
@@ -13,15 +13,15 @@
     fixed: false, the columns' widths hold still (table_colgroup). %>
 <% hideable = columns.select(&:hideable) %>
 <% fixed = true if fixed.nil? %>
-<div class="ui-data-table" data-controller="ui--data-table" data-ui--data-table-key-value="<%= id %>">
+<div class="data-table-wrap" data-controller="data-table" data-data-table-key-value="<%= id %>">
   <% if hideable.size > 1 && !actions %>
-    <div class="ui-data-table__toolbar">
+    <div class="data-table-wrap__toolbar">
       <%= render "ui/data_table_columns", id: id, columns: hideable %>
     </div>
   <% end %>
 
-  <div class="ui-data-table__container">
-    <table class="<%= class_names("data-table ui-data-table__table", "data-table--fixed": fixed) %>" id="<%= id %>_table" data-ui--data-table-target="table">
+  <div class="table-wrap">
+    <table class="<%= class_names("table data-table", "data-table--fixed": fixed) %>" id="<%= id %>_table" data-data-table-target="table">
       <% if fixed %>
         <%= ui_data_table_colgroup columns, selectable: selectable, actions: actions %>
       <% end %>
@@ -35,11 +35,11 @@
             <%= ui_data_table_th column %>
           <% end %>
           <% if actions %>
-            <th class="ui-data-table__actions-header">
+            <th class="data-table__actions-header">
               <% if hideable.size > 1 %>
                 <%= render "ui/data_table_columns", id: id, columns: hideable, icon: true %>
               <% else %>
-                <span class="for-screen-reader">Actions</span>
+                <span class="visually-hidden">Actions</span>
               <% end %>
             </th>
           <% end %>

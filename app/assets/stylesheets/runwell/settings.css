@@ -1,0 +1,243 @@
+/* Settings (every page), Users and Invitations, on rune_ui's tokens (docs/rune-ui-migration.md). Unlayered, so these win over rune's
+/* components.
+/*
+/* 1 Header and nav   2 A settings page and its sections   3 Lists, choices and small pieces
+/* 4 Pages (Setup, Roles, Plugins, Your menu, Connected apps, Webhooks, Updates, Names,
+/*   Two-factor, Appearance)   5 People (a person's page, the invitation page, the users index) */
+
+/* ======================================================================= 1 Header and nav */
+
+/* "Settings" and its line across both columns of the settings layout (runwell.css 5), over a
+/* rule. It rides in with the nav (settings/_header), so it's the layout's first grid item. */
+.settings-layout:has(.settings-header) { row-gap: var(--s-4); }
+.settings-header { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-5); border-bottom: 1px solid var(--line); }
+.settings-header__description { color: var(--text-muted); font-size: var(--text-read); }
+
+/* The nav (settings/_nav, and a plugin's section_nav): ghost links grouped under small muted
+/* labels, the current one tinted. Sticky beside the page; a scrolling row over it when narrow. */
+.settings-nav { position: sticky; top: var(--s-4); display: flex; flex-direction: column; gap: var(--s-1); max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; }
+/* A heading has room above it, but not the first (a plugin's section_nav_heading comes wrapped
+/* in a span in development, hence the second selector). */
+.settings-nav__heading { display: flex; align-items: center; height: calc(var(--control-h) + var(--s-4)); padding: var(--s-4) var(--s-3) 0; color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.settings-nav > .settings-nav__heading:first-child, .settings-nav > :first-child > .settings-nav__heading:only-child { height: var(--control-h); padding-top: 0; }
+.settings-nav__list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.settings-nav__list--nested { padding-top: 2px; padding-left: var(--s-2); border-left: 1px solid var(--line); margin-left: 1.25rem; }
+.settings-nav__link { display: flex; align-items: center; gap: 6px; height: var(--control-h); padding: 0 var(--s-3); border-radius: var(--radius-control); color: var(--text); font-weight: var(--weight-strong); text-decoration: none; white-space: nowrap; }
+.settings-nav__link:hover { background: var(--hover); color: var(--text); }
+.settings-nav__link[aria-current="page"] { background: var(--layer-2); color: var(--text); }
+.settings-nav__link .icon { flex: 0 0 auto; color: inherit; }
+.settings-nav__link--nested { color: var(--text-muted); font-weight: var(--weight); }
+.settings-nav__link--nested[aria-current="page"] { font-weight: var(--weight-strong); }
+@media (max-width: 860px) {
+  .settings-nav { position: static; flex-direction: row; max-height: none; padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: visible; }
+  .settings-nav__heading { display: none; }
+  .settings-nav__list { flex-direction: row; }
+  .settings-nav__list li { display: contents; }
+  .settings-nav__list--nested { display: contents; }
+}
+
+/* ======================================================================= 2 A settings page and its sections */
+
+/* One column, no cards: sections stacked, each a heading, a muted line and a rule, then what it
+/* holds. --wide (the audit log's table) takes the page's width. */
+.settings-page { display: flex; flex-direction: column; gap: 2.5rem; max-width: 48rem; min-width: 0; }
+.settings-page--wide { max-width: none; }
+.settings-section { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+.settings-section__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-1) var(--s-4); align-items: start; padding-bottom: var(--s-5); border-bottom: 1px solid var(--line); }
+.settings-section__head:last-child { padding-bottom: 0; border-bottom: 0; }
+.settings-section__head:has(> .settings-section__actions) { grid-template-columns: minmax(0, 1fr) auto; }
+.settings-section__head > :is(h1, h2) { grid-column: 1; font-size: calc(var(--text-read) * 1.25); font-weight: var(--weight-strong); line-height: 1.5; letter-spacing: normal; }
+.settings-section__description { grid-column: 1; color: var(--text-muted); font-size: var(--text-read); line-height: 1.5; }
+.settings-section__description code { color: var(--text); }
+.settings-section__actions { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+
+/* Text in a section: an error. And what's pushed to the end of its row (Download CSV, a
+/* plugin's Delete). */
+.settings-error { color: var(--danger); }
+.settings-end { margin-left: auto; }
+
+/* Forms: fields roomier than rune's default, and an input with its button at its end. */
+.settings-form { gap: var(--s-5); min-width: 0; }
+.settings-inline { display: flex; flex-flow: row wrap; align-items: center; gap: var(--s-2); }
+.settings-inline :is(input, select, .secret-field) { flex: 1 1 14rem; min-width: 0; }
+.settings-inline--fit :is(input, select) { flex: 0 0 auto; }
+
+/* A switch with its hint (switch_field) on a settings page: a setting row in rune's card. */
+.settings-group__card .setting-row--field { min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
+
+/* A form opened in place (a <details> whose summary is the button): a bordered box under it. */
+.settings-fold { display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-fold > summary { width: fit-content; }
+/* A field's Change (Fields): at the end of its row, and across the row once open. */
+.settings-field__change[open] { flex-basis: 100%; }
+.settings-field__change[open] > summary { align-self: flex-end; }
+.settings-subform { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+
+/* Email's tabs (rune's tabs over the frame they swap) and the tab's sections under them. */
+.settings-tabs { display: flex; flex-direction: column; gap: var(--s-5); }
+.settings-tabs__panel { display: flex; flex-direction: column; gap: 2.5rem; }
+
+/* Radio cards' group, under its name and line (Appearance, Views). */
+.settings-fieldset { display: grid; gap: var(--s-2); min-width: 0; margin: 0; padding: 0; border: 0; }
+.settings-fieldset > legend { padding: 0 0 var(--s-2); }
+.settings-fieldset > .settings-choices { padding-top: var(--s-1); }
+
+/* ======================================================================= 3 Lists, choices and small pieces */
+
+/* A list: rows in one bordered box, a hairline over each (a shadow, so the wrapper spans Herb
+/* adds in development can't break it; the box clips the first one's). */
+.settings-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); overflow: hidden; }
+.settings-list--scroll { max-height: 28rem; overflow-y: auto; }
+.settings-list .list-row { flex-wrap: wrap; gap: var(--s-3); padding: var(--s-3); border-radius: 0; box-shadow: 0 -1px 0 var(--line); }
+.settings-list .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading); }
+/* A title with a badge or a key beside it. */
+.settings-list .list-row__title:has(.badge, .settings-key) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); white-space: normal; }
+.settings-key { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); }
+
+/* A row of badges (what a plugin adds, a person's role and state). */
+.settings-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* The one thing that can't be undone, in a card tinted the danger colour. */
+.settings-danger { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4); padding: var(--s-4) var(--s-5); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--danger) 4%, var(--panel)); }
+.settings-danger__text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: 2px; min-width: 0; }
+.settings-danger__title { color: var(--danger); font-size: var(--text-ui); }
+.settings-danger__text p { color: var(--text-muted); }
+
+/* Radio cards (Appearance, Views, Your account's text size): a bordered preview, its name under
+/* it, the chosen one edged in the accent. The radio covers the card, invisibly, so it's still a
+/* real, focusable radio. */
+.settings-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--s-4); }
+.settings-choices--wide { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.settings-choice { position: relative; display: grid; gap: var(--s-2); min-width: 0; color: var(--text); font-weight: var(--weight); text-align: center; cursor: pointer; }
+.settings-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; appearance: none; opacity: 0; cursor: pointer; }
+.settings-choice__preview { --icon-size: 1.5rem; display: flex; align-items: center; justify-content: center; height: 5rem; padding: var(--s-1); overflow: hidden; border: 2px solid var(--line); border-radius: var(--radius); background: var(--panel); transition: border-color .15s, box-shadow .15s; }
+.settings-choice:hover .settings-choice__preview { border-color: var(--line-strong); }
+.settings-choice:has(input:checked) .settings-choice__preview { border-color: var(--accent); }
+.settings-choice:has(input:focus-visible) .settings-choice__preview { box-shadow: var(--ring); }
+.settings-choice__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.settings-choice:has(input:checked) .settings-choice__label { font-weight: var(--weight-strong); }
+
+/* Copy buttons (copy_to_clipboard_controller): flash the accent once copied. */
+.btn.settings-copied { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+
+/* A table's centred column (Roles' permissions, a tick or a dash per role). */
+.table :is(th, td).settings-center { text-align: center; }
+
+/* ======================================================================= 4 Pages */
+
+/* Setup: a checklist, a ring that fills in once a step is done. */
+.settings-setup__check { --icon-size: .75rem; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 1.25rem; height: 1.25rem; border: 1.5px solid var(--line-strong); border-radius: 50%; color: var(--accent-ink); }
+.settings-setup__check--done { border-color: var(--accent); background: var(--accent); }
+.settings-setup__title--done { color: var(--text-muted); font-weight: var(--weight); text-decoration: line-through; }
+
+/* Roles: each role beside what it may do; stacked in a narrow sidebar. */
+.settings-roles { display: grid; grid-template-columns: max-content 1fr; gap: var(--s-2) var(--s-5); font-size: var(--text-read); }
+.settings-roles dt { font-weight: var(--weight-strong); }
+.settings-roles dd { color: var(--text-muted); }
+.settings-roles--stacked { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: var(--text-ui); }
+.settings-roles--stacked dd:not(:last-child) { padding-bottom: var(--s-2); }
+
+/* Plugins: cards two or three to a row. Active or Dormant follows the switch the moment it
+/* flips, before the save lands. */
+.settings-plugins { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
+.settings-plugins > .card { height: 100%; }
+.settings-plugins .card__title { line-height: 1.25; }
+.settings-plugins .card__content { flex: 1; color: var(--text-muted); line-height: 1.5; }
+.settings-plugins .card__footer { justify-content: flex-start; }
+.plugin-card__switch { flex-direction: row; align-items: center; }
+.plugin-card:has(.switch input:checked) .plugin-card__dormant,
+.plugin-card:not(:has(.switch input:checked)) .plugin-card__active { display: none; }
+
+/* A change's or an update's log (why it failed). */
+.settings-log { max-height: 16rem; color: var(--danger); font-size: var(--text-meta); }
+.settings-notes { display: flex; flex-direction: column; gap: var(--s-2); max-height: 20rem; overflow-y: auto; }
+
+/* Your menu: each plugin's row, its keys, ↑ ↓ and a switch. A hidden one is faint; the first's
+/* ↑ and the last's ↓ keep their place, unseen. */
+.settings-menu__item--hidden { color: var(--text-faint); }
+.settings-menu__item--hidden .list-row__media { opacity: .5; }
+.settings-menu__down .icon { rotate: 180deg; }
+.settings-menu .icon-button[disabled] { visibility: hidden; }
+
+/* Connected apps: a new token to copy, and each connection's recent calls under Activity. */
+.settings-activity { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-activity > summary { width: fit-content; color: var(--text-faint); font-size: var(--text-meta); }
+.settings-activity > summary:hover { color: var(--text); }
+.settings-activity__calls { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: var(--text-meta); }
+.settings-activity__call { display: flex; align-items: center; gap: var(--s-2); min-width: 0; color: var(--text-faint); }
+.settings-activity__call code { font-size: inherit; color: var(--text); }
+.settings-activity__error { color: var(--danger); }
+.settings-activity__summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Webhooks: one card per endpoint. */
+.settings-webhook .card__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+.settings-webhook .card__hint code { overflow-wrap: anywhere; }
+.settings-webhook .card__action { flex-wrap: wrap; }
+
+/* Updates: what's running. */
+.settings-facts { font-size: var(--text-read); }
+
+/* Names: each type's switch, names and prefix in a row, under a line of headings. */
+.settings-names__type { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) 5rem; align-items: center; gap: var(--s-3); }
+.settings-names__type--head { color: var(--text-muted); }
+
+/* Two-factor setup: numbered steps, the QR code on white (authenticator apps read it best dark
+/* on light, whatever the theme), and a code field six digits wide. */
+.settings-steps { display: flex; flex-direction: column; gap: var(--s-5); margin: 0; padding-left: 1.25rem; font-size: var(--text-read); }
+.settings-steps > li { padding-left: var(--s-1); }
+.settings-steps > li::marker { color: var(--text-muted); font-weight: var(--weight-strong); }
+.settings-steps__step { display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-steps__qr { width: fit-content; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; }
+.settings-steps__key { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+.settings-steps__key > summary { color: var(--text-muted); }
+.settings-steps__key code { font-size: var(--text-ui); }
+.two-factor__qr { display: block; width: 11rem; height: 11rem; }
+input.settings-code { width: 11ch; font-family: var(--font-mono); font-size: var(--text-read); font-weight: 600; letter-spacing: .15em; }
+
+/* Appearance: the custom CSS box, uploads, and the previews inside each radio card. */
+textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(--font-mono); font-size: var(--text-meta); line-height: 1.5; tab-size: 2; white-space: pre; resize: vertical; }
+.settings-upload { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--s-2); width: 100%; height: 5rem; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted); font-weight: var(--weight-strong); cursor: pointer; }
+.settings-upload:hover { background: var(--hover); color: var(--text); }
+.settings-upload:has(input:focus-visible) { box-shadow: var(--ring); }
+.settings-upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.settings-upload__current { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+
+/* appearance.css draws the samples (fonts, sizes, swatches, the theme's little page) and stays
+/* the theming contract; these are the parts of it drawn with shadcn's old tokens, on rune's. */
+[class*="appearance-swatch--"] { box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line-strong); }
+[class*="appearance-corner--"] { background-color: var(--layer-2); border-color: var(--text); }
+.theme-mock { border-radius: calc(var(--radius) - 2px); }
+
+/* ======================================================================= 5 People */
+
+/* A person's page and the invitation page: the working card and, beside it for those who manage
+/* people, a narrower card of what's around them (2 : 1), stacked when narrow. */
+.person-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (min-width: 960px) { .person-page--split { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+.person-page__main { gap: var(--s-6); padding: var(--s-6); }
+.person-page__side { position: relative; gap: 1.75rem; padding: var(--s-5); }
+.person-page__side .settings-section { gap: var(--s-4); }
+.person-page__side .settings-section__head { padding-bottom: 0; border-bottom: 0; }
+.person-page__side .settings-section__head > h2 { font-size: var(--text-read); }
+.person-page__side .settings-list--scroll { max-height: 18rem; }
+@media (max-width: 640px) { .person-page__main, .person-page__side { padding: var(--s-4); } }
+
+/* The invitation page's sidebar hides for a wider working column (], panes_controller): a thin
+/* strip that keeps the button bringing it back. Only where that button is. */
+.person-page__side > .sidebar-toggle { position: absolute; top: var(--s-4); right: var(--s-4); z-index: 1; }
+.person-page__side:has(> .sidebar-toggle) > .settings-section:first-of-type > .settings-section__head { padding-right: 2rem; }
+@media (min-width: 960px) {
+  html[data-sidebar="collapsed"] .person-page--split:has(> .person-page__side > .sidebar-toggle) { grid-template-columns: minmax(0, 1fr) 2.75rem; }
+  html[data-sidebar="collapsed"] .person-page__side:has(> .sidebar-toggle) { align-items: center; min-height: 2.75rem; padding: 6px; }
+  html[data-sidebar="collapsed"] .person-page__side:has(> .sidebar-toggle) > :not(.sidebar-toggle) { display: none; }
+  html[data-sidebar="collapsed"] .person-page__side > .sidebar-toggle { position: static; }
+  html[data-sidebar="collapsed"] .person-page__side > .sidebar-toggle .icon { transform: scaleX(-1); }
+}
+
+/* A person's heading: their avatar, larger, beside their name and badges. */
+.person-page__heading { display: flex; align-items: center; gap: var(--s-4); }
+.person-page__heading .avatar { width: 3.5rem; height: 3.5rem; font-size: 1.25rem; }
+.person-page__name { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+/* The users table's name cell: the avatar beside the name. */
+.users-table__name { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }

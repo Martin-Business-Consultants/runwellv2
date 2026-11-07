@@ -1,18 +1,5 @@
 <%# locals: () %>
+<%# Notices and alerts (rune_ui's flash), in a frame so a turbo stream can replace them. %>
 <%= turbo_frame_tag :flash do %>
-  <% if flash[:notice] || flash[:alert] %>
-    <div class="ui-toaster">
-      <% if flash[:alert] %>
-        <div class="ui-toast ui-toast--error" role="alert" data-controller="element-removal" data-action="animationend->element-removal#remove">
-          <%= icon_tag "close-circle" %>
-          <span><%= flash[:alert] %></span>
-        </div>
-      <% else %>
-        <div class="ui-toast" role="status" data-controller="element-removal" data-action="animationend->element-removal#remove">
-          <%= icon_tag "check-circle" %>
-          <span><%= flash[:notice] %></span>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+  <%= flash_messages %>
 <% end %>

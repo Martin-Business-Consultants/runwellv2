@@ -1,33 +1,33 @@
 <% @page_title = "Sign in" %>
 
 <div class="auth">
-  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title">Welcome back</h1>
-      <p class="ui-card__description">Sign in with your email address and password</p>
+  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title">Welcome back</h1>
+      <p class="card__hint">Sign in with your email address and password</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: session_path, class: "auth__form", data: { controller: "form" } do |form| %>
-        <div class="ui-field">
-          <%= form.label :email_address, "Email", class: "ui-label" %>
-          <%= form.email_field :email_address, required: true, class: "ui-input", autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
+        <div class="field">
+          <%= form.label :email_address, "Email", class: "field__label" %>
+          <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
         </div>
 
-        <div class="ui-field">
+        <div class="field">
           <div class="auth__label-row">
-            <%= form.label :password, "Password", class: "ui-label" %>
+            <%= form.label :password, "Password", class: "field__label" %>
             <%= link_to "Forgot your password?", new_password_path, class: "auth__aside-link" %>
           </div>
-          <%= form.password_field :password, required: true, class: "ui-input", autocomplete: "current-password", maxlength: 72 %>
+          <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
         </div>
 
-        <button type="submit" id="log_in" class="ui-button ui-button--block" data-form-target="submit">Sign in</button>
+        <button type="submit" id="log_in" class="btn btn--primary btn--block" data-form-target="submit">Sign in</button>
       <% end %>
 
-      <p class="ui-separator ui-separator--label auth__separator">Or</p>
+      <p class="separator separator--label auth__separator">Or</p>
 
-      <%= link_to new_session_link_path(email_address: params[:email_address]), class: "ui-button ui-button--outline ui-button--block" do %>
+      <%= link_to new_session_link_path(email_address: params[:email_address]), class: "btn btn--secondary btn--block" do %>
         <%= icon_tag "email" %>
         <span>Email me a sign-in link</span>
       <% end %>

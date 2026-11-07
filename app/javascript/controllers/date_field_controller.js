@@ -73,7 +73,7 @@ export default class extends Controller {
       todayBtn: true,
       todayBtnMode: 1,
       clearBtn: !this.displayTarget.required,
-      buttonClass: "btn txt-small",
+      buttonClass: "btn btn--ghost btn--sm",
       prevArrow: "‹",
       nextArrow: "›",
       updateOnBlur: false,

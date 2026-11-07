@@ -1,14 +1,14 @@
 <% @page_title = "Requests" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <p class="portal-page-header__description">What you’ve asked us for, newest first.</p>
 <% end %>
 
 <% if @requests.any? %>
-  <section class="ui-card ui-card--flush portal-card">
-    <div class="ui-table-container">
-      <table class="ui-table portal-table">
+  <section class="card card--flush portal-card">
+    <div class="table-wrap">
+      <table class="table portal-table">
         <thead>
           <tr>
             <th>Subject</th>
@@ -20,8 +20,8 @@
           <% @requests.each do |request_record| %>
             <%# herb:key request_record.id %>
             <tr>
-              <td class="font-weight-medium"><%= request_record.title %></td>
-              <td class="portal-table__date txt-subtle txt-nowrap"><%= l request_record.created_at.in_time_zone, format: :long %></td>
+              <td class="portal-table__title"><%= request_record.title %></td>
+              <td class="portal-table__date muted nowrap"><%= l request_record.created_at.in_time_zone, format: :long %></td>
               <td class="portal-table__status"><%= status_tag portal_request_status(request_record), highlight: request_record.status == "done" %></td>
             </tr>
           <% end %>

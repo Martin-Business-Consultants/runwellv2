@@ -2,51 +2,49 @@
 <%= render "settings/header", current: :setup %>
 <% setup = @setup %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section setup">
-      <header class="settings__heading">
-        <h2>Get set up</h2>
-        <p class="settings__description">Each step checks itself off once it’s done.</p>
-        <div class="settings__heading-actions">
-          <span class="ui-badge ui-badge--outline"><%= setup.done_count %> of <%= setup.steps.size %> done</span>
-        </div>
-      </header>
+<div class="settings-page">
+  <section class="settings-section setup">
+    <header class="settings-section__head">
+      <h2>Get set up</h2>
+      <p class="settings-section__description">Each step checks itself off once it’s done.</p>
+      <div class="settings-section__actions">
+        <%= badge "#{setup.done_count} of #{setup.steps.size} done", tone: :outline %>
+      </div>
+    </header>
 
-      <ol class="settings__list">
-        <% setup.steps.each do |step| %>
-          <%# herb:key step.key %>
-          <li class="ui-item ui-item--sm">
-            <div class="ui-item__media">
-              <% if step.done %>
-                <span class="settings-setup__check settings-setup__check--done" aria-hidden="true"><%= icon_tag "check" %></span>
-              <% else %>
-                <span class="settings-setup__check" aria-hidden="true"></span>
-              <% end %>
-            </div>
-            <div class="ui-item__content">
-              <% if step.done %>
-                <p class="ui-item__title settings-setup__title--done"><%= step.title %><span class="for-screen-reader">(done)</span></p>
-              <% else %>
-                <p class="ui-item__title">
-                  <%= link_to step.title, step.path, class: "txt-link" %>
-                  <% if step.optional %>
-                    <span class="ui-badge ui-badge--secondary">Optional</span>
-                  <% end %>
-                </p>
-                <p class="ui-item__description"><%= step.text %></p>
-              <% end %>
-            </div>
-            <% unless step.done %>
-              <div class="ui-item__actions">
-                <%= link_to step.path, class: "ui-button ui-button--ghost ui-button--icon-sm", title: step.title, tabindex: -1, aria: { hidden: true } do %>
-                  <%= icon_tag "arrow-right" %>
-                <% end %>
-              </div>
+    <ol class="settings-list">
+      <% setup.steps.each do |step| %>
+        <%# herb:key step.key %>
+        <li class="list-row">
+          <div class="list-row__media">
+            <% if step.done %>
+              <span class="settings-setup__check settings-setup__check--done" aria-hidden="true"><%= icon_tag "check" %></span>
+            <% else %>
+              <span class="settings-setup__check" aria-hidden="true"></span>
             <% end %>
-          </li>
-        <% end %>
-      </ol>
-    </section>
-  </div>
-</section>
+          </div>
+          <div class="list-row__content">
+            <% if step.done %>
+              <p class="list-row__title settings-setup__title--done"><%= step.title %><span class="visually-hidden">(done)</span></p>
+            <% else %>
+              <p class="list-row__title">
+                <%= link_to step.title, step.path %>
+                <% if step.optional %>
+                  <%= badge "Optional", tone: :neutral %>
+                <% end %>
+              </p>
+              <p class="list-row__desc"><%= step.text %></p>
+            <% end %>
+          </div>
+          <% unless step.done %>
+            <div class="list-row__actions">
+              <%= link_to step.path, class: "icon-button", title: step.title, tabindex: -1, aria: { hidden: true } do %>
+                <%= icon_tag "arrow-right" %>
+              <% end %>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+</div>

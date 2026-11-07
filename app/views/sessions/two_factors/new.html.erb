@@ -1,21 +1,21 @@
 <% @page_title = "Two-factor sign-in" %>
 
 <div class="auth">
-  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title">One more step</h1>
-      <p class="ui-card__description">Enter the 6-digit code from your authenticator app.</p>
+  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title">One more step</h1>
+      <p class="card__hint">Enter the 6-digit code from your authenticator app.</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: session_two_factor_path, class: "auth__form", data: { controller: "form" } do |form| %>
-        <div class="ui-field">
-          <%= form.label :code, "Code", class: "ui-label" %>
-          <%= form.text_field :code, required: true, class: "ui-input auth__code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 11 %>
-          <p class="ui-field__description">Lost your phone? Enter one of your recovery codes instead. If you have none, an owner can reset two-factor sign-in for you in Users.</p>
+        <div class="field">
+          <%= form.label :code, "Code", class: "field__label" %>
+          <%= form.text_field :code, required: true, class: "auth__code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 11 %>
+          <p class="field__hint">Lost your phone? Enter one of your recovery codes instead. If you have none, an owner can reset two-factor sign-in for you in Users.</p>
         </div>
 
-        <button type="submit" class="ui-button ui-button--block" data-form-target="submit">Sign in</button>
+        <button type="submit" class="btn btn--primary btn--block" data-form-target="submit">Sign in</button>
       <% end %>
     </div>
   </section>

@@ -1,29 +1,29 @@
 <% @page_title = "Ask for something" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <p class="portal-page-header__description">A change, a question, something new. We’ll get back to you.</p>
 <% end %>
 
-<section class="ui-card portal-card portal-form-card">
-  <div class="ui-card__content">
+<section class="card portal-card portal-form-card">
+  <div class="card__content">
     <%= render "layouts/shared/errors", record: @request_record %>
 
     <%= form_with model: @request_record, scope: :request, url: portal_requests_path, class: "portal-form",
           data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-      <div class="ui-field">
-        <%= form.label :subject, "Subject", class: "ui-label" %>
-        <%= form.text_field :subject, value: @request_record.title, required: true, class: "ui-input", autofocus: true, autocomplete: "off" %>
+      <div class="field">
+        <%= form.label :subject, "Subject", class: "field__label" %>
+        <%= form.text_field :subject, value: @request_record.title, required: true, autofocus: true, autocomplete: "off" %>
       </div>
 
-      <div class="ui-field">
-        <label class="ui-label" for="<%= form.field_id(:body) %>">Details</label>
+      <div class="field">
+        <label class="field__label" for="<%= form.field_id(:body) %>">Details</label>
         <%= rich_text_field_tag form.field_name(:body), @request_record.description, id: form.field_id(:body) %>
       </div>
 
-      <div class="portal-form__actions">
-        <%= link_to "Cancel", portal_requests_path, class: "ui-button ui-button--outline" %>
-        <button type="submit" class="ui-button" data-form-target="submit">Send request</button>
+      <div class="button-row portal-form__actions">
+        <%= link_to "Cancel", portal_requests_path, class: "btn btn--secondary" %>
+        <button type="submit" class="btn btn--primary" data-form-target="submit">Send request</button>
       </div>
 
       <%= link_to "Cancel and go back", portal_root_path, data: { form_target: "cancel" }, hidden: true %>

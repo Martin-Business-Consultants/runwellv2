@@ -1,41 +1,37 @@
 <% @page_title = "Set up two-factor sign-in" %>
 <%= render "settings/header", current: :account %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Set up two-factor sign-in</h2>
-        <p class="settings__description">After your password, Runwell will ask for a code from an app on your phone, so a stolen password isn’t enough to get in.</p>
-      </header>
-      <ol class="settings-steps">
-        <li>Open an authenticator app: 1Password, Google Authenticator, Microsoft Authenticator, Authy or your phone’s built-in passwords app.</li>
-        <li>
-          Scan this code with it.
-          <div class="settings-steps__qr two-factor__qr-frame"><%= @qr_code %></div>
-          <details>
-            <summary class="txt-subtle">Can’t scan? Enter this key instead</summary>
-            <div class="copy-row margin-block-start-half">
-              <code><%= @secret.scan(/.{4}/).join(" ") %></code>
-            </div>
-          </details>
-        </li>
-        <li>
-          <%= form_with url: settings_two_factor_path, class: "ui-field", data: { controller: "form" } do |form| %>
-            <%= form.label :code, "Enter the 6-digit code it shows.", class: "ui-label" %>
-            <div class="settings__actions">
-              <%= form.text_field :code, required: true, class: "ui-input settings-code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7 %>
-              <button type="submit" class="ui-button">Turn on</button>
-            </div>
-          <% end %>
-        </li>
-      </ol>
-      <% if Setting.current.require_two_factor? && can?(:manage_people) %>
-        <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch do |form| %>
-          <%= form.hidden_field :require_two_factor, value: "0" %>
-          <p class="settings__note">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="ui-button ui-button--link">Stop requiring it</button></p>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Set up two-factor sign-in</h2>
+      <p class="settings-section__description">After your password, Runwell will ask for a code from an app on your phone, so a stolen password isn’t enough to get in.</p>
+    </header>
+    <ol class="settings-steps">
+      <li>Open an authenticator app: 1Password, Google Authenticator, Microsoft Authenticator, Authy or your phone’s built-in passwords app.</li>
+      <li class="settings-steps__step">
+        <span>Scan this code with it.</span>
+        <div class="settings-steps__qr"><%= @qr_code %></div>
+        <details class="settings-steps__key">
+          <summary>Can’t scan? Enter this key instead</summary>
+          <code><%= @secret.scan(/.{4}/).join(" ") %></code>
+        </details>
+      </li>
+      <li>
+        <%= form_with url: settings_two_factor_path, class: "field", data: { controller: "form" } do |form| %>
+          <%= form.label :code, "Enter the 6-digit code it shows.", class: "field__label" %>
+          <div class="settings-inline settings-inline--fit">
+            <%= form.text_field :code, required: true, class: "settings-code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7 %>
+            <button type="submit" class="btn btn--primary">Turn on</button>
+          </div>
         <% end %>
+      </li>
+    </ol>
+    <% if Setting.current.require_two_factor? && can?(:manage_people) %>
+      <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch do |form| %>
+        <%= form.hidden_field :require_two_factor, value: "0" %>
+        <p class="muted">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="link-button">Stop requiring it</button></p>
       <% end %>
-    </section>
-  </div>
-</section>
+    <% end %>
+  </section>
+</div>

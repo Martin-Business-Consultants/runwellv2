@@ -1,20 +1,20 @@
 <% @page_title = "Forgot your password?" %>
 
 <div class="auth">
-  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title"><%= @page_title %></h1>
-      <p class="ui-card__description">We’ll email you a link to choose a new one.</p>
+  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title"><%= @page_title %></h1>
+      <p class="card__hint">We’ll email you a link to choose a new one.</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: passwords_path, class: "auth__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :email_address, "Email", class: "ui-label" %>
-          <%= form.email_field :email_address, required: true, class: "ui-input", autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
+        <div class="field">
+          <%= form.label :email_address, "Email", class: "field__label" %>
+          <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
         </div>
 
-        <button type="submit" class="ui-button ui-button--block">Email reset link</button>
+        <button type="submit" class="btn btn--primary btn--block">Email reset link</button>
       <% end %>
     </div>
   </section>

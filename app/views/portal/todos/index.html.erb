@@ -1,14 +1,14 @@
 <% @page_title = term(:work) %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <p class="portal-page-header__description">What we are working on for you.</p>
 <% end %>
 
 <% if @todos.any? %>
-  <section class="ui-card ui-card--flush portal-card">
-    <div class="ui-table-container">
-      <table class="ui-table portal-table">
+  <section class="card card--flush portal-card">
+    <div class="table-wrap">
+      <table class="table portal-table">
         <thead>
           <tr>
             <th>Title</th>
@@ -21,15 +21,15 @@
           <% @todos.each do |todo| %>
             <%# herb:key todo.id %>
             <tr>
-              <td class="font-weight-medium"><%= todo.title %></td>
-              <td class="portal-table__secondary txt-subtle">
+              <td class="portal-table__title"><%= todo.title %></td>
+              <td class="portal-table__secondary muted">
                 <% if todo.engagement %>
                   <%= link_to "#{todo.engagement.ref} #{todo.engagement.title}", portal_engagement_path(todo.engagement), class: "portal-table__link" %>
                 <% else %>
                   General
                 <% end %>
               </td>
-              <td class="portal-table__date txt-subtle txt-nowrap">
+              <td class="portal-table__date muted nowrap">
                 <% if todo.due_on %>
                   <%= l todo.due_on, format: :short %>
                 <% end %>

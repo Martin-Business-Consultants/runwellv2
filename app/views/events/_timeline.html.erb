@@ -1,40 +1,40 @@
 <%# locals: (subject:, expanded: nil) %>
-<%# A record's history as an activity feed in a card: who did what, newest first. Folded in a
-    sidebar; open where it is the whole tab (expanded). %>
+<%# A record's history as an activity feed in a card (rune_ui's folding card): who did what,
+    newest first. Folded in a sidebar; open where it is the whole tab (expanded). %>
 <% events = subject.events.recent.limit(30).includes(:actor_user) %>
 <% if events.any? %>
-  <section class="ui-card record-card record-timeline">
-    <details class="record-timeline__details"<% if expanded %> open<% end %>>
-      <summary class="ui-card__header record-timeline__summary">
-        <h2 class="ui-card__title">History</h2>
-        <p class="ui-card__description">The last <%= pluralize events.size, "change" %>, newest first</p>
-        <span class="ui-card__action record-timeline__chevron"><%= icon_tag "caret-down" %></span>
-      </summary>
-      <div class="ui-card__content">
-        <ol class="record-feed">
-          <% events.each do |event| %>
-            <%# herb:key event.id %>
-            <li data-filter-target="item" class="record-feed__item">
-              <span class="record-feed__avatar">
-                <% if event.actor_user %>
-                  <%= person_tag event.actor_user %>
-                <% else %>
-                  <%= ui_avatar event.actor_name.to_s, size: :sm %>
-                <% end %>
-              </span>
-              <div class="record-feed__body">
-                <p class="record-feed__title"><%= event_title(event) %></p>
-                <p class="record-feed__meta">
-                  <% unless event.actor_user %><%= event.actor_name %> · <% end %><%= event.source_label %> · <time datetime="<%= event.occurred_at.iso8601 %>"><%= l event.occurred_at, format: :short %></time>
-                </p>
-                <% if (details = event_details(event)).present? %>
-                  <p class="record-feed__details"><%= details %></p>
-                <% end %>
-              </div>
-            </li>
-          <% end %>
-        </ol>
-      </div>
-    </details>
-  </section>
+  <details class="card card--fold record-card record-timeline"<% if expanded %> open<% end %>>
+    <summary class="card__fold-summary record-timeline__summary">
+      <span class="card__head">
+        <h2 class="card__title">History</h2>
+        <span class="card__hint">The last <%= pluralize events.size, "change" %>, newest first</span>
+      </span>
+      <%= icon_tag "chevron", class: "fold__chevron" %>
+    </summary>
+    <ol class="record-feed">
+      <% events.each do |event| %>
+        <%# herb:key event.id %>
+        <li data-filter-target="item" class="record-feed__item">
+          <span class="record-feed__avatar">
+            <% if event.actor_user %>
+              <%= person_tag event.actor_user %>
+            <% else %>
+              <%= avatar event.actor_name.to_s, size: :md %>
+            <% end %>
+          </span>
+          <div class="record-feed__body">
+            <p class="record-feed__title"><%= event_title(event) %></p>
+            <p class="record-feed__meta dot-list">
+              <% unless event.actor_user %><span><%= event.actor_name %></span><% end %>
+              <span><%= event.source_label %></span>
+              <time datetime="<%= event.occurred_at.iso8601 %>"><%= l event.occurred_at, format: :short %></time>
+            </p>
+            <% if (details = event_details(event)).present? %>
+              <p class="record-feed__details"><%= details %></p>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </details>
 <% end %>

@@ -4,7 +4,7 @@ class Engagement < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
   include Refs, CustomFields
 
-  mentionable_fields :description, :estimate_notes
+  mentionable_fields :description
 
   LABELS = %w[project work_order service].freeze
   SHAPES = %w[fixed recurring].freeze

@@ -3,107 +3,105 @@
 <% available = Runwell::PluginCatalog.available %>
 
 <turbo-frame id="plugins" target="_top">
-  <section class="settings">
-    <div class="settings__panel">
-      <% if @change %>
-        <section class="settings__section" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
-          <header class="settings__heading">
-            <h2><%= @change.summary %></h2>
-          </header>
-          <p class="settings__text">
-            Started <%= time_ago_in_words(@change.created_at) %> ago<% if @change.requested_by %> by <%= person_tag @change.requested_by %><% end %>.
-            Runwell restarts when it’s in place, which takes a few seconds. This page checks every few seconds.
-          </p>
-        </section>
+  <div class="settings-page">
+    <% if @change %>
+      <section class="settings-section" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
+        <header class="settings-section__head">
+          <h2><%= @change.summary %></h2>
+        </header>
+        <p>
+          Started <%= time_ago_in_words(@change.created_at) %> ago<% if @change.requested_by %> by <%= person_tag @change.requested_by %><% end %>.
+          Runwell restarts when it’s in place, which takes a few seconds. This page checks every few seconds.
+        </p>
+      </section>
+    <% end %>
+
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2>Installed plugins</h2>
+        <p class="settings-section__description">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. A plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
+        <div class="settings-section__actions">
+          <%= button_to settings_plugins_check_path, class: "btn btn--secondary btn--sm" do %>
+            <%= icon_tag "refresh" %>
+            <span>Check for updates</span>
+          <% end %>
+        </div>
+      </header>
+
+      <% if @plugins.any? %>
+        <ul class="settings-plugins">
+          <% @plugins.each do |plugin| %>
+            <%# herb:key plugin.key %>
+            <%= render "settings/plugins/plugin", plugin: plugin, enabled: Runwell::Plugins.enabled?(plugin.key) %>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= render "layouts/shared/empty", text: "No plugins installed yet. Add one below." %>
       <% end %>
 
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2>Installed plugins</h2>
-          <p class="settings__description">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. A plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
-          <div class="settings__heading-actions">
-            <%= button_to settings_plugins_check_path, class: "ui-button ui-button--outline ui-button--sm" do %>
-              <%= icon_tag "refresh" %>
-              <span>Check for updates</span>
-            <% end %>
-          </div>
-        </header>
+      <% InstalledPlugins.failed.each do |name, error| %>
+        <%# herb:key name %>
+        <p class="settings-error"><strong><%= name %></strong> is installed but didn’t load: <%= error %></p>
+      <% end %>
+    </section>
 
-        <% if @plugins.any? %>
-          <ul class="settings-plugins">
-            <% @plugins.each do |plugin| %>
-              <%# herb:key plugin.key %>
-              <%= render "settings/plugins/plugin", plugin: plugin, enabled: Runwell::Plugins.enabled?(plugin.key) %>
-            <% end %>
-          </ul>
-        <% else %>
-          <%= render "layouts/shared/empty", text: "No plugins installed yet. Add one below." %>
-        <% end %>
-
-        <% InstalledPlugins.failed.each do |name, error| %>
-          <%# herb:key name %>
-          <p class="settings__error"><strong><%= name %></strong> is installed but didn’t load: <%= error %></p>
-        <% end %>
-      </section>
-
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2>Add a plugin</h2>
-          <p class="settings__description">From the catalog, or any other by its GitHub repository. Runwell installs its latest release.</p>
-        </header>
-        <% if available.any? %>
-          <ul class="settings-plugins">
-            <% available.each do |entry| %>
-              <%# herb:key entry.key %>
-              <li class="ui-card">
-                <header class="ui-card__header">
-                  <h3 class="ui-card__title"><%= entry.name %></h3>
-                </header>
-                <p class="ui-card__content margin-none"><%= entry.description %></p>
-                <footer class="ui-card__footer">
-                  <%= button_to settings_plugins_installations_path, params: { repo: entry.key }, class: "ui-button ui-button--outline ui-button--sm" do %>
-                    <%= icon_tag "add" %>
-                    <span>Install</span>
-                  <% end %>
-                </footer>
-              </li>
-            <% end %>
-          </ul>
-        <% end %>
-
-        <%= form_with url: settings_plugins_installations_path, class: "ui-field" do |form| %>
-          <%= form.label :repo, "GitHub repository", class: "ui-label" %>
-          <div class="settings__inline">
-            <%= form.text_field :repo, class: "ui-input", placeholder: "owner/runwell-thing", autocomplete: "off", required: true %>
-            <button type="submit" class="ui-button">Install</button>
-          </div>
-        <% end %>
-      </section>
-
-      <% if @changes.any? %>
-        <section class="settings__section">
-          <header class="settings__heading">
-            <h2>Recent changes</h2>
-          </header>
-          <ul class="settings__list settings__list--scroll">
-            <% @changes.each do |change| %>
-              <%# herb:key change.id %>
-              <li class="ui-item ui-item--sm">
-                <% if change.requested_by %>
-                  <div class="ui-item__media"><%= person_tag change.requested_by %></div>
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2>Add a plugin</h2>
+        <p class="settings-section__description">From the catalog, or any other by its GitHub repository. Runwell installs its latest release.</p>
+      </header>
+      <% if available.any? %>
+        <ul class="settings-plugins">
+          <% available.each do |entry| %>
+            <%# herb:key entry.key %>
+            <li class="card">
+              <header class="card__head">
+                <h3 class="card__title"><%= entry.name %></h3>
+              </header>
+              <p class="card__content"><%= entry.description %></p>
+              <footer class="card__footer">
+                <%= button_to settings_plugins_installations_path, params: { repo: entry.key }, class: "btn btn--secondary btn--sm" do %>
+                  <%= icon_tag "add" %>
+                  <span>Install</span>
                 <% end %>
-                <div class="ui-item__content">
-                  <p class="ui-item__title"><%= change.summary %> <%= ui_status_badge change.status %></p>
-                  <p class="ui-item__description"><%= time_ago_in_words(change.created_at) %> ago</p>
-                  <% if change.message.present? %>
-                    <pre class="settings-log upgrade-message"><%= change.message %></pre>
-                  <% end %>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        </section>
+              </footer>
+            </li>
+          <% end %>
+        </ul>
       <% end %>
-    </div>
-  </section>
+
+      <%= form_with url: settings_plugins_installations_path, class: "field" do |form| %>
+        <%= form.label :repo, "GitHub repository", class: "field__label" %>
+        <div class="settings-inline">
+          <%= form.text_field :repo, placeholder: "owner/runwell-thing", autocomplete: "off", required: true %>
+          <button type="submit" class="btn btn--primary">Install</button>
+        </div>
+      <% end %>
+    </section>
+
+    <% if @changes.any? %>
+      <section class="settings-section">
+        <header class="settings-section__head">
+          <h2>Recent changes</h2>
+        </header>
+        <ul class="settings-list settings-list--scroll">
+          <% @changes.each do |change| %>
+            <%# herb:key change.id %>
+            <li class="list-row">
+              <% if change.requested_by %>
+                <div class="list-row__media"><%= person_tag change.requested_by %></div>
+              <% end %>
+              <div class="list-row__content">
+                <p class="list-row__title"><%= change.summary %> <%= ui_status_badge change.status %></p>
+                <p class="list-row__desc"><%= time_ago_in_words(change.created_at) %> ago</p>
+                <% if change.message.present? %>
+                  <pre class="settings-log"><%= change.message %></pre>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </div>
 </turbo-frame>

@@ -1,34 +1,34 @@
 <%# locals: (subject:) %>
-<section class="ui-card record-card" id="documents">
-  <header class="ui-card__header">
-    <h2 class="ui-card__title">Documents</h2>
-    <p class="ui-card__description">Files kept here. The switch shows one to the client in their portal.</p>
+<section class="card record-card" id="documents">
+  <header class="card__head">
+    <h2 class="card__title">Documents</h2>
+    <p class="card__hint">Files kept here. The switch shows one to the client in their portal.</p>
   </header>
 
-  <div class="ui-card__content record-card__stack">
+  <div class="card__content record-card__stack">
     <%# Drop files on the box (or click it to choose): the file input covers it, so a drop fills the
         input, each file uploads with its progress on the box, and the form sends them to the same
         documents#create as the quick action tray. %>
     <%= form_with url: documents_path, multipart: true, namespace: dom_id(subject, :documents), class: "document-drop",
           data: document_upload_data.merge(turbo_action: "advance") do |form| %>
       <%= hidden_field_tag :record, QuickAction.value_for(subject), id: nil %>
-      <%= document_drop_target form, "document-drop__target" %>
+      <%= document_drop_target form %>
     <% end %>
 
     <% documents = subject.documents.recent.includes(:uploaded_by, file_attachment: :blob) %>
     <% if documents.any? %>
-      <ul class="record-list document-list">
+      <ul class="record-list">
         <% documents.each do |document| %>
           <%# herb:key document.id %>
-          <li class="record-list__row" data-filter-target="item">
+          <li class="list-row document-row" data-filter-target="item">
             <%= render "documents/link", document: document, meta: safe_join([ number_to_human_size(document.byte_size), person_tag(document.uploaded_by).presence, "#{time_ago_in_words(document.created_at)} ago" ].compact, " · ") %>
 
-            <span class="record-list__actions">
-              <%= form_with model: document, namespace: dom_id(document), class: "document-list__visible", data: { controller: "form" } do |form| %>
-                <%= switch_tag(title: "Visible to the client", screen_reader_label: "Visible to the client") { form.check_box :client_visible, class: "switch__input", data: { action: "change->form#submit" } } %>
+            <span class="list-row__actions">
+              <%= form_with model: document, namespace: dom_id(document), class: "document-row__visible", data: { controller: "form" } do |form| %>
+                <%= switch_tag(title: "Visible to the client", screen_reader_label: "Visible to the client") { form.check_box :client_visible, role: "switch", data: { action: "change->form#submit" } } %>
               <% end %>
               <% if document.deletable_by?(Current.user) %>
-                <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), trigger_class: "txt-small", keys: "d",
+                <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), keys: "d",
                       message: "The file is removed for everyone, including the client’s portal." %>
               <% end %>
             </span>

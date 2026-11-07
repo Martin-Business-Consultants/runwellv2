@@ -1,10 +1,10 @@
 <%# locals: (notification:) %>
 <% ref, name = notification_target_label(notification.notifiable_target) %>
-<span class="ui-item__media notification__avatar">
+<span class="list-row__media notification__avatar">
   <%= avatar_image_tag notification.creator %>
 </span>
 
-<span class="ui-item__content notification__content">
+<span class="list-row__content">
   <%= render "notifications/notification/mention/body", notification: notification %>
-  <span class="notification__context overflow-ellipsis"><%= [ ref, name ].compact_blank.join(" · ") %></span>
+  <span class="notification__context"><%= [ ref, name ].compact_blank.join(" · ") %></span>
 </span>

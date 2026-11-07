@@ -1,16 +1,15 @@
 <%# locals: (current:, extra: nil) %>
-<%# How an index shows its records, as small icon tabs (ui-tabs) beside its New button. Each
-    choice keeps the page's other filters. %>
+<%# How an index shows its records, as small icon tabs beside its New button. Each choice keeps
+    the page's other filters. %>
 <% views = [ [ "cards", "Cards", "grid" ], [ "table", "Table", "column-left" ] ] + Array(extra) %>
 <% following = views[(views.index { |key, _label, _icon| key == current } || -1) + 1]&.first || views.first.first %>
-<nav class="ui-tabs ui-tabs--icons" aria-label="View">
+<nav class="tabs tabs--icons" aria-label="View">
   <% views.each do |key, label, icon| %>
     <%# herb:key key %>
     <% keys = [ ("v" if key == following), ("g b" if key == "board") ].compact.join(", ") %>
-    <%= link_to url_for(request.query_parameters.merge("view" => key)), class: "ui-tabs__trigger",
-          title: label, aria: { current: ("page" if key == current) }, data: { keys: keys.presence } do %>
+    <%= link_to url_for(request.query_parameters.merge("view" => key)), class: "tabs__tab",
+          title: label, aria: { current: (key == current) ? "page" : "false", label: label }, data: { keys: keys.presence } do %>
       <%= icon_tag icon %>
-      <span class="for-screen-reader"><%= label %></span>
     <% end %>
   <% end %>
 </nav>

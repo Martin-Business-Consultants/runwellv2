@@ -19,7 +19,7 @@ module BriefingsHelper
       count = briefing.count(key)
       link_to("#{count} #{words}", briefing_more_path(key), class: class_names("home-summary__item", "home-summary__item--late": key == "overdue")) if count.positive?
     end
-    safe_join(links, tag.span(" · ", class: "txt-subtle", aria: { hidden: true }))
+    safe_join(links, tag.span(" · ", class: "faint", aria: { hidden: true }))
   end
 
   # The greeting at the top of home, by the time of day in the install's zone.

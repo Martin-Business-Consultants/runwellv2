@@ -1,10 +1,10 @@
 <%# locals: (path:, title:, id_label: nil, context: nil, meta: nil, status: nil, highlight: nil, people: nil) %>
-<%# A record as a card for the Cards view on indexes, drawn as shadcn's Card: a muted line naming
+<%# A record as a card for the Cards view on indexes, on rune_ui's card: a muted line naming
     where it sits, the title, and a footer of outline badges (the status with a dot in its tone,
     never a tint) with the people on it at the end. The whole card is its link. %>
 <article class="card app-card" data-filter-target="item">
-  <%= link_to path, class: "card__link app-card__link", title: title, data: { turbo_frame: "_top" } do %>
-    <span class="for-screen-reader"><%= title %></span>
+  <%= link_to path, class: "app-card__link", title: title, data: { turbo_frame: "_top" } do %>
+    <span class="visually-hidden"><%= title %></span>
   <% end %>
 
   <header class="app-card__header">
@@ -28,7 +28,7 @@
       <% end %>
       <% Array(meta).compact_blank.each do |text| %>
         <%# herb:key text %>
-        <span class="ui-badge ui-badge--outline app-card__meta"><%= text %></span>
+        <span class="badge badge--outline"><%= text %></span>
       <% end %>
     </div>
     <% if people.present? %>

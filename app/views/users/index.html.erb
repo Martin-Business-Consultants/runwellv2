@@ -7,10 +7,10 @@
 <% end %>
 <% if @view == "table" && manage %>
   <% content_for :index_bulk do %>
-  <%= bulk_bar do %>
-    <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] } %>
-    <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ] %>
-  <% end %>
+    <%= bulk_bar do %>
+      <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] } %>
+      <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ] %>
+    <% end %>
   <% end %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: ("Invite someone" if manage), new_path: (new_user_invitation_path if manage) %>
@@ -40,28 +40,25 @@
 <% end %>
 
 <% if manage && @invitations.any? %>
-  <section class="settings">
-    <div class="settings__panel panel shadow txt-align-start">
-      <section class="settings__section flex flex-column gap-half">
-        <header>
-          <h2 class="divider">Invitations out</h2>
-        </header>
-        <ul class="settings__scrollable-list">
-          <% @invitations.each do |invitation| %>
-            <%# herb:key invitation.id %>
-            <li class="flex align-center gap-half txt-small">
-              <div class="txt-align-start overflow-ellipsis min-width">
-                <strong><%= invitation.email_address %></strong>
-                <div class="txt-x-small txt-subtle"><%= invitation.role.capitalize %> · invited by <%= invitation.invited_by.display_name %> <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></div>
-              </div>
-              <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
-              <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "btn txt-small" %>
-              <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: user_invitation_path(invitation), trigger_class: "txt-small",
-                    message: "The link they were sent stops working." %>
-            </li>
-          <% end %>
-        </ul>
-      </section>
-    </div>
+  <section class="card card--flush users-invitations">
+    <header class="card__head">
+      <h2 class="card__title">Invitations out</h2>
+    </header>
+    <ul class="list">
+      <% @invitations.each do |invitation| %>
+        <%# herb:key invitation.id %>
+        <li class="list-row">
+          <div class="list-row__content">
+            <p class="list-row__title"><%= invitation.email_address %></p>
+            <p class="list-row__desc"><%= invitation.role.capitalize %> · invited by <%= invitation.invited_by.display_name %> <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
+          </div>
+          <div class="list-row__actions">
+            <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "btn btn--secondary btn--sm" %>
+            <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: user_invitation_path(invitation),
+                  message: "The link they were sent stops working." %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
   </section>
 <% end %>

@@ -1,7 +1,8 @@
 <%# locals: (todo:, draggable: nil) %>
-<%# A todo on the board (Fizzy's card preview, in its data attributes), drawn as a small shadcn Card:
-    the ref and client on a muted line, the title, then the due date as an outline badge and the
-    people on it. The column names the status, so the card carries no colour of its own. %>
+<%# A todo on the board (Fizzy's card preview, in its data attributes), drawn as a small index card
+    (app-card--compact): the ref and client on a faint line, the title, then the due date as an
+    outline badge and the people on it. The column names the status, so the card carries no colour
+    of its own. %>
 <% overdue = todo.status != "done" && todo.due_on&.past? %>
 <%= todo_article_tag todo, class: "card app-card app-card--compact", draggable: draggable ? "true" : nil, tabindex: 0, data: {
       id: todo.id,
@@ -10,14 +11,14 @@
       css_variable_counter_target: "item",
       filter_target: "item",
       action: "mouseenter->navigable-list#hoverSelect" } do %>
-  <%= link_to todo_path(todo), draggable: false, class: "card__link app-card__link", title: todo.title, data: { turbo_frame: "_top" } do %>
-    <span class="for-screen-reader"><%= todo.title %></span>
+  <%= link_to todo_path(todo), draggable: false, class: "app-card__link", title: todo.title, data: { turbo_frame: "_top" } do %>
+    <span class="visually-hidden"><%= todo.title %></span>
   <% end %>
 
   <header class="app-card__header">
     <p class="app-card__eyebrow">
       <% if todo_ref(todo).present? %>
-        <span class="app-card__ref"><span class="for-screen-reader"><%= term(:engagement) %></span> <%= todo_ref(todo) %></span>
+        <span class="app-card__ref"><span class="visually-hidden"><%= term(:engagement) %></span> <%= todo_ref(todo) %></span>
       <% end %>
       <span class="app-card__context"><%= todo_client_name(todo) %></span>
     </p>
@@ -27,11 +28,11 @@
   <footer class="app-card__footer">
     <div class="app-card__badges">
       <% if todo.status == "done" && todo.completed_at %>
-        <%= ui_badge "Done #{l todo.completed_at.to_date, format: :short}", :positive %>
+        <%= badge "Done #{l todo.completed_at.to_date, format: :short}", tone: :ok %>
       <% elsif overdue %>
-        <%= ui_badge "Due #{l todo.due_on, format: :short}", :negative, title: "Overdue" %>
+        <%= badge "Due #{l todo.due_on, format: :short}", tone: :danger, title: "Overdue" %>
       <% elsif todo.due_on %>
-        <%= ui_badge "Due #{l todo.due_on, format: :short}", :outline, class: "app-card__meta" %>
+        <%= badge "Due #{l todo.due_on, format: :short}", tone: :outline %>
       <% end %>
     </div>
     <% if todo.owners.any? %>

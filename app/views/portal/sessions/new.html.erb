@@ -1,20 +1,20 @@
 <% @page_title = "Client sign in" %>
 
 <div class="auth">
-  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title">Client sign in</h1>
-      <p class="ui-card__description">Enter the email we have on file and we’ll send you a sign-in link. No password needed.</p>
+  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title">Client sign in</h1>
+      <p class="card__hint">Enter the email we have on file and we’ll send you a sign-in link. No password needed.</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: portal_session_path, class: "auth__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :email, "Email", class: "ui-label" %>
-          <%= form.email_field :email, required: true, class: "ui-input", autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
+        <div class="field">
+          <%= form.label :email, "Email", class: "field__label" %>
+          <%= form.email_field :email, required: true, autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
         </div>
 
-        <button type="submit" class="ui-button ui-button--block">
+        <button type="submit" class="btn btn--primary btn--block">
           <%= icon_tag "email" %>
           <span>Email me a link</span>
         </button>

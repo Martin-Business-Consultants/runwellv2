@@ -1,56 +1,54 @@
 <% @page_title = "Address" %>
 <%= render "settings/header", current: :address %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Where people reach Runwell</h2>
-        <p class="settings__description">
-          Every link Runwell sends points here: portal sign-ins, invitations and notifications.
-          Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Where people reach Runwell</h2>
+      <p class="settings-section__description">
+        Every link Runwell sends points here: portal sign-ins, invitations and notifications.
+        Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
+      </p>
+    </header>
+    <% if !Runwell.host_set? %>
+      <div class="alert alert--attention" role="status">
+        <%= icon_tag "globe", class: "alert__icon" %>
+        <p class="alert__title">Not set yet</p>
+        <p class="alert__body">
+          Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
         </p>
-      </header>
-      <% if !Runwell.host_set? %>
-        <div class="ui-alert ui-alert--warning" role="status">
-          <%= icon_tag "globe", class: "ui-alert__icon" %>
-          <p class="ui-alert__title">Not set yet</p>
-          <p class="ui-alert__description">
-            Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
-          </p>
-        </div>
-      <% end %>
+      </div>
+    <% end %>
 
-      <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "ui-field" do |form| %>
-        <%= form.label :app_url, "Runwell’s address", class: "ui-label" %>
-        <div class="settings__inline">
-          <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
-                class: "ui-input", autocomplete: "off" %>
-          <button type="submit" class="ui-button">Save</button>
-        </div>
-        <% if ENV["APP_HOST"].present? %>
-          <p class="ui-field__description">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
-        <% end %>
+    <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "field" do |form| %>
+      <%= form.label :app_url, "Runwell’s address", class: "field__label" %>
+      <div class="settings-inline">
+        <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
+              autocomplete: "off" %>
+        <button type="submit" class="btn btn--primary">Save</button>
+      </div>
+      <% if ENV["APP_HOST"].present? %>
+        <p class="field__hint">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
       <% end %>
-    </section>
+    <% end %>
+  </section>
 
-    <section class="settings__section" id="time_zone">
-      <header class="settings__heading">
-        <h2>Your time zone</h2>
-        <p class="settings__description">
-          Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
-        </p>
-      </header>
-      <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "ui-field" do |form| %>
-        <%= form.label :time_zone, "Time zone", class: "ui-label" %>
-        <div class="settings__inline">
-          <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name }, class: "ui-select" %>
-          <button type="submit" class="ui-button">Save</button>
-        </div>
-        <% if @setting.time_zone.blank? %>
-          <p class="ui-field__description">Not saved yet: <%= Setting.zone.name %> is the <%= ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default" %>.</p>
-        <% end %>
+  <section class="settings-section" id="time_zone">
+    <header class="settings-section__head">
+      <h2>Your time zone</h2>
+      <p class="settings-section__description">
+        Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
+      </p>
+    </header>
+    <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "field" do |form| %>
+      <%= form.label :time_zone, "Time zone", class: "field__label" %>
+      <div class="settings-inline">
+        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name } %>
+        <button type="submit" class="btn btn--primary">Save</button>
+      </div>
+      <% if @setting.time_zone.blank? %>
+        <p class="field__hint">Not saved yet: <%= Setting.zone.name %> is the <%= ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default" %>.</p>
       <% end %>
-    </section>
-  </div>
-</section>
+    <% end %>
+  </section>
+</div>

@@ -1,0 +1,268 @@
+/* Record pages and their forms: clients, contacts, engagements, a piece of work, scope items,
+/* documents, notes, custom fields, history, on rune_ui's tokens (docs/rune-ui-migration.md).
+/* Unlayered, so these win over rune's components.
+/*
+/* A record page (.record-page) is a header row across the top, then the working column (2/3:
+/* tabs over cards) beside a sidebar of cards (1/3: details, contacts, history). Its cards are
+/* rune's .card; facts are rune's dl.details; rows are rune's .list-row.
+/*
+/* 1 Page   2 Cards   3 Tabs   4 Lists   5 Work on a record   6 Activity feed   7 Notes
+/* 8 Documents   9 Forms   10 Engagement sidebar   11 Indexes */
+
+/* ======================================================================= 1 Page */
+
+.record-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (min-width: 960px) { .record-page { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+
+/* The header row: the title and a line about the record at the start, its actions at the end. */
+.record-page__header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s-4); min-width: 0; }
+.record-page__heading { display: flex; flex: 1 1 20rem; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.record-page__heading .page-title { overflow-wrap: anywhere; }
+.record-page__description { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--s-3); color: var(--text-muted); }
+
+.record-page__main, .record-page__aside { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+
+/* Links in a record's text (its description line, facts, notes): the text's colour, underlined,
+/* rather than rune's accent, so a page of facts doesn't read as a page of links. */
+.record-page a:not([class]) { color: var(--text); font-weight: var(--weight-strong); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+.record-page a:not([class]):hover { color: var(--text); text-decoration-color: currentColor; }
+
+/* Hiding the sidebar (]): the working column takes the width; the toggle in the header turns to
+/* face the other way. */
+@media (min-width: 960px) { html[data-sidebar="collapsed"] .record-page { grid-template-columns: minmax(0, 1fr); } }
+html[data-sidebar="collapsed"] .record-page__aside { display: none; }
+html[data-sidebar="collapsed"] .record-page__header .sidebar-toggle .icon { transform: scaleX(-1); }
+
+/* The toggle (layouts/shared/_sidebar_toggle) drawn as an icon button in the header row. */
+.record-page__header .sidebar-toggle { display: inline-grid; place-items: center; width: var(--control-h); height: var(--control-h); padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); }
+.record-page__header .sidebar-toggle:hover { background: var(--hover); color: var(--text); }
+
+/* ======================================================================= 2 Cards */
+
+/* A record's add buttons sit at the start of its cards' footers, under the list they add to. */
+.record-card > .card__footer { justify-content: flex-start; }
+.record-card > .card__footer:has(.record-add[open]) { align-items: stretch; }
+
+.record-card__stack { display: flex; flex-direction: column; gap: var(--s-4); }
+.record-card__empty { color: var(--text-muted); }
+.record-card__prose { font-size: var(--text-read); line-height: 1.6; }
+
+/* What comes next, in order, down a sidebar. */
+.record-steps { display: flex; flex-direction: column; gap: var(--s-2); padding-left: 1.25rem; color: var(--text-muted); line-height: 1.5; }
+
+/* A record's custom field values under its facts, on a rule (custom_fields/_values). Each pair is
+/* in a row element that lays out as if it weren't there. */
+.custom-fields__row { display: contents; }
+.record-page .custom-fields { padding-top: var(--s-4); border-top: 1px solid var(--line); }
+
+/* ======================================================================= 3 Tabs */
+
+/* The working column's tabs (layouts/shared/_record_tabs) above the tab's cards. */
+.record-tabs { display: flex; flex-direction: column; gap: var(--s-4); }
+.record-tabs__panel { display: flex; flex-direction: column; gap: var(--s-5); }
+
+/* ======================================================================= 4 Lists */
+
+/* A card's list of rows (rune's .list-row): a hairline between them. Rows run into the card's
+/* padding, so their text lines up with the card's title and the hover tint has room. */
+.record-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.record-list > li + li { border-top: 1px solid var(--line); }
+.record-list > li > .list-row, .record-list__row { margin-inline: calc(-1 * var(--s-3)); }
+.record-list .list-row { padding-block: var(--s-2); }
+/* A row that is the list item itself (documents, work) keeps to the column. */
+.record-list > li.list-row, li.record-list__row { margin-inline: 0; padding-inline: 0; }
+
+.record-list__ref { color: var(--text-muted); font-weight: var(--weight); }
+.record-list__badges { display: flex; flex-wrap: wrap; gap: var(--s-1); padding-top: 2px; }
+
+/* The work partials' own row names (todos/_todo), drawn as .list-row's parts. */
+.record-list__row { display: flex; align-items: center; gap: var(--s-3); min-width: 0; padding: var(--s-2) var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+a.record-list__row:hover { background: var(--hover); color: var(--text); }
+.record-list__main { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; color: inherit; text-decoration: none; }
+.record-list__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
+.record-list__description, .record-list__meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+.record-list__meta { flex-shrink: 0; }
+.record-list__actions { display: flex; flex-shrink: 0; align-items: center; gap: var(--s-2); }
+
+/* A contact's portal access and approval, as icons at the end of their row. */
+.contact-marks { display: flex; flex-shrink: 0; align-items: center; gap: 6px; color: var(--text-muted); }
+.contact-marks__mark { display: inline-flex; }
+.contact-marks__mark--approve { color: var(--ok); }
+
+/* ======================================================================= 5 Work on a record */
+
+/* A piece of work in a record's list: its status circle leads, like a task list's checkbox, and
+/* its title underlines under the pointer. */
+.todo-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
+.todo-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+
+/* An engagement's work, grouped by scope item: each group's name, done of total and state over its rows. */
+.work-groups { display: flex; flex-direction: column; }
+.work-group + .work-group { border-top: 1px solid var(--line); }
+.work-group__header { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) 0 var(--s-1); }
+.work-group:first-child .work-group__header { padding-top: 0; }
+.work-group__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; text-decoration: none; }
+a.work-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+.work-group__count, .work-focus__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* One scope item's work alone: its name, how much is done, its state and a way to its page. */
+.work-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); }
+.work-focus__text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.work-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-read); font-weight: 600; }
+
+/* Adding work or a scope item in place: a small button that opens its form below it. */
+.record-add { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--s-4); }
+.record-add[open] > summary { background: var(--layer-2); color: var(--text); }
+.record-add__form { gap: var(--s-3); width: 100%; }
+.record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: var(--s-3); }
+.record-add__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
+
+/* ======================================================================= 6 Activity feed (notes, history) */
+
+.record-feed { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.record-feed__item { display: flex; align-items: flex-start; gap: var(--s-3); padding-block: var(--s-4); }
+.record-feed__item:first-child { padding-top: 0; }
+.record-feed__item:last-child { padding-bottom: 0; }
+.record-feed__item + .record-feed__item { border-top: 1px solid var(--line); }
+.record-feed__avatar { display: inline-flex; flex-shrink: 0; }
+.record-feed__avatar .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
+.record-feed__body { display: flex; flex: 1; flex-direction: column; gap: var(--s-1); min-width: 0; }
+.record-feed__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-height: 2rem; }
+.record-feed__title { font-weight: var(--weight-strong); }
+.record-feed__meta { gap: 2px 6px; font-size: var(--text-meta); }
+.record-feed__meta.dot-list > * + *::before { margin-right: 6px; }
+.record-feed__details { color: var(--text-muted); font-size: var(--text-meta); overflow-wrap: anywhere; }
+.record-feed__text { font-size: var(--text-read); line-height: 1.6; }
+
+/* History in the sidebar is narrower: smaller avatars, tighter rows. */
+.record-page__aside .record-feed__item { padding-block: var(--s-3); }
+.record-page__aside .record-feed__item:first-child { padding-top: 0; }
+.record-page__aside .record-feed__item:last-child { padding-bottom: 0; }
+.record-page__aside .record-feed__avatar .avatar { width: 1.5rem; height: 1.5rem; font-size: var(--text-xs); }
+
+/* History folds (rune's .card--fold): its title and hint, then the chevron. */
+.record-timeline__summary { gap: var(--s-3); font-weight: var(--weight); }
+.record-timeline__summary:focus-visible { border-radius: var(--radius-sm); }
+
+/* ======================================================================= 7 Notes */
+
+/* Writing a note above a record's notes (notes/_section): one box, the editor on top (toolbar
+/* always shown, so focusing it shifts nothing), the kind, source and Add note along its foot. */
+.note-composer { gap: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); transition: border-color .12s, box-shadow .12s; }
+.note-composer:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+.note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: var(--radius) var(--radius) 0 0; background: transparent; box-shadow: none; }
+.note-composer .lexxy-editor__content { min-height: 3lh; }
+
+.note-composer__footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); padding: 6px; border-top: 1px solid var(--line); }
+.note-composer__footer :is(select, input) { border-color: transparent; background-color: transparent; }
+.note-composer__footer :is(select, input):hover { background-color: var(--hover); }
+.note-composer__footer :is(select, input):focus { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); }
+.note-composer__kind { flex: 0 0 auto; }
+.note-composer__source { flex: 1 1 10rem; min-width: 0; }
+.note-composer__submit { margin-left: auto; }
+
+/* ======================================================================= 8 Documents */
+
+/* Documents/_section: the drop box (.upload-drop, runwell/components.css), then the files as
+/* rows: the file's type tag, name and details as the thing to click, its switch and delete. */
+.document-link__wrap { display: contents; }
+.document-link { display: flex; flex: 1; align-items: center; gap: var(--s-3); min-width: 0; padding: 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.document-link:hover { color: var(--text); }
+.document-link:hover .document-link__name { text-decoration: underline; text-underline-offset: 4px; }
+.document-link__icon { display: grid; flex-shrink: 0; place-items: center; width: 2.25rem; height: 2.25rem; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--layer-2); color: var(--text-muted); font-size: .625rem; font-weight: 600; text-transform: uppercase; }
+.document-link__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.document-link__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
+.document-link__meta { display: flex; align-items: center; gap: var(--s-1); min-width: 0; overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); white-space: nowrap; }
+.document-link__meta .avatar { width: 1rem; height: 1rem; font-size: .5625rem; }
+
+/* The visible-to-client switch is a form of its own, on the row's line. */
+.document-row__visible { display: flex; flex-direction: row; align-items: center; gap: 0; }
+
+/* An image's preview: the picture as large as fits, its name and links under it. */
+.document-preview { width: fit-content; max-width: calc(100vw - 2rem); max-height: calc(100dvh - 4rem); margin: auto; }
+.document-preview__image { display: block; max-width: 100%; max-height: calc(100dvh - 12rem); margin-inline: auto; object-fit: contain; border-radius: var(--radius-sm); }
+.document-preview__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.document-preview__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ======================================================================= 9 Forms */
+
+/* A record's form (clients/_form and the like): a card of fields with Cancel and the main action
+/* at its foot. Short fields pair up in a .field-row, which stacks when narrow. */
+.record-form__body { gap: var(--s-4); }
+/* A short field (a status) beside a long one (a time zone). */
+@media (min-width: 640px) { .record-form__row--narrow-first { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
+
+/* A group of fields under its own heading (a fieldset's legend). A legend sits outside the
+/* fieldset's flow, so its space below is its own padding, not the group's gap. */
+.record-form__group { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+.record-form__group > legend { padding-bottom: var(--s-3); font-size: var(--text-read); }
+
+/* A switch with its explanation as one box (an edit page's sidebar): tinted once it's on. */
+.record-form__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); transition: background .12s, border-color .12s; }
+.record-form__toggle:hover { background: var(--hover); }
+.record-form__toggle:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
+.record-form__toggle-text { min-width: 0; color: var(--text-muted); }
+
+/* "Also on it" on a piece of work's edit page: the team as chips, picked ones tinted. */
+.owner-checklist { display: flex; flex-direction: column; min-width: 0; }
+.owner-checklist__legend { padding-bottom: 6px; font-weight: var(--weight-strong); }
+.owner-checklist__people { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.owner-checklist__person { display: inline-flex; align-items: center; gap: var(--s-2); padding: 6px var(--s-3) 6px var(--s-2); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; transition: background .12s, border-color .12s; }
+.owner-checklist__person:hover { background: var(--hover); }
+.owner-checklist__person:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
+.owner-checklist__person:has(:focus-visible) { box-shadow: var(--ring); }
+.owner-checklist__person input:focus-visible { box-shadow: none; }
+
+/* ======================================================================= 10 Engagement sidebar */
+
+/* Its scope items and General as two full-width tabs. */
+.engagement-sidebar__tabs { width: 100%; }
+.engagement-sidebar__tabs .tabs__tab { flex: 1; justify-content: center; }
+.engagement-sidebar__tabs .tabs__tab[aria-pressed="true"] { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+
+/* An engagement's scope items (engagements/_scope): each with rune's status dot for its state, done of total
+/* and a thin bar. The one whose work is shown is raised, as a nav marks its page. */
+.scope-section { display: flex; flex-direction: column; gap: var(--s-3); }
+.scope-nav { display: flex; flex-direction: column; gap: 2px; margin-inline: calc(-1 * var(--s-2)); }
+.scope-nav__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px var(--s-3); padding: var(--s-2); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.scope-nav__item:hover { background: var(--hover); color: var(--text); }
+.scope-nav__item[aria-current="page"] { background: var(--layer-2); font-weight: var(--weight-strong); }
+.scope-nav__name { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.scope-nav__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scope-nav__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; }
+.scope-nav__progress { grid-column: 1 / -1; width: 100%; height: 2px; overflow: hidden; border: 0; border-radius: var(--radius-pill); background: var(--layer-3); appearance: none; }
+.scope-nav__progress::-webkit-progress-bar { background: var(--layer-3); }
+.scope-nav__progress::-webkit-progress-value { background: var(--ok); }
+.scope-nav__progress::-moz-progress-bar { background: var(--ok); }
+
+/* A scope item's name in place (scope_items/_item, _new): the field, then its button, on one line. */
+.scope-item-fields { display: flex; align-items: center; gap: var(--s-2); font-size: var(--text-meta); }
+.scope-item-fields form { display: contents; }
+.scope-item-fields input { flex: 1; min-width: 0; height: var(--control-h-sm); font-size: var(--text-meta); }
+
+/* Finishing, reopening and erasing an engagement (engagements/_close, _erase). */
+.engagement-finish__choices { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.engagement-finish__form { gap: var(--s-3); }
+.engagement-finish__text { color: var(--text-muted); }
+.engagement-finish__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.engagement-finish__danger, .engagement-finish__danger:hover { color: var(--danger); }
+.engagement-finish__danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
+.erase-engagement__form { padding: var(--s-4); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 5%, var(--panel)); }
+
+/* The inline confirmation (layouts/shared/_confirm) at the foot of a record's sidebar starts
+/* where the cards do, at their width. */
+.record-page__aside > .confirm { justify-content: flex-start; }
+.record-page__aside .confirm__card { width: 100%; }
+
+/* ======================================================================= 11 Indexes */
+
+/* An engagement's row in the table: its title as plain text to click, its client quieter. */
+.engagement-row__title, .engagement-row__client { color: var(--text); text-decoration: none; }
+.engagement-row__client { color: var(--text-muted); }
+:is(.engagement-row__title, .engagement-row__client):hover { color: var(--accent); }
+
+/* A client's status badge that opens its picker (clients/_status_picker): the badge is the button. */
+.status-picker { position: relative; display: inline-block; }
+.status-picker__trigger { display: inline-flex; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; font: inherit; cursor: pointer; }
+.status-picker__trigger:hover .badge { filter: brightness(.95); }
+.status-picker__display { display: contents; }

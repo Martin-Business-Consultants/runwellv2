@@ -1,9 +1,9 @@
 <%# locals: (text:, action_text: nil, action_path: nil) %>
-<%# What an empty list says, and where its records come from: one quiet line in a dashed box, with
-    a link to the next step when there is one. %>
-<div class="blank-slate">
-  <%= text %>
+<%# What an empty list says, and where its records come from: one quiet line in a dashed box
+    (rune_ui's empty state), with a link to the next step when there is one. %>
+<div class="empty">
+  <p><%= text %></p>
   <% if action_path %>
-    <%= link_to action_text, action_path, class: "txt-link" %>
+    <%= link_to action_text, action_path %>
   <% end %>
 </div>

@@ -1,12 +1,13 @@
-# Runwell UI: Runwell's own builders over nobuild_ui (the gem's NobuildUi::Helper has ui_button,
-# ui_link_button, ui_button_classes, ui_badge, ui_kbd, ui_avatar, ui_dropdown and the menu
-# items). The styleguide at /ui (development) shows every component.
+# Runwell's own builders over rune_ui (the gem's helpers: button_link, button_classes, badge,
+# avatar, menu, popover_menu, dialog, tabs…; see ../rune_ui/README.md). The styleguide at /ui
+# (development) shows the components.
 module UiHelper
-  STATUS_BADGES = { "positive" => :positive, "negative" => :negative, "waiting" => :warning, "progress" => :info, "neutral" => :neutral }.freeze
+  # Runwell's status tones (ApplicationHelper::STATUS_TONES) as rune_ui's badge tones.
+  STATUS_BADGES = { "positive" => :ok, "negative" => :danger, "waiting" => :attention, "progress" => :accent, "neutral" => :neutral }.freeze
 
   # A status in its tone: ui_status_badge("overdue").
   def ui_status_badge(label, highlight: false, **options)
-    ui_badge(label, STATUS_BADGES.fetch(status_tone(label, highlight: highlight)), **options)
+    badge(label, tone: STATUS_BADGES.fetch(status_tone(label, highlight: highlight)), **options)
   end
 
   # Data table (ui/_data_table): one column of it. key names the column (its cells carry
@@ -21,7 +22,7 @@ module UiHelper
   end
 
   def ui_data_table_th(column)
-    classes = class_names(column.header_class, "data-table__number" => column.align == :end, "txt-align-center" => column.align == :center)
+    classes = class_names(column.header_class, "data-table__number" => column.align == :end, "data-table__center" => column.align == :center)
     if column.sort
       sortable_th(column.label, column.sort, class: classes.presence, data: { column: column.key })
     else

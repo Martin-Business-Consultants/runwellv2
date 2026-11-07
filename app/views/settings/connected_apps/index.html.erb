@@ -1,124 +1,122 @@
 <% @page_title = "Connected apps" %>
 <%= render "settings/header", current: :connected_apps %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <% if @new_token %>
-      <section class="settings__section">
-        <div class="ui-alert" role="status">
-          <%= icon_tag "lock", class: "ui-alert__icon" %>
-          <p class="ui-alert__title">Your new token</p>
-          <div class="ui-alert__description">
-            <p>Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
-          </div>
+<div class="settings-page">
+  <% if @new_token %>
+    <section class="settings-section">
+      <div class="alert" role="status">
+        <%= icon_tag "lock", class: "alert__icon" %>
+        <p class="alert__title">Your new token</p>
+        <div class="alert__body">
+          <p>Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
         </div>
-        <div class="copy-row">
-          <code class="ui-input overflow-ellipsis" id="new_token"><%= @new_token.plaintext %></code>
-          <button type="button" class="ui-button ui-button--outline" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">Copy</button>
-        </div>
-      </section>
-    <% end %>
+      </div>
+      <div class="copy-field">
+        <code id="new_token"><%= @new_token.plaintext %></code>
+        <button type="button" class="btn btn--secondary" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">Copy</button>
+      </div>
+    </section>
+  <% end %>
 
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Apps acting as your agent</h2>
-        <p class="settings__description">
-          Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Apps acting as your agent</h2>
+      <p class="settings-section__description">
+        Everything an app does with these is recorded as <strong><%= Current.user.agent&.display_name || "your agent" %></strong>, with the app’s name, so your history shows what you did and what your AI did. Your agent has exactly your role.
+      </p>
+    </header>
+    <% if @tokens.any? %>
+      <ul class="settings-list">
+        <%= render partial: "settings/connected_apps/token", collection: @tokens, as: :token %>
+      </ul>
+    <% else %>
+      <%= render "layouts/shared/empty", text: "Nothing is connected yet." %>
+    <% end %>
+  </section>
+
+  <% if can?(:manage_settings) %>
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2><%= term(:client, count: 2) %>’ AI</h2>
+        <p class="settings-section__description">
+          A contact with portal access can connect their own assistant under Connected apps in the portal, or by giving it <code><%= portal_mcp_url %></code>.
+          It sees what they see and can send requests, as them.
         </p>
       </header>
-      <% if @tokens.any? %>
-        <ul class="settings__list">
-          <%= render partial: "settings/connected_apps/token", collection: @tokens, as: :token %>
-        </ul>
-      <% else %>
-        <%= render "layouts/shared/empty", text: "Nothing is connected yet." %>
-      <% end %>
     </section>
+  <% end %>
 
-    <% if can?(:manage_settings) %>
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2><%= term(:client, count: 2) %>’ AI</h2>
-          <p class="settings__description">
-            A contact with portal access can connect their own assistant under Connected apps in the portal, or by giving it <code><%= portal_mcp_url %></code>.
-            It sees what they see and can send requests, as them.
-          </p>
-        </header>
-      </section>
-    <% end %>
-
-    <% if @everyone&.any? %>
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2>Everyone’s connections</h2>
-          <p class="settings__description">
-            Every app and token connected to Runwell by your team and by <%= term(:client, count: 2).downcase %>’ contacts. Pause one to stop it at once, or disconnect it.
-            Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
-          </p>
-          <div class="settings__heading-actions">
-            <span class="ui-badge ui-badge--outline"><%= @everyone.size %></span>
-          </div>
-        </header>
-        <ul class="settings__list settings__list--scroll">
-          <% @everyone.each do |token| %>
-            <%# herb:key token.id %>
-            <%= render "settings/connected_apps/token", token: token, holder: true %>
-          <% end %>
-        </ul>
-      </section>
-    <% end %>
-
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Connect an AI app</h2>
-        <p class="settings__description">Runwell speaks MCP at <code><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
+  <% if @everyone&.any? %>
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2>Everyone’s connections</h2>
+        <p class="settings-section__description">
+          Every app and token connected to Runwell by your team and by <%= term(:client, count: 2).downcase %>’ contacts. Pause one to stop it at once, or disconnect it.
+          Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
+        </p>
+        <div class="settings-section__actions">
+          <%= badge @everyone.size.to_s, tone: :outline %>
+        </div>
       </header>
-      <ul class="settings__list">
-        <li class="ui-item ui-item--sm">
-          <div class="ui-item__content">
-            <p class="ui-item__title">Claude or ChatGPT</p>
-            <p class="ui-item__description">Add a custom connector with that URL. You’ll be asked to approve it here.</p>
-          </div>
-        </li>
-        <li class="ui-item ui-item--sm">
-          <div class="ui-item__content">
-            <p class="ui-item__title">Muse, Grok and assistants that build their own connection</p>
-            <p class="ui-item__description">Describe Runwell to it as an MCP server at that URL, and make a personal token below when it asks for a key.</p>
-          </div>
-        </li>
-        <li class="ui-item ui-item--sm">
-          <div class="ui-item__content">
-            <p class="ui-item__title">Claude Code</p>
-            <p class="ui-item__description">Add it, then run <code>/mcp</code> in Claude Code to sign in.</p>
-            <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
-          </div>
-        </li>
-        <li class="ui-item ui-item--sm">
-          <div class="ui-item__content">
-            <p class="ui-item__title">The command line</p>
-            <p class="ui-item__description">Install it, then sign in.</p>
-            <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
-          </div>
-        </li>
+      <ul class="settings-list settings-list--scroll">
+        <% @everyone.each do |token| %>
+          <%# herb:key token.id %>
+          <%= render "settings/connected_apps/token", token: token, holder: true %>
+        <% end %>
       </ul>
     </section>
+  <% end %>
 
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Personal tokens</h2>
-        <p class="settings__description">For scripts and tools that can’t sign in through the browser.</p>
-      </header>
-      <%= form_with url: settings_connected_apps_path, scope: :access_token, class: "settings__form settings__form--tight" do |form| %>
-        <div class="ui-field">
-          <%= form.label :name, "Token name", class: "ui-label" %>
-          <%= form.text_field :name, class: "ui-input", autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”" %>
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Connect an AI app</h2>
+      <p class="settings-section__description">Runwell speaks MCP at <code><%= mcp_url %></code>. Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a client.</p>
+    </header>
+    <ul class="settings-list">
+      <li class="list-row">
+        <div class="list-row__content">
+          <p class="list-row__title">Claude or ChatGPT</p>
+          <p class="list-row__desc">Add a custom connector with that URL. You’ll be asked to approve it here.</p>
         </div>
-        <label class="settings__check">
-          <%= form.check_box :read_only, class: "ui-checkbox" %>
-          <span>Read only</span>
-        </label>
-        <div><button type="submit" class="ui-button">Make a personal token</button></div>
-      <% end %>
-    </section>
-  </div>
-</section>
+      </li>
+      <li class="list-row">
+        <div class="list-row__content">
+          <p class="list-row__title">Muse, Grok and assistants that build their own connection</p>
+          <p class="list-row__desc">Describe Runwell to it as an MCP server at that URL, and make a personal token below when it asks for a key.</p>
+        </div>
+      </li>
+      <li class="list-row">
+        <div class="list-row__content">
+          <p class="list-row__title">Claude Code</p>
+          <p class="list-row__desc">Add it, then run <code>/mcp</code> in Claude Code to sign in.</p>
+          <%= code_block "claude mcp add --transport http runwell #{mcp_url}" %>
+        </div>
+      </li>
+      <li class="list-row">
+        <div class="list-row__content">
+          <p class="list-row__title">The command line</p>
+          <p class="list-row__desc">Install it, then sign in.</p>
+          <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Personal tokens</h2>
+      <p class="settings-section__description">For scripts and tools that can’t sign in through the browser.</p>
+    </header>
+    <%= form_with url: settings_connected_apps_path, scope: :access_token do |form| %>
+      <div class="field">
+        <%= form.label :name, "Token name", class: "field__label" %>
+        <%= form.text_field :name, autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”" %>
+      </div>
+      <label class="checkbox">
+        <%= form.check_box :read_only %>
+        <span>Read only</span>
+      </label>
+      <div><button type="submit" class="btn btn--primary">Make a personal token</button></div>
+    <% end %>
+  </section>
+</div>

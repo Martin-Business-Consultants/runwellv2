@@ -1,79 +1,77 @@
 <% @page_title = "Export" %>
 <%= render "settings/header", current: :export %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Export</h2>
-        <p class="settings__description">Everything Runwell holds, as a .zip that’s built in the background and emailed to you when ready, then kept for a week.</p>
-      </header>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Export</h2>
+      <p class="settings-section__description">Everything Runwell holds, as a .zip that’s built in the background and emailed to you when ready, then kept for a week.</p>
+    </header>
 
-      <div class="settings__list">
-        <div class="ui-item">
-          <div class="ui-item__media"><%= icon_tag "share" %></div>
-          <div class="ui-item__content">
-            <p class="ui-item__title">Export everything</p>
-            <p class="ui-item__description">
-              Every table (yours and your plugins’) as JSON and CSV, and every file. It’s yours to keep, move or open in a spreadsheet.
-              Passwords, tokens and other secrets are left out.
-            </p>
-          </div>
-          <div class="ui-item__actions">
-            <%= button_to settings_exports_path, class: "ui-button ui-button--sm" do %>
-              <span>Make an export</span>
-            <% end %>
-          </div>
+    <div class="settings-list">
+      <div class="list-row">
+        <div class="list-row__media"><%= icon_tag "share" %></div>
+        <div class="list-row__content">
+          <p class="list-row__title">Export everything</p>
+          <p class="list-row__desc">
+            Every table (yours and your plugins’) as JSON and CSV, and every file. It’s yours to keep, move or open in a spreadsheet.
+            Passwords, tokens and other secrets are left out.
+          </p>
         </div>
-        <div class="ui-item">
-          <div class="ui-item__media"><%= icon_tag "lock" %></div>
-          <div class="ui-item__content">
-            <p class="ui-item__title">Back up for Runwell Go</p>
-            <p class="ui-item__description">
-              The database itself and every file, to restore with Settings › Import in Runwell Go (or <code>runwell import</code>).
-              Everyone signs in there with the passwords they use here. It holds every secret this install does, so keep it as safe as the server.
-            </p>
-          </div>
-          <div class="ui-item__actions">
-            <%= button_to settings_exports_path, params: { kind: "backup" }, class: "ui-button ui-button--outline ui-button--sm" do %>
-              <span>Make a backup</span>
-            <% end %>
-          </div>
+        <div class="list-row__actions">
+          <%= button_to settings_exports_path, class: "btn btn--primary btn--sm" do %>
+            <span>Make an export</span>
+          <% end %>
         </div>
       </div>
-    </section>
-
-    <% if @exports.any? %>
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2>Recent exports</h2>
-        </header>
-        <ul class="settings__list settings__list--scroll">
-          <% @exports.each do |export| %>
-            <%# herb:key export.id %>
-            <li class="ui-item ui-item--sm" data-filter-target="item">
-              <div class="ui-item__content">
-                <p class="ui-item__title"><%= export.backup? ? "Backup" : "Export" %> · <%= l export.created_at, format: :long %></p>
-                <p class="ui-item__description">
-                  By <%= export.user.display_name %>
-                  <% if export.ready? %>
-                    · <%= number_with_delimiter(export.rows_count) %> records, <%= pluralize(export.files_count, "file") %>, <%= number_to_human_size(export.archive.byte_size) %>
-                  <% elsif export.state == "failed" %>
-                    · failed: <%= export.error %>
-                  <% else %>
-                    · being made…
-                  <% end %>
-                </p>
-              </div>
-              <% if export.ready? %>
-                <div class="ui-item__actions">
-                  <%= link_to "Download", settings_export_path(export), class: "ui-button ui-button--outline ui-button--sm", data: { turbo: false } %>
-                </div>
-              <% end %>
-            </li>
+      <div class="list-row">
+        <div class="list-row__media"><%= icon_tag "lock" %></div>
+        <div class="list-row__content">
+          <p class="list-row__title">Back up for Runwell Go</p>
+          <p class="list-row__desc">
+            The database itself and every file, to restore with Settings › Import in Runwell Go (or <code>runwell import</code>).
+            Everyone signs in there with the passwords they use here. It holds every secret this install does, so keep it as safe as the server.
+          </p>
+        </div>
+        <div class="list-row__actions">
+          <%= button_to settings_exports_path, params: { kind: "backup" }, class: "btn btn--secondary btn--sm" do %>
+            <span>Make a backup</span>
           <% end %>
-        </ul>
-      </section>
-    <% end %>
-  </div>
-</section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <% if @exports.any? %>
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2>Recent exports</h2>
+      </header>
+      <ul class="settings-list settings-list--scroll">
+        <% @exports.each do |export| %>
+          <%# herb:key export.id %>
+          <li class="list-row" data-filter-target="item">
+            <div class="list-row__content">
+              <p class="list-row__title"><%= export.backup? ? "Backup" : "Export" %> · <%= l export.created_at, format: :long %></p>
+              <p class="list-row__desc">
+                By <%= export.user.display_name %>
+                <% if export.ready? %>
+                  · <%= number_with_delimiter(export.rows_count) %> records, <%= pluralize(export.files_count, "file") %>, <%= number_to_human_size(export.archive.byte_size) %>
+                <% elsif export.state == "failed" %>
+                  · failed: <%= export.error %>
+                <% else %>
+                  · being made…
+                <% end %>
+              </p>
+            </div>
+            <% if export.ready? %>
+              <div class="list-row__actions">
+                <%= link_to "Download", settings_export_path(export), class: "btn btn--secondary btn--sm", data: { turbo: false } %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</div>

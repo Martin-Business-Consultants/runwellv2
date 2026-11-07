@@ -1,22 +1,25 @@
 <%# locals: (name:, path:, message: nil, trigger_class: nil, keys: nil) %>
-<%# Fizzy's delete: a trash button opening a modal that names what goes and asks once. %>
+<%# Delete: a trash button opening a dialog (rune_ui's) that names what goes and asks once. %>
 <% title = "Delete " + name + "?" %>
-<div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="<%= class_names("ui-button ui-button--ghost ui-button--icon-sm txt-negative", trigger_class) %>" title="<%= title %>" data-keys="<%= keys %>" data-action="dialog#open">
+<div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
+  <button type="button" class="<%= class_names("icon-button icon-button--danger", trigger_class) %>" title="<%= title %>" aria-label="<%= title %>" aria-haspopup="dialog" data-keys="<%= keys %>" data-action="rune-dialog#open">
     <%= icon_tag "trash" %>
-    <span class="for-screen-reader"><%= title %></span>
   </button>
-  <dialog class="ui-dialog" aria-label="<%= title %>" data-dialog-target="dialog">
-    <header class="ui-dialog__header">
-      <h3 class="ui-dialog__title"><%= title %></h3>
-      <p class="ui-dialog__description"><%= message || "This can’t be undone." %></p>
-    </header>
-    <footer class="ui-dialog__footer">
-      <button type="button" class="ui-button ui-button--outline" data-action="dialog#close">Cancel</button>
-      <%= button_to path, method: :delete, class: "ui-button ui-button--destructive", data: { turbo_frame: "_top" } do %>
-        <%= icon_tag "trash" %>
-        <span>Delete</span>
-      <% end %>
-    </footer>
+  <dialog class="dialog" aria-label="<%= title %>" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop">
+    <div class="dialog__box">
+      <header class="dialog__header">
+        <h2 class="dialog__title"><%= title %></h2>
+      </header>
+      <div class="dialog__body">
+        <p class="dialog__hint"><%= message || "This can’t be undone." %></p>
+        <div class="dialog__actions">
+          <button type="button" class="btn btn--ghost" data-action="rune-dialog#close">Cancel</button>
+          <%= button_to path, method: :delete, class: "btn btn--danger", data: { turbo_frame: "_top" } do %>
+            <%= icon_tag "trash" %>
+            <span>Delete</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </dialog>
 </div>

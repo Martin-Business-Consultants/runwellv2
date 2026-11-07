@@ -1,117 +1,115 @@
 <% @page_title = "Fields" %>
 <%= render "settings/header", current: :fields %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Fields</h2>
-        <p class="settings__description">What you record beyond the basics, like a property address or a matter number. Fields are information only: nothing in Runwell acts on them. Every field is optional. Archiving one hides it and keeps its values.</p>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Fields</h2>
+      <p class="settings-section__description">What you record beyond the basics, like a property address or a matter number. Fields are information only: nothing in Runwell acts on them. Every field is optional. Archiving one hides it and keeps its values.</p>
+    </header>
+  </section>
+
+  <% CustomField::MODELS.each do |model| %>
+    <%# herb:key model %>
+    <% fields = @fields.fetch(model, []) %>
+    <section class="settings-section">
+      <header class="settings-section__head">
+        <h2><%= custom_field_model_name(model, count: 2) %></h2>
+        <div class="settings-section__actions">
+          <span class="badge badge--outline"><%= pluralize(fields.size, "field") %></span>
+        </div>
       </header>
-    </section>
 
-    <% CustomField::MODELS.each do |model| %>
-      <%# herb:key model %>
-      <% fields = @fields.fetch(model, []) %>
-      <section class="settings__section">
-        <header class="settings__heading">
-          <h2><%= custom_field_model_name(model, count: 2) %></h2>
-          <div class="settings__heading-actions">
-            <span class="ui-badge ui-badge--outline"><%= pluralize(fields.size, "field") %></span>
-          </div>
-        </header>
-
-        <% if fields.any? %>
-          <ul class="settings__list">
-            <% fields.each do |field| %>
-              <%# herb:key field.id %>
-              <li class="ui-item ui-item--sm settings-field" data-filter-target="item">
-                <div class="ui-item__content">
-                  <p class="ui-item__title">
-                    <%= field.label %>
-                    <% if field.archived? %>
-                      <span class="ui-badge ui-badge--neutral">Archived</span>
-                    <% end %>
-                  </p>
-                  <p class="ui-item__description"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to clients" if field.client_visible %></p>
-                </div>
-                <div class="ui-item__actions">
+      <% if fields.any? %>
+        <ul class="settings-list">
+          <% fields.each do |field| %>
+            <%# herb:key field.id %>
+            <li class="list-row settings-field" data-filter-target="item">
+              <div class="list-row__content">
+                <p class="list-row__title">
+                  <%= field.label %>
                   <% if field.archived? %>
-                    <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "ui-button ui-button--outline ui-button--sm" %>
-                  <% else %>
-                    <%= button_to settings_field_path(field), method: :patch, params: { field: { position: field.position - 1 } }, class: "ui-button ui-button--ghost ui-button--icon-sm", title: "Move up", disabled: field == fields.first do %>
-                      <%= icon_tag "arrow-up" %>
-                      <span class="for-screen-reader">Move <%= field.label %> up</span>
-                    <% end %>
-                    <%= render "layouts/shared/delete_dialog", name: field.label, path: settings_field_path(field),
-                          message: "It’s archived: hidden from forms, pages and agents, with its values kept. You can restore it." %>
+                    <span class="badge">Archived</span>
                   <% end %>
-                </div>
-                <% unless field.archived? %>
-                  <details class="settings-field__change">
-                    <summary class="ui-button ui-button--outline ui-button--sm">Change</summary>
-                    <%= form_with model: field, url: settings_field_path(field), method: :patch, scope: :field, namespace: dom_id(field), class: "settings__form settings__form--tight settings__subform" do |form| %>
-                      <div class="ui-field">
-                        <%= form.label :label, "Label", class: "ui-label" %>
-                        <%= form.text_field :label, required: true, class: "ui-input", autocomplete: "off" %>
-                      </div>
-                      <% if field.kind == "choice" %>
-                        <div class="ui-field">
-                          <%= form.label :choices, "Choices", class: "ui-label" %>
-                          <%= form.text_field :choices, value: field.choices.join(", "), class: "ui-input", autocomplete: "off" %>
-                          <p class="ui-field__description">Separated by commas.</p>
-                        </div>
-                      <% end %>
-                      <label class="settings__check">
-                        <%= form.check_box :listed, class: "ui-checkbox" %>
-                        <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
-                      </label>
-                      <label class="settings__check">
-                        <%= form.check_box :client_visible, class: "ui-checkbox" %>
-                        <span>Shown to the client in the portal</span>
-                      </label>
-                      <div><button type="submit" class="ui-button ui-button--sm">Save</button></div>
-                    <% end %>
-                  </details>
+                </p>
+                <p class="list-row__desc"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to clients" if field.client_visible %></p>
+              </div>
+              <div class="list-row__actions">
+                <% if field.archived? %>
+                  <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "btn btn--secondary btn--sm" %>
+                <% else %>
+                  <%= button_to settings_field_path(field), method: :patch, params: { field: { position: field.position - 1 } }, class: "icon-button", title: "Move up", disabled: field == fields.first do %>
+                    <%= icon_tag "arrow-up" %>
+                    <span class="visually-hidden">Move <%= field.label %> up</span>
+                  <% end %>
+                  <%= render "layouts/shared/delete_dialog", name: field.label, path: settings_field_path(field),
+                        message: "It’s archived: hidden from forms, pages and agents, with its values kept. You can restore it." %>
                 <% end %>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <%= render "layouts/shared/empty", text: "No fields yet." %>
-        <% end %>
-
-        <details class="settings__add">
-          <summary class="ui-button ui-button--outline ui-button--sm"><%= icon_tag "add" %> Add a field</summary>
-          <%= form_with url: settings_fields_path, scope: :field, namespace: "new_#{model.downcase}", class: "settings__form settings__form--tight settings__subform" do |form| %>
-            <%= form.hidden_field :model_type, value: model %>
-            <div class="settings__row">
-              <div class="ui-field">
-                <%= form.label :label, "Label", class: "ui-label" %>
-                <%= form.text_field :label, required: true, class: "ui-input", autocomplete: "off", placeholder: "Property address" %>
               </div>
-              <div class="ui-field">
-                <%= form.label :kind, "Kind", class: "ui-label" %>
-                <%= form.select :kind, CustomField::KINDS.map { [ CustomField::KIND_LABELS[it], it ] }, {}, class: "ui-select" %>
-              </div>
-            </div>
-            <div class="ui-field">
-              <%= form.label :choices, "Choices", class: "ui-label" %>
-              <%= form.text_field :choices, class: "ui-input", autocomplete: "off", placeholder: "Small, Medium, Large" %>
-              <p class="ui-field__description">For a choice field, separated by commas. The kind can’t change once the field has values.</p>
-            </div>
-            <label class="settings__check">
-              <%= form.check_box :listed, class: "ui-checkbox" %>
-              <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
-            </label>
-            <label class="settings__check">
-              <%= form.check_box :client_visible, class: "ui-checkbox" %>
-              <span>Shown to the client in the portal</span>
-            </label>
-            <div><button type="submit" class="ui-button ui-button--sm">Add field</button></div>
+              <% unless field.archived? %>
+                <details class="settings-fold settings-field__change">
+                  <summary class="btn btn--secondary btn--sm">Change</summary>
+                  <%= form_with model: field, url: settings_field_path(field), method: :patch, scope: :field, namespace: dom_id(field), class: "settings-subform" do |form| %>
+                    <div class="field">
+                      <%= form.label :label, "Label", class: "field__label" %>
+                      <%= form.text_field :label, required: true, autocomplete: "off" %>
+                    </div>
+                    <% if field.kind == "choice" %>
+                      <div class="field">
+                        <%= form.label :choices, "Choices", class: "field__label" %>
+                        <%= form.text_field :choices, value: field.choices.join(", "), autocomplete: "off" %>
+                        <p class="field__hint">Separated by commas.</p>
+                      </div>
+                    <% end %>
+                    <label class="checkbox">
+                      <%= form.check_box :listed %>
+                      <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
+                    </label>
+                    <label class="checkbox">
+                      <%= form.check_box :client_visible %>
+                      <span>Shown to the client in the portal</span>
+                    </label>
+                    <div><button type="submit" class="btn btn--primary btn--sm">Save</button></div>
+                  <% end %>
+                </details>
+              <% end %>
+            </li>
           <% end %>
-        </details>
-      </section>
-    <% end %>
-  </div>
-</section>
+        </ul>
+      <% else %>
+        <%= render "layouts/shared/empty", text: "No fields yet." %>
+      <% end %>
+
+      <details class="settings-fold">
+        <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add a field</summary>
+        <%= form_with url: settings_fields_path, scope: :field, namespace: "new_#{model.downcase}", class: "settings-subform" do |form| %>
+          <%= form.hidden_field :model_type, value: model %>
+          <div class="field-row">
+            <div class="field">
+              <%= form.label :label, "Label", class: "field__label" %>
+              <%= form.text_field :label, required: true, autocomplete: "off", placeholder: "Property address" %>
+            </div>
+            <div class="field">
+              <%= form.label :kind, "Kind", class: "field__label" %>
+              <%= form.select :kind, CustomField::KINDS.map { [ CustomField::KIND_LABELS[it], it ] }, {} %>
+            </div>
+          </div>
+          <div class="field">
+            <%= form.label :choices, "Choices", class: "field__label" %>
+            <%= form.text_field :choices, autocomplete: "off", placeholder: "Small, Medium, Large" %>
+            <p class="field__hint">For a choice field, separated by commas. The kind can’t change once the field has values.</p>
+          </div>
+          <label class="checkbox">
+            <%= form.check_box :listed %>
+            <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
+          </label>
+          <label class="checkbox">
+            <%= form.check_box :client_visible %>
+            <span>Shown to the client in the portal</span>
+          </label>
+          <div><button type="submit" class="btn btn--primary btn--sm">Add field</button></div>
+        <% end %>
+      </details>
+    </section>
+  <% end %>
+</div>

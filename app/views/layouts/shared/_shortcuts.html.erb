@@ -1,27 +1,30 @@
 <%# locals: () %>
-<%# The ? sheet: a button in the nav opening shadcn's Dialog, listing every key as Kbd. %>
-<div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="ui-button ui-button--ghost ui-button--icon-sm" title="Help and keyboard shortcuts" data-keys="?" data-action="dialog#open">
-    <kbd class="txt-x-small">?</kbd>
-    <span class="for-screen-reader">Keyboard shortcuts</span>
+<%# The ? sheet: a button in the nav opening a dialog (rune_ui's), listing every key. %>
+<div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
+  <button type="button" class="icon-button" title="Help and keyboard shortcuts" aria-haspopup="dialog" data-keys="?" data-action="rune-dialog#open">
+    <kbd>?</kbd>
+    <span class="visually-hidden">Keyboard shortcuts</span>
   </button>
-  <dialog class="ui-dialog shortcuts" data-dialog-target="dialog" aria-labelledby="shortcuts_title">
-    <header class="ui-dialog__header">
-      <h2 class="ui-dialog__title" id="shortcuts_title">Keyboard shortcuts</h2>
-      <p class="ui-dialog__description">Letters work anywhere outside a text field. A pair like <kbd>g</kbd> <kbd>c</kbd> is pressed one key after the other.</p>
-    </header>
-    <button type="button" class="ui-dialog__close ui-button ui-button--ghost ui-button--icon-sm" title="Close" data-action="dialog#close">
-      <%= icon_tag "close" %>
-      <span class="for-screen-reader">Close</span>
-    </button>
-    <%= render "layouts/shared/shortcut_list" %>
-    <footer class="ui-dialog__footer shortcuts__footer">
-      <button type="button" class="ui-button ui-button--outline hints-switch" data-action="keyboard#toggleHints">
-        <span class="hints-switch__show">Show key hints</span>
-        <span class="hints-switch__hide">Hide key hints</span>
-        <kbd class="hide-on-touch">.</kbd>
-      </button>
-      <button type="button" class="ui-button" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
-    </footer>
+  <dialog class="dialog dialog--lg shortcuts" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="shortcuts_title">
+    <div class="dialog__box">
+      <header class="dialog__header">
+        <div class="stack shortcuts__intro">
+          <h2 class="dialog__title" id="shortcuts_title">Keyboard shortcuts</h2>
+          <p class="muted">Letters work anywhere outside a text field. A pair like <kbd>g</kbd> <kbd>c</kbd> is pressed one key after the other.</p>
+        </div>
+        <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
+      </header>
+      <div class="dialog__body">
+        <%= render "layouts/shared/shortcut_list" %>
+      </div>
+      <footer class="dialog__actions shortcuts__footer">
+        <button type="button" class="<%= button_classes(variant: :secondary) %> hints-switch" data-action="keyboard#toggleHints">
+          <span class="hints-switch__show">Show key hints</span>
+          <span class="hints-switch__hide">Hide key hints</span>
+          <kbd class="hide-on-touch">.</kbd>
+        </button>
+        <button type="button" class="<%= button_classes(variant: :primary) %>" data-action="rune-dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
+      </footer>
+    </div>
   </dialog>
 </div>

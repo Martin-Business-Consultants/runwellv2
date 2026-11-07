@@ -1,67 +1,65 @@
 <% @page_title = @person.display_name %>
-<% content_for :header do %>
-  <%= parent_page "Users", users_path %>
-<% end %>
+<%= parent_page "Users", users_path %>
 <% me = @person == Current.user %>
 <% manage = can?(:manage_people) %>
 
-<section class="settings person-page<%= " settings--split" if manage %>">
-  <div class="settings__panel panel shadow txt-align-start">
+<div class="<%= class_names("person-page", "person-page--split": manage) %>">
+  <div class="card person-page__main">
     <div class="person-page__heading">
-      <%= avatar_preview_tag @person, hidden_for_screen_reader: true, class: "people__avatar" %>
-      <div class="min-width">
-        <h1 class="page-title"><%= @person.display_name %><%= " (you)" if me %></h1>
-        <div class="settings__chips">
-          <%= ui_badge @person.role.capitalize, :outline %>
+      <%= avatar_preview_tag @person, hidden_for_screen_reader: true %>
+      <div class="person-page__name">
+        <h1><%= @person.display_name %><%= " (you)" if me %></h1>
+        <div class="settings-chips">
+          <%= badge @person.role.capitalize, tone: :outline %>
           <% if @person.deactivated? %>
-            <%= ui_badge "Deactivated", :neutral %>
+            <%= badge "Deactivated", tone: :neutral %>
           <% else %>
-            <%= ui_badge "Active", :positive %>
+            <%= badge "Active", tone: :ok %>
           <% end %>
           <% if manage && @person.two_factor? %>
-            <%= ui_badge "Two-factor", :positive %>
+            <%= badge "Two-factor", tone: :ok %>
           <% end %>
         </div>
       </div>
     </div>
 
     <% if manage %>
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Details</h2>
-        <p class="settings__description">Their name, the address they sign in with, and what they may do.</p>
+        <p class="settings-section__description">Their name, the address they sign in with, and what they may do.</p>
       </header>
-      <%= form_with model: @person, url: user_path(@person), method: :patch, scope: :user, class: "settings__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :name, "Name", class: "ui-label" %>
-          <%= form.text_field :name, required: true, class: "ui-input", autocomplete: "off" %>
+      <%= form_with model: @person, url: user_path(@person), method: :patch, scope: :user, class: "settings-form" do |form| %>
+        <div class="field">
+          <%= form.label :name, "Name", class: "field__label" %>
+          <%= form.text_field :name, required: true, autocomplete: "off" %>
         </div>
-        <div class="ui-field">
-          <%= form.label :email_address, "Email address", class: "ui-label" %>
-          <%= form.email_field :email_address, required: true, class: "ui-input", autocomplete: "off" %>
-          <p class="ui-field__description">They sign in with it, and Runwell’s email goes there.<% unless me %> Changing it signs them out everywhere.<% end %></p>
+        <div class="field">
+          <%= form.label :email_address, "Email address", class: "field__label" %>
+          <%= form.email_field :email_address, required: true, autocomplete: "off" %>
+          <p class="field__hint">They sign in with it, and Runwell’s email goes there.<% unless me %> Changing it signs them out everywhere.<% end %></p>
         </div>
-        <div class="ui-field">
-          <%= form.label :role, "Role", class: "ui-label" %>
-          <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {}, class: "ui-select" %>
-          <p class="ui-field__description"><%= User::ROLE_DESCRIPTIONS[@person.role] %></p>
+        <div class="field">
+          <%= form.label :role, "Role", class: "field__label" %>
+          <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {} %>
+          <p class="field__hint"><%= User::ROLE_DESCRIPTIONS[@person.role] %></p>
         </div>
-        <div><button type="submit" class="ui-button">Save</button></div>
+        <div><button type="submit" class="btn btn--primary">Save</button></div>
       <% end %>
     </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Password</h2>
         <% if me %>
-          <p class="settings__description">Change your own in <%= link_to "Your account", settings_account_path, class: "txt-link" %>.</p>
+          <p class="settings-section__description">Change your own in <%= link_to "Your account", settings_account_path %>.</p>
         <% else %>
-          <p class="settings__description">Send them a link to choose a new one, or set one for them.</p>
+          <p class="settings-section__description">Send them a link to choose a new one, or set one for them.</p>
         <% end %>
       </header>
       <% unless me %>
-        <div class="settings__actions">
-          <%= button_to user_password_path(@person), class: "ui-button ui-button--outline" do %>
+        <div class="button-row">
+          <%= button_to user_password_path(@person), class: "btn btn--secondary" do %>
             <%= icon_tag "email" %> <span>Email them a link to choose one</span>
           <% end %>
         </div>
@@ -70,106 +68,104 @@
     </section>
 
     <% unless me %>
-      <section class="settings__section">
-        <div class="settings__danger">
-          <div class="ui-item">
-            <div class="ui-item__content">
-              <h2 class="ui-item__title settings__danger-title">Danger zone</h2>
-              <% if @person.deactivated? %>
-                <p class="ui-item__description">Deactivated: they can’t sign in, and their name stays on their work.</p>
-              <% else %>
-                <p class="ui-item__description">Deactivating signs them out everywhere and stops their connected apps. Their name stays on their work, and you can reactivate them.</p>
-              <% end %>
-            </div>
-            <div class="ui-item__actions">
-              <% if @person.deactivated? %>
-                <%= button_to "Reactivate", user_deactivation_path(@person), method: :delete, class: "ui-button ui-button--outline ui-button--sm" %>
-              <% else %>
-                <%= render "layouts/shared/confirm", trigger: "Deactivate #{@person.display_name}", title: "Deactivate #{@person.display_name}?",
-                      body: "They’re signed out everywhere, their connected apps stop, and they can’t sign in. Their name stays on their work, and you can reactivate them.",
-                      button: "Deactivate", path: user_deactivation_path(@person), method: :post, icon: "remove" %>
-              <% end %>
-            </div>
+      <section class="settings-section">
+        <div class="settings-danger">
+          <div class="settings-danger__text">
+            <h2 class="settings-danger__title">Danger zone</h2>
+            <% if @person.deactivated? %>
+              <p>Deactivated: they can’t sign in, and their name stays on their work.</p>
+            <% else %>
+              <p>Deactivating signs them out everywhere and stops their connected apps. Their name stays on their work, and you can reactivate them.</p>
+            <% end %>
+          </div>
+          <div class="button-row">
+            <% if @person.deactivated? %>
+              <%= button_to "Reactivate", user_deactivation_path(@person), method: :delete, class: "btn btn--secondary btn--sm" %>
+            <% else %>
+              <%= render "layouts/shared/confirm", trigger: "Deactivate #{@person.display_name}", title: "Deactivate #{@person.display_name}?",
+                    body: "They’re signed out everywhere, their connected apps stop, and they can’t sign in. Their name stays on their work, and you can reactivate them.",
+                    button: "Deactivate", path: user_deactivation_path(@person), method: :post, icon: "remove" %>
+            <% end %>
           </div>
         </div>
       </section>
     <% end %>
     <% else %>
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Details</h2>
       </header>
-      <dl class="settings-facts">
-        <dt>Email address</dt><dd><%= mail_to @person.email_address, class: "txt-link" %></dd>
-        <dt>Role</dt><dd><%= @person.role.capitalize %>: <span class="txt-subtle"><%= User::ROLE_DESCRIPTIONS[@person.role] %></span></dd>
+      <dl class="details settings-facts">
+        <dt>Email address</dt><dd><%= mail_to @person.email_address %></dd>
+        <dt>Role</dt><dd><%= @person.role.capitalize %>: <span class="muted"><%= User::ROLE_DESCRIPTIONS[@person.role] %></span></dd>
       </dl>
     </section>
     <% end %>
   </div>
 
   <% if manage %>
-  <aside class="settings__panel settings__panel--side panel txt-align-start">
-    <section class="settings__section">
-      <header class="settings__heading">
+  <aside class="card person-page__side">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Signed in</h2>
         <% unless me %>
           <% if @sessions.any? %>
-            <div class="settings__heading-actions">
-              <%= button_to "Sign out everywhere", user_sessions_path(@person), method: :delete, class: "ui-button ui-button--outline ui-button--sm" %>
+            <div class="settings-section__actions">
+              <%= button_to "Sign out everywhere", user_sessions_path(@person), method: :delete, class: "btn btn--secondary btn--sm" %>
             </div>
           <% end %>
         <% end %>
       </header>
       <% if @sessions.any? %>
-        <ul class="settings__list settings__list--scroll">
+        <ul class="settings-list settings-list--scroll">
           <% @sessions.each do |session| %>
             <%# herb:key session.id %>
-            <li class="ui-item ui-item--sm">
-              <div class="ui-item__content">
-                <p class="ui-item__title overflow-ellipsis"><%= session.user_agent.to_s.truncate(80).presence || "A browser" %></p>
-                <p class="ui-item__description"><%= session.ip_address %> · since <%= l session.created_at, format: :short %></p>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= session.user_agent.to_s.truncate(80).presence || "A browser" %></p>
+                <p class="list-row__desc"><%= session.ip_address %> · since <%= l session.created_at, format: :short %></p>
               </div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="settings__note">Not signed in anywhere.</p>
+        <p class="muted">Not signed in anywhere.</p>
       <% end %>
     </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Connected apps</h2>
         <% if @connections.any? %>
-          <div class="settings__heading-actions">
+          <div class="settings-section__actions">
             <%= render "layouts/shared/delete_dialog", name: "every app #{@person.display_name} connected", path: user_connections_path(@person),
                   message: "Their personal tokens and connected apps stop working at once. Anything they already did stays." %>
           </div>
         <% end %>
       </header>
       <% if @connections.any? %>
-        <ul class="settings__list">
+        <ul class="settings-list">
           <% @connections.each do |token| %>
             <%# herb:key token.id %>
-            <li class="ui-item ui-item--sm">
-              <div class="ui-item__content">
-                <p class="ui-item__title overflow-ellipsis"><%= token.name %></p>
-                <p class="ui-item__description"><%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %></p>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= token.name %></p>
+                <p class="list-row__desc"><%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %></p>
               </div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="settings__note">No apps or scripts connected.</p>
+        <p class="muted">No apps or scripts connected.</p>
       <% end %>
     </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Two-factor sign-in</h2>
         <% if @person.two_factor? %>
           <% if !me && @person.active? %>
-            <div class="settings__heading-actions">
+            <div class="settings-section__actions">
               <%= render "layouts/shared/delete_dialog", name: "two-factor sign-in for " + @person.display_name, path: user_two_factor_path(@person),
                     message: "Use this when they’ve lost their phone and their recovery codes. They’re signed out, sign in with just their password, and set it up again." %>
             </div>
@@ -177,35 +173,35 @@
         <% end %>
       </header>
       <% if @person.two_factor? %>
-        <p class="settings__text">On: a code from an authenticator app after their password.</p>
+        <p>On: a code from an authenticator app after their password.</p>
       <% elsif Setting.current.require_two_factor? %>
-        <p class="settings__note">Not set up yet: they set it up on their next page.</p>
+        <p class="muted">Not set up yet: they set it up on their next page.</p>
       <% else %>
-        <p class="settings__note">Off.</p>
+        <p class="muted">Off.</p>
       <% end %>
     </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>Recent sign-ins</h2>
       </header>
       <% if @sign_ins.any? %>
-        <ul class="settings__list settings__list--scroll">
+        <ul class="settings-list settings-list--scroll">
           <% @sign_ins.each do |event| %>
             <%# herb:key event.id %>
-            <li class="ui-item ui-item--sm">
-              <div class="ui-item__content">
-                <p class="ui-item__title"><%= event.kind == "user.signed_in" ? "Signed in" : "Failed to sign in" %><%= " with #{event.payload["method"]}" if event.payload["method"].present? %></p>
-                <p class="ui-item__description"><%= l event.occurred_at, format: :short %><%= " · #{event.payload["ip"]}" if event.payload["ip"].present? %></p>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= event.kind == "user.signed_in" ? "Signed in" : "Failed to sign in" %><%= " with #{event.payload["method"]}" if event.payload["method"].present? %></p>
+                <p class="list-row__desc"><%= l event.occurred_at, format: :short %><%= " · #{event.payload["ip"]}" if event.payload["ip"].present? %></p>
               </div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="settings__note">None recorded.</p>
+        <p class="muted">None recorded.</p>
       <% end %>
-      <p class="settings__text"><%= link_to "Everything in the audit log", settings_audit_log_path(person: @person.id), class: "txt-link" %></p>
+      <p><%= link_to "Everything in the audit log", settings_audit_log_path(person: @person.id) %></p>
     </section>
   </aside>
   <% end %>
-</section>
+</div>

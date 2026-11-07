@@ -1,6 +1,7 @@
 <%# locals: (document:, meta:) %>
-<span class="attachment__icon txt-xx-small"><%= document.filename.extension&.downcase.presence || "file" %></span>
-<span class="txt-align-start overflow-ellipsis">
-  <strong><%= document.filename %></strong>
-  <span class="display-block txt-x-small txt-subtle"><%= meta %></span>
+<%# A document as its file type's tag, its name and a line of what it is (size, who, when). %>
+<span class="document-link__icon"><%= document.filename.extension&.downcase.presence || "file" %></span>
+<span class="document-link__text">
+  <strong class="document-link__name"><%= document.filename %></strong>
+  <span class="document-link__meta"><%= meta %></span>
 </span>

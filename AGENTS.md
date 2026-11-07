@@ -11,9 +11,9 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
   gems); the core itself makes none
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
-  `app/assets/stylesheets` served by Propshaft, no build step. Components are Runwell UI: the
-  `nobuild_ui` gem (shadcn/ui in plain CSS, shared with Lumin Ads, `../nobuild-ui`) plus
-  Runwell's own pieces in `app/assets/stylesheets/ui` (below); the rest is modelled on Fizzy (`../fizzy`)
+  `app/assets/stylesheets` served by Propshaft, no build step. Components are rune_ui (a gem
+  shared with Botter, `../rune_ui`) plus Runwell's own pieces in `app/assets/stylesheets/runwell`
+  (Frontend, below); behaviour (keys, boards, popups, pagination) is modelled on Fizzy (`../fizzy`)
 - Search: ActiveSearch (`rails-active_search`) over SQLite FTS5, one polymorphic
   `:searchable` index (`config/search.rb`, `SearchableDocument`)
 - ReActionView (https://reactionview.dev) compiles every `.html.erb` through
@@ -101,7 +101,7 @@ re-pointed versions' and decisions' events, notes and documents at their engagem
 
 Rules the code enforces: events are immutable (the one exception: an owner erasing a closed
 engagement for good, `Engagement#erase!`, typing its ref; the client keeps an `engagement.erased`
-event); every event has a source; estimate notes never reach a client.
+event); every event has a source.
 
 ## Conventions
 
@@ -123,7 +123,7 @@ event); every event has a source; estimate notes never reach a client.
   (`Searchable#to_search_document`)
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
-  highlighter colours it as it does code blocks in rich text (`code.css`)
+  highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
 - Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): a calendar
   (vanillajs-datepicker, vendored in `vendor/javascript`, through the `date-field` controller) on a
   read-only field showing "Oct 20, 2026", beside a hidden field holding YYYY-MM-DD, which is what's
@@ -198,7 +198,7 @@ around a checkbox with no form method; an empty list is
 A list of the same partial is `render partial:, collection:, as:` (herb lint's
 `actionview-prefer-collection-render`), not a loop.
 
-Every trash icon opens Fizzy's modal delete dialog,
+Every trash icon opens a delete dialog (rune_ui's `<dialog>`),
 `render "layouts/shared/delete_dialog", name:, path:, message:` — never a native
 `turbo_confirm`. A destructive action on a record's own page (delete, archive) confirms inline with
 `render "layouts/shared/confirm", trigger:, title:, body:, button:, path:`,
@@ -208,24 +208,24 @@ Boards are Fizzy's board wholesale, not a new take on it: the same
 `card-columns` markup and data attributes, `column_tag` / `column_frame_tag`
 (`ColumnsHelper`, verbatim), the stream / doing columns / closed anatomy, an
 expander per column, maximize pages, cards loaded into column frames, card
-previews in Fizzy's `card` markup, and drops posting to one endpoint per
+previews in the index cards' markup (`app-card app-card--compact`), and drops posting to one endpoint per
 destination (`Columns::…::Drops::{Streams,Columns,Closures}Controller`) that
 answer with a morphing `turbo_stream.replace` of the target column. The Work
 board (`todos/board/*`, `todos/columns/show`, `columns/todos/drops/*`) is the
-reference. Two departures: column colors come from classes (`todo-board.css`), not inline
+reference. Two departures: column colors come from classes (`runwell/work.css`), not inline
 styles; and cards keep a manual order (`Todo#board_position`, positioned per status). A column
 marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
 `before` (the card it now sits before) for `Todo#move!`.
 
-Staff pages have a left nav, shadcn's Sidebar (`layouts/shared/_sidenav`, `sidenav.css` and
-`ui/app.css`): the install at the top, home and the core sections with icons under Workspace
+Staff pages are rune_ui's shell (`app_shell` in the application layout): a left nav
+(`layouts/shared/_sidenav`, `runwell.css`) beside the page in an inset panel. The nav has the install at the top, home and the core sections with icons under Workspace
 (`sidenav_link_to`, which marks the current one), plugin links under Plugins (`nav_plugin_items`:
 each person's own order and choice of them, Settings > Your account > Your menu,
 `User::NavPlugins`; `g 1`… follow it), and at its foot the signed-in person, whose menu holds
 their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
-too). The page sheet beside it opens with the inset header (`layouts/shared/_inset_header`): the
-sidebar toggle (`[`) and a breadcrumb from `parent_page` and `@page_title`. Below 800px the nav
-runs across the top. Every index shows its records as cards or a table, and has no
+too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from `parent_page`
+and `@page_title` (`breadcrumb_items`, through rune_ui's `crumbs`). Below 860px the nav slides in
+over the page. Every index shows its records as cards or a table, and has no
 heading: the nav marks the current section. The controller sets `@view = index_view`
 (Work adds `extra: %w[board]`), which reads `?view=` or the install's default (Settings >
 Views). The page starts with
@@ -234,9 +234,8 @@ quick_filter pills on the left (wrap them in `<% content_for :index_filters do %
 rendering the toolbar), and on the right the Cards / Table icon toggle and the New button,
 spanning the page's column. Then either a `cards cards--grid` grid of
 `render "layouts/shared/card", path:, title:, id_label:, context:, meta:, status:`
-(Fizzy's card markup, colored by status) or a `<table class="data-table">` in
-`panel shadow center index-table`, whose last cell per row is
-`render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
+(a rune `card`, its status a badge) or the data table (`render "ui/data_table"`, below), whose
+last cell per row is `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
 action the record doesn't allow: engagements delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
 column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
 index toolbar with `content_for :index_bulk`) takes the toolbar's row while rows are picked, in the
@@ -254,31 +253,29 @@ filters it. The filter itself is one control at the foot of the nav
 nothing to filter. Pages never render their own. The filter controller lives on
 `#global-container`.
 
-A record's page, and its new and edit pages, are `settings settings--split`: the working
-column (2/3: the description, versions, work, the form) and an
-`<aside class="settings__panel settings__panel--side">` (1/3) that opens with a Details
-`<dl class="record-facts">` and holds the smaller sections (contacts, plugin panels, notes or
-history, delete or archive). New pages use the sidebar for what comes next
-(`record-steps`) and related records. Never a lone centered card for a form. The title and
-the record's actions share one row (`page-heading`, `page-heading__actions`), not the header.
-A record with several sections (clients, engagements, work, scope items) puts them in tabs
-in the working column: `record_tab(key, label, count:)` plus `plugin_record_tabs(:client_panel)`
-(one tab per plugin panel), `current_record_tab(tabs, default)`, and
-`render "layouts/shared/record_tabs"` inside `<turbo-frame id="record_tab" target="_top">`.
-A tab is a `?tab=` link that only reloads the frame; the first heading in a tab is hidden
-since the tab names it. The sidebar keeps Details, the few things always needed (contacts),
-History, and destructive actions. An engagement is the exception: its facts are one line under
-the title (`record-meta`, with plugins' `:engagement_meta`), History is a tab, and the sidebar is
-its sections (`engagements/_scope`, where they're added): all work, each section with done of
-total, and other work, each a `?item=` link that shows just
-that work in the Work tab, where its todos are added. A section's add action is one small outlined button
-(`ui-button ui-button--outline ui-button--sm` with the add icon) in a `section-actions` row after its list, a `<details>`
-when it opens a form; the one filled button on a page is its next step. A record page (`settings settings--split record-page`, `ui/app-records.css`) opens with a
-header row across both columns: `<h1 class="page-title"><%= @page_title %></h1>`, a muted
-description, and its actions as outline buttons (Edit, Copy for AI) beside the sidebar toggle
-(`]`); below it the working column and the sidebar are stacks of `ui-card`s. Up a level is
-`parent_page label, path` in the header block: a `<link rel="up">` that Esc follows and the inset
-header's breadcrumb shows, never a Back button.
+A record's page, and its new and edit pages, are a `record-page` (`runwell/records.css`): a
+header row across the top (`record-page__header`: `record-page__heading` with
+`<h1 class="page-title"><%= @page_title %></h1>` and a muted `record-page__description`, then
+the record's actions in a `button-row` as secondary buttons, Edit and Copy for AI, beside the
+sidebar toggle `]`), then the working column (`record-page__main`, 2/3: the description, work,
+the form) beside the sidebar (`record-page__aside`, 1/3: Details as a `dl.details`, the smaller
+sections such as contacts and plugin panels, notes or history, delete or archive). Both columns
+are stacks of rune `card`s. New pages use the sidebar for what comes next (`record-steps`) and
+related records. Never a lone centered card for a form. A record with several sections (clients,
+engagements, work, scope items) puts them in tabs in the working column: `record_tab(key, label,
+count:)` plus `plugin_record_tabs(:client_panel)` (one tab per plugin panel),
+`current_record_tab(tabs, default)`, and `render "layouts/shared/record_tabs", variant: "pill"`
+inside `<turbo-frame id="record_tab" target="_top">`. A tab is a `?tab=` link that only reloads
+the frame; the first heading in a tab is hidden since the tab names it. The sidebar keeps
+Details, the few things always needed (contacts), History, and destructive actions. An
+engagement is the exception: its facts are one line under the title (`record-meta`, with
+plugins' `:engagement_meta`), History is a tab, and the sidebar is its sections
+(`engagements/_scope`, where they're added): all work, each section with done of total, and
+other work, each a `?item=` link that shows just that work in the Work tab, where its todos are
+added. A section's add action is one small secondary button with the add icon after its list
+(`record-add`), a `<details>` when it opens a form; the one primary button on a page is its next
+step. Up a level is `parent_page label, path`, called in the template: a `<link rel="up">` that
+Esc follows and the panel bar's breadcrumb shows, never a Back button.
 
 Guide people through the hierarchy rather than documenting it. A record page says what happens
 next (`engagement_next_step` under the engagement's state). An empty list says where its records
@@ -299,54 +296,65 @@ changes in place with `todos/status_dot`.
 
 Filters on an index page are Fizzy's quick filters above the list, not
 buttons inside the card: a row of
-`render "layouts/shared/quick_filter", title:, param:, options:, current:`
-inside `<div class="filters margin-block-end">`. Each choice is a link that
+`render "layouts/shared/quick_filter", title:, param:, options:, current:` in
+`content_for :index_filters`, which the index toolbar shows. Each choice is a link that
 swaps one query param, so filters are bookmarkable and Back works; the
 controller reads the params (`engagements#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
-Styling: components come from **Runwell UI**, a no-build port of shadcn/ui in plain CSS: the
-`nobuild_ui` gem (`Martin-Business-Consultants/nobuild-ui`, also used by Lumin Ads) holds the
-components, their tokens, the `ui--popover` / `ui--proxy` controllers and `NobuildUi::Helper`;
-`app/assets/stylesheets/ui` holds Runwell's mapping and its own pieces (app*.css, the data table).
-The styleguide is at `/ui` in development. A fix to a component goes in the gem (work on it
-with `bundle config set local.nobuild_ui ../nobuild-ui`), so both apps get it. Build new markup
-with it and move markup you touch onto it:
+Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter
+(`Martin-Business-Consultants/rune_ui` on GitHub, locked by revision; to work on it beside the
+core, `bundle config local.rune_ui ../rune_ui`; its README lists every helper and class). A fix to
+a component goes in the gem, so both apps get it. Runwell's own CSS is in `app/assets/stylesheets`, after rune's (which is all in
+the `rune` layer, so Runwell's unlayered rules win), listed in order in `RUNWELL_STYLESHEETS`:
+the theming contract (`_global`, `appearance`, `font-face`), `rune-theme` (points rune's tokens
+at the palette), `runwell` (the shell: sidebar, page filter, settings layout, sign-in and portal
+layouts), `runwell/components` (what every area shares: popups, the index toolbar and filters,
+the data table, the bulk bar, index cards, hint mode, form widgets) and one file per area
+(`runwell/home`, `work`, `records`, `settings`, `public`). The styleguide is at `/ui` in
+development. Build new markup with it:
 
-- Tokens are shadcn's names (the gem's `tokens.css`, re-pointed by `ui/tokens.css`) — `--background`, `--foreground`, `--card`,
-  `--popover`, `--primary`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`,
-  `--destructive`, `--border`, `--input`, `--ring`, `--radius-sm/md/lg/xl`, `--shadow-xs/sm/md/lg`
-  — built from the theming tokens (`docs/theming.md`), so Appearance and custom CSS reach them.
-  New CSS reads these, not the `--color-ink-*` steps
-- Components are `ui-` classes in shadcn's names and variants: `ui-button` (`--secondary`,
-  `--outline`, `--ghost`, `--link`, `--destructive`; `--sm`, `--lg`, `--icon`, `--icon-sm`),
-  `ui-badge`, `ui-card` (`__header`, `__title`, `__description`, `__action`, `__content`,
-  `__footer`), `ui-input`, `ui-select`, `ui-textarea`, `ui-label`, `ui-field`, `ui-checkbox`,
-  `ui-radio`, `ui-switch`, `ui-tabs` (links with `aria-current`, or state with `aria-pressed`;
-  `--line`, `--icons`), `ui-dialog`, `ui-sheet`, `ui-menu`, `ui-popover`, `ui-tooltip`, `ui-toast`,
-  `ui-table`, `ui-alert`, `ui-avatar`, `ui-separator`, `ui-skeleton`, `ui-kbd`, `ui-progress`,
-  `ui-breadcrumb`, `ui-empty`, `ui-item`. They live in the `ui` layer, after `components`
-- The gem's helpers spell the common ones: `ui_button`, `ui_link_button`, `ui_button_classes`
-  (for `link_to`, `button_to`, `form.submit`), `ui_badge`, `ui_kbd`, `ui_avatar`, and a dropdown
-  menu `ui_dropdown` with `ui_menu_item` / `ui_menu_label` / `ui_menu_separator`; `UiHelper` adds
-  `ui_status_badge` and the data table's. Fizzy's popups (`popup_menu`, quick filters, pickers)
-  are drawn as shadcn's dropdown menu (`popup.css`), their triggers `ui-dropdown__trigger`
-  outline buttons
-- Native elements over JavaScript: `<dialog>` (opened by the `dialog` controller), the `popover`
-  attribute (placed and given menu keys by `ui--popover`), `<details>`, real checkboxes and
-  radios. A new component's CSS uses descendant or class selectors, not child ones: in
-  development ReActionView wraps every ERB output in a `display: contents` span
-- Index tables are the **data table** (`ui/_data_table`, `ui/data-table.css`): describe the
+- Tokens are rune's: `--page`, `--panel`, `--layer-1..3`, `--text`, `--text-muted`,
+  `--text-faint`, `--line`, `--line-strong`, `--hover`, `--accent`, `--accent-soft`, `--ok`,
+  `--danger`, `--attention`; space `--s-1..6`; `--radius-*`; `--control-h`, `--control-h-sm`,
+  `--row-h`; type `--text-xs`, `--text-meta`, `--text-ui` (the body, 13px), `--text-read`,
+  `--text-title`, `--weight`, `--weight-strong`. `rune-theme.css` builds them from the theming
+  tokens (`docs/theming.md`), so Appearance and custom CSS reach them. New CSS reads these, never
+  `--color-*` or `--lch-*` directly (unless it needs a palette colour rune has no token for)
+- Helpers spell the components (markup built in Ruby, so Herb can't mangle it): `button_link`,
+  `action_button`, `submit_button`, `icon_button`, `button_classes` (for `link_to`, `button_to`,
+  `form.button`; variants `:primary`, `:secondary`, `:ghost`, `:danger`, size `:sm`), `badge`
+  (`ui_status_badge` / `status_tag` for a Runwell status, toned by `STATUS_TONES`), `card`,
+  `list_row`, `field`, `empty_state`, `menu` / `popover_menu` with `menu_link`, `menu_button`,
+  `menu_label`, `menu_divider`, `dialog` / `sheet` / `confirm_dialog`, `tabs`, `callout`,
+  `avatar` / `avatar_stack`, `settings_group` / `setting_row`, `switch`, `segmented`,
+  `copy_button`, `progress_bar`. `icon_tag name` draws one of the icons
+  `config/initializers/rune_ui.rb` registers (rune-style inline SVG); an unknown name draws a dot
+- Classes where markup is written by hand: `btn btn--*`, `icon-button`, `pill` (a filter or
+  picker's trigger), `card` (`__head`, `__title`, `__hint`, `__action`, `__content`, `__footer`;
+  `--flush`, `--sm`), `list-row` (`__media`, `__content`, `__title`, `__desc`, `__actions`),
+  `field` / `field__label` / `field__hint` / `field-row`, `badge`, `count`, `tabs` / `tabs__tab`
+  (`--pills`, `--icons`), `alert`, `table` in a `table-wrap`, `dl.details`, `empty`, `stack`,
+  `grid-2`, `button-row`, `separator`, `<kbd>`, `muted`, `faint`, `small`, `visually-hidden`.
+  Bare inputs, selects and textareas need no class; every `<form>` is a flex column with a gap
+  (`form.button_to` is inline), so an inline form gets its own layout class
+- Runwell's popups stay Runwell's (Fizzy's behaviour, drawn as a rune menu): `popup_menu`, quick
+  filters, the status and owner pickers and bulk menus are a `<dialog class="popup">` with
+  `popup__list` / `popup__item` / `popup__btn` under the `dialog`, `picker`, `fixed-popup` or
+  `combobox` controllers. A new menu with no such behaviour is `popover_menu`
+- Native elements over JavaScript: `<dialog>` (opened by `rune-dialog`, or the `dialog`
+  controller for popups), the `popover` attribute (placed by `rune-popover`), `<details>`, real
+  checkboxes and radios. CSS uses descendant or class selectors, not child ones: in development
+  ReActionView wraps every ERB output in a `display: contents` span
+- Index tables are the **data table** (`ui/_data_table`, `runwell/components.css`): describe the
   columns with `ui_column(key, label, sort:, width:, align:, hideable:)` and pass a row partial
   (`clients/_row`: `bulk_select_cell`, then `<td data-column="key">` per column in order, then
   `layouts/shared/row_actions`). It brings sortable headers (TableSorting), the checkbox column
-  (bulk actions), a Columns menu that hides columns (`ui--data-table`, per browser), fixed widths
-  (`table_colgroup`) and `table_pagination`. What every row shares goes in `row_locals:` so it's
-  read once (Prosopite)
-- The older Fizzy components (`btn`, `panel`, `popup`, `input`, `status-tag`) are drawn with the
-  same tokens so the app looks one way; plugins may still use them. Utility classes (`flex`,
-  `gap`, `txt-*`, `margin-*`) stay. Copy Fizzy's view patterns where Runwell UI has nothing
-  (`settings__section`, `record-facts`, cards and the board)
+  (bulk actions), a Columns menu that hides columns (`data-table` controller, per browser), fixed
+  widths (`table_colgroup`) and `table_pagination`. What every row shares goes in `row_locals:`
+  so it's read once (Prosopite)
+- An area's own pieces are BEM classes in that area's stylesheet. Space with `gap`, never
+  sibling margins; no coloured left borders (states are tints, weight, dots and badges)
 
 ReActionView rules:
 
@@ -420,7 +428,7 @@ ReActionView rules:
   relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe
 - The search bar is Fizzy's (`bar/_bar`, `bar_controller`), rendered in the
   application layout footer for signed-in staff. It shows only once opened (`s`, ⌘K): the
-  bottom of staff pages stays clear but for the notification bell (`corner.css`)
+  bottom of staff pages stays clear but for the notification bell (`runwell/home.css`)
 
 ## Keyboard shortcuts
 
@@ -453,7 +461,7 @@ key on the button with `<kbd class="hide-on-touch">`.
 
 Hint mode (`.`, or the switch in the `?` sheet) teaches the keys in place: the keyboard controller
 copies each `data-keys` into `data-key-hint` (the first alternative, `mod` as ⌘ or Ctrl) and
-`hints.css` draws it as a keycap over the control, never moving anything; keys inside an item show
+`runwell/components.css` draws it as a keycap over the control, never moving anything; keys inside an item show
 only on the row you're on, and controls that already show a `<kbd>` get none.
 `layouts/shared/_hint_legend` lists the keys with no control (j/k, Enter, /, s, a, Esc, ?). It's
 remembered per browser (localStorage `keyHints`), off by default, and hidden on touch devices.
@@ -477,16 +485,16 @@ tray (`notifications/_tray`), which a bell in the bottom right corner fans open 
 
 ## Documents
 
-Files live in Active Storage (`storage/` locally). Two places, both Fizzy's:
+Files live in Active Storage (`storage/` locally). Two places:
 
 - Inline in rich text: staff editors (`rich_text_field form, :body, staff: true`) take
   dropped, pasted or uploaded files through Lexxy's direct uploads, and `rich_text`
-  renders them with Fizzy's `active_storage/blobs/_blob` partials. Client-facing editors
+  renders them with the `active_storage/blobs/_blob` partials (styled by Lexxy's content CSS). Client-facing editors
   stay text only (`attachments="false"`)
 - A Documents section (`render "documents/section", subject:`) on clients, engagements,
   scope items, todos and requests: a `Document` per file (`Documentable`), with who
   uploaded it and a `client_visible` switch. Files are added from the quick action tray (Document), whose
-  modal holds Fizzy's dashed `input--upload` drop target. The portal lists only
+  modal holds the dashed drop target (`document_drop_target`, `.upload-drop`). The portal lists only
   client-visible files (`Engagement#client_documents`)
 
 ## Plugins
@@ -791,11 +799,11 @@ hard-code "Engagement", "Project", "Client" or "Work". Keys (`project`, `work_or
 Settings > Appearance sets the install's default theme (system, light, dark), color
 scheme, corners and font, plus a logo and favicon (Active Storage on `Setting`). Each
 layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font` and
-`data-default-theme` (`appearance_data`); `appearance.css` turns them into Fizzy's tokens,
+`data-default-theme` (`appearance_data`); `appearance.css` turns them into the palette tokens (which `rune-theme.css` hands to rune_ui),
 and the page previews a change instantly (`appearance` controller) before saving.
 A person's sun/moon choice (localStorage) beats the install's default theme.
 Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
-the root font size (16px, `base.css`; text on shadcn/ui's steps, the body 14px, `_global.css`); a person's own choice in
+the root font size (16px times `--text-scale`, `rune-theme.css`; rune_ui's text steps, the body 13px); a person's own choice in
 Settings > Your account (`User#text_size`, blank follows the install) beats it. Every font size in
 the stylesheets is rem or em so it all scales, and table column shares (`COLUMN_SHAPES`) leave room
 for the larger sizes.
@@ -805,7 +813,7 @@ whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill sha
 `var(--radius-pill, 99rem)`, true circles stay `50%`, and every control (buttons, inputs,
 selects, toggles, tags) uses `var(--radius-control)` so they always match. Write new CSS
 the same way.
-Schemes and fonts override Fizzy's unlayered tokens, so they are unlayered too.
+Schemes and fonts override the palette's unlayered tokens, so they are unlayered too.
 Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: values for the design tokens
 in `docs/theming.md`, the contract (tokens stable across releases, class names not). It is served
 from `/theme/:digest` (`ThemesController`, never a `<style>`), linked last and unlayered on staff

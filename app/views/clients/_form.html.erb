@@ -2,28 +2,28 @@
 <%# internal_aside: the edit page puts the Internal switch in its sidebar, tied to this form by id. %>
 <%= render "layouts/shared/errors", record: client %>
 
-<%= form_with model: client, id: dom_id(client, :form), class: "ui-card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-  <header class="ui-card__header">
-    <h2 class="ui-card__title"><%= term(:client) %></h2>
-    <p class="ui-card__description">Their name, where they stand, and the time zone their portal uses.</p>
+<%= form_with model: client, id: dom_id(client, :form), class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <header class="card__head">
+    <h2 class="card__title"><%= term(:client) %></h2>
+    <p class="card__hint">Their name, where they stand, and the time zone their portal uses.</p>
   </header>
 
-  <div class="ui-card__content record-form__body">
-    <label class="ui-field">
-      <span class="ui-label">Name</span>
-      <%= form.text_field :name, required: true, class: "ui-input", autofocus: client.new_record?, autocomplete: "off", placeholder: "Acme Inc." %>
+  <div class="card__content record-form__body">
+    <label class="field">
+      <span class="field__label">Name</span>
+      <%= form.text_field :name, required: true, autofocus: client.new_record?, autocomplete: "off", placeholder: "Acme Inc." %>
     </label>
 
-    <div class="record-form__row record-form__row--narrow-first">
-      <label class="ui-field">
-        <span class="ui-label">Status</span>
-        <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, class: "ui-select" %>
+    <div class="field-row record-form__row--narrow-first">
+      <label class="field">
+        <span class="field__label">Status</span>
+        <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {} %>
       </label>
 
-      <label class="ui-field record-form__tz">
-        <span class="ui-label">Time zone</span>
-        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" }, class: "ui-select" %>
-        <span class="ui-field__description">Their portal and emails show times in it.</span>
+      <label class="field">
+        <span class="field__label">Time zone</span>
+        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" } %>
+        <span class="field__hint">Their portal and emails show times in it.</span>
       </label>
     </div>
 
@@ -34,9 +34,9 @@
     <%= custom_field_inputs form, client %>
   </div>
 
-  <footer class="ui-card__footer ui-card__footer--bordered ui-card__footer--end">
-    <%= link_to "Cancel", client.new_record? ? clients_path : client_path(client), class: "ui-button ui-button--outline", data: { form_target: "cancel" } %>
-    <button type="submit" class="ui-button" data-form-target="submit">
+  <footer class="card__footer card__footer--bordered">
+    <%= link_to "Cancel", client.new_record? ? clients_path : client_path(client), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <button type="submit" class="btn btn--primary" data-form-target="submit">
       <span><%= client.new_record? ? "Add client" : "Save changes" %></span>
     </button>
   </footer>

@@ -1,0 +1,142 @@
+/* Runwell's own pieces, on rune_ui's tokens and beside its components (unlayered, so these win
+/* over rune's). Each area of the app adds a section here as it moves to rune_ui
+/* (docs/rune-ui-migration.md).
+/*
+/* 1 Page   2 Sidebar   3 Page filter   4 Theme toggle   5 Settings layout   6 Sign-in pages
+/* 7 Portal */
+
+/* ======================================================================= 1 Page */
+
+.skip-link { position: absolute; top: var(--s-2); left: var(--s-2); z-index: 100; transform: translateY(-200%); }
+.skip-link:focus { transform: none; padding: var(--s-2) var(--s-3); border-radius: var(--radius-control); background: var(--panel); box-shadow: var(--shadow-popover); }
+
+/* Frames hold rows, cards and sections inside grids and flex layouts, so they lay out as their
+/* contents, as Fizzy's base had it. */
+turbo-frame { display: contents; }
+
+/* The nav's width is the token Runwell has always had for it. */
+:root { --sidebar-width: 16rem; }
+
+/* ======================================================================= 2 Sidebar */
+
+.sidebar__top { height: auto; min-height: 2.5rem; padding-left: 0; }
+.sidebar__brand { flex: 1; gap: var(--s-2); padding: 4px var(--s-2); border-radius: var(--radius-sm); }
+.sidebar__brand:hover { background: var(--hover); }
+.sidebar__logo { width: 2rem; height: 2rem; border-radius: var(--radius); font-size: var(--text-read); overflow: hidden; }
+.sidebar__logo img { width: 100%; height: 100%; object-fit: contain; }
+.sidebar__brand-text { display: flex; flex-direction: column; min-width: 0; line-height: var(--leading-tight); }
+.sidebar__brand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__brand-name img { max-height: 1.25rem; width: auto; }
+.sidebar__brand-sub { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sidebar__tools { margin-top: auto; display: flex; align-items: center; gap: var(--s-1); padding: var(--s-3) var(--s-1) 0; }
+.sidebar__tools + .sidebar__footer { margin-top: 0; padding-top: var(--s-1); }
+.sidebar__account { height: auto; min-height: 2.75rem; padding: 4px var(--s-2); }
+.sidebar__avatar { flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: var(--radius); overflow: hidden; }
+.sidebar__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.sidebar__account-text { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: var(--leading-tight); text-align: left; }
+.sidebar__account-text .sidebar__label { color: var(--text); font-weight: var(--weight-strong); }
+.sidebar__account-email { color: var(--text-faint); font-size: var(--text-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__footer .menu__items { min-width: 15rem; }
+
+/* ======================================================================= 3 Page filter ("/") */
+
+/* Just the key in the nav until focused or holding text, when it opens into a field. It shows
+/* only on pages with rows to filter; a filtered-out row stays hidden whatever its display. */
+.nav-filter { display: inline-flex; align-items: center; gap: 6px; height: var(--control-h-sm); padding: 0 6px; border: 1px solid transparent; border-radius: var(--radius-control); color: var(--text-muted); cursor: text; }
+.nav-filter:hover { background: var(--hover); }
+#global-container:not(:has([data-filter-target~="item"])) .nav-filter { display: none; }
+.nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) { flex: 1; border-color: var(--line-strong); background: var(--panel); }
+.nav-filter:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+.nav-filter__input { width: 0; height: auto; padding: 0; border: 0; background: none; box-shadow: none; color: inherit; font-size: var(--text-meta); transition: width .15s var(--ease); }
+.nav-filter__input:focus { box-shadow: none; }
+.nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) .nav-filter__input { width: 100%; }
+[data-filter-target~="item"][hidden] { display: none !important; }
+
+/* ======================================================================= 4 Theme toggle (a moon while light, a sun while dark) */
+
+.theme-toggle__sun { display: none; }
+html[data-theme="dark"] .theme-toggle .theme-toggle__moon { display: none; }
+html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .theme-toggle .theme-toggle__moon { display: none; }
+  html:not([data-theme]) .theme-toggle .theme-toggle__sun { display: inline-block; }
+}
+
+/* ======================================================================= 5 Settings layout (its nav beside the page) */
+
+.settings-layout { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--s-6); align-items: start; }
+.settings-layout__page { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+@media (max-width: 860px) { .settings-layout { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); } }
+
+/* ======================================================================= 6 Sign-in and other public pages */
+
+/* The page a step off the card (rune's --page), the install's brand over one narrow column,
+/* centred in the window; the footer at its foot and the theme toggle in the corner. The pages'
+/* own parts are in runwell/public.css. */
+.auth-layout {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-5); min-height: 100dvh;
+  padding: calc(var(--s-5) + var(--custom-safe-inset-top, 0px)) var(--s-5) calc(var(--s-5) + var(--custom-safe-inset-bottom, 0px));
+}
+@media (min-width: 768px) { .auth-layout { padding-inline: 2.5rem; } }
+.auth-layout > #global-container { display: flex; flex-direction: column; align-items: center; gap: var(--s-5); width: 100%; margin-block: auto; }
+.auth-layout__header { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); }
+.auth-layout__theme { position: fixed; top: calc(var(--s-4) + var(--custom-safe-inset-top, 0px)); right: var(--s-4); }
+.auth-layout__brand { display: flex; align-items: center; gap: var(--s-2); color: var(--text); font-size: var(--text-read); font-weight: var(--weight-strong); }
+.auth-layout__brand .sidebar__logo { width: 1.5rem; height: 1.5rem; border-radius: var(--radius-sm); font-size: var(--text-xs); }
+.auth-layout__brand .header__logo-image { width: auto; max-width: 12rem; max-height: 2rem; }
+/* rune's .main--narrow, without its own top margin and padding: the body centres it. A consent
+/* (.auth--wide) has more to say, so a little more room. */
+.auth-layout__main { width: 100%; max-width: 24rem; margin: 0; padding: 0; gap: var(--s-5); }
+.auth-layout__main:has(.auth--wide) { max-width: 28rem; }
+/* The flash frame takes no row (and no gap) until a notice lands in it. */
+:is(.auth-layout__main, .portal-main) > #flash:not(:has(.flash)) { display: none; }
+.auth-layout__footer { width: 100%; max-width: 24rem; color: var(--text-faint); font-size: var(--text-meta); }
+
+/* ======================================================================= 7 Portal (a top bar over one column) */
+
+/* The bar and the column share one width, wider than the staff pages': the portal has no nav
+/* beside it. */
+.portal-layout { --portal-width: 72rem; display: flex; flex-direction: column; min-height: 100dvh; background: var(--panel); }
+.portal-layout > #global-container { display: flex; flex-direction: column; flex: 1 0 auto; }
+.portal-topbar {
+  position: sticky; top: 0; z-index: 12; padding-top: var(--custom-safe-inset-top, 0px);
+  border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px);
+}
+.portal-topbar__inner { display: flex; align-items: center; gap: 0 var(--s-5); width: 100%; max-width: var(--portal-width); min-height: 3.5rem; margin: 0 auto; padding: 0 var(--s-5); }
+.portal-topbar__brand { flex: 0 1 auto; min-width: 0; }
+.portal-topbar__brand .sidebar__logo { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; font-size: var(--text-meta); }
+.portal-topbar__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+
+/* The sections as ghost buttons, the current one on a tint. */
+.portal-nav { display: flex; align-items: center; gap: var(--s-1); min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.portal-nav__link {
+  display: inline-flex; align-items: center; flex: 0 0 auto; height: var(--control-h); padding: 0 .625rem; border-radius: var(--radius-control);
+  color: var(--text-muted); font-weight: var(--weight-strong); text-decoration: none; white-space: nowrap; transition: background .12s, color .12s;
+}
+.portal-nav__link:hover { background: var(--hover); color: var(--text); }
+.portal-nav__link[aria-current="page"] { background: var(--layer-2); color: var(--text); }
+
+.portal-topbar__actions { display: flex; align-items: center; gap: var(--s-2); min-height: 3.5rem; margin-left: auto; }
+.portal-user__button { display: inline-grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer; }
+.portal-user__button:hover { box-shadow: 0 0 0 3px var(--hover); }
+.portal-user__button .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
+.portal-topbar .menu__items { min-width: 14rem; }
+.portal-user__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.portal-user__name { overflow: hidden; color: var(--text); font-size: var(--text-ui); font-weight: var(--weight-strong); text-overflow: ellipsis; white-space: nowrap; }
+.portal-user__email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.portal-main { max-width: var(--portal-width); padding: var(--s-6) var(--s-5) 4rem; gap: var(--s-5); }
+.portal-footer { width: 100%; max-width: var(--portal-width); margin: 0 auto; padding: 0 var(--s-5) var(--s-6); color: var(--text-faint); font-size: var(--text-meta); text-align: center; }
+
+/* Narrow: the sections take a row of their own under the brand, scrolling sideways, and New
+/* request keeps only its icon. */
+@media (max-width: 767px) {
+  .portal-topbar__inner { flex-wrap: wrap; padding: 0 var(--s-4); }
+  .portal-nav { order: 3; width: 100%; padding: var(--s-1) 0 var(--s-2); }
+  .portal-main { padding: var(--s-5) var(--s-4) 3rem; }
+}
+@media (max-width: 479px) {
+  .portal-topbar__new { width: var(--control-h-sm); padding: 0; }
+  .portal-topbar__new > :not(.icon) { display: none; }
+}
