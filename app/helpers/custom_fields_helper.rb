@@ -6,8 +6,8 @@ module CustomFieldsHelper
     safe_join(record.custom_fields.map do |field|
       name = "#{form.object_name}[custom_fields][#{field.key}]"
       id = "#{form.object_name}_custom_#{field.key}".parameterize(separator: "_")
-      tag.label(class: "record-form__field") do
-        safe_join([ tag.span(field.label, class: "record-form__label"), custom_field_input(field, name, id, record.custom_value(field)) ])
+      tag.label(class: "field") do
+        safe_join([ tag.span(field.label, class: "field__label"), custom_field_input(field, name, id, record.custom_value(field)) ])
       end
     end)
   end
@@ -24,7 +24,7 @@ module CustomFieldsHelper
     when "date" then l(value, format: :long)
     when "boolean" then value ? "Yes" : "No"
     when "long_text" then rich_text(value)
-    when "link" then link_to(value.delete_prefix("https://").delete_prefix("http://").delete_suffix("/"), value, class: "txt-link", target: "_blank", rel: "noopener")
+    when "link" then link_to(value.delete_prefix("https://").delete_prefix("http://").delete_suffix("/"), value, target: "_blank", rel: "noopener")
     when "number" then number_with_delimiter(value)
     else value
     end
@@ -38,18 +38,20 @@ module CustomFieldsHelper
   end
 
   private
+    # Bare inputs: rune_ui styles them with no class.
     def custom_field_input(field, name, id, value)
-      input = { id: id, class: "input full-width", autocomplete: "off" }
+      input = { id: id, autocomplete: "off" }
       case field.kind
       when "long_text" then rich_text_field_tag(name, value, id: id, staff: true)
       when "number" then number_field_tag(name, value, step: "any", **input)
       when "money" then money_field_tag(name, value, **input)
       when "date" then date_input_tag(name, value, **input.except(:autocomplete))
       when "boolean"
+        # A span, not switch_tag's label: the field around it is already the label.
         tag.span(class: "switch") do
-          safe_join([ hidden_field_tag(name, "", id: nil), check_box_tag(name, "true", value == true, id: id, class: "switch__input"), tag.span(class: "switch__btn") ])
+          safe_join([ hidden_field_tag(name, "", id: nil), check_box_tag(name, "true", value == true, id: id, role: "switch"), tag.span(class: "switch__track", aria: { hidden: true }) ])
         end
-      when "choice" then select_tag(name, options_for_select(field.choices, value), include_blank: true, id: id, class: "input input--select full-width")
+      when "choice" then select_tag(name, options_for_select(field.choices, value), include_blank: true, id: id)
       when "link" then url_field_tag(name, value, placeholder: "https://…", **input)
       else text_field_tag(name, value, **input)
       end

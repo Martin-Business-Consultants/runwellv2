@@ -5,22 +5,22 @@
     the list's frame from quick_actions/records), so a page never carries every record. %>
 <% list_id = "#{form_id}_records" %>
 <% search_url = quick_action_records_path(types: (types || QuickAction::RECORD_TYPES).join(","), form_id: form_id) %>
-<div class="<%= class_names("quick-action__picker flex align-center gap-half", "quick-action__picker--full": !prefix) %>" data-controller="dialog combobox record-search" data-record-search-url-value="<%= search_url %>"
+<div class="<%= class_names("quick-action__picker", "quick-action__picker--full": !prefix) %>" data-controller="dialog combobox record-search" data-record-search-url-value="<%= search_url %>"
   data-action="keydown.esc->dialog#close:stop:prevent click@document->dialog#closeOnClickOutside dialog:close->record-search#reset">
   <input type="hidden" name="record" value="" form="<%= form_id %>">
   <% if prefix %>
-    <span class="txt-small txt-subtle"><%= prefix %></span>
+    <span class="small muted"><%= prefix %></span>
   <% end %>
-  <button type="button" class="ui-button ui-button--outline ui-dropdown__trigger min-width" aria-haspopup="listbox" data-action="click->dialog#toggle:stop">
-    <span class="overflow-ellipsis" data-combobox-target="label"><%= record ? record_label(record) : "Choose…" %></span>
-    <span class="ui-dropdown__chevron" aria-hidden="true"></span>
+  <button type="button" class="pill quick-action__trigger" aria-haspopup="listbox" data-action="click->dialog#toggle:stop">
+    <span data-combobox-target="label"><%= record ? record_label(record) : "Choose…" %></span>
+    <%= icon_tag "caret-down" %>
   </button>
   <template data-combobox-target="hiddenFieldTemplate">
     <input type="hidden" name="record" form="<%= form_id %>">
   </template>
 
   <%= popup_menu label: "Where it goes" do %>
-    <input type="search" class="input input--transparent txt-small full-width" placeholder="Find a <%= records.map { record_type_term(it.class.name) }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ").downcase %>…" autocomplete="off" aria-label="Find a record" data-1p-ignore="true" data-record-search-target="input" data-dialog-target="focusMouse" data-action="input->record-search#search keydown.enter->record-search#chooseFirst:prevent">
+    <input type="search" placeholder="Find a <%= records.map { record_type_term(it.class.name) }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ").downcase %>…" autocomplete="off" aria-label="Find a record" data-1p-ignore="true" data-record-search-target="input" data-dialog-target="focusMouse" data-action="input->record-search#search keydown.enter->record-search#chooseFirst:prevent">
     <turbo-frame id="<%= list_id %>" data-record-search-target="frame">
       <%= render "quick_actions/records", records: records, record: record %>
     </turbo-frame>

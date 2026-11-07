@@ -7,38 +7,35 @@
 <% tab = current_record_tab(tabs, "notes") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
-<% content_for :header do %>
-  <% if home %>
-    <%= parent_page(@todo.scope_item&.description || @todo.engagement&.ref || @todo.client.name, home) %>
-  <% else %>
-    <%= parent_page term(:work), todos_path(owner: "none") %>
-  <% end %>
-
+<% if home %>
+  <%= parent_page(@todo.scope_item&.description || @todo.engagement&.ref || @todo.client.name, home) %>
+<% else %>
+  <%= parent_page term(:work), todos_path(owner: "none") %>
 <% end %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <% if @todo.engagement %>
-          <%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %>
+          <%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement %>
           <span aria-hidden="true">›</span>
           <% if @todo.scope_item %>
-            <%= link_to @todo.scope_item.description, @todo.scope_item, class: "txt-link" %>
+            <%= link_to @todo.scope_item.description, @todo.scope_item %>
           <% else %>
             <span>Other work</span>
           <% end %>
         <% elsif @todo.client %>
-          <%= link_to @todo.client.name, @todo.client, class: "txt-link" %> <span aria-hidden="true">›</span> <span>Not on any <%= term(:engagement).downcase %></span>
+          <%= link_to @todo.client.name, @todo.client %> <span aria-hidden="true">›</span> <span>Not on any <%= term(:engagement).downcase %></span>
         <% else %>
           <span>No <%= term(:client).downcase %> matched yet: edit it to choose one.</span>
         <% end %>
       </p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "todos/ai_brief", todo: @todo, labelled: true %>
-      <%= link_to edit_todo_path(@todo), class: "ui-button ui-button--outline", data: { keys: "e" } do %>
+      <%= link_to edit_todo_path(@todo), class: "btn btn--secondary", data: { keys: "e" } do %>
         <%= icon_tag "pencil" %>
         <span>Edit</span>
         <kbd class="hide-on-touch">E</kbd>
@@ -47,12 +44,12 @@
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Description</h2>
+  <div class="record-page__main">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Description</h2>
       </header>
-      <div class="ui-card__content record-card__stack">
+      <div class="card__content record-card__stack">
         <% if @todo.description.present? %>
           <div class="record-card__prose"><%= rich_text @todo.description %></div>
         <% else %>
@@ -80,14 +77,14 @@
     </turbo-frame>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= plugin_slots(:todo_aside, todo: @todo) %>
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content">
-        <dl class="record-facts">
+      <div class="card__content">
+        <dl class="details">
           <dt>Status</dt><dd><%= render "todos/status_dot", todo: @todo, labelled: true %></dd>
           <dt>On it</dt><dd><%= render "todos/owner_picker", todo: @todo, labelled: true %></dd>
           <dt>Due</dt>
@@ -98,19 +95,19 @@
                 <%= status_tag "Overdue", highlight: true %>
               <% end %>
             <% else %>
-              <span class="txt-subtle">No date</span>
+              <span class="muted">No date</span>
             <% end %>
           </dd>
           <dt><%= term(:client) %></dt>
           <dd>
             <% if @todo.client %>
-              <%= link_to @todo.client.name, @todo.client, class: "txt-link" %>
+              <%= link_to @todo.client.name, @todo.client %>
             <% else %>
-              <span class="txt-subtle">None matched</span>
+              <span class="muted">None matched</span>
             <% end %>
           </dd>
           <% if @todo.requester_name.present? %>
-            <dt>Requested by</dt><dd><%= @todo.requester_name %><% if @todo.sender_email.present? && @todo.contact.nil? %> <span class="txt-subtle">(<%= @todo.sender_email %>)</span><% end %></dd>
+            <dt>Requested by</dt><dd><%= @todo.requester_name %><% if @todo.sender_email.present? && @todo.contact.nil? %> <span class="muted">(<%= @todo.sender_email %>)</span><% end %></dd>
           <% end %>
           <dt>Came in</dt><dd><%= @todo.source.humanize %>, <%= l @todo.created_at.to_date, format: :short %></dd>
           <dt>Client sees it</dt><dd><%= @todo.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>

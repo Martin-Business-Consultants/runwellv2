@@ -22,8 +22,8 @@ module TodosHelper
       safe_join(Todo::STATUSES.map do |status|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { picker_value: status }) do
           tag.button(type: "submit", name: "todo[status]", value: status, class: "popup__btn", data: { action: "picker#choose" }) do
-            safe_join([ tag.span(tag.span(class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true }), class: "display-contents", data: { picker_part: "dot" }),
-              tag.span(status.humanize, class: "overflow-ellipsis flex-item-grow", data: { picker_part: "label" }),
+            safe_join([ tag.span(tag.span(class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true }), class: "status-dot-picker__dot", data: { picker_part: "dot" }),
+              tag.span(status.humanize, class: "popup__label", data: { picker_part: "label" }),
               icon_tag("check", class: "checked") ])
           end
         end
@@ -41,8 +41,8 @@ module TodosHelper
       safe_join(todo_people.map do |person|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id }) do
           tag.button(type: "submit", name: "assignee_id", value: person.id, class: "popup__btn", data: { action: "picker#choose" }) do
-            safe_join([ avatar_image_tag(person, class: "owner-picker__avatar owner-picker__avatar--small", alt: ""),
-              tag.span(person.display_name, class: "overflow-ellipsis flex-item-grow"),
+            safe_join([ avatar_image_tag(person, class: "avatar owner-picker__avatar", alt: ""),
+              tag.span(person.display_name, class: "popup__label"),
               icon_tag("check", class: "checked") ])
           end
         end
@@ -50,15 +50,18 @@ module TodosHelper
     end
   end
 
-  # Everyone on a piece of work as overlapping avatars, the lead first (preload assignments: :user).
-  def todo_owners_tag(todo, limit: 3, fallback: nil)
+  # Everyone on a piece of work as overlapping avatars (rune_ui's avatar stack), the lead first and
+  # on top (preload assignments: :user). hidden: inside a control whose own text names them (the
+  # owner picker's trigger), so screen readers don't hear every name twice.
+  def todo_owners_tag(todo, limit: 3, fallback: nil, hidden: false)
     owners = todo.owners
     return (fallback ? tag.span(fallback, class: "person__none") : "".html_safe) if owners.empty?
 
     shown = owners.first(limit)
     rest = owners.size - shown.size
-    tag.span class: "owner-stack", title: todo_owners_label(todo) do
-      safe_join(shown.map { person_tag(it) } + [ (tag.span("+#{rest}", class: "owner-stack__more") if rest.positive?) ].compact)
+    tag.span class: "avatar-stack owner-stack", title: (todo_owners_label(todo) unless hidden), aria: { hidden: (true if hidden) } do
+      safe_join(shown.map { person_tag(it) } +
+        [ (tag.span("+#{rest}", class: "avatar avatar--md avatar--more", title: owners.drop(limit).map(&:display_name).to_sentence) if rest.positive?) ].compact)
     end
   end
 

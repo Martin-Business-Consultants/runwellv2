@@ -1,35 +1,32 @@
 <% @page_title = "Invite someone" %>
+<%= parent_page "Users", users_path %>
 
-<% content_for :header do %>
-  <%= parent_page "Users", users_path %>
-<% end %>
-
-<section class="settings settings--split person-page">
-  <div class="settings__panel panel shadow txt-align-start">
-    <section class="settings__section">
-      <header class="settings__heading">
+<div class="person-page person-page--split">
+  <div class="card person-page__main">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h1><%= @page_title %></h1>
-        <p class="settings__description">They get an email with a link to choose a name and password. It works once and expires in <%= distance_of_time_in_words(0, Invitation::EXPIRES_IN) %>.</p>
+        <p class="settings-section__description">They get an email with a link to choose a name and password. It works once and expires in <%= distance_of_time_in_words(0, Invitation::EXPIRES_IN) %>.</p>
       </header>
-      <%= form_with model: @invitation, url: user_invitations_path, class: "settings__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :email_address, "Email address", class: "ui-label" %>
-          <%= form.email_field :email_address, required: true, autofocus: true, class: "ui-input", autocomplete: "off", placeholder: "name@example.com" %>
+      <%= form_with model: @invitation, url: user_invitations_path, class: "settings-form" do |form| %>
+        <div class="field">
+          <%= form.label :email_address, "Email address", class: "field__label" %>
+          <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "off", placeholder: "name@example.com" %>
         </div>
-        <div class="ui-field">
-          <%= form.label :role, "Role", class: "ui-label" %>
-          <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {}, class: "ui-select" %>
-          <p class="ui-field__description">What they may do; see each role on the right.</p>
+        <div class="field">
+          <%= form.label :role, "Role", class: "field__label" %>
+          <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {} %>
+          <p class="field__hint">What they may do; see each role on the right.</p>
         </div>
-        <div><button type="submit" class="ui-button">Send invitation</button></div>
+        <div><button type="submit" class="btn btn--primary">Send invitation</button></div>
       <% end %>
     </section>
   </div>
 
-  <aside class="settings__panel settings__panel--side panel txt-align-start">
+  <aside class="card person-page__side">
     <%= render "layouts/shared/sidebar_toggle" %>
-    <section class="settings__section">
-      <header class="settings__heading">
+    <section class="settings-section">
+      <header class="settings-section__head">
         <h2>What each role can do</h2>
       </header>
       <dl class="settings-roles settings-roles--stacked">
@@ -42,20 +39,20 @@
     </section>
 
     <% if @invitations.any? %>
-      <section class="settings__section">
-        <header class="settings__heading">
+      <section class="settings-section">
+        <header class="settings-section__head">
           <h2>Invitations out</h2>
         </header>
-        <ul class="settings__list settings__list--scroll">
+        <ul class="settings-list settings-list--scroll">
           <% @invitations.each do |invitation| %>
             <%# herb:key invitation.id %>
-            <li class="ui-item ui-item--sm" data-filter-target="item">
-              <div class="ui-item__content">
-                <p class="ui-item__title overflow-ellipsis"><%= invitation.email_address %></p>
-                <p class="ui-item__description"><%= invitation.role.capitalize %> · <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
+            <li class="list-row" data-filter-target="item">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= invitation.email_address %></p>
+                <p class="list-row__desc"><%= invitation.role.capitalize %> · <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
               </div>
-              <div class="ui-item__actions">
-                <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "ui-button ui-button--outline ui-button--sm" %>
+              <div class="list-row__actions">
+                <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "btn btn--secondary btn--sm" %>
                 <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: user_invitation_path(invitation),
                       message: "The link they were sent stops working." %>
               </div>
@@ -65,4 +62,4 @@
       </section>
     <% end %>
   </aside>
-</section>
+</div>

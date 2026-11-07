@@ -6,8 +6,8 @@
     are always on the page and state only shows one, so opening them never waits on the server. %>
 <div class="engagement-finish" data-controller="state-focus" data-state-focus-state-value="closing">
   <div class="engagement-finish__choices" hidden="<%= closing != "" %>">
-    <button type="button" class="ui-button ui-button--outline ui-button--sm" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-    <button type="button" class="ui-button ui-button--ghost ui-button--sm txt-negative" title="Cancel <%= engagement.ref %>" data-herb-set="closing=cancelled">
+    <button type="button" class="btn btn--secondary btn--sm" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
+    <button type="button" class="btn btn--ghost btn--sm engagement-finish__danger" title="Cancel <%= engagement.ref %>" data-herb-set="closing=cancelled">
       <%= icon_tag "close-circle" %>
       <span>Cancel it</span>
     </button>
@@ -18,10 +18,10 @@
       <strong>Mark <%= engagement.ref %> complete?</strong>
       <span class="engagement-finish__text">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="completed">
-      <%= form.text_field :reason, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
+      <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
       <div class="engagement-finish__actions">
-        <button type="submit" class="ui-button ui-button--sm">Mark complete</button>
-        <button type="button" class="ui-button ui-button--ghost ui-button--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
+        <button type="submit" class="btn btn--primary btn--sm">Mark complete</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
       </div>
     <% end %>
   </div>
@@ -31,10 +31,10 @@
       <strong>Cancel <%= engagement.ref %>?</strong>
       <span class="engagement-finish__text">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="cancelled">
-      <%= form.text_field :reason, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
+      <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
       <div class="engagement-finish__actions">
-        <button type="submit" class="ui-button ui-button--destructive ui-button--sm">Cancel it</button>
-        <button type="button" class="ui-button ui-button--ghost ui-button--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
+        <button type="submit" class="btn btn--danger btn--sm">Cancel it</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
       </div>
     <% end %>
   </div>

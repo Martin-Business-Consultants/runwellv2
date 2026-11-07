@@ -1,21 +1,21 @@
 <%# locals: (form_id:) %>
 <%= form_with model: Note.new, url: notes_path, id: form_id, namespace: "quick_action", class: "quick-action__form", data: { turbo_frame: "_top" } do |form| %>
-  <div class="ui-field">
-    <span class="ui-label">Note</span>
+  <div class="field">
+    <span class="field__label">Note</span>
     <%= rich_text_field form, :body, placeholder: "What was said or decided…", staff: true %>
   </div>
-  <div class="ui-field-row">
-    <div class="ui-field">
-      <%= form.label :kind, "Kind", class: "ui-label" %>
-      <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" }, class: "ui-select" %>
+  <div class="field-row">
+    <div class="field">
+      <%= form.label :kind, "Kind", class: "field__label" %>
+      <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" } %>
     </div>
-    <div class="ui-field">
-      <%= form.label :source, "Source", class: "ui-label" %>
-      <%= form.text_field :source, class: "ui-input", autocomplete: "off", placeholder: "Call with Ann, 24 Sep" %>
+    <div class="field">
+      <%= form.label :source, "Source", class: "field__label" %>
+      <%= form.text_field :source, autocomplete: "off", placeholder: "Call with Ann, 24 Sep" %>
     </div>
   </div>
-  <div class="ui-dialog__footer">
-    <button type="button" class="ui-button ui-button--outline" data-action="dialog#close">Cancel</button>
-    <button type="submit" class="ui-button">Add note</button>
+  <div class="dialog__actions">
+    <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
+    <button type="submit" class="btn btn--primary">Add note</button>
   </div>
 <% end %>

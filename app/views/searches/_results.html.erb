@@ -1,26 +1,22 @@
 <%# locals: (results:, query:) %>
-<%# Command's list: results grouped by kind (in order of their best match), each group under a
-    small muted heading. %>
-<section class="search">
-  <div class="search__results">
-    <% if query.nil? %>
-      <div class="search__blank-slate">
-        Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, notes and documents.
-      </div>
-    <% elsif results.empty? %>
-      <div class="search__blank-slate">
-        No results found.
-      </div>
-    <% end %>
+<%# The results: grouped by kind (in order of their best match), each group under a small muted
+    heading. Not rune's .search (a search field), so its own block. %>
+<section class="search-results">
+  <% if query.nil? %>
+    <p class="search-results__empty">
+      Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, <%= term(:work).downcase %>, notes and documents.
+    </p>
+  <% elsif results.empty? %>
+    <p class="search-results__empty">No results found.</p>
+  <% end %>
 
-    <% search_result_groups(results).each do |kind, group| %>
-      <%# herb:key kind %>
-      <div class="search__group" role="group" aria-label="<%= kind %>">
-        <div class="search__group-heading" aria-hidden="true"><%= kind %></div>
-        <ul class="search__list">
-          <%= render partial: "searches/result", collection: group %>
-        </ul>
-      </div>
-    <% end %>
-  </div>
+  <% search_result_groups(results).each do |kind, group| %>
+    <%# herb:key kind %>
+    <div class="search-results__group" role="group" aria-label="<%= kind %>">
+      <div class="search-results__heading" aria-hidden="true"><%= kind %></div>
+      <ul class="search-results__list">
+        <%= render partial: "searches/result", collection: group %>
+      </ul>
+    </div>
+  <% end %>
 </section>

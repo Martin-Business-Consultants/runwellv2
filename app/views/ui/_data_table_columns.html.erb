@@ -1,23 +1,24 @@
 <%# locals: (id:, columns:, icon: nil) %>
-<%# A data table's Columns menu (ui/_data_table): a checkbox per column that can be hidden. %>
-<div class="ui-data-table__columns" data-controller="ui--popover" data-ui--popover-align-value="end">
+<%# A data table's Columns menu (ui/_data_table): a checkbox per column that can be hidden, in a
+    rune_ui popover (it stays open while columns are ticked: the items aren't .menu__item). %>
+<div class="popover-menu data-table__columns" data-controller="rune-popover" data-rune-popover-align-value="end">
   <% if icon %>
-    <button type="button" class="ui-button ui-button--ghost ui-button--icon-sm" popovertarget="<%= id %>_columns" title="Columns" aria-label="Columns">
+    <button type="button" class="icon-button" popovertarget="<%= id %>_columns" title="Columns" aria-label="Columns" data-rune-popover-target="trigger">
       <%= icon_tag "sliders" %>
     </button>
   <% else %>
-    <button type="button" class="ui-button ui-button--outline ui-button--sm" popovertarget="<%= id %>_columns">
+    <button type="button" class="btn btn--secondary btn--sm" popovertarget="<%= id %>_columns" data-rune-popover-target="trigger">
       <%= icon_tag "sliders" %>
       <span>Columns</span>
     </button>
   <% end %>
-  <div class="ui-menu" id="<%= id %>_columns" popover data-ui--popover-target="popover">
-    <div class="ui-menu__label">Show columns</div>
-    <hr class="ui-menu__separator">
+  <div class="popover menu__items" id="<%= id %>_columns" popover data-rune-popover-target="popover">
+    <div class="menu__label">Show columns</div>
+    <div class="menu__divider" role="separator"></div>
     <% columns.each do |column| %>
       <%# herb:key column.key %>
-      <label class="ui-menu__item">
-        <input type="checkbox" class="ui-data-table__toggle" value="<%= column.key %>" checked data-ui--data-table-target="toggle" data-action="ui--data-table#toggle">
+      <label class="menu__check">
+        <input type="checkbox" value="<%= column.key %>" checked data-data-table-target="toggle" data-action="data-table#toggle">
         <span><%= column.label %></span>
       </label>
     <% end %>

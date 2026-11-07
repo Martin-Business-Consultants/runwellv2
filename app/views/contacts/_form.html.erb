@@ -2,47 +2,47 @@
 <%= render "layouts/shared/errors", record: contact %>
 
 <%= form_with model: contact, url: contact.new_record? ? client_contacts_path(contact.client) : contact_path(contact),
-      class: "ui-card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-  <header class="ui-card__header">
-    <h2 class="ui-card__title">Contact</h2>
-    <p class="ui-card__description">Someone at <%= contact.client.name %> you deal with.</p>
+      class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <header class="card__head">
+    <h2 class="card__title">Contact</h2>
+    <p class="card__hint">Someone at <%= contact.client.name %> you deal with.</p>
   </header>
 
-  <div class="ui-card__content record-form__body">
-    <div class="ui-field-row">
-      <label class="ui-field">
-        <span class="ui-label">Name</span>
-        <%= form.text_field :name, required: true, class: "ui-input", autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
+  <div class="card__content record-form__body">
+    <div class="field-row">
+      <label class="field">
+        <span class="field__label">Name</span>
+        <%= form.text_field :name, required: true, autofocus: true, autocomplete: "off", placeholder: "Ann Approver" %>
       </label>
 
-      <label class="ui-field">
-        <span class="ui-label">Role</span>
-        <%= form.text_field :role, class: "ui-input", autocomplete: "off", placeholder: "Marketing lead" %>
-      </label>
-    </div>
-
-    <div class="ui-field-row">
-      <label class="ui-field">
-        <span class="ui-label">Email</span>
-        <%= form.email_field :email, class: "ui-input", autocomplete: "off", placeholder: "ann@acme.example" %>
-      </label>
-
-      <label class="ui-field">
-        <span class="ui-label">Phone</span>
-        <%= form.telephone_field :phone, class: "ui-input", autocomplete: "off" %>
+      <label class="field">
+        <span class="field__label">Role</span>
+        <%= form.text_field :role, autocomplete: "off", placeholder: "Marketing lead" %>
       </label>
     </div>
 
-    <fieldset class="ui-fieldset record-form__switches">
-      <legend class="ui-label">Access</legend>
+    <div class="field-row">
+      <label class="field">
+        <span class="field__label">Email</span>
+        <%= form.email_field :email, autocomplete: "off", placeholder: "ann@acme.example" %>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Phone</span>
+        <%= form.telephone_field :phone, autocomplete: "off" %>
+      </label>
+    </div>
+
+    <fieldset class="record-form__group">
+      <legend>Access</legend>
       <%= switch_field form, :portal_access, label: "Can sign in to the client portal", hint: "Signs in with an emailed link, sees this client’s shared work and documents, and sends requests." %>
       <%= switch_field form, :can_approve, label: "Can approve", hint: "Can say yes for their company when something needs their approval." %>
     </fieldset>
   </div>
 
-  <footer class="ui-card__footer ui-card__footer--bordered ui-card__footer--end">
-    <%= link_to "Cancel", client_path(contact.client), class: "ui-button ui-button--outline", data: { form_target: "cancel" } %>
-    <button type="submit" class="ui-button" data-form-target="submit">
+  <footer class="card__footer card__footer--bordered">
+    <%= link_to "Cancel", client_path(contact.client), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <button type="submit" class="btn btn--primary" data-form-target="submit">
       <span><%= contact.new_record? ? "Add contact" : "Save changes" %></span>
     </button>
   </footer>

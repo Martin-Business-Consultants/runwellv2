@@ -1,21 +1,21 @@
 <% @page_title = "Connected apps" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <p class="portal-page-header__description">Your own assistant (Muse, Claude, ChatGPT and the like) can see what you see here and ask us for things, as you.</p>
 <% end %>
 
 <div class="portal-stack">
   <% if @new_token %>
-    <section class="ui-card portal-card portal-card--highlight">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Your new token</h2>
-        <p class="ui-card__description">Copy it now: it won’t be shown again. It acts as you, in this portal only, until you disconnect it.</p>
+    <section class="card portal-card portal-card--highlight">
+      <header class="card__head">
+        <h2 class="card__title">Your new token</h2>
+        <p class="card__hint">Copy it now: it won’t be shown again. It acts as you, in this portal only, until you disconnect it.</p>
       </header>
-      <div class="ui-card__content">
-        <div class="copy-row portal-copy-row">
-          <code class="ui-input portal-copy-row__value"><%= @new_token.plaintext %></code>
-          <button type="button" class="ui-button ui-button--outline" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="btn--reversed" data-action="copy-to-clipboard#copy">
+      <div class="card__content">
+        <div class="copy-field">
+          <code><%= @new_token.plaintext %></code>
+          <button type="button" class="btn btn--secondary" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="portal-copied" data-action="copy-to-clipboard#copy">
             <%= icon_tag "copy-paste" %>
             <span>Copy</span>
           </button>
@@ -24,54 +24,54 @@
     </section>
   <% end %>
 
-  <section class="ui-card ui-card--flush portal-card">
-    <header class="ui-card__header ui-card__header--bordered">
-      <h2 class="ui-card__title">Your AI, connected</h2>
-      <p class="ui-card__description">Everything it does is recorded as done through it.</p>
+  <section class="card card--flush portal-card">
+    <header class="card__head card__head--bordered">
+      <h2 class="card__title">Your AI, connected</h2>
+      <p class="card__hint">Everything it does is recorded as done through it.</p>
     </header>
     <% if @tokens.any? %>
-      <ul class="ui-item-group">
+      <ul class="list">
         <% @tokens.each do |token| %>
           <%# herb:key token.id %>
-          <li class="ui-item ui-item--sm">
-            <div class="ui-item__content">
-              <p class="ui-item__title">
-                <span class="overflow-ellipsis"><%= token.name %></span>
+          <li class="list-row">
+            <div class="list-row__content">
+              <p class="list-row__title portal-token__title">
+                <span class="portal-token__name"><%= token.name %></span>
                 <% if token.paused? %>
                   <%= status_tag "Paused" %>
                 <% end %>
               </p>
-              <p class="ui-item__description">
+              <p class="list-row__desc">
                 <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
               </p>
             </div>
-            <div class="ui-item__actions">
-              <%= render "layouts/shared/delete_dialog", name: token.name, path: portal_connected_app_path(token), trigger_class: "txt-small",
+            <div class="list-row__actions">
+              <%= render "layouts/shared/delete_dialog", name: token.name, path: portal_connected_app_path(token),
                     message: "It stops working at once. Anything it already did stays." %>
             </div>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="portal-card__empty">Nothing is connected yet.</p>
+      <%= empty_state "Nothing is connected yet.", compact: true %>
     <% end %>
   </section>
 
-  <section class="ui-card portal-card">
-    <header class="ui-card__header">
-      <h2 class="ui-card__title">Connect one</h2>
-      <p class="ui-card__description">Give your assistant this address. If it can sign in by itself, it sends you here to approve it, after the usual emailed sign-in link.</p>
+  <section class="card portal-card">
+    <header class="card__head">
+      <h2 class="card__title">Connect one</h2>
+      <p class="card__hint">Give your assistant this address. If it can sign in by itself, it sends you here to approve it, after the usual emailed sign-in link.</p>
     </header>
-    <div class="ui-card__content portal-stack portal-stack--tight">
+    <div class="card__content">
       <%= code_block portal_mcp_url %>
-      <p class="portal-muted">If it asks for a key instead (Muse does, for a server you describe to it), make one here and paste it in.</p>
+      <p class="muted">If it asks for a key instead (Muse does, for a server you describe to it), make one here and paste it in.</p>
       <%= form_with url: portal_connected_apps_path, scope: :access_token, class: "portal-token-form" do |form| %>
-        <%= form.text_field :name, class: "ui-input portal-token-form__name", autocomplete: "off", placeholder: "Name it, like “Muse”", aria: { label: "Token name" } %>
-        <label class="ui-label portal-token-form__check">
-          <%= form.check_box :read_only, class: "ui-checkbox" %>
+        <%= form.text_field :name, class: "portal-token-form__name", autocomplete: "off", placeholder: "Name it, like “Muse”", aria: { label: "Token name" } %>
+        <label class="checkbox">
+          <%= form.check_box :read_only %>
           <span>Read only</span>
         </label>
-        <button type="submit" class="ui-button">Make a key</button>
+        <button type="submit" class="btn btn--primary">Make a key</button>
       <% end %>
     </div>
   </section>

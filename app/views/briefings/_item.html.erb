@@ -1,21 +1,22 @@
 <%# locals: (item:) %>
-<%# One line in Waiting on you: a piece of work, or a mention of the person (shadcn's Item). %>
+<%# One line in Waiting on you: a piece of work, or a mention of the person (a list row: who,
+    what, where, and when on the right). %>
 <% if item.is_a?(Notification) %>
   <% ref, name = notification_target_label(item.notifiable_target) %>
-  <%= link_to notification_path(item), class: "ui-item ui-item--sm home-list__link" do %>
-    <span class="ui-item__media"><%= person_tag item.creator %></span>
-    <span class="ui-item__content">
-      <span class="ui-item__title home-list__title"><span class="overflow-ellipsis"><%= item.creator&.first_name %> mentioned you</span></span>
-      <span class="ui-item__description home-list__meta overflow-ellipsis"><%= [ ref, name ].compact.join(" · ") %></span>
+  <%= link_to notification_path(item), class: "list-row home-list__link" do %>
+    <span class="list-row__media"><%= person_tag item.creator %></span>
+    <span class="list-row__content">
+      <span class="list-row__title"><%= item.creator&.first_name %> mentioned you</span>
+      <span class="list-row__desc home-list__meta"><%= [ ref, name ].compact.join(" · ") %></span>
     </span>
     <span class="home-list__time"><%= time_ago_in_words(item.created_at) %></span>
   <% end %>
 <% else %>
-  <%= link_to todo_path(item), class: "ui-item ui-item--sm home-list__link" do %>
-    <span class="ui-item__media"><%= person_tag item.owner, fallback: "Unassigned" %></span>
-    <span class="ui-item__content">
-      <span class="ui-item__title home-list__title"><span class="overflow-ellipsis"><%= item.title %></span></span>
-      <span class="ui-item__description home-list__meta overflow-ellipsis"><%= home_work_where(item) %></span>
+  <%= link_to todo_path(item), class: "list-row home-list__link" do %>
+    <span class="list-row__media"><%= person_tag item.owner, fallback: "Unassigned" %></span>
+    <span class="list-row__content">
+      <span class="list-row__title"><%= item.title %></span>
+      <span class="list-row__desc home-list__meta"><%= home_work_where(item) %></span>
     </span>
     <% if item.due_on %>
       <span class="<%= class_names("home-list__time", "home-list__time--late": item.due_on.past?) %>"><%= home_due(item.due_on) %></span>

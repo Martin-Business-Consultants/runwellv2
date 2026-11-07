@@ -1,0 +1,252 @@
+/* Home (briefings), Notifications, Search, Quick actions and the bar, on rune_ui's tokens
+/* (docs/rune-ui-migration.md). Unlayered, so these win over rune's components.
+/*
+/* 1 Home   2 The bar and search   3 Trays   4 Notifications   5 Quick actions */
+
+/* ======================================================================= 1 Home */
+
+/* A greeting with the ways in to work, four counts, then Your work (a table grouped by when it's
+/* due) beside cards of what's waiting on the person. */
+.home { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+.home-heading { align-items: flex-end; }
+.home-heading__title { letter-spacing: -.025em; }
+
+/* Four counts across where there's room, two below. Each card is its list's link. */
+.home-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+@media (min-width: 1200px) { .home-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* A faint wash of the accent from the foot, flat in dark. */
+.home-stat { color: var(--text); text-decoration: none; background-image: linear-gradient(to top, color-mix(in oklch, var(--accent) 5%, var(--panel)), var(--panel)); transition: border-color .12s; }
+.home-stat:hover { border-color: var(--line-strong); color: var(--text); }
+html[data-theme="dark"] .home-stat { background-image: none; }
+@media (prefers-color-scheme: dark) { html:not([data-theme]) .home-stat { background-image: none; } }
+.home-stat .home-stat__value { font-size: 1.875rem; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.025em; line-height: 1.1; }
+.home-stat__icon { color: var(--text-muted); }
+.home-stat--alert :is(.home-stat__value, .home-stat__icon) { color: var(--danger); }
+.home-stat__note { color: var(--text-muted); }
+
+/* A newer release: the icon, the title over the versions, and its button across from them.
+/* Placed by class, not child combinators, since ERB tooling may wrap the icon and button. */
+.home-update { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--s-3); }
+.home-update .alert__icon { grid-column: 1; grid-row: 1 / span 2; }
+.home-update :is(.alert__title, .alert__body) { grid-column: 2; }
+.home-update .home-update__action { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+
+.home-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--s-4); }
+@media (min-width: 1100px) { .home-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+.home-side { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+
+/* Your work: status, title, where, due; a tinted heading row per group. The card is the frame,
+/* so the table runs to its edges, lined up with the card's head. */
+.home-work__scroll { overflow-x: auto; }
+.home-work__table { table-layout: fixed; }
+.home-work__table :is(th, td):first-child { padding-left: var(--s-5); }
+.home-work__table :is(th, td):last-child { padding-right: var(--s-5); }
+.home-work__col--status { width: 3.5rem; }
+.home-work__col--where { width: 34%; }
+.home-work__col--due { width: 8.5rem; }
+.home-work__group th { background: var(--layer-1); color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.home-work__group-label { display: inline-flex; align-items: center; gap: var(--s-2); }
+.home-work__more { color: var(--text-muted); text-decoration: underline; text-underline-offset: 4px; }
+.home-work__more:hover { color: var(--text); }
+.home-work__title, .home-work__where { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-work__where { color: var(--text-muted); }
+.home-work__table .home-work__due { color: var(--text-muted); text-align: right; white-space: nowrap; }
+.home-work__table .home-work__due--late { color: var(--danger); }
+.home-work__empty { padding-bottom: var(--s-5); color: var(--text-muted); }
+
+/* What's waiting: a card per section, its count beside the title, a row per thing (who, what,
+/* where, when), lined up with the card's head. */
+.home-panel__title { display: flex; align-items: center; gap: var(--s-2); }
+.home-list { margin: 0; list-style: none; }
+.card--flush > .home-list { padding: var(--s-1); }
+.home-list__link { padding-inline: calc(var(--s-5) - var(--s-1)); }
+.home-list__link .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
+.home-list__meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-list__time { flex: 0 0 auto; align-self: flex-start; color: var(--text-muted); font-size: var(--text-meta); white-space: nowrap; }
+.home-list__time--late { color: var(--danger); }
+
+/* All caught up: rune's empty state with a check in a tile over it. */
+.home-empty h2 { color: var(--text); }
+.home-empty__icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius); background: var(--layer-2); color: var(--text); }
+
+/* ======================================================================= 2 The bar and search */
+
+/* Closed, the bar takes no room and no clicks: its button (S, ⌘K) is on the page, since keys
+/* only click what's there, but out of sight. */
+.bar { position: fixed; inset: auto 0 0 0; z-index: var(--z-bar); display: flex; flex-direction: column; pointer-events: none; }
+.bar__placeholder { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.bar__backdrop, .bar__footer { display: none; }
+
+/* Open (the placeholder hides once S is pressed): a command box a third of the way down, over a
+/* dimmed, blurred page, fading and zooming in. */
+@keyframes home-overlay-in { from { opacity: 0; scale: .95; } }
+.bar:has(.bar__placeholder[hidden]) {
+  inset: 33.333% 0 auto 0; z-index: calc(var(--z-tray) + 10); width: calc(100% - 2rem); max-height: calc(66.666dvh - 1rem); margin-inline: auto; padding: var(--s-1);
+  overflow: hidden; border-radius: var(--radius-panel); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
+  pointer-events: auto; animation: home-overlay-in .1s ease-out;
+}
+@media (min-width: 640px) { .bar:has(.bar__placeholder[hidden]) { width: 24rem; } }
+.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .1); backdrop-filter: blur(4px); }
+.bar__input { flex: 0 0 auto; padding: var(--s-1) var(--s-1) 0; }
+
+/* The results under the box, whether or not their dialog is open: before a search the hint,
+/* after one the results. Empty, they take no room. */
+.bar .bar__modal {
+  position: static; z-index: auto; display: block; width: auto; max-width: none; height: auto; max-height: 18rem; margin: 0; padding: 0;
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; border: 0; background: none; color: inherit;
+}
+.bar .bar__modal:not(:has(.search-results)) { display: none; }
+.bar:has(.bar__placeholder[hidden]) .bar__footer {
+  display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: var(--s-4);
+  margin: var(--s-1) calc(var(--s-1) * -1) calc(var(--s-1) * -1); padding: var(--s-2) var(--s-3);
+  border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--text-meta);
+}
+@media (any-hover: none) { .bar:has(.bar__placeholder[hidden]) .bar__footer { display: none; } }
+.bar__footer-key { display: inline-flex; align-items: center; gap: 6px; }
+
+/* The search box (bar and /search): an icon, the field without its own frame, and ✕. */
+.search-box { flex-direction: row; align-items: center; gap: 0; height: var(--control-h); padding: 0 2px 0 var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--layer-1); color: var(--text-muted); }
+.search-box__icon { color: var(--text-faint); }
+.search-box .search-box__input { flex: 1; min-width: 0; height: 100%; padding: 0 .625rem 0 6px; border: 0; background: transparent; box-shadow: none; color: var(--text); }
+.search-box .search-box__input:focus { box-shadow: none; }
+.search-box__input::-webkit-search-cancel-button { display: none; }
+.search-box .search-box__reset { width: 1.5rem; height: 1.5rem; }
+.search-box__reset .icon { width: .75rem; height: .75rem; }
+
+/* The results: groups by kind, a rule between them, rows of icon · title over the match · client. */
+.search-results { display: block; }
+.search-results__empty { padding: var(--s-5) var(--s-2); color: var(--text-muted); text-align: center; }
+.search-results__group { padding: var(--s-1); overflow: hidden; }
+.search-results__group + .search-results__group { margin-inline: calc(var(--s-1) * -1); padding-inline: var(--s-2); border-top: 1px solid var(--line); }
+.search-results__heading { padding: 6px var(--s-2); color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); line-height: var(--leading-tight); }
+.search-results__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.search-results__result { display: flex; align-items: center; gap: var(--s-2); padding: 6px var(--s-2); border-radius: var(--radius); color: var(--text); text-decoration: none; user-select: none; }
+.search-results__result:is(:hover, :focus-visible) { background: var(--layer-2); color: var(--text); box-shadow: none; }
+.search-results__icon { color: var(--text-muted); }
+.search-results__result:is(:hover, :focus-visible) .search-results__icon { color: var(--text); }
+.search-results__text { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.search-results__title, .search-results__excerpt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-results__title { font-weight: var(--weight-strong); }
+.search-results__excerpt, .search-results__context { color: var(--text-muted); font-size: var(--text-meta); }
+.search-results__context { flex: 0 0 auto; max-width: 35%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The match: bold in the text's colour, not a highlighter. */
+.search-results mark { position: static; background: none; color: var(--text); font-weight: 600; white-space: inherit; }
+.search-results mark span { display: none; }
+
+/* /search: the same box and results, framed on the page. */
+.search-page { display: flex; flex-direction: column; width: min(100%, 42rem); margin: var(--s-4) auto 0; padding: var(--s-1); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); }
+.search-page .search-box { margin: var(--s-1) var(--s-1) 0; }
+.search-page .search-box:has(.search-box__input:placeholder-shown) .search-box__reset { display: none; }
+
+/* ======================================================================= 3 Trays */
+
+/* The bell and the quick actions, bottom right, each opening a popover above it. */
+.tray { position: fixed; inset: auto calc(var(--s-3) + env(safe-area-inset-right)) calc(var(--s-3) + env(safe-area-inset-bottom)) auto; z-index: var(--z-tray); display: flex; flex-direction: column; align-items: flex-end; }
+
+/* Closed, the actions tray takes no clicks: it sits over the bell, and A clicks its hidden toggle. */
+.tray--actions:not(:has(.tray__dialog[open])) { pointer-events: none; }
+.tray--actions .tray__toggle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+.tray__dialog[open] {
+  position: absolute; inset: auto 0 3rem auto; display: flex; flex-direction: column-reverse; width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem);
+  margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
+  transform-origin: bottom right; animation: home-overlay-in .1s ease-out;
+}
+.tray__item { position: relative; }
+
+/* The bell: a round button, with a red dot while something is unread. */
+.tray__toggle { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.tray__toggle-btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--panel); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / .08); transition: background .12s; }
+.tray__toggle:hover .tray__toggle-btn, .tray__dialog[open] ~ .tray__toggle .tray__toggle-btn { background: var(--layer-2); }
+.tray__toggle-text { display: none; }
+html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notification) ~ .tray__toggle::after {
+  content: ""; position: absolute; inset: 0 0 auto auto; width: .625rem; height: .625rem; border: 2px solid var(--panel); border-radius: 50%; background: var(--danger);
+}
+
+/* The notifications popover: a header (See all, Clear all), then the newest six. */
+.tray__item--hat { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-1); padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); border-bottom: 1px solid var(--line); }
+.tray__title { flex: 1; font-size: var(--text-ui); font-weight: 600; }
+.tray__hat-action { display: flex; flex-direction: row; gap: 0; }
+.tray__hat-action[aria-selected] .btn { background: var(--hover); color: var(--text); }
+.tray__new-notifications { display: none; }
+.tray__dialog:has(#notifications .tray__item:nth-child(7)) .tray__new-notifications { display: inline; }
+.tray__dialog:has(#notifications .tray__item:nth-child(7)) .tray__old-notifications { display: none; }
+.tray--notifications:not(:has(.tray__item--notification)) .tray__clear-notifications { display: none; }
+.tray--notifications #notifications { display: block; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.tray--notifications .tray__item--notification:nth-child(n + 7) { display: none; }
+.tray__empty { display: none; padding: var(--s-6) var(--s-4); color: var(--text-muted); text-align: center; }
+.tray__dialog:not(:has(.tray__item--notification)) .tray__empty { display: block; }
+
+/* The quick actions popover: its label, the record picker, then the actions (a menu). */
+.tray--actions .tray__dialog[open] { width: min(18rem, 100vw - 1.5rem); gap: var(--s-1); padding: var(--s-1); overflow: visible; }
+.tray__item--picker { margin-inline: calc(var(--s-1) * -1); padding: 0 var(--s-2) var(--s-2); border-bottom: 1px solid var(--line); }
+.tray__item--picker .quick-action__trigger { flex: 1; max-width: none; justify-content: space-between; }
+/* The tray sits at the foot of the screen, so the picker's list opens upwards. */
+.tray__item--picker .popup { inset: auto 0 calc(100% + 4px) auto; max-height: 60dvh; }
+.tray__item:has(.menu__item:focus-visible) { z-index: 1; }
+
+/* ======================================================================= 4 Notifications */
+
+/* A notification (the popover and /notifications): a row of who, what and where, with the time,
+/* an unread dot and the read toggle on the right. A rule between rows. */
+.notification + .notification { border-top: 1px solid var(--line); }
+.notification .notification__link { align-items: flex-start; flex-wrap: nowrap; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-radius: 0; }
+.notification .notification__link:focus-visible { background: var(--accent-soft); box-shadow: none; }
+.notification[aria-selected] .notification__link { background: var(--layer-2); }
+.notification__avatar img { display: block; width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover; }
+.notification__body { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-muted); }
+.notification__context { overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
+.notification__meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; gap: var(--s-1); }
+.notification__meta form { display: contents; }
+.notification__time { display: inline-flex; align-items: center; gap: 6px; color: var(--text-faint); font-size: var(--text-meta); white-space: nowrap; }
+.unread .notification__time::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--accent); }
+
+/* Mark read or unread: there on hover, focus or the j / k row, always on touch. */
+.notification__toggle { position: relative; opacity: 0; }
+.notification__toggle .icon { width: .875rem; height: .875rem; }
+.notification:is(:hover, :focus-within, [aria-selected]) .notification__toggle, .notification__toggle:focus-visible { opacity: 1; }
+@media (any-hover: none) { .notification__toggle { opacity: 1; } }
+.notification__count { position: absolute; inset: -.25rem -.25rem auto auto; min-width: 1rem; padding: 0 4px; font-size: .625rem; line-height: 1rem; }
+
+/* /notifications: a card of the new over a card of the seen. */
+.notifications-page { display: flex; flex-direction: column; gap: var(--s-5); width: min(100%, 42rem); margin-inline: auto; }
+.notifications-list__empty { padding: 2.5rem var(--s-4); color: var(--text-muted); text-align: center; }
+.notifications-list:has(.tray__item--notification) .notifications-list__empty { display: none; }
+.notifications-list--read:not(:has(.tray__item--notification)) { display: none; }
+
+/* ======================================================================= 5 Quick actions */
+
+/* The modal (quick_actions#new): a title and hint with ✕ across, where it goes, the form. */
+.quick-action:focus-visible { box-shadow: var(--shadow-popover); }
+/* The picker's list hangs out of the dialog rather than scrolling inside it, where there's room. */
+@media (min-height: 40rem) { .quick-action { overflow: visible; } }
+.quick-action__header { align-items: flex-start; }
+.quick-action__heading { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.quick-action__heading kbd { margin-inline: 1px; }
+.quick-action__optional { color: var(--text-muted); font-weight: var(--weight); }
+
+/* The picker (the modal and the tray): a pill showing the pick, its list a popup under it. */
+.quick-action__picker { position: relative; display: flex; align-items: center; gap: var(--s-2); }
+.quick-action__picker .popup { max-width: min(30rem, 100dvw - 4rem); }
+.quick-action__picker--full .quick-action__trigger { flex: 1; max-width: none; height: var(--control-h); justify-content: space-between; font-size: inherit; }
+.quick-action__records { max-height: 18rem; overflow-y: auto; }
+.quick-action__kind { flex: 0 0 auto; color: var(--text-faint); font-size: var(--text-xs); white-space: nowrap; }
+.quick-action__none { padding: var(--s-2) var(--s-3); color: var(--text-muted); }
+
+/* Also on it: folded under a toggle; the team as chips, a picked one in the accent's tint. */
+.quick-action__more-toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: var(--weight-strong); }
+.quick-action__more-toggle:hover { color: var(--text); }
+.quick-action__more-toggle .icon { width: .875rem; height: .875rem; rotate: -90deg; transition: rotate .15s; }
+.quick-action__more[open] .quick-action__more-toggle .icon { rotate: 0deg; }
+.quick-action__people { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); padding-top: var(--s-3); }
+.quick-action__person { display: inline-flex; align-items: center; gap: var(--s-2); padding: 6px var(--s-3) 6px var(--s-2); border: 1px solid var(--line-strong); border-radius: var(--radius); cursor: pointer; transition: background .12s, border-color .12s; }
+.quick-action__person:hover { background: var(--hover); }
+.quick-action__person:has(:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.quick-action__person:has(:focus-visible) { box-shadow: var(--ring); }
+
+/* Documents: the drop target fills the form; the file input covers it, unseen, to take the click
+/* and the drop. */
+.quick-action__upload { position: relative; width: 100%; height: auto; min-height: 6rem; padding: var(--s-4); border: 1px dashed var(--line-strong); white-space: normal; font-weight: var(--weight); font-size: var(--text-meta); cursor: pointer; }
+.quick-action__upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.quick-action__upload:has(input[type="file"]:focus-visible) { box-shadow: var(--ring); }

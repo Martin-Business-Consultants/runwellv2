@@ -3,34 +3,34 @@
 <%# herb:state (changing: "") %>
 <%# New recovery codes, or turning two-factor off (unless the install requires it), each asking for
     the password. Both forms are always on the page and state only shows one. %>
-<div class="settings__form settings__form--tight" data-controller="state-focus" data-state-focus-state-value="changing">
-  <div class="settings__actions" hidden="<%= changing != "" %>">
-    <button type="button" class="ui-button ui-button--outline ui-button--sm" data-herb-set="changing=codes">New recovery codes</button>
+<div class="stack" data-controller="state-focus" data-state-focus-state-value="changing">
+  <div class="button-row" hidden="<%= changing != "" %>">
+    <button type="button" class="btn btn--secondary btn--sm" data-herb-set="changing=codes">New recovery codes</button>
     <% unless required %>
-      <button type="button" class="ui-button ui-button--ghost ui-button--sm txt-negative" data-herb-set="changing=off">Turn off</button>
+      <button type="button" class="btn btn--danger btn--sm" data-herb-set="changing=off">Turn off</button>
     <% end %>
   </div>
 
-  <div class="ui-field" hidden="<%= changing != "codes" %>">
-    <%= form_with url: settings_two_factor_recovery_codes_path, class: "settings__inline", namespace: "recovery" do |form| %>
-      <%= form.password_field :password, required: true, class: "ui-input", autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
-      <button type="submit" class="ui-button">Show new codes</button>
-      <button type="button" class="ui-button ui-button--ghost" data-keys="esc" data-herb-reset="changing">Cancel</button>
+  <div class="field" hidden="<%= changing != "codes" %>">
+    <%= form_with url: settings_two_factor_recovery_codes_path, class: "settings-inline", namespace: "recovery" do |form| %>
+      <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
+      <button type="submit" class="btn btn--primary">Show new codes</button>
+      <button type="button" class="btn btn--ghost" data-keys="esc" data-herb-reset="changing">Cancel</button>
     <% end %>
-    <p class="ui-field__description">Your old codes stop working.</p>
+    <p class="field__hint">Your old codes stop working.</p>
   </div>
 
   <% unless required %>
-    <div class="ui-field" hidden="<%= changing != "off" %>">
-      <%= form_with url: settings_two_factor_path, method: :delete, class: "settings__inline", namespace: "disable" do |form| %>
-        <%= form.password_field :password, required: true, class: "ui-input", autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
-        <button type="submit" class="ui-button ui-button--destructive">Turn off two-factor sign-in</button>
-        <button type="button" class="ui-button ui-button--ghost" data-keys="esc" data-herb-reset="changing">Cancel</button>
+    <div class="field" hidden="<%= changing != "off" %>">
+      <%= form_with url: settings_two_factor_path, method: :delete, class: "settings-inline", namespace: "disable" do |form| %>
+        <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Your password", autofocus: true, aria: { label: "Your password" } %>
+        <button type="submit" class="btn btn--danger">Turn off two-factor sign-in</button>
+        <button type="button" class="btn btn--ghost" data-keys="esc" data-herb-reset="changing">Cancel</button>
       <% end %>
     </div>
   <% end %>
 
   <% if required %>
-    <p class="settings__note">This install requires two-factor sign-in, so it stays on.</p>
+    <p class="muted">This install requires two-factor sign-in, so it stays on.</p>
   <% end %>
 </div>

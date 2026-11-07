@@ -77,9 +77,8 @@ module TableSortingHelper
   end
 
   def table_page_link(label, number, disabled: false, current: false, rel: nil)
-    # Runwell UI's pagination: the current page an outline button, the others ghost ones.
-    numeric = label.to_s.match?(/\A\d+\z/)
-    classes = ui_button_classes(current ? :outline : :ghost, size: numeric ? :icon_sm : :sm, class: "table-pagination__page")
+    # The pagination: the current page an outline (secondary) button, the others ghost ones.
+    classes = button_classes(variant: current ? :secondary : :ghost, size: :sm, extra: "table-pagination__page")
     if disabled
       tag.span(label, class: classes, "aria-disabled": true)
     else

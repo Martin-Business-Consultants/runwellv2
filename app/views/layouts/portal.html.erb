@@ -3,67 +3,59 @@
 <html lang="en" data-scheme="<%= appearance[:scheme] %>" data-radius="<%= appearance[:radius] %>" data-font="<%= appearance[:font] %>" data-text-size="<%= appearance[:text_size] %>" data-default-theme="<%= appearance[:default_theme] %>">
   <%= render "layouts/shared/head" %>
 
-  <%# The client portal, as shadcn/ui's dashboard: a top bar (the client, the sections as ghost
-      buttons, New request, the contact's menu) over a centered column of cards (ui/app-public.css). %>
-  <body class="public portal-layout">
+  <%# The client portal: a top bar (the client, the sections, New request, the contact's menu)
+      over one centered column (runwell.css, .portal-layout). %>
+  <body class="portal-layout">
+    <a href="#main" class="skip-link" data-turbo="false">Skip to main content</a>
     <div id="global-container">
       <header class="portal-topbar" id="header">
-        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
         <div class="portal-topbar__inner">
-          <%= link_to portal_root_path, class: "portal-topbar__brand" do %>
-            <span class="portal-topbar__brand-mark"><%= render "layouts/shared/logo_mark" %></span>
-            <span class="header__logo portal-topbar__brand-name"><%= current_contact.client.name %></span>
+          <%= link_to portal_root_path, class: "sidebar__brand portal-topbar__brand" do %>
+            <span class="sidebar__logo"><%= render "layouts/shared/logo_mark" %></span>
+            <span class="portal-topbar__name"><%= current_contact.client.name %></span>
           <% end %>
 
           <nav class="portal-nav" aria-label="Portal">
-            <%= link_to term(:engagement, count: 2), portal_root_path, class: "portal-nav__link", aria: { current: ("page" if request.path == portal_root_path || request.path.start_with?("/portal/engagements")) } %>
-            <%= link_to term(:work), portal_todos_path, class: "portal-nav__link", aria: { current: ("page" if request.path.start_with?(portal_todos_path)) } %>
+            <%= link_to term(:engagement, count: 2), portal_root_path, class: "portal-nav__link", aria: { current: (request.path == portal_root_path || request.path.start_with?("/portal/engagements")) ? "page" : "false" } %>
+            <%= link_to term(:work), portal_todos_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_todos_path)) ? "page" : "false" } %>
             <%= plugin_portal_nav_links(class: "portal-nav__link") %>
-            <%= link_to "Requests", portal_requests_path, class: "portal-nav__link", aria: { current: ("page" if request.path == portal_requests_path) } %>
+            <%= link_to "Requests", portal_requests_path, class: "portal-nav__link", aria: { current: (request.path == portal_requests_path) ? "page" : "false" } %>
           </nav>
 
           <div class="portal-topbar__actions">
             <%= plugin_slots(:portal_actions, contact: current_contact) %>
-            <%= link_to new_portal_request_path, class: "ui-button ui-button--sm portal-topbar__new" do %>
+            <%= link_to new_portal_request_path, class: button_classes(variant: :primary, size: :sm, extra: "portal-topbar__new") do %>
               <%= icon_tag "add" %>
               <span>New request</span>
             <% end %>
 
-            <div class="portal-user" data-controller="ui--popover" data-ui--popover-align-value="end">
-              <button type="button" class="portal-user__button" popovertarget="portal_user_menu" title="<%= current_contact.name %>">
-                <%= ui_avatar current_contact.name, class: "portal-user__avatar" %>
-                <span class="for-screen-reader">Your menu</span>
-              </button>
-              <div class="ui-menu portal-user__menu" id="portal_user_menu" popover data-ui--popover-target="popover">
-                <div class="ui-menu__label portal-user__label">
-                  <span class="portal-user__name"><%= current_contact.name %></span>
-                  <span class="portal-user__email"><%= current_contact.email %></span>
-                </div>
-                <hr class="ui-menu__separator">
-                <%= link_to portal_requests_path, class: "ui-menu__item" do %>
-                  <%= icon_tag "email" %> <span>Your requests</span>
-                <% end %>
-                <%= link_to portal_connected_apps_path, class: "ui-menu__item", aria: { current: ("page" if request.path == portal_connected_apps_path) } do %>
-                  <%= icon_tag "settings-outline" %> <span>Connected apps</span>
-                <% end %>
-                <button type="button" class="ui-menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
-                  <%= icon_tag "moon", class: "theme-toggle__moon" %>
-                  <%= icon_tag "sun", class: "theme-toggle__sun" %>
-                  <span>Light or dark</span>
-                </button>
-                <hr class="ui-menu__separator">
-                <%= button_to portal_session_path, method: :delete, class: "ui-menu__item", form: { class: "display-contents" } do %>
-                  <%= icon_tag "logout" %> <span>Sign out</span>
-                <% end %>
+            <% you = capture do %>
+              <%= avatar current_contact.name, size: :md %>
+              <span class="visually-hidden">Your menu</span>
+            <% end %>
+            <%= menu you, trigger_class: "portal-user__button" do %>
+              <div class="menu__label portal-user__label">
+                <strong class="portal-user__name"><%= current_contact.name %></strong>
+                <span class="portal-user__email"><%= current_contact.email %></span>
               </div>
-            </div>
+              <%= menu_divider %>
+              <%= menu_link safe_join([ icon_tag("email"), tag.span("Your requests") ]), portal_requests_path %>
+              <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Connected apps") ]), portal_connected_apps_path,
+                    aria: { current: ("page" if request.path == portal_connected_apps_path) } %>
+              <button type="button" class="menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
+                <%= icon_tag "moon", class: "theme-toggle__moon" %>
+                <%= icon_tag "sun", class: "theme-toggle__sun" %>
+                <span>Light or dark</span>
+              </button>
+              <%= menu_divider %>
+              <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), portal_session_path, method: :delete %>
+            <% end %>
           </div>
         </div>
       </header>
 
-      <%= render "layouts/shared/flash" %>
-
-      <main id="main" class="portal-main">
+      <main id="main" class="main portal-main">
+        <%= render "layouts/shared/flash" %>
         <div class="portal-page-header">
           <%= yield :header %>
         </div>

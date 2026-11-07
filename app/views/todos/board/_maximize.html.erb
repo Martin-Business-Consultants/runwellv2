@@ -1,5 +1,5 @@
 <%# locals: (column_path:) %>
-<%= link_to column_path, class: "cards__maximize-button ui-button ui-button--ghost ui-button--icon-sm", title: "Expand column", data: { turbo_frame: "_top" } do %>
+<%= link_to column_path, class: "cards__maximize-button icon-button", title: "Expand column", data: { turbo_frame: "_top" } do %>
   <%= icon_tag "maximize" %>
-  <span class="for-screen-reader">Expand column</span>
+  <span class="visually-hidden">Expand column</span>
 <% end %>

@@ -2,118 +2,116 @@
 <%= render "settings/header", current: :account %>
 <% install_size = Setting.current.text_size %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section" id="sign-in">
-      <header class="settings__heading">
-        <h2>Ways to sign in</h2>
-        <p class="settings__description">Your password always works. These add to it.</p>
-      </header>
-      <%= form_with model: @user, url: settings_passwordless_path, method: :patch, data: { controller: "form" } do |form| %>
-        <%= switch_field form, :passwordless, label: "Sign in with an emailed link", submit_on_change: true,
-              hint: "“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too." %>
-      <% end %>
-    </section>
+<div class="settings-page">
+  <section class="settings-section" id="sign-in">
+    <header class="settings-section__head">
+      <h2>Ways to sign in</h2>
+      <p class="settings-section__description">Your password always works. These add to it.</p>
+    </header>
+    <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "settings-group__card", data: { controller: "form" } do |form| %>
+      <%= switch_field form, :passwordless, label: "Sign in with an emailed link", submit_on_change: true,
+            hint: "“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too." %>
+    <% end %>
+  </section>
 
-    <section class="settings__section" id="two-factor">
-      <header class="settings__heading">
-        <h2>Two-factor sign-in</h2>
-        <p class="settings__description">A code from an app on your phone after your password, so a stolen password isn’t enough to get in.</p>
-      </header>
-      <div class="ui-item ui-item--outline">
-        <div class="ui-item__media"><%= icon_tag "lock" %></div>
-        <div class="ui-item__content">
+  <section class="settings-section" id="two-factor">
+    <header class="settings-section__head">
+      <h2>Two-factor sign-in</h2>
+      <p class="settings-section__description">A code from an app on your phone after your password, so a stolen password isn’t enough to get in.</p>
+    </header>
+    <div class="settings-list">
+      <div class="list-row">
+        <div class="list-row__media"><%= icon_tag "lock" %></div>
+        <div class="list-row__content">
           <% if @user.two_factor? %>
-            <p class="ui-item__title">Authenticator app <span class="ui-badge ui-badge--positive">On</span></p>
-            <p class="ui-item__description">Since <%= l @user.otp_enabled_at.to_date, format: :long %>. <%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
+            <p class="list-row__title">Authenticator app <%= badge "On", tone: :ok %></p>
+            <p class="list-row__desc">Since <%= l @user.otp_enabled_at.to_date, format: :long %>. <%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
           <% else %>
-            <p class="ui-item__title">Authenticator app <span class="ui-badge ui-badge--neutral">Off</span></p>
-            <p class="ui-item__description">Turn it on and Runwell asks for a code after your password.</p>
+            <p class="list-row__title">Authenticator app <%= badge "Off", tone: :neutral %></p>
+            <p class="list-row__desc">Turn it on and Runwell asks for a code after your password.</p>
           <% end %>
         </div>
         <% unless @user.two_factor? %>
-          <div class="ui-item__actions">
-            <%= link_to new_settings_two_factor_path, class: "ui-button ui-button--sm" do %>
-              <span>Set up</span>
-            <% end %>
+          <div class="list-row__actions">
+            <%= link_to "Set up", new_settings_two_factor_path, class: "btn btn--primary btn--sm" %>
           </div>
         <% end %>
       </div>
-      <% if @user.two_factor? %>
-        <%= render "settings/accounts/two_factor_changes", required: Setting.current.require_two_factor? %>
-      <% end %>
-    </section>
+    </div>
+    <% if @user.two_factor? %>
+      <%= render "settings/accounts/two_factor_changes", required: Setting.current.require_two_factor? %>
+    <% end %>
+  </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Text size</h2>
-        <p class="settings__description">Yours alone, on every device you sign in on. The install’s default is <%= Setting::TEXT_SIZES[install_size] %>.</p>
-      </header>
-      <%= form_with model: @user, url: settings_account_path, method: :patch, data: { controller: "appearance", install_text_size: install_size } do |form| %>
-        <div class="settings-choices">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Text size</h2>
+      <p class="settings-section__description">Yours alone, on every device you sign in on. The install’s default is <%= Setting::TEXT_SIZES[install_size] %>.</p>
+    </header>
+    <%= form_with model: @user, url: settings_account_path, method: :patch, data: { controller: "appearance", install_text_size: install_size } do |form| %>
+      <div class="settings-choices">
+        <label class="settings-choice">
+          <span class="settings-choice__preview" aria-hidden="true"><%= icon_tag "settings-outline" %></span>
+          <span class="settings-choice__label">Install default</span>
+          <%= form.radio_button :text_size, "", checked: @user.text_size.blank?, data: { action: "click->appearance#preview" } %>
+        </label>
+        <% Setting::TEXT_SIZES.each do |value, label| %>
+          <%# herb:key value %>
           <label class="settings-choice">
-            <span class="settings-choice__preview" aria-hidden="true"><%= icon_tag "settings-outline" %></span>
-            <span class="settings-choice__label">Install default</span>
-            <%= form.radio_button :text_size, "", checked: @user.text_size.blank?, data: { action: "click->appearance#preview" } %>
+            <span class="settings-choice__preview" aria-hidden="true">
+              <% sample_class = "appearance-sample appearance-size--" + value %>
+              <span class="<%= sample_class %>">Aa</span>
+            </span>
+            <span class="settings-choice__label"><%= label %></span>
+            <%= form.radio_button :text_size, value, checked: @user.text_size == value, data: { action: "click->appearance#preview" } %>
           </label>
-          <% Setting::TEXT_SIZES.each do |value, label| %>
-            <%# herb:key value %>
-            <label class="settings-choice">
-              <span class="settings-choice__preview" aria-hidden="true">
-                <% sample_class = "appearance-sample appearance-size--" + value %>
-                <span class="<%= sample_class %>">Aa</span>
-              </span>
-              <span class="settings-choice__label"><%= label %></span>
-              <%= form.radio_button :text_size, value, checked: @user.text_size == value, data: { action: "click->appearance#preview" } %>
-            </label>
-          <% end %>
-        </div>
-      <% end %>
-    </section>
-
-    <%# Your menu: the plugins that are on, in this person's order, each shown or hidden in their nav.
-        One form: the switches save as they change; ↑ and ↓ move one place (User::NavPlugins). %>
-    <% menu = @user.person.ordered_nav_items(Runwell::Plugins.enabled_nav_items) %>
-    <section class="settings__section" id="menu">
-      <header class="settings__heading">
-        <h2>Your menu</h2>
-        <p class="settings__description">Which plugins show in the menu on the left, and in what order: yours alone. The first shown is <kbd>g</kbd> <kbd>1</kbd>, the next <kbd>g</kbd> <kbd>2</kbd>, and so on.</p>
-      </header>
-      <% if menu.empty? %>
-        <%= render "layouts/shared/empty", text: "No plugin with a page is switched on." %>
-      <% else %>
-        <%= form_with url: settings_menu_path, method: :patch, class: "settings-menu", data: { controller: "form" } do %>
-          <ul class="settings__list">
-            <% shown_index = 0 %>
-            <% menu.each_with_index do |(key, (label, _path, icon)), index| %>
-              <%# herb:key key %>
-              <% hidden = @user.person.nav_plugin_hidden?(key) %>
-              <% shown_index += 1 unless hidden %>
-              <li class="<%= class_names("ui-item ui-item--sm", "settings-menu__item--hidden": hidden) %>">
-                <input type="hidden" name="order[]" value="<%= key %>">
-                <div class="ui-item__media"><%= icon_tag icon || "grid" %></div>
-                <div class="ui-item__content">
-                  <p class="ui-item__title">
-                    <%= label %>
-                    <% unless hidden %>
-                      <span class="settings__meta">g <%= shown_index %></span>
-                    <% end %>
-                  </p>
-                </div>
-                <div class="ui-item__actions">
-                  <button type="submit" name="move" value="<%= key %>:up" class="ui-button ui-button--ghost ui-button--icon-sm" title="Move <%= label %> up" <% if index.zero? %>disabled<% end %>>
-                    <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move <%= label %> up</span>
-                  </button>
-                  <button type="submit" name="move" value="<%= key %>:down" class="ui-button ui-button--ghost ui-button--icon-sm settings-menu__down" title="Move <%= label %> down" <% if index == menu.size - 1 %>disabled<% end %>>
-                    <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move <%= label %> down</span>
-                  </button>
-                  <%= switch_tag(title: "Show #{label} in your menu") { check_box_tag "shown[]", key, !hidden, id: nil, class: "switch__input", aria: { label: "Show #{label} in your menu" }, data: { action: "change->form#submit" } } %>
-                </div>
-              </li>
-            <% end %>
-          </ul>
         <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Your menu: the plugins that are on, in this person's order, each shown or hidden in their nav.
+      One form: the switches save as they change; ↑ and ↓ move one place (User::NavPlugins). %>
+  <% menu = @user.person.ordered_nav_items(Runwell::Plugins.enabled_nav_items) %>
+  <section class="settings-section" id="menu">
+    <header class="settings-section__head">
+      <h2>Your menu</h2>
+      <p class="settings-section__description">Which plugins show in the menu on the left, and in what order: yours alone. The first shown is <kbd>g</kbd> <kbd>1</kbd>, the next <kbd>g</kbd> <kbd>2</kbd>, and so on.</p>
+    </header>
+    <% if menu.empty? %>
+      <%= render "layouts/shared/empty", text: "No plugin with a page is switched on." %>
+    <% else %>
+      <%= form_with url: settings_menu_path, method: :patch, class: "settings-menu", data: { controller: "form" } do %>
+        <ul class="settings-list">
+          <% shown_index = 0 %>
+          <% menu.each_with_index do |(key, (label, _path, icon)), index| %>
+            <%# herb:key key %>
+            <% hidden = @user.person.nav_plugin_hidden?(key) %>
+            <% shown_index += 1 unless hidden %>
+            <li class="<%= class_names("list-row", "settings-menu__item--hidden": hidden) %>">
+              <input type="hidden" name="order[]" value="<%= key %>">
+              <div class="list-row__media"><%= icon_tag icon || "grid" %></div>
+              <div class="list-row__content">
+                <p class="list-row__title">
+                  <%= label %>
+                  <% unless hidden %>
+                    <span class="settings-key">g <%= shown_index %></span>
+                  <% end %>
+                </p>
+              </div>
+              <div class="list-row__actions">
+                <button type="submit" name="move" value="<%= key %>:up" class="icon-button" title="Move <%= label %> up" <% if index.zero? %>disabled<% end %>>
+                  <%= icon_tag "arrow-up" %> <span class="visually-hidden">Move <%= label %> up</span>
+                </button>
+                <button type="submit" name="move" value="<%= key %>:down" class="icon-button settings-menu__down" title="Move <%= label %> down" <% if index == menu.size - 1 %>disabled<% end %>>
+                  <%= icon_tag "arrow-up" %> <span class="visually-hidden">Move <%= label %> down</span>
+                </button>
+                <%= switch_tag(title: "Show #{label} in your menu") { check_box_tag "shown[]", key, !hidden, id: "shown_#{key}", role: "switch", aria: { label: "Show #{label} in your menu" }, data: { action: "change->form#submit" } } %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
       <% end %>
-    </section>
-  </div>
-</section>
+    <% end %>
+  </section>
+</div>

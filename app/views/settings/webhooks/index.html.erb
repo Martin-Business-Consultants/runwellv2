@@ -1,113 +1,111 @@
 <% @page_title = "Webhooks" %>
 <%= render "settings/header", current: :webhooks %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Webhooks</h2>
-        <p class="settings__description">
-          Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
-          Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
-          Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
-        </p>
-      </header>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Webhooks</h2>
+      <p class="settings-section__description">
+        Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
+        Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
+        Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
+      </p>
+    </header>
 
-      <% if @endpoints.empty? %>
-        <%= render "layouts/shared/empty", text: "No webhooks yet. Add one below." %>
-      <% end %>
+    <% if @endpoints.empty? %>
+      <%= render "layouts/shared/empty", text: "No webhooks yet. Add one below." %>
+    <% end %>
 
-      <% @endpoints.each do |endpoint| %>
-        <%# herb:key endpoint.id %>
-        <article class="ui-card settings-webhook" id="<%= dom_id(endpoint) %>">
-          <header class="ui-card__header">
-            <h3 class="ui-card__title"><%= endpoint.description.presence || endpoint.url %></h3>
-            <p class="ui-card__description">
-              <code><%= endpoint.url %></code><br>
-              <%= endpoint.kinds.present? ? endpoint.kinds_text : "Every event" %><%= ", with sign-in and security" if endpoint.include_security? %>
-              <% if endpoint.failures_in_a_row.positive? %> · <%= pluralize(endpoint.failures_in_a_row, "failure") %> in a row<% end %>
-            </p>
-            <div class="ui-card__action">
-              <% if endpoint.active? %>
-                <span class="ui-badge ui-badge--positive">On</span>
-              <% else %>
-                <span class="ui-badge ui-badge--negative">Off</span>
-              <% end %>
-              <%= render "layouts/shared/delete_dialog", name: "this webhook", path: settings_webhook_path(endpoint), message: "Events stop going to #{endpoint.url}." %>
-            </div>
-          </header>
-          <div class="ui-card__content settings__form">
-            <%= form_with model: endpoint, url: settings_webhook_path(endpoint), method: :patch, namespace: dom_id(endpoint), class: "settings__form settings__form--tight" do |form| %>
-              <div class="ui-field">
-                <%= form.label :secret, "Secret", class: "ui-label" %>
-                <%= secret_field form, :secret, readonly: true %>
-              </div>
-              <div class="ui-field">
-                <%= form.label :kinds_text, "Only these kinds", class: "ui-label" %>
-                <%= form.text_field :kinds_text, class: "ui-input", placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
-              </div>
-              <label class="settings__check"><%= form.check_box :include_security, class: "ui-checkbox" %> <span>Include sign-ins and security changes</span></label>
-              <label class="settings__check"><%= form.check_box :active, class: "ui-checkbox" %> <span>On</span></label>
-              <div class="settings__actions">
-                <button type="submit" class="ui-button ui-button--sm">Save</button>
-                <button type="submit" name="ping" value="1" class="ui-button ui-button--outline ui-button--sm">Send a test</button>
-              </div>
+    <% @endpoints.each do |endpoint| %>
+      <%# herb:key endpoint.id %>
+      <article class="card settings-webhook" id="<%= dom_id(endpoint) %>">
+        <header class="card__head">
+          <h3 class="card__title"><%= endpoint.description.presence || endpoint.url %></h3>
+          <p class="card__hint">
+            <code><%= endpoint.url %></code><br>
+            <%= endpoint.kinds.present? ? endpoint.kinds_text : "Every event" %><%= ", with sign-in and security" if endpoint.include_security? %>
+            <% if endpoint.failures_in_a_row.positive? %> · <%= pluralize(endpoint.failures_in_a_row, "failure") %> in a row<% end %>
+          </p>
+          <div class="card__action">
+            <% if endpoint.active? %>
+              <span class="badge badge--ok">On</span>
+            <% else %>
+              <span class="badge badge--danger">Off</span>
             <% end %>
-            <% deliveries = @deliveries[endpoint.id] || [] %>
-            <% if deliveries.any? %>
-              <div class="settings-table">
-                <table class="ui-table">
-                  <thead><tr><th>When</th><th>Event</th><th>Result</th><th>Tries</th></tr></thead>
-                  <tbody>
-                    <% deliveries.each do |delivery| %>
-                      <%# herb:key delivery.id %>
-                      <tr>
-                        <td class="txt-nowrap"><%= l delivery.created_at, format: :short %></td>
-                        <td><code><%= delivery.kind %></code></td>
-                        <td>
-                          <% if delivery.ok? %>
-                            <span class="ui-badge ui-badge--positive"><%= delivery.status_code %></span> <span class="txt-subtle"><%= delivery.duration_ms %> ms</span>
-                          <% elsif delivery.attempts.zero? %>
-                            <span class="ui-badge ui-badge--warning">Queued</span>
-                          <% else %>
-                            <span class="ui-badge ui-badge--negative"><%= delivery.status_code || "Failed" %></span> <span class="txt-subtle"><%= delivery.error %></span>
-                          <% end %>
-                        </td>
-                        <td><%= delivery.attempts %></td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              </div>
-            <% end %>
+            <%= render "layouts/shared/delete_dialog", name: "this webhook", path: settings_webhook_path(endpoint), message: "Events stop going to #{endpoint.url}." %>
           </div>
-        </article>
-      <% end %>
-    </section>
+        </header>
+        <div class="card__content">
+          <%= form_with model: endpoint, url: settings_webhook_path(endpoint), method: :patch, namespace: dom_id(endpoint) do |form| %>
+            <div class="field">
+              <%= form.label :secret, "Secret", class: "field__label" %>
+              <%= secret_field form, :secret, readonly: true %>
+            </div>
+            <div class="field">
+              <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
+              <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
+            </div>
+            <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
+            <label class="checkbox"><%= form.check_box :active %> <span>On</span></label>
+            <div class="button-row">
+              <button type="submit" class="btn btn--primary btn--sm">Save</button>
+              <button type="submit" name="ping" value="1" class="btn btn--secondary btn--sm">Send a test</button>
+            </div>
+          <% end %>
+          <% deliveries = @deliveries[endpoint.id] || [] %>
+          <% if deliveries.any? %>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>When</th><th>Event</th><th>Result</th><th>Tries</th></tr></thead>
+                <tbody>
+                  <% deliveries.each do |delivery| %>
+                    <%# herb:key delivery.id %>
+                    <tr>
+                      <td class="nowrap"><%= l delivery.created_at, format: :short %></td>
+                      <td><code><%= delivery.kind %></code></td>
+                      <td>
+                        <% if delivery.ok? %>
+                          <span class="badge badge--ok"><%= delivery.status_code %></span> <span class="muted"><%= delivery.duration_ms %> ms</span>
+                        <% elsif delivery.attempts.zero? %>
+                          <span class="badge badge--attention">Queued</span>
+                        <% else %>
+                          <span class="badge badge--danger"><%= delivery.status_code || "Failed" %></span> <span class="muted"><%= delivery.error %></span>
+                        <% end %>
+                      </td>
+                      <td><%= delivery.attempts %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        </div>
+      </article>
+    <% end %>
+  </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Add a webhook</h2>
-        <p class="settings__description">Event kinds are listed in the <%= link_to "plugin contract", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/plugin-contract.md#events", class: "txt-link", target: "_blank", rel: "noopener" %>; sign-in ones in the audit log.</p>
-      </header>
-      <%= form_with model: @endpoint, url: settings_webhooks_path, class: "settings__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :url, "Address", class: "ui-label" %>
-          <%= form.url_field :url, class: "ui-input", placeholder: "https://hooks.example.com/runwell", required: true, autocomplete: "off" %>
-        </div>
-        <div class="ui-field">
-          <%= form.label :description, "Name", class: "ui-label" %>
-          <%= form.text_field :description, class: "ui-input", placeholder: "Zapier: closed engagements to the sales sheet", autocomplete: "off" %>
-          <p class="ui-field__description">Optional.</p>
-        </div>
-        <div class="ui-field">
-          <%= form.label :kinds_text, "Only these kinds", class: "ui-label" %>
-          <%= form.text_field :kinds_text, class: "ui-input", placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
-          <p class="ui-field__description">Optional: blank sends every event.</p>
-        </div>
-        <label class="settings__check"><%= form.check_box :include_security, class: "ui-checkbox" %> <span>Include sign-ins and security changes</span></label>
-        <div><button type="submit" class="ui-button">Add webhook</button></div>
-      <% end %>
-    </section>
-  </div>
-</section>
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Add a webhook</h2>
+      <p class="settings-section__description">Event kinds are listed in the <%= link_to "plugin contract", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/plugin-contract.md#events", target: "_blank", rel: "noopener" %>; sign-in ones in the audit log.</p>
+    </header>
+    <%= form_with model: @endpoint, url: settings_webhooks_path, class: "settings-form" do |form| %>
+      <div class="field">
+        <%= form.label :url, "Address", class: "field__label" %>
+        <%= form.url_field :url, placeholder: "https://hooks.example.com/runwell", required: true, autocomplete: "off" %>
+      </div>
+      <div class="field">
+        <%= form.label :description, "Name", class: "field__label" %>
+        <%= form.text_field :description, placeholder: "Zapier: closed engagements to the sales sheet", autocomplete: "off" %>
+        <p class="field__hint">Optional.</p>
+      </div>
+      <div class="field">
+        <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
+        <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
+        <p class="field__hint">Optional: blank sends every event.</p>
+      </div>
+      <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
+      <div><button type="submit" class="btn btn--primary">Add webhook</button></div>
+    <% end %>
+  </section>
+</div>

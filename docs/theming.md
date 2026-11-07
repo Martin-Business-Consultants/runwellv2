@@ -12,7 +12,7 @@ for custom CSS when those choices aren't enough to make Runwell look like your o
 
 - **Tokens are the stable surface.** The tokens below keep their names and meaning across
   releases. A theme that only sets tokens keeps working when Runwell updates.
-- **Class names are not.** Component classes (`.panel`, `.btn`, `.card`…) change as the app does.
+- **Class names are not.** Component classes (`.btn`, `.card`, `.list-row`…) change as the app does.
   A rule that targets one may break on any update. Use them sparingly, for small touches.
 - **Custom CSS loads last and unlayered**, after the app's stylesheets and Appearance's choices,
   so a plain `:root { … }` wins without `!important`.
@@ -57,41 +57,53 @@ Families for status colors (`red`, `yellow`, `lime`, `green`, `aqua`, `blue`, `p
 
 ### Component tokens
 
-The components follow shadcn/ui and read its token names. Each is built from the tokens above, so
-a theme normally leaves them alone; set one only to change that role on its own (a theme in both
-modes sets it in both blocks).
+The components come from rune_ui (the UI kit Runwell shares with Botter) and read its token names.
+Runwell builds each from the tokens above (`rune-theme.css`), light and dark, so a theme normally
+leaves them alone; set one only to change that role on its own (a theme in both modes sets it in
+both blocks).
 
 | Token | What it colors | Built from |
 | --- | --- | --- |
-| `--primary`, `--primary-foreground` | Primary buttons, switches, checked boxes | the accent, `--lch-ink-inverted` |
-| `--card`, `--popover` | Cards, menus and popovers (a step lighter than the page in dark) | `--lch-canvas` |
-| `--muted`, `--muted-foreground` | Tab tracks, counts, secondary text | the ink steps |
-| `--accent` | Hover and selected rows, menu items | `--lch-ink-lightest` |
-| `--destructive` | Delete buttons, errors | `--lch-red-dark` |
-| `--border`, `--input`, `--ring` | Hairlines, field borders, focus rings | the ink steps and accent |
+| `--page` | Behind the panel (the nav's ground) | `--lch-ink-lightest` (the canvas in dark) |
+| `--panel` | The page's panel, cards, menus and dialogs | `--lch-canvas` (`--lch-ink-lightest` in dark) |
+| `--layer-1`, `--layer-2`, `--layer-3` | Faint fills: settings cards, tab tracks, hovered menu items, switch tracks | the ink steps |
+| `--text`, `--text-muted`, `--text-faint` | Body text, secondary text, hints and icons | `--lch-ink-darkest`, `-dark`, `-medium` |
+| `--line`, `--line-strong` | Hairlines, field and button borders | `--lch-ink-lighter`, `-light` |
+| `--hover` | Hovered rows and ghost buttons | `--lch-ink-lighter`, faded |
+| `--accent`, `--accent-hover`, `--accent-ink`, `--accent-soft` | Links, switches, checked boxes, focus, picked rows | `--lch-accent`, `--lch-ink-inverted`, `--lch-accent-lightest` |
+| `--ok`, `--danger`, `--attention` | Success, errors and destructive actions, warnings and counts | `--color-positive`, `--color-negative`, `--lch-yellow-dark` |
+
+Primary buttons are drawn in `--text` on `--panel` (ink on paper), not in the accent.
 
 ### Type
 
 | Token | What it sets | Default |
 | --- | --- | --- |
 | `--font-sans` | Everything | Inter, then the system font |
-| `--font-serif` | Serif text in rich text | `ui-serif, serif` |
 | `--font-mono` | Code, refs, keys | `ui-monospace, …` |
-| `--text-scale` | Every size at once (Text size sets it) | `1` |
-| `--text-x-small` … `--text-xx-large` | The size steps, in rem (shadcn/ui's: the body is `--text-normal`, 14px) | `0.75rem` … `1.875rem` |
+| `--text-scale` | Every size at once (Text size sets it): the root is `calc(1rem * --text-scale)` and every size is rem | `1` |
+| `--text-xs`, `--text-meta`, `--text-ui`, `--text-read`, `--text-title` | The size steps: badges, hints, the UI (the body), reading text, a page title | `0.6875rem`, `0.75rem`, `0.8125rem`, `0.875rem`, `1.25rem` |
+| `--weight`, `--weight-strong` | Body and emphasis weights | `440`, `530` |
 
 ### Shape, space and depth
 
 | Token | What it sets | Default |
 | --- | --- | --- |
 | `--radius-scale` | Every container's corners, as a multiple | `1` |
-| `--radius-control` | Buttons, inputs, tags, toggles | `var(--radius-lg)` (0.625rem, shadcn's rounded-lg) |
+| `--radius-control` | Buttons, inputs, tags, toggles | `var(--radius-lg)` (0.625rem) |
 | `--radius-pill` | Pill shapes | `99rem` |
-| `--inline-space` | Horizontal rhythm | `1ch` |
-| `--block-space` | Vertical rhythm | `1rem` |
-| `--shadow` | Panels and cards | a soft three-layer shadow |
+| `--s-1` … `--s-6` | The space steps | `0.25rem` … `2rem` |
+| `--control-h`, `--control-h-sm` | Button and field heights | `2rem`, `1.75rem` |
 | `--shadow-popover` | Menus and dialogs | a deeper shadow |
 | `--main-width` | The widest a page grows | `1400px` |
+
+### Retired in 4.0
+
+These were read by the old components and no longer are, so setting them does nothing:
+`--font-serif`, `--text-x-small` … `--text-xx-large` (use `--text-scale` or the steps above),
+`--inline-space`, `--block-space`, `--shadow`, and shadcn's component tokens (`--primary`,
+`--card`, `--popover`, `--muted`, `--border`, `--input`, `--ring`…). Set the `--lch-*` palette
+instead, or the component tokens above.
 
 ## An example
 

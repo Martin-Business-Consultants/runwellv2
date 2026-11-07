@@ -1,6 +1,7 @@
 <%# locals: () %>
-<%# The bell in the bottom right corner (g n) and its Popover: a header with the way to every
-    notification and Clear all, over the newest few as Items (notifications/trays/show). %>
+<%# The bell in the bottom right corner (g n) and its popover: a header with the way to every
+    notification and Clear all, over the newest few as list rows (notifications/trays/show). The
+    dialog stacks in reverse, so the header sits on top while the rows come first for the keys. %>
 <section class="tray tray--notifications" data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:render#update" data-dialog-sizing-value="false">
   <dialog class="tray__dialog"
       aria-label="Notifications"
@@ -16,14 +17,14 @@
     <div class="tray__item tray__item--hat">
       <h2 class="tray__title">Notifications</h2>
       <div data-navigable-list-target="item" class="tray__hat-action">
-        <%= link_to notifications_path, class: "ui-button ui-button--ghost ui-button--sm tray__see-all", data: { action: "click->dialog#close" } do %>
+        <%= link_to notifications_path, class: "btn btn--ghost btn--sm tray__see-all", data: { action: "click->dialog#close" } do %>
           <span class="tray__new-notifications">See all new</span>
           <span class="tray__old-notifications">View all</span>
         <% end %>
       </div>
 
       <%= button_to bulk_reading_path(from_tray: true),
-            class: "ui-button ui-button--ghost ui-button--sm tray__clear-notifications",
+            class: "btn btn--ghost btn--sm tray__clear-notifications",
             title: "Mark all notifications as read",
             data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
             form: { class: "tray__hat-action", data: { navigable_list_target: "item" } } do %>
@@ -33,7 +34,7 @@
     </div>
   </dialog>
 
-  <button class="tray__toggle" data-action="dialog#toggle" data-keys="g n" aria-label="Toggle notifications stack" aria-haspopup="true">
+  <button type="button" class="tray__toggle" data-action="dialog#toggle" data-keys="g n" aria-label="Toggle notifications stack" aria-haspopup="true">
     <span class="tray__toggle-btn">
       <%= icon_tag "bell" %>
       <span class="tray__toggle-text">Notifications</span>

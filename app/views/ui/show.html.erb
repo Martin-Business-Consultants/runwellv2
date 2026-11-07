@@ -1,337 +1,148 @@
-<% content_for :title, "UI" %>
+<% @page_title = "UI" %>
 
-<div class="ui-styleguide">
-  <header class="ui-styleguide__intro">
-    <h1 class="ui-styleguide__title">Runwell UI</h1>
-    <p class="ui-card__description">
-      A no-build port of shadcn/ui: plain CSS in <code>app/assets/stylesheets/ui</code>, native elements, Stimulus only
-      where HTML can't do it. Every colour comes from the theme, so Settings › Appearance and custom CSS reach all of it.
-    </p>
-  </header>
+<%= page_header "Runwell UI", "rune_ui (../rune_ui), in Runwell's theme: every colour comes from the palette, so Settings › Appearance and custom CSS reach all of it. The gem's README lists every helper." %>
 
-  <section class="ui-styleguide__section" id="button">
-    <h2 class="ui-styleguide__heading">Button</h2>
-    <div class="ui-styleguide__row">
-      <%= ui_button "Default" %>
-      <%= ui_button "Secondary", variant: :secondary %>
-      <%= ui_button "Outline", variant: :outline %>
-      <%= ui_button "Ghost", variant: :ghost %>
-      <%= ui_button "Destructive", variant: :destructive %>
-      <%= ui_button "Link", variant: :link %>
-    </div>
-    <div class="ui-styleguide__row">
-      <%= ui_button "Small", size: :sm, variant: :outline %>
-      <%= ui_button "Large", size: :lg, variant: :outline %>
-      <%= ui_button "New client", icon: "add" %>
-      <%= ui_button icon: "gear", size: :icon, variant: :outline, "aria-label": "Settings" %>
-      <%= ui_button icon: "trash", size: :icon_sm, variant: :ghost, "aria-label": "Delete" %>
-      <%= ui_button "Disabled", disabled: true %>
-      <%= ui_link_button "A link", ui_path, variant: :secondary %>
-    </div>
-    <div class="ui-styleguide__row">
-      <div class="ui-button-group" role="group" aria-label="View">
-        <button type="button" class="ui-button ui-button--outline" aria-pressed="true">Cards</button>
-        <button type="button" class="ui-button ui-button--outline">Table</button>
-        <button type="button" class="ui-button ui-button--outline">Board</button>
-      </div>
-      <button type="button" class="ui-button ui-button--outline">Search <%= ui_kbd("⌘", "K") %></button>
-    </div>
-  </section>
+<%= card "Buttons" do %>
+  <%= button_row do %>
+    <%= button_link "Primary", ui_path, variant: :primary %>
+    <%= button_link "Accent", ui_path, variant: :primary, class: "btn--accent" %>
+    <%= button_link "Secondary", ui_path %>
+    <%= button_link "Ghost", ui_path, variant: :ghost %>
+    <%= button_link "Danger", ui_path, variant: :danger %>
+    <%= button_link "New client", ui_path, variant: :primary, icon: :plus %>
+  <% end %>
+  <%= button_row do %>
+    <%= button_link "Small", ui_path, size: :sm %>
+    <%= button_link "Small ghost", ui_path, size: :sm, variant: :ghost %>
+    <%= icon_button :settings, label: "Settings" %>
+    <%= icon_button :copy, label: "Copy" %>
+    <button type="button" class="<%= button_classes %>" disabled>Disabled</button>
+    <button type="button" class="<%= button_classes %>" aria-busy="true">Saving</button>
+  <% end %>
+<% end %>
 
-  <section class="ui-styleguide__section" id="badge">
-    <h2 class="ui-styleguide__heading">Badge</h2>
-    <div class="ui-styleguide__row">
-      <%= ui_badge "Default" %>
-      <%= ui_badge "Secondary", :secondary %>
-      <%= ui_badge "Outline", :outline %>
-      <%= ui_badge "Destructive", :destructive %>
-      <%= ui_badge "12", :count %>
-    </div>
-    <div class="ui-styleguide__row">
-      <%= ui_status_badge "Done" %>
-      <%= ui_status_badge "Planned" %>
-      <%= ui_status_badge "In progress" %>
-      <%= ui_status_badge "Overdue" %>
-      <%= ui_status_badge "Closed" %>
-    </div>
-  </section>
+<%= card "Marks" do %>
+  <div class="button-row">
+    <%= badge "Neutral" %>
+    <%= badge "Done", tone: :ok %>
+    <%= badge "Overdue", tone: :danger %>
+    <%= badge "Waiting", tone: :attention %>
+    <%= badge "In progress", tone: :accent %>
+    <%= badge "Running", tone: :busy %>
+    <%= badge "Outline", tone: :outline %>
+    <%= ui_status_badge "blocked" %>
+    <span class="count">3</span>
+    <span class="count count--quiet">12</span>
+  </div>
+  <div class="button-row">
+    <%= avatar "Ted Martin" %>
+    <%= avatar "Priya Nair", size: :md %>
+    <%= avatar "Jordan Blake", size: :lg %>
+    <%= empty_avatar "Unassigned", size: :md %>
+    <%= avatar_stack do %><%= avatar "Ted Martin", size: :md %><%= avatar "Sarah Producer", size: :md %><%= avatar "Marcus Webb", size: :md %><% end %>
+    <%= status_dot :ok %> <%= status_dot :attention %> <%= status_dot :failed %> <%= status_dot :busy %>
+    <span>Press <kbd>g</kbd> <kbd>w</kbd> for work</span>
+    <span data-tooltip="A tooltip">Hover me</span>
+  </div>
+<% end %>
 
-  <section class="ui-styleguide__section" id="card">
-    <h2 class="ui-styleguide__heading">Card</h2>
-    <div class="ui-styleguide__grid">
-      <section class="ui-card">
-        <header class="ui-card__header">
-          <h3 class="ui-card__title">Website rebuild</h3>
-          <p class="ui-card__description">Harbor Dental Group · Project</p>
-          <div class="ui-card__action"><%= ui_badge "Active", :positive %></div>
-        </header>
-        <div class="ui-card__content">
-          <p class="ui-styleguide__text">A new site for all three offices: service pages, a provider directory and online booking.</p>
-        </div>
-        <footer class="ui-card__footer ui-card__footer--end">
-          <%= ui_button "Archive", variant: :ghost %>
-          <%= ui_button "Open" %>
-        </footer>
-      </section>
+<div class="grid-2">
+  <%= card "Fields", hint: "Bare inputs are styled; field() adds the label and hint." do %>
+    <%= form_with url: ui_path, method: :get do |form| %>
+      <%= field form, :name, hint: "As clients see it." do %><%= form.text_field :name, placeholder: "Acme" %><% end %>
+      <%= field form, :status do %><%= form.select :status, %w[Active Paused] %><% end %>
+      <%= field form, :notes do %><%= form.text_area :notes, rows: 3 %><% end %>
+      <label class="checkbox"><%= form.check_box :portal %> Portal access</label>
+    <% end %>
+  <% end %>
 
-      <form class="ui-card" action="#">
-        <header class="ui-card__header">
-          <h3 class="ui-card__title">Sign in</h3>
-          <p class="ui-card__description">Enter your email below to sign in.</p>
-        </header>
-        <div class="ui-card__content ui-styleguide__stack">
-          <div class="ui-field">
-            <label class="ui-label" for="sg-email">Email</label>
-            <input class="ui-input" autocomplete="off" id="sg-email" type="email" placeholder="you@example.com">
-          </div>
-          <div class="ui-field">
-            <label class="ui-label" for="sg-password">Password</label>
-            <input class="ui-input" autocomplete="off" id="sg-password" type="password" aria-invalid="true">
-            <p class="ui-field__error">Password is too short</p>
-          </div>
-        </div>
-        <footer class="ui-card__footer">
-          <%= ui_button "Sign in", full_width: true %>
-        </footer>
-      </form>
-    </div>
-  </section>
-
-  <section class="ui-styleguide__section" id="form">
-    <h2 class="ui-styleguide__heading">Form controls</h2>
-    <div class="ui-styleguide__grid">
-      <div class="ui-styleguide__stack">
-        <div class="ui-field">
-          <label class="ui-label" for="sg-name">Name</label>
-          <input class="ui-input" autocomplete="off" id="sg-name" placeholder="Acme Inc.">
-          <p class="ui-field__description">Shown on the portal and in emails.</p>
-        </div>
-        <div class="ui-field-row">
-          <div class="ui-field">
-            <label class="ui-label" for="sg-status">Status</label>
-            <select class="ui-select" id="sg-status">
-              <option>Active</option>
-              <option>Lead</option>
-              <option>Former</option>
-            </select>
-          </div>
-          <div class="ui-field">
-            <label class="ui-label" for="sg-due">Due</label>
-            <input class="ui-input" autocomplete="off" id="sg-due" type="date">
-          </div>
-        </div>
-        <div class="ui-field">
-          <label class="ui-label" for="sg-notes">Notes</label>
-          <textarea class="ui-textarea" id="sg-notes" placeholder="Type your message here."></textarea>
-        </div>
-        <div class="ui-input-group">
-          <span class="ui-input-group__addon"><%= icon_tag "search" %></span>
-          <input class="ui-input" autocomplete="off" type="search" placeholder="Search…" aria-label="Search">
-        </div>
-      </div>
-
-      <div class="ui-styleguide__stack">
-        <label class="ui-field ui-field--inline">
-          <input type="checkbox" class="ui-checkbox" checked>
-          <span class="ui-label">Accept terms and conditions</span>
-          <span class="ui-field__description">You agree to our terms of service.</span>
-        </label>
-        <label class="ui-field ui-field--inline">
-          <input type="checkbox" class="ui-checkbox">
-          <span class="ui-label">Send me a weekly briefing</span>
-        </label>
-        <fieldset class="ui-fieldset">
-          <legend class="ui-label">Notify me about</legend>
-          <div class="ui-radio-group">
-            <label class="ui-field ui-field--inline"><input type="radio" name="sg-notify" class="ui-radio" checked> <span class="ui-label">All new work</span></label>
-            <label class="ui-field ui-field--inline"><input type="radio" name="sg-notify" class="ui-radio"> <span class="ui-label">Mentions only</span></label>
-            <label class="ui-field ui-field--inline"><input type="radio" name="sg-notify" class="ui-radio"> <span class="ui-label">Nothing</span></label>
-          </div>
-        </fieldset>
-        <label class="ui-field ui-field--inline ui-field--end ui-field--card">
-          <input type="checkbox" role="switch" class="ui-switch" checked>
-          <span class="ui-label">Portal access</span>
-          <span class="ui-field__description">They can sign in and see their work.</span>
-        </label>
-        <label class="ui-field ui-field--inline ui-field--end ui-field--card">
-          <input type="checkbox" role="switch" class="ui-switch">
-          <span class="ui-label">Internal</span>
-          <span class="ui-field__description">This is us. Its engagements are our own projects.</span>
-        </label>
-      </div>
-    </div>
-  </section>
-
-  <section class="ui-styleguide__section" id="tabs">
-    <h2 class="ui-styleguide__heading">Tabs</h2>
-    <nav class="ui-tabs" aria-label="Segmented">
-      <a class="ui-tabs__trigger" aria-current="page" href="#tabs">Open <span class="ui-badge ui-badge--count">4</span></a>
-      <a class="ui-tabs__trigger" href="#tabs">All <span class="ui-badge ui-badge--count">9</span></a>
-      <a class="ui-tabs__trigger" href="#tabs">Closed</a>
-    </nav>
-    <nav class="ui-tabs ui-tabs--line" aria-label="Line">
-      <a class="ui-tabs__trigger" aria-current="page" href="#tabs">Engagements</a>
-      <a class="ui-tabs__trigger" href="#tabs">Work</a>
-      <a class="ui-tabs__trigger" href="#tabs">Notes</a>
-      <a class="ui-tabs__trigger" href="#tabs">Documents</a>
-    </nav>
-  </section>
-
-  <section class="ui-styleguide__section" id="menu">
-    <h2 class="ui-styleguide__heading">Dropdown menu, popover, tooltip, dialog, sheet</h2>
-    <div class="ui-styleguide__row">
-      <div data-controller="ui--popover">
-        <button type="button" class="ui-button ui-button--outline" popovertarget="sg-menu">Open menu <%= icon_tag "caret-down" %></button>
-        <div class="ui-menu" id="sg-menu" popover data-ui--popover-target="popover">
-          <div class="ui-menu__label">My account</div>
-          <hr class="ui-menu__separator">
-          <a class="ui-menu__item" href="#menu"><%= icon_tag "person" %> Profile <kbd class="ui-menu__shortcut">⇧⌘P</kbd></a>
-          <a class="ui-menu__item" href="#menu"><%= icon_tag "gear" %> Settings <kbd class="ui-menu__shortcut">⌘,</kbd></a>
-          <label class="ui-menu__item"><input type="checkbox" checked> Show the sidebar</label>
-          <hr class="ui-menu__separator">
-          <button type="button" class="ui-menu__item ui-menu__item--destructive"><%= icon_tag "trash" %> Delete</button>
-        </div>
-      </div>
-
-      <div data-controller="ui--popover" data-ui--popover-align-value="center">
-        <button type="button" class="ui-button ui-button--outline" popovertarget="sg-popover">Popover</button>
-        <div class="ui-popover ui-styleguide__stack" id="sg-popover" popover data-ui--popover-target="popover">
-          <div class="ui-dialog__header">
-            <h3 class="ui-card__title">Dimensions</h3>
-            <p class="ui-dialog__description">Set the dimensions for the layer.</p>
-          </div>
-          <div class="ui-field">
-            <label class="ui-label" for="sg-width">Width</label>
-            <input class="ui-input ui-input--sm" autocomplete="off" id="sg-width" value="100%">
-          </div>
-        </div>
-      </div>
-
-      <span class="ui-tooltip">
-        <button type="button" class="ui-button ui-button--outline">Hover me</button>
-        <span role="tooltip" class="ui-tooltip__content">Add to library</span>
-      </span>
-
-      <button type="button" class="ui-button ui-button--outline" command="show-modal" commandfor="sg-dialog">Dialog</button>
-      <button type="button" class="ui-button ui-button--outline" command="show-modal" commandfor="sg-sheet">Sheet</button>
-    </div>
-
-    <dialog class="ui-dialog" id="sg-dialog" closedby="any" aria-labelledby="sg-dialog-title">
-      <header class="ui-dialog__header">
-        <h2 class="ui-dialog__title" id="sg-dialog-title">Delete this client?</h2>
-        <p class="ui-dialog__description">This erases Harbor Dental Group, its engagements and its work. It can't be undone.</p>
-      </header>
-      <footer class="ui-dialog__footer">
-        <button type="button" class="ui-button ui-button--outline" command="close" commandfor="sg-dialog">Cancel</button>
-        <button type="button" class="ui-button ui-button--destructive" command="close" commandfor="sg-dialog">Delete</button>
-      </footer>
-    </dialog>
-
-    <dialog class="ui-sheet" id="sg-sheet" closedby="any" aria-labelledby="sg-sheet-title">
-      <header class="ui-dialog__header">
-        <h2 class="ui-dialog__title" id="sg-sheet-title">Edit profile</h2>
-        <p class="ui-dialog__description">Make changes to your profile here.</p>
-      </header>
-      <div class="ui-field">
-        <label class="ui-label" for="sg-sheet-name">Name</label>
-        <input class="ui-input" autocomplete="off" id="sg-sheet-name" value="Ted Martin">
-      </div>
-      <footer class="ui-dialog__footer">
-        <button type="button" class="ui-button" command="close" commandfor="sg-sheet">Save changes</button>
-      </footer>
-    </dialog>
-  </section>
-
-  <section class="ui-styleguide__section" id="table">
-    <h2 class="ui-styleguide__heading">Table</h2>
-    <div class="ui-card ui-card--flush">
-      <div class="ui-table-container">
-        <table class="ui-table">
-          <thead>
-            <tr><th>Work</th><th>Client</th><th>Status</th><th class="ui-table__numeric">Due</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><a class="ui-table__row-link" href="#table">Send the proposal</a></td><td>Coastal Kitchen &amp; Bath</td><td><%= ui_status_badge "Planned" %></td><td class="ui-table__numeric">Nov 7</td></tr>
-            <tr><td><a class="ui-table__row-link" href="#table">Review generation</a></td><td>Northside Physical Therapy</td><td><%= ui_status_badge "Overdue" %></td><td class="ui-table__numeric">Oct 31</td></tr>
-            <tr><td><a class="ui-table__row-link" href="#table">Profile management</a></td><td>Harbor Dental Group</td><td><%= ui_status_badge "In progress" %></td><td class="ui-table__numeric">Nov 11</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="ui-styleguide__section" id="feedback">
-    <h2 class="ui-styleguide__heading">Alert, item, empty, avatar, progress, skeleton</h2>
-    <div class="ui-styleguide__grid">
-      <div class="ui-styleguide__stack">
-        <div class="ui-alert" role="status">
-          <%= icon_tag "check-circle", class: "ui-alert__icon" %>
-          <p class="ui-alert__title">Saved</p>
-          <div class="ui-alert__description">Your changes are live for everyone.</div>
-        </div>
-        <div class="ui-alert ui-alert--destructive" role="alert">
-          <%= icon_tag "close-circle", class: "ui-alert__icon" %>
-          <p class="ui-alert__title">Unable to send the invitation</p>
-          <div class="ui-alert__description"><p>Check the email settings and try again.</p></div>
-        </div>
-        <ul class="ui-item-group ui-card ui-card--flush">
-          <li class="ui-item">
-            <div class="ui-item__media"><%= ui_avatar "Sarah Producer" %></div>
-            <div class="ui-item__content">
-              <p class="ui-item__title">Sarah Producer</p>
-              <p class="ui-item__description">sarah@runwell.app · Manager</p>
-            </div>
-            <div class="ui-item__actions"><%= ui_button "Edit", variant: :outline, size: :sm %></div>
-          </li>
-          <li class="ui-item">
-            <div class="ui-item__media"><%= ui_avatar "Marcus Webb" %></div>
-            <div class="ui-item__content">
-              <p class="ui-item__title">Marcus Webb</p>
-              <p class="ui-item__description">marcus@runwell.app · Member</p>
-            </div>
-            <div class="ui-item__actions"><%= ui_button "Edit", variant: :outline, size: :sm %></div>
-          </li>
-        </ul>
-      </div>
-      <div class="ui-styleguide__stack">
-        <div class="ui-empty">
-          <div class="ui-empty__media ui-empty__media--icon"><%= icon_tag "board" %></div>
-          <div>
-            <h3 class="ui-empty__title">No engagements yet</h3>
-            <p class="ui-empty__description">Start one for a client: a project, a retainer, a work order.</p>
-          </div>
-          <%= ui_button "New engagement", icon: "add" %>
-        </div>
-        <div class="ui-styleguide__row">
-          <div class="ui-avatar-group">
-            <%= ui_avatar "Ted Martin" %>
-            <%= ui_avatar "Priya Nair" %>
-            <%= ui_avatar "Jordan Blake" %>
-          </div>
-          <%= ui_avatar "Ted Martin", size: :lg %>
-          <%= ui_avatar "Ted Martin", size: :sm %>
-        </div>
-        <progress class="ui-progress" value="60" max="100">60%</progress>
-        <div class="ui-styleguide__row">
-          <div class="ui-skeleton ui-styleguide__skeleton-circle"></div>
-          <div class="ui-styleguide__stack ui-styleguide__grow">
-            <div class="ui-skeleton ui-styleguide__skeleton-line"></div>
-            <div class="ui-skeleton ui-styleguide__skeleton-line ui-styleguide__skeleton-line--short"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="ui-styleguide__section" id="misc">
-    <h2 class="ui-styleguide__heading">Breadcrumb, separator, kbd</h2>
-    <ol class="ui-breadcrumb">
-      <li><a href="#misc">Clients</a></li>
-      <li><a href="#misc">Harbor Dental Group</a></li>
-      <li><span aria-current="page">Website rebuild</span></li>
-    </ol>
-    <hr class="ui-separator">
-    <div class="ui-separator ui-separator--label">or continue with</div>
-    <p class="ui-styleguide__text">Press <%= ui_kbd("g", "w") %> for work, or <%= ui_kbd("⌘", "K") %> to search.</p>
-  </section>
+  <%= card "Menus and dialogs" do %>
+    <%= button_row do %>
+      <%= menu "More" do %>
+        <%= menu_label "Record" %>
+        <%= menu_link "Edit", ui_path %>
+        <%= menu_link "Copy for AI", ui_path %>
+        <%= menu_divider %>
+        <%= menu_button "Delete", ui_path, method: :get, danger: true %>
+      <% end %>
+      <%= popover_menu "Status", align: :start do %>
+        <%= menu_link "Planned", ui_path %>
+        <%= menu_link "In progress", ui_path %>
+        <%= menu_link "Done", ui_path %>
+      <% end %>
+      <%= dialog "Rename", trigger: "Open a dialog" do %>
+        <p class="muted">A dialog holds a short form or a decision.</p>
+        <%= dialog_actions do %><button type="button" class="<%= button_classes(variant: :primary) %>">Save</button><% end %>
+      <% end %>
+      <%= sheet "Filters", trigger: "Open a sheet" do %>
+        <p class="muted">A sheet slides in from the side.</p>
+      <% end %>
+    <% end %>
+  <% end %>
 </div>
+
+<%= card "Tabs, callouts and progress" do %>
+  <%= tabs([ [ "Work", ui_path, current: true, count: 4 ], [ "Notes", ui_path ], [ "History", ui_path ] ]) %>
+  <%= callout "Your trial ends Friday.", tone: :attention, title: "Heads up" %>
+  <%= callout "Saved.", tone: :ok %>
+  <%= progress_bar 60, label: "3 of 5 done" %>
+  <span class="skeleton styleguide-skeleton"></span>
+<% end %>
+
+<%= card "List", flush: true do %>
+  <div class="list">
+    <%= list_row ui_path, title: "Acme Storage", sub: "3 engagements · 12 open", meta: badge("Active", tone: :ok), avatar: avatar("Acme Storage", size: :md) %>
+    <%= list_row ui_path, title: "Biofuse", sub: "1 engagement · 46 requests", meta: badge("Busy", tone: :attention), avatar: avatar("Biofuse", size: :md) %>
+  </div>
+<% end %>
+
+<%= settings_group "Settings rows", hint: "A heading above a card of label / control rows." do %>
+  <%= setting_row "Portal", hint: "Clients see their work." do %><span class="switch"><input type="checkbox" role="switch" checked aria-label="Portal"><span class="switch__track" aria-hidden="true"></span></span><% end %>
+  <%= setting_row "Default view", hint: "For every index." do %><select class="select--sm" aria-label="Default view"><option>Cards</option><option>Table</option></select><% end %>
+<% end %>
+
+<%= empty_state "No clients yet. They come from the quick action (g c n)." do %>
+  <%= button_link "New client", ui_path, variant: :primary, icon: :plus %>
+<% end %>
+
+<%= card "Runwell’s own", hint: "Pieces rune_ui gained for Runwell, and Runwell’s shared partials (layouts/shared, runwell/components.css)." do %>
+  <div class="index-toolbar">
+    <div class="filters">
+      <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: "active", options: [ [ "Active", "active" ], [ "Dormant", "dormant" ], [ "All", "all" ] ] %>
+      <button type="button" class="pill"><span>Owner</span><%= icon_tag "caret-down" %></button>
+    </div>
+    <div class="index-toolbar__end">
+      <%= render "layouts/shared/view_toggle", current: "cards" %>
+      <%= render "layouts/shared/new_link", text: "New client", path: ui_path %>
+    </div>
+  </div>
+  <%= render "layouts/shared/segmented_filter", label: "Status", param: :tab, current: "open", options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: { "open" => 4, "done" => 9, "all" => 13 } %>
+  <div class="list">
+    <a class="list-row" href="<%= ui_path %>">
+      <span class="list-row__media"><%= avatar "Priya Nair", size: :md %></span>
+      <span class="list-row__content">
+        <span class="list-row__title">Priya mentioned you</span>
+        <span class="list-row__desc">P-12 · Website refresh</span>
+      </span>
+      <span class="list-row__actions"><%= badge "Overdue", tone: :danger %></span>
+    </a>
+  </div>
+  <section class="card card--sm">
+    <header class="card__head">
+      <h3 class="card__title">A card with an action</h3>
+      <p class="card__hint">Its action sits beside the title and hint.</p>
+      <div class="card__action"><%= icon_button :settings, label: "Settings" %></div>
+    </header>
+  </section>
+  <p class="separator separator--label">Or</p>
+  <div class="field-row">
+    <div class="field"><label class="field__label" for="ui_first">First name</label><input id="ui_first" type="text"></div>
+    <div class="field"><label class="field__label" for="ui_last">Last name</label><input id="ui_last" type="text"></div>
+  </div>
+  <div class="alert alert--danger" role="alert">
+    <%= icon_tag "close-circle", class: "alert__icon" %>
+    <p class="alert__title">That didn’t work</p>
+    <p class="alert__body">Name can’t be blank.</p>
+  </div>
+  <%= render "layouts/shared/empty", text: "No dormant clients.", action_text: "Show all", action_path: ui_path %>
+<% end %>

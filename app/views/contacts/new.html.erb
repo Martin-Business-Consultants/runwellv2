@@ -1,25 +1,23 @@
 <% @page_title = "Add a contact" %>
 
-<% content_for :header do %>
-  <%= parent_page @client.name, @client %>
-<% end %>
+<%= parent_page @client.name, @client %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title">Add a contact at <%= @client.name %></h1>
       <p class="record-page__description">Someone you deal with there. Portal access and approval are off until you switch them on.</p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <%= render "contacts/form", contact: @contact %>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= render "contacts/sidebar", client: @client, contact: @contact %>
   </aside>
 </section>

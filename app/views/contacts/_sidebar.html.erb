@@ -2,10 +2,10 @@
 <%# Beside a contact's form: who else is at the client (what the two switches allow is under each
     switch in the form). %>
 <% others = client.contacts.active.ordered.where.not(id: contact.id).to_a %>
-<section class="ui-card record-card">
-  <header class="ui-card__header">
-    <h2 class="ui-card__title">At <%= client.name %></h2>
-    <p class="ui-card__description">
+<section class="card record-card">
+  <header class="card__head">
+    <h2 class="card__title">At <%= client.name %></h2>
+    <p class="card__hint">
       <% if others.empty? %>
         No one else yet.
       <% else %>
@@ -14,17 +14,17 @@
     </p>
   </header>
   <% if others.any? %>
-    <div class="ui-card__content">
-      <ul class="record-list record-list--compact">
+    <div class="card__content">
+      <ul class="record-list">
         <% others.each do |other| %>
           <%# herb:key other.id %>
           <li data-filter-target="item">
-            <%= link_to edit_contact_path(other), class: "record-list__row" do %>
-              <%= ui_avatar other.name %>
-              <span class="record-list__main">
-                <span class="record-list__title"><%= other.name %></span>
+            <%= link_to edit_contact_path(other), class: "list-row" do %>
+              <%= avatar other.name, size: :md %>
+              <span class="list-row__content">
+                <span class="list-row__title"><%= other.name %></span>
                 <% if other.role.present? %>
-                  <span class="record-list__description"><%= other.role %></span>
+                  <span class="list-row__desc"><%= other.role %></span>
                 <% end %>
                 <% if other.portal? || other.can_approve? %>
                   <span class="record-list__badges">

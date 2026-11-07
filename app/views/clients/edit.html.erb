@@ -1,31 +1,29 @@
 <% @page_title = "Edit #{@client.name_was}" %>
 
-<% content_for :header do %>
-  <%= parent_page @client.name_was, @client %>
-<% end %>
+<%= parent_page @client.name_was, @client %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">Changes show everywhere they appear, the portal included.</p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <%= render "clients/form", client: @client, internal_aside: true %>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+  <aside class="record-page__aside">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content">
-        <dl class="record-facts">
+      <div class="card__content">
+        <dl class="details">
           <dt>Status</dt><dd><%= status_tag @client.status_was.to_s.humanize, highlight: @client.status_was == "active" %></dd>
           <dt>Contacts</dt><dd><%= @client.contacts.active.count %></dd>
           <dt><%= term(:engagement, count: 2) %></dt><dd><%= @client.engagements.count %></dd>
@@ -35,15 +33,15 @@
     </section>
 
     <%# Saved with the form beside it (the form attribute), on Save changes. %>
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Internal</h2>
-        <p class="ui-card__description">Saved with the form, on Save changes.</p>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Internal</h2>
+        <p class="card__hint">Saved with the form, on Save changes.</p>
       </header>
-      <div class="ui-card__content">
+      <div class="card__content">
         <div class="record-form__toggle">
-          <label class="record-form__hint record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its engagements are our own projects.</label>
-          <%= switch_tag { hidden_field_tag("client[internal]", "0", id: nil, form: dom_id(@client, :form), autocomplete: "off") + check_box_tag("client[internal]", "1", @client.internal?, id: dom_id(@client, :internal), class: "switch__input", form: dom_id(@client, :form)) } %>
+          <label class="record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its engagements are our own projects.</label>
+          <%= switch_tag { hidden_field_tag("client[internal]", "0", id: nil, form: dom_id(@client, :form), autocomplete: "off") + check_box_tag("client[internal]", "1", @client.internal?, id: dom_id(@client, :internal), role: "switch", form: dom_id(@client, :form)) } %>
         </div>
       </div>
     </section>

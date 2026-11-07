@@ -1,25 +1,25 @@
 <% @page_title = "Choose a new password" %>
 
 <div class="auth">
-  <section class="ui-card auth__card <%= "shake" if flash[:alert] %>">
-    <header class="ui-card__header auth__header">
-      <h1 class="ui-card__title auth__title"><%= @page_title %></h1>
-      <p class="ui-card__description">Up to 72 characters. You’ll sign in with it from now on.</p>
+  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title"><%= @page_title %></h1>
+      <p class="card__hint">Up to 72 characters. You’ll sign in with it from now on.</p>
     </header>
 
-    <div class="ui-card__content auth__content">
+    <div class="card__content auth__content">
       <%= form_with url: password_path(params[:token]), method: :put, class: "auth__form" do |form| %>
-        <div class="ui-field">
-          <%= form.label :password, "New password", class: "ui-label" %>
-          <%= form.password_field :password, required: true, class: "ui-input", autofocus: true, autocomplete: "new-password", maxlength: 72 %>
+        <div class="field">
+          <%= form.label :password, "New password", class: "field__label" %>
+          <%= form.password_field :password, required: true, autofocus: true, autocomplete: "new-password", maxlength: 72 %>
         </div>
 
-        <div class="ui-field">
-          <%= form.label :password_confirmation, "Repeat it", class: "ui-label" %>
-          <%= form.password_field :password_confirmation, required: true, class: "ui-input", autocomplete: "new-password", maxlength: 72 %>
+        <div class="field">
+          <%= form.label :password_confirmation, "Repeat it", class: "field__label" %>
+          <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", maxlength: 72 %>
         </div>
 
-        <button type="submit" class="ui-button ui-button--block">Save</button>
+        <button type="submit" class="btn btn--primary btn--block">Save</button>
       <% end %>
     </div>
   </section>

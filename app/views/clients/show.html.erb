@@ -9,12 +9,10 @@
 <% tab = current_record_tab(tabs, "engagements") %>
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
-<% content_for :header do %>
-  <%= parent_page term(:client, count: 2), clients_path %>
-<% end %>
+<%= parent_page term(:client, count: 2), clients_path %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
@@ -22,8 +20,8 @@
         <span><%= @client.internal? ? "Internal: our own projects" : term(:client) %> since <%= l @client.created_at.to_date, format: :long %></span>
       </p>
     </div>
-    <div class="page-heading__actions">
-      <%= link_to edit_client_path(@client), class: "ui-button ui-button--outline", data: { keys: "e" } do %>
+    <div class="button-row">
+      <%= link_to edit_client_path(@client), class: "btn btn--secondary", data: { keys: "e" } do %>
         <%= icon_tag "pencil" %>
         <span>Edit</span>
         <kbd class="hide-on-touch">E</kbd>
@@ -32,36 +30,36 @@
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <turbo-frame id="record_tab" target="_top">
       <div class="record-tabs">
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
         <div class="record-tabs__panel">
           <% case tab %>
           <% when "engagements" %>
-            <section class="ui-card record-card" id="engagements">
-              <header class="ui-card__header">
-                <h2 class="ui-card__title"><%= term(:engagement, count: 2) %></h2>
-                <p class="ui-card__description">What we run for <%= @client.name %>.</p>
-                <div class="ui-card__action">
+            <section class="card record-card" id="engagements">
+              <header class="card__head">
+                <h2 class="card__title"><%= term(:engagement, count: 2) %></h2>
+                <p class="card__hint">What we run for <%= @client.name %>.</p>
+                <div class="card__action">
                   <%= render "layouts/shared/segmented_filter", label: "Show " + term(:engagement, count: 2).downcase, param: :engagements, current: @engagement_state,
                         options: Engagement.filter_options, counts: Engagement.filter_counts(scope: @client.engagements) %>
                 </div>
               </header>
 
-              <div class="ui-card__content">
+              <div class="card__content">
                 <% engagements = Engagement.filtered(state: @engagement_state, scope: @client.engagements) %>
                 <% if engagements.any? %>
                   <ul class="record-list">
                     <% engagements.each do |engagement| %>
                       <%# herb:key engagement.id %>
                       <li data-filter-target="item">
-                        <%= link_to engagement, class: "record-list__row" do %>
-                          <span class="record-list__main">
-                            <span class="record-list__title"><span class="record-list__ref"><%= engagement.ref %></span> <%= engagement.title %></span>
-                            <span class="record-list__description"><%= engagement.label_name %></span>
+                        <%= link_to engagement, class: "list-row" do %>
+                          <span class="list-row__content">
+                            <span class="list-row__title"><span class="record-list__ref"><%= engagement.ref %></span> <%= engagement.title %></span>
+                            <span class="list-row__desc"><%= engagement.label_name %></span>
                           </span>
-                          <%= status_tag engagement.state_label, highlight: engagement.active? %>
+                          <span class="list-row__meta"><%= status_tag engagement.state_label, highlight: engagement.active? %></span>
                         <% end %>
                       </li>
                     <% end %>
@@ -69,15 +67,15 @@
                 <% elsif @client.engagements.exists? %>
                   <p class="record-card__empty">
                     None <%= Engagement.filter_options.to_h.invert.fetch(@engagement_state).downcase %>.
-                    <%= link_to "Show all", client_path(@client, engagements: "all"), class: "txt-link" %>
+                    <%= link_to "Show all", client_path(@client, engagements: "all") %>
                   </p>
                 <% else %>
                   <p class="record-card__empty">No <%= term(:engagement, count: 2).downcase %> yet.</p>
                 <% end %>
               </div>
 
-              <footer class="ui-card__footer">
-                <%= link_to new_engagement_path(client_id: @client.id), class: "ui-button ui-button--outline ui-button--sm" do %>
+              <footer class="card__footer">
+                <%= link_to new_engagement_path(client_id: @client.id), class: "btn btn--secondary btn--sm" do %>
                   <%= icon_tag "add" %>
                   <span>New <%= term(:engagement).downcase %></span>
                 <% end %>
@@ -98,14 +96,14 @@
     </turbo-frame>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= plugin_slots(:client_aside, client: @client) %>
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content record-card__stack">
-        <dl class="record-facts">
+      <div class="card__content record-card__stack">
+        <dl class="details">
           <dt>Status</dt><dd><%= status_tag @client.status.humanize, highlight: @client.status == "active" %></dd>
           <% if @client.internal? %>
             <dt>Internal</dt><dd>This is us: our own projects</dd>
@@ -124,29 +122,29 @@
       </div>
     </section>
 
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Contacts</h2>
-        <p class="ui-card__description"><%= pluralize contacts.size, "person", plural: "people" %> at <%= @client.name %></p>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Contacts</h2>
+        <p class="card__hint"><%= pluralize contacts.size, "person", plural: "people" %> at <%= @client.name %></p>
       </header>
-      <div class="ui-card__content">
+      <div class="card__content">
         <% if contacts.any? %>
-          <ul class="record-list record-list--compact">
+          <ul class="record-list">
             <% contacts.each do |contact| %>
               <%# herb:key contact.id %>
-              <li data-filter-target="item" class="contact-row">
-                <%= link_to edit_contact_path(contact), class: "record-list__row" do %>
-                  <%= ui_avatar contact.name %>
-                  <span class="record-list__main">
-                    <span class="record-list__title"><%= contact.name %></span>
-                    <span class="record-list__description"><%= [ contact.role, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
+              <li data-filter-target="item">
+                <%= link_to edit_contact_path(contact), class: "list-row" do %>
+                  <%= avatar contact.name, size: :md %>
+                  <span class="list-row__content">
+                    <span class="list-row__title"><%= contact.name %></span>
+                    <span class="list-row__desc"><%= [ contact.role, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
                   </span>
-                  <span class="contact-row__marks">
+                  <span class="contact-marks">
                     <% if contact.portal? %>
-                      <span class="contact-row__mark" title="Can sign in to the portal"><%= icon_tag "globe" %><span class="for-screen-reader">Portal</span></span>
+                      <span class="contact-marks__mark" title="Can sign in to the portal"><%= icon_tag "globe" %><span class="visually-hidden">Portal</span></span>
                     <% end %>
                     <% if contact.can_approve? %>
-                      <span class="contact-row__mark contact-row__mark--approve" title="Can approve"><%= icon_tag "check-circle" %><span class="for-screen-reader">Can approve</span></span>
+                      <span class="contact-marks__mark contact-marks__mark--approve" title="Can approve"><%= icon_tag "check-circle" %><span class="visually-hidden">Can approve</span></span>
                     <% end %>
                   </span>
                 <% end %>
@@ -157,8 +155,8 @@
           <p class="record-card__empty">No contacts yet.</p>
         <% end %>
       </div>
-      <footer class="ui-card__footer">
-        <%= link_to new_client_contact_path(@client), class: "ui-button ui-button--outline ui-button--sm" do %>
+      <footer class="card__footer">
+        <%= link_to new_client_contact_path(@client), class: "btn btn--secondary btn--sm" do %>
           <%= icon_tag "person-add" %>
           <span>Add a contact</span>
         <% end %>

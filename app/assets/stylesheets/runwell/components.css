@@ -1,0 +1,348 @@
+/* Runwell's shared pieces on rune_ui's tokens: the ones every area uses and rune_ui doesn't have
+/* (its behaviour is Runwell's: popups with their keys, the index toolbar, the data table, bulk
+/* actions, index cards). Unlayered, so these win over rune's components.
+/*
+/* 1 Popups   2 Index toolbar and filters   3 Data table   4 Bulk bar   5 Index cards
+/* 6 Small pieces   7 Form widgets */
+
+/* ======================================================================= 1 Popups */
+
+/* A <dialog class="popup"> (PopupHelper#popup_menu) opened by the dialog controller below its
+/* trigger, drawn as rune's menu: the pickers, quick filters and bulk menus. Items are
+/* .popup__item > .popup__btn; the chosen one carries a check. */
+.popup {
+  position: absolute; inset: calc(100% + 4px) auto auto 0; z-index: 40;
+  display: none; flex-direction: column; gap: 1px;
+  min-width: 12.5rem; max-width: min(22rem, calc(100vw - 1rem)); max-height: min(24rem, 70vh); overflow-y: auto;
+  margin: 0; padding: 4px; border: 0; border-radius: var(--radius);
+  background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
+  font-size: var(--text-ui); text-align: start;
+}
+.popup[open] { display: flex; }
+.popup:is(.popup--align-left, .orient-left) { inset-inline: auto 0; translate: var(--orient-offset, 0px); }
+.popup:is(.popup--align-right, .orient-right) { inset-inline: 0 auto; translate: var(--orient-offset, 0px); }
+.popup form { display: contents; }
+/* Pinned to the viewport beside its trigger (fixed_popup_controller), so a scrolling list can't clip it. */
+.fixed-popup--placed .popup[open] { position: fixed; inset: var(--popup-top) auto auto var(--popup-left); translate: none; z-index: 50; }
+
+.popup__title { padding: var(--s-2) var(--s-3) var(--s-1); color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); white-space: nowrap; }
+.popup__title:focus-visible { box-shadow: none; }
+.popup__list { display: flex; flex-direction: column; gap: 1px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.popup__section:is(:not(:has(.popup__list)), :not(:has(.popup__list > *)), :has(.popup__item[hidden]):not(:has(.popup__item:not([hidden])))) { display: none; }
+.popup__section-title { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: var(--s-1); padding: var(--s-2) var(--s-3); background: var(--panel); color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.popup__section:not([open]) .popup__section-title .icon { rotate: -90deg; }
+.popup__item { position: relative; display: flex; align-items: center; width: 100%; border-radius: calc(5px * var(--radius-scale)); }
+.popup__item[aria-selected] { background: var(--layer-2); }
+.popup__item:has(.popup__btn[disabled]) { pointer-events: none; }
+.popup__item--form { gap: var(--s-2); padding: var(--s-1); }
+.popup .popup__btn {
+  display: flex; align-items: center; gap: var(--s-2); flex: 1 1 auto; width: 100%; min-width: 0; min-height: var(--control-h);
+  padding: 0 var(--s-3); border: 0; border-radius: inherit; background: none; color: var(--text);
+  font: inherit; text-align: start; text-decoration: none; cursor: pointer;
+}
+.popup .popup__btn:is(:hover, :focus-visible) { background: var(--layer-2); color: var(--text); box-shadow: none; }
+.popup .popup__btn[disabled] { opacity: .5; }
+.popup .popup__btn .icon { color: var(--text-faint); }
+.popup__item[aria-checked] .popup__btn { padding-right: 2rem; }
+.popup__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.popup__item .checked { display: none; position: absolute; right: var(--s-3); color: var(--text-muted); pointer-events: none; }
+.popup__item[aria-checked="true"] .checked { display: block; }
+.popup__item[aria-checked="true"] .popup__btn { font-weight: var(--weight-strong); }
+.popup__footer { margin-top: 4px; padding: var(--s-2) var(--s-3) var(--s-1); border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--text-meta); text-align: center; }
+.popup input:is([type="search"], [type="text"]) { height: var(--control-h-sm); margin-bottom: 4px; }
+
+/* rune popover menus: a checkbox that isn't a menu item (the Columns menu: it stays open). */
+.menu__check { display: flex; align-items: center; gap: var(--s-2); min-height: var(--control-h); padding: 0 var(--s-3); border-radius: calc(5px * var(--radius-scale)); cursor: pointer; }
+.menu__check:hover { background: var(--layer-2); }
+
+/* ======================================================================= 2 Index toolbar and filters */
+
+/* An index's top row: its filter pills, and across from them the view toggle and New. */
+.index-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: var(--control-h); }
+.index-toolbar__filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); min-width: 0; }
+.index-toolbar__end { display: flex; align-items: center; gap: var(--s-3); flex: 0 0 auto; }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+
+/* A quick filter: its pill and popup. Hidden when it has nothing to filter by. */
+.quick-filter { position: relative; display: inline-flex; }
+.quick-filter:not(:has(.popup__item)) { display: none !important; }
+.filters:not(.filters--expanded) .quick-filter:not([data-filter-show="true"]) { display: none; }
+
+/* New: the page's primary action, with its key. On a phone, just the icon. */
+.new-link kbd { height: 1.125rem; min-width: 1.125rem; border-color: color-mix(in srgb, var(--panel) 25%, transparent); background: transparent; color: inherit; opacity: .7; }
+@media (max-width: 640px) {
+  .new-link { width: var(--control-h); padding: 0; }
+  .new-link :is(.new-link__text, .new-link__key) { display: none; }
+}
+
+/* ======================================================================= 3 Data table */
+
+/* ui/_data_table on rune's .table: sortable headers, a checkbox column, edit and delete at each
+/* row's end, a Columns menu, and pages underneath. */
+.data-table-wrap { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.data-table-wrap__toolbar { display: flex; align-items: center; justify-content: flex-end; gap: var(--s-2); }
+.data-table-wrap__toolbar:empty { display: none; }
+.data-table td strong { font-weight: var(--weight-strong); }
+.data-table td a:not([class]) { color: var(--text); font-weight: var(--weight-strong); text-decoration: none; }
+.data-table td a:not([class]):hover { color: var(--accent); }
+.data-table .data-table__number { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.data-table .data-table__center { text-align: center; }
+.data-table [data-column][hidden] { display: none; }
+@media (max-width: 640px) { .data-table td { white-space: nowrap; } }
+
+/* Widths that hold still (table_colgroup: a share of the width on each <col>, as a class, since
+/* views carry no style attributes): sorting or turning a page moves nothing; narrower than 48rem
+/* it scrolls. */
+.data-table--fixed { min-width: 48rem; table-layout: fixed; }
+.data-table--fixed td { overflow-wrap: anywhere; }
+.data-table__col--p1 { width: 1%; } .data-table__col--p2 { width: 2%; } .data-table__col--p3 { width: 3%; } .data-table__col--p4 { width: 4%; } .data-table__col--p5 { width: 5%; } .data-table__col--p6 { width: 6%; } .data-table__col--p7 { width: 7%; } .data-table__col--p8 { width: 8%; } .data-table__col--p9 { width: 9%; } .data-table__col--p10 { width: 10%; }
+.data-table__col--p11 { width: 11%; } .data-table__col--p12 { width: 12%; } .data-table__col--p13 { width: 13%; } .data-table__col--p14 { width: 14%; } .data-table__col--p15 { width: 15%; } .data-table__col--p16 { width: 16%; } .data-table__col--p17 { width: 17%; } .data-table__col--p18 { width: 18%; } .data-table__col--p19 { width: 19%; } .data-table__col--p20 { width: 20%; }
+.data-table__col--p21 { width: 21%; } .data-table__col--p22 { width: 22%; } .data-table__col--p23 { width: 23%; } .data-table__col--p24 { width: 24%; } .data-table__col--p25 { width: 25%; } .data-table__col--p26 { width: 26%; } .data-table__col--p27 { width: 27%; } .data-table__col--p28 { width: 28%; } .data-table__col--p29 { width: 29%; } .data-table__col--p30 { width: 30%; }
+.data-table__col--p31 { width: 31%; } .data-table__col--p32 { width: 32%; } .data-table__col--p33 { width: 33%; } .data-table__col--p34 { width: 34%; } .data-table__col--p35 { width: 35%; } .data-table__col--p36 { width: 36%; } .data-table__col--p37 { width: 37%; } .data-table__col--p38 { width: 38%; } .data-table__col--p39 { width: 39%; } .data-table__col--p40 { width: 40%; }
+.data-table__col--p41 { width: 41%; } .data-table__col--p42 { width: 42%; } .data-table__col--p43 { width: 43%; } .data-table__col--p44 { width: 44%; } .data-table__col--p45 { width: 45%; } .data-table__col--p46 { width: 46%; } .data-table__col--p47 { width: 47%; } .data-table__col--p48 { width: 48%; } .data-table__col--p49 { width: 49%; } .data-table__col--p50 { width: 50%; }
+.data-table__col--p51 { width: 51%; } .data-table__col--p52 { width: 52%; } .data-table__col--p53 { width: 53%; } .data-table__col--p54 { width: 54%; } .data-table__col--p55 { width: 55%; } .data-table__col--p56 { width: 56%; } .data-table__col--p57 { width: 57%; } .data-table__col--p58 { width: 58%; } .data-table__col--p59 { width: 59%; } .data-table__col--p60 { width: 60%; }
+.data-table__col--p61 { width: 61%; } .data-table__col--p62 { width: 62%; } .data-table__col--p63 { width: 63%; } .data-table__col--p64 { width: 64%; } .data-table__col--p65 { width: 65%; } .data-table__col--p66 { width: 66%; } .data-table__col--p67 { width: 67%; } .data-table__col--p68 { width: 68%; } .data-table__col--p69 { width: 69%; } .data-table__col--p70 { width: 70%; }
+.data-table__col--p71 { width: 71%; } .data-table__col--p72 { width: 72%; } .data-table__col--p73 { width: 73%; } .data-table__col--p74 { width: 74%; } .data-table__col--p75 { width: 75%; } .data-table__col--p76 { width: 76%; } .data-table__col--p77 { width: 77%; } .data-table__col--p78 { width: 78%; } .data-table__col--p79 { width: 79%; } .data-table__col--p80 { width: 80%; }
+.data-table__col--p81 { width: 81%; } .data-table__col--p82 { width: 82%; } .data-table__col--p83 { width: 83%; } .data-table__col--p84 { width: 84%; } .data-table__col--p85 { width: 85%; } .data-table__col--p86 { width: 86%; } .data-table__col--p87 { width: 87%; } .data-table__col--p88 { width: 88%; } .data-table__col--p89 { width: 89%; } .data-table__col--p90 { width: 90%; }
+.data-table__col--p91 { width: 91%; } .data-table__col--p92 { width: 92%; } .data-table__col--p93 { width: 93%; } .data-table__col--p94 { width: 94%; } .data-table__col--p95 { width: 95%; } .data-table__col--p96 { width: 96%; } .data-table__col--p97 { width: 97%; } .data-table__col--p98 { width: 98%; } .data-table__col--p99 { width: 99%; } .data-table__col--p100 { width: 100%; }
+
+/* The row j / k landed on, and the rows picked for a bulk action. */
+.data-table tbody tr:focus-visible { outline: none; box-shadow: none; }
+.data-table tbody tr:focus-visible td { background: var(--hover); }
+.data-table tbody tr:focus-visible td:first-child { box-shadow: inset 0 0 0 1px var(--accent); }
+.data-table tr[data-picked] td { background: var(--accent-soft); }
+
+/* A sortable header: its label a small ghost button, an arrow beside it on hover and on the sorted column. */
+.data-table th.data-table__sortable { padding-block: 0; padding-left: calc(var(--s-3) - var(--s-2)); }
+.data-table__sort { display: inline-flex; align-items: center; gap: 6px; height: var(--control-h-sm); padding: 0 var(--s-2); border-radius: var(--radius-control); color: inherit; text-decoration: none; }
+.data-table__sort:hover { background: var(--hover); color: var(--text); }
+.data-table__sort--active { color: var(--text); }
+.data-table__center > .data-table__sort { justify-content: center; }
+.data-table__sort-arrow { width: 0; height: 0; border-bottom: .3em solid currentColor; border-inline: .27em solid transparent; opacity: 0; transition: opacity 80ms, rotate 120ms; }
+.data-table__sort:hover .data-table__sort-arrow { opacity: .4; }
+.data-table__sort--active .data-table__sort-arrow { opacity: 1; }
+.data-table__sort-arrow--desc { rotate: 180deg; }
+
+/* The checkbox column: header and rows the same width, so the boxes stack. */
+.data-table :is(th, td).data-table__select { width: 1%; padding-right: var(--s-1); text-align: center; }
+.data-table__checkbox { display: block; margin: 0 auto; cursor: pointer; }
+
+/* Edit and delete, quiet until the row is hovered. */
+.data-table__actions, .data-table__actions-header { width: 1%; white-space: nowrap; text-align: right; }
+.data-table__actions-row { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+.data-table__actions dialog { white-space: normal; text-align: left; }
+.row-action { opacity: .6; }
+tr:hover .row-action, .row-action:focus-visible { opacity: 1; }
+.data-table__columns { font-weight: var(--weight); }
+
+/* "Load more" and the pages under a table. */
+.pagination-link { display: block; flex: 1; min-height: 1.5rem; pointer-events: none; text-decoration: none; }
+.pagination-link.pagination-link--active-when-observed { width: 0; height: 0; overflow: hidden; visibility: hidden; }
+turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagination-link--active-when-observed { display: none; }
+.pagination-list { display: contents; }
+.pagination-link.pagination-link--manual { flex: none; margin: 0 auto; pointer-events: auto; }
+.data-table .pagination-row td { height: 0; padding: 0; border: 0; }
+.table-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.table-pagination__summary { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.table-pagination__pages { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); }
+.table-pagination__gap { padding: 0 var(--s-1); color: var(--text-faint); }
+
+/* ======================================================================= 4 Bulk bar */
+
+/* While rows are picked (data-bulk-active on <main>) the bar takes the index toolbar's row: its
+/* pills where the filters were, Delete where the view toggle and New were. */
+#main[data-bulk-active] :is(.index-toolbar__filter-pills, .index-toolbar__end) { display: none !important; }
+#main[data-bulk-active] .index-toolbar__filters { flex: 1 1 auto; }
+.bulk-bar { display: contents; }
+.bulk-bar[hidden] { display: none; }
+.bulk-bar__actions { justify-content: flex-start; }
+.bulk-bar__count { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--text); }
+.bulk-bar__count:hover { background: var(--accent-soft); }
+.bulk-bar__end { margin-left: auto; }
+
+/* ======================================================================= 5 Index cards (the Cards view) */
+
+/* layouts/shared/_card: a ref and context line, the title, and a footer of badges with the
+/* people on it. The whole card is its link. */
+.cards--grid { width: 100%; }
+.cards--grid .cards__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); align-items: stretch; gap: var(--s-4); }
+.cards--grid :is(.pagination-link, .empty) { grid-column: 1 / -1; }
+.app-card { position: relative; justify-content: space-between; gap: var(--s-4); min-width: 0; padding: var(--s-4); transition: border-color .12s; }
+.app-card:hover { border-color: var(--line-strong); }
+.app-card:has(.app-card__link:focus-visible) { box-shadow: var(--ring); }
+.app-card__link { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.app-card__link:focus-visible { box-shadow: none; }
+.app-card__header { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.app-card__eyebrow { display: flex; align-items: center; gap: var(--s-2); min-width: 0; color: var(--text-faint); font-size: var(--text-meta); }
+.app-card__ref { flex: 0 0 auto; color: var(--text-muted); font-weight: var(--weight-strong); }
+.app-card__context { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-card__ref + .app-card__context { padding-left: var(--s-2); border-left: 1px solid var(--line); }
+.app-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: var(--text-read); font-weight: var(--weight-strong); line-height: 1.375; }
+.app-card__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-width: 0; }
+.app-card__badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.app-card__people { position: relative; z-index: 2; display: inline-flex; align-items: center; flex: 0 0 auto; margin-left: auto; }
+
+/* ======================================================================= 6 Small pieces */
+
+/* People: nobody's placeholder, and "+N" at the end of a stack. */
+.person__none { color: var(--text-faint); font-size: var(--text-meta); }
+.avatar--more { background: var(--layer-3); color: var(--text-muted); }
+
+/* Delete with a confirmation in place (layouts/shared/_confirm). */
+.confirm { display: flex; justify-content: center; }
+.confirm__card { width: min(100%, 26rem); }
+.confirm__trigger { color: var(--danger); }
+.confirm__trigger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 9%, transparent); }
+
+/* A secret (secret_field): the field with an eye to show it. */
+.secret-field { position: relative; display: flex; align-items: center; width: 100%; }
+.secret-field input { padding-right: 2.25rem; }
+.secret-field__eye { position: absolute; right: 2px; }
+.secret-field__hide, .secret-field--shown .secret-field__show { display: none; }
+.secret-field--shown .secret-field__hide { display: block; }
+
+/* The ? sheet (layouts/shared/_shortcuts): groups in two columns, each a list of what a key
+/* does with its keys at the end; the footer turns hint mode on and off. */
+.dialog.shortcuts { width: min(56rem, calc(100vw - 2rem)); }
+.shortcuts__groups { columns: 2 20rem; column-gap: var(--s-6); }
+.shortcuts__groups section { display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-5); break-inside: avoid; }
+.shortcuts__heading { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.shortcut-list { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: dense; }
+.shortcut-list :is(dt, dd) { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.shortcut-list dt { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; padding-left: var(--s-4); white-space: nowrap; }
+.shortcut-list dd { grid-column: 1; }
+.shortcut-list :is(dt, dd):last-of-type { border-bottom: 0; }
+.shortcut-list kbd { text-transform: none; }
+.shortcuts__footer { margin: 0 calc(var(--s-5) * -1); padding: var(--s-4) var(--s-5) 0; border-top: 1px solid var(--line); }
+.hints-switch__hide, html[data-hints] .hints-switch__show { display: none; }
+html[data-hints] .hints-switch__hide { display: inline; }
+
+/* A snippet outside rich text (code_block): a command or request to read or copy, coloured with
+/* the theme's code tokens (_global.css), as code in rich text is. */
+.code-block { margin: 0; padding: var(--s-3) var(--s-4); overflow-x: auto; border-radius: var(--radius); background: var(--layer-2); border: 0; font-family: var(--font-mono); font-size: var(--text-meta); tab-size: 2; text-align: start; white-space: pre; overflow-wrap: normal; }
+.code-block :is(.token.attr-name, .token.atrule, .token.attr, .token.keyword) { color: var(--color-code-token__att); }
+.code-block :is(.token.boolean, .token.constant, .token.number, .token.property, .token.symbol, .token.tag) { color: var(--color-code-token__property); }
+.code-block :is(.token.attr-value, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string) { color: var(--color-code-token__selector); }
+.code-block :is(.token.comment, .token.cdata, .token.doctype, .token.prolog) { color: var(--color-code-token__comment); font-style: italic; }
+.code-block :is(.token.deleted, .token.entity, .token.operator, .token.url) { color: var(--color-code-token__operator); }
+.code-block :is(.token.class, .token.class-name, .token.function) { color: var(--color-code-token__function); }
+.code-block :is(.token.important, .token.namespace, .token.regex, .token.variable) { color: var(--color-code-token__variable); }
+.code-block .token.punctuation { color: var(--color-code-token__punctuation); }
+
+/* A switch with a hint, in a form (switch_field): a setting row without its card. */
+.setting-row--field { min-height: 0; padding: 0; }
+
+/* Hint mode (keyboard_controller, the . key): each control's key as a keycap on it, from
+/* data-key-hint, and a strip of the keys with no control at the foot of the page. Keycaps are
+/* overlays, so turning hints on moves nothing. */
+:where(html[data-hints] [data-key-hint]:not(input, textarea, select)) { position: relative; }
+html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd))::after {
+  content: attr(data-key-hint); position: absolute; inset: -.55em -.55em auto auto; z-index: 2;
+  min-width: 1.4em; padding: .25em .4em; border-radius: var(--radius-xs); background: var(--text); color: var(--panel);
+  box-shadow: 0 0 0 2px var(--panel); font-family: var(--font-sans); font-size: .65rem; font-weight: 600; line-height: 1;
+  text-align: center; text-transform: none; white-space: pre; word-spacing: .2em; pointer-events: none;
+}
+html[data-hints] :is(.sidebar__link, .sidebar__brand)[data-key-hint]::after { inset: 50% var(--s-2) auto auto; translate: 0 -50%; }
+html[data-hints] :is([data-filter-target~="item"], [data-keyboard-item]):not(:hover, :focus-within, [data-keyboard-current], [aria-selected="true"]) [data-key-hint]::after { display: none; }
+.hint-legend { display: none; }
+html[data-hints] .hint-legend {
+  position: fixed; bottom: var(--s-4); left: 50%; translate: -50% 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: var(--s-2) var(--s-4); max-width: calc(100vw - 2rem); padding: var(--s-2) var(--s-3); border-radius: var(--radius);
+  background: var(--panel); box-shadow: var(--shadow-popover); color: var(--text-muted); font-size: var(--text-meta);
+}
+.hint-legend__item { display: inline-flex; align-items: center; gap: 4px; }
+@media (any-hover: none) { html[data-hints] [data-key-hint]::after { display: none; } }
+
+@media (any-hover: none) { .hide-on-touch { display: none !important; } }
+
+/* ======================================================================= 7 Form widgets */
+
+/* The fields Runwell builds from more than one input (ApplicationHelper's date_input, money_field,
+/* rich_text_field; DocumentsHelper's document_drop_target). Bare inputs inside them are rune's. */
+
+/* A date (date_input): a hidden field with the date sent, and a read-only one showing it that
+/* opens the calendar. The wrapper has no box, so the field people see lays out as any input. */
+.date-picker { display: contents; }
+.date-picker input[readonly][data-date-field-target="display"] { cursor: pointer; }
+
+/* The calendar (vanillajs-datepicker, the date-field controller), drawn as a rune popover: weeks
+/* of small rounded day cells, today tinted, the chosen day in the primary button's colours, the
+/* month's arrows and Today / Clear as small buttons. Its buttons carry the controller's
+/* buttonClass (btn), so they're reset here. */
+dialog:has(.datepicker.active) { overflow: visible; }
+.datepicker { width: min-content; }
+.datepicker:not(.active) { display: none; }
+.datepicker-dropdown { position: absolute; z-index: 60; padding-top: 4px; }
+.datepicker-dropdown.datepicker-orient-top { padding: 0 0 4px; }
+.datepicker-picker { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-2); border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); font-size: var(--text-ui); }
+.datepicker-controls { display: flex; align-items: center; gap: var(--s-1); }
+.datepicker-controls :is(.button, .btn) {
+  display: inline-flex; align-items: center; justify-content: center; height: var(--control-h-sm); padding: 0 var(--s-2);
+  border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); font: inherit; font-weight: var(--weight); cursor: pointer;
+}
+.datepicker-controls :is(.button, .btn):hover { background: var(--hover); color: var(--text); }
+.datepicker-controls :is(.button, .btn)[disabled] { opacity: .4; cursor: not-allowed; }
+.datepicker-controls .view-switch { flex: auto; font-weight: var(--weight-strong); }
+.datepicker-controls :is(.prev-button, .next-button) { flex: 0 0 var(--control-h-sm); width: var(--control-h-sm); padding: 0; color: var(--text-muted); font-size: 1.125rem; line-height: 1; }
+.datepicker-controls :is(.prev-button, .next-button).disabled { visibility: hidden; }
+.datepicker-footer { padding-top: var(--s-2); border-top: 1px solid var(--line); }
+.datepicker-footer .datepicker-controls > * { flex: 1; }
+.datepicker-footer .datepicker-controls :is(.button, .btn) { border: 1px solid var(--line-strong); background: var(--panel); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.datepicker-footer .datepicker-controls :is(.button, .btn):hover { background: var(--layer-1); }
+.datepicker-main { flex: auto; }
+.datepicker-view, .datepicker-grid { display: flex; }
+.datepicker-view { align-items: stretch; width: calc(7 * 2rem); }
+.datepicker-grid { flex: auto; flex-wrap: wrap; row-gap: 2px; }
+.datepicker .days { display: flex; flex: auto; flex-direction: column; }
+.datepicker .days-of-week { display: flex; }
+.datepicker span { display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: default; user-select: none; }
+.datepicker .dow { flex-basis: calc(100% / 7); height: 1.75rem; color: var(--text-faint); font-size: var(--text-meta); }
+.datepicker-cell { flex-basis: calc(100% / 7); height: 2rem; font-variant-numeric: tabular-nums; }
+.datepicker-cell:not(.day) { flex-basis: 25%; height: 3rem; }
+.datepicker-cell:not(.disabled):hover { background: var(--hover); cursor: pointer; }
+.datepicker-cell:is(.prev, .next):not(.disabled) { color: var(--text-faint); }
+.datepicker-cell.disabled { color: var(--text-faint); opacity: .5; }
+.datepicker-cell.today:not(.selected) { background: var(--layer-2); font-weight: var(--weight-strong); }
+.datepicker-cell.focused:not(.selected) { background: var(--layer-2); }
+.datepicker-cell.selected, .datepicker-cell.selected:hover { background: var(--text); color: var(--panel); font-weight: var(--weight-strong); }
+
+/* Money (money_field): the dollars people type and the cents sent, laid out as the one field. */
+.money-field { display: contents; }
+
+/* Rich text (rich_text_field, Lexxy): rune_ui's lexxy.css frames the editor; here it takes the
+/* app's faces and corners, and the ring every other field shows on focus. */
+:root {
+  --lexxy-font-base: var(--font-sans);
+  --lexxy-font-mono: var(--font-mono);
+  --lexxy-radius: var(--radius-xs);
+  --lexxy-focus-ring-color: var(--accent);
+}
+lexxy-editor { font-size: var(--text-read); }
+lexxy-editor:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); }
+.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) { border-radius: var(--radius-sm); background: transparent; }
+.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):is([aria-pressed="true"], [aria-expanded="true"]) { background: var(--layer-2); color: var(--text); }
+@media (any-hover: hover) {
+  .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):hover:not([aria-pressed="true"]) { background: var(--hover); color: var(--text); }
+}
+/* Saved rich text: a list reads as tight as it did in the editor (Lexxy wraps each item's text
+/* in a paragraph). */
+.lexxy-content li > p { margin: 0; padding: 0; }
+.lexxy-content li > :is(ul, ol) { margin-block: 0; }
+
+/* Uploads (document_drop_target): a dashed box the width of its column. The file input covers it,
+/* so a click chooses and a drop fills it; the upload controller writes progress into it. Hovered,
+/* dragged over or focused, it takes the accent. */
+.upload-drop {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-2); width: 100%;
+  padding: var(--s-5); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted);
+  text-align: center; cursor: pointer; transition: background .12s, border-color .12s, color .12s;
+}
+.upload-drop:is(:hover, .drag-and-drop__hover-container) { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); background: var(--accent-soft); color: var(--text); }
+.upload-drop:has(input:focus-visible) { border-color: var(--accent); box-shadow: var(--ring); }
+.upload-drop input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 0; cursor: pointer; }
+.upload-drop input[type="file"]::file-selector-button { cursor: pointer; }
+.upload-drop__choose { color: var(--text); font-weight: var(--weight-strong); text-decoration: underline; text-underline-offset: 4px; }
+.upload-drop progress { flex-basis: 100%; width: 100%; height: 4px; accent-color: var(--accent); }
+.upload-drop[aria-busy="true"], form[aria-busy="true"] .upload-drop { cursor: progress; }
+.styleguide-skeleton { width: 12rem; }

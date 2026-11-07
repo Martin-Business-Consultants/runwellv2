@@ -3,58 +3,56 @@
 <% settings = Runwell::Plugins.settings_pages[@plugin.key] %>
 <%= render "settings/header", current: @plugin.key %>
 
-<section class="settings">
-  <div class="settings__panel">
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h1><%= @plugin.name %></h1>
-        <p class="settings__description"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></p>
-        <div class="settings__heading-actions">
-          <% if on %>
-            <%= ui_badge "Active", :positive %>
-          <% else %>
-            <%= ui_badge "Dormant", :neutral %>
-          <% end %>
-        </div>
-      </header>
-      <p class="settings__text"><%= @plugin.description %></p>
-      <% unless @plugin.compatible? %>
-        <p class="settings__error">Needs Runwell <%= @plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
-      <% end %>
-      <% if @plugin.homepage.present? %>
-        <p class="settings__text"><%= link_to "About this plugin", @plugin.homepage, class: "txt-link", target: "_blank", rel: "noopener" %></p>
-      <% end %>
-    </section>
-
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>What it adds</h2>
-      </header>
-      <div class="settings__chips">
-        <% Runwell::Plugins.additions(@plugin.key).each do |addition| %>
-          <%# herb:key addition %>
-          <span class="ui-badge ui-badge--secondary"><%= addition %></span>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2><%= @plugin.name %></h2>
+      <p class="settings-section__description"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></p>
+      <div class="settings-section__actions">
+        <% if on %>
+          <%= badge "Active", tone: :ok %>
+        <% else %>
+          <%= badge "Dormant", tone: :neutral %>
         <% end %>
       </div>
-    </section>
+    </header>
+    <p><%= @plugin.description %></p>
+    <% unless @plugin.compatible? %>
+      <p class="settings-error">Needs Runwell <%= @plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
+    <% end %>
+    <% if @plugin.homepage.present? %>
+      <p><%= link_to "About this plugin", @plugin.homepage, target: "_blank", rel: "noopener" %></p>
+    <% end %>
+  </section>
 
-    <section class="settings__section">
-      <header class="settings__heading">
-        <h2>Settings</h2>
-        <% settings_note = if on && settings then "#{@plugin.name} has its own settings." elsif settings then "Switch it on to set it up." else "Nothing to set up: switching it on is all it needs." end %>
-        <p class="settings__description"><%= settings_note %></p>
-      </header>
-      <div class="settings__actions">
-        <% if on && settings %>
-          <%= link_to instance_exec(&settings.last), class: "ui-button" do %>
-            <%= icon_tag "settings-outline" %>
-            <span>Open <%= @plugin.name %> settings</span>
-          <% end %>
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>What it adds</h2>
+    </header>
+    <div class="settings-chips">
+      <% Runwell::Plugins.additions(@plugin.key).each do |addition| %>
+        <%# herb:key addition %>
+        <span class="badge"><%= addition %></span>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Settings</h2>
+      <% settings_note = if on && settings then "#{@plugin.name} has its own settings." elsif settings then "Switch it on to set it up." else "Nothing to set up: switching it on is all it needs." end %>
+      <p class="settings-section__description"><%= settings_note %></p>
+    </header>
+    <div class="button-row">
+      <% if on && settings %>
+        <%= link_to instance_exec(&settings.last), class: "btn btn--primary" do %>
+          <%= icon_tag "settings-outline" %>
+          <span>Open <%= @plugin.name %> settings</span>
         <% end %>
-        <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: class_names("ui-button", "ui-button--outline": on) do %>
-          <span><%= on ? "Switch #{@plugin.name} off" : "Switch #{@plugin.name} on" %></span>
-        <% end %>
-      </div>
-    </section>
-  </div>
-</section>
+      <% end %>
+      <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: class_names("btn", "btn--primary": !on, "btn--secondary": on) do %>
+        <span><%= on ? "Switch #{@plugin.name} off" : "Switch #{@plugin.name} on" %></span>
+      <% end %>
+    </div>
+  </section>
+</div>

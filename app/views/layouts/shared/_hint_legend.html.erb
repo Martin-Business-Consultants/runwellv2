@@ -1,6 +1,6 @@
 <%# locals: () %>
 <%# Hint mode's strip at the foot of the page: the keys that have no control to label. Shown
-    only while hint mode is on (hints.css); the keyboard controller turns it on and off. %>
+    only while hint mode is on; the keyboard controller turns it on and off. %>
 <aside class="hint-legend hide-on-touch" aria-label="Keyboard hints">
   <span class="hint-legend__item"><kbd>j</kbd><kbd>k</kbd> Move</span>
   <span class="hint-legend__item"><kbd>Enter</kbd> Open</span>
@@ -9,7 +9,7 @@
   <span class="hint-legend__item"><kbd>a</kbd> Quick actions</span>
   <span class="hint-legend__item"><kbd>Esc</kbd> Back</span>
   <span class="hint-legend__item"><kbd>?</kbd> All keys</span>
-  <button type="button" class="hint-legend__close ui-button ui-button--ghost ui-button--sm txt-x-small" data-action="keyboard#toggleHints">
+  <button type="button" class="btn btn--ghost btn--sm hint-legend__close" data-action="keyboard#toggleHints">
     <kbd>.</kbd> Hide hints
   </button>
 </aside>

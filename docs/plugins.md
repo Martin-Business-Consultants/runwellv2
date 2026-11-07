@@ -17,6 +17,9 @@ deletes its code and keeps its tables.
 Plugins aren't bundled (Bundler freezes the Gemfile in production), so a plugin can use only
 the gems the core bundles.
 
+Runwell 4.0 moved the core's UI to rune_ui. A plugin built for 3.x moves its views and
+stylesheet as [upgrading-to-4.md](upgrading-to-4.md) describes.
+
 ## The smallest plugin
 
 ```

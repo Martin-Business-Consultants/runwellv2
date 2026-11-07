@@ -7,8 +7,8 @@ that needs a newer core. How to build, develop and release a plugin is in
 [plugin template](https://github.com/Martin-Business-Consultants/runwell-plugin-template) is a
 working starting point.
 
-**Stable** means it keeps its name, arguments and meaning within the major version (2.x): a change
-that would break a plugin waits for 3.0, and anything going away is marked deprecated first, for at
+**Stable** means it keeps its name, arguments and meaning within the major version (4.x): a change
+that would break a plugin waits for 5.0, and anything going away is marked deprecated first, for at
 least one minor release. **Experimental** may change in a minor release, said in its release
 notes.
 
@@ -111,6 +111,21 @@ Any other core helper is not part of this contract and may go without notice. Tw
 were removed in 3.0 with agreements: `contact_options` and `default_approver`; keep a copy in the
 plugin (QuickBooks has `quickbooks_contact_options` and `quickbooks_default_contact`).
 
+**The UI kit (4.0).** A plugin's views are drawn with rune_ui, the core's UI kit, and its helpers
+are part of this contract: `button_link`, `action_button`, `submit_button`, `icon_button`,
+`button_classes` (variants `:primary`, `:secondary`, `:ghost`, `:danger`; size `:sm`), `badge`,
+`card`, `list_row`, `field`, `form_errors`, `empty_state`, `menu`, `popover_menu`, `menu_link`,
+`menu_button`, `menu_label`, `menu_divider`, `dialog`, `sheet`, `dialog_actions`,
+`confirm_dialog`, `tabs`, `callout`, `avatar`, `avatar_stack`, `settings_group`, `setting_row`,
+`switch`, `segmented`, `copy_button`, `copy_field`, `progress_bar`, `time_ago` and `icon`
+(`icon_tag` draws the core's icons by name). So are the classes they emit and the ones rune_ui
+documents for markup written by hand (`btn`, `icon-button`, `pill`, `card` and its parts,
+`list-row` and its parts, `field`, `badge`, `tabs`, `alert`, `table`, `dl.details`, `empty`,
+`stack`, `button-row`, `muted`…); its README lists them. Its Stimulus controllers (`rune-*`) may
+be used from markup. Runwell's own classes (an area's `record-page`, `settings-section`,
+`work-group`…) are still not an API. A plugin's stylesheet reads the tokens in
+[theming.md](theming.md), never the core's class names.
+
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
 each page calls `section_nav "Its name" do … end` once (a partial of the plugin's, given the
 current page), with `section_nav_heading` over each group and
@@ -122,9 +137,10 @@ rows ships its own (Websites' `website-checklist--repeater` is a working copy to
 
 A drop box for files is the core's `upload` Stimulus controller on a multipart form
 (`data-upload-url-value` the direct uploads URL, `data-upload-max-size-value` `Document::MAX_SIZE`),
-around a `label.btn.input--upload` holding a `data-upload-target="status"` text, a hidden
-`<progress data-upload-target="progress">` and a multiple file input
-(`data-upload-target="input"`, `data-action="change->upload#start"`). Dropped or chosen files go
+around the dashed drop target, `document_drop_target(form)` (4.0: a `label.upload-drop` holding a
+`data-upload-target="status"` text, a hidden `<progress data-upload-target="progress">` and a
+multiple file input, `data-upload-target="input"`, `data-action="change->upload#start"`; its
+fields post as `document[files][]`). Dropped or chosen files go
 straight to storage, then the form posts their signed ids under the input's name; check each
 blob's size on the server too. Documented in 2.24.0, stable.
 
@@ -331,6 +347,14 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 | `MailerHelper`: `mail_heading`, `mail_button`, `mail_quote`, `mail_small`, `content_for :preheader / :reason` | 2.10 | Stable |
 
 ## Changes to this contract
+
+**4.0** moved the core's UI from nobuild_ui and Fizzy's stylesheets to rune_ui. Removed: every
+`ui-*` class and nobuild_ui's helpers (`ui_button`, `ui_link_button`, `ui_button_classes`,
+`ui_badge`, `ui_kbd`, `ui_avatar`, `ui_dropdown`, `ui_menu_*`); Fizzy's component classes (`btn--*`
+other than rune's, `panel`, `popup` outside `popup_menu`, `input`, `status-tag`, `blank-slate`)
+and utility classes (`flex`, `gap`, `txt-*`, `margin-*`, `pad-*`, `for-screen-reader`…); the
+mask icons and their SVG files; shadcn's tokens (`--primary`, `--card`…). What replaces each is in
+[upgrading-to-4.md](upgrading-to-4.md).
 
 Each release's notes say what it added here. This page lists the version each call arrived in, so
 a plugin can set `requires:` to the newest one it uses.

@@ -10,10 +10,10 @@ class EngagementsController < ApplicationController
     next_tools: %i[add_scope_item create_work]
   agent_tool :create_engagement, on: :create, route: "/engagements", title: "Start an engagement",
     description: "A project, work order or service for a client (or, for the internal client, your own project). It's active from the start: add sections (add_scope_item) to group its work, and work (create_work).",
-    params: { engagement: { client_id: "integer!", label: Engagement::LABELS, shape: Engagement::SHAPES, title: "string!", description: "text", estimate_notes: "text", custom_fields: {} } },
+    params: { engagement: { client_id: "integer!", label: Engagement::LABELS, shape: Engagement::SHAPES, title: "string!", description: "text", custom_fields: {} } },
     next_tools: %i[add_scope_item create_work]
   agent_tool :update_engagement, on: :update, title: "Change an engagement",
-    params: { engagement: { title: "string", description: "text", estimate_notes: "text", label: Engagement::LABELS, shape: Engagement::SHAPES, custom_fields: {} } }
+    params: { engagement: { title: "string", description: "text", label: Engagement::LABELS, shape: Engagement::SHAPES, custom_fields: {} } }
   agent_tool :delete_engagement, on: :destroy, title: "Delete an engagement",
     description: "Only while it has no work: its sections, notes and documents go with it. Otherwise close it."
   agent_tool :close_engagement, on: :close, title: "Mark an engagement complete, or cancel it",
@@ -96,5 +96,5 @@ class EngagementsController < ApplicationController
     scope = action_name == "show" ? Engagement.includes(scope_items: :todos) : Engagement
     @engagement = scope.find_by_ref!(params[:ref])
   end
-  def engagement_params = params.expect(engagement: [ :client_id, :label, :shape, :title, :description, :estimate_notes, custom_fields: {} ])
+  def engagement_params = params.expect(engagement: [ :client_id, :label, :shape, :title, :description, custom_fields: {} ])
 end

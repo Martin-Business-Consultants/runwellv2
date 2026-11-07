@@ -1,10 +1,11 @@
 <%# locals: (item:) %>
-<div class="scope-item-fields txt-small">
+<%# Renaming a scope item in place (its name and a check to save), and deleting it. %>
+<div class="scope-item-fields">
   <%= form_with model: item, namespace: dom_id(item) do |form| %>
-    <%= form.text_field :description, required: true, class: "ui-input", autocomplete: "off", aria: { label: "Name" } %>
-    <button type="submit" class="ui-button ui-button--outline ui-button--icon" title="Save">
+    <%= form.text_field :description, required: true, autocomplete: "off", aria: { label: "Name" } %>
+    <button type="submit" class="icon-button" title="Save">
       <%= icon_tag "check" %>
-      <span class="for-screen-reader">Save</span>
+      <span class="visually-hidden">Save</span>
     </button>
   <% end %>
   <%= render "layouts/shared/delete_dialog", name: item.description, path: scope_item_path(item),

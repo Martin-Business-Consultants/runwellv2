@@ -7,41 +7,36 @@
    ] %>
 <% tab = current_record_tab(tabs, "work") %>
 
-<% content_for :header do %>
-  <%= parent_page @engagement.ref, @engagement %>
+<%= parent_page @engagement.ref, @engagement %>
 
-  <div class="header__actions header__actions--end">
-  </div>
-<% end %>
-
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %>
-        <span>A <%= term(:scope_item).downcase %> of <%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement, class: "txt-link" %></span>
+        <span>A <%= term(:scope_item).downcase %> of <%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement %></span>
       </p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <turbo-frame id="record_tab" target="_top">
       <div class="record-tabs">
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
         <div class="record-tabs__panel">
           <% case tab %>
           <% when "work" %>
-            <section class="ui-card record-card" id="work">
-              <header class="ui-card__header">
-                <h2 class="ui-card__title"><%= term(:work) %></h2>
-                <p class="ui-card__description"><%= done %> of <%= total %> done</p>
+            <section class="card record-card" id="work">
+              <header class="card__head">
+                <h2 class="card__title"><%= term(:work) %></h2>
+                <p class="card__hint"><%= done %> of <%= total %> done</p>
               </header>
 
-              <div class="ui-card__content">
+              <div class="card__content">
                 <% if @todos.any? %>
                   <ul class="record-list">
                     <%= render partial: "todos/todo", collection: @todos, as: :todo %>
@@ -52,7 +47,7 @@
               </div>
 
               <% unless @engagement.closed? %>
-                <footer class="ui-card__footer">
+                <footer class="card__footer">
                   <%= render "todos/add", engagement: @engagement, scope_item: @item %>
                 </footer>
               <% end %>
@@ -67,28 +62,28 @@
     </turbo-frame>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
+  <aside class="record-page__aside">
     <%= plugin_slots(:scope_item_aside, scope_item: @item) %>
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content">
-        <dl class="record-facts">
+      <div class="card__content">
+        <dl class="details">
           <dt>Delivery</dt><dd><%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %></dd>
           <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
-          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement, class: "txt-link" %></dd>
-          <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client, class: "txt-link" %></dd>
+          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement %></dd>
+          <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client %></dd>
         </dl>
       </div>
     </section>
 
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Rename or remove</h2>
-        <p class="ui-card__description">Removing it keeps its <%= term(:work).downcase %> on the <%= term(:engagement).downcase %>.</p>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Rename or remove</h2>
+        <p class="card__hint">Removing it keeps its <%= term(:work).downcase %> on the <%= term(:engagement).downcase %>.</p>
       </header>
-      <div class="ui-card__content">
+      <div class="card__content">
         <%= render "scope_items/item", item: @item %>
       </div>
     </section>

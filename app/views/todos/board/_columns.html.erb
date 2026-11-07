@@ -1,6 +1,6 @@
 <%# locals: (board:) %>
 <% counts = board.reorder(nil).group(:status).count %>
-<%= tag.div class: "card-columns hide-scrollbar", data: {
+<%= tag.div class: "card-columns", data: {
       controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list",
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
       drag_and_drop_hover_container_class: "drag-and-drop__hover-container",

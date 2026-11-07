@@ -1,71 +1,69 @@
 <% @page_title = "Edit #{@todo.title_was}" %>
 
-<% content_for :header do %>
-  <%= parent_page @todo.title_was, @todo %>
-<% end %>
+<%= parent_page @todo.title_was, @todo %>
 
-<section class="settings settings--split record-page">
-  <header class="record-page__header page-heading">
+<section class="record-page">
+  <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">What it is, who’s on it and when it’s due, and where it came from.</p>
     </div>
-    <div class="page-heading__actions">
+    <div class="button-row">
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
-  <div class="settings__panel record-page__main">
+  <div class="record-page__main">
     <%= render "layouts/shared/errors", record: @todo %>
 
-    <%= form_with model: @todo, class: "ui-card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+    <%= form_with model: @todo, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
       <%= hidden_field_tag :from_edit, "1" %>
 
-      <div class="ui-card__content record-form__body">
-        <fieldset class="ui-fieldset">
+      <div class="card__content record-form__body">
+        <fieldset class="record-form__group">
           <legend><%= term(:work) %></legend>
-          <label class="ui-field">
-            <span class="ui-label">Title</span>
-            <%= form.text_field :title, required: true, class: "ui-input", autofocus: true, autocomplete: "off" %>
+          <label class="field">
+            <span class="field__label">Title</span>
+            <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off" %>
           </label>
 
-          <label class="ui-field">
-            <span class="ui-label">Description</span>
+          <label class="field">
+            <span class="field__label">Description</span>
             <%= rich_text_field form, :description, staff: true %>
           </label>
 
-          <div class="ui-field-row">
-            <label class="ui-field">
-              <span class="ui-label">Status</span>
-              <%= form.select :status, todo_status_options, {}, class: "ui-select" %>
+          <div class="field-row">
+            <label class="field">
+              <span class="field__label">Status</span>
+              <%= form.select :status, todo_status_options, {} %>
             </label>
 
-            <label class="ui-field">
-              <span class="ui-label">Due</span>
-              <%= date_input form, :due_on, class: "ui-input" %>
+            <label class="field">
+              <span class="field__label">Due</span>
+              <%= date_input form, :due_on %>
             </label>
           </div>
         </fieldset>
 
-        <hr class="ui-separator record-form__separator">
+        <hr class="separator">
 
-        <fieldset class="ui-fieldset">
+        <fieldset class="record-form__group">
           <legend>Who’s on it</legend>
-          <label class="ui-field">
-            <span class="ui-label">Lead</span>
-            <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, class: "ui-select" %>
-            <span class="ui-field__description">The one person it’s up to.</span>
+          <label class="field">
+            <span class="field__label">Lead</span>
+            <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" } %>
+            <span class="field__hint">The one person it’s up to.</span>
           </label>
 
-          <fieldset class="ui-field owner-checklist">
-            <legend class="ui-label">Also on it</legend>
+          <fieldset class="owner-checklist">
+            <legend class="owner-checklist__legend">Also on it</legend>
             <%= hidden_field_tag "todo[other_owner_ids][]", "", id: nil %>
             <div class="owner-checklist__people">
               <% others = @todo.other_owners.map(&:id) %>
               <% todo_people.each do |person| %>
                 <%# herb:key person.id %>
                 <label class="owner-checklist__person">
-                  <%= check_box_tag "todo[other_owner_ids][]", person.id, others.include?(person.id), id: "todo_other_owner_#{person.id}", class: "ui-checkbox" %>
+                  <%= check_box_tag "todo[other_owner_ids][]", person.id, others.include?(person.id), id: "todo_other_owner_#{person.id}" %>
                   <%= person_tag person %>
                   <span><%= person.display_name %></span>
                 </label>
@@ -74,32 +72,32 @@
           </fieldset>
         </fieldset>
 
-        <hr class="ui-separator record-form__separator">
+        <hr class="separator">
 
-        <fieldset class="ui-fieldset">
+        <fieldset class="record-form__group">
           <legend>Where it belongs</legend>
           <% if @todo.engagement %>
-            <label class="ui-field">
-              <span class="ui-label"><%= term(:scope_item) %></span>
-              <%= form.select :scope_item_id, @todo.engagement.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, class: "ui-select" %>
+            <label class="field">
+              <span class="field__label"><%= term(:scope_item) %></span>
+              <%= form.select :scope_item_id, @todo.engagement.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" } %>
             </label>
           <% else %>
-            <label class="ui-field">
-              <span class="ui-label"><%= term(:client) %></span>
-              <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" }, class: "ui-select" %>
+            <label class="field">
+              <span class="field__label"><%= term(:client) %></span>
+              <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" } %>
             </label>
           <% end %>
 
-          <div class="ui-field-row">
-            <label class="ui-field">
-              <span class="ui-label">Requested by</span>
+          <div class="field-row">
+            <label class="field">
+              <span class="field__label">Requested by</span>
               <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,
-                    { include_blank: "Nobody in particular" }, class: "ui-select" %>
+                    { include_blank: "Nobody in particular" } %>
             </label>
 
-            <label class="ui-field">
-              <span class="ui-label">Came in by</span>
-              <%= form.text_field :source, required: true, class: "ui-input", autocomplete: "off", placeholder: "app, email, phone…" %>
+            <label class="field">
+              <span class="field__label">Came in by</span>
+              <%= form.text_field :source, required: true, autocomplete: "off", placeholder: "app, email, phone…" %>
             </label>
           </div>
 
@@ -109,27 +107,27 @@
         </fieldset>
       </div>
 
-      <footer class="ui-card__footer ui-card__footer--bordered ui-card__footer--end">
-        <%= link_to "Cancel", todo_path(@todo), class: "ui-button ui-button--outline", data: { form_target: "cancel" } %>
-        <button type="submit" class="ui-button" data-form-target="submit">
+      <footer class="card__footer card__footer--bordered">
+        <%= link_to "Cancel", todo_path(@todo), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+        <button type="submit" class="btn btn--primary" data-form-target="submit">
           <span>Save changes</span>
         </button>
       </footer>
     <% end %>
   </div>
 
-  <aside class="settings__panel settings__panel--side record-page__aside">
-    <section class="ui-card record-card">
-      <header class="ui-card__header">
-        <h2 class="ui-card__title">Details</h2>
+  <aside class="record-page__aside">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
       </header>
-      <div class="ui-card__content">
-        <dl class="record-facts">
+      <div class="card__content">
+        <dl class="details">
           <% if @todo.engagement %>
-            <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement, class: "txt-link" %></dd>
+            <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@todo.engagement.ref} #{@todo.engagement.title}", @todo.engagement %></dd>
           <% end %>
           <% if @todo.client %>
-            <dt><%= term(:client) %></dt><dd><%= link_to @todo.client.name, @todo.client, class: "txt-link" %></dd>
+            <dt><%= term(:client) %></dt><dd><%= link_to @todo.client.name, @todo.client %></dd>
           <% end %>
           <dt>Added</dt><dd><%= l @todo.created_at.to_date, format: :long %><%= " by #{@todo.created_by.display_name}" if @todo.created_by %></dd>
           <% if @todo.completed_at %>

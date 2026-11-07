@@ -1,14 +1,15 @@
 <%# locals: () %>
-<%# Search, opened with S or ⌘K: shadcn's Command dialog. The input sits at the top, the results
-    (searches/_results, loaded into bar_content) below it, and the keys at the foot. The backdrop
-    closes it, as Esc and the ✕ do. %>
+<%# Search, opened with S or ⌘K: a command box a third of the way down the page. The input sits
+    at the top, the results (searches/_results, loaded into bar_content) below it, and the keys at
+    the foot. Closed, nothing shows: the button S clicks is on the page but out of sight. The
+    backdrop closes it, as Esc and the ✕ do. %>
 <div class="bar" data-controller="bar" data-bar-dialog-outlet="#bar-modal"
     data-bar-search-url-value="<%= search_path %>">
   <div class="bar__backdrop" aria-hidden="true" data-action="click->bar#reset"></div>
 
-  <div class="flex justify-center bar__placeholder" data-bar-target="buttonsContainer">
-    <%= tag.button class: "ui-button ui-button--ghost ui-button--sm", title: "Search (S or ⌘K)", data: { keys: "s, mod+k", action: "bar#search" } do %>
-      <span class="display-contents">Search <kbd class="hide-on-touch">S</kbd></span>
+  <div class="bar__placeholder" data-bar-target="buttonsContainer">
+    <%= tag.button class: "btn btn--ghost btn--sm", type: "button", title: "Search (S or ⌘K)", data: { keys: "s, mod+k", action: "bar#search" } do %>
+      Search <kbd class="hide-on-touch">S</kbd>
     <% end %>
   </div>
 
@@ -22,7 +23,7 @@
   <% end %>
 
   <footer class="bar__footer hide-on-touch" aria-hidden="true">
-    <span class="bar__footer-key"><kbd class="ui-kbd">↵</kbd> Search</span>
-    <span class="bar__footer-key"><kbd class="ui-kbd">Esc</kbd> Close</span>
+    <span class="bar__footer-key"><kbd>↵</kbd> Search</span>
+    <span class="bar__footer-key"><kbd>Esc</kbd> Close</span>
   </footer>
 </div>

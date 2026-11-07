@@ -1,0 +1,126 @@
+/* Sign-in, password, sign-up and OAuth pages, and the client portal's pages, on rune_ui's tokens
+/* (docs/rune-ui-migration.md). The two layouts' frames are in runwell.css (sections 6 and 7);
+/* this is what goes in them. Unlayered, so these win over rune's components.
+/*
+/* 1 The auth card   2 Portal pages   3 Portal cards, lists and tables   4 Portal forms */
+
+/* ======================================================================= 1 The auth card */
+
+/* One card that names the step in its centred header, then the fields, a full-width button and
+/* the other ways in. The card and its parts are roomier than rune's default card, as the old
+/* login blocks were: this card is the whole page. */
+.auth { display: flex; flex-direction: column; gap: var(--s-5); }
+.auth__card { gap: var(--s-5); padding: var(--s-5); }
+.auth__header { gap: var(--s-1); text-align: center; }
+.auth__title { font-size: var(--text-title); line-height: 1.2; letter-spacing: -.01em; }
+.auth__header .card__hint { color: var(--text-muted); font-size: var(--text-read); line-height: var(--leading); }
+.auth__strong { color: var(--text); }
+.auth__content { gap: var(--s-5); }
+.auth__form { gap: var(--s-5); }
+
+/* Password's label with "Forgot your password?" across from it. */
+.auth__label-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.auth__aside-link { color: var(--text); text-decoration: none; text-underline-offset: 4px; }
+.auth__aside-link:hover { color: var(--text); text-decoration: underline; }
+
+/* The two-factor code reads as six spaced digits. */
+.auth__code { font-variant-numeric: tabular-nums; letter-spacing: .2em; }
+
+/* Cancel and Connect on an OAuth consent share the row. */
+.auth__actions { display: flex; gap: var(--s-2); }
+.auth__actions .btn { flex: 1 1 0; }
+.auth__return { text-align: center; }
+
+/* Small muted lines under the card (another way in) and in the footer (what Runwell is). */
+.auth__note, .auth-footer { color: var(--text-muted); font-size: var(--text-read); text-align: center; text-wrap: balance; }
+.auth-footer { color: var(--text-faint); font-size: var(--text-meta); }
+:is(.auth__note, .auth-footer) a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+:is(.auth__note, .auth-footer) a:hover { color: var(--text); text-decoration-color: currentColor; }
+
+/* A wrong password (or code, or form) shakes the card once. */
+.auth__card--shake { animation: auth-shake 400ms both; }
+@keyframes auth-shake {
+  0% { transform: translateX(-2rem); }
+  25% { transform: translateX(2rem); }
+  50% { transform: translateX(-1rem); }
+  75% { transform: translateX(1rem); }
+}
+@media (prefers-reduced-motion: reduce) { .auth__card--shake { animation: none; } }
+
+/* ======================================================================= 2 Portal pages */
+
+/* The page's header (portal layout, from each page's :header): a trail, the title, what the page
+/* is for, and the record's status. Hidden when a page sets none. */
+.portal-page-header { display: flex; flex-direction: column; gap: 6px; }
+.portal-page-header:not(:has(h1, h2, nav, p)) { display: none; }
+.portal-page-header h1 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; }
+.portal-page-header__crumbs { padding-bottom: var(--s-2); font-weight: var(--weight); }
+.portal-page-header__description { color: var(--text-muted); font-size: var(--text-read); }
+.portal-page-header__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); padding-top: var(--s-1); }
+
+/* A record's page: the main column and a narrower one beside it, one column on a narrow screen. */
+.portal-grid { display: grid; align-items: start; gap: var(--s-5); }
+@media (min-width: 1024px) { .portal-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+.portal-grid__main, .portal-grid__side, .portal-stack { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+
+/* ======================================================================= 3 Portal cards, lists and tables */
+
+.portal-card:not(.card--flush) { padding: var(--s-5); }
+.portal-card.card--flush > .card__head { padding: var(--s-4) var(--s-5); }
+.portal-card--highlight { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+
+/* Rows in a flush card run edge to edge, the card's padding at their ends and a rule between. */
+.portal-card > .list { gap: 0; padding: 0; }
+.portal-card > .list > .list-row { padding: var(--s-3) var(--s-5); border-radius: 0; }
+.portal-card > .list > .list-row + .list-row { border-top: 1px solid var(--line); }
+.portal-card > .list .list-row__title { white-space: normal; overflow-wrap: anywhere; }
+.portal-card .empty--compact { padding: var(--s-5); color: var(--text-muted); font-size: var(--text-read); }
+
+/* A connected app's name, truncated, then Paused when it is. */
+.portal-token__title { display: flex; align-items: center; gap: var(--s-2); }
+.portal-token__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The new token's Copy button while the copy-to-clipboard controller says it worked. */
+.btn.portal-copied, .btn.portal-copied:hover { background: var(--text); border-color: transparent; color: var(--panel); }
+
+/* A document's row: the whole row is its link (documents/_link). */
+.portal-documents .document-link { flex: 1; min-width: 0; color: var(--text); text-decoration: none; }
+.portal-documents .document-link:hover { color: var(--text); }
+
+/* The engagement's description, and its facts: the label left, the value right. */
+.portal-prose { font-size: var(--text-read); line-height: 1.6; }
+.portal-prose .lexxy-content > :first-child { margin-top: 0; }
+.portal-prose .lexxy-content > :last-child { margin-bottom: 0; }
+.portal-details { grid-template-columns: minmax(0, 1fr) auto; font-size: var(--text-read); }
+.portal-details dd { font-weight: var(--weight-strong); text-align: right; }
+.portal-grid__side .custom-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line); font-size: var(--text-read); }
+.portal-grid__side .custom-fields__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+/* What plugins add to the portal's pages sits in a card; their settings sections take its padding. */
+.portal-slot .settings__section { padding-inline: 0; }
+
+/* Tables in a flush card: no frame of their own, the card's padding at the row ends, a tinted head. */
+.portal-card > .table-wrap { border: 0; border-radius: 0; background: none; }
+.portal-table thead tr { background: var(--layer-1); }
+.portal-table :is(th, td) { padding-inline: var(--s-3); }
+.portal-table td { padding-block: var(--s-3); }
+.portal-table :is(th, td):first-child { padding-left: var(--s-5); }
+.portal-table :is(th, td):last-child { padding-right: var(--s-5); }
+.portal-table__title { font-weight: var(--weight-strong); }
+.portal-table__ref { width: 1px; font-weight: var(--weight-strong); }
+.portal-table__date { width: 1px; }
+.portal-table :is(th, td).portal-table__status { width: 1px; text-align: right; }
+.portal-table__link { color: inherit; text-decoration: none; }
+.portal-table__link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 639px) { .portal-table__secondary { display: none; } }
+
+/* ======================================================================= 4 Portal forms */
+
+.portal-form-card { width: 100%; max-width: 42rem; }
+.portal-form { gap: var(--s-5); }
+.portal-form lexxy-editor { min-height: 10rem; }
+.portal-form__actions { justify-content: flex-end; }
+
+/* Making a key: the name takes the room, Read only and the button beside it, wrapping when narrow. */
+.portal-token-form { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+.portal-token-form__name { flex: 1 1 12rem; width: auto; }

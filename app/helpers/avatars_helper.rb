@@ -3,12 +3,9 @@ module AvatarsHelper
     user.avatar_background_color
   end
 
+  # A person's picture, larger (the sidebar's account, a person's page): rune_ui's avatar.
   def avatar_preview_tag(user, hidden_for_screen_reader: false, **options)
-    tag.span class: class_names("avatar", options.delete(:class)),
-      aria: { hidden: hidden_for_screen_reader, label: user.name },
-      tabindex: hidden_for_screen_reader ? -1 : nil do
-      avatar_image_tag(user, **options)
-    end
+    avatar(user.name, url: user_avatar_path(user), size: :lg, class: options.delete(:class))
   end
 
   def avatar_image_tag(user, **options)
@@ -20,23 +17,18 @@ module AvatarsHelper
   def person_tag(user, fallback: nil, size: nil)
     return (fallback ? tag.span(fallback, class: "person__none") : "".html_safe) unless user
 
-    tag.span class: class_names("person", "person--#{size}" => size), title: user.display_name do
-      avatar_image_tag(user, class: "person__avatar", alt: "", title: nil) +
-        tag.span(user.display_name, class: "for-screen-reader")
-    end
+    avatar(user.display_name, url: user_avatar_path(user), size: size == :large ? :lg : :md, class: "person")
   end
 
-  # A client's contacts as overlapping circles of initials: the first `limit`, then "+N" for the
+  # A client's contacts as overlapping circles of initials (rune_ui's avatar_stack): the first `limit`, then "+N" for the
   # rest. Each name is its tooltip and what a screen reader hears.
   def contact_stack(contacts, limit: 3)
     shown = contacts.first(limit)
     rest = contacts.size - shown.size
 
-    tag.span class: "contact-stack" do
-      circles = shown.map do |contact|
-        tag.span contact.initials, class: "contact-avatar contact-avatar--#{contact.avatar_tone}", title: contact.name, role: "img", aria: { label: contact.name }
-      end
-      circles << tag.span("+#{rest}", class: "contact-stack__more", title: contacts.drop(limit).map(&:name).to_sentence) if rest.positive?
+    tag.span class: "avatar-stack contact-stack" do
+      circles = shown.map { avatar(it.name, size: :md) }
+      circles << tag.span("+#{rest}", class: "avatar avatar--md avatar--more", title: contacts.drop(limit).map(&:name).to_sentence) if rest.positive?
       safe_join(circles)
     end
   end

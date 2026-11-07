@@ -14,8 +14,7 @@ class Portal::EngagementsControllerTest < ActionDispatch::IntegrationTest
     assert_equal %w[S-1 WO-1], response.parsed_body["engagements"].map { it["ref"] }.sort
   end
 
-  test "show lists sections and visible work, never internal notes" do
-    @landing.update!(estimate_notes: "Two sprints, internal only")
+  test "show lists sections and visible work" do
     work_per_section!(@landing)
     @landing.todos.last.update!(client_visible: false)
     get portal_engagement_path(@landing), as: :json
