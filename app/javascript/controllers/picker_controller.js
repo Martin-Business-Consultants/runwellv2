@@ -7,11 +7,13 @@ import { Controller } from "@hotwired/stimulus"
 // (a task's owners, Fizzy's assignments), current lists every choice made, each click turns one on
 // or off and the menu stays open; the answer replaces what shows beside it.
 export default class extends Controller {
-  static targets = [ "display", "list" ]
-  static values = { current: String, options: String, multiple: Boolean }
+  static targets = [ "display", "list", "form" ]
+  static values = { current: String, options: String, multiple: Boolean, popup: String, url: String, labelled: Boolean }
 
-  // dialog:show: bring in the page's shared choices, marking the current one.
+  // dialog:show: bring in the menu (if it isn't here yet) and the page's shared choices, marking
+  // the current one.
   fill() {
+    this.#materialize()
     if (!this.hasListTarget || !this.optionsValue || this.listTarget.children.length) return
 
     const template = document.getElementById(this.optionsValue)
@@ -22,6 +24,25 @@ export default class extends Controller {
     this.listTarget.querySelectorAll("[data-picker-value]").forEach(item => {
       item.setAttribute("aria-checked", current.includes(item.dataset.pickerValue))
     })
+  }
+
+  // A row carries only an empty <dialog>: its insides are on the page once (popup value), copied
+  // in the first time it opens, with the form pointed at this record (url value).
+  #materialize() {
+    if (!this.popupValue || this.hasFormTarget) return
+
+    const template = document.getElementById(this.popupValue)
+    const dialog = this.element.querySelector("dialog")
+    if (!template || !dialog) return
+
+    dialog.append(template.content.cloneNode(true))
+    const form = dialog.querySelector("form")
+    form.action = this.urlValue
+    if (this.labelledValue) {
+      const labelled = document.createElement("input")
+      Object.assign(labelled, { type: "hidden", name: "labelled", value: "1" })
+      form.append(labelled)
+    }
   }
 
   // A choice was clicked: show it now; the form goes on to save it. The menu closes on

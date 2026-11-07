@@ -7,7 +7,15 @@ image: runwell
 
 env:
   clear:
-    # Jobs (mail, in-place updates) run inside Puma: one container per install.
+    # Jobs (mail, in-place updates) run inside Puma: one container per install. A busy install
+    # runs them in a container of their own instead, so mail, search indexing and plugin work
+    # never take Puma's threads from pages: set SOLID_QUEUE_IN_PUMA: false in its destination
+    # and give it a job role there, on the same volume (the jobs share the web's SQLite files):
+    #
+    #   servers:
+    #     job:
+    #       hosts: [ <the web's host> ]
+    #       cmd: bin/jobs
     SOLID_QUEUE_IN_PUMA: true
 
 # Databases, uploaded files, backups and downloaded releases (RUNWELL_DATA_DIR). Without it each

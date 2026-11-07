@@ -124,6 +124,8 @@ class TasksController < ApplicationController
     # due date beside it (Overdue depends on the status), not a reload of the whole page. Refused,
     # the picker goes back to what was saved, and the reason shows.
     def answer_in_place(saved)
+      return answer_with_list(saved) if saved && @task.saved_change_to_status?
+
       @task.reload unless saved
       labelled = params[:labelled].present?
       picker = "tasks/status_dot"
@@ -159,6 +161,37 @@ class TasksController < ApplicationController
 
     # Added from the Work section on the work's or client's own page: that section again
     # (open work, and the section it was focused on) and the notice, without reloading the page.
+    # A status change from a list: the task moves to where it now belongs. On a piece of work's or
+    # a client's page, their Tasks section comes back as a stream, keeping its Open / Done / All
+    # filter and the section in focus (so marking one done takes it out of Open at once); on the
+    # Tasks index, where a filter may now leave it out, the page refreshes in place.
+    def answer_with_list(saved)
+      flash.now[:notice] = "#{@task.title}: #{@task.status.humanize.downcase}."
+      section = list_section_on_referer
+      return render(turbo_stream: turbo_stream.refresh(request_id: nil)) unless section
+
+      render turbo_stream: [ turbo_stream.replace("tasks", method: :morph, **section), turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
+    end
+
+    # The Tasks section of the page the change came from (its path and query), if it shows one.
+    def list_section_on_referer
+      referer = URI(request.referer.to_s)
+      query = Rack::Utils.parse_query(referer.query.to_s)
+      state = query["tasks"].presence_in(%w[open done all]) || "open"
+      route = Rails.application.routes.recognize_path(referer.path) rescue {}
+      case route.values_at(:controller, :action)
+      when %w[works show]
+        work = Work.find_by(ref: route[:ref].to_s.upcase) or return
+        item = query["item"] == "other" ? "other" : query["item"].presence&.to_i
+        { partial: "tasks/section", locals: { work: work, state: state, item: item } }
+      when %w[clients show]
+        client = Client.find_by(id: route[:id]) or return
+        { partial: "tasks/client_section", locals: { client: client, state: state } }
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
+
     def render_task_section(home)
       flash.now[:notice] = "Added."
       section = if home.is_a?(Work)

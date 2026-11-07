@@ -284,9 +284,8 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* ======================================================================= The side panel */
 
-/* A task beside the page (tasks/_panel, side-panel controller): a panel down the right edge. On a
-/* wide screen the page narrows to make room, so the list you opened it from stays in view; on a
-/* narrow one it covers the page. */
+/* A task over the page (tasks/_panel, side-panel controller): a panel floating down the right
+/* edge, over whatever is under it (the board keeps its full width); full screen on a phone. */
 .task-panel {
   --task-panel-width: min(32rem, 100vw - 1rem);
 
@@ -298,9 +297,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 }
 @keyframes task-panel-in { from { opacity: 0; translate: 1rem 0; } }
 @media (prefers-reduced-motion: reduce) { .task-panel { animation: none; } }
-@media (min-width: 1200px) {
-  body:has(.task-panel) .app .panel { margin-right: calc(min(32rem, 100vw - 1rem) + var(--s-4)); }
-}
 @media (max-width: 639px) { .task-panel { inset: 0; width: 100vw; border: 0; border-radius: 0; } }
 
 .task-panel__header { display: flex; align-items: center; gap: var(--s-2); }

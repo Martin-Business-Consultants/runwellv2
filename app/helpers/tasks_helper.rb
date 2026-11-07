@@ -42,6 +42,38 @@ module TasksHelper
 
   # The owners picker's people, on the page once like the others; each click puts that person on
   # the work or takes them off (Tasks::AssignmentsController).
+  # The status and owner menus' insides, on the page once like their choices: a row carries only
+  # its button and an empty <dialog>, and the picker copies this in the first time it opens,
+  # pointing the form at that task (picker controller, url value). Without these each row of a
+  # long table carried two dialogs' worth of forms nobody opened. No per-form token: the form's
+  # address is filled in later, and Turbo sends the page's token with the submission.
+  def task_status_popup_template
+    return if @task_status_popup_rendered
+
+    @task_status_popup_rendered = true
+    tag.template(id: "task-status-popup") do
+      safe_join([ tag.strong("Status", class: "popup__title"),
+        form_with(url: "#", method: :patch, authenticity_token: false, data: { picker_target: "form" }) do
+          hidden_field_tag(:inline, "status", id: nil) + tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
+        end ])
+    end
+  end
+
+  def task_owner_popup_template
+    return if @task_owner_popup_rendered
+
+    @task_owner_popup_rendered = true
+    tag.template(id: "task-owner-popup") do
+      safe_join([
+        tag.input(type: "search", class: "owner-picker__search", placeholder: "Who’s on it…", autocomplete: "off", aria: { label: "Find a person" },
+          data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" }),
+        form_with(url: "#", method: :post, authenticity_token: false, data: { picker_target: "form" }) do
+          tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
+        end,
+        tag.p("The first on leads.", class: "owner-picker__hint") ])
+    end
+  end
+
   def task_assignee_options_template
     return if @task_assignee_options_rendered
 

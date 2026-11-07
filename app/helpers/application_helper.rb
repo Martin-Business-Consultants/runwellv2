@@ -211,9 +211,18 @@ module ApplicationHelper
 
   # Sanitized HTML from a rich text field, with mentions rendered. Older values are plain
   # text, so they keep their line breaks.
+  # Rendered rich text depends only on its HTML (mentions and files render the same for everyone),
+  # so each is kept in this process's memory, keyed by the HTML's digest, rather than parsed and
+  # rendered again on every page (RICH_TEXT_CACHE, a few MB, oldest out first).
+  RICH_TEXT_CACHE = ActiveSupport::Cache::MemoryStore.new(size: 16.megabytes)
+
   def rich_text(html)
     return if html.blank?
 
+    RICH_TEXT_CACHE.fetch(Digest::SHA256.hexdigest(html)) { render_rich_text(html) }
+  end
+
+  def render_rich_text(html)
     html = simple_format(html) unless html.include?("<")
     # Always as HTML: during ReActionView's slots request Action Text's own templates would
     # otherwise render in the slots format and come back as data, not markup.

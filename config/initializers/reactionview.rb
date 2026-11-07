@@ -57,3 +57,26 @@ Herb::Analysis::TemplateDependencies.prepend(Module.new do
     super.tap { @analyses[path] = [ key, it ] }
   end
 end)
+
+# After every render, ReActionView sends the page's slot dependency map (which state each slot
+# reads), and Herb 0.11 rebuilds it from the templates each time: 30-50ms a page, more than the
+# page's own templates take, for the same answer. The map depends only on the template files (the
+# render passes no params), so keep each page's until a view changes: once per boot where code
+# doesn't reload, and in development until a template's modified time moves on.
+# (Not under Runwell::, which an initializer would define before lib/runwell.rb autoloads.)
+module SlotEnvelopeCache
+  ENVELOPES = Concurrent::Map.new
+
+  def self.views_version
+    return :static unless Rails.application.config.enable_reloading
+
+    Dir.glob(Rails.root.join("{app,engines}/**/views/**/*.erb").to_s).map { File.mtime(it).to_r }.max
+  end
+
+  def envelope(entry_point, params: {})
+    return super unless params.empty?
+
+    ENVELOPES.compute_if_absent([ entry_point.to_s, SlotEnvelopeCache.views_version ]) { super }
+  end
+end
+Herb::Engine::Slots::Dependencies.prepend(SlotEnvelopeCache)

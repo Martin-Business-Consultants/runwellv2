@@ -187,7 +187,7 @@ focuses its `autofocus` field.
 Stay on the page you're working from; bring the rest to it. Every state still has a real URL, so
 Back, refresh and links work, and there's no client-side router:
 
-- **The side panel**: a task opens beside the page (`tasks/_panel` in `layouts/shared/_side_panel`,
+- **The side panel**: a task opens over the page (`tasks/_panel` in `layouts/shared/_side_panel`,
   the `side-panel` controller on `<body>`), its state the page's own URL plus `?task=42`. A link
   that opens a task keeps `task_path` as its href and adds `data: side_panel_data(task)` (Cmd-click
   still opens the task's page). The layout renders the panel on a full load; a request for the
@@ -207,6 +207,10 @@ Back, refresh and links work, and there's no client-side router:
   subscribe with `turbo_stream_from`, and Turbo morphs them when someone else changes something
   (the tab that made the change ignores its own). Imports stay quiet. Notifications refresh the
   person's page (`turbo_stream_from Current.user, :notifications` in the layout)
+- **Status changes move the task**: changing a task's status in a list
+  (`TasksController#answer_with_list`) streams back the Tasks section of the work or client page
+  it came from, keeping its Open / Done / All filter and the section in focus, so a task marked
+  done leaves Open at once; on the Tasks index the page refreshes in place
 - **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
   shows after 200ms
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
@@ -447,6 +451,13 @@ ReActionView rules:
   form
 - Keep markup valid (no `<div>` inside `<p>`, every tag closed). Herb shows
   errors as an overlay in development and raises in test
+- Speed: after every render ReActionView sends the page's slot dependency map, which Herb 0.11
+  rebuilt from the templates each time (half of a page's render). `config/initializers/reactionview.rb`
+  keeps each page's map (`SlotEnvelopeCache`) until a view changes, beside its cache of Herb's
+  per-file analysis. Rich text renders once per distinct HTML (`ApplicationHelper::RICH_TEXT_CACHE`,
+  in memory). A row's status and owner menus are a button and an empty `<dialog>`: their insides
+  are page templates (`task_status_popup_template`, `task_owner_popup_template`) the picker copies in
+  on first open
 - Reactive features are experimental in 0.6. When something breaks, check the
   response of the `application/vnd.herb.slots+json` request the page makes
 - Don't pass an interpolated string to `turbo_frame_tag`
