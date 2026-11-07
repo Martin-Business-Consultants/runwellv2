@@ -302,9 +302,10 @@ swaps one query param, so filters are bookmarkable and Back works; the
 controller reads the params (`engagements#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
-Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter (`../rune_ui`,
-a path gem; its README lists every helper and class). A fix to a component goes in the gem, so
-both apps get it. Runwell's own CSS is in `app/assets/stylesheets`, after rune's (which is all in
+Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter
+(`Martin-Business-Consultants/rune_ui` on GitHub, locked by revision; to work on it beside the
+core, `bundle config local.rune_ui ../rune_ui`; its README lists every helper and class). A fix to
+a component goes in the gem, so both apps get it. Runwell's own CSS is in `app/assets/stylesheets`, after rune's (which is all in
 the `rune` layer, so Runwell's unlayered rules win), listed in order in `RUNWELL_STYLESHEETS`:
 the theming contract (`_global`, `appearance`, `font-face`), `rune-theme` (points rune's tokens
 at the palette), `runwell` (the shell: sidebar, page filter, settings layout, sign-in and portal
