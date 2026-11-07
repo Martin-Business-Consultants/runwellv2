@@ -262,11 +262,6 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 .work-focus__title { font-size: var(--text-read); }
 .work-focus__count { font-variant-numeric: tabular-nums; }
 
-/* Adding work in place (todos/_add, inside the record pages' record-add): the title, then owner,
-/* due date and scope item side by side as room allows, then Add at the end. */
-.record-add__form { gap: var(--s-3); width: 100%; }
-.record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: var(--s-3); }
-.record-add__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
 
 /* ======================================================================= 8 Copy for AI */
 
@@ -286,3 +281,38 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* An engagement's Work card: the Open / Done / All filter beside the List / Board switch. */
 .work-section__actions { display: flex; align-items: center; gap: var(--s-2); }
+
+/* ======================================================================= The side panel */
+
+/* A task beside the page (todos/_panel, side-panel controller): a panel down the right edge. On a
+/* wide screen the page narrows to make room, so the list you opened it from stays in view; on a
+/* narrow one it covers the page. */
+.task-panel {
+  --task-panel-width: min(32rem, 100vw - 1rem);
+
+  position: fixed; inset: var(--s-2) var(--s-2) var(--s-2) auto; z-index: calc(var(--z-bar) - 5);
+  display: flex; flex-direction: column; gap: var(--s-4); width: var(--task-panel-width);
+  padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid var(--line); border-radius: var(--radius-panel, var(--radius-lg)); background: var(--panel);
+  box-shadow: var(--shadow-popover); animation: task-panel-in .14s var(--ease, ease-out);
+}
+@keyframes task-panel-in { from { opacity: 0; translate: 1rem 0; } }
+@media (prefers-reduced-motion: reduce) { .task-panel { animation: none; } }
+@media (min-width: 1200px) {
+  body:has(.task-panel) .app .panel { margin-right: calc(min(32rem, 100vw - 1rem) + var(--s-4)); }
+}
+@media (max-width: 639px) { .task-panel { inset: 0; width: 100vw; border: 0; border-radius: 0; } }
+
+.task-panel__header { display: flex; align-items: center; gap: var(--s-2); }
+.task-panel__context { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
+.task-panel__context a { color: inherit; }
+.task-panel__actions { display: flex; align-items: center; gap: 2px; }
+.task-panel__title-form { gap: 0; }
+.task-panel__title { width: 100%; padding: var(--s-1) var(--s-2); margin-inline: calc(var(--s-2) * -1); border-color: transparent; background: none; box-shadow: none; font-size: var(--text-title); font-weight: var(--weight-strong); }
+.task-panel__title:hover { border-color: var(--line); }
+.task-panel__title:focus { border-color: var(--line-strong); background: var(--panel); }
+.task-panel__details dd { min-width: 0; }
+.task-panel__field { flex-direction: row; gap: 0; }
+.task-panel__field :is(select, .date-picker) { max-width: 16rem; }
+.task-panel__description { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+.task-panel .record-card { box-shadow: none; }

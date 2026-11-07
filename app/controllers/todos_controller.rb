@@ -59,8 +59,14 @@ class TodosController < ApplicationController
     todo = home.todos.new(todo_params.merge(created_by: current_user))
     if todo.save
       todo.record_event!("todo.created")
-      redirect_back fallback_location: home, notice: params[:record].present? ? "Added “#{todo.title}” to #{home_name(home)}." : "Added."
+      if params[:inline] == "work" && request.format.turbo_stream?
+        render_work_section(home)
+      else
+        redirect_back fallback_location: home, notice: params[:record].present? ? "Added “#{todo.title}” to #{home_name(home)}." : "Added."
+      end
     else
+      return refuse_in_place(todo.errors.full_messages.to_sentence) if params[:inline] == "work" && request.format.turbo_stream?
+
       redirect_back fallback_location: home, alert: todo.errors.full_messages.to_sentence
     end
   end
@@ -73,6 +79,9 @@ class TodosController < ApplicationController
 
   def update
     saved = @todo.update(todo_params)
+    if request.format.turbo_stream? && (params[:inline] == "panel" || (params[:inline].present? && side_panel_open_for?(@todo)))
+      return refresh_under_panel(saved)
+    end
     return answer_in_place(saved) if params[:inline].present? && request.format.turbo_stream?
 
     if saved
@@ -98,6 +107,10 @@ class TodosController < ApplicationController
 
   def destroy
     @todo.destroy
+    if row_removal?
+      closing = side_panel_open_for?(@todo) ? [ turbo_stream.update("side_panel", "") ] : []
+      return remove_row(@todo, notice: "Removed.", also: closing)
+    end
     # From a list, stay on it; from the todo's own pages (now gone), go to its engagement.
     if request.referer.to_s.include?(todo_path(@todo))
       redirect_to todo_home, notice: "Removed."
@@ -125,6 +138,36 @@ class TodosController < ApplicationController
     end
 
     def owner_filter = owner_filter_for(@owner)
+
+    # Is this todo the one open in the side panel of the page that sent the change (?task=)?
+    def side_panel_open_for?(todo)
+      Rack::Utils.parse_query(URI(request.referer.to_s).query.to_s)["task"] == todo.id.to_s
+    rescue URI::InvalidURIError
+      false
+    end
+
+    # A change from the side panel (or to the todo open in it): the page under the panel, panel and
+    # all, refreshes in place (a morph, scroll kept), so its row, card, counts and the panel agree.
+    def refresh_under_panel(saved)
+      if saved
+        flash[:notice] = "Saved."
+      else
+        flash[:alert] = @todo.errors.full_messages.to_sentence
+      end
+      render turbo_stream: turbo_stream.refresh(request_id: nil)
+    end
+
+    # Added from the Work section on the engagement's or client's own page: that section again
+    # (open work, and the section it was focused on) and the notice, without reloading the page.
+    def render_work_section(home)
+      flash.now[:notice] = "Added."
+      section = if home.is_a?(Engagement)
+        { partial: "todos/section", locals: { engagement: home, item: params[:inline_item].presence&.to_i } }
+      else
+        { partial: "todos/client_section", locals: { client: home } }
+      end
+      render turbo_stream: [ turbo_stream.replace("work", method: :morph, **section), turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
+    end
 
     def home_name(home) = home.is_a?(Engagement) ? "#{home.ref} #{home.title}" : home.name
 

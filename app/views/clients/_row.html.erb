@@ -1,6 +1,6 @@
 <%# locals: (client:, listed:) %>
 <%# One client in the index's data table (ui/_data_table): the cells in the columns' order. %>
-<tr data-filter-target="item">
+<tr id="<%= dom_id(client, :row) %>" data-filter-target="item">
   <%= bulk_select_cell client, client.name %>
   <td data-column="name"><%= link_to client.name, client, class: "row-link" %></td>
   <td data-column="status"><%= render "clients/status_picker", client: client %></td>

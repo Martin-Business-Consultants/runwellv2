@@ -13,7 +13,7 @@
     fixed: false, the columns' widths hold still (table_colgroup). %>
 <% hideable = columns.select(&:hideable) %>
 <% fixed = true if fixed.nil? %>
-<div class="data-table-wrap" data-controller="data-table" data-data-table-key-value="<%= id %>">
+<div class="data-table-wrap" data-controller="<%= actions ? "data-table row-delete" : "data-table" %>" data-data-table-key-value="<%= id %>">
   <% if hideable.size > 1 && !actions %>
     <div class="data-table-wrap__toolbar">
       <%= render "ui/data_table_columns", id: id, columns: hideable %>
@@ -51,6 +51,9 @@
     </table>
   </div>
 
+  <% if actions %>
+    <%= render "layouts/shared/row_delete_dialog" %>
+  <% end %>
   <% if empty && rows.none? %>
     <%= render "layouts/shared/empty", text: empty %>
   <% end %>

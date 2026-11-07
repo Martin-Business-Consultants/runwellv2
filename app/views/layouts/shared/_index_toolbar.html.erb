@@ -1,4 +1,4 @@
-<%# locals: (view: nil, extra_views: nil, new_text: nil, new_path: nil) %>
+<%# locals: (view: nil, extra_views: nil, new_text: nil, new_path: nil, new_modal: nil) %>
 <%# An index page's top row: the page's filter pills (content_for :index_filters), and across
     from them the view toggle and New button. While table rows are picked, the bulk bar
     (content_for :index_bulk, BulkHelper) takes the row: its actions where the filters were, Delete
@@ -18,7 +18,7 @@
       <%= render "layouts/shared/view_toggle", current: view, extra: extra_views %>
     <% end %>
     <% if new_path %>
-      <%= render "layouts/shared/new_link", text: new_text, path: new_path %>
+      <%= render "layouts/shared/new_link", text: new_text, path: new_path, modal: new_modal %>
     <% end %>
   </div>
 </div>

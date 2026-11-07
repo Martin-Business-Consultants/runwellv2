@@ -1,7 +1,11 @@
 <% @page_title = "New " + term(:engagement).downcase %>
 <% client = @engagement.client %>
 <% existing = client ? client.engagements.includes(:client).order(created_at: :desc).limit(8).to_a : [] %>
-
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <%= render "engagements/form", engagement: @engagement, modal: true %>
+  <% end %>
+<% else %>
 <%= parent_page term(:engagement, count: 2), engagements_path %>
 
 <section class="record-page">
@@ -68,3 +72,4 @@
     <% end %>
   </aside>
 </section>
+<% end %>

@@ -1,0 +1,9 @@
+<%# locals: (todo: nil) %>
+<%# The side panel's frame (side-panel controller): empty, or the task named by ?task= on the page
+    you're on (todos/_panel). The layout renders it, and so does ApplicationController for a frame
+    request, which skips the page's own work. %>
+<turbo-frame id="side_panel" data-side-panel-target="frame" data-turbo-action="advance">
+  <% if todo %>
+    <%= render "todos/panel", todo: todo %>
+  <% end %>
+</turbo-frame>

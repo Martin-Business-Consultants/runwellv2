@@ -1,4 +1,15 @@
 <% @page_title = "Invite someone" %>
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <section class="settings-section record-modal__body">
+      <header class="settings-section__head">
+        <h2><%= @page_title %></h2>
+        <p class="settings-section__description">They get an email with a link to choose a name and password.</p>
+      </header>
+      <%= render "users/invitations/form", invitation: @invitation, modal: true %>
+    </section>
+  <% end %>
+<% else %>
 <%= parent_page "Users", users_path %>
 
 <div class="person-page person-page--split">
@@ -8,18 +19,7 @@
         <h1><%= @page_title %></h1>
         <p class="settings-section__description">They get an email with a link to choose a name and password. It works once and expires in <%= distance_of_time_in_words(0, Invitation::EXPIRES_IN) %>.</p>
       </header>
-      <%= form_with model: @invitation, url: user_invitations_path, class: "settings-form" do |form| %>
-        <div class="field">
-          <%= form.label :email_address, "Email address", class: "field__label" %>
-          <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "off", placeholder: "name@example.com" %>
-        </div>
-        <div class="field">
-          <%= form.label :role, "Role", class: "field__label" %>
-          <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {} %>
-          <p class="field__hint">What they may do; see each role on the right.</p>
-        </div>
-        <div><button type="submit" class="btn btn--primary">Send invitation</button></div>
-      <% end %>
+      <%= render "users/invitations/form", invitation: @invitation %>
     </section>
   </div>
 
@@ -63,3 +63,4 @@
     <% end %>
   </aside>
 </div>
+<% end %>

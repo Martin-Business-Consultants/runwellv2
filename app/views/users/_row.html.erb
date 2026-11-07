@@ -1,6 +1,6 @@
 <%# locals: (person:, manage:) %>
 <%# One person in the users index's data table (ui/_data_table): the cells in the columns' order. %>
-<tr data-filter-target="item">
+<tr id="<%= dom_id(person, :row) %>" data-filter-target="item">
   <% if manage %>
     <%= bulk_select_cell person, person.display_name %>
   <% end %>

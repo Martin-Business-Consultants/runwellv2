@@ -2,6 +2,10 @@
 module TodoBoardScoped
   extend ActiveSupport::Concern
 
+  included do
+    helper_method :board_todos
+  end
+
   private
 
   # A move the todo refuses (a rule a plugin adds, say): the page refreshes, so the card goes

@@ -1,6 +1,7 @@
 <%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, todo: nil) %>
 <%# A table row's last cell: edit and delete, each only when the record allows it (and
-    delete only for people who may delete records). %>
+    delete only for people who may delete records). Delete opens the table's one dialog
+    (layouts/shared/_row_delete_dialog), which its button fills in. %>
 <td class="data-table__actions">
   <div class="data-table__actions-row">
     <% if todo %>
@@ -13,7 +14,7 @@
       <% end %>
     <% end %>
     <% if delete_path && can?(:delete_records) %>
-      <%= render "layouts/shared/delete_dialog", name: name, path: delete_path, message: delete_message, trigger_class: "row-action", keys: "d" %>
+      <%= row_delete_button name: name, path: delete_path, message: delete_message %>
     <% end %>
   </div>
 </td>

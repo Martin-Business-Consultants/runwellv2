@@ -13,7 +13,7 @@
     <% end %>
   <% end %>
 <% end %>
-<%= render "layouts/shared/index_toolbar", view: @view, new_text: ("Invite someone" if manage), new_path: (new_user_invitation_path if manage) %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: ("Invite someone" if manage), new_path: (new_user_invitation_path if manage), new_modal: true %>
 
 <% if @people.any? %>
   <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),

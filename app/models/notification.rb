@@ -1,4 +1,5 @@
 class Notification < ApplicationRecord
+  include LiveRefreshes
   belongs_to :user
   belongs_to :creator, class_name: "User"
   belongs_to :source, polymorphic: true
@@ -34,4 +35,6 @@ class Notification < ApplicationRecord
     def deliver_later
       NotificationMailer.notification(self).deliver_later
     end
+
+    def live_streams = [ [ user, :notifications ] ]
 end

@@ -1,7 +1,7 @@
-<%# locals: (engagement:) %>
+<%# locals: (engagement:, modal: nil) %>
 <%= render "layouts/shared/errors", record: engagement %>
 
-<%= form_with model: engagement, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+<%= form_with model: engagement, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do |form| %>
   <header class="card__head">
     <h2 class="card__title"><%= term(:engagement) %></h2>
     <p class="card__hint">Who it’s for, what kind it is, and what it covers.</p>
@@ -44,7 +44,11 @@
   </div>
 
   <footer class="card__footer card__footer--bordered">
-    <%= link_to "Cancel", engagement.persisted? ? engagement_path(engagement) : engagements_path, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% if modal %>
+      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+    <% else %>
+      <%= link_to "Cancel", engagement.persisted? ? engagement_path(engagement) : engagements_path, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% end %>
     <button type="submit" class="btn btn--primary" data-form-target="submit">
       <span><%= engagement.new_record? ? "Draft engagement" : "Save changes" %></span>
     </button>

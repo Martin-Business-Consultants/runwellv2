@@ -24,13 +24,13 @@
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
   <div class="card-columns__left"></div>
 
-  <%= render "todos/board/stream", count: counts.fetch("planned", 0) %>
+  <%= render "todos/board/stream", count: counts.fetch("planned", 0), board: board %>
 
   <div class="card-columns__right">
     <% Todo::BOARD_COLUMNS.each do |status| %>
       <%# herb:key status %>
-      <%= render "todos/board/column", status: status, count: counts.fetch(status, 0) %>
+      <%= render "todos/board/column", status: status, count: counts.fetch(status, 0), board: board %>
     <% end %>
-    <%= render "todos/board/closed", count: counts.fetch("done", 0) %>
+    <%= render "todos/board/closed", count: counts.fetch("done", 0), board: board %>
   </div>
 <% end %>

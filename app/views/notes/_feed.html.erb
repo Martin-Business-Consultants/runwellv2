@@ -1,0 +1,35 @@
+<%# locals: (subject:) %>
+<%# A record's notes, newest first, under the composer (notes/_section). Adding one from the
+    composer replaces just this (NotesController#create answers a turbo stream), so the editor
+    above stays as it is. %>
+<div class="notes-feed" id="<%= dom_id(subject, :notes_feed) %>">
+  <% notes = subject.notes.recent.includes(:author) %>
+  <% if notes.any? %>
+    <ul class="record-feed">
+      <% notes.each do |note| %>
+        <%# herb:key note.id %>
+        <li data-filter-target="item" class="record-feed__item">
+          <span class="record-feed__avatar"><%= person_tag note.author %></span>
+          <div class="record-feed__body">
+            <div class="record-feed__head">
+              <p class="record-feed__meta dot-list">
+                <span class="badge badge--outline"><%= note.kind.humanize %></span>
+                <time datetime="<%= note.occurred_at.iso8601 %>"><%= l(note.occurred_at, format: :short) %></time>
+                <% if note.source.present? %>
+                  <span><%= note.source %></span>
+                <% end %>
+              </p>
+              <% if note.deletable_by?(Current.user) %>
+                <%= render "layouts/shared/delete_dialog", name: "this note", path: note_path(note) %>
+              <% end %>
+            </div>
+            <div class="record-feed__text"><%= rich_text note.body %></div>
+            <%= plugin_slots(:note_row, note: note) %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="record-card__empty">No notes yet.</p>
+  <% end %>
+</div>

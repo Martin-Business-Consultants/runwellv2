@@ -1,8 +1,8 @@
 <%# locals: (todo:, listed:) %>
 <%# One piece of work in the index's data table (ui/_data_table): the cells in the columns' order. %>
-<tr data-filter-target="item">
+<tr id="<%= dom_id(todo, :row) %>" data-filter-target="item">
   <%= bulk_select_cell todo, todo.title %>
-  <td data-column="title"><%= link_to todo.title, todo_path(todo) %></td>
+  <td data-column="title"><%= link_to todo.title, todo_path(todo), data: side_panel_data(todo) %></td>
   <td class="nowrap" data-column="engagement">
     <% if todo.engagement %>
       <%= link_to todo.engagement.ref, todo.engagement, class: "work-table__ref" %>

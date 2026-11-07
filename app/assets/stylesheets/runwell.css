@@ -20,7 +20,7 @@ turbo-frame { display: contents; }
 /* for less motion. */
 @view-transition { navigation: auto; }
 .sidebar { view-transition-name: sidebar; }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: .16s; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .1s; }
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }

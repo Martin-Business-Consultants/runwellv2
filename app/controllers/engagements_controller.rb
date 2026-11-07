@@ -76,9 +76,14 @@ class EngagementsController < ApplicationController
   def destroy
     if @engagement.deletable?
       @engagement.destroy!
+      return remove_row(@engagement, notice: "#{@engagement.ref} deleted.") if row_removal?
+
       redirect_to engagements_path, notice: "#{@engagement.ref} deleted."
     else
-      redirect_back fallback_location: @engagement, alert: "#{@engagement.ref} has work on it, so it can’t be deleted. Close it instead."
+      alert = "#{@engagement.ref} has work on it, so it can’t be deleted. Close it instead."
+      return refuse_in_place(alert) if row_removal?
+
+      redirect_back fallback_location: @engagement, alert: alert
     end
   end
 

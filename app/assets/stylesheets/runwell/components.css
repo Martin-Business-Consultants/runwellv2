@@ -348,3 +348,9 @@ lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); 
 .upload-drop progress { flex-basis: 100%; width: 100%; height: 4px; accent-color: var(--accent); }
 .upload-drop[aria-busy="true"], form[aria-busy="true"] .upload-drop { cursor: progress; }
 .styleguide-skeleton { width: 12rem; }
+
+/* ======================================================================= Pending */
+
+/* While a form is on its way (Turbo marks it aria-busy), its submit button dims and takes no
+/* second click, so a save is never sent twice and you can see it's working. */
+form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacity: .6; cursor: progress; pointer-events: none; }

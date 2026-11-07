@@ -1,6 +1,10 @@
 <% @page_title = "New " + term(:client).downcase %>
 <% recent = Client.order(created_at: :desc).limit(6).to_a %>
-
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <%= render "clients/form", client: @client, modal: true %>
+  <% end %>
+<% else %>
 <%= parent_page term(:client, count: 2), clients_path %>
 
 <section class="record-page">
@@ -54,3 +58,4 @@
     <% end %>
   </aside>
 </section>
+<% end %>

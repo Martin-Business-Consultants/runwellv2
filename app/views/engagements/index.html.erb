@@ -1,4 +1,5 @@
 <% @page_title = term(:engagement, count: 2) %>
+<%= turbo_stream_from :engagements %>
 <% listed = CustomField.for("Engagement").listed.to_a %>
 
 <% content_for :index_filters do %>
@@ -16,7 +17,7 @@
   <% end %>
   <% end %>
 <% end %>
-<%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:engagement).downcase, new_path: new_engagement_path %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:engagement).downcase, new_path: new_engagement_path, new_modal: true %>
 
 <% if @engagements.any? %>
   <% columns = [ ui_column(:ref, "Ref", sort: :ref, width: [ @column_widths[:ref], "Ref" ], hideable: false),

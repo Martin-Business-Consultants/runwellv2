@@ -1,0 +1,71 @@
+<%# locals: (todo:) %>
+<%# A task in the side panel (layouts/shared/_side_panel), beside the page you opened it from:
+    where it sits, its title, status, who's on it, due date and section, each saved as you change
+    it, its description and its notes. Saving refreshes the page under it in place
+    (TodosController#update), and others' changes arrive live (turbo_stream_from). Open goes to
+    its own page; Esc or ✕ closes it. %>
+<section class="task-panel" id="<%= dom_id(todo, :panel) %>" aria-label="<%= todo.title %>">
+  <%= turbo_stream_from todo %>
+  <header class="task-panel__header">
+    <p class="task-panel__context">
+      <% if todo.engagement %>
+        <%= link_to todo.engagement.ref + " " + todo.engagement.title, todo.engagement, data: { turbo_frame: "_top" } %>
+      <% elsif todo.client %>
+        <%= link_to todo.client.name, todo.client, data: { turbo_frame: "_top" } %>
+      <% else %>
+        <span>No <%= term(:client).downcase %> yet</span>
+      <% end %>
+    </p>
+    <div class="task-panel__actions">
+      <%= render "todos/ai_brief", todo: todo %>
+      <%= link_to todo_path(todo), class: "icon-button", title: "Open its page", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "maximize" %>
+        <span class="visually-hidden">Open <%= todo.title %> on its own page</span>
+      <% end %>
+      <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close">
+        <%= icon_tag "close" %>
+        <span class="visually-hidden">Close</span>
+      </button>
+    </div>
+  </header>
+
+  <%= form_with model: todo, url: todo_path(todo), method: :patch, namespace: dom_id(todo, :panel_title), class: "task-panel__title-form", data: { controller: "form" } do |form| %>
+    <%= hidden_field_tag :inline, "panel", id: nil %>
+    <%= form.text_field :title, class: "task-panel__title", required: true, autocomplete: "off", aria: { label: "Title" }, data: { action: "change->form#submit" } %>
+  <% end %>
+
+  <dl class="details task-panel__details">
+    <dt>Status</dt><dd><%= render "todos/status_dot", todo: todo, labelled: true %></dd>
+    <dt>On it</dt><dd><%= render "todos/owner_picker", todo: todo, labelled: true %></dd>
+    <dt>Due</dt>
+    <dd>
+      <%= form_with model: todo, url: todo_path(todo), method: :patch, namespace: dom_id(todo, :panel_due), class: "task-panel__field", data: { controller: "form" } do |form| %>
+        <%= hidden_field_tag :inline, "panel", id: nil %>
+        <%= date_input form, :due_on, aria: { label: "Due" }, data: { action: "change->form#submit" } %>
+      <% end %>
+    </dd>
+    <% if todo.engagement %>
+      <dt><%= term(:scope_item) %></dt>
+      <dd>
+        <%= form_with model: todo, url: todo_path(todo), method: :patch, namespace: dom_id(todo, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
+          <%= hidden_field_tag :inline, "panel", id: nil %>
+          <%= form.select :scope_item_id, todo.engagement.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other work" }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
+        <% end %>
+      </dd>
+    <% end %>
+  </dl>
+
+  <div class="task-panel__description">
+    <% if todo.description.present? %>
+      <div class="record-card__prose"><%= rich_text todo.description %></div>
+    <% else %>
+      <p class="muted">No description.</p>
+    <% end %>
+    <%= link_to edit_todo_path(todo), class: "btn btn--secondary btn--sm", data: { turbo_frame: "_top" } do %>
+      <%= icon_tag "pencil" %>
+      <span>Edit details</span>
+    <% end %>
+  </div>
+
+  <%= render "notes/section", subject: todo, permanent: false %>
+</section>

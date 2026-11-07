@@ -4,7 +4,7 @@
     record-list; work.css adds what's particular to work. %>
 <li data-filter-target="item" class="record-list__row todo-item">
   <%= render "todos/status_dot", todo: todo %>
-  <%= link_to todo_path(todo), class: "record-list__main" do %>
+  <%= link_to todo_path(todo), class: "record-list__main", data: side_panel_data(todo) do %>
     <span class="record-list__title"><%= todo.title %></span>
     <span class="record-list__description"><%= todo_details(todo, with_engagement: with_engagement) %></span>
   <% end %>

@@ -1,4 +1,5 @@
 class Note < ApplicationRecord
+  include LiveRefreshes
   include Searchable, Mentions
 
   mentionable_fields :body
@@ -25,4 +26,7 @@ class Note < ApplicationRecord
   def search_title = "#{kind.humanize} note"
   def search_content = body
   def search_client_id = subject.is_a?(Client) ? subject.id : subject.try(:client_id) || subject.try(:client)&.id
+
+  private
+    def live_streams = [ subject, subject.try(:engagement), subject.try(:client) ]
 end

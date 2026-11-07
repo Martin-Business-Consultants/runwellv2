@@ -8,6 +8,7 @@
 <% tab = current_record_tab(tabs, "work") %>
 
 <%= parent_page @engagement.ref, @engagement %>
+<%= turbo_stream_from @item %>
 
 <section class="record-page">
   <header class="record-page__header">
@@ -48,7 +49,7 @@
 
               <% unless @engagement.closed? %>
                 <footer class="card__footer">
-                  <%= render "todos/add", engagement: @engagement, scope_item: @item %>
+                  <%= render "todos/add", engagement: @engagement, scope_item: @item, inline: false %>
                 </footer>
               <% end %>
             </section>

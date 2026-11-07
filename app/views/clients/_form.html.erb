@@ -1,8 +1,8 @@
-<%# locals: (client:, internal_aside: nil) %>
+<%# locals: (client:, internal_aside: nil, modal: nil) %>
 <%# internal_aside: the edit page puts the Internal switch in its sidebar, tied to this form by id. %>
 <%= render "layouts/shared/errors", record: client %>
 
-<%= form_with model: client, id: dom_id(client, :form), class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+<%= form_with model: client, id: dom_id(client, :form), class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do |form| %>
   <header class="card__head">
     <h2 class="card__title"><%= term(:client) %></h2>
     <p class="card__hint">Their name, where they stand, and the time zone their portal uses.</p>
@@ -35,7 +35,11 @@
   </div>
 
   <footer class="card__footer card__footer--bordered">
-    <%= link_to "Cancel", client.new_record? ? clients_path : client_path(client), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% if modal %>
+      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+    <% else %>
+      <%= link_to "Cancel", client.new_record? ? clients_path : client_path(client), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% end %>
     <button type="submit" class="btn btn--primary" data-form-target="submit">
       <span><%= client.new_record? ? "Add client" : "Save changes" %></span>
     </button>

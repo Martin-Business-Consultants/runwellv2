@@ -10,6 +10,13 @@ module TodosBoardHelper
     { "in_progress" => "var(--color-card-4)", "in_review" => "var(--color-card-6)", "blocked" => "var(--color-card-8)" }.fetch(status)
   end
 
+  # A column's first page of cards, rendered with the board so it doesn't wait on a request of its
+  # own (later pages load from Todos::ColumnsController as the column scrolls, in the same order).
+  def todo_board_page(board, status)
+    todos = board.where(status: status).then { status == "done" ? it.order(:due_on, :position) : it.board_ordered }
+    GearedPagination::Recordset.new(todos).page(1)
+  end
+
   # The filters the board's column frames and drops carry: the page's query (Work), or what the
   # page set (@board_filters: an engagement's Work tab shows everyone's work on it).
   def todo_board_filters

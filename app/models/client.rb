@@ -1,5 +1,6 @@
 class Client < ApplicationRecord
   include Eventful, Noted, Searchable, Documentable, CustomFields
+  include LiveRefreshes
 
   STATUSES = %w[active dormant former].freeze
 
@@ -43,4 +44,7 @@ class Client < ApplicationRecord
   def search_client_id = id
 
   ActiveSupport.run_load_hooks(:runwell_client, self)
+
+  private
+    def live_streams = [ self, :clients ]
 end

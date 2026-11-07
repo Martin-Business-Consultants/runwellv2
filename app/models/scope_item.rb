@@ -1,6 +1,7 @@
 # A section of an engagement: a part of what it delivers, grouping the work under it. Added,
 # renamed, reordered and removed on the engagement; its state comes from its work.
 class ScopeItem < ApplicationRecord
+  include LiveRefreshes
   include Noted, Documentable
 
   belongs_to :engagement, inverse_of: :scope_items
@@ -24,4 +25,7 @@ class ScopeItem < ApplicationRecord
   end
 
   def progress = [ todos.count { |todo| todo.status == "done" }, todos.size ]
+
+  private
+    def live_streams = [ self, engagement ]
 end

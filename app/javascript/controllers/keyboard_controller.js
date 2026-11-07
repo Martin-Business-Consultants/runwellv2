@@ -223,8 +223,9 @@ export default class extends Controller {
 
   // Items
 
+  // The page's items, not the side panel's (its notes), so j / k keep moving down the list.
   #items() {
-    return Array.from(document.querySelectorAll(ITEM)).filter(usable)
+    return Array.from(document.querySelectorAll(ITEM)).filter(item => usable(item) && !item.closest(".task-panel"))
   }
 
   #step(delta, event) {
@@ -247,6 +248,7 @@ export default class extends Controller {
     if (!item.hasAttribute("tabindex")) item.tabIndex = -1
     item.focus({ preventScroll: true })
     item.scrollIntoView({ block: "nearest" })
+    item.dispatchEvent(new CustomEvent("keyboard:select", { bubbles: true }))
   }
 
   #clear(event) {

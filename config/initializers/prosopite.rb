@@ -14,7 +14,9 @@ if defined?(Prosopite)
     # - a status change re-places the todo in its lists (positioning, TodosController#update)
     # - erasing an engagement destroys what hangs off each record
     Prosopite.allow_stack_paths = [ "app/models/agent/resolver.rb", "app/controllers/concerns/bulk_action.rb",
-      "TodosController#update", "Engagement#erase!" ]
+      "TodosController#update", "Engagement#erase!",
+      # The board renders each column's first page (one query a column, a handful, on purpose).
+      "app/views/todos/board/_cards.html.erb" ]
   end
 
   # Prosopite tells queries apart with pg_query, a Postgres parser, which can't read SQLite's ?

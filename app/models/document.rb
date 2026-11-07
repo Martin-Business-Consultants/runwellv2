@@ -1,6 +1,7 @@
 # A file kept on a client, engagement, scope item, todo or request. Staff see them all; the
 # client portal shows only the ones marked client_visible.
 class Document < ApplicationRecord
+  include LiveRefreshes
   include Searchable
 
   belongs_to :documentable, polymorphic: true
@@ -30,4 +31,6 @@ class Document < ApplicationRecord
     def file_within_limit
       errors.add(:file, "is over the #{ActiveSupport::NumberHelper.number_to_human_size(MAX_SIZE)} limit") if file.attached? && file.byte_size > MAX_SIZE
     end
+
+    def live_streams = [ documentable, documentable.try(:engagement), documentable.try(:client) ]
 end

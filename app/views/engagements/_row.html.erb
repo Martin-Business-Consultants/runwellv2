@@ -1,6 +1,6 @@
 <%# locals: (engagement:, listed:) %>
 <%# One engagement in the index's data table (ui/_data_table): the cells in the columns' order. %>
-<tr data-filter-target="item">
+<tr id="<%= dom_id(engagement, :row) %>" data-filter-target="item">
   <%= bulk_select_cell engagement, engagement.ref %>
   <td class="nowrap" data-column="ref"><%= link_to engagement.ref, engagement, class: "row-link" %></td>
   <td data-column="title"><%= link_to engagement.title, engagement, class: "engagement-row__title" %></td>

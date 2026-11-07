@@ -10,6 +10,7 @@
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
 <%= parent_page term(:client, count: 2), clients_path %>
+<%= turbo_stream_from @client %>
 
 <section class="record-page">
   <header class="record-page__header">

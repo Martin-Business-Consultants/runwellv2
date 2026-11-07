@@ -6,7 +6,7 @@
   <%# Staff pages: rune_ui's shell (the nav down the left, the page in an inset panel under a bar
       with the nav's toggle and the breadcrumb). Runwell's keys (keyboard), the details sidebar
       (panes, ]), the "/" filter (filter) and bulk actions (bulk) ride on it. %>
-  <body class="<%= class_names(@body_class) %>" data-controller="keyboard panes">
+  <body class="<%= class_names(@body_class) %>" data-controller="keyboard panes side-panel" data-action="keyboard:select->side-panel#follow">
     <a href="#main" class="skip-link" data-turbo="false">Skip to main content</a>
     <% if authenticated? %>
       <%= crumbs(*breadcrumb_items) %>
@@ -42,6 +42,9 @@
           <%= render "notifications/tray" %>
         </div>
         <%= render "quick_actions/tray" %>
+        <%= render "layouts/shared/side_panel", todo: side_panel_todo %>
+        <%= turbo_stream_from Current.user, :notifications %>
+        <turbo-frame id="modal"></turbo-frame>
       <% end %>
       <% if authenticated? %>
         <%= render "layouts/shared/hint_legend" %>

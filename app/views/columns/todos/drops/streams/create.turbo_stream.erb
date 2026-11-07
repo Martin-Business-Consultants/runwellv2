@@ -1,1 +1,1 @@
-<%= turbo_stream.replace("planned-todos", partial: "todos/board/stream", method: :morph, locals: { count: @count }) %>
+<%= turbo_stream.replace("planned-todos", partial: "todos/board/stream", method: :morph, locals: { count: @count, board: board_todos }) %>

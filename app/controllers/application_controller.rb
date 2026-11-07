@@ -13,7 +13,9 @@ class ApplicationController < ActionController::Base
   before_action { Current.source = Current.agent? ? "agent" : "app" }
   before_action :refuse_read_only_writes
   before_action :remember_host
+  before_action :render_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
   around_action :in_install_time_zone
+  helper_method :side_panel_todo
 
   private
 
@@ -26,6 +28,33 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user = Current.user
+
+  # The task open in the side panel (?task=42 on any staff page), or nil.
+  def side_panel_todo
+    return unless Current.user && !Current.agent? && params[:task].present?
+
+    @side_panel_todo ||= Todo.includes(:engagement, :client, :scope_item, :owner, assignments: :user).find_by(id: params[:task])
+  end
+
+  # A record deleted from its table row (the table's one delete dialog sends inline=row): that row
+  # goes and the notice shows, with no reload; a refusal shows where you are. Elsewhere, redirects.
+  def row_removal? = params[:inline] == "row" && request.format.turbo_stream?
+
+  def remove_row(record, notice:, also: [])
+    flash.now[:notice] = notice
+    render turbo_stream: [ turbo_stream.remove(helpers.dom_id(record, :row)), *also, turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
+  end
+
+  def refuse_in_place(alert)
+    flash.now[:alert] = alert
+    render turbo_stream: turbo_stream.replace("flash", partial: "layouts/shared/flash"), status: :unprocessable_entity
+  end
+
+  # Opening or closing the side panel loads just its frame: the page under it stays as it is, so
+  # its own action needn't run.
+  def render_side_panel
+    render partial: "layouts/shared/side_panel", locals: { todo: side_panel_todo }, layout: false
+  end
 
   # Until someone sets the address (Settings > Address or APP_HOST), mail links to the one
   # signed-in people reach Runwell at (Runwell.host). Health checks and bare IPs don't count.

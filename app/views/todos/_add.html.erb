@@ -1,10 +1,18 @@
-<%# locals: (engagement: nil, client: nil, scope_item: nil) %>
-<%# Adds work on an engagement (under one of its scope items, or other work), or straight on a client. %>
+<%# locals: (engagement: nil, client: nil, scope_item: nil, inline: nil) %>
+<%# Adds work on an engagement (under one of its scope items, or other work), or straight on a client.
+    In the Work section of an engagement's or client's page it comes back as that section alone
+    (TodosController#create); inline: false where the page shows its work another way. %>
 <% home = engagement || client %>
 <details class="record-add">
-  <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add a todo</summary>
+  <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add <%= term(:work).downcase %></summary>
   <%= form_with model: Todo.new, url: (engagement ? engagement_todos_path(engagement) : client_todos_path(client)), namespace: dom_id(scope_item || home, :new_todo),
         class: "record-add__form", data: { controller: "form" } do |form| %>
+    <% unless inline == false %>
+      <%= hidden_field_tag :inline, "work", id: nil %>
+      <% if scope_item %>
+        <%= hidden_field_tag :inline_item, scope_item.id, id: nil %>
+      <% end %>
+    <% end %>
     <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "What needs doing…", aria: { label: "Title" } %>
     <div class="record-add__fields">
       <%= form.select :owner_id, todo_owner_options, { include_blank: "Unassigned" }, aria: { label: "Owner" } %>
@@ -16,7 +24,7 @@
       <% end %>
     </div>
     <div class="record-add__actions">
-      <button type="submit" class="btn btn--primary btn--sm">Add a todo</button>
+      <button type="submit" class="btn btn--primary btn--sm">Add <%= term(:work).downcase %></button>
     </div>
   <% end %>
 </details>

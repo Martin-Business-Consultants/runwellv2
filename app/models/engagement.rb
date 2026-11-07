@@ -3,6 +3,7 @@
 class Engagement < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
   include Refs, CustomFields
+  include LiveRefreshes
 
   mentionable_fields :description
 
@@ -130,4 +131,7 @@ class Engagement < ApplicationRecord
   def search_content = description
 
   ActiveSupport.run_load_hooks(:runwell_engagement, self)
+
+  private
+    def live_streams = [ self, :engagements, client ]
 end

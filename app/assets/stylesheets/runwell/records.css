@@ -113,6 +113,10 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* Adding work or a scope item in place: a small button that opens its form below it. */
 .record-add { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--s-4); }
 .record-add[open] > summary { background: var(--layer-2); color: var(--text); }
+/* Open, the form runs the card's full width: its fields fill the row instead of shrinking to fit. */
+.record-add[open] { align-self: stretch; width: 100%; }
+/* Adding work in place (todos/_add): the title across, then owner, due date and section side by
+/* side as room allows, then Add at the end. */
 .record-add__form { gap: var(--s-3); width: 100%; }
 .record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: var(--s-3); }
 .record-add__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
@@ -271,3 +275,11 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* under the meta line, where the Overview card used to be. */
 .record-page__title-row { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
 .record-page__next { color: var(--text-muted); font-size: var(--text-meta); }
+
+/* The notes under the composer (notes/_feed): a box of their own only so a stream can replace them. */
+.notes-feed { display: contents; }
+
+/* A form in a modal over an index (layouts/shared/_modal): the dialog is the frame, so the form
+/* card inside loses its own. */
+.record-modal .record-form { border: 0; box-shadow: none; background: none; }
+.record-modal__body { padding: var(--s-2); }

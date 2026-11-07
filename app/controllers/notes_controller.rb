@@ -14,8 +14,18 @@ class NotesController < ApplicationController
     note.source = note.source.presence || Current.source || "app"
     if note.save
       subject.record_event!("note.added", payload: { kind: note.kind }) if subject.respond_to?(:record_event!)
-      redirect_back fallback_location: subject, notice: "Note added."
+      # From the composer on the record's own page: just its notes and the notice, no reload.
+      if params[:inline] == "notes" && request.format.turbo_stream?
+        flash.now[:notice] = "Note added."
+        render turbo_stream: [ turbo_stream.replace(helpers.dom_id(subject, :notes_feed), partial: "notes/feed", locals: { subject: subject }),
+                               turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
+      else
+        redirect_back fallback_location: subject, notice: "Note added."
+      end
     else
+      # From the composer: say why where you are, keeping what was typed.
+      return refuse_in_place(note.errors.full_messages.to_sentence) if params[:inline] == "notes" && request.format.turbo_stream?
+
       redirect_back fallback_location: subject, alert: note.errors.full_messages.to_sentence
     end
   end

@@ -10,6 +10,7 @@
 <% next_step = engagement_next_step(@engagement) %>
 
 <%= parent_page term(:engagement, count: 2), engagements_path %>
+<%= turbo_stream_from @engagement %>
 
 <section class="record-page">
   <header class="record-page__header">

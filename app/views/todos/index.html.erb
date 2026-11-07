@@ -1,4 +1,5 @@
 <% @page_title = term(:work, count: 2) %>
+<%= turbo_stream_from :work %>
 <% listed = CustomField.for("Todo").listed.to_a %>
 <% @body_class = "contained-scrolling" if @view == "board" %>
 

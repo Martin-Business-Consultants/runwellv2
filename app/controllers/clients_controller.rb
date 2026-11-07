@@ -68,9 +68,14 @@ class ClientsController < ApplicationController
 
   def destroy
     if @client.destroy
+      return remove_row(@client, notice: "#{@client.name} deleted.") if row_removal?
+
       redirect_to clients_path, notice: "Client deleted."
     else
-      redirect_to edit_client_path(@client), alert: "#{@client.name} has engagements, so it can’t be deleted."
+      alert = "#{@client.name} has #{Setting.current.term(:engagement, count: 2).downcase}, so it can’t be deleted."
+      return refuse_in_place(alert) if row_removal?
+
+      redirect_to edit_client_path(@client), alert: alert
     end
   end
 

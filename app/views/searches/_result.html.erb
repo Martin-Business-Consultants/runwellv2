@@ -2,7 +2,9 @@
 <%# Records must come from a search: ActiveSearch sets #hit only on ones it hydrated. One row:
     the kind's icon, the title over a line of the match, and the client on the right. %>
 <li>
-  <%= link_to search_result_path(result), class: "search-results__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
+  <% link_data = { turbo_frame: "_top", action: "bar#reset" } %>
+  <% link_data = side_panel_data(result, **link_data) if result.is_a?(Todo) %>
+  <%= link_to search_result_path(result), class: "search-results__result", data: link_data do %>
     <%= icon_tag search_result_icon(result), class: "search-results__icon" %>
     <span class="search-results__text">
       <span class="search-results__title"><%= result.hit.highlight(:title) || result.search_title %></span>

@@ -10,6 +10,13 @@ module TodosHelper
     engagements.map { |engagement| [ "#{engagement.ref} #{engagement.title}", engagement.ref ] }
   end
 
+  # What a link that opens a todo in the side panel carries (side-panel controller); its href stays
+  # the todo's own page, for a new tab or a modifier click.
+  def side_panel_data(todo, **data)
+    action = [ data.delete(:action), "side-panel#open" ].compact.join(" ")
+    data.merge(action: action, side_panel_task_param: todo.id)
+  end
+
   # The team for the inline owner picker, loaded once per page however many rows use it.
   def todo_people = @todo_people ||= User.active.people.ordered.to_a
 

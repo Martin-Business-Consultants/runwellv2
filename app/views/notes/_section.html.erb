@@ -15,6 +15,7 @@
     <%= form_with model: Note.new, url: notes_path, namespace: dom_id(subject, :note), id: dom_id(subject, :note_composer), class: "note-composer",
           data: { controller: "form", turbo_frame: "_top", turbo_permanent: (true unless permanent == false), action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
       <%= hidden_field_tag :record, QuickAction.value_for(subject), id: nil %>
+      <%= hidden_field_tag :inline, "notes", id: nil %>
       <%= rich_text_field form, :body, placeholder: "Add a note: what was said or decided… @ to mention someone", staff: true %>
       <div class="note-composer__footer">
         <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" }, class: "select--sm note-composer__kind", aria: { label: "Kind" } %>
@@ -23,34 +24,6 @@
       </div>
     <% end %>
 
-    <% notes = subject.notes.recent.includes(:author) %>
-    <% if notes.any? %>
-      <ul class="record-feed">
-        <% notes.each do |note| %>
-          <%# herb:key note.id %>
-          <li data-filter-target="item" class="record-feed__item">
-            <span class="record-feed__avatar"><%= person_tag note.author %></span>
-            <div class="record-feed__body">
-              <div class="record-feed__head">
-                <p class="record-feed__meta dot-list">
-                  <span class="badge badge--outline"><%= note.kind.humanize %></span>
-                  <time datetime="<%= note.occurred_at.iso8601 %>"><%= l(note.occurred_at, format: :short) %></time>
-                  <% if note.source.present? %>
-                    <span><%= note.source %></span>
-                  <% end %>
-                </p>
-                <% if note.deletable_by?(Current.user) %>
-                  <%= render "layouts/shared/delete_dialog", name: "this note", path: note_path(note) %>
-                <% end %>
-              </div>
-              <div class="record-feed__text"><%= rich_text note.body %></div>
-              <%= plugin_slots(:note_row, note: note) %>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p class="record-card__empty">No notes yet.</p>
-    <% end %>
+    <%= render "notes/feed", subject: subject %>
   </div>
 </section>

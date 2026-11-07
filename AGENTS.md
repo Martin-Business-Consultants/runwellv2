@@ -178,6 +178,32 @@ it when the state changes (the guide's `useState` pattern). Esc closes it, even 
 Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
 focuses its `autofocus` field.
 
+Stay on the page you're working from; bring the rest to it. Every state still has a real URL, so
+Back, refresh and links work, and there's no client-side router:
+
+- **The side panel**: a task opens beside the page (`todos/_panel` in `layouts/shared/_side_panel`,
+  the `side-panel` controller on `<body>`), its state the page's own URL plus `?task=42`. A link
+  that opens a task keeps `todo_path` as its href and adds `data: side_panel_data(todo)` (Cmd-click
+  still opens the task's page). The layout renders the panel on a full load; a request for the
+  `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
+  action). Esc or ✕ closes it (Back if it was opened here), and it follows `j` / `k`
+  (`keyboard:select`). Its fields save on change with `inline=panel`, answered with a
+  `turbo_stream.refresh` so the page under it, panel and all, morphs in place; so does a change to
+  the task open in it from anywhere on the page (`side_panel_open_for?`)
+- **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) loads the new page
+  into the layout's `modal` frame; `new.html.erb` renders `layouts/shared/_modal` around its form
+  (`modal: true`) when `turbo_frame_request_id == "modal"`, and the form submits to `_top`
+- **Rows go in place**: the table's delete dialog sends `inline=row`; `remove_row` answers a stream
+  removing `dom_id(record, :row)` (every row partial's `<tr>` id), and `refuse_in_place` says why
+  where you are
+- **Live**: models that people watch include `LiveRefreshes` and name what a change touches
+  (`live_streams`: the record, what it sits on, `:work` / `:engagements` / `:clients`); pages
+  subscribe with `turbo_stream_from`, and Turbo morphs them when someone else changes something
+  (the tab that made the change ignores its own). Imports stay quiet. Notifications refresh the
+  person's page (`turbo_stream_from Current.user, :notifications` in the layout)
+- **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
+  shows after 200ms
+
 Page changes use the browser's own view transitions, no JavaScript: Turbo renders its visits
 through them (`<meta name="view-transition" content="same-origin">` in `layouts/shared/_head`) and
 full loads take `@view-transition` (`runwell.css`, which also keeps the nav still as its own
@@ -205,14 +231,18 @@ A list of the same partial is `render partial:, collection:, as:` (herb lint's
 
 Every trash icon opens a delete dialog (rune_ui's `<dialog>`),
 `render "layouts/shared/delete_dialog", name:, path:, message:` — never a native
-`turbo_confirm`. A destructive action on a record's own page (delete, archive) confirms inline with
+`turbo_confirm`. In a table row it's `row_delete_button` instead (from `row_actions`): the table
+has one dialog (`layouts/shared/_row_delete_dialog`, `row-delete` controller) that the button fills
+in, so a long table doesn't carry a dialog and a form per row. A destructive action on a record's own page (delete, archive) confirms inline with
 `render "layouts/shared/confirm", trigger:, title:, body:, button:, path:`,
 which is ReActionView state with no JavaScript.
 
 Boards are Fizzy's board wholesale, not a new take on it: the same
 `card-columns` markup and data attributes, `column_tag` / `column_frame_tag`
 (`ColumnsHelper`, verbatim), the stream / doing columns / closed anatomy, an
-expander per column, maximize pages, cards loaded into column frames, card
+expander per column, maximize pages, cards in column frames (each column's first page rendered
+with the board, `todo_board_page` and `todos/board/_cards`, the rest loading from the column's
+address as it scrolls), card
 previews in the index cards' markup (`app-card app-card--compact`), and drops posting to one endpoint per
 destination (`Columns::…::Drops::{Streams,Columns,Closures}Controller`) that
 answer with a morphing `turbo_stream.replace` of the target column. The Work
@@ -651,6 +681,10 @@ do, through the same controllers: there is no separate API.
 - **Reads** need a `.json.jbuilder` view beside the HTML one. Start each record with
   `json.merge! agent_ref(record)` (type, id, `record` "Type:id", display name, `url`) and give
   every view a `summary`. Rich text goes out through `agent_text`
+- **In-place forms answer with a stream**: a form inside a section on the record's own page (the
+  notes composer, a Work section's Add a todo) sends `inline`, and its action renders a turbo
+  stream replacing that section and the flash rather than redirecting back to a whole new page;
+  anything else (agents, the quick action tray, a plain HTML post) still gets the redirect
 - **Writes need nothing extra**: `AgentResponses` turns the redirect + notice into
   `{ status: "ok", summary }`, a redirect with an alert or a 422 re-render into
   `{ status: "error", errors }` (from the record the action was saving). So write notices a

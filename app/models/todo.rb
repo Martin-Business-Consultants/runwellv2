@@ -5,6 +5,7 @@
 # (`source`). A promise with a date is work with a due date; whoever it's assigned to owns it.
 class Todo < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable
+  include LiveRefreshes
 
   mentionable_fields :description
 
@@ -102,4 +103,6 @@ class Todo < ApplicationRecord
   end
 
   ActiveSupport.run_load_hooks(:runwell_todo, self)
+
+    def live_streams = [ self, :work, engagement, client, scope_item ]
 end

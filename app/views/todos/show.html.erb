@@ -13,6 +13,7 @@
   <%= parent_page term(:work, count: 2), todos_path(owner: "none") %>
 <% end %>
 
+<%= turbo_stream_from @todo %>
 <section class="record-page">
   <header class="record-page__header">
     <div class="record-page__heading">

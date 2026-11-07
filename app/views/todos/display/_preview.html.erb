@@ -11,7 +11,7 @@
       css_variable_counter_target: "item",
       filter_target: "item",
       action: "mouseenter->navigable-list#hoverSelect" } do %>
-  <%= link_to todo_path(todo), draggable: false, class: "app-card__link", title: todo.title, data: { turbo_frame: "_top" } do %>
+  <%= link_to todo_path(todo), draggable: false, class: "app-card__link", title: todo.title, data: side_panel_data(todo, turbo_frame: "_top") do %>
     <span class="visually-hidden"><%= todo.title %></span>
   <% end %>
 
