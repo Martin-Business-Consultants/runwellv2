@@ -5,7 +5,7 @@
 <% state ||= "open" %>
 <% picked = item.is_a?(Integer) ? work.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
-<section class="card record-card" id="tasks">
+<section class="card record-card" id="tasks" data-task-list="work" data-task-list-state="<%= state %>"<% if item %> data-task-list-item="<%= item %>"<% end %>>
   <header class="card__head">
     <h2 class="card__title"><%= term(:task, count: 2) %></h2>
     <p class="card__hint">

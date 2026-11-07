@@ -12,8 +12,8 @@
         options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
         options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + task_owner_options.map { |name, id| [ name, id.to_s ] } %>
-  <%= render "layouts/shared/quick_filter", title: "Work…", param: :work, current: @work,
-        options: [ [ "All works", "all" ] ] + task_work_filter_options(@work) %>
+  <%= render "layouts/shared/quick_filter", title: "Work…", param: :work, current: @work_filter,
+        options: [ [ "All " + term(:work, count: 2).downcase, "all" ] ] + task_work_filter_options(@work_filter) %>
 <% end %>
 <% if @view == "table" %>
   <% content_for :index_bulk do %>
@@ -39,8 +39,11 @@
                  ui_column(:due, "Due", sort: :due, width: [ 28, "Due" ]),
                  ui_column(:status, "Status", sort: :status, width: :status, align: :center),
                  *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
-  <%= render "ui/data_table", id: "tasks", columns: columns, rows: @tasks, row: "tasks/row", as: :task,
-        row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+  <%# The list and its filter, for a status changed in a row (Tasks::StatusesController). %>
+  <div class="task-list" data-task-list="index" data-task-list-state="<%= @status %>">
+    <%= render "ui/data_table", id: "tasks", columns: columns, rows: @tasks, row: "tasks/row", as: :task,
+          row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+  </div>
   <% if @tasks.none? %>
     <%= render "tasks/blank" %>
   <% end %>

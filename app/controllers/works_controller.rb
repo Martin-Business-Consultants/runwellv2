@@ -36,10 +36,10 @@ class WorksController < ApplicationController
   end
 
   def show
-    # The Work section shows open work unless asked for done or all (?work=done|all), for every
-    # section or the one picked in the sidebar (?item=12, or "other" for work in none).
-    @task_state = params[:tasks].presence_in(%w[open done all]) || "open"
-    @task_item = params[:item] == "other" ? "other" : params[:item].presence&.to_i
+    # The Tasks section shows open tasks unless asked for done or all (?tasks=done|all), for every
+    # section or the one picked in the sidebar (?item=12, or "other" for tasks in none).
+    @task_state = Task.state_filter(params[:tasks])
+    @task_item = Task.section_focus(params[:item])
     # Its work as a list by section, or as the Work board (?task_view=board) for everyone's work on it.
     @task_view = params[:task_view] == "board" ? "board" : "list"
     if @task_view == "board"
@@ -55,8 +55,7 @@ class WorksController < ApplicationController
   def create
     @work = Work.new(work_params.merge(created_by: current_user))
     if @work.save
-      @work.record_event!("work.created")
-      redirect_to @work, notice: "#{@work.ref} started: add its work as it comes up."
+      redirect_to @work, notice: "#{@work.ref} started: add its #{Setting.current.term(:task, count: 2).downcase} as they come up."
     else
       render :new, status: :unprocessable_entity
     end
@@ -80,7 +79,7 @@ class WorksController < ApplicationController
 
       redirect_to works_path, notice: "#{@work.ref} deleted."
     else
-      alert = "#{@work.ref} has work on it, so it can’t be deleted. Close it instead."
+      alert = "#{@work.ref} has #{Setting.current.term(:task, count: 2).downcase} on it, so it can’t be deleted. Close it instead."
       return refuse_in_place(alert) if row_removal?
 
       redirect_back fallback_location: @work, alert: alert
@@ -100,6 +99,8 @@ class WorksController < ApplicationController
   end
 
   private
+    def current_record = (@work if @work&.persisted?)
+
 
   # The page reads each section's work (its delivery state): loaded together rather than one query
   # per section.

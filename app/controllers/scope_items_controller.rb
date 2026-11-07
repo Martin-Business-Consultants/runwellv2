@@ -38,13 +38,15 @@ class ScopeItemsController < ApplicationController
   def destroy
     item = ScopeItem.find(params[:id])
     if item.destroy
-      redirect_to item.work, notice: "#{Setting.current.term(:scope_item)} removed; its work stays on the work."
+      redirect_to item.work, notice: "#{Setting.current.term(:scope_item)} removed; its #{Setting.current.term(:task, count: 2).downcase} stay on the #{Setting.current.term(:work).downcase}."
     else
       redirect_to item.work, alert: item.errors.full_messages.to_sentence
     end
   end
 
   private
+    def current_record = @item
+
 
   def item_params
     params.expect(scope_item: %i[description position])

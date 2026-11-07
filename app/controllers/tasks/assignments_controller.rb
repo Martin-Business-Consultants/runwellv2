@@ -1,4 +1,4 @@
-# The owner picker's click (Fizzy's assignments): puts a person on the work, or takes them off.
+# The owner picker's click (Fizzy's assignments): puts a person on the task, or takes them off.
 # The first on leads; taking off the lead hands it to whoever came on next. The menu stays open,
 # and the answer replaces the avatars beside it.
 class Tasks::AssignmentsController < ApplicationController

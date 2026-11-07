@@ -20,6 +20,16 @@ class User < ApplicationRecord
 
   def display_name = name.presence || email_address
 
+  # An owner as filters and forms name one: "me" (the person acting), "none" or blank (nobody, nil),
+  # or a person's id or name (::Agent::Resolver, which raises when a name matches no one or several).
+  def self.owner_id_for(value, me:)
+    case value.to_s
+    when "", "none" then nil
+    when "me" then me.id
+    else ::Agent::Resolver.id_for("User", value)
+    end
+  end
+
   private
 
   # Settings > Audit log: who changed whose role.

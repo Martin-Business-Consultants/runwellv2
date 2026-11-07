@@ -1,4 +1,4 @@
-# Work, many at once: status, owner, due date, whether the client sees it, or remove.
+# Tasks, many at once: status, owner, due date, whether the client sees it, or remove.
 class Bulk::TasksController < ApplicationController
   include BulkAction
   allow_staff
@@ -11,29 +11,22 @@ class Bulk::TasksController < ApplicationController
   def update
     changes = params.expect(task: %i[status owner_id due_on client_visible]).to_h
     if changes.key?("owner_id")
-      changes["owner_id"] = owner_id(changes["owner_id"])
+      changes["owner_id"] = User.owner_id_for(changes["owner_id"], me: current_user.person)
       changes["other_owner_ids"] = [] if changes["owner_id"].nil? # Unassigned: nobody on it at all
     end
     return redirect_back(fallback_location: tasks_path, alert: "Choose what to change.") if changes.empty?
 
-    apply_to_each(selected(Task.all), done: "Updated %{count} #{term_for(:task, count: 2)}", fallback: tasks_path) do |task|
+    apply_to_each(selected(Task.all), done: "Updated %{count} #{term_for(:task)}", fallback: tasks_path) do |task|
       task.update(changes) || task.errors.full_messages.to_sentence
     end
   end
 
   def destroy
-    apply_to_each(selected(Task.all), done: "Removed %{count} #{term_for(:task, count: 2)}", fallback: tasks_path) do |task|
+    apply_to_each(selected(Task.all), done: "Removed %{count} #{term_for(:task)}", fallback: tasks_path) do |task|
       task.destroy ? true : "it couldn’t be removed"
     end
   end
 
   private
-    def owner_id(value)
-      return nil if value.blank? || value == "none"
-      return current_user.person.id if value == "me"
-
-      Agent::Resolver.id_for("User", value)
-    end
-
     def term_for(key) = Setting.current.term(key, count: 2).downcase
 end

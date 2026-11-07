@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   include AgentTools, AgentResponses
   include TableSorting
   include BotChecked
+  include TurboFlash, RemovesRows
   include NPlusOneDetection
   allow_browser versions: :modern
   # ReActionView registers its slots format, and Rails then answers a bare "*/*" (a plain fetch(),
@@ -15,7 +16,7 @@ class ApplicationController < ActionController::Base
   before_action :remember_host
   before_action :render_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
   around_action :in_install_time_zone
-  helper_method :side_panel_task
+  helper_method :side_panel_task, :current_record
 
   private
 
@@ -29,25 +30,15 @@ class ApplicationController < ActionController::Base
 
   def current_user = Current.user
 
+  # The record on screen, for the quick action tray's picker to start on: a controller that shows
+  # one says which (ClientsController, WorksController, ScopeItemsController, TasksController).
+  def current_record = nil
+
   # The task open in the side panel (?task=42 on any staff page), or nil.
   def side_panel_task
     return unless Current.user && !Current.agent? && params[:task].present?
 
     @side_panel_task ||= Task.includes(:work, :client, :scope_item, :owner, assignments: :user).find_by(id: params[:task])
-  end
-
-  # A record deleted from its table row (the table's one delete dialog sends inline=row): that row
-  # goes and the notice shows, with no reload; a refusal shows where you are. Elsewhere, redirects.
-  def row_removal? = params[:inline] == "row" && request.format.turbo_stream?
-
-  def remove_row(record, notice:, also: [])
-    flash.now[:notice] = notice
-    render turbo_stream: [ turbo_stream.remove(helpers.dom_id(record, :row)), *also, turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
-  end
-
-  def refuse_in_place(alert)
-    flash.now[:alert] = alert
-    render turbo_stream: turbo_stream.replace("flash", partial: "layouts/shared/flash"), status: :unprocessable_entity
   end
 
   # Opening or closing the side panel loads just its frame: the page under it stays as it is, so

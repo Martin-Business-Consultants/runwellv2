@@ -87,4 +87,8 @@ class AccessToken < ApplicationRecord
   def used!
     update_column(:last_used_at, Time.current) if last_used_at.nil? || last_used_at < 1.minute.ago
   end
+
+  # One-call tokens (Agent::Dispatch.run_as, a plugin's in-app assistant), gone once their calls are
+  # past keeping (AgentHousekeepingJob).
+  def self.prune_assistants = where(kind: "assistant").where(created_at: ...AgentCall::KEPT.ago).find_each(&:destroy!)
 end

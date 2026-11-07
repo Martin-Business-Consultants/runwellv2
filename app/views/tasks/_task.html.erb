@@ -1,8 +1,8 @@
 <%# locals: (task:, with_work: nil) %>
-<%# A piece of work in a record's Work card: its status to change in place, its title and details
-    (the link), then Overdue, who's on it and Copy for AI. The rows are the record pages'
-    record-list; work.css adds what's particular to work. %>
-<li data-filter-target="item" class="record-list__row task-item">
+<%# A task in a record's Tasks card: its status to change in place, its title and details (the
+    link), then Overdue, who's on it and Copy for AI. The rows are the record pages' record-list;
+    tasks.css adds what's particular to tasks. %>
+<li id="<%= dom_id(task, :item) %>" data-filter-target="item" class="record-list__row task-item">
   <%= render "tasks/status_dot", task: task %>
   <%= side_panel_link_to task, class: "record-list__main" do %>
     <span class="record-list__title"><%= task.title %></span>

@@ -13,12 +13,11 @@ module TasksBoardHelper
   # A column's first page of cards, rendered with the board so it doesn't wait on a request of its
   # own (later pages load from Tasks::ColumnsController as the column scrolls, in the same order).
   def task_board_page(board, status)
-    tasks = board.where(status: status).then { status == "done" ? it.order(:due_on, :position) : it.board_ordered }
-    GearedPagination::Recordset.new(tasks).page(1)
+    GearedPagination::Recordset.new(board.board_column(status)).page(1)
   end
 
-  # The filters the board's column frames and drops carry: the page's query (Work), or what the
-  # page set (@board_filters: a piece of work's Work tab shows everyone's work on it).
+  # The filters the board's column frames and drops carry: the page's query (Tasks), or what the
+  # page set (@board_filters: a piece of work's Tasks tab shows everyone's tasks on it).
   def task_board_filters
     @board_filters || request.query_parameters.slice("owner", "work").reverse_merge("owner" => "me")
   end

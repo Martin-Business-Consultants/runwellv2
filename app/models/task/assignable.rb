@@ -1,5 +1,5 @@
-# Who's on a piece of work: its owner (the lead) and anyone else, Fizzy's assignments. Everyone on
-# it, the lead too, has an assignment, so "my work" is work anyone gave me a part in. Setting the
+# Who's on a task: its owner (the lead) and anyone else, Fizzy's assignments. Everyone on it, the
+# lead too, has an assignment, so "my tasks" are tasks anyone gave me a part in. Setting the
 # owner directly (a form, a bulk change, an agent, a plugin) replaces the lead and keeps the rest.
 module Task::Assignable
   extend ActiveSupport::Concern

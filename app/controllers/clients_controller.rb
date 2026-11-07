@@ -29,7 +29,7 @@ class ClientsController < ApplicationController
 
   def show
     @work_state = Work.filter_from(params, :works)
-    @task_state = params[:tasks].presence_in(%w[open done all]) || "open"
+    @task_state = Task.state_filter(params[:tasks])
   end
 
   def new
@@ -39,7 +39,6 @@ class ClientsController < ApplicationController
   def create
     @client = Client.new(client_params)
     if @client.save
-      @client.record_event!("client.created")
       redirect_to @client, notice: "Client added."
     else
       render :new, status: :unprocessable_entity
@@ -80,12 +79,13 @@ class ClientsController < ApplicationController
   end
 
   private
+    def current_record = (@client if @client&.persisted?)
+
     # The status badge on the clients table saved: answer with that badge, not the whole list.
     def answer_in_place(saved)
       @client.reload unless saved
-      flash.now[:alert] = @client.errors.full_messages.to_sentence unless saved
       streams = [ turbo_stream.replace(helpers.dom_id(@client, :status), partial: "clients/status_picker", locals: { client: @client }) ]
-      streams << turbo_stream.replace("flash", partial: "layouts/shared/flash") unless saved
+      streams << turbo_stream_flash(alert: @client.errors.full_messages.to_sentence) unless saved
       render turbo_stream: streams
     end
 

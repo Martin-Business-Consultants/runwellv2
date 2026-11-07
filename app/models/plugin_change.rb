@@ -6,11 +6,12 @@
 # presses its Update button. The change succeeds once the install boots with the plugin loaded at
 # that release (or gone); an update that won't load puts the previous release back.
 class PluginChange < ApplicationRecord
+  include BackgroundRun
+
   class Refused < StandardError; end
   class Failed < StandardError; end
 
   ACTIONS = %w[install update remove].freeze
-  STATUSES = %w[running succeeded failed].freeze
   TIMEOUT = 15.minutes
   REPO_FORMAT = %r{\A[\w.-]+/[\w.-]+\z}
   NAME_FORMAT = /\A[a-z][a-z0-9_]*\z/
@@ -20,13 +21,7 @@ class PluginChange < ApplicationRecord
   normalizes :repo, with: ->(value) { value.to_s.strip.sub(%r{\A(https?://)?github\.com/}, "").delete_suffix("/").delete_suffix(".git") }
 
   validates :action, inclusion: { in: ACTIONS }
-  validates :status, inclusion: { in: STATUSES }
   validates :repo, format: { with: REPO_FORMAT, message: "should be a GitHub repository, like owner/name" }
-
-  scope :running, -> { where(status: "running") }
-  scope :ordered, -> { order(created_at: :desc) }
-
-  def self.current = running.ordered.first
 
   def self.install!(repo, by:) = start!(action: "install", repo: repo, by: by)
 
@@ -45,9 +40,6 @@ class PluginChange < ApplicationRecord
 
     create!(requested_by: by, **attributes).tap { PluginChangeJob.perform_later(it) }
   end
-
-  # Settles running changes once the install has restarted. Called on Settings > Plugins and nightly.
-  def self.reconcile = running.find_each(&:reconcile!)
 
   # Plugins switched on whose code isn't here, put back as the install boots (PluginRestoreJob):
   # those that came with Runwell before plugins lived on the server. Each is tried once.
@@ -86,14 +78,6 @@ class PluginChange < ApplicationRecord
       fail! "No word after #{TIMEOUT.inspect}. The install's log says what happened."
     end
   end
-
-  def fail!(message)
-    update!(status: "failed", finished_at: Time.current, message: message)
-  end
-
-  def running? = status == "running"
-  def succeeded? = status == "succeeded"
-  def failed? = status == "failed"
 
   def summary
     name = key || repo

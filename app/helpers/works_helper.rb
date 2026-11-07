@@ -4,8 +4,8 @@ module WorksHelper
     if work.closed?
       "#{work.state_label} #{l work.closed_at.to_date, format: :long}#{": #{work.close_reason}" if work.close_reason.present?}. Its work and history stay; reopen it if work starts again."
     else
-      done, open = work.tasks.partition { it.status == "done" }.map(&:size)
-      progress = work.tasks.none? ? "nothing yet, so add it below" : (open.zero? ? "all done" : "#{open} open, #{done} done")
+      done, open = work.task_progress
+      progress = (done + open).zero? ? "nothing yet, so add it below" : (open.zero? ? "all done" : "#{open} open, #{done} done")
       "#{term(:task, count: 2)}: #{progress}.#{finish_hint(work, open)}"
     end
   end

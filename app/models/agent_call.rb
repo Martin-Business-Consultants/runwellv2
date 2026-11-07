@@ -11,4 +11,7 @@ class AgentCall < ApplicationRecord
     create!(access_token: token, tool: tool, status: body["status"].to_s, code: body["code"],
       summary: body["summary"].to_s.truncate(250).presence, duration_ms: ((Time.current - started_at) * 1000).round)
   end
+
+  # Calls past keeping (KEPT), forgotten nightly (AgentHousekeepingJob).
+  def self.prune = where(created_at: ...KEPT.ago).in_batches.delete_all
 end

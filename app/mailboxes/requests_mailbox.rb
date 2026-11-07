@@ -16,9 +16,8 @@ class RequestsMailbox < ApplicationMailbox
 
     def receive_request
       request = Task.create!(title: title, description: body.to_html, sender_name: sender_name, sender_email: sender_email,
-                             source: "email", created_at: mail.date || Time.current)
+                             source: "email", created_at: mail.date || Time.current, requested: true)
       attach_files(request)
-      request.record_event!("task.requested", actor: nil, source: "email", actor_label: request.requester_name)
 
       if request.contact && Setting.current.requests_email.present?
         RequestMailer.with(task: request, in_reply_to: mail.message_id).received.deliver_later

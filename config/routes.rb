@@ -137,7 +137,10 @@ Rails.application.routes.draw do
   end
   resources :tasks, only: %i[index show create edit update destroy] do
     get :brief, on: :member
-    resources :assignments, only: :create, module: :tasks
+    scope module: :tasks do
+      resources :assignments, only: :create
+      resource :status, only: :update
+    end
   end
 
   namespace :columns do

@@ -14,20 +14,16 @@
 # this install boots on the new version; a failed run, or no word within TIMEOUT, fails it. The
 # old version keeps running meanwhile.
 class Upgrade < ApplicationRecord
+  include BackgroundRun
+
   class Refused < StandardError; end
 
   VIAS = %w[in_place github local manual].freeze
-  STATUSES = %w[running succeeded failed].freeze
   TIMEOUT = 45.minutes
 
   belongs_to :requested_by, class_name: "User"
 
   validates :via, inclusion: { in: VIAS - %w[manual] }
-  validates :status, inclusion: { in: STATUSES }
-
-  scope :running, -> { where(status: "running") }
-  scope :failed, -> { where(status: "failed") }
-  scope :ordered, -> { order(created_at: :desc) }
 
   def self.via
     configured = ENV["RUNWELL_UPDATES"].presence
@@ -42,8 +38,6 @@ class Upgrade < ApplicationRecord
 
   def self.available? = via == "local" || via == "in_place" || (via == "github" && Release::Github.token.present?)
 
-  def self.current = running.ordered.first
-
   # Updates the install to the release, as the person who asked. Refuses when that release
   # isn't newer, updating isn't set up, or an update is already running.
   def self.start!(release, by:)
@@ -54,10 +48,6 @@ class Upgrade < ApplicationRecord
 
     create!(requested_by: by, from_version: Runwell::VERSION, to_version: release.version, via: via).tap(&:start)
   end
-
-  # Settles running updates: done once this install runs the new version, failed when the run
-  # failed or went quiet. Called on Settings > Updates and nightly.
-  def self.reconcile = running.find_each(&:reconcile!)
 
   # Started from a job (UpgradeJob), so the request that asked never waits on GitHub or a download.
   def start = UpgradeJob.perform_later(self)
@@ -79,14 +69,6 @@ class Upgrade < ApplicationRecord
   rescue Release::Github::Error => error
     Rails.error.report(error, context: { upgrade: id })
   end
-
-  def fail!(message)
-    update!(status: "failed", finished_at: Time.current, message: message)
-  end
-
-  def running? = status == "running"
-  def succeeded? = status == "succeeded"
-  def failed? = status == "failed"
 
   def tag = "v#{to_version}"
 

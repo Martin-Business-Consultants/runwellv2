@@ -79,7 +79,7 @@ them something else on screen (`term(:work)`, `term(:task)`).
    is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).
    `Event` (append-only, every write of consequence), `Note`
 4. **What came in** — a request is a task nobody has taken on or started (`Task.requests`:
-   unassigned and planned, derived, whoever added it), at `/requests`. A task keeps who asked
+   unassigned and planned, derived, whoever added it), at `/tasks?owner=none` (`/requests` redirects there). A task keeps who asked
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
    Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
    emails create them (`task.requested`)
@@ -110,7 +110,17 @@ event); every event has a source.
 ## Conventions
 
 - Rich models, skinny controllers, no service objects. Domain verbs are model
-  methods (`close!`, `reopen!`, `move!`, `assign!`)
+  methods (`close!`, `reopen!`, `move!`, `assign!`). A model is its core plus concerns named for
+  what they do: shared ones in `app/models/concerns` (`Eventful`, `LiveRefreshes`,
+  `RecordsCreation`, `BackgroundRun`…), a model's own under its name (`Task::Assignable`,
+  `Setting::Mail`, `Setting::Appearance`…), as Fizzy splits `Card` and `User`
+- A write of consequence records its event in the model, not the controller: creating a client,
+  piece of work or task (`RecordsCreation`; a portal or email request is `task.requested`, marked
+  with `requested: true`), a note added or deleted (`Note`), a status change (`Task`), a close
+- Controllers find their records through `*Scoped` concerns (`TaskScoped`, `SubjectScoped` for
+  what a note or document goes on) and say which record is on screen with `current_record`
+- Patches to Rails and gems live in `lib/rails_ext`, one file each, required by
+  `config/initializers/extensions.rb` (Fizzy's layout); none in initializers
 - State is derived, never typed in (`Work#state`, `ScopeItem#delivery_state`)
 - Views are ERB templates rendering models directly; no serializers
 - The core keeps no money, but plugins do, the same way: integer cents everywhere: columns, params, agent tools (`price_cents: "integer"`)
@@ -199,9 +209,9 @@ Back, refresh and links work, and there's no client-side router:
   still opens the task's page). The layout renders the panel on a full load; a request for the
   `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
   action). Esc or ✕ closes it (Back if it was opened here), and it follows `j` / `k`
-  (`keyboard:select`). Its fields save on change with `inline=panel`, answered with a
-  `turbo_stream.refresh` so the page under it, panel and all, morphs in place; so does a change to
-  the task open in it from anywhere on the page (`side_panel_open_for?`)
+  (`keyboard:select`). It loads by setting its frame's `src` and records the address through
+  Turbo's history (no page visit runs under it). Its fields save on change with `inline=panel`,
+  answered by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows
 - **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) loads the new page
   into the layout's `modal` frame; `new.html.erb` renders `layouts/shared/_modal` around its form
   (`modal: true`) when `turbo_frame_request_id == "modal"`, and the form submits to `_top`
@@ -213,10 +223,14 @@ Back, refresh and links work, and there's no client-side router:
   subscribe with `turbo_stream_from`, and Turbo morphs them when someone else changes something
   (the tab that made the change ignores its own). Imports stay quiet. Notifications refresh the
   person's page (`turbo_stream_from Current.user, :notifications` in the layout)
-- **Status changes move the task**: changing a task's status in a list
-  (`TasksController#answer_with_list`) streams back the Tasks section of the work or client page
-  it came from, keeping its Open / Done / All filter and the section in focus, so a task marked
-  done leaves Open at once; on the Tasks index the page refreshes in place
+- **Answers redraw every place, never ask where they came from** (Fizzy's way): a change is
+  answered by a `.turbo_stream.erb` that replaces each place the record can show; a target the page
+  lacks is skipped. A task's status has its own controller (`Tasks::StatusesController`,
+  `PATCH /tasks/:id/status`, `tasks/statuses/update.turbo_stream.erb`). A Tasks list describes
+  itself (`data-task-list`, `-state`, `-item` on the section or the Tasks table), the picker sends
+  that with the change, and `Task::List` says whether the task still belongs there, so a task
+  marked done leaves Open at once. Nothing reads `request.referer` to decide an answer.
+  `turbo_stream_flash(notice:)` (`TurboFlash`) shows the toast; `RemovesRows` removes a row
 - **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
   shows after 200ms
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
@@ -463,9 +477,9 @@ ReActionView rules:
 - Keep markup valid (no `<div>` inside `<p>`, every tag closed). Herb shows
   errors as an overlay in development and raises in test
 - Speed: after every render ReActionView sends the page's slot dependency map, which Herb 0.11
-  rebuilt from the templates each time (half of a page's render). `config/initializers/reactionview.rb`
-  keeps each page's map (`SlotEnvelopeCache`) until a view changes, beside its cache of Herb's
-  per-file analysis. Rich text renders once per distinct HTML (`ApplicationHelper::RICH_TEXT_CACHE`,
+  rebuilt from the templates each time (half of a page's render). `lib/rails_ext/herb_slot_envelope_cache.rb`
+  keeps each page's map until a view changes, beside its cache of Herb's per-file analysis
+  (`herb_analysis_cache.rb`). Rich text renders once per distinct HTML (`RichTextHelper::RICH_TEXT_CACHE`,
   in memory). A row's status and owner menus are a button and an empty `<dialog>`: their insides
   are page templates (`task_status_popup_template`, `task_owner_popup_template`) the picker copies in
   on first open
@@ -639,7 +653,7 @@ Clients email requests rather than signing in (Action Mailbox; `docs/install.md`
 An inbound service forwards the address in Settings > Email
 (`Setting#requests_email`): the server's `INBOUND_EMAIL_INGRESS` / `RAILS_INBOUND_EMAIL_PASSWORD`, or else
 the install's own `Setting.inbound_ingress` / `inbound_password` (Settings > Email, or a plugin such as
-Cloudflare via `Setting#receive_mail_through!`; `config/initializers/action_mailbox.rb` reads them
+Cloudflare via `Setting#receive_mail_through!`; `lib/rails_ext/action_mailbox_settings_ingress.rb` reads them
 per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: each message
 becomes a request, tasks nobody has taken on (`source` "email"): the subject its title, the message
 its description (`Task::EmailBody` cuts quoted mail and signatures, preferring the text part),

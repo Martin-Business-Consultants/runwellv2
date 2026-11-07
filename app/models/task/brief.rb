@@ -1,5 +1,5 @@
-# Everything a local AI needs to do one piece of work and report back, as Markdown: what the
-# work is and where it sits, the section it belongs to, what's been said, what else is due, how to
+# Everything a local AI needs to do one task and report back, as Markdown: what the task is and
+# where it sits, the section it belongs to, what's been said, what else is due, how to
 # update Runwell with the `runwell` command (or MCP), and whatever plugins add (the Code plugin
 # adds repositories and a branch). Copied by the AI button on a task, and served to agents by
 # the brief_task tool. Staff only: it includes internal notes.
@@ -41,7 +41,7 @@ class Task::Brief
       "## The work\n\n#{text.presence || "(No description. Read the notes below, and ask if it's unclear.)"}"
     end
 
-    # The work's sections, so the work is read against the rest of what it delivers.
+    # Its work's sections, so the task is read against the rest of what the work delivers.
     def agreed_scope
       return unless work
 
@@ -60,7 +60,7 @@ class Task::Brief
       }.join("\n")
     end
 
-    # Other open work with a date alongside this one (on its work, else its client): what else
+    # Other open tasks with a date alongside this one (on its work, else its client): what else
     # has been promised.
     def due_alongside
       home = work || task.client or return

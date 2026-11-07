@@ -1,17 +1,5 @@
 module QuickActionsHelper
   # The record the page is about, for quick actions and plugins ("Start on …").
-  def current_record
-    return @current_record if defined?(@current_record)
-
-    @current_record =
-      case controller_path
-      when "clients" then Client.find_by(id: params[:id])
-      when "works" then Work.find_by(ref: params[:ref].to_s.upcase) if params[:ref]
-      when "scope_items" then ScopeItem.find_by(id: params[:id])
-      when "tasks" then Task.find_by(id: params[:id])
-      end
-  end
-
   def record_label(record)
     record.is_a?(ScopeItem) ? record.description : record.search_title
   end

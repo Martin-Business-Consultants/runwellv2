@@ -1,0 +1,17 @@
+<%# The task's new status everywhere it shows: the list it was changed in (its section again on a
+    piece of work's or client's page; its row, or its row gone if the filter now leaves it out, on
+    the Tasks index), its pickers, due date and side panel. Targets the page lacks are skipped. %>
+<% if @list&.kind == "work" && @task.work %>
+  <%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/section", locals: { work: @task.work, state: @list.state, item: @list.item } %>
+<% elsif @list&.kind == "client" && @task.client %>
+  <%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/client_section", locals: { client: @task.client, state: @list.state } %>
+<% elsif @list&.kind == "index" && !@list.shows?(@task) %>
+  <%= turbo_stream.remove dom_id(@task, :row) %>
+<% else %>
+  <%= turbo_stream.replace dom_id(@task, :row), method: :morph, partial: "tasks/row", locals: { task: @task, listed: CustomField.for("Task").listed.to_a } %>
+<% end %>
+<%= turbo_stream.replace dom_id(@task, :status), partial: "tasks/status_dot", locals: { task: @task, options_on_page: true } %>
+<%= turbo_stream.replace dom_id(@task, :status_labelled), partial: "tasks/status_dot", locals: { task: @task, labelled: true, options_on_page: true } %>
+<%= turbo_stream.replace dom_id(@task, :due), partial: "tasks/due", locals: { task: @task } %>
+<%= turbo_stream.replace dom_id(@task, :panel), method: :morph, partial: "tasks/panel", locals: { task: @task } %>
+<%= turbo_stream_flash(notice: @notice, alert: @alert) %>

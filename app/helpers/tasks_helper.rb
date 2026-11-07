@@ -3,7 +3,7 @@ module TasksHelper
 
   def task_owner_options = User.active.people.ordered.map { |user| [ user.display_name, user.id ] }
 
-  # The Work page's work filter: only work with open tasks (a large install has
+  # The Tasks page's work filter: only work with open tasks (a large install has
   # hundreds of pieces of work, most with nothing to show here), and the one chosen, whatever it is.
   def task_work_filter_options(current)
     works = Work.where(id: Task.open.select(:work_id)).or(Work.where(ref: current)).order(:ref)
@@ -41,7 +41,7 @@ module TasksHelper
   end
 
   # The owners picker's people, on the page once like the others; each click puts that person on
-  # the work or takes them off (Tasks::AssignmentsController).
+  # the task or takes them off (Tasks::AssignmentsController).
   # The status and owner menus' insides, on the page once like their choices: a row carries only
   # its button and an empty <dialog>, and the picker copies this in the first time it opens,
   # pointing the form at that task (picker controller, url value). Without these each row of a
@@ -54,7 +54,7 @@ module TasksHelper
     tag.template(id: "task-status-popup") do
       safe_join([ tag.strong("Status", class: "popup__title"),
         form_with(url: "#", method: :patch, authenticity_token: false, data: { picker_target: "form" }) do
-          hidden_field_tag(:inline, "status", id: nil) + tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
+          tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
         end ])
     end
   end
@@ -91,7 +91,7 @@ module TasksHelper
     end
   end
 
-  # Everyone on a piece of work as overlapping avatars (rune_ui's avatar stack), the lead first and
+  # Everyone on a task as overlapping avatars (rune_ui's avatar stack), the lead first and
   # on top (preload assignments: :user). hidden: inside a control whose own text names them (the
   # owner picker's trigger), so screen readers don't hear every name twice.
   def task_owners_tag(task, limit: 3, fallback: nil, hidden: false)
@@ -122,7 +122,7 @@ module TasksHelper
     ].compact.join(" · ")
   end
 
-  # Where a piece of work sits, for a card or a row: its work's ref, else nothing.
+  # Where a task sits, for a card or a row: its work's ref, else nothing.
   def task_ref(task) = task.work&.ref
 
   # Its client's name, or that nobody matched (an email from an unknown sender).

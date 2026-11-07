@@ -15,7 +15,7 @@ class TestEmailJob < ApplicationJob
 
   private
     def record(outcome)
-      setting = Setting.first
+      setting = Setting.current
       setting.update!(test_email: setting.test_email.merge(outcome))
     end
 end

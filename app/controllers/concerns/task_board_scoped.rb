@@ -1,4 +1,4 @@
-# The Work board's filters, shared by the board, its column frames and its drops.
+# The Tasks board's filters, shared by the board, its column frames and its drops.
 module TaskBoardScoped
   extend ActiveSupport::Concern
 
@@ -15,19 +15,21 @@ module TaskBoardScoped
     render turbo_stream: turbo_stream.refresh(request_id: nil)
   end
 
-  # Your own work unless the filter says otherwise, as on the page (TasksController#index).
+  # Your own tasks unless the filter says otherwise, as on the page (TasksController#index).
   def board_tasks
     Task.filtered(owner: owner_filter_for(params[:owner].presence || "me"), work: params[:work].presence || "all")
   end
 
-  # The owner param as an id: "me" is the person (for their agent too, the person it acts for),
-  # "none" nobody, a name the person it names; the Work page's own filter sends ids.
+  # The owner filter as Task.filtered takes it: "any", or an owner (User.owner_id_for; "me" is the
+  # person, for their agent too the person it acts for). A name that matches several people takes
+  # the best match, and one that matches no one shows nothing, since a filter never errors.
   def owner_filter_for(owner)
-    case owner
-    when "any" then "any"
-    when "me" then current_user.person.id
-    when "none" then nil
-    else Agent::Resolver.id?(owner) ? owner : Agent::Resolver.candidates("User", owner).first&.id || 0
-    end
+    return "any" if owner == "any"
+
+    User.owner_id_for(owner, me: current_user.person)
+  rescue Agent::Resolver::Ambiguous => ambiguous
+    ambiguous.candidates.first&.id
+  rescue Agent::Resolver::Missing
+    0
   end
 end

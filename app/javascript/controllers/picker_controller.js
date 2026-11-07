@@ -38,11 +38,22 @@ export default class extends Controller {
     dialog.append(template.content.cloneNode(true))
     const form = dialog.querySelector("form")
     form.action = this.urlValue
-    if (this.labelledValue) {
-      const labelled = document.createElement("input")
-      Object.assign(labelled, { type: "hidden", name: "labelled", value: "1" })
-      form.append(labelled)
+    if (this.labelledValue) this.#hidden(form, "labelled", "1")
+
+    // In a Tasks list (data-task-list: which list, its filter, the section in focus), the change
+    // says so, and the answer brings that list back as it now stands.
+    const list = this.element.closest("[data-task-list]")
+    if (list) {
+      this.#hidden(form, "list[kind]", list.dataset.taskList)
+      if (list.dataset.taskListState) this.#hidden(form, "list[state]", list.dataset.taskListState)
+      if (list.dataset.taskListItem) this.#hidden(form, "list[item]", list.dataset.taskListItem)
     }
+  }
+
+  #hidden(form, name, value) {
+    const input = document.createElement("input")
+    Object.assign(input, { type: "hidden", name, value })
+    form.append(input)
   }
 
   // A choice was clicked: show it now; the form goes on to save it. The menu closes on

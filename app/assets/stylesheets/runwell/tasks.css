@@ -313,3 +313,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-panel__field :is(select, .date-picker) { max-width: 16rem; }
 .task-panel__description { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); }
 .task-panel .record-card { box-shadow: none; }
+
+/* The Tasks table's list context (data-task-list for status changes): no box of its own. */
+.task-list { display: contents; }

@@ -42,6 +42,4 @@ module BulkAction
       name = record.try(:ref) || record.try(:name) || record.try(:title) || record.try(:subject) || record.try(:description).to_s.truncate(40)
       "“#{name}”"
     end
-
-    def counted(count, noun) = helpers.pluralize(count, noun)
 end

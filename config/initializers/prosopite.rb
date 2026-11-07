@@ -14,15 +14,8 @@ if defined?(Prosopite)
     # - a status change re-places the task in its lists (positioning, TasksController#update)
     # - erasing a piece of work destroys what hangs off each record
     Prosopite.allow_stack_paths = [ "app/models/agent/resolver.rb", "app/controllers/concerns/bulk_action.rb",
-      "TasksController#update", "Work#erase!",
+      "TasksController#update", "Tasks::StatusesController#update", "Work#erase!",
       # The board renders each column's first page (one query a column, a handful, on purpose).
       "app/views/tasks/board/_cards.html.erb" ]
   end
-
-  # Prosopite tells queries apart with pg_query, a Postgres parser, which can't read SQLite's ?
-  # placeholders: every fingerprint failed and Prosopite raised the query itself. Postgres's $1 in
-  # their place reads the same for fingerprinting.
-  Prosopite.singleton_class.prepend(Module.new do
-    def fingerprint(query) = super(query.gsub(/(?<![\w'"])\?(?![\w'"])/, "$1"))
-  end)
 end

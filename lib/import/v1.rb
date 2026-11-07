@@ -8,7 +8,7 @@
 #
 # What maps to what: partners → clients; partner users → contacts; staff → users with their
 # passwords; projects, services and work orders → work (milestones and work order items
-# as their sections; v1's prices stay behind, since the core keeps no money); todos → work;
+# as their sections; v1's prices stay behind, since the core keeps no money); todos → tasks;
 # tickets → requests; notes, time entries and todo and ticket files; client addresses (custom
 # fields) and links (a note). Everything else in v1 (invoices, milestone health, specs,
 # questionnaires, daily reports, groups, tags, files whose records v1 no longer has) stays
@@ -33,16 +33,16 @@ module Import
       @out = out
       @users = {}        # v1 user id → User
       @clients = {}      # v1 partner id → Client
-      @engagements = {}  # "project:3", "service:1", "work_order:1" → Engagement
+      @works = {}  # "project:3", "service:1", "work_order:1" → Work
       @items = {}        # "milestone:5", "item:2" → ScopeItem
-      @todos = {}        # v1 todo id → Todo
-      @requests = {}     # v1 ticket id → Todo (a request, or the work it became)
+      @todos = {}        # v1 todo id → Task
+      @requests = {}     # v1 ticket id → Task (a request, or the task it became)
       @counts = Hash.new(0)
       @skipped = Hash.new { |hash, key| hash[key] = [] }
     end
 
     def run
-      raise "This install already has clients or engagements. Import into an empty database." if Client.exists? || Work.exists?
+      raise "This install already has clients or work. Import into an empty database." if Client.exists? || Work.exists?
 
       # History, not news: jobs (mention notifications, file analysis) are held, never run.
       ActiveJob::Base.queue_adapter = :test
@@ -52,7 +52,7 @@ module Import
           import_users
           import_clients
           import_client_details
-          import_engagements
+          import_works
           import_requests
           import_notes
           import_time
@@ -137,9 +137,9 @@ module Import
       end
     end
 
-    # --- Engagements ---------------------------------------------------------------------
+    # --- Work ---------------------------------------------------------------------------
 
-    def import_engagements
+    def import_works
       rows("services").each { import_service(it) }
       rows("projects").each { import_project(it) }
       import_general_work
@@ -149,92 +149,92 @@ module Import
     def import_project(row)
       client = @clients[row["partner_id"]] or return @skipped[:projects] << "#{row["name"]}: no client"
 
-      engagement = client.works.create!(
+      work = client.works.create!(
         label: "project", shape: "fixed", title: row["name"],
         description: rich("Project", row["id"], "description") || row["description"].presence,
         estimate_notes: rich("Project", row["id"], "context") || row["context"].presence,
         created_by: @users[row["user_id"]], created_at: time(row["created_at"]))
-      @engagements["project:#{row["id"]}"] = engagement
+      @works["project:#{row["id"]}"] = work
       @counts[:projects] += 1
 
       @db.execute("SELECT * FROM milestones WHERE project_id = ? ORDER BY position", [ row["id"] ]).each do |milestone|
-        @items["milestone:#{milestone["id"]}"] = engagement.scope_items.create!(description: milestone["name"])
+        @items["milestone:#{milestone["id"]}"] = work.scope_items.create!(description: milestone["name"])
       end
-      todos_where("project_id = ?", row["id"]).each { import_todo(it, engagement) }
-      close!(engagement, "Completed in Runwell v1", at: time(row["completed_at"]) || time(row["updated_at"])) if row["completed"] == 1
+      todos_where("project_id = ?", row["id"]).each { import_task(it, work) }
+      close!(work, "Completed in Runwell v1", at: time(row["completed_at"]) || time(row["updated_at"])) if row["completed"] == 1
     end
 
     def import_service(row)
       client = @clients[row["partner_id"]] or return @skipped[:services] << "#{row["name"]}: no client"
 
-      engagement = client.works.create!(
+      work = client.works.create!(
         label: "service", shape: "recurring", title: row["name"],
         description: rich("Service", row["id"], "description") || row["description"].presence,
         estimate_notes: row["context"].presence,
         created_by: @users[row["user_id"]], created_at: time(row["created_at"]))
-      @engagements["service:#{row["id"]}"] = engagement
+      @works["service:#{row["id"]}"] = work
       @counts[:services] += 1
 
-      todos_where("service_id = ? AND #{NO_PROJECT}", row["id"]).each { import_todo(it, engagement) }
-      close!(engagement, "Ended in Runwell v1", at: time(row["updated_at"])) if row["completed"] == 1 || row["status"] != "active"
+      todos_where("service_id = ? AND #{NO_PROJECT}", row["id"]).each { import_task(it, work) }
+      close!(work, "Ended in Runwell v1", at: time(row["updated_at"])) if row["completed"] == 1 || row["status"] != "active"
     end
 
-    # Work v1 kept on a client with no project or service is work straight on that client here.
+    # Todos v1 kept on a client with no project or service are tasks straight on that client here.
     def import_general_work
       todos_where("#{NO_PROJECT} AND #{NO_SERVICE}").group_by { it["partner_id"] }.each do |partner_id, todos|
         client = @clients[partner_id] or next @skipped[:todos] << "#{todos.size} with no client"
 
-        todos.each { import_todo(it, nil, client: client) }
+        todos.each { import_task(it, nil, client: client) }
       end
     end
 
     def import_work_order(row)
-      client = @clients[row["partner_id"]] || @engagements["project:#{row["project_id"]}"]&.client
+      client = @clients[row["partner_id"]] || @works["project:#{row["project_id"]}"]&.client
       return @skipped[:work_orders] << "#{row["title"]}: no client" unless client
 
-      engagement = client.works.create!(
+      work = client.works.create!(
         label: "work_order", shape: "fixed", title: row["title"],
         description: rich("WorkOrder", row["id"], "description") || row["description"].presence,
         estimate_notes: row["notes"].presence,
         created_by: @users[row["created_by_id"]], created_at: time(row["created_at"]))
-      @engagements["work_order:#{row["id"]}"] = engagement
+      @works["work_order:#{row["id"]}"] = work
       @counts[:work_orders] += 1
 
       @db.execute("SELECT * FROM work_order_items WHERE work_order_id = ? ORDER BY position", [ row["id"] ]).each do |item|
         description = [ item["name"], plain(item["description"]) ].compact_blank.join(": ")
-        @items["item:#{item["id"]}"] = engagement.scope_items.create!(description: description)
+        @items["item:#{item["id"]}"] = work.scope_items.create!(description: description)
       end
 
-      todos_where("work_order_item_id IN (SELECT id FROM work_order_items WHERE work_order_id = ?)", row["id"]).each { import_todo(it, engagement) }
-      close!(engagement, "Fulfilled in Runwell v1", at: time(row["fulfilled_at"])) if row["fulfilled_at"].present?
+      todos_where("work_order_item_id IN (SELECT id FROM work_order_items WHERE work_order_id = ?)", row["id"]).each { import_task(it, work) }
+      close!(work, "Fulfilled in Runwell v1", at: time(row["fulfilled_at"])) if row["fulfilled_at"].present?
     end
 
-    def close!(engagement, reason, at:)
-      engagement.close!(reason: reason, actor: actor, source: SOURCE)
-      engagement.update!(closed_at: at) if at
+    def close!(work, reason, at:)
+      work.close!(reason: reason, actor: actor, source: SOURCE)
+      work.update!(closed_at: at) if at
     end
 
     # --- Work ----------------------------------------------------------------------------
 
-    # Onto the engagement, or straight onto the client when it had none (engagement nil).
-    def import_todo(row, engagement, client: nil)
+    # Onto the work, or straight onto the client when it had none (work nil).
+    def import_task(row, work, client: nil)
       return if @todos.key?(row["id"])
 
       scope_item = @items["milestone:#{row["milestone_id"]}"] || @items["item:#{row["work_order_item_id"]}"]
-      scope_item = nil if scope_item && (engagement.nil? || scope_item.work != engagement)
+      scope_item = nil if scope_item && (work.nil? || scope_item.work != work)
       owners = todo_owners[row["id"]] || []
       status = TODO_STATUSES.fetch(row["status"], "planned")
-      todo = (engagement ? engagement.tasks : client.tasks).create!(
+      task = (work ? work.tasks : client.tasks).create!(
         title: row["name"], status: status, scope_item: scope_item,
         description: rich("Todo", row["id"], "description") || row["description"].presence,
         owner: @users[owners.first], due_on: row["due_date"], client_visible: row["client_visible"] == 1,
         completed_at: (time(row["completed_at"]) || time(row["updated_at"]) if status == "done"),
         created_by: @users[row["created_by_id"]], created_at: time(row["created_at"]), updated_at: time(row["updated_at"]))
-      @todos[row["id"]] = todo
+      @todos[row["id"]] = task
       @counts[:todos] += 1
       @counts[:todos_cancelled] += 1 if row["status"] == "cancelled"
-      @skipped[:extra_assignees] << "#{todo.title}: also #{owners.drop(1).map { user_name(it) }.join(", ")}" if owners.size > 1
-      attach_files("Todo", row["id"], todo, client_visible: todo.client_visible?)
+      @skipped[:extra_assignees] << "#{task.title}: also #{owners.drop(1).map { user_name(it) }.join(", ")}" if owners.size > 1
+      attach_files("Todo", row["id"], task, client_visible: task.client_visible?)
     end
 
     def todos_where(condition, *binds)
@@ -248,7 +248,7 @@ module Import
 
     # --- Requests, notes, time, files ----------------------------------------------------
 
-    # A ticket is a request: work on its client nobody has taken on. One that already became a todo
+    # A ticket is a request: a task on its client nobody has taken on. One that already became a todo
     # is that todo (its notes and files join it); a closed one with no todo was let go, so it
     # isn't brought over.
     def import_requests
@@ -308,7 +308,7 @@ module Import
         subject = case row["noteable_type"]
         when "Todo" then @todos[row["noteable_id"]]
         when "Ticket" then @requests[row["noteable_id"]]
-        when "Project" then @engagements["project:#{row["noteable_id"]}"]
+        when "Project" then @works["project:#{row["noteable_id"]}"]
         when "Partner" then @clients[row["noteable_id"]]
         end
         next @skipped[:notes] << "note #{row["id"]} on #{row["noteable_type"]} #{row["noteable_id"]}, which wasn't imported" unless subject
@@ -335,7 +335,7 @@ module Import
         trackable = case row["timeable_type"]
         when "Todo" then @todos[row["timeable_id"]]
         when "Partner" then @clients[row["timeable_id"]]
-        when "Project" then @engagements["project:#{row["timeable_id"]}"]
+        when "Project" then @works["project:#{row["timeable_id"]}"]
         end
         unless user && trackable && row["minutes"].to_i > 0
           next @skipped[:time_entries] << "entry #{row["id"]}: #{row["minutes"]} min by #{user_name(row["user_id"])} on #{row["timeable_type"]} #{row["timeable_id"]}"

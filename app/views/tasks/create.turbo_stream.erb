@@ -1,0 +1,8 @@
+<%# Added in a piece of work's or a client's Tasks section: that section again (open tasks, and the
+    section it was focused on), and the notice. %>
+<% if @home.is_a?(Work) %>
+  <%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/section", locals: { work: @home, item: params[:inline_item].presence&.to_i } %>
+<% else %>
+  <%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/client_section", locals: { client: @home } %>
+<% end %>
+<%= turbo_stream_flash(notice: "Added.") %>

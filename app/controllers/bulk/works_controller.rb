@@ -8,7 +8,7 @@ class Bulk::WorksController < ApplicationController
 
   def destroy
     apply_to_each(selected(Work.all), done: "Deleted %{count} #{Setting.current.term(:work, count: 2).downcase}", fallback: works_path) do |work|
-      next "it has work on it; close it instead" unless work.deletable?
+      next "it has #{Setting.current.term(:task, count: 2).downcase} on it; close it instead" unless work.deletable?
 
       work.destroy!
       true

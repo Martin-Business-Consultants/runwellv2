@@ -3,7 +3,7 @@
 class Work < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
   include Refs, CustomFields
-  include LiveRefreshes
+  include LiveRefreshes, RecordsCreation
 
   mentionable_fields :description
 
@@ -62,9 +62,6 @@ class Work < ApplicationRecord
     value.presence_in(FILTERS) || "open"
   end
 
-  # Active until closed. An internal client's work are your own projects.
-  STATES = %w[active closed].freeze
-
   def state = closed? ? "closed" : "active"
   def active? = !closed?
   def internal? = client&.internal? || false
@@ -105,6 +102,9 @@ class Work < ApplicationRecord
       record_event!("work.reopened", actor: actor, source: source)
     end
   end
+
+  # How its tasks stand: [done, open].
+  def task_progress = tasks.partition { it.status == "done" }.map(&:size)
 
   # The state in words: "Completed" or "Cancelled" once closed, else the state itself.
   def state_label

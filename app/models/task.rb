@@ -1,11 +1,15 @@
-# A piece of work: under a piece of work (often in one of its sections), or straight on a
+# A task: on a piece of work (often in one of its sections), or straight on a
 # client. Small on purpose: who's on it (a lead and others), a status and a date. No time, no money.
-# Work nobody has taken on or started is a request (`Task.requests`): what a client asked for by
+# A task nobody has taken on or started is a request (`Task.requests`): what a client asked for by
 # email or the portal arrives that way, with who asked (`contact`, or an unmatched sender) and how
-# (`source`). A promise with a date is work with a due date; whoever it's assigned to owns it.
+# (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable
-  include LiveRefreshes
+  include LiveRefreshes, RecordsCreation
+
+  # A request from outside (a client in the portal or through their agent, or an email): set by
+  # whoever makes it, so its history says task.requested, credited to who asked, not task.created.
+  attr_accessor :requested
 
   mentionable_fields :description
 
@@ -20,7 +24,7 @@ class Task < ApplicationRecord
   belongs_to :owner, class_name: "User", optional: true
   belongs_to :created_by, class_name: "User", optional: true
   positioned on: [ :work, :status ]
-  # The Work board's order: one list per status across every work, set by dragging.
+  # The Tasks board's order: one list per status across all work, set by dragging.
   positioned on: :status, column: :board_position
 
   validates :title, presence: true
@@ -35,11 +39,19 @@ class Task < ApplicationRecord
   scope :overdue, -> { open.where("due_on < ?", Date.current) }
   scope :client_visible, -> { where(client_visible: true) }
   scope :board_ordered, -> { order(:board_position) }
-  scope :due_soon, -> { open.where(due_on: Date.current..(Date.current + 7)) }
-  # When open work is due, as home and the Work list's Due filter split it: late, today, or in
+  # One column of the Tasks board: its tasks in the order dragged, or Done's by when they were due.
+  scope :board_column, ->(status) { where(status: status).then { status == "done" ? it.order(:due_on, :position) : it.board_ordered } }
+  # When open tasks are due, as the Tasks list's Due filter splits them: late, today, or in
   # the seven days after today.
   scope :due_today, -> { open.where(due_on: Date.current) }
   scope :due_this_week, -> { open.where(due_on: (Date.current + 1)..(Date.current + 7)) }
+  # A Tasks section's filter (?tasks= on a piece of work's or a client's page): open by default.
+  STATE_FILTERS = %w[open done all].freeze
+  def self.state_filter(value) = value.presence_in(STATE_FILTERS) || "open"
+  # The section a piece of work's Tasks show alone (?item=): a section's id, "other" for tasks in
+  # none, or nil for all of them.
+  def self.section_focus(value) = value == "other" ? "other" : value.presence&.to_i
+
   DUE_FILTERS = { "overdue" => :overdue, "today" => :due_today, "week" => :due_this_week }.freeze
   # Nobody has taken it on or started it: a request, waiting for someone to be assigned.
   scope :requests, -> { where(owner_id: nil, status: "planned") }
@@ -103,6 +115,14 @@ class Task < ApplicationRecord
   end
 
   ActiveSupport.run_load_hooks(:runwell_task, self)
+
+    def record_creation
+      return super unless requested
+      return if Current.source == "import"
+
+      asker = [ requester_name, (Current.access_token.name if Current.client_agent?) ].compact.join(" via ")
+      record_event!("task.requested", actor: nil, source: source, actor_label: asker)
+    end
 
     def live_streams = [ self, :tasks, work, client, scope_item ]
 end

@@ -1,5 +1,9 @@
 class Note < ApplicationRecord
   include LiveRefreshes
+
+  # Its record's history says a note was added or deleted (and of what kind).
+  after_create_commit -> { subject.record_event!("note.added", payload: { kind: kind }) }, if: :subject_records_events?
+  after_destroy_commit -> { subject.record_event!("note.deleted", payload: { kind: kind }) }, if: :subject_records_events?
   include Searchable, Mentions
 
   mentionable_fields :body
@@ -28,5 +32,7 @@ class Note < ApplicationRecord
   def search_client_id = subject.is_a?(Client) ? subject.id : subject.try(:client_id) || subject.try(:client)&.id
 
   private
+    def subject_records_events? = Current.source != "import" && subject.respond_to?(:record_event!)
+
     def live_streams = [ subject, subject.try(:work), subject.try(:client) ]
 end

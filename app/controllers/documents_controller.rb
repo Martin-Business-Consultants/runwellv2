@@ -1,4 +1,6 @@
 class DocumentsController < ApplicationController
+  include SubjectScoped
+  before_action :set_subject, only: :create
   allow_staff
   agent_tool :add_document, on: :create, title: "Add a document to a record",
     description: "record: \"Type:id\" for a Client, Work, ScopeItem or Task. Files start internal; set_document_visibility shows one to the client.",
@@ -7,10 +9,8 @@ class DocumentsController < ApplicationController
     params: { document: { client_visible: "boolean!" } }, confirm: "Making it visible shows the file to the client in their portal."
   agent_tool :delete_document, on: :destroy, title: "Delete a document"
 
-  SUBJECTS = %w[Client Work ScopeItem Task].freeze
-
   def create
-    subject = find_subject or return redirect_back(fallback_location: root_path, alert: "Choose where this goes.")
+    subject = @subject
 
     files = Array(params.dig(:document, :files)).compact_blank
     documents = files.map { |file| subject.documents.new(file: file, uploaded_by: current_user) }
@@ -40,10 +40,4 @@ class DocumentsController < ApplicationController
     document.destroy!
     redirect_back fallback_location: root_path, notice: "#{document.filename} removed."
   end
-
-  private
-    # The record picked in the quick action tray ("Client:12").
-    def find_subject
-      QuickAction.locate(params[:record], SUBJECTS) if params[:record].present?
-    end
 end

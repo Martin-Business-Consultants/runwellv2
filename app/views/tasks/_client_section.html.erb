@@ -4,7 +4,7 @@
 <% state ||= "open" %>
 <% all = client.tasks.includes(:owner, :work, :client, :custom_values, assignments: :user).order(:due_on, :position, :id).to_a %>
 <% shown = all.select { |task| state == "all" || (state == "done") == (task.status == "done") } %>
-<section class="card record-card" id="tasks">
+<section class="card record-card" id="tasks" data-task-list="client" data-task-list-state="<%= state %>">
   <header class="card__head">
     <h2 class="card__title"><%= term(:task, count: 2) %></h2>
     <p class="card__hint">On their <%= term(:work, count: 2).downcase %> and straight on <%= client.name %>.</p>

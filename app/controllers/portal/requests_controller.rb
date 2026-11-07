@@ -20,15 +20,11 @@ class Portal::RequestsController < Portal::BaseController
     asked = params.expect(request: %i[subject body])
     @request_record = client.tasks.new(title: asked[:subject], description: asked[:body], contact: current_contact,
                                        sender_name: current_contact.name, sender_email: current_contact.email,
-                                       source: Current.client_agent? ? "agent" : "portal")
+                                       source: Current.client_agent? ? "agent" : "portal", requested: true)
     if @request_record.save
-      @request_record.record_event!("task.requested", actor: nil, source: @request_record.source, actor_label: requester_label)
       redirect_to portal_requests_path, notice: "Sent. We'll get back to you."
     else
       render :new, status: :unprocessable_entity
     end
   end
-
-  private
-    def requester_label = Current.client_agent? ? "#{current_contact.name} via #{Current.access_token.name}" : current_contact.name
 end

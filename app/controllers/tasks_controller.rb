@@ -31,12 +31,12 @@ class TasksController < ApplicationController
   def index
     @view = index_view(extra: %w[board])
     @status = params[:status].presence_in(STATUS_FILTERS) || "open"
-    # The page opens on your own work; agents (JSON) list everyone unless they ask.
+    # The page opens on your own tasks; agents (JSON) list everyone unless they ask.
     @owner = params[:owner].presence || (request.format.json? ? "any" : "me")
-    @work = params[:work].presence || "all"
+    @work_filter = params[:work].presence || "all"
     @due = params[:due].presence_in(Task::DUE_FILTERS.keys) || "any"
 
-    scope = Task.filtered(owner: owner_filter, work: @work)
+    scope = Task.filtered(owner: owner_filter, work: @work_filter)
     scope = scope.public_send(Task::DUE_FILTERS[@due]) unless @due == "any"
     @board = scope
     scope = scope.open if @status == "open"
@@ -46,28 +46,21 @@ class TasksController < ApplicationController
   end
 
   # On a piece of work (its ref in the path), a client (client_id, or the client's page), or the record
-  # picked in the quick action modal (g t n).
+  # picked in the quick action modal (g t n). Added in a Tasks section, that section comes back
+  # (create.turbo_stream.erb); anywhere else, back where it was added.
   def create
-    home =
-      if params[:work_ref] then Work.find_by_ref!(params[:work_ref])
-      elsif params[:client_id] then Client.find(params[:client_id])
-      elsif params[:record].present? then QuickAction.locate(params[:record], %w[Work Client])
-      elsif params.dig(:task, :client_id).present? then Client.find(params.dig(:task, :client_id))
-      end
-    return redirect_back(fallback_location: tasks_path, alert: "Choose the #{Setting.current.term(:work).downcase} or #{Setting.current.term(:client).downcase} it’s for.") unless home
+    @home = home_from_params
+    return redirect_back(fallback_location: tasks_path, alert: "Choose the #{Setting.current.term(:work).downcase} or #{Setting.current.term(:client).downcase} it’s for.") unless @home
 
-    task = home.tasks.new(task_params.merge(created_by: current_user))
+    task = @home.tasks.new(task_params.merge(created_by: current_user))
     if task.save
-      task.record_event!("task.created")
-      if params[:inline] == "tasks" && request.format.turbo_stream?
-        render_task_section(home)
-      else
-        redirect_back fallback_location: home, notice: params[:record].present? ? "Added “#{task.title}” to #{home_name(home)}." : "Added."
-      end
-    else
-      return refuse_in_place(task.errors.full_messages.to_sentence) if params[:inline] == "tasks" && request.format.turbo_stream?
+      return render(:create) if inline?("tasks")
 
-      redirect_back fallback_location: home, alert: task.errors.full_messages.to_sentence
+      redirect_back fallback_location: @home, notice: params[:record].present? ? "Added “#{task.title}” to #{home_name(@home)}." : "Added."
+    else
+      return refuse_in_place(task.errors.full_messages.to_sentence) if inline?("tasks")
+
+      redirect_back fallback_location: @home, alert: task.errors.full_messages.to_sentence
     end
   end
 
@@ -77,19 +70,17 @@ class TasksController < ApplicationController
   def edit
   end
 
+  # From the side panel, the task is redrawn wherever it shows (update.turbo_stream.erb); from its
+  # edit page, back to it; anywhere else (an agent, a plain form), back where it came from.
   def update
-    saved = @task.update(task_params)
-    if request.format.turbo_stream? && (params[:inline] == "panel" || (params[:inline].present? && side_panel_open_for?(@task)))
-      return refresh_under_panel(saved)
-    end
-    return answer_in_place(saved) if params[:inline].present? && request.format.turbo_stream?
+    if @task.update(task_params)
+      return render(:update) if inline?("panel")
 
-    if saved
-      if params[:from_edit]
-        redirect_to @task, notice: "Saved."
-      else
-        redirect_back fallback_location: task_home
-      end
+      params[:from_edit] ? redirect_to(@task, notice: "Saved.") : redirect_back(fallback_location: task_home)
+    elsif inline?("panel")
+      @alert = @task.errors.full_messages.to_sentence
+      @task.reload
+      render :update, status: :unprocessable_entity
     elsif params[:from_edit]
       render :edit, status: :unprocessable_entity
     else
@@ -105,108 +96,37 @@ class TasksController < ApplicationController
     end
   end
 
+  # From its table row, just the row goes (and the side panel, if it showed this task); anywhere
+  # else, to its work, client or the requests it was among.
   def destroy
     @task.destroy
-    if row_removal?
-      closing = side_panel_open_for?(@task) ? [ turbo_stream.update("side_panel", "") ] : []
-      return remove_row(@task, notice: "Removed.", also: closing)
-    end
-    # From a list, stay on it; from the task's own pages (now gone), go to its work.
-    if request.referer.to_s.include?(task_path(@task))
-      redirect_to task_home, notice: "Removed."
-    else
-      redirect_back fallback_location: task_home, notice: "Removed."
-    end
+    return remove_row(@task, notice: "Removed.", also: [ turbo_stream.remove(helpers.dom_id(@task, :panel)) ]) if row_removal?
+
+    redirect_to task_home, notice: "Removed."
   end
 
   private
-    # The status picker on a list saved: answer with that picker as it now stands, and the
-    # due date beside it (Overdue depends on the status), not a reload of the whole page. Refused,
-    # the picker goes back to what was saved, and the reason shows.
-    def answer_in_place(saved)
-      return answer_with_list(saved) if saved && @task.saved_change_to_status?
-
-      @task.reload unless saved
-      labelled = params[:labelled].present?
-      picker = "tasks/status_dot"
-      id = helpers.dom_id(@task, "status#{"_labelled" if labelled}")
-      flash.now[:alert] = @task.errors.full_messages.to_sentence unless saved
-
-      locals = { task: @task, labelled: labelled, options_on_page: true } # the page has the choices already
-      streams = [ turbo_stream.replace(id, partial: picker, locals: locals),
-                  turbo_stream.replace(helpers.dom_id(@task, :due), partial: "tasks/due", locals: { task: @task }) ]
-      streams << turbo_stream.replace("flash", partial: "layouts/shared/flash") unless saved
-      render turbo_stream: streams
-    end
+    def current_record = @task
 
     def owner_filter = owner_filter_for(@owner)
 
-    # Is this task the one open in the side panel of the page that sent the change (?task=)?
-    def side_panel_open_for?(task)
-      Rack::Utils.parse_query(URI(request.referer.to_s).query.to_s)["task"] == task.id.to_s
-    rescue URI::InvalidURIError
-      false
-    end
+    # A form in place on a page (the side panel's fields, a Tasks section's Add) marks itself, and
+    # is answered as a stream; the same action answers anything else with a redirect.
+    def inline?(form) = params[:inline] == form && request.format.turbo_stream?
 
-    # A change from the side panel (or to the task open in it): the page under the panel, panel and
-    # all, refreshes in place (a morph, scroll kept), so its row, card, counts and the panel agree.
-    def refresh_under_panel(saved)
-      if saved
-        flash[:notice] = "Saved."
-      else
-        flash[:alert] = @task.errors.full_messages.to_sentence
+    def home_from_params
+      if params[:work_ref] then Work.find_by_ref!(params[:work_ref])
+      elsif params[:client_id] then Client.find(params[:client_id])
+      elsif params[:record].present? then QuickAction.locate(params[:record], %w[Work Client])
+      elsif params.dig(:task, :client_id).present? then Client.find(params.dig(:task, :client_id))
       end
-      render turbo_stream: turbo_stream.refresh(request_id: nil)
-    end
-
-    # Added from the Work section on the work's or client's own page: that section again
-    # (open work, and the section it was focused on) and the notice, without reloading the page.
-    # A status change from a list: the task moves to where it now belongs. On a piece of work's or
-    # a client's page, their Tasks section comes back as a stream, keeping its Open / Done / All
-    # filter and the section in focus (so marking one done takes it out of Open at once); on the
-    # Tasks index, where a filter may now leave it out, the page refreshes in place.
-    def answer_with_list(saved)
-      flash.now[:notice] = "#{@task.title}: #{@task.status.humanize.downcase}."
-      section = list_section_on_referer
-      return render(turbo_stream: turbo_stream.refresh(request_id: nil)) unless section
-
-      render turbo_stream: [ turbo_stream.replace("tasks", method: :morph, **section), turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
-    end
-
-    # The Tasks section of the page the change came from (its path and query), if it shows one.
-    def list_section_on_referer
-      referer = URI(request.referer.to_s)
-      query = Rack::Utils.parse_query(referer.query.to_s)
-      state = query["tasks"].presence_in(%w[open done all]) || "open"
-      route = Rails.application.routes.recognize_path(referer.path) rescue {}
-      case route.values_at(:controller, :action)
-      when %w[works show]
-        work = Work.find_by(ref: route[:ref].to_s.upcase) or return
-        item = query["item"] == "other" ? "other" : query["item"].presence&.to_i
-        { partial: "tasks/section", locals: { work: work, state: state, item: item } }
-      when %w[clients show]
-        client = Client.find_by(id: route[:id]) or return
-        { partial: "tasks/client_section", locals: { client: client, state: state } }
-      end
-    rescue URI::InvalidURIError
-      nil
-    end
-
-    def render_task_section(home)
-      flash.now[:notice] = "Added."
-      section = if home.is_a?(Work)
-        { partial: "tasks/section", locals: { work: home, item: params[:inline_item].presence&.to_i } }
-      else
-        { partial: "tasks/client_section", locals: { client: home } }
-      end
-      render turbo_stream: [ turbo_stream.replace("tasks", method: :morph, **section), turbo_stream.replace("flash", partial: "layouts/shared/flash") ]
     end
 
     def home_name(home) = home.is_a?(Work) ? "#{home.ref} #{home.title}" : home.name
 
-    # Where the work lives: its work, else its client, else the requests it's among.
+    # Where the task lives: its work, else its client, else the requests it's among.
     def task_home = @task.work || @task.client || tasks_path(owner: "none")
 
-  def set_task = @task = Task.find(params[:id])
-  def task_params = params.expect(task: [ :title, :description, :status, :client_id, :contact_id, :source, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {}, other_owner_ids: [] ])
+    def set_task = @task = Task.find(params[:id])
+    def task_params = params.expect(task: [ :title, :description, :status, :client_id, :contact_id, :source, :owner_id, :due_on, :position, :client_visible, :scope_item_id, custom_fields: {}, other_owner_ids: [] ])
 end

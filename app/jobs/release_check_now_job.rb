@@ -4,6 +4,6 @@ class ReleaseCheckNowJob < ApplicationJob
   def perform
     Release.check!
   rescue Release::Github::Error => error
-    Setting.first.update!(release_check_error: error.message)
+    Setting.current.update!(release_check_error: error.message)
   end
 end
