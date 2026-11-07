@@ -14,6 +14,18 @@
 /* contents, as Fizzy's base had it. */
 turbo-frame { display: contents; }
 
+/* Page changes cross-fade with the browser's own view transitions: Turbo's visits (the
+/* view-transition meta in layouts/shared/_head) and full page loads (@view-transition). The nav
+/* is its own group, so it holds still while the page beside it changes. None for anyone who asks
+/* for less motion. */
+@view-transition { navigation: auto; }
+.sidebar { view-transition-name: sidebar; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .16s; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+}
+
 /* No visible scrollbars anywhere: a bar appearing as content grows shifted the layout. Everything
 /* still scrolls by wheel, touch and keys. */
 * { scrollbar-width: none; }

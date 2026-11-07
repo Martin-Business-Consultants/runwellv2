@@ -10,6 +10,8 @@
   <%= csp_meta_tag %>
 
   <% turbo_refreshes_with method: :morph, scroll: :preserve %>
+  <%# Turbo's visits render through the browser's own view transitions (runwell.css styles them). %>
+  <meta name="view-transition" content="same-origin">
 
   <%= render "layouts/theme_preference" %>
   <%= app_stylesheet_tags %>

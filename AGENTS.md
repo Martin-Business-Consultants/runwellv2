@@ -178,6 +178,13 @@ it when the state changes (the guide's `useState` pattern). Esc closes it, even 
 Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
 focuses its `autofocus` field.
 
+Page changes use the browser's own view transitions, no JavaScript: Turbo renders its visits
+through them (`<meta name="view-transition" content="same-origin">` in `layouts/shared/_head`) and
+full loads take `@view-transition` (`runwell.css`, which also keeps the nav still as its own
+`view-transition-name` and turns them off for reduced motion). An element worth carrying across
+pages gets a `view-transition-name` unique on the page; nothing calls `startViewTransition` for a
+page change.
+
 JavaScript that should follow elements as they come and go is a ReActionView behavior
 (`app/javascript/behaviors`, one file per attribute, listed in `behaviors/index.js`), not a
 controller or a document listener.
