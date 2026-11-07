@@ -12,7 +12,7 @@
 <%= parent_page term(:client, count: 2), clients_path %>
 <%= turbo_stream_from @client %>
 
-<section class="record-page">
+<section class="record-page record-page--tabbed">
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>

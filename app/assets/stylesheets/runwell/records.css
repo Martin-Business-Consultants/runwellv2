@@ -13,6 +13,12 @@
 
 .record-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
 @media (min-width: 960px) { .record-page { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+/* A page whose working column opens with its tabs (record-page--tabbed: clients, work, sections):
+/* the tab row sits above both columns, so the sidebar starts level with the first card under the
+/* tabs: one pill row (rune's tabs--pills: a small control and its 2px frame) and the tabs' gap down. */
+@media (min-width: 960px) {
+  .record-page--tabbed .record-page__aside { padding-top: calc(var(--control-h-sm) + 4px + var(--s-4)); }
+}
 
 /* The header row: the title and a line about the record at the start, its actions at the end. */
 .record-page__header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s-4); min-width: 0; }

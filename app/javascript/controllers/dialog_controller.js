@@ -13,7 +13,21 @@ export default class extends Controller {
 
   connect() {
     this.dialogTarget.setAttribute("aria-hidden", "true")
+    this.closeForOther = this.closeForOther.bind(this)
+    document.addEventListener("dialog:opening", this.closeForOther)
     if (this.autoOpenValue) this.open()
+  }
+
+  disconnect() {
+    document.removeEventListener("dialog:opening", this.closeForOther)
+  }
+
+  // Another menu opening closes this one, unless it opens inside it (a picker in a modal or a
+  // tray). Clicking from one filter to the next leaves only the new one open: their triggers stop
+  // the click, so the outside click that would close the first never reaches it.
+  closeForOther({ target }) {
+    if (target === this.element || this.element.contains(target)) return
+    if (this.dialogTarget.open) this.close()
   }
 
   focusTouchTargetConnected() {
@@ -22,6 +36,7 @@ export default class extends Controller {
 
   open() {
     const modal = this.modalValue
+    this.element.dispatchEvent(new CustomEvent("dialog:opening", { bubbles: true }))
 
     if (modal) {
       this.dialogTarget.showModal()
