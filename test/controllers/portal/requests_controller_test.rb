@@ -12,19 +12,19 @@ class Portal::RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create logs a request from the portal" do
-    assert_difference("Todo.count") do
+    assert_difference("Task.count") do
       post portal_requests_path, params: { request: { subject: "Add a newsletter", body: "Please" } }
     end
-    r = Todo.last
+    r = Task.last
     assert_redirected_to portal_requests_path
     assert_equal [ clients(:acme), contacts(:bob), "portal", "bob@acme.example", true ],
                  [ r.client, r.contact, r.source, r.sender_email, r.request? ]
     event = r.events.last
-    assert_equal [ "todo.requested", "portal", "Bob Requester" ], [ event.kind, event.source, event.actor_name ]
+    assert_equal [ "task.requested", "portal", "Bob Requester" ], [ event.kind, event.source, event.actor_name ]
   end
 
   test "create with errors" do
-    assert_no_difference("Todo.count") do
+    assert_no_difference("Task.count") do
       post portal_requests_path, params: { request: { subject: "" } }
     end
     assert_response :unprocessable_entity

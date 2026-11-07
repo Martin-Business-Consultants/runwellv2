@@ -1,12 +1,12 @@
 # Index tables sort by their column headers: ?sort=due&direction=desc. A controller names the
 # columns it can sort by and how, and `sorted` applies the one in the URL; with none, the
 # scope keeps its own order. The view's headers are `sortable_th` (TableSortingHelper), which
-# reads `current_sort`. Only stored columns sort: a derived value (an engagement's state, a
+# reads `current_sort`. Only stored columns sort: a derived value (a piece of work's state, a
 # count) stays a plain header.
 #
-#   sortable_columns title: "todos.title",
-#     client: [ "clients.name", ->(scope) { scope.left_joins(engagement: :client) } ],
-#     due: "todos.due_on"
+#   sortable_columns title: "tasks.title",
+#     client: [ "clients.name", ->(scope) { scope.left_joins(work: :client) } ],
+#     due: "tasks.due_on"
 module TableSorting
   extend ActiveSupport::Concern
 

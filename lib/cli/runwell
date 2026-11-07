@@ -2,8 +2,8 @@
 # runwell: Runwell from the command line, for people and for AI harnesses.
 #
 # Every command is a tool from the server (runwell tools), so this file never needs to change
-# when Runwell grows: `runwell list_clients`, `runwell create_work --engagement_ref P-3
-# --todo.title "Draft the sitemap"`. One file, the Ruby standard library only.
+# when Runwell grows: `runwell list_clients`, `runwell create_task --work_ref P-3
+# --task.title "Draft the sitemap"`. One file, the Ruby standard library only.
 #
 #   runwell login [URL]          sign in through the browser (--token rw_… for a personal token,
 #                                --read-only for access that can't change anything, --client to
@@ -115,7 +115,7 @@ def login(args)
   url = (args.find { !it.start_with?("--") } || base_url).sub(%r{/+\z}, "")
   die "give Runwell's address: runwell login https://runwell.example.com", code: "usage" unless url.match?(%r{\Ahttps?://})
 
-  # A personal token says whose it is: a client's works on the portal, not on /mcp.
+  # A personal token says whose it is: a client's work on the portal, not on /mcp.
   if token
     path = client || http(:post, "#{url}/mcp", token: token, body: { jsonrpc: "2.0", id: 1, method: "tools/list" }).code == "401" ? "/portal/mcp" : "/mcp"
     save_config("url" => url, "token" => token, "mcp_path" => path)
@@ -243,7 +243,7 @@ OUTPUT_FLAGS = %w[--json --human --ids-only --count].freeze
 def take_output_options(args)
   options = OUTPUT_FLAGS.to_h { [ it.delete_prefix("--").tr("-", "_").to_sym, !args.delete(it).nil? ] }
   if (index = args.index("--field"))
-    options[:field] = args.slice!(index, 2).last or die("--field needs a path, like data.todo.status", code: "usage")
+    options[:field] = args.slice!(index, 2).last or die("--field needs a path, like data.task.status", code: "usage")
   end
   options[:json] = true if !options[:human] && !$stdout.tty? && !options[:ids_only] && !options[:count] && !options[:field]
   options
@@ -459,7 +459,7 @@ end
 def skill_text = <<~MARKDOWN
   ---
   name: runwell
-  description: Use Runwell, the project management, from the shell with the `runwell` CLI. Use for anything about clients, engagements, work (todos and requests), notes, documents or time, and when given a Runwell work brief.
+  description: Use Runwell, the project management, from the shell with the `runwell` CLI. Use for anything about clients, work, tasks (and requests), notes, documents or time, and when given a Runwell work brief.
   ---
   #{SKILL_MARKER}
 
@@ -468,44 +468,44 @@ def skill_text = <<~MARKDOWN
   `runwell` runs any Runwell tool: `runwell tools` lists them for your role, `runwell help <tool>` shows inputs.
   You act as the person's agent ("Ted's agent via Claude Code"), with exactly their role.
 
-  - Start with `runwell list_work --owner me` (the person's own work); find anything with `runwell search --q "…"`.
-  - Engagements go by ref (`--ref P-3`, `--engagement_ref WO-12`). Tools taking `--record` want "Type:id" (`Todo:12`), as each result's `record` shows.
-  - Names work where ids do: `--id "Bloom"`, `--todo.owner_id priya`, `--ref "Spanish pages"`, `--record "Client:Bloom"`. An `ambiguous` answer (exit 10) lists `candidates`: ask the person which one, then use its id. `runwell resolve --q "…"` looks a name up.
+  - Start with `runwell list_tasks --owner me` (the person's own tasks); find anything with `runwell search --q "…"`.
+  - Works go by ref (`--ref P-3`, `--work_ref WO-12`). Tools taking `--record` want "Type:id" (`Task:12`), as each result's `record` shows.
+  - Names work where ids do: `--id "Bloom"`, `--task.owner_id priya`, `--ref "Spanish pages"`, `--record "Client:Bloom"`. An `ambiguous` answer (exit 10) lists `candidates`: ask the person which one, then use its id. `runwell resolve --q "…"` looks a name up.
   - On a schedule, use `runwell changes --since 24h`, keep the `cursor` it gives, and next time pass `--after <cursor>` to hear only what's new.
   - Changes are safe to retry: the CLI gives each one an idempotency key, so a repeat after a dropped connection doesn't happen twice.
-  - Nested inputs use dots: `runwell create_work --engagement_ref P-3 --todo.title "Draft the sitemap" --todo.due_on 2026-10-02`.
-  - Output is JSON when piped. `--ids-only`, `--count` and `--field data.todo.status` keep answers small. Files: `--document.files @brief.pdf`.
+  - Nested inputs use dots: `runwell create_task --work_ref P-3 --task.title "Draft the sitemap" --task.due_on 2026-10-02`.
+  - Output is JSON when piped. `--ids-only`, `--count` and `--field data.task.status` keep answers small. Files: `--document.files @brief.pdf`.
   - A success may list `next`: the commands to run next, with what's known filled in.
   - Errors carry a `code` and a `hint`; exit statuses match (`runwell help exit-codes`). Branch on the code: `invalid` means fix the named fields; `refused` means Runwell said no as things stand; `auth` means ask the person to sign in.
   - Anything that reaches a client answers `needs_confirmation` (exit 9). Show the person; only after they agree, run it again with `--yes`.
   - Never run `runwell login` yourself: it needs a person at a browser. If you're not signed in, ask them. `runwell doctor` checks everything.
 
-  ## Working a todo
+  ## Working a task
 
-  1. `runwell brief_work --id <id> --field brief` for the work, agreed scope, notes and repos (or use the brief the person pasted).
-  2. `runwell update_work --id <id> --todo.status in_progress`, then leave a note when you decide something: `runwell add_note --record Todo:<id> --note.body "…"`.
+  1. `runwell brief_task --id <id> --field brief` for the task, its work's agreed scope, notes and repos (or use the brief the person pasted).
+  2. `runwell update_task --id <id> --task.status in_progress`, then leave a note when you decide something: `runwell add_note --record Task:<id> --note.body "…"`.
   3. Stay within the agreed scope; if it needs more, stop and say so in a note.
-  4. Finish with `--todo.status in_review` (or `finish_work` when the Code plugin is on) and a closing note. A person checks it and marks it done; don't mark your own work done.
+  4. Finish with `--task.status in_review` (or `finish_task` when the Code plugin is on) and a closing note. A person checks it and marks it done; don't mark your own tasks done.
 
   ## Workflows from plugins
 
-  Plugins add workflows, like turning a client call's notes into work. `runwell me --field workflows` lists
+  Plugins add workflows, like turning a client call's notes into tasks. `runwell me --field workflows` lists
   the ones switched on here, each with its steps. Follow them when the person asks for one.
 
   ## Building on Runwell
 
   - A theme ("make Runwell look like our brand"): `runwell theme_brief --field brief` gives the design tokens and rules; write CSS that sets only tokens, show it, then `runwell update_appearance --setting.custom_css @theme.css` (owners).
   - A plugin (a new feature of its own): start from github.com/Martin-Business-Consultants/runwell-plugin-template (`bin/rename "Name"`), keep to docs/plugin-contract.md in Runwell's repository, and read the template's AGENTS.md.
-  - Words: Settings › Names renames clients, engagements, work and the rest (`runwell me` shows the current ones). Use the install's words with the person.
+  - Words: Settings › Names renames clients, work, tasks and the rest (`runwell me` shows the current ones). Use the install's words with the person.
 
   ## Routines people ask for
 
-  - "Every morning, go through `runwell list_work --owner me` and tell me what needs me, most urgent first."
+  - "Every morning, go through `runwell list_tasks --owner me` and tell me what needs me, most urgent first."
   - "Go through the requests: for each, suggest who should take it on, and ask before assigning."
-  - "Find overdue work, and draft a note to each owner."
+  - "Find overdue tasks, and draft a note to each owner."
   - "Before a client call, summarise everything on <client> since last week." (`runwell changes --client_id "<client>" --since 7d`)
   - "Here are my notes from the call with <client>: debrief it." (the Account management plugin's workflow)
-  - "Check my in-progress work against the repos and mark what's actually done, with a note."
+  - "Check my in-progress tasks against the repos and mark what's actually done, with a note."
 MARKDOWN
 
 def install_session_hook

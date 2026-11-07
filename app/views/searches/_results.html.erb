@@ -4,7 +4,7 @@
 <section class="search-results">
   <% if query.nil? %>
     <p class="search-results__empty">
-      Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:engagement, count: 2).downcase %>, <%= term(:work, count: 2).downcase %>, notes and documents.
+      Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:work, count: 2).downcase %>, <%= term(:task, count: 2).downcase %>, notes and documents.
     </p>
   <% elsif results.empty? %>
     <p class="search-results__empty">No results found.</p>

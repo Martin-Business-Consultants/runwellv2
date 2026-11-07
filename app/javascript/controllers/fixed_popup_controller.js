@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Places a small popup menu in the viewport beside its trigger, so a scrolling list around it
-// can't clip it (the work rows on engagement pages). It opens below the trigger, or above
+// can't clip it (the work rows on work pages). It opens below the trigger, or above
 // when there's no room, stays inside the window, and closes if the page scrolls.
 export default class extends Controller {
   static targets = [ "trigger", "popup" ]

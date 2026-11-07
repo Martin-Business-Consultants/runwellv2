@@ -9,7 +9,7 @@
       <dt><kbd>Enter</kbd> <kbd>o</kbd></dt><dd>Open the item</dd>
       <dt><kbd>e</kbd></dt><dd>Edit the item, or the record on screen</dd>
       <dt><kbd>d</kbd></dt><dd>Delete, archive or close it (asks first)</dd>
-      <dt><kbd>c</kbd></dt><dd>Copy a work item’s brief for your AI</dd>
+      <dt><kbd>c</kbd></dt><dd>Copy a task’s brief for your AI</dd>
       <dt><kbd>x</kbd></dt><dd>Pick the row, to act on several at once (in a table)</dd>
       <dt><kbd>Esc</kbd></dt><dd>Drop the selection, then go up a level</dd>
     </dl>
@@ -19,9 +19,9 @@
     <h3 class="shortcuts__heading">Go to</h3>
     <dl class="shortcut-list">
       <dt><kbd>g</kbd><kbd>c</kbd></dt><dd><%= term(:client, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>e</kbd></dt><dd><%= term(:engagement, count: 2) %></dd>
       <dt><kbd>g</kbd><kbd>w</kbd></dt><dd><%= term(:work, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:work, count: 2) %> board</dd>
+      <dt><kbd>g</kbd><kbd>t</kbd></dt><dd><%= term(:task, count: 2) %></dd>
+      <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:task, count: 2) %> board</dd>
       <dt><kbd>g</kbd><kbd>u</kbd></dt><dd>Users</dd>
       <% nav_plugin_items.values.each_with_index do |(label, _path), index| %>
         <%# herb:key label %>
@@ -39,8 +39,8 @@
       <dt><kbd>v</kbd></dt><dd>Switch cards, table and board</dd>
       <dt><kbd>/</kbd></dt><dd>Filter what’s on the page</dd>
       <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
-      <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:work).downcase %> or time</dd>
-      <dt><kbd>g</kbd> <kbd>w</kbd> <kbd>n</kbd></dt><dd>Add a <%= term(:work).downcase %> to any <%= term(:engagement).downcase %> or <%= term(:client).downcase %></dd>
+      <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:task).downcase %> or time</dd>
+      <dt><kbd>g</kbd> <kbd>t</kbd> <kbd>n</kbd></dt><dd>Add a <%= term(:task).downcase %> to any <%= term(:work).downcase %> or <%= term(:client).downcase %></dd>
       <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
         <%# herb:key shortcut.keys %>
         <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>

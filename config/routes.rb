@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "todos#index"
+  root "tasks#index"
 
   get "theme/:digest", to: "themes#show", as: :theme_stylesheet, constraints: { digest: /[0-9a-f]+/ }, format: false
   resource :session
@@ -36,11 +36,11 @@ Rails.application.routes.draw do
 
   # Many records at once, from a table's selection (BulkAction).
   namespace :bulk do
-    resource :todos, path: "work", only: %i[update destroy]
+    resource :tasks, only: %i[update destroy]
     resource :clients, only: %i[update destroy]
     resource :users, only: :update
-    resource :engagements, only: :destroy do
-      resource :closure, only: :create, module: :engagements
+    resource :works, path: "work", only: :destroy do
+      resource :closure, only: :create, module: :works
     end
   end
   get "install/cli", to: "cli#install", as: :cli_install
@@ -117,36 +117,32 @@ Rails.application.routes.draw do
 
   resources :clients do
     resources :contacts, only: %i[new create edit update destroy], shallow: true
-    resources :engagements, only: :create
-    resources :todos, only: :create, path: "work"
+    resources :works, only: :create, path: "work"
+    resources :tasks, only: :create
   end
 
-  resources :engagements, param: :ref do
+  # Work (projects, work orders, services) at /work/P-3; its tasks at /tasks.
+  resources :works, param: :ref, path: "work" do
     member do
       post :close
       post :reopen
     end
-    resource :erasure, only: :create, module: :engagements
+    resource :erasure, only: :create, module: :works
     resources :scope_items, only: %i[show create update destroy], shallow: true
-    resources :todos, only: :create, path: "work"
+    resources :tasks, only: :create
   end
 
-  # Work lives at /work (the models and helpers stay todo_*). The old /todos addresses redirect,
-  # keeping the query string, so bookmarks and briefs copied before the move still open.
-  namespace :todos, path: "work" do
+  namespace :tasks do
     resources :columns, only: :show
   end
-  resources :todos, path: "work", only: %i[index show create edit update destroy] do
+  resources :tasks, only: %i[index show create edit update destroy] do
     get :brief, on: :member
-    resources :assignments, only: :create, module: :todos
+    resources :assignments, only: :create, module: :tasks
   end
-  get "todos(/*rest)", format: false, to: redirect { |params, request|
-    [ "/work", params[:rest] ].compact.join("/") + (request.query_string.present? ? "?#{request.query_string}" : "")
-  }
 
   namespace :columns do
-    resources :todos, path: "work", only: [] do
-      scope module: :todos do
+    resources :tasks, only: [] do
+      scope module: :tasks do
         namespace :drops do
           resource :stream, only: :create
           resource :column, only: :create
@@ -155,21 +151,20 @@ Rails.application.routes.draw do
       end
     end
   end
-  # Requests and commitments are work now: old addresses land on unassigned work.
-  get "requests(/*rest)", to: redirect("/work?owner=none")
-  get "commitments(/*rest)", to: redirect("/work")
+  # Requests and commitments are tasks now: old addresses land on unassigned tasks.
+  get "requests(/*rest)", to: redirect("/tasks?owner=none")
+  get "commitments(/*rest)", to: redirect("/tasks")
   get "quick_actions/new", to: "quick_actions#new", as: :new_quick_action
   get "quick_actions/records", to: "quick_actions/records#index", as: :quick_action_records
   resources :notes, only: %i[create destroy]
   resources :documents, only: %i[create update destroy]
 
   namespace :portal do
-    root "engagements#index"
+    root "works#index"
     resource :session, only: %i[new create destroy]
     get "session/:token", to: "sessions#show", as: :session_link
-    resources :engagements, param: :ref, only: %i[index show]
-    resources :todos, path: "work", only: :index
-    get "todos", to: redirect("/portal/work")
+    resources :works, param: :ref, path: "work", only: %i[index show]
+    resources :tasks, only: :index
     resources :requests, only: %i[index new create]
     resource :me, only: :show
     post "mcp", to: "mcp#create", as: :mcp

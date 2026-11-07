@@ -1,4 +1,4 @@
-# A record that takes the install's custom fields (Client, Engagement, Todo). Values are
+# A record that takes the install's custom fields (Client, Work, Task). Values are
 # assigned by field key, as the forms and agent tools send them:
 #
 #   client.update(custom_fields: { "website" => "acme.example", "renewal" => "2026-12-01" })

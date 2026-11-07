@@ -1,0 +1,9 @@
+<% @page_title = "Column: #{@status.humanize}" %>
+<%# The breadcrumb names the page ("Work › Column: Planned"), and Esc goes back to the board. %>
+<%= parent_page term(:task, count: 2), tasks_path(task_board_filters.merge(view: "board")) %>
+
+<section class="cards cards--grid">
+  <turbo-frame id="<%= @status %>_cards">
+    <%= render "tasks/board/cards", status: @status, page: @page %>
+  </turbo-frame>
+</section>

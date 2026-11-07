@@ -1,0 +1,56 @@
+<%# locals: (work:, modal: nil) %>
+<%= render "layouts/shared/errors", record: work %>
+
+<%= form_with model: work, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do |form| %>
+  <header class="card__head">
+    <h2 class="card__title"><%= term(:work) %></h2>
+    <p class="card__hint">Who it’s for, what kind it is, and what it covers.</p>
+  </header>
+
+  <div class="card__content record-form__body">
+    <label class="field">
+      <span class="field__label"><%= term(:client) %></span>
+      <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Choose a client" },
+            required: true, disabled: work.persisted? %>
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span class="field__label">Label</span>
+        <%= form.select :label, label_options(work.label), {} %>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Shape</span>
+        <%= form.select :shape, [ [ "Fixed scope", "fixed" ], [ "Recurring", "recurring" ] ], {},
+              disabled: work.persisted? %>
+      </label>
+    </div>
+
+    <label class="field">
+      <span class="field__label">Title</span>
+      <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off", placeholder: "Spring landing page" %>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Description</span>
+      <%= rich_text_field form, :description, staff: true %>
+      <% unless work.internal? %>
+        <span class="field__hint">Shown to the <%= term(:client).downcase %> in the portal.</span>
+      <% end %>
+    </label>
+
+    <%= custom_field_inputs form, work %>
+  </div>
+
+  <footer class="card__footer card__footer--bordered">
+    <% if modal %>
+      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+    <% else %>
+      <%= link_to "Cancel", work.persisted? ? work_path(work) : works_path, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% end %>
+    <button type="submit" class="btn btn--primary" data-form-target="submit">
+      <span><%= work.new_record? ? "Draft work" : "Save changes" %></span>
+    </button>
+  </footer>
+<% end %>

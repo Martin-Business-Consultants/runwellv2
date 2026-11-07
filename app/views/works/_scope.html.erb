@@ -1,0 +1,48 @@
+<%# locals: (work:, current: nil) %>
+<%# The work's sections down the sidebar: all its work, each section, and work in none, each
+    with how much is done. Picking one shows just its work in the Work tab
+    (?item=), where its tasks are added. current: the one shown ("all", an id, "other"), nil off
+    the Work tab. Counted in one query, not one per item. %>
+<% statuses = work.tasks.pluck(:scope_item_id, :status).group_by(&:first).transform_values { |rows| rows.map(&:last) } %>
+<% items = work.scope_items.to_a %>
+<% rows = items.map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
+<% rows << [ "other", "Other tasks", statuses[nil] ] if statuses[nil] %>
+<% everything = statuses.values.flatten %>
+<% filters = request.query_parameters.slice("tasks") %>
+
+<%# Under the sidebar's sections tab (works/_sidebar), which names it. %>
+<section class="scope-section">
+  <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
+    <a href="<%= work_path(work, filters.merge(tab: "tasks")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
+      <span class="scope-nav__name">All <%= term(:task, count: 2).downcase %></span>
+      <span class="scope-nav__count"><%= everything.count("done") %>/<%= everything.size %></span>
+      <progress class="scope-nav__progress" value="<%= everything.count("done") %>" max="<%= [ everything.size, 1 ].max %>"></progress>
+    </a>
+    <% rows.each do |id, name, item_statuses| %>
+      <%# herb:key id %>
+      <% state = id == "other" ? nil : ScopeItem.delivery_state_of(item_statuses) %>
+      <a href="<%= work_path(work, filters.merge(tab: "tasks", item: id)) %>" class="scope-nav__item"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
+        <span class="scope-nav__name" title="<%= name %>">
+          <% if state %>
+            <%= status_dot({ "in_progress" => :accent, "blocked" => :danger, "done" => :ok }.fetch(state, :neutral), label: state.humanize) %>
+          <% end %>
+          <span class="scope-nav__label"><%= name %></span>
+        </span>
+        <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>
+        <progress class="scope-nav__progress" value="<%= item_statuses.count("done") %>" max="<%= [ item_statuses.size, 1 ].max %>"></progress>
+      </a>
+    <% end %>
+  </nav>
+  <% if rows.empty? %>
+    <p class="record-card__empty">
+      No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:task, count: 2).downcase %>, or add <%= term(:task, count: 2).downcase %> straight in the <%= term(:task, count: 2) %> tab.
+    </p>
+  <% end %>
+</section>
+
+<% unless work.closed? %>
+  <details class="record-add">
+    <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
+    <%= render "scope_items/new", work: work %>
+  </details>
+<% end %>

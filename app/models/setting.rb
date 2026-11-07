@@ -3,7 +3,7 @@
 class Setting < ApplicationRecord
   include CustomCss, Eventful
 
-  TERMS = %w[client engagement scope_item work].freeze
+  TERMS = %w[client work scope_item task].freeze
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
   RADII = { "sharp" => "Sharp", "fizzy" => "Soft", "round" => "Round" }.freeze
@@ -142,7 +142,7 @@ class Setting < ApplicationRecord
   end
 
   def enabled_labels
-    Engagement::LABELS.select { label_enabled?(it) }
+    Work::LABELS.select { label_enabled?(it) }
   end
 
   # A plugin is on or off as the owner set it, else as its manifest says. Plugins are off

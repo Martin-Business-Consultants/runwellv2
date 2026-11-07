@@ -1,13 +1,13 @@
 <% @page_title = @item.description %>
 <% done, total = @item.progress %>
 <% tabs = [
-     record_tab("work", term(:work, count: 2), count: @todos.size),
+     record_tab("tasks", term(:task, count: 2), count: @tasks.size),
      record_tab("notes", "Notes", count: @item.notes.count),
      record_tab("documents", "Documents", count: @item.documents.count)
    ] %>
-<% tab = current_record_tab(tabs, "work") %>
+<% tab = current_record_tab(tabs, "tasks") %>
 
-<%= parent_page @engagement.ref, @engagement %>
+<%= parent_page @work.ref, @work %>
 <%= turbo_stream_from @item %>
 
 <section class="record-page">
@@ -16,7 +16,7 @@
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %>
-        <span>A <%= term(:scope_item).downcase %> of <%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement %></span>
+        <span>A <%= term(:scope_item).downcase %> of <%= link_to "#{@work.ref} #{@work.title}", @work %></span>
       </p>
     </div>
     <div class="button-row">
@@ -30,26 +30,26 @@
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
         <div class="record-tabs__panel">
           <% case tab %>
-          <% when "work" %>
-            <section class="card record-card" id="work">
+          <% when "tasks" %>
+            <section class="card record-card" id="tasks">
               <header class="card__head">
-                <h2 class="card__title"><%= term(:work, count: 2) %></h2>
+                <h2 class="card__title"><%= term(:task, count: 2) %></h2>
                 <p class="card__hint"><%= done %> of <%= total %> done</p>
               </header>
 
               <div class="card__content">
-                <% if @todos.any? %>
+                <% if @tasks.any? %>
                   <ul class="record-list">
-                    <%= render partial: "todos/todo", collection: @todos, as: :todo %>
+                    <%= render partial: "tasks/task", collection: @tasks, as: :task %>
                   </ul>
                 <% else %>
                   <p class="record-card__empty">No work under this yet.</p>
                 <% end %>
               </div>
 
-              <% unless @engagement.closed? %>
+              <% unless @work.closed? %>
                 <footer class="card__footer">
-                  <%= render "todos/add", engagement: @engagement, scope_item: @item, inline: false %>
+                  <%= render "tasks/add", work: @work, scope_item: @item, inline: false %>
                 </footer>
               <% end %>
             </section>
@@ -73,8 +73,8 @@
         <dl class="details">
           <dt>Delivery</dt><dd><%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %></dd>
           <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
-          <dt><%= term(:engagement) %></dt><dd><%= link_to "#{@engagement.ref} #{@engagement.title}", @engagement %></dd>
-          <dt><%= term(:client) %></dt><dd><%= link_to @engagement.client.name, @engagement.client %></dd>
+          <dt><%= term(:work) %></dt><dd><%= link_to "#{@work.ref} #{@work.title}", @work %></dd>
+          <dt><%= term(:client) %></dt><dd><%= link_to @work.client.name, @work.client %></dd>
         </dl>
       </div>
     </section>
@@ -82,7 +82,7 @@
     <section class="card record-card">
       <header class="card__head">
         <h2 class="card__title">Rename or remove</h2>
-        <p class="card__hint">Removing it keeps its <%= term(:work, count: 2).downcase %> on the <%= term(:engagement).downcase %>.</p>
+        <p class="card__hint">Removing it keeps its <%= term(:task, count: 2).downcase %> on the <%= term(:work).downcase %>.</p>
       </header>
       <div class="card__content">
         <%= render "scope_items/item", item: @item %>

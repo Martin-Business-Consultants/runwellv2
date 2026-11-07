@@ -1,7 +1,7 @@
 # Pages watching a record (turbo_stream_from) refresh in place when it changes, so a teammate's
 # change shows up without a reload: Turbo's morphing refresh, debounced in the browser, and the tab
 # that made the change ignores its own (the request id). A model says what its change touches with
-# live_streams: itself, what it sits on, and the list it's in (:work, :engagements, :clients).
+# live_streams: itself, what it sits on, and the list it's in (:work, :works, :clients).
 # Sent straight after the commit (a row in solid_cable in production), and not while importing.
 module LiveRefreshes
   extend ActiveSupport::Concern

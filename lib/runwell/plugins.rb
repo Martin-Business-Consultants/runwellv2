@@ -7,25 +7,25 @@
 #
 #   Runwell::Plugins.register :time_tracking, name: "Time tracking", version: "0.1.0",
 #     description: "Timers and logged time on work, with a weekly timesheet."
-#   Runwell::Plugins.slot :todo_panel, :time_tracking, "time_tracking/slots/todo_panel"
+#   Runwell::Plugins.slot :task_panel, :time_tracking, "time_tracking/slots/task_panel"
 #   Runwell::Plugins.nav :time_tracking, "Time", -> { time_tracking_timesheet_path }
 #   Runwell::Plugins.permission :time_tracking, :view_everyones_time, name: "See everyone's time", roles: %w[owner manager]
-#   Runwell::Plugins.quick_action :time_tracking, label: "Time", icon: "history", partial: "...", types: %w[Client Engagement Todo]
+#   Runwell::Plugins.quick_action :time_tracking, label: "Time", icon: "history", partial: "...", types: %w[Client Work Task]
 #
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
-# :engagement_panel (engagement:), :todo_panel (todo:), :email_inbound (no locals; Settings > Email,
+# :work_panel (work:), :task_panel (task:), :email_inbound (no locals; Settings > Email,
 # where requests' mail comes in), :client_aside
-# (client:), :engagement_aside (engagement:, its sidebar), :engagement_meta (engagement:, the line under
-# its title: a status badge or a short fact), :todo_aside (todo:, a piece of work's sidebar),
+# (client:), :work_aside (work:, its sidebar), :work_meta (work:, the line under
+# its title: a status badge or a short fact), :task_aside (task:, a piece of work's sidebar),
 # :scope_item_aside (scope_item:) and :note_row (note:), inside each row; in the
 # client portal, :portal_home (client:),
-# :portal_engagement_panel (engagement:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
+# :portal_work_panel (work:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
 #   Runwell::Plugins.settings :google_ads, "Google Ads", -> { google_ads_settings_path }
 #   Runwell::Plugins.nightly :google_ads, -> { GoogleAds::SyncJob.perform_later }
 #   Runwell::Plugins.stylesheet :google_ads, "google_ads/charts"   # app/assets/stylesheets in the engine
-# Models run load hooks (:runwell_client, :runwell_engagement, :runwell_todo, :runwell_user) so a plugin can
+# Models run load hooks (:runwell_client, :runwell_work, :runwell_task, :runwell_user) so a plugin can
 # add associations, and every Event is published as "event.runwell" (event:); a plugin's
 # subscriber should check Runwell::Plugins.enabled?(key).
 module Runwell
@@ -42,10 +42,10 @@ module Runwell
     # A key a plugin answers to, listed on the ? sheet (the control itself declares data-keys).
     Shortcut = Struct.new(:keys, :description, keyword_init: true)
 
-    SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
-      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel",
-      client_aside: "Client sidebar", engagement_aside: "Engagement sidebar", engagement_meta: "Engagement title line",
-      todo_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header" }.freeze
+    SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", work_panel: "Work panel", task_panel: "Work panel",
+      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_work_panel: "Portal work panel",
+      client_aside: "Client sidebar", work_aside: "Work sidebar", work_meta: "Work title line",
+      task_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header" }.freeze
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }
@@ -103,8 +103,8 @@ module Runwell
         nightly_tasks[key] = task
       end
 
-      # A section of the brief a local AI gets for a todo (the AI button, the brief_work tool):
-      # a lambda taking the todo and the install's base URL, returning Markdown or nil.
+      # A section of the brief a local AI gets for a task (the AI button, the brief_task tool):
+      # a lambda taking the task and the install's base URL, returning Markdown or nil.
       # A workflow an AI harness should know (MCP instructions, `me`, the CLI skill points at it):
       # what to do when a person asks for it, in a few steps naming the plugin's tools.
       def agent_workflow(key, title, text)
@@ -116,7 +116,7 @@ module Runwell
       end
 
       # A question for the in-app AI's Ask panel, offered on the given record types (Client,
-      # Engagement, Todo, ScopeItem) or, with none, on every page.
+      # Work, Task, ScopeItem) or, with none, on every page.
       def ai_prompt(key, label, types: nil)
         ai_prompts[key] |= [ AiPrompt.new(label: label, types: types) ]
       end
@@ -140,7 +140,7 @@ module Runwell
 
       # An entry in the quick action tray. The partial renders the form (form_id:),
       # which posts a "record" param ("Client:12") of one of the types. context: maps the
-      # record on screen to one of the types, e.g. a scope item to its engagement.
+      # record on screen to one of the types, e.g. a scope item to its work.
       def quick_action(key, label:, icon:, partial:, types:, title: nil, context: nil)
         quick_actions[key] = QuickAction.new(key: key, label: label, title: title, icon: icon, partial: partial, types: types, context: context)
       end

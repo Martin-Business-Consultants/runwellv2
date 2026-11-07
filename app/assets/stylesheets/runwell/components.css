@@ -164,8 +164,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* ======================================================================= 5 Cards */
 
-/* The board's cards (app-card, todos/display/_preview) and a maximized column's grid of them
-/* (todos/columns/show). Indexes are tables only since 5.0. */
+/* The board's cards (app-card, tasks/display/_preview) and a maximized column's grid of them
+/* (tasks/columns/show). Indexes are tables only since 5.0. */
 .cards--grid { width: 100%; }
 .cards--grid .cards__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); align-items: stretch; gap: var(--s-4); }
 .cards--grid :is(.pagination-link, .empty) { grid-column: 1 / -1; }
@@ -354,3 +354,11 @@ lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); 
 /* While a form is on its way (Turbo marks it aria-busy), its submit button dims and takes no
 /* second click, so a save is never sent twice and you can see it's working. */
 form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacity: .6; cursor: progress; pointer-events: none; }
+
+/* ======================================================================= Toasts */
+
+/* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash). On staff
+/* pages they stack just above the bell and the quick actions' +, over the side panel and trays;
+/* sign-in pages and the portal have nothing in that corner, so they take it. */
+#flash .flashes--toast { --toast-bottom: calc(var(--s-3) + 2.5rem + var(--s-3)); --toast-z: calc(var(--z-tray) + 1); }
+:is(.auth-layout__main, .portal-main) #flash .flashes--toast { --toast-bottom: var(--s-3); }

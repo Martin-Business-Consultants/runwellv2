@@ -98,16 +98,11 @@
         <% end %>
 
         <% if Upgrade.available? %>
-          <details class="settings-fold">
-            <summary class="btn btn--primary">Update to <%= @release.version %></summary>
-            <div class="stack settings-subform">
-              <p>
-                Runwell backs up its databases, updates and restarts. It’s unavailable for a minute or two; nobody is signed out.
-                If anything fails, <%= Runwell::VERSION %> keeps running and this page says why.
-              </p>
-              <div class="button-row"><%= button_to "Update now", settings_updates_path, class: "btn btn--primary" %></div>
-            </div>
-          </details>
+          <p class="muted">
+            Runwell backs up its databases, updates and restarts. It’s unavailable for a minute or two; nobody is signed out.
+            If anything fails, <%= Runwell::VERSION %> keeps running and this page says why.
+          </p>
+          <div class="button-row"><%= button_to "Update to " + @release.version, settings_updates_path, class: "btn btn--primary" %></div>
         <% else %>
           <p>Updating from here isn’t set up on this install. On the server:</p>
           <%= code_block manual_update_command(@release) %>
@@ -123,26 +118,40 @@
         <header class="settings-section__head">
           <h2>Past updates</h2>
         </header>
-        <ul class="settings-list settings-list--scroll">
-          <% @upgrades.each do |upgrade| %>
-            <%# herb:key upgrade.id %>
-            <li class="list-row">
-              <div class="list-row__media"><%= person_tag upgrade.requested_by %></div>
-              <div class="list-row__content">
-                <p class="list-row__title"><%= upgrade.from_version %> → <%= upgrade.to_version %> <%= ui_status_badge upgrade.status %></p>
-                <p class="list-row__desc">
-                  <%= time_ago_in_words(upgrade.created_at) %> ago
-                  <% if upgrade.external_url %>
-                    · <%= link_to "Deploy log", upgrade.external_url, target: "_blank", rel: "noopener" %>
-                  <% end %>
-                </p>
+        <div class="table-wrap settings-table">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Update</th>
+                <th>Status</th>
+                <th>By</th>
+                <th>When</th>
+                <th><span class="visually-hidden">Deploy log</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @upgrades.each do |upgrade| %>
+                <%# herb:key upgrade.id %>
+                <tr>
+                  <td class="nowrap"><strong><%= upgrade.from_version %> → <%= upgrade.to_version %></strong></td>
+                  <td><%= ui_status_badge upgrade.status %></td>
+                  <td><%= person_tag upgrade.requested_by, fallback: "Runwell" %></td>
+                  <td class="muted nowrap"><time datetime="<%= upgrade.created_at.iso8601 %>" title="<%= l upgrade.created_at, format: :long %>"><%= time_ago_in_words(upgrade.created_at) %> ago</time></td>
+                  <td class="settings-table__end">
+                    <% if upgrade.external_url %>
+                      <%= link_to "Deploy log", upgrade.external_url, target: "_blank", rel: "noopener" %>
+                    <% end %>
+                  </td>
+                </tr>
                 <% if upgrade.message.present? %>
-                  <pre class="settings-log"><%= upgrade.message %></pre>
+                  <tr class="settings-table__detail">
+                    <td colspan="5"><pre class="settings-log"><%= upgrade.message %></pre></td>
+                  </tr>
                 <% end %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </section>
     <% end %>
   </div>

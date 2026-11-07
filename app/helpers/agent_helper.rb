@@ -8,10 +8,10 @@ module AgentHelper
       "display_name" => agent_label(record), "url" => agent_url(record) }.compact
   end
 
-  # An engagement as a client's agent sees it: its ref and title, and its portal page.
-  def portal_agent_ref(engagement)
-    { "type" => "Engagement", "ref" => engagement.ref, "display_name" => "#{engagement.ref} #{engagement.title}",
-      "url" => portal_engagement_url(engagement) }.compact
+  # A piece of work as a client's agent sees it: its ref and title, and its portal page.
+  def portal_agent_ref(work)
+    { "type" => "Work", "ref" => work.ref, "display_name" => "#{work.ref} #{work.title}",
+      "url" => portal_work_url(work) }.compact
   end
 
   def agent_label(record)

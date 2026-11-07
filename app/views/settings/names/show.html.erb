@@ -1,7 +1,7 @@
 <% @page_title = "Names" %>
 <% tabs = [
      record_tab("things", "Things"),
-     record_tab("types", term(:engagement) + " types")
+     record_tab("types", term(:work) + " types")
    ] %>
 <% tab = current_record_tab(tabs, "things") %>
 <%= render "settings/header", current: :names %>
@@ -40,7 +40,7 @@
 <%= form_with url: settings_names_path, method: :patch, class: "settings-form", data: { controller: "form" } do %>
   <section class="settings-section">
     <header class="settings-section__head">
-      <h2><%= term(:engagement) %> types</h2>
+      <h2><%= term(:work) %> types</h2>
       <p class="settings-section__description">Each type has its own name and ref prefix. A new prefix applies to new refs only; existing refs keep theirs. Switch off a type you don’t use.</p>
     </header>
 
@@ -48,7 +48,7 @@
       <div class="settings-names__type settings-names__type--head" aria-hidden="true">
         <span>Use</span><span>Singular</span><span>Plural</span><span>Prefix</span>
       </div>
-      <% Engagement::LABELS.each do |label| %>
+      <% Work::LABELS.each do |label| %>
         <%# herb:key label %>
         <% field = "terminology[labels][" + label + "]" %>
         <% id = "terminology_labels_" + label %>

@@ -1,5 +1,5 @@
 # A quick action picker's choices for what was typed into it, into the picker's list frame:
-# matching clients, engagements and work by name, ref or title (QuickAction.search). Pickers start
+# matching clients, work and tasks by name, ref or title (QuickAction.search). Pickers start
 # with a dozen records and find the rest here, so no page carries every record.
 class QuickActions::RecordsController < ApplicationController
   allow_staff

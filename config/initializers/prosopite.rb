@@ -11,12 +11,12 @@ if defined?(Prosopite)
     # Loops that query per record on purpose, so they aren't N+1s to fix:
     # - Agent::Resolver tries a name as exact, then prefix, then contains, stopping at a match
     # - a bulk action runs each record's own verb, one at a time (BulkAction)
-    # - a status change re-places the todo in its lists (positioning, TodosController#update)
-    # - erasing an engagement destroys what hangs off each record
+    # - a status change re-places the task in its lists (positioning, TasksController#update)
+    # - erasing a piece of work destroys what hangs off each record
     Prosopite.allow_stack_paths = [ "app/models/agent/resolver.rb", "app/controllers/concerns/bulk_action.rb",
-      "TodosController#update", "Engagement#erase!",
+      "TasksController#update", "Work#erase!",
       # The board renders each column's first page (one query a column, a handful, on purpose).
-      "app/views/todos/board/_cards.html.erb" ]
+      "app/views/tasks/board/_cards.html.erb" ]
   end
 
   # Prosopite tells queries apart with pg_query, a Postgres parser, which can't read SQLite's ?

@@ -1,0 +1,36 @@
+<%# locals: (board:) %>
+<% counts = board.reorder(nil).group(:status).count %>
+<%= tag.div class: "card-columns", data: {
+      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list",
+      drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
+      drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
+      collapsible_columns_board_value: "tasks",
+      collapsible_columns_collapsed_class: "is-collapsed",
+      collapsible_columns_expanded_class: "is-expanded",
+      collapsible_columns_no_transitions_class: "no-transitions",
+      collapsible_columns_title_not_visible_class: "is-off-screen",
+      navigable_list_supports_vertical_navigation_value: false,
+      navigable_list_has_nested_navigation_value: true,
+      navigable_list_prevent_handled_keys_value: true,
+      navigable_list_auto_select_value: false,
+      navigable_list_auto_scroll_value: false,
+      action: "
+        keydown->navigable-list#navigate
+        dragstart->drag-and-drop#dragStart
+        dragover->drag-and-drop#dragOver
+        dragenter->drag-and-strum#dragEnter
+        drop->drag-and-drop#drop
+        dragend->drag-and-drop#dragEnd
+        click@document->navigable-list#deselectWhenClickingOutside" } do %>
+  <div class="card-columns__left"></div>
+
+  <%= render "tasks/board/stream", count: counts.fetch("planned", 0), board: board %>
+
+  <div class="card-columns__right">
+    <% Task::BOARD_COLUMNS.each do |status| %>
+      <%# herb:key status %>
+      <%= render "tasks/board/column", status: status, count: counts.fetch(status, 0), board: board %>
+    <% end %>
+    <%= render "tasks/board/closed", count: counts.fetch("done", 0), board: board %>
+  </div>
+<% end %>

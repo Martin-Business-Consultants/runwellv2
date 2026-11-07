@@ -4,7 +4,7 @@
 class ResolutionsController < ApplicationController
   allow_staff
   agent_tool :resolve, on: :show, title: "Find the record a name refers to",
-    description: "Give what the person called it (a client's name, a person, an engagement's ref or title, a todo's title…) and optionally its type. Answers the matching records, best first, with the id and record (\"Type:id\") other tools take. Most tools also accept the name in place of an id.",
+    description: "Give what the person called it (a client's name, a person, a piece of work's ref or title, a task's title…) and optionally its type. Answers the matching records, best first, with the id and record (\"Type:id\") other tools take. Most tools also accept the name in place of an id.",
     params: { q: "string!", type: Agent::Resolver.types }
 
   def show

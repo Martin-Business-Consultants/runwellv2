@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_090000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -150,14 +150,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   end
 
   create_table "assignments", force: :cascade do |t|
-    t.integer "todo_id", null: false
+    t.integer "task_id", null: false
     t.integer "user_id", null: false
     t.integer "assigner_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["assigner_id"], name: "index_assignments_on_assigner_id"
-    t.index ["todo_id", "user_id"], name: "index_assignments_on_todo_id_and_user_id", unique: true
-    t.index ["todo_id"], name: "index_assignments_on_todo_id"
+    t.index ["task_id", "user_id"], name: "index_assignments_on_task_id_and_user_id", unique: true
+    t.index ["task_id"], name: "index_assignments_on_task_id"
     t.index ["user_id"], name: "index_assignments_on_user_id"
   end
 
@@ -244,25 +244,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.datetime "updated_at", null: false
     t.index ["documentable_type", "documentable_id"], name: "index_documents_on_documentable"
     t.index ["uploaded_by_id"], name: "index_documents_on_uploaded_by_id"
-  end
-
-  create_table "engagements", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.string "ref", null: false
-    t.string "label", default: "work_order", null: false
-    t.string "shape", default: "fixed", null: false
-    t.string "title", null: false
-    t.text "description"
-    t.text "estimate_notes"
-    t.datetime "closed_at"
-    t.string "close_reason"
-    t.integer "created_by_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "close_outcome"
-    t.index ["client_id"], name: "index_engagements_on_client_id"
-    t.index ["created_by_id"], name: "index_engagements_on_created_by_id"
-    t.index ["ref"], name: "index_engagements_on_ref", unique: true
   end
 
   create_table "events", force: :cascade do |t|
@@ -462,9 +443,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "engagement_id"
+    t.integer "work_id"
     t.index ["agreement_version_id"], name: "index_scope_items_on_agreement_version_id"
-    t.index ["engagement_id"], name: "index_scope_items_on_engagement_id"
+    t.index ["work_id"], name: "index_scope_items_on_work_id"
   end
 
   create_table "searchable_documents", force: :cascade do |t|
@@ -549,8 +530,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.index ["key"], name: "index_sign_in_providers_on_key", unique: true
   end
 
-  create_table "todos", force: :cascade do |t|
-    t.integer "engagement_id"
+  create_table "tasks", force: :cascade do |t|
+    t.integer "work_id"
     t.integer "scope_item_id"
     t.string "title", null: false
     t.text "description"
@@ -569,14 +550,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.string "source", default: "app", null: false
     t.string "sender_name"
     t.string "sender_email"
-    t.index ["client_id"], name: "index_todos_on_client_id"
-    t.index ["contact_id"], name: "index_todos_on_contact_id"
-    t.index ["created_by_id"], name: "index_todos_on_created_by_id"
-    t.index ["engagement_id", "status", "position"], name: "index_todos_on_engagement_id_and_status_and_position"
-    t.index ["engagement_id"], name: "index_todos_on_engagement_id"
-    t.index ["owner_id"], name: "index_todos_on_owner_id"
-    t.index ["scope_item_id"], name: "index_todos_on_scope_item_id"
-    t.index ["status", "board_position"], name: "index_todos_on_status_and_board_position"
+    t.index ["client_id"], name: "index_tasks_on_client_id"
+    t.index ["contact_id"], name: "index_tasks_on_contact_id"
+    t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
+    t.index ["owner_id"], name: "index_tasks_on_owner_id"
+    t.index ["scope_item_id"], name: "index_tasks_on_scope_item_id"
+    t.index ["status", "board_position"], name: "index_tasks_on_status_and_board_position"
+    t.index ["work_id", "status", "position"], name: "index_tasks_on_work_id_and_status_and_position"
+    t.index ["work_id"], name: "index_tasks_on_work_id"
   end
 
   create_table "upgrades", force: :cascade do |t|
@@ -647,6 +628,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.index ["created_by_id"], name: "index_webhook_endpoints_on_created_by_id"
   end
 
+  create_table "works", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.string "ref", null: false
+    t.string "label", default: "work_order", null: false
+    t.string "shape", default: "fixed", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.text "estimate_notes"
+    t.datetime "closed_at"
+    t.string "close_reason"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "close_outcome"
+    t.index ["client_id"], name: "index_works_on_client_id"
+    t.index ["created_by_id"], name: "index_works_on_created_by_id"
+    t.index ["ref"], name: "index_works_on_ref", unique: true
+  end
+
   add_foreign_key "access_tokens", "contacts"
   add_foreign_key "access_tokens", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -654,25 +654,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   add_foreign_key "agent_calls", "access_tokens"
   add_foreign_key "agent_idempotency_keys", "access_tokens"
   add_foreign_key "agreement_versions", "agreement_versions", column: "superseded_by_id"
-  add_foreign_key "agreement_versions", "engagements"
   add_foreign_key "agreement_versions", "users", column: "sent_by_id"
+  add_foreign_key "agreement_versions", "works", column: "engagement_id"
   add_foreign_key "approval_links", "agreement_versions"
   add_foreign_key "approval_links", "contacts"
   add_foreign_key "approvals", "agreement_versions"
   add_foreign_key "approvals", "contacts"
   add_foreign_key "approvals", "users", column: "recorded_by_id"
-  add_foreign_key "assignments", "todos", on_delete: :cascade
+  add_foreign_key "assignments", "tasks", on_delete: :cascade
   add_foreign_key "assignments", "users"
   add_foreign_key "assignments", "users", column: "assigner_id", on_delete: :nullify
   add_foreign_key "commitments", "clients"
   add_foreign_key "commitments", "contacts"
-  add_foreign_key "commitments", "engagements"
   add_foreign_key "commitments", "users"
+  add_foreign_key "commitments", "works", column: "engagement_id"
   add_foreign_key "contacts", "clients"
   add_foreign_key "custom_values", "custom_fields"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
-  add_foreign_key "engagements", "clients"
-  add_foreign_key "engagements", "users", column: "created_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
   add_foreign_key "exports", "users"
   add_foreign_key "identities", "users"
@@ -694,15 +692,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   add_foreign_key "requests", "users", column: "triaged_by_id"
   add_foreign_key "scope_items", "agreement_versions"
   add_foreign_key "sessions", "users"
-  add_foreign_key "todos", "engagements"
-  add_foreign_key "todos", "scope_items"
-  add_foreign_key "todos", "users", column: "created_by_id"
-  add_foreign_key "todos", "users", column: "owner_id"
+  add_foreign_key "tasks", "scope_items"
+  add_foreign_key "tasks", "users", column: "created_by_id"
+  add_foreign_key "tasks", "users", column: "owner_id"
+  add_foreign_key "tasks", "works"
   add_foreign_key "upgrades", "users", column: "requested_by_id"
   add_foreign_key "users", "users", column: "agent_owner_id"
   add_foreign_key "webhook_deliveries", "events"
   add_foreign_key "webhook_deliveries", "webhook_endpoints"
   add_foreign_key "webhook_endpoints", "users", column: "created_by_id"
+  add_foreign_key "works", "clients"
+  add_foreign_key "works", "users", column: "created_by_id"
 
   # Virtual tables defined in this database.
   # Note that virtual tables may not work with other database engines. Be careful if changing database.

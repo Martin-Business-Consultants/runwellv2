@@ -74,7 +74,7 @@ module Agent
 
       def path_description(part)
         case part
-        when "ref", "engagement_ref" then "The engagement's ref, like WO-12 or S-4, or its title"
+        when "ref", "work_ref" then "The work's ref, like WO-12 or S-4, or its title"
         when "id" then "The record's id, or its name to look up"
         when "key" then "The plugin's key"
         else "The #{part.delete_suffix("_id").humanize.downcase}’s id, or its name"

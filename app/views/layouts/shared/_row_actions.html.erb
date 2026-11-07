@@ -1,11 +1,11 @@
-<%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, todo: nil) %>
+<%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, task: nil) %>
 <%# A table row's last cell: edit and delete, each only when the record allows it (and
     delete only for people who may delete records). Delete opens the table's one dialog
     (layouts/shared/_row_delete_dialog), which its button fills in. %>
 <td class="data-table__actions">
   <div class="data-table__actions-row">
-    <% if todo %>
-      <%= render "todos/ai_brief", todo: todo %>
+    <% if task %>
+      <%= render "tasks/ai_brief", task: task %>
     <% end %>
     <% if edit_path %>
       <% edit_label = "Edit " + name %>

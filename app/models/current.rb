@@ -1,6 +1,6 @@
 class Current < ActiveSupport::CurrentAttributes
   attribute :session, :access_token, :portal_session, :source, :settings
-  # Set only inside Engagement#erase!, so plugins' records that refuse deletion know it's an erase.
+  # Set only inside Work#erase!, so plugins' records that refuse deletion know it's an erase.
   attribute :erasing
 
   # The client's contact on the portal: signed in by link, or acting through their token.

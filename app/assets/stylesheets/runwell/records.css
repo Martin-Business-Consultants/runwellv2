@@ -1,4 +1,4 @@
-/* Record pages and their forms: clients, contacts, engagements, a piece of work, scope items,
+/* Record pages and their forms: clients, contacts, works, a piece of work, scope items,
 /* documents, notes, custom fields, history, on rune_ui's tokens (docs/rune-ui-migration.md).
 /* Unlayered, so these win over rune's components.
 /*
@@ -7,7 +7,7 @@
 /* rune's .card; facts are rune's dl.details; rows are rune's .list-row.
 /*
 /* 1 Page   2 Cards   3 Tabs   4 Lists   5 Work on a record   6 Activity feed   7 Notes
-/* 8 Documents   9 Forms   10 Engagement sidebar   11 Indexes */
+/* 8 Documents   9 Forms   10 Work sidebar   11 Indexes */
 
 /* ======================================================================= 1 Page */
 
@@ -75,7 +75,7 @@ html[data-sidebar="collapsed"] .record-page__header .sidebar-toggle .icon { tran
 .record-list__ref { color: var(--text-muted); font-weight: var(--weight); }
 .record-list__badges { display: flex; flex-wrap: wrap; gap: var(--s-1); padding-top: 2px; }
 
-/* The work partials' own row names (todos/_todo), drawn as .list-row's parts. */
+/* The work partials' own row names (tasks/_task), drawn as .list-row's parts. */
 .record-list__row { display: flex; align-items: center; gap: var(--s-3); min-width: 0; padding: var(--s-2) var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
 a.record-list__row:hover { background: var(--hover); color: var(--text); }
 .record-list__main { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; color: inherit; text-decoration: none; }
@@ -93,29 +93,29 @@ a.record-list__row:hover { background: var(--hover); color: var(--text); }
 
 /* A piece of work in a record's list: its status circle leads, like a task list's checkbox, and
 /* its title underlines under the pointer. */
-.todo-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
-.todo-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+.task-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
+.task-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
 
-/* An engagement's work, grouped by scope item: each group's name, done of total and state over its rows. */
-.work-groups { display: flex; flex-direction: column; }
-.work-group + .work-group { border-top: 1px solid var(--line); }
-.work-group__header { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) 0 var(--s-1); }
-.work-group:first-child .work-group__header { padding-top: 0; }
-.work-group__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; text-decoration: none; }
-a.work-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
-.work-group__count, .work-focus__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* A piece of work's work, grouped by scope item: each group's name, done of total and state over its rows. */
+.task-groups { display: flex; flex-direction: column; }
+.task-group + .task-group { border-top: 1px solid var(--line); }
+.task-group__header { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) 0 var(--s-1); }
+.task-group:first-child .task-group__header { padding-top: 0; }
+.task-group__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; text-decoration: none; }
+a.task-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+.task-group__count, .task-focus__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* One scope item's work alone: its name, how much is done, its state and a way to its page. */
-.work-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); }
-.work-focus__text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
-.work-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-read); font-weight: 600; }
+.task-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); }
+.task-focus__text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.task-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-read); font-weight: 600; }
 
 /* Adding work or a scope item in place: a small button that opens its form below it. */
 .record-add { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--s-4); }
 .record-add[open] > summary { background: var(--layer-2); color: var(--text); }
 /* Open, the form runs the card's full width: its fields fill the row instead of shrinking to fit. */
 .record-add[open] { align-self: stretch; width: 100%; }
-/* Adding work in place (todos/_add): the title across, then owner, due date and section side by
+/* Adding work in place (tasks/_add): the title across, then owner, due date and section side by
 /* side as room allows, then Add at the end. */
 .record-add__form { gap: var(--s-3); width: 100%; }
 .record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: var(--s-3); }
@@ -217,14 +217,14 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 .owner-checklist__person:has(:focus-visible) { box-shadow: var(--ring); }
 .owner-checklist__person input:focus-visible { box-shadow: none; }
 
-/* ======================================================================= 10 Engagement sidebar */
+/* ======================================================================= 10 Work sidebar */
 
 /* Its scope items and General as two full-width tabs. */
-.engagement-sidebar__tabs { width: 100%; }
-.engagement-sidebar__tabs .tabs__tab { flex: 1; justify-content: center; }
-.engagement-sidebar__tabs .tabs__tab[aria-pressed="true"] { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.work-sidebar__tabs { width: 100%; }
+.work-sidebar__tabs .tabs__tab { flex: 1; justify-content: center; }
+.work-sidebar__tabs .tabs__tab[aria-pressed="true"] { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
 
-/* An engagement's scope items (engagements/_scope): each with rune's status dot for its state, done of total
+/* A piece of work's scope items (works/_scope): each with rune's status dot for its state, done of total
 /* and a thin bar. The one whose work is shown is raised, as a nav marks its page. */
 .scope-section { display: flex; flex-direction: column; gap: var(--s-3); }
 .scope-nav { display: flex; flex-direction: column; gap: 2px; margin-inline: calc(-1 * var(--s-2)); }
@@ -244,14 +244,14 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 .scope-item-fields form { display: contents; }
 .scope-item-fields input { flex: 1; min-width: 0; height: var(--control-h-sm); font-size: var(--text-meta); }
 
-/* Finishing, reopening and erasing an engagement (engagements/_close, _erase). */
-.engagement-finish__choices { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
-.engagement-finish__form { gap: var(--s-3); }
-.engagement-finish__text { color: var(--text-muted); }
-.engagement-finish__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-.engagement-finish__danger, .engagement-finish__danger:hover { color: var(--danger); }
-.engagement-finish__danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
-.erase-engagement__form { padding: var(--s-4); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 5%, var(--panel)); }
+/* Finishing, reopening and erasing a piece of work (works/_close, _erase). */
+.work-finish__choices { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.work-finish__form { gap: var(--s-3); }
+.work-finish__text { color: var(--text-muted); }
+.work-finish__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.work-finish__danger, .work-finish__danger:hover { color: var(--danger); }
+.work-finish__danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
+.erase-work__form { padding: var(--s-4); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 5%, var(--panel)); }
 
 /* The inline confirmation (layouts/shared/_confirm) at the foot of a record's sidebar starts
 /* where the cards do, at their width. */
@@ -260,10 +260,10 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* ======================================================================= 11 Indexes */
 
-/* An engagement's row in the table: its title as plain text to click, its client quieter. */
-.engagement-row__title, .engagement-row__client { color: var(--text); text-decoration: none; }
-.engagement-row__client { color: var(--text-muted); }
-:is(.engagement-row__title, .engagement-row__client):hover { color: var(--accent); }
+/* A piece of work's row in the table: its title as plain text to click, its client quieter. */
+.work-row__title, .work-row__client { color: var(--text); text-decoration: none; }
+.work-row__client { color: var(--text-muted); }
+:is(.work-row__title, .work-row__client):hover { color: var(--accent); }
 
 /* A client's status badge that opens its picker (clients/_status_picker): the badge is the button. */
 .status-picker { position: relative; display: inline-block; }
@@ -271,7 +271,7 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 .status-picker__trigger:hover .badge { filter: brightness(.95); }
 .status-picker__display { display: contents; }
 
-/* An engagement's title with its info button (the description, in a dialog), and the next step
+/* A piece of work's title with its info button (the description, in a dialog), and the next step
 /* under the meta line, where the Overview card used to be. */
 .record-page__title-row { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
 .record-page__next { color: var(--text-muted); font-size: var(--text-meta); }

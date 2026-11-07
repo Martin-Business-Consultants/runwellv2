@@ -6,9 +6,9 @@ module QuickActionsHelper
     @current_record =
       case controller_path
       when "clients" then Client.find_by(id: params[:id])
-      when "engagements" then Engagement.find_by(ref: params[:ref].to_s.upcase) if params[:ref]
+      when "works" then Work.find_by(ref: params[:ref].to_s.upcase) if params[:ref]
       when "scope_items" then ScopeItem.find_by(id: params[:id])
-      when "todos" then Todo.find_by(id: params[:id])
+      when "tasks" then Task.find_by(id: params[:id])
       end
   end
 
@@ -18,15 +18,15 @@ module QuickActionsHelper
 
   # Which kind of record it is, in this install's words.
   def record_kind(record)
-    record.is_a?(Engagement) ? record.label_name : record_type_term(record.class.name)
+    record.is_a?(Work) ? record.label_name : record_type_term(record.class.name)
   end
 
   def record_type_term(type)
     case type
     when "Client" then term(:client)
-    when "Engagement" then term(:engagement)
+    when "Work" then term(:work)
     when "ScopeItem" then term(:scope_item)
-    when "Todo" then term(:work)
+    when "Task" then term(:task)
     else type.titleize
     end
   end

@@ -13,9 +13,9 @@ module ActiveSupport
     # and those about the requirement switch it on themselves.
     setup { Setting.current.update_columns(require_two_factor: false) }
 
-    # One piece of work per section of a fixture engagement, named after it.
-    def work_per_section!(engagement)
-      engagement.scope_items.map { engagement.todos.create!(title: it.description, scope_item: it) }
+    # One piece of work per section of a fixture work, named after it.
+    def tasks_per_section!(work)
+      work.scope_items.map { work.tasks.create!(title: it.description, scope_item: it) }
     end
   end
 end

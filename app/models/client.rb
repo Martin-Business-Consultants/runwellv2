@@ -5,11 +5,11 @@ class Client < ApplicationRecord
   STATUSES = %w[active dormant former].freeze
 
   # Restrictions first, so a client with agreed work is refused before anything is destroyed.
-  has_many :engagements, dependent: :restrict_with_error
+  has_many :works, dependent: :restrict_with_error
   has_many :contacts, dependent: :destroy
-  # Its work, on its engagements or straight on it. A client with engagements can't be deleted, so
+  # Its work, on its work or straight on it. A client with work can't be deleted, so
   # only work straight on it goes with it.
-  has_many :todos, dependent: :destroy
+  has_many :tasks, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }

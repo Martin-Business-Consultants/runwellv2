@@ -1,0 +1,17 @@
+<%# locals: (status:, count:, board:) %>
+<%= column_tag id: "tasks-#{status}", name: status.humanize, drop_url: columns_task_drops_column_path("__id__", task_board_filters.merge(column_id: status)),
+      card_color: task_column_color(status), class: "cards--doing cards--#{status.dasherize}",
+  data: {
+    drag_and_strum_target: "container",
+    drag_and_drop_sortable: true,
+    collapsible_columns_target: "column",
+    action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
+  } do %>
+  <header class="cards__header">
+    <%= render "tasks/board/expander", title: status.humanize, count: count, column_id: "tasks-#{status}", status: status %>
+    <%= render "tasks/board/maximize", column_path: tasks_column_path(status, task_board_filters) %>
+  </header>
+  <%= column_frame_tag "#{status}_cards" do %>
+    <%= render "tasks/board/cards", status: status, page: task_board_page(board, status) %>
+  <% end %>
+<% end %>

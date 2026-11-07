@@ -1,0 +1,107 @@
+<% @page_title = "#{@work.ref} #{@work.title}" %>
+
+<% content_for :header do %>
+  <%= parent_page term(:work, count: 2), portal_root_path %>
+  <nav class="crumbs portal-page-header__crumbs" aria-label="Breadcrumb">
+    <%= link_to term(:work, count: 2), portal_root_path %>
+    <span class="crumbs__sep" aria-hidden="true">/</span>
+    <span class="crumbs__current" aria-current="page"><%= @work.ref %></span>
+  </nav>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
+  <div class="portal-page-header__meta">
+    <%= status_tag @work.state_label, highlight: @work.active? %>
+  </div>
+<% end %>
+
+<% items = @work.scope_items %>
+<% tasks = @work.tasks.client_visible %>
+<% panels = plugin_slots(:portal_work_panel, work: @work) %>
+
+<div class="portal-grid">
+  <div class="portal-grid__main">
+    <% if @work.description.present? %>
+      <section class="card portal-card">
+        <header class="card__head">
+          <h2 class="card__title">Overview</h2>
+        </header>
+        <div class="card__content portal-prose">
+          <%= rich_text @work.description %>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="card card--flush portal-card">
+      <header class="card__head card__head--bordered">
+        <h2 class="card__title"><%= term(:scope_item, count: 2) %></h2>
+        <p class="card__hint">What this covers, and how far along each part is.</p>
+      </header>
+      <% if items.any? %>
+        <ul class="list">
+          <% items.each do |item| %>
+            <%# herb:key item.id %>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= item.description %></p>
+              </div>
+              <div class="list-row__actions">
+                <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= empty_state "Nothing listed yet.", compact: true %>
+      <% end %>
+    </section>
+
+    <section class="card card--flush portal-card">
+      <header class="card__head card__head--bordered">
+        <h2 class="card__title"><%= term(:task, count: 2) %></h2>
+        <p class="card__hint">What we’re doing on it for you.</p>
+      </header>
+      <% if tasks.any? %>
+        <ul class="list">
+          <% tasks.each do |task| %>
+            <%# herb:key task.id %>
+            <li class="list-row">
+              <div class="list-row__content">
+                <p class="list-row__title"><%= task.title %></p>
+                <% if task.due_on %>
+                  <p class="list-row__desc">Due <%= l task.due_on, format: :short %></p>
+                <% end %>
+              </div>
+              <div class="list-row__actions">
+                <%= status_tag task.status.humanize, highlight: task.status == "done" %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= empty_state "No work to show yet.", compact: true %>
+      <% end %>
+    </section>
+  </div>
+
+  <aside class="portal-grid__side">
+    <section class="card portal-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
+      </header>
+      <div class="card__content">
+        <dl class="details portal-details">
+          <dt>Type</dt>
+          <dd><%= @work.label_name %></dd>
+        </dl>
+        <%= render "custom_fields/values", record: @work, client: true %>
+      </div>
+    </section>
+
+    <%= render "portal/works/documents", documents: @work.client_documents %>
+
+    <% if panels.present? %>
+      <section class="card portal-card portal-slot">
+        <%= panels %>
+      </section>
+    <% end %>
+  </aside>
+</div>

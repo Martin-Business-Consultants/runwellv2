@@ -1,4 +1,4 @@
-# The tabs across a record page's working column (clients, engagements, work, scope items):
+# The tabs across a record page's working column (clients, work, tasks, scope items):
 # the core's sections, one tab per plugin panel that's on, and History. A tab is a ?tab= link
 # inside the record_tab frame, so it's bookmarkable, Back works, and only the tab reloads.
 module RecordTabsHelper

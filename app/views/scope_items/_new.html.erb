@@ -1,7 +1,7 @@
-<%# locals: (engagement:) %>
+<%# locals: (work:) %>
 <%# A new scope item: its name and Add, on one line. %>
 <div class="scope-item-fields">
-  <%= form_with model: [ engagement, ScopeItem.new ], namespace: dom_id(engagement, :new_item) do |form| %>
+  <%= form_with model: [ work, ScopeItem.new ], namespace: dom_id(work, :new_item) do |form| %>
     <%= form.text_field :description, required: true, autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
     <button type="submit" class="btn btn--primary btn--sm" title="Add">
       <span>Add</span>

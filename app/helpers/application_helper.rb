@@ -7,7 +7,7 @@ module ApplicationHelper
   # the palette and its settings (_global, appearance, font-face: the theming contract,
   # docs/theming.md), the bridge that points rune's tokens at it (rune-theme), the shell
   # (runwell), the pieces every area shares (runwell/components) and each area's own.
-  RUNWELL_STYLESHEETS = %w[_global appearance font-face rune-theme runwell runwell/components runwell/home runwell/work runwell/records runwell/settings runwell/public].freeze
+  RUNWELL_STYLESHEETS = %w[_global appearance font-face rune-theme runwell runwell/components runwell/home runwell/tasks runwell/records runwell/settings runwell/public].freeze
 
   # Herb compiles stylesheet_link_tag into a single <link>, so each list is spelled out.
   # Plugin stylesheets get their own tag.
@@ -60,13 +60,13 @@ module ApplicationHelper
       text_size: Current.user&.text_size.presence || setting.text_size }
   end
 
-  # This install's word for a core thing (Settings > Names), e.g. term(:engagement, count: 2).
+  # This install's word for a core thing (Settings > Names), e.g. term(:work, count: 2).
   def term(key, count: 1) = Setting.current.term(key, count: count)
   def label_term(label, count: 1) = Setting.current.label_name(label, count: count)
 
   def label_options(current = nil)
     labels = Setting.current.enabled_labels | Array(current).compact
-    Engagement::LABELS.select { labels.include?(it) }.map { [ label_term(it), it ] }
+    Work::LABELS.select { labels.include?(it) }.map { [ label_term(it), it ] }
   end
 
   # What plugins registered for a slot in this view (Runwell::Plugins).
@@ -253,7 +253,7 @@ module ApplicationHelper
     end
   end
 
-  # The page one level up (a record's list, a todo's engagement). Not a button: it's a
+  # The page one level up (a record's list, a task's work). Not a button: it's a
   # <link rel="up"> in the head (layouts/shared/_head), and Esc goes there (keyboard_controller).
   def parent_page(label, url)
     @breadcrumb_parent = [ label, url_for(url) ]

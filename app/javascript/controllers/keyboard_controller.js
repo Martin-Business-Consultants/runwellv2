@@ -8,7 +8,7 @@ import { nextFrame } from "helpers/timing_helpers"
 // - j / k, g g / G walk the page's items (anything marked data-filter-target="item"),
 //   Enter or o opens the one you're on, Esc drops it
 // - a chord starting with g goes somewhere: any element declaring data-keys="g c". A chord may
-//   take a third key (data-keys="g w n"): after g w it waits a moment for one, vim style, and
+//   take a third key (data-keys="g t n"): after g t it waits a moment for one, vim style, and
 //   with none (or another) does g w
 // - every other key clicks the visible element declaring it (data-keys="e"), or focuses it
 //   (data-keys-focus). One inside the current item wins over the page's own, so e and d
@@ -162,7 +162,7 @@ export default class extends Controller {
     this.chordTimer = setTimeout(() => { this.pending = null }, CHORD_TIMEOUT)
   }
 
-  // A longer chord starts with this one (g w, with g w n declared somewhere).
+  // A longer chord starts with this one (g t, with g t n declared somewhere).
   #extended(chord) {
     return Array.from(document.querySelectorAll("[data-keys]")).some(element =>
       usable(element) && element.dataset.keys.split(",").some(name => name.trim().startsWith(`${chord} `)))

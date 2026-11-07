@@ -1,0 +1,18 @@
+<%# locals: (documents:) %>
+<%# The work's documents shared with the client, as a card of rows (portal/works/show). %>
+<% if documents.any? %>
+  <section class="card card--flush portal-card">
+    <header class="card__head card__head--bordered">
+      <h2 class="card__title">Documents</h2>
+    </header>
+
+    <ul class="list portal-documents">
+      <% documents.each do |document| %>
+        <%# herb:key document.id %>
+        <li class="list-row">
+          <%= render "documents/link", document: document, meta: "#{number_to_human_size(document.byte_size)} · #{l document.created_at.to_date, format: :long}" %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

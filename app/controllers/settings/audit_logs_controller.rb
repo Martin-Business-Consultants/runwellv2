@@ -1,14 +1,14 @@
 require "csv"
 
 # Settings > Audit log, for owners: every event in the install, newest first, from sign-ins and
-# security changes to engagements and work, filtered by area, person and period, and downloadable
+# security changes to work and tasks, filtered by area, person and period, and downloadable
 # as CSV for whoever keeps the records.
 class Settings::AuditLogsController < Settings::BaseController
   AREAS = {
     "all" => "Everything",
     "security" => "Sign-in and settings",
-    "engagements" => :engagement,
-    "work" => :work,
+    "works" => :work,
+    "tasks" => :task,
     "requests" => "Requests",
     "clients" => :client
   }.freeze
@@ -16,7 +16,7 @@ class Settings::AuditLogsController < Settings::BaseController
   CSV_LIMIT = 50_000
 
   agent_tool :audit_log, on: :show, title: "Read the audit log",
-    description: "Every event (sign-ins, security and settings changes, engagements, work, requests), newest first. area: #{AREAS.keys.join(", ")}; person: a user id; days: 7, 30, 90 or all.",
+    description: "Every event (sign-ins, security and settings changes, work, tasks, requests), newest first. area: #{AREAS.keys.join(", ")}; person: a user id; days: 7, 30, 90 or all.",
     params: { area: AREAS.keys, person: "integer", days: PERIODS.keys }
 
   # An area's label, in this install's names (Settings > Names).
@@ -24,7 +24,7 @@ class Settings::AuditLogsController < Settings::BaseController
     label = AREAS.fetch(key)
     return label if label.is_a?(String)
     name = Setting.current.term(label, count: 2)
-    label == :work ? "#{name} and notes" : name
+    label == :task ? "#{name} and notes" : name
   end
 
   def show
@@ -47,9 +47,9 @@ class Settings::AuditLogsController < Settings::BaseController
       scope = scope.where(actor_user: [ @person, @person.agent ].compact) if @person
       case @area
       when "security" then scope.where(subject_type: Event::SECURITY_SUBJECTS)
-      when "engagements" then scope.where("kind LIKE 'agreement.%' OR kind LIKE 'engagement.%'")
-      when "work" then scope.where("kind LIKE 'todo.%' OR kind LIKE 'commitment.%' OR kind LIKE 'note.%' OR kind LIKE 'document.%'")
-      when "requests" then scope.where("kind = 'todo.requested' OR kind LIKE 'request.%' OR kind LIKE 'question.%'")
+      when "works" then scope.where("kind LIKE 'agreement.%' OR kind LIKE 'work.%'")
+      when "tasks" then scope.where("kind LIKE 'task.%' OR kind LIKE 'commitment.%' OR kind LIKE 'note.%' OR kind LIKE 'document.%'")
+      when "requests" then scope.where("kind = 'task.requested' OR kind LIKE 'request.%' OR kind LIKE 'question.%'")
       when "clients" then scope.where("kind LIKE 'client.%'")
       else scope
       end

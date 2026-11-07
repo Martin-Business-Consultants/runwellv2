@@ -1,7 +1,7 @@
 <% @page_title = "Notifications" %>
 <% @hide_footer_frames = true %>
 <%# The breadcrumb (Home › Notifications) is the page's title. %>
-<%= parent_page term(:work, count: 2), todos_path %>
+<%= parent_page term(:task, count: 2), tasks_path %>
 
 <div class="notifications-page" data-controller="badge navigable-list" data-badge-unread-class="unread" data-action="keydown@document->navigable-list#navigate" data-navigable-list-actionable-items-value="true"
       data-navigable-list-focus-on-selection-value="false">

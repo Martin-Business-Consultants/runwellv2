@@ -111,13 +111,13 @@ module Agent
         when String
           return value if value.blank?
 
-          if path && key.in?(%w[ref engagement_ref])
-            value.match?(Resolver::REF) ? value : Resolver.resolve("Engagement", value, client: client_scope).ref
+          if path && key.in?(%w[ref work_ref])
+            value.match?(Resolver::REF) ? value : Resolver.resolve("Work", value, client: client_scope).ref
           elsif path && key == "id" && (type = tool.controller.controller_path.split("/").last.classify).in?(Resolver.types)
             Resolver.id_for(type, value, client: client_scope)
           elsif Resolver::PARAMS[key] == "User" && value.downcase.in?(%w[me none])
             value.downcase == "me" ? (access_token&.user&.id || value) : ""
-          elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Engagement Todo]))
+          elsif (type = Resolver::PARAMS[key]) && (client_scope.nil? || type.in?(%w[Work Task]))
             Resolver.id_for(type, value, client: client_scope)
           elsif key == "record" && (match = value.match(/\A(\w+):(.+)\z/)) && match[1].in?(Resolver.types) && !Resolver.id?(match[2])
             "#{match[1]}:#{Resolver.resolve(match[1], match[2], client: client_scope).id}"
@@ -159,7 +159,7 @@ module Agent
         record = [ body["data"], body ].compact.flat_map { |h| h.values.grep(Hash) }.find { it["record"] && it["id"] }
         return {} unless record
 
-        { "id" => record["id"], "record" => record["record"], "todo_id" => (record["id"] if record["type"] == "Todo") }.compact
+        { "id" => record["id"], "record" => record["record"], "task_id" => (record["id"] if record["type"] == "Task") }.compact
       end
 
       # Not done yet: what would happen, in words, so the agent can ask the person first.

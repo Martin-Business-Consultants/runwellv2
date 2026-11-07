@@ -1,0 +1,47 @@
+<% @page_title = term(:task, count: 2) %>
+<%= turbo_stream_from :tasks %>
+<% listed = CustomField.for("Task").listed.to_a %>
+<% @body_class = "contained-scrolling" if @view == "board" %>
+
+<% content_for :index_filters do %>
+  <% unless @view == "board" %>
+    <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
+          options: [ [ "Open tasks", "open" ], [ "All tasks", "all" ], [ "In progress", "in_progress" ], [ "In review", "in_review" ], [ "Blocked", "blocked" ] ] %>
+  <% end %>
+  <%= render "layouts/shared/quick_filter", title: "Due…", param: :due, current: @due,
+        options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
+  <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
+        options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + task_owner_options.map { |name, id| [ name, id.to_s ] } %>
+  <%= render "layouts/shared/quick_filter", title: "Work…", param: :work, current: @work,
+        options: [ [ "All works", "all" ] ] + task_work_filter_options(@work) %>
+<% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
+    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[status]", label: "Status", choices: Task::STATUSES.map { [ it.humanize, it ] } %>
+    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + task_owner_options %>
+    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
+    <%= bulk_date bulk_tasks_path, method: :patch, name: "task[due_on]", label: "Due date" %>
+  <% end %>
+  <% end %>
+<% end %>
+<%# New task opens the quick action's task form (it picks the work or client it goes on), as g t n does. %>
+<%= render "layouts/shared/index_toolbar", view: @view, extra_views: [ [ "board", "Board", "board" ] ],
+      new_text: "New " + term(:task).downcase, new_path: new_quick_action_path(kind: "task"), new_frame: "quick_action" %>
+
+<% if @view == "board" %>
+  <%= render "tasks/board/columns", board: @board %>
+<% else %>
+  <% columns = [ ui_column(:title, term(:task), sort: :title, width: [ @column_widths[:title], term(:task) ], hideable: false),
+                 ui_column(:work, term(:work), sort: :work, width: [ @column_widths[:work], term(:work) ]),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
+                 ui_column(:owner, "Owner", sort: :owner, width: :avatar),
+                 ui_column(:due, "Due", sort: :due, width: [ 28, "Due" ]),
+                 ui_column(:status, "Status", sort: :status, width: :status, align: :center),
+                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+  <%= render "ui/data_table", id: "tasks", columns: columns, rows: @tasks, row: "tasks/row", as: :task,
+        row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+  <% if @tasks.none? %>
+    <%= render "tasks/blank" %>
+  <% end %>
+<% end %>

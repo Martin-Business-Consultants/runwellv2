@@ -7,7 +7,7 @@
 <% end %>
 <% if @view == "table" %>
   <% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with engagements can’t be deleted, and are skipped and named.") : nil) do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with work can’t be deleted, and are skipped and named.") : nil) do %>
     <%= bulk_menu bulk_clients_path, method: :patch, name: "client[status]", label: "Status", choices: Client::STATUSES.map { [ it.humanize, it ] } %>
   <% end %>
   <% end %>
@@ -18,7 +18,7 @@
   <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
                  ui_column(:status, "Status", sort: :status, width: :status),
                  ui_column(:contacts, "Contacts", width: :avatars),
-                 ui_column(:engagements, "Open " + term(:engagement, count: 2).downcase, width: :number, align: :end),
+                 ui_column(:works, "Open " + term(:work, count: 2).downcase, width: :number, align: :end),
                  *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
   <%= render "ui/data_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client, row_locals: { listed: listed },
         page: @page, selectable: true, actions: true %>

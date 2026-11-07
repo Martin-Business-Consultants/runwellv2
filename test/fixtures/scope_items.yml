@@ -1,19 +1,19 @@
 design:
-  engagement: landing
+  work: landing
   description: Design and copy
   position: 1
 
 build:
-  engagement: landing
+  work: landing
   description: Build and launch
   position: 2
 
 care:
-  engagement: retainer
+  work: retainer
   description: Updates, backups, monitoring
   position: 1
 
 globex_design:
-  engagement: globex_site
+  work: globex_site
   description: Design
   position: 1

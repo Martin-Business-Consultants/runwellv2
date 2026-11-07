@@ -1,0 +1,38 @@
+<%# locals: (client:, state: nil) %>
+<%# A client's work: on its work and straight on the client. Open by default; the filter
+    shows done or all. Work added here is on the client, not on any work. %>
+<% state ||= "open" %>
+<% all = client.tasks.includes(:owner, :work, :client, :custom_values, assignments: :user).order(:due_on, :position, :id).to_a %>
+<% shown = all.select { |task| state == "all" || (state == "done") == (task.status == "done") } %>
+<section class="card record-card" id="tasks">
+  <header class="card__head">
+    <h2 class="card__title"><%= term(:task, count: 2) %></h2>
+    <p class="card__hint">On their <%= term(:work, count: 2).downcase %> and straight on <%= client.name %>.</p>
+    <div class="card__action">
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
+            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+    </div>
+  </header>
+
+  <div class="card__content">
+    <% if shown.any? %>
+      <ul class="record-list">
+        <% shown.each do |task| %>
+          <%# herb:key task.id %>
+          <%= render "tasks/task", task: task, with_work: true %>
+        <% end %>
+      </ul>
+    <% elsif all.any? %>
+      <p class="record-card__empty">
+        <%= state == "open" ? "Nothing open: all #{all.size} done." : "Nothing done yet." %>
+        <%= link_to "Show all", client_path(client, request.query_parameters.merge("tab" => "tasks", "tasks" => "all")) %>
+      </p>
+    <% else %>
+      <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> yet. Add it here, on one of their <%= term(:work, count: 2).downcase %>, or it arrives as a request.</p>
+    <% end %>
+  </div>
+
+  <footer class="card__footer">
+    <%= render "tasks/add", client: client %>
+  </footer>
+</section>

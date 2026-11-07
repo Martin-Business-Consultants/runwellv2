@@ -14,7 +14,7 @@ module CustomFieldsHelper
 
   # What this install calls the model a field belongs to (Settings > Names).
   def custom_field_model_name(model_type, count: 1)
-    term({ "Client" => :client, "Engagement" => :engagement, "Todo" => :work }.fetch(model_type), count: count)
+    term({ "Client" => :client, "Work" => :work, "Task" => :task }.fetch(model_type), count: count)
   end
 
   # A value as a person reads it.

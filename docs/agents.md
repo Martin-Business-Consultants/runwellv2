@@ -34,7 +34,7 @@ or from **Connected apps** in the portal:
 - One that asks for a key (Muse does) gets a personal key made on that page.
 - On the command line: `runwell login https://your-install --client`.
 
-Their assistant can see their engagements, the work and documents shared with them, and their
+Their assistant can see their work, the tasks and documents shared with them, and their
 requests, and it can send a request. It never sees anything of another client's, or anything
 internal.
 
@@ -47,7 +47,7 @@ internal.
   back, so a morning routine hears each change once.
 - **One-tap starts.** Prompts like plan my day, standup, go through requests, a weekly client update
   and catch me up; clients get where are things at and ask for something.
-- **Records as context.** `runwell://engagements/WO-12`, `runwell://clients/Bloom` and the
+- **Records as context.** `runwell://works/WO-12`, `runwell://clients/Bloom` and the
   like can be attached to a conversation.
 - **Safe retries.** A change sent with an idempotency key (the CLI adds one to every change)
   happens once, however often a flaky connection sends it.

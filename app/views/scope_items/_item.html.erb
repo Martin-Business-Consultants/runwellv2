@@ -9,5 +9,5 @@
     </button>
   <% end %>
   <%= render "layouts/shared/delete_dialog", name: item.description, path: scope_item_path(item),
-        message: "Removing it keeps its #{term(:work, count: 2).downcase} on the #{term(:engagement).downcase}, under no #{term(:scope_item).downcase}." %>
+        message: "Removing it keeps its #{term(:task, count: 2).downcase} on the #{term(:work).downcase}, under no #{term(:scope_item).downcase}." %>
 </div>

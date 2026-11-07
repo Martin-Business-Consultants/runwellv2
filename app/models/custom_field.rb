@@ -1,10 +1,10 @@
-# Something an install records about its clients, engagements or work that the core doesn't
+# Something an install records about its clients, work or tasks that the core doesn't
 # (Settings > Fields). Information only: nothing in Runwell acts on a custom field, so anything
 # that needs behaviour is a real column or a plugin's own table. Optional, never required; a
 # field that's no longer wanted is archived, keeping its values, so history still reads right.
 # The key is set once from the label and never changes, so agents and imports can rely on it.
 class CustomField < ApplicationRecord
-  MODELS = %w[Client Engagement Todo].freeze
+  MODELS = %w[Client Work Task].freeze
   KINDS = %w[text long_text number money date boolean choice link].freeze
   KIND_LABELS = { "text" => "Text", "long_text" => "Long text", "number" => "Number", "money" => "Money", "date" => "Date",
     "boolean" => "Yes or no", "choice" => "Choice", "link" => "Link" }.freeze

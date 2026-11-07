@@ -1,7 +1,7 @@
 class Settings::NamesController < Settings::BaseController
   agent_tool :show_names, on: :show, title: "Show what this install calls things"
   agent_tool :update_names, on: :update, title: "Rename things",
-    description: "terminology: { client: { one:, other: }, engagement: {…}, scope_item: {…}, work: {…}, labels: { project: { one:, other:, prefix:, enabled: }, work_order: {…}, service: {…} } }. Send the names (client, engagement, scope_item, work), the labels, or both: whichever part is sent is replaced whole (anything left out of it goes back to its default), and a part not sent stays as it was.",
+    description: "terminology: { client: { one:, other: }, work: {…}, scope_item: {…}, task: {…}, labels: { project: { one:, other:, prefix:, enabled: }, work_order: {…}, service: {…} } }. Send the names (client, work, scope_item, task), the labels, or both: whichever part is sent is replaced whole (anything left out of it goes back to its default), and a part not sent stays as it was.",
     params: { terminology: {} }
 
   def show
@@ -24,7 +24,7 @@ class Settings::NamesController < Settings::BaseController
   def terminology_from(input)
     input = input&.to_unsafe_h || {}
     terms = Setting::TERMS.to_h { |key| [ key, input.fetch(key, {}).slice("one", "other").compact_blank ] }.compact_blank
-    labels = Engagement::LABELS.to_h do |label|
+    labels = Work::LABELS.to_h do |label|
       fields = input.dig("labels", label) || {}
       entry = fields.slice("one", "other", "prefix").compact_blank
       entry["prefix"] = entry["prefix"].upcase.gsub(/[^A-Z0-9]/, "") if entry["prefix"]

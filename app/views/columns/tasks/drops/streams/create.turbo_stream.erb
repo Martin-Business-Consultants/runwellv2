@@ -1,0 +1,1 @@
+<%= turbo_stream.replace("planned-tasks", partial: "tasks/board/stream", method: :morph, locals: { count: @count, board: board_tasks }) %>

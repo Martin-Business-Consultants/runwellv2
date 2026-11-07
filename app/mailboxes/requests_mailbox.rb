@@ -1,5 +1,5 @@
 # A client's email, as a request: work on the sender's client (matched by their address, else
-# none until someone picks one) that nobody has taken on yet. The subject is the title, the body the description, cleaned of quoted mail and signatures (Todo::EmailBody), and
+# none until someone picks one) that nobody has taken on yet. The subject is the title, the body the description, cleaned of quoted mail and signatures (Task::EmailBody), and
 # attachments become its documents. Automatic replies and our own mail are dropped. A known contact gets a short
 # acknowledgement.
 class RequestsMailbox < ApplicationMailbox
@@ -12,16 +12,16 @@ class RequestsMailbox < ApplicationMailbox
   private
     def sender_email = mail.from_address&.address.to_s.downcase
     def sender_name = mail.from_address&.display_name.presence || mail[:from]&.display_names&.first.presence
-    def body = @body ||= Todo::EmailBody.new(mail)
+    def body = @body ||= Task::EmailBody.new(mail)
 
     def receive_request
-      request = Todo.create!(title: title, description: body.to_html, sender_name: sender_name, sender_email: sender_email,
+      request = Task.create!(title: title, description: body.to_html, sender_name: sender_name, sender_email: sender_email,
                              source: "email", created_at: mail.date || Time.current)
       attach_files(request)
-      request.record_event!("todo.requested", actor: nil, source: "email", actor_label: request.requester_name)
+      request.record_event!("task.requested", actor: nil, source: "email", actor_label: request.requester_name)
 
       if request.contact && Setting.current.requests_email.present?
-        RequestMailer.with(todo: request, in_reply_to: mail.message_id).received.deliver_later
+        RequestMailer.with(task: request, in_reply_to: mail.message_id).received.deliver_later
       end
     end
 

@@ -15,8 +15,8 @@
 
   <%= sidebar_section "Workspace" %>
   <%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %>
-  <%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %>
-  <%= sidenav_link_to term(:work, count: 2), todos_path, icon: "board", keys: "g w" %>
+  <%= sidenav_link_to term(:work, count: 2), works_path, icon: "clipboard", keys: "g w" %>
+  <%= sidenav_link_to term(:task, count: 2), tasks_path, icon: "board", keys: "g t" %>
   <%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %>
 
   <% if nav_plugin_items.any? %>
