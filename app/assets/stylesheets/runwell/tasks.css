@@ -285,11 +285,12 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* ======================================================================= The side panel */
 
 /* A task over the page (tasks/_panel, side-panel controller): a panel floating down the right
-/* edge, over whatever is under it (the board keeps its full width); full screen on a phone. */
+/* edge, over whatever is under it, the + and bell in the corner too (the board keeps its full
+/* width); full screen on a phone. Toasts and the open search float above it. */
 .task-panel {
   --task-panel-width: min(32rem, 100vw - 1rem);
 
-  position: fixed; inset: var(--s-2) var(--s-2) var(--s-2) auto; z-index: calc(var(--z-bar) - 5);
+  position: fixed; inset: var(--s-2) var(--s-2) var(--s-2) auto; z-index: calc(var(--z-tray) + 1);
   display: flex; flex-direction: column; gap: var(--s-4); width: var(--task-panel-width);
   padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain;
   border: 1px solid var(--line); border-radius: var(--radius-panel, var(--radius-lg)); background: var(--panel);

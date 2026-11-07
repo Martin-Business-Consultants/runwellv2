@@ -182,3 +182,6 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 .quick-action__upload { position: relative; width: 100%; height: auto; min-height: 6rem; padding: var(--s-4); border: 1px dashed var(--line-strong); white-space: normal; font-weight: var(--weight); font-size: var(--text-meta); cursor: pointer; }
 .quick-action__upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .quick-action__upload:has(input[type="file"]:focus-visible) { box-shadow: var(--ring); }
+
+/* Open, search floats above everything else that floats: the side panel, the trays, toasts. */
+.bar:has(.bar__placeholder[hidden]) { z-index: calc(var(--z-tray) + 10); }

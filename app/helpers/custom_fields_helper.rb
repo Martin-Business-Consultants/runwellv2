@@ -51,7 +51,7 @@ module CustomFieldsHelper
         tag.span(class: "switch") do
           safe_join([ hidden_field_tag(name, "", id: nil), check_box_tag(name, "true", value == true, id: id, role: "switch"), tag.span(class: "switch__track", aria: { hidden: true }) ])
         end
-      when "choice" then select_tag(name, options_for_select(field.choices, value), include_blank: true, id: id)
+      when "choice" then select_tag(name, options_for_select(field.choices, value), include_blank: true, id: id, data: { controller: "choices" })
       when "link" then url_field_tag(name, value, placeholder: "https://…", **input)
       else text_field_tag(name, value, **input)
       end

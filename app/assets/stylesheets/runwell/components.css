@@ -360,5 +360,53 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 /* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash). On staff
 /* pages they stack just above the bell and the quick actions' +, over the side panel and trays;
 /* sign-in pages and the portal have nothing in that corner, so they take it. */
-#flash .flashes--toast { --toast-bottom: calc(var(--s-3) + 2.5rem + var(--s-3)); --toast-z: calc(var(--z-tray) + 1); }
+#flash .flashes--toast { --toast-bottom: calc(var(--s-3) + 2.5rem + var(--s-3)); --toast-z: calc(var(--z-tray) + 2); }
 :is(.auth-layout__main, .portal-main) #flash .flashes--toast { --toast-bottom: var(--s-3); }
+
+/* ======================================================================= Comboboxes */
+
+/* Every form select is a combobox (Choices.js, the choices controller): the field looks like the
+/* app's other fields, and its choices open in a menu like the app's popups, with a filter box once
+/* there are more than a few. Drawn here on rune's tokens rather than Choices' own stylesheet, so
+/* Appearance reaches it. */
+.choices { position: relative; width: 100%; overflow: visible; font-size: inherit; }
+.choices:focus { outline: none; }
+.choices__inner {
+  display: flex; align-items: center; width: 100%; min-height: var(--control-h); padding: 0 1.75rem 0 .625rem;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text);
+  cursor: pointer; transition: border-color .12s, box-shadow .12s;
+}
+.choices.is-focused .choices__inner, .choices.is-open .choices__inner { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+.choices.is-disabled .choices__inner { opacity: .6; cursor: not-allowed; }
+.choices[data-type*="select-one"]::after {
+  content: ""; position: absolute; top: 50%; right: .7rem; width: .4rem; height: .4rem; border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted); transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+.choices[data-type*="select-one"].is-open::after { transform: translateY(-30%) rotate(-135deg); }
+.choices__list { margin: 0; padding: 0; list-style: none; }
+.choices__list--single { flex: 1; min-width: 0; }
+.choices__list--single .choices__item { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.choices__placeholder { color: var(--text-faint); }
+.choices__list--dropdown {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow-popover);
+}
+.choices__list--dropdown.is-active { display: block; animation: choices-in .1s ease-out; }
+.choices.is-flipped .choices__list--dropdown { top: auto; bottom: calc(100% + 4px); }
+@keyframes choices-in { from { opacity: 0; transform: translateY(-2px); } }
+.choices__list--dropdown .choices__list { max-height: 16rem; padding: 4px; overflow-y: auto; overscroll-behavior: contain; }
+.choices__list--dropdown .choices__item { padding: 6px var(--s-2); border-radius: calc(5px * var(--radius-scale)); color: var(--text); cursor: pointer; }
+.choices__list--dropdown .choices__item.is-highlighted { background: var(--hover); }
+.choices__list--dropdown .choices__item.is-selected { font-weight: var(--weight-strong); }
+.choices__list--dropdown .choices__item--disabled { opacity: .5; cursor: default; }
+.choices__list--dropdown :is(.choices__notice, .has-no-results, .has-no-choices) { color: var(--text-muted); cursor: default; }
+.choices__heading { padding: 6px var(--s-2) 2px; color: var(--text-faint); font-size: var(--text-xs); font-weight: var(--weight-strong); }
+.choices__list--dropdown .choices__input {
+  display: block; width: calc(100% - 8px); height: var(--control-h-sm); margin: 4px 4px 0; padding: 0 .5rem;
+  border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--layer-1); color: var(--text); font: inherit; font-size: var(--text-meta);
+}
+.choices__list--dropdown .choices__input:focus { outline: none; border-color: var(--line-strong); box-shadow: none; }
+/* A small select (select--sm, the note composer's kind) stays small. */
+.choices:has(.select--sm) .choices__inner { min-height: var(--control-h-sm); font-size: var(--text-meta); }
+/* In a row of fields or a compact form, the combobox fills its place as the select did. */
+.task-panel__field .choices { max-width: 16rem; }
