@@ -115,16 +115,16 @@ way, by `owner/name`.
 Each is the reference for a kind of plugin. Read the one closest to yours.
 
 `runwell-time-tracking` is the reference for the extension points: minutes logged on clients,
-engagements and todos (a polymorphic `trackable`, like notes and documents, with the engagement and
-client kept alongside so totals roll up), totals on engagements, a weekly timesheet, and "Log time"
+work and tasks (a polymorphic `trackable`, like notes and documents, with the work and
+client kept alongside so totals roll up), totals on work, a weekly timesheet, and "Log time"
 in the quick action tray. No live timers.
 
 `runwell-agreements` (Agreements, 3.0) holds what the core no longer does: an agreement on an
-engagement (a title and rich text, any price written in it) under the install's logo, sent to the
+work (a title and rich text, any price written in it) under the install's logo, sent to the
 client's approvers as a PDF (Prawn, bundled by the core for plugins) and signed on a public page by
-typed name, the signed PDF stamped with the name, date and address and kept with the engagement.
-Approving records the yes; it creates no work. It fills the engagement's tab, sidebar and title
-line (`:engagement_panel`, `:engagement_aside`, `:engagement_meta`) and the portal's engagement
+typed name, the signed PDF stamped with the name, date and address and kept with the work.
+Approving records the yes; it creates no tasks. It fills the work's tab, sidebar and title
+line (`:work_panel`, `:work_aside`, `:work_meta`) and the portal's work
 panel, and imports the agreements the core kept before 3.0 (`agreement_versions`, `approvals`).
 Until Stripe, QuickBooks, Reporting and Factory are updated for 3.0, the parts of them that read
 agreement versions and approvals (payment links on approval, a service's amount, approved but not
@@ -141,7 +141,7 @@ settings.
 
 `runwell-google-ads` is the reference for a plugin that reaches the portal: read-only Google
 Ads reporting. The owner connects their own Google API app in Settings > Google Ads (OAuth,
-credentials encrypted with Active Record encryption); an engagement links to an ad account
+credentials encrypted with Active Record encryption); a piece of work links to an ad account
 (`GoogleAds::Link`, permission `link_ad_accounts`); a nightly sync copies monthly and daily
 figures; staff and the client see the same report (server-drawn SVG charts,
 `GoogleAds::ReportsHelper`), and an account that stops serving shows on home and emails the
@@ -155,23 +155,23 @@ before `ActionDispatch::SSL`, it trusts `CF-Connecting-IP` only when the connect
 a Cloudflare range (bundled list, refreshed nightly) and marks the request https.
 
 `runwell-coding` (Code) is the reference for a plugin that takes webhooks: git repositories
-linked to clients, engagements and todos (`Coding::Repository`, a polymorphic `linkable`; a
-todo inherits its engagement's repos and an engagement its client's). `checkout_work` hands an
+linked to clients, work and tasks (`Coding::Repository`, a polymorphic `linkable`; a
+task inherits its work's repos and a piece of work its client's). `checkout_work` hands an
 agent the clone commands, branch (`p-4/58-slug`) and agreed scope; `log_progress`,
-`finish_work` and `flag_out_of_scope` (a request for someone to take on) report back. Connected to GitHub in
+`finish_task` and `flag_out_of_scope` (a request for someone to take on) report back. Connected to GitHub in
 Settings > Code (OAuth), a signed public endpoint (`/code/github/webhooks`) brings in pull
-requests and checks on work (a merge can mark the todo done), deploys (production ones on the
-engagement timeline, and in the portal when shared), labelled issues as requests, and commits,
+requests and checks on tasks (a merge can mark the task done), deploys (production ones on the
+work timeline, and in the portal when shared), labelled issues as requests, and commits,
 from which time is suggested when Time tracking is on. A deactivated person who can still reach
 a linked repo shows on home. It never pushes code or stores secrets.
 
-`runwell-factory` (Factory) is the reference for a plugin that hands work to agents running
-unattended. A person queues a todo (`Factory::Item`, with optional instructions) once it is ready
+`runwell-factory` (Factory) is the reference for a plugin that hands tasks to agents running
+unattended. A person queues a task (`Factory::Item`, with optional instructions) once it is ready
 (`Factory::Readiness`: approved scope, a description or scope item, a linked repository from the
-Code plugin, a client that allows it), or an approval queues its engagement's ready work
+Code plugin, a client that allows it), or an approval queues its work's ready tasks
 (`queue_on_approval`). A runner claims the next item with a lease (`claim_work`, earliest due first,
 no priorities), renews it (`heartbeat_run`) and ends it (`finish_run`); a `Factory::Run` records the
-runner, branch, pull request, summary and cost. Success puts the todo in review; failure frees it
+runner, branch, pull request, summary and cost. Success puts the task in review; failure frees it
 for another attempt or blocks it once `max_attempts` are used; a lapsed lease abandons the run.
 Limits live in `Factory::Policy` (runs at once, time, attempts, monthly budget, blocked clients).
 What the agent is told is `Factory::Task`, served with each run. The runner is a separate Rust
@@ -182,8 +182,8 @@ QuickBooks customer by id (`Quickbooks::Customer`). A service links to a recurri
 template (`Quickbooks::RecurringLink`) that Runwell keeps in step: an approved revision
 changes it and closing the service stops it (both from `"event.runwell"`, run in jobs), and
 the nightly sync flags a template edited in QuickBooks so it no longer matches (`drift`).
-Fixed-price work is invoiced from its panel (`Quickbooks::WorkOrderBilling`), in full or as a
-deposit whose balance can be armed to send when the engagement is closed; QuickBooks emails
+Fixed-price tasks is invoiced from its panel (`Quickbooks::WorkOrderBilling`), in full or as a
+deposit whose balance can be armed to send when the work is closed; QuickBooks emails
 each with its pay link, and the portal lists open invoices with a Pay button. Every write to
 the books is a named method on `Quickbooks::Api`. `runwell-reporting` has no tables: it reads
 the QuickBooks mirror (billed, collected, aging, by client, recurring coverage, approved but
@@ -201,8 +201,8 @@ check's state is derived from the latest result per expectation: failing, due (n
 older than `every_days`, or before a retest that a production deploy, a fix or a changed value asks for),
 passing. A failed result opens a `Qa::Issue` (where, steps, expected, actual; found live when the
 check is live, an escape); fixing it needs a root cause, and someone else or the next passing
-test verifies it. A `Qa::Gate` puts a check on a todo: a validation added through
-`:runwell_todo` keeps it from done until the check passes in tests since it last went to review,
+test verifies it. A `Qa::Gate` puts a check on a task: a validation added through
+`:runwell_task` keeps it from done until the check passes in tests since it last went to review,
 by someone other than its owner (board drops that a rule refuses refresh the board with the reason).
 `bin/rails "qa:import[path/to/file.yml]"` loads a client's checks from a file (the plugin's `examples/acme_storage.yml`).
 
@@ -218,9 +218,9 @@ quick action), and requests are answered within a business day (`Replies`). Meet
 agenda, due `AGENDA_AHEAD` before, and the recap, due `RECAP_WITHIN` after, both draftable from the
 records (`Meeting::AgendaDraft`), on rhythms (`MeetingSeries`, planned nightly). Calls: an AI
 harness debriefs a call (the plugin's agent workflow): `debrief_call` gives the client's open
-engagements and agreed scope, its people, and the team with each person's expertise tags
-(`Expertise`, set in its settings) and open work; `record_call` (preview first) makes the call note,
-the contact, todos on the right engagements with owners and dates, requests and health at once
+work and agreed scope, its people, and the team with each person's expertise tags
+(`Expertise`, set in its settings) and open tasks; `record_call` (preview first) makes the call note,
+the contact, tasks on the right work with owners and dates, requests and health at once
 (`Call::Plan`). Home (`Attention`) warns before a standard is missed. Its guide is `docs/guide.md`
 in its repository, and Accounts > Guide.
 
@@ -228,19 +228,19 @@ in its repository, and Accounts > Guide.
 makes a `StripeBilling::Charge` per version, in the request, so the approval page
 (`:approval_page`) offers the link straight away and the client is emailed it: a service's first
 approval starts a subscription on the cadence, a later revision or add-on moves that subscription
-to the new amount, fixed work is a one-time link for the initial price and then each change
+to the new amount, fixed tasks is a one-time link for the initial price and then each change
 order's difference. Each charge has a `paid` flag, set by Stripe's signed webhook or recorded with
 a note by someone with `manage_billing` (which switches the link off). A service is billed once
-(`StripeBilling::Subscription` is unique per engagement, one open subscription link, a second
+(`StripeBilling::Subscription` is unique per work, one open subscription link, a second
 subscription cancelled at once), and Stripe and QuickBooks each refuse a service the other bills.
 Stripe connects with OAuth (Stripe Connect) through a broker on the install holding the platform's
 keys (`STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY`), which hands each install its token
 server to server against a PKCE-style verifier.
 
 `runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
-(`Meetings::Priority`: a todo, done when the todo is, or a line of their own, ticked off by hand)
+(`Meetings::Priority`: a task, done when the task is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its
-people, agenda and notes) shows each person beside their priorities for its day, next to open work
+people, agenda and notes) shows each person beside their priorities for its day, next to open tasks
 to pick from. A meeting repeats through a `Meetings::Series` (every weekday, chosen weekdays every
 week or two, or monthly on the same weekday), planned a week ahead and nightly; changing the series
 changes the meetings still to come. At the end of the day each

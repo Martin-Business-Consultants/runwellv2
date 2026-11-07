@@ -1,7 +1,7 @@
 # Undoes the "General" project the v1 import used to make per client for work v1 kept with no
 # project (Import::V1 now puts that work straight on the client). For each one: its work, notes
 # and documents (and any time logged on it, with Time tracking installed) move onto its client,
-# then the emptied project is closed and erased, which leaves an engagement.erased event on the
+# then the emptied project is closed and erased, which leaves a piece of work.erased event on the
 # client. Only projects the importer made match: titled General, with the importer's description.
 # A dry run unless told to apply.
 #
@@ -17,33 +17,33 @@ module Import
     end
 
     def self.matches
-      Engagement.where(title: "General", label: "project").includes(:client).select { it.description.to_s.strip == DESCRIPTION }
+      Work.where(title: "General", label: "project").includes(:client).select { it.description.to_s.strip == DESCRIPTION }
     end
 
     def run
       found = self.class.matches
       return @out.puts("No General projects from the v1 import here.") if found.empty?
 
-      found.each do |engagement|
-        counts = { work: engagement.todos.count, notes: engagement.notes.count, documents: engagement.documents.count }
-        @out.puts "#{engagement.ref} General (#{engagement.client.name}): #{counts.map { |kind, count| "#{count} #{kind}" }.join(", ")} #{@apply ? "moved onto the client; project erased" : "would move onto the client"}"
-        unfold(engagement) if @apply
+      found.each do |work|
+        counts = { work: work.tasks.count, notes: work.notes.count, documents: work.documents.count }
+        @out.puts "#{work.ref} General (#{work.client.name}): #{counts.map { |kind, count| "#{count} #{kind}" }.join(", ")} #{@apply ? "moved onto the client; project erased" : "would move onto the client"}"
+        unfold(work) if @apply
       end
       @out.puts(@apply ? "Done: #{found.size} unfolded." : "Nothing changed. Run bin/rails \"import:unfold_general[apply]\" to do it.")
     end
 
     private
-      def unfold(engagement)
-        client = engagement.client
+      def unfold(work)
+        client = work.client
         Current.set(source: "import") do
-          Engagement.transaction do
-            engagement.todos.to_a.each { it.update!(engagement: nil, scope_item: nil) }
-            engagement.notes.to_a.each { it.update!(subject: client) }
-            engagement.documents.to_a.each { it.update!(documentable: client) }
-            TimeTracking::Entry.where(trackable: engagement).update_all(trackable_type: "Client", trackable_id: client.id) if defined?(TimeTracking::Entry)
-            engagement.reload
-            engagement.close!(reason: "Its work moved onto #{client.name}", actor: nil) unless engagement.closed?
-            engagement.erase!(actor: nil)
+          Work.transaction do
+            work.tasks.to_a.each { it.update!(work: nil, scope_item: nil) }
+            work.notes.to_a.each { it.update!(subject: client) }
+            work.documents.to_a.each { it.update!(documentable: client) }
+            TimeTracking::Entry.where(trackable: work).update_all(trackable_type: "Client", trackable_id: client.id) if defined?(TimeTracking::Entry)
+            work.reload
+            work.close!(reason: "Its work moved onto #{client.name}", actor: nil) unless work.closed?
+            work.erase!(actor: nil)
           end
         end
       end

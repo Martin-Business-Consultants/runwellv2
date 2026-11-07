@@ -1,0 +1,146 @@
+<% @page_title = "Edit #{@task.title_was}" %>
+
+<%= parent_page @task.title_was, @task %>
+
+<section class="record-page">
+  <header class="record-page__header">
+    <div class="record-page__heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="record-page__description">What it is, who’s on it and when it’s due, and where it came from.</p>
+    </div>
+    <div class="button-row">
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="record-page__main">
+    <%= render "layouts/shared/errors", record: @task %>
+
+    <%= form_with model: @task, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+      <%= hidden_field_tag :from_edit, "1" %>
+
+      <div class="card__content record-form__body">
+        <fieldset class="record-form__group">
+          <legend><%= term(:task) %></legend>
+          <label class="field">
+            <span class="field__label">Title</span>
+            <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off" %>
+          </label>
+
+          <label class="field">
+            <span class="field__label">Description</span>
+            <%= rich_text_field form, :description, staff: true %>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="field__label">Status</span>
+              <%= form.select :status, task_status_options, {} %>
+            </label>
+
+            <label class="field">
+              <span class="field__label">Due</span>
+              <%= date_input form, :due_on %>
+            </label>
+          </div>
+        </fieldset>
+
+        <hr class="separator">
+
+        <fieldset class="record-form__group">
+          <legend>Who’s on it</legend>
+          <label class="field">
+            <span class="field__label">Lead</span>
+            <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" } %>
+            <span class="field__hint">The one person it’s up to.</span>
+          </label>
+
+          <fieldset class="owner-checklist">
+            <legend class="owner-checklist__legend">Also on it</legend>
+            <%= hidden_field_tag "task[other_owner_ids][]", "", id: nil %>
+            <div class="owner-checklist__people">
+              <% others = @task.other_owners.map(&:id) %>
+              <% task_people.each do |person| %>
+                <%# herb:key person.id %>
+                <label class="owner-checklist__person">
+                  <%= check_box_tag "task[other_owner_ids][]", person.id, others.include?(person.id), id: "task_other_owner_#{person.id}" %>
+                  <%= person_tag person %>
+                  <span><%= person.display_name %></span>
+                </label>
+              <% end %>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        <hr class="separator">
+
+        <fieldset class="record-form__group">
+          <legend>Where it belongs</legend>
+          <% if @task.work %>
+            <label class="field">
+              <span class="field__label"><%= term(:scope_item) %></span>
+              <%= form.select :scope_item_id, @task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" } %>
+            </label>
+          <% else %>
+            <label class="field">
+              <span class="field__label"><%= term(:client) %></span>
+              <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" } %>
+            </label>
+          <% end %>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="field__label">Requested by</span>
+              <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,
+                    { include_blank: "Nobody in particular" } %>
+            </label>
+
+            <label class="field">
+              <span class="field__label">Came in by</span>
+              <%= form.text_field :source, required: true, autocomplete: "off", placeholder: "app, email, phone…" %>
+            </label>
+          </div>
+
+          <%= switch_field form, :client_visible, label: "Visible to the client", hint: "Shown in the client’s portal, with its status and due date." %>
+
+          <%= custom_field_inputs form, @task %>
+        </fieldset>
+      </div>
+
+      <footer class="card__footer card__footer--bordered">
+        <%= link_to "Cancel", task_path(@task), class: "btn btn--secondary", data: { form_target: "cancel" } %>
+        <button type="submit" class="btn btn--primary" data-form-target="submit">
+          <span>Save changes</span>
+        </button>
+      </footer>
+    <% end %>
+  </div>
+
+  <aside class="record-page__aside">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
+      </header>
+      <div class="card__content">
+        <dl class="details">
+          <% if @task.work %>
+            <dt><%= term(:work) %></dt><dd><%= link_to "#{@task.work.ref} #{@task.work.title}", @task.work %></dd>
+          <% end %>
+          <% if @task.client %>
+            <dt><%= term(:client) %></dt><dd><%= link_to @task.client.name, @task.client %></dd>
+          <% end %>
+          <dt>Added</dt><dd><%= l @task.created_at.to_date, format: :long %><%= " by #{@task.created_by.display_name}" if @task.created_by %></dd>
+          <% if @task.completed_at %>
+            <dt>Done</dt><dd><%= l @task.completed_at.to_date, format: :long %></dd>
+          <% end %>
+        </dl>
+      </div>
+    </section>
+
+    <% if can?(:delete_records) %>
+      <%= render "layouts/shared/confirm", trigger: "Remove this " + term(:task).downcase, title: "Remove #{@task.title_was}?",
+            body: "It comes off the #{term(:work).downcase} and the #{term(:client).downcase}’s portal. Its history stays.",
+            button: "Remove", path: task_path(@task) %>
+    <% end %>
+  </aside>
+</section>

@@ -1,5 +1,5 @@
 # The client portal: a contact signed in by magic link sees their own client's
-# engagements, visible work and can send a request. Their own agent can do the same with a
+# work, visible tasks and can send a request. Their own agent can do the same with a
 # token of theirs (Settings in the portal, or OAuth): a bearer request is answered as JSON and
 # reaches only this contact's client, never a staff page.
 class Portal::BaseController < ApplicationController

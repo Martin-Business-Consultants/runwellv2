@@ -4,7 +4,7 @@ class Contact < ApplicationRecord
   belongs_to :client
   has_many :portal_sessions, dependent: :destroy
   has_many :access_tokens, dependent: :destroy
-  has_many :todos, dependent: :nullify
+  has_many :tasks, dependent: :nullify
 
   normalizes :email, with: ->(e) { e.to_s.strip.downcase.presence }
   validates :name, presence: true

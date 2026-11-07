@@ -6,7 +6,7 @@
   <section class="settings-section">
     <header class="settings-section__head">
       <h2>Audit log</h2>
-      <p class="settings-section__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:engagement, count: 2).downcase %> and <%= term(:work, count: 2).downcase %>. Nothing here can be edited or deleted.</p>
+      <p class="settings-section__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:work, count: 2).downcase %> and <%= term(:task, count: 2).downcase %>. Nothing here can be edited or deleted.</p>
     </header>
     <div class="filters">
       <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.keys.map { |key| [ Settings::AuditLogsController.area_label(key), key ] } %>

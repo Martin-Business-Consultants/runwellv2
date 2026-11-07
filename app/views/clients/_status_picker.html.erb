@@ -1,6 +1,6 @@
 <%# locals: (client:) %>
 <%# A client's status on the clients table, changed in place: its badge opens a menu of the
-    statuses (Fizzy's popup, like todos/status_dot); choosing one shows at once (picker) and saves
+    statuses (Fizzy's popup, like tasks/status_dot); choosing one shows at once (picker) and saves
     it, answered with just this picker (ClientsController#update). %>
 <% label = client.status.humanize %>
 <div class="row-picker status-picker" id="<%= dom_id(client, :status) %>" data-controller="dialog fixed-popup picker" data-dialog-orient-value="false"

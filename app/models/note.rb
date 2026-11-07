@@ -28,5 +28,5 @@ class Note < ApplicationRecord
   def search_client_id = subject.is_a?(Client) ? subject.id : subject.try(:client_id) || subject.try(:client)&.id
 
   private
-    def live_streams = [ subject, subject.try(:engagement), subject.try(:client) ]
+    def live_streams = [ subject, subject.try(:work), subject.try(:client) ]
 end

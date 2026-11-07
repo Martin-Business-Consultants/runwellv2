@@ -1,9 +1,9 @@
 # One action on many records at once, from a table's selection (layouts/shared/bulk_bar) or an
 # agent: each record goes through the same model verb and rules as doing it alone, one at a time,
 # so permissions, validations and events are unchanged. A record the action doesn't apply to (sent
-# already, not open, has engagements) is skipped and named in the result rather than failing the rest.
+# already, not open, has work) is skipped and named in the result rather than failing the rest.
 #
-#   apply_to_each(records, done: "Moved %{count} to done") { |todo| todo.update(status: "done") || todo.errors.full_messages.to_sentence }
+#   apply_to_each(records, done: "Moved %{count} to done") { |task| task.update(status: "done") || task.errors.full_messages.to_sentence }
 #
 # The block answers true when it worked, or the reason it didn't.
 module BulkAction

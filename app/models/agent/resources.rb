@@ -1,18 +1,18 @@
-# Records a harness can attach as context (MCP resources): runwell://engagements/WO-12,
+# Records a harness can attach as context (MCP resources): runwell://works/WO-12,
 # runwell://clients/Bloom and the like, read through the matching show tool (so names work and
-# the read is logged like any call). Staff have these; a client's agent its own engagements.
+# the read is logged like any call). Staff have these; a client's agent its own works.
 module Agent
   module Resources
     Template = Data.define(:uri_template, :name, :title, :description, :tool, :parameter)
 
     STAFF = [
-      Template.new("runwell://engagements/{ref}", "engagement", "Engagement", "An engagement by its ref (WO-12) or title: sections, work, notes.", "show_engagement", "ref"),
-      Template.new("runwell://clients/{id}", "client", "Client", "A client by id or name: contacts, engagements, open work, notes.", "show_client", "id"),
-      Template.new("runwell://work/{id}", "work", "Work", "A piece of work by id or title.", "show_work", "id")
+      Template.new("runwell://works/{ref}", "work", "Work", "A piece of work by its ref (WO-12) or title: sections, tasks, notes.", "show_work", "ref"),
+      Template.new("runwell://clients/{id}", "client", "Client", "A client by id or name: contacts, work, open tasks, notes.", "show_client", "id"),
+      Template.new("runwell://tasks/{id}", "task", "Task", "A task by id or title.", "show_task", "id")
     ].freeze
 
     CLIENT = [
-      Template.new("runwell://portal/engagements/{ref}", "engagement", "Engagement", "One of your engagements by its ref or title.", "portal_engagement", "ref")
+      Template.new("runwell://portal/works/{ref}", "work", "Work", "One of your work by its ref or title.", "portal_work", "ref")
     ].freeze
 
     def self.templates(set) = set.reject { it.parameter.nil? }.map { MCP::ResourceTemplate.new(uri_template: it.uri_template, name: it.name, title: it.title, description: it.description, mime_type: "application/json") }

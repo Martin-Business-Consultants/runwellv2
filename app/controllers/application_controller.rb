@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
   before_action :remember_host
   before_action :render_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
   around_action :in_install_time_zone
-  helper_method :side_panel_todo
+  helper_method :side_panel_task
 
   private
 
@@ -30,10 +30,10 @@ class ApplicationController < ActionController::Base
   def current_user = Current.user
 
   # The task open in the side panel (?task=42 on any staff page), or nil.
-  def side_panel_todo
+  def side_panel_task
     return unless Current.user && !Current.agent? && params[:task].present?
 
-    @side_panel_todo ||= Todo.includes(:engagement, :client, :scope_item, :owner, assignments: :user).find_by(id: params[:task])
+    @side_panel_task ||= Task.includes(:work, :client, :scope_item, :owner, assignments: :user).find_by(id: params[:task])
   end
 
   # A record deleted from its table row (the table's one delete dialog sends inline=row): that row
@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
   # Opening or closing the side panel loads just its frame: the page under it stays as it is, so
   # its own action needn't run.
   def render_side_panel
-    render partial: "layouts/shared/side_panel", locals: { todo: side_panel_todo }, layout: false
+    render partial: "layouts/shared/side_panel", locals: { task: side_panel_task }, layout: false
   end
 
   # Until someone sets the address (Settings > Address or APP_HOST), mail links to the one

@@ -1,4 +1,4 @@
-# A file kept on a client, engagement, scope item, todo or request. Staff see them all; the
+# A file kept on a client, work, scope item, task or request. Staff see them all; the
 # client portal shows only the ones marked client_visible.
 class Document < ApplicationRecord
   include LiveRefreshes
@@ -32,5 +32,5 @@ class Document < ApplicationRecord
       errors.add(:file, "is over the #{ActiveSupport::NumberHelper.number_to_human_size(MAX_SIZE)} limit") if file.attached? && file.byte_size > MAX_SIZE
     end
 
-    def live_streams = [ documentable, documentable.try(:engagement), documentable.try(:client) ]
+    def live_streams = [ documentable, documentable.try(:work), documentable.try(:client) ]
 end

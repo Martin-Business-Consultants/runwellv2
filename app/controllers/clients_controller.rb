@@ -5,15 +5,15 @@ class ClientsController < ApplicationController
     description: "Active clients unless status says otherwise: active (the default), dormant, former or all.",
     params: { status: "string" }
   agent_tool :show_client, on: :show, title: "Show a client",
-    description: "A client with its contacts, engagements, open work, notes and documents.", next_tools: %i[create_contact create_engagement add_note]
+    description: "A client with its contacts, work, open tasks, notes and documents.", next_tools: %i[create_contact create_work add_note]
   agent_tool :create_client, on: :create, title: "Add a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects.",
-    params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }, next_tools: %i[create_contact create_engagement]
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose works are internal projects.",
+    params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }, next_tools: %i[create_contact create_work]
   agent_tool :update_client, on: :update, title: "Change a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose engagements are internal projects.",
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose works are internal projects.",
     params: { client: { name: "string", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }
   agent_tool :delete_client, on: :destroy, title: "Delete a client",
-    description: "Removes the client with its contacts, work and notes. A client with engagements can’t be deleted: set its status to former instead."
+    description: "Removes the client with its contacts, tasks and notes. A client with work can’t be deleted: set its status to former instead."
 
   before_action :set_client, only: %i[show edit update destroy]
 
@@ -24,12 +24,12 @@ class ClientsController < ApplicationController
     @status = params[:status].presence_in(Client::STATUSES + %w[all]) || "active"
     scope = @status == "all" ? Client.all : Client.where(status: @status)
     @column_widths = column_widths(scope, :name) if @view == "table"
-    @clients = paginate sorted(scope.ordered.includes(:contacts, :engagements, :custom_values))
+    @clients = paginate sorted(scope.ordered.includes(:contacts, :works, :custom_values))
   end
 
   def show
-    @engagement_state = Engagement.filter_from(params, :engagements)
-    @work_state = params[:work].presence_in(%w[open done all]) || "open"
+    @work_state = Work.filter_from(params, :works)
+    @task_state = params[:tasks].presence_in(%w[open done all]) || "open"
   end
 
   def new
@@ -72,7 +72,7 @@ class ClientsController < ApplicationController
 
       redirect_to clients_path, notice: "Client deleted."
     else
-      alert = "#{@client.name} has #{Setting.current.term(:engagement, count: 2).downcase}, so it can’t be deleted."
+      alert = "#{@client.name} has #{Setting.current.term(:work, count: 2).downcase}, so it can’t be deleted."
       return refuse_in_place(alert) if row_removal?
 
       redirect_to edit_client_path(@client), alert: alert

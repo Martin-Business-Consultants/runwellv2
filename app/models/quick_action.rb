@@ -2,13 +2,13 @@
 # registers, to the record on screen or to another one picked from a list. Notes, documents
 # and plugin records are polymorphic, so each action names the record types it takes.
 class QuickAction
-  RECORD_TYPES = %w[Client Engagement ScopeItem Todo].freeze
+  RECORD_TYPES = %w[Client Work ScopeItem Task].freeze
   STARTING = 12 # records a picker shows before anything is typed
 
   attr_reader :key, :label, :title, :icon, :partial, :types
 
   # context: turns the record on screen into one this action takes (time on a scope item
-  # goes to its engagement), or nil.
+  # goes to its work), or nil.
   def initialize(key:, label:, icon:, partial:, title: nil, types: RECORD_TYPES, context: nil)
     @key, @label, @icon, @partial, @types, @context = key.to_s, label, icon, partial, types, context
     @title = title || "Add a #{label.downcase}"
@@ -17,10 +17,10 @@ class QuickAction
   CORE = [
     new(key: :note, label: "Note", icon: "comment", partial: "quick_actions/note"),
     new(key: :document, label: "Document", icon: "attachment", partial: "quick_actions/document"),
-    # Work from anywhere (g w n): on an engagement or straight on a client; work or a scope item on
-    # screen take its engagement, else its client.
-    new(key: :work, label: "Work", title: "Add work", icon: "check-circle", partial: "quick_actions/work",
-      types: %w[Engagement Client], context: ->(record) { record.try(:engagement) || record.try(:client) })
+    # A task from anywhere (g t n): on a piece of work or straight on a client; a task or a section
+    # on screen take its work, else its client.
+    new(key: :task, label: "Task", title: "Add a task", icon: "check-circle", partial: "quick_actions/task",
+      types: %w[Work Client], context: ->(record) { record.try(:work) || record.try(:client) })
   ].freeze
 
   class << self
@@ -54,8 +54,8 @@ class QuickAction
     def scope_for(type)
       case type
       when "Client" then Client.all
-      when "Engagement" then Engagement.includes(:client)
-      when "Todo" then Todo.includes(:engagement, :client)
+      when "Work" then Work.includes(:client)
+      when "Task" then Task.includes(:work, :client)
       else type.constantize.all
       end
     end

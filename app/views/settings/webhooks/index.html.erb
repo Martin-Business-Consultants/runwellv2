@@ -6,7 +6,7 @@
     <header class="settings-section__head">
       <h2>Webhooks</h2>
       <p class="settings-section__description">
-        Send each event (a <%= term(:client).downcase %> added, an engagement closed, <%= term(:work, count: 2).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
+        Send each event (a <%= term(:client).downcase %> added, a piece of work closed, <%= term(:task, count: 2).downcase %> done…) as JSON to another tool: Zapier, Make, n8n, a spreadsheet script, your own server.
         Each request is signed with the endpoint’s secret: <code>X-Runwell-Signature</code> is <code>sha256=</code> and the HMAC-SHA256 of <code>X-Runwell-Timestamp</code>, a dot, and the body.
         Failed deliveries are retried for about a day; twenty failures in a row switch an endpoint off.
       </p>
@@ -43,7 +43,7 @@
             </div>
             <div class="field">
               <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
-              <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
+              <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. work.closed, task.*", autocomplete: "off" %>
             </div>
             <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
             <label class="checkbox"><%= form.check_box :active %> <span>On</span></label>
@@ -96,12 +96,12 @@
       </div>
       <div class="field">
         <%= form.label :description, "Name", class: "field__label" %>
-        <%= form.text_field :description, placeholder: "Zapier: closed engagements to the sales sheet", autocomplete: "off" %>
+        <%= form.text_field :description, placeholder: "Zapier: closed work to the sales sheet", autocomplete: "off" %>
         <p class="field__hint">Optional.</p>
       </div>
       <div class="field">
         <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
-        <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. engagement.closed, todo.*", autocomplete: "off" %>
+        <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. work.closed, task.*", autocomplete: "off" %>
         <p class="field__hint">Optional: blank sends every event.</p>
       </div>
       <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>

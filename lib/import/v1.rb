@@ -7,7 +7,7 @@
 #   bin/rails "import:v1[path/to/main.sqlite3,path/to/files]"
 #
 # What maps to what: partners → clients; partner users → contacts; staff → users with their
-# passwords; projects, services and work orders → engagements (milestones and work order items
+# passwords; projects, services and work orders → work (milestones and work order items
 # as their sections; v1's prices stay behind, since the core keeps no money); todos → work;
 # tickets → requests; notes, time entries and todo and ticket files; client addresses (custom
 # fields) and links (a note). Everything else in v1 (invoices, milestone health, specs,
@@ -42,7 +42,7 @@ module Import
     end
 
     def run
-      raise "This install already has clients or engagements. Import into an empty database." if Client.exists? || Engagement.exists?
+      raise "This install already has clients or engagements. Import into an empty database." if Client.exists? || Work.exists?
 
       # History, not news: jobs (mention notifications, file analysis) are held, never run.
       ActiveJob::Base.queue_adapter = :test
@@ -149,7 +149,7 @@ module Import
     def import_project(row)
       client = @clients[row["partner_id"]] or return @skipped[:projects] << "#{row["name"]}: no client"
 
-      engagement = client.engagements.create!(
+      engagement = client.works.create!(
         label: "project", shape: "fixed", title: row["name"],
         description: rich("Project", row["id"], "description") || row["description"].presence,
         estimate_notes: rich("Project", row["id"], "context") || row["context"].presence,
@@ -167,7 +167,7 @@ module Import
     def import_service(row)
       client = @clients[row["partner_id"]] or return @skipped[:services] << "#{row["name"]}: no client"
 
-      engagement = client.engagements.create!(
+      engagement = client.works.create!(
         label: "service", shape: "recurring", title: row["name"],
         description: rich("Service", row["id"], "description") || row["description"].presence,
         estimate_notes: row["context"].presence,
@@ -192,7 +192,7 @@ module Import
       client = @clients[row["partner_id"]] || @engagements["project:#{row["project_id"]}"]&.client
       return @skipped[:work_orders] << "#{row["title"]}: no client" unless client
 
-      engagement = client.engagements.create!(
+      engagement = client.works.create!(
         label: "work_order", shape: "fixed", title: row["title"],
         description: rich("WorkOrder", row["id"], "description") || row["description"].presence,
         estimate_notes: row["notes"].presence,
@@ -221,10 +221,10 @@ module Import
       return if @todos.key?(row["id"])
 
       scope_item = @items["milestone:#{row["milestone_id"]}"] || @items["item:#{row["work_order_item_id"]}"]
-      scope_item = nil if scope_item && (engagement.nil? || scope_item.engagement != engagement)
+      scope_item = nil if scope_item && (engagement.nil? || scope_item.work != engagement)
       owners = todo_owners[row["id"]] || []
       status = TODO_STATUSES.fetch(row["status"], "planned")
-      todo = (engagement ? engagement.todos : client.todos).create!(
+      todo = (engagement ? engagement.tasks : client.tasks).create!(
         title: row["name"], status: status, scope_item: scope_item,
         description: rich("Todo", row["id"], "description") || row["description"].presence,
         owner: @users[owners.first], due_on: row["due_date"], client_visible: row["client_visible"] == 1,
@@ -259,7 +259,7 @@ module Import
         if request.nil?
           next if row["status"] == "closed"
 
-          request = Todo.create!(
+          request = Task.create!(
             client: @clients[row["partner_id"]], title: row["subject"].presence || "(no subject)",
             description: rich("Ticket", row["id"], "body") || row["body_html"].presence || row["body"].presence,
             sender_name: row["sender_name"], sender_email: row["sender_email"],

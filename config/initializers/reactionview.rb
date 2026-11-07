@@ -45,7 +45,7 @@ end
 
 # ReActionView works out which state each page depends on after every render, and Herb 0.11's
 # analysis re-reads and re-parses the page and every partial it reaches each time: about 175
-# parses and 350ms on an engagement page, for the same answer. An analysis depends only on the
+# parses and 350ms on a piece of work page, for the same answer. An analysis depends only on the
 # file, so keep each one until the file changes.
 Herb::Analysis::TemplateDependencies.prepend(Module.new do
   def analyze(file_path)

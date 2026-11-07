@@ -16,7 +16,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     get client_path(clients(:acme)), as: :json
     client = response.parsed_body["client"]
     assert_equal 2, client["contacts"].size
-    assert_equal %w[S-1 WO-1], client["engagements"].map { |e| e["ref"] }.sort
+    assert_equal %w[S-1 WO-1], client["works"].map { |e| e["ref"] }.sort
   end
 
   test "create" do

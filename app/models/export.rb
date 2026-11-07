@@ -147,7 +147,7 @@ class Export < ApplicationRecord
 
         data/   one table per file, as JSON (an array of rows) and CSV (a header row, then rows).
                 Rows keep their ids, so records point at each other the way they do in Runwell:
-                engagements.client_id is a clients.id, todos.engagement_id an engagements.id, and so on.
+                works.client_id is a clients.id, tasks.work_id an works.id, and so on.
                 Tables named after a plugin (time_tracking_entries, …) are that plugin's.
         files/  every stored file (documents, images in rich text, the logo), named <blob id>-<name>.
                 active_storage_attachments says which record each blob belongs to.

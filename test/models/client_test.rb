@@ -14,7 +14,7 @@ class ClientTest < ActiveSupport::TestCase
     assert dup.errors[:status].any?
   end
 
-  test "a client with engagements cannot be destroyed" do
+  test "a client with work cannot be destroyed" do
     assert_not clients(:acme).destroy
   end
 end

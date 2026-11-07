@@ -1,0 +1,30 @@
+<%# locals: (work: nil, client: nil, scope_item: nil, inline: nil) %>
+<%# Adds work on a piece of work (under one of its scope items, or other work), or straight on a client.
+    In the Work section of a piece of work's or client's page it comes back as that section alone
+    (TasksController#create); inline: false where the page shows its work another way. %>
+<% home = work || client %>
+<details class="record-add">
+  <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add <%= term(:task).downcase %></summary>
+  <%= form_with model: Task.new, url: (work ? work_tasks_path(work) : client_tasks_path(client)), namespace: dom_id(scope_item || home, :new_task),
+        class: "record-add__form", data: { controller: "form" } do |form| %>
+    <% unless inline == false %>
+      <%= hidden_field_tag :inline, "tasks", id: nil %>
+      <% if scope_item %>
+        <%= hidden_field_tag :inline_item, scope_item.id, id: nil %>
+      <% end %>
+    <% end %>
+    <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "What needs doing…", aria: { label: "Title" } %>
+    <div class="record-add__fields">
+      <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" }, aria: { label: "Owner" } %>
+      <%= date_input form, :due_on, aria: { label: "Due" } %>
+      <% if scope_item %>
+        <%= form.hidden_field :scope_item_id, value: scope_item.id %>
+      <% elsif work %>
+        <%= form.select :scope_item_id, work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other tasks" }, aria: { label: term(:scope_item) } %>
+      <% end %>
+    </div>
+    <div class="record-add__actions">
+      <button type="submit" class="btn btn--primary btn--sm">Add <%= term(:task).downcase %></button>
+    </div>
+  <% end %>
+</details>

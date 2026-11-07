@@ -1,12 +1,12 @@
 class NotesController < ApplicationController
   allow_staff
   agent_tool :add_note, on: :create, title: "Add a note to a record",
-    description: "record: \"Type:id\" for a Client, Engagement, ScopeItem or Todo (e.g. \"Client:12\"). @mention someone by writing their name; they are notified.",
+    description: "record: \"Type:id\" for a Client, Work, ScopeItem or Task (e.g. \"Client:12\"). @mention someone by writing their name; they are notified.",
     params: { record: "string!", note: { body: "text!", kind: Note::KINDS, source: "string" } }
   agent_tool :delete_note, on: :destroy, title: "Delete a note",
     description: "Only its author (or the author's person, for a note their agent wrote) or someone who may delete records."
 
-  SUBJECTS = %w[Client Engagement ScopeItem Todo].freeze
+  SUBJECTS = %w[Client Work ScopeItem Task].freeze
 
   def create
     subject = find_subject or return redirect_back(fallback_location: root_path, alert: "Choose where this goes.")

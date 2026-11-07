@@ -2,7 +2,7 @@
 # something to reply to: anything new they send is a request of its own.
 class RequestMailer < ApplicationMailer
   def received
-    @request = params[:todo]
+    @request = params[:task]
     headers["Auto-Submitted"] = "auto-replied"
     if params[:in_reply_to].present?
       headers["In-Reply-To"] = "<#{params[:in_reply_to]}>"

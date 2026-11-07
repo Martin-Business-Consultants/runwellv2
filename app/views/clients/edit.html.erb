@@ -26,7 +26,7 @@
         <dl class="details">
           <dt>Status</dt><dd><%= status_tag @client.status_was.to_s.humanize, highlight: @client.status_was == "active" %></dd>
           <dt>Contacts</dt><dd><%= @client.contacts.active.count %></dd>
-          <dt><%= term(:engagement, count: 2) %></dt><dd><%= @client.engagements.count %></dd>
+          <dt><%= term(:work, count: 2) %></dt><dd><%= @client.works.count %></dd>
           <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
         </dl>
       </div>
@@ -40,7 +40,7 @@
       </header>
       <div class="card__content">
         <div class="record-form__toggle">
-          <label class="record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its engagements are our own projects.</label>
+          <label class="record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its work is our own.</label>
           <%= switch_tag { hidden_field_tag("client[internal]", "0", id: nil, form: dom_id(@client, :form), autocomplete: "off") + check_box_tag("client[internal]", "1", @client.internal?, id: dom_id(@client, :internal), role: "switch", form: dom_id(@client, :form)) } %>
         </div>
       </div>
@@ -48,7 +48,7 @@
 
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Delete this client", title: "Delete #{@client.name_was}?",
-            body: "This removes the #{term(:client).downcase} with its contacts, #{term(:work, count: 2).downcase} and notes. One with #{term(:engagement, count: 2).downcase} can’t be deleted.",
+            body: "This removes the #{term(:client).downcase} with its contacts, #{term(:task, count: 2).downcase} and notes. One with #{term(:work, count: 2).downcase} can’t be deleted.",
             button: "Delete client", path: client_path(@client) %>
     <% end %>
   </aside>

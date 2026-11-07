@@ -1,0 +1,124 @@
+<% @page_title = @task.title %>
+<% home = @task.scope_item || @task.work || @task.client %>
+<% tabs = [
+     record_tab("notes", "Notes", count: @task.notes.count),
+     record_tab("documents", "Documents", count: @task.documents.count)
+   ] + plugin_record_tabs(:task_panel) %>
+<% tab = current_record_tab(tabs, "notes") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+
+<% if home %>
+  <%= parent_page(@task.scope_item&.description || @task.work&.ref || @task.client.name, home) %>
+<% else %>
+  <%= parent_page term(:task, count: 2), tasks_path(owner: "none") %>
+<% end %>
+
+<%= turbo_stream_from @task %>
+<section class="record-page">
+  <header class="record-page__header">
+    <div class="record-page__heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="record-page__description">
+        <% if @task.work %>
+          <%= link_to "#{@task.work.ref} #{@task.work.title}", @task.work %>
+          <span aria-hidden="true">›</span>
+          <% if @task.scope_item %>
+            <%= link_to @task.scope_item.description, @task.scope_item %>
+          <% else %>
+            <span>Other tasks</span>
+          <% end %>
+        <% elsif @task.client %>
+          <%= link_to @task.client.name, @task.client %> <span aria-hidden="true">›</span> <span>Not on any <%= term(:work).downcase %></span>
+        <% else %>
+          <span>No <%= term(:client).downcase %> matched yet: edit it to choose one.</span>
+        <% end %>
+      </p>
+    </div>
+    <div class="button-row">
+      <%= render "tasks/ai_brief", task: @task, labelled: true %>
+      <%= link_to edit_task_path(@task), class: "btn btn--secondary", data: { keys: "e" } do %>
+        <%= icon_tag "pencil" %>
+        <span>Edit</span>
+        <kbd class="hide-on-touch">E</kbd>
+      <% end %>
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="record-page__main">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Description</h2>
+      </header>
+      <div class="card__content record-card__stack">
+        <% if @task.description.present? %>
+          <div class="record-card__prose"><%= rich_text @task.description %></div>
+        <% else %>
+          <p class="record-card__empty">No description.</p>
+        <% end %>
+        <%= render "custom_fields/values", record: @task %>
+      </div>
+    </section>
+
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @task %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @task %>
+          <% end %>
+          <% if plugin_partial %>
+            <%= render plugin_partial, task: @task %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="record-page__aside">
+    <%= plugin_slots(:task_aside, task: @task) %>
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">Details</h2>
+      </header>
+      <div class="card__content">
+        <dl class="details">
+          <dt>Status</dt><dd><%= render "tasks/status_dot", task: @task, labelled: true %></dd>
+          <dt>On it</dt><dd><%= render "tasks/owner_picker", task: @task, labelled: true %></dd>
+          <dt>Due</dt>
+          <dd>
+            <% if @task.due_on %>
+              <%= l @task.due_on, format: :long %>
+              <% if @task.status != "done" && @task.due_on.past? %>
+                <%= status_tag "Overdue", highlight: true %>
+              <% end %>
+            <% else %>
+              <span class="muted">No date</span>
+            <% end %>
+          </dd>
+          <dt><%= term(:client) %></dt>
+          <dd>
+            <% if @task.client %>
+              <%= link_to @task.client.name, @task.client %>
+            <% else %>
+              <span class="muted">None matched</span>
+            <% end %>
+          </dd>
+          <% if @task.requester_name.present? %>
+            <dt>Requested by</dt><dd><%= @task.requester_name %><% if @task.sender_email.present? && @task.contact.nil? %> <span class="muted">(<%= @task.sender_email %>)</span><% end %></dd>
+          <% end %>
+          <dt>Came in</dt><dd><%= @task.source.humanize %>, <%= l @task.created_at.to_date, format: :short %></dd>
+          <dt>Client sees it</dt><dd><%= @task.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>
+          <% if @task.completed_at %>
+            <dt>Done</dt><dd><%= l @task.completed_at.to_date, format: :short %></dd>
+          <% end %>
+        </dl>
+      </div>
+    </section>
+
+    <%= render "events/timeline", subject: @task %>
+  </aside>
+</section>

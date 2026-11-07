@@ -1,0 +1,20 @@
+<%# locals: (task:, listed:) %>
+<%# One piece of work in the index's data table (ui/_data_table): the cells in the columns' order. %>
+<tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
+  <%= bulk_select_cell task, task.title %>
+  <td data-column="title"><%= side_panel_link_to task, task.title %></td>
+  <td class="nowrap" data-column="work">
+    <% if task.work %>
+      <%= link_to task.work.ref, task.work, class: "task-table__ref" %>
+    <% end %>
+  </td>
+  <td class="muted" data-column="client"><%= task.client&.name %></td>
+  <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
+  <td class="nowrap" data-column="due"><%= render "tasks/due", task: task %></td>
+  <td class="data-table__center" data-column="status"><%= render "tasks/status_dot", task: task %></td>
+  <% listed.each do |field| %>
+    <%# herb:key field.id %>
+    <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, task.custom_value(field)) %></td>
+  <% end %>
+  <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task %>
+</tr>

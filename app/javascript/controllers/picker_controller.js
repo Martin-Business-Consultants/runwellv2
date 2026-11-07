@@ -1,10 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Runwell: an in-place picker (a todo's status or owner, a client's status) that shows the choice
+// Runwell: an in-place picker (a task's status or owner, a client's status) that shows the choice
 // the moment it's made, while its form saves it; the answer then replaces the picker with what was
 // saved (or puts it back, with the reason, if it was refused). Choices may live once on the page
 // in a <template> (options value) and are copied into the menu when it first opens. With multiple
-// (a todo's owners, Fizzy's assignments), current lists every choice made, each click turns one on
+// (a task's owners, Fizzy's assignments), current lists every choice made, each click turns one on
 // or off and the menu stays open; the answer replaces what shows beside it.
 export default class extends Controller {
   static targets = [ "display", "list" ]

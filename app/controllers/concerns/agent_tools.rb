@@ -27,7 +27,7 @@ module AgentTools
     # array of allowed values, a nested hash, a list of one type ("integer[]"), or a list of
     # objects ([ { title: "string!" } ]); a trailing "!" makes it required. Path
     # parameters (id, ref, client_id…) come from the route; route: picks one by its path when
-    # an action has several ("/engagements/:engagement_ref/work"). confirm: what reaches a client;
+    # an action has several ("/works/:work_ref/work"). confirm: what reaches a client;
     # the tool then previews until called again with confirm: true.
     def agent_tool(name, on:, title:, description: nil, params: {}, confirm: nil, route: nil, follow: true, next_tools: [])
       self.agent_declarations = agent_declarations.merge(on.to_s => {

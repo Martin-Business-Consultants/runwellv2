@@ -87,7 +87,7 @@
 .portal-documents .document-link { flex: 1; min-width: 0; color: var(--text); text-decoration: none; }
 .portal-documents .document-link:hover { color: var(--text); }
 
-/* The engagement's description, and its facts: the label left, the value right. */
+/* The work's description, and its facts: the label left, the value right. */
 .portal-prose { font-size: var(--text-read); line-height: 1.6; }
 .portal-prose .lexxy-content > :first-child { margin-top: 0; }
 .portal-prose .lexxy-content > :last-child { margin-bottom: 0; }

@@ -1,7 +1,8 @@
-<%# locals: (text:, path:, icon: nil, key: nil, modal: nil) %>
-<% icon ||= "add"
+<%# locals: (text:, path:, icon: nil, key: nil, modal: nil, frame: nil) %>
+<% frame ||= ("modal" if modal)
+   icon ||= "add"
    key ||= "n" %>
-<a href="<%= path %>" class="btn btn--primary new-link" data-keys="<%= key %>"<% if modal %> data-turbo-frame="modal"<% end %>>
+<a href="<%= path %>" class="btn btn--primary new-link" data-keys="<%= key %>"<% if frame %> data-turbo-frame="<%= frame %>"<% end %>>
   <%= icon_tag icon %>
   <span class="new-link__text"><%= text %></span>
   <kbd class="new-link__key hide-on-touch"><%= key.upcase %></kbd>

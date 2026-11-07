@@ -7,8 +7,8 @@
 <% record = current_record %>
 <section class="tray tray--actions" data-controller="dialog" data-dialog-sizing-value="false" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>
-  <%# g w n opens the work form, on the engagement or client on screen (or the work's). %>
-  <a href="<%= new_quick_action_path(kind: "work", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g w n" class="visually-hidden">Add <%= term(:work).downcase %></a>
+  <%# g t n opens the task form, on the work or client on screen (or the task's work). %>
+  <a href="<%= new_quick_action_path(kind: "task", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g t n" class="visually-hidden">Add <%= term(:task).downcase %></a>
 
   <dialog class="tray__dialog" aria-label="Quick actions" data-dialog-target="dialog">
     <% QuickAction.all.each do |action| %>

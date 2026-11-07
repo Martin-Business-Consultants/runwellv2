@@ -1,0 +1,9 @@
+<%# locals: (task:) %>
+<%# A task's due date on the Work table, with Overdue while it's late and not done. Replaced on
+    its own when the status changes in place (TasksController#update). %>
+<span class="task-due" id="<%= dom_id(task, :due) %>">
+  <%= l(task.due_on, format: :short) if task.due_on %>
+  <% if task.status != "done" && task.due_on&.past? %>
+    <%= status_tag "Overdue" %>
+  <% end %>
+</span>

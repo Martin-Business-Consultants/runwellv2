@@ -5,13 +5,13 @@ en:
     client:
       one: "Client"
       other: "Clients"
-    engagement:
+    work:
       one: "Work"
       other: "Work"
     scope_item:
       one: "Section"
       other: "Sections"
-    work:
+    task:
       one: "Task"
       other: "Tasks"
     labels:

@@ -1,0 +1,75 @@
+<% @page_title = "New " + term(:work).downcase %>
+<% client = @work.client %>
+<% existing = client ? client.works.includes(:client).order(created_at: :desc).limit(8).to_a : [] %>
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <%= render "works/form", work: @work, modal: true %>
+  <% end %>
+<% else %>
+<%= parent_page term(:work, count: 2), works_path %>
+
+<section class="record-page">
+  <header class="record-page__header">
+    <div class="record-page__heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <p class="record-page__description">
+        <% if client&.internal? %>
+          <%= client.name %> is internal: one of your own projects.
+        <% else %>
+          It’s active from the start: add its <%= term(:scope_item, count: 2).downcase %> and <%= term(:task, count: 2).downcase %> next.
+        <% end %>
+      </p>
+    </div>
+    <div class="button-row">
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="record-page__main">
+    <%= render "works/form", work: @work %>
+  </div>
+
+  <aside class="record-page__aside">
+    <section class="card record-card">
+      <header class="card__head">
+        <h2 class="card__title">How it goes</h2>
+      </header>
+      <div class="card__content">
+        <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:task, count: 2).downcase}.",
+             "Add #{term(:task, count: 2).downcase} with owners and due dates, whenever something needs doing.", "Track it on the #{term(:task, count: 2)} table or board like any other.",
+             "Close the #{term(:work).downcase} when it’s done." ] %>
+        <ol class="record-steps">
+          <% steps.each do |step| %>
+            <%# herb:key step %>
+            <li><%= step %></li>
+          <% end %>
+        </ol>
+      </div>
+    </section>
+
+    <% if client %>
+      <section class="card record-card">
+        <header class="card__head">
+          <h2 class="card__title"><%= client.name %>’s <%= term(:work, count: 2).downcase %></h2>
+          <p class="card__hint"><%= existing.empty? ? "This is their first." : pluralize(existing.size, "so far", plural: "so far") %></p>
+        </header>
+        <% if existing.any? %>
+          <div class="card__content">
+            <ul class="record-list">
+              <% existing.each do |work| %>
+                <%# herb:key work.id %>
+                <li data-filter-target="item">
+                  <%= link_to work, class: "list-row" do %>
+                    <span class="list-row__content"><span class="list-row__title"><span class="record-list__ref"><%= work.ref %></span> <%= work.title %></span></span>
+                    <span class="list-row__meta"><%= status_tag work.state_label, highlight: work.active? %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </section>
+    <% end %>
+  </aside>
+</section>
+<% end %>

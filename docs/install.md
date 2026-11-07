@@ -134,7 +134,7 @@ until either is set, links use the address people were last seen using.
 | `MAIL_FROM` | The sender when Settings > Email leaves it blank | `Runwell <no-reply@` the address `>` |
 | `ASSUME_SSL` | Trust that a proxy terminated TLS | `true` in Docker (unless `FORCE_SSL=false`), else `false` |
 | `FORCE_SSL` | Redirect http to https and use secure cookies | `true` |
-| `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process. On a busy install set it to `false` and run `bin/jobs` beside the web (a second container or a Kamal `job` role), so mail, search indexing and plugin work don't take Puma's threads from pages | `true` in Docker, else set by the installer |
+| `SOLID_QUEUE_IN_PUMA` | Run jobs inside the web process. On a busy install set it to `false` and run `bin/jobs` beside the web (a second container or a Kamal `job` role), so mail, search indexing and plugin tasks don't take Puma's threads from pages | `true` in Docker, else set by the installer |
 | `RAILS_MAX_THREADS`, `RAILS_LOG_LEVEL` | Puma threads, log level | 3, `info` |
 | `RUNWELL_UPDATES` | How Settings > Updates updates: `in_place` (a Docker install updating itself), `local` (bin/update), `github` (the Deploy workflow) or `manual` (shows the command) | worked out from the install |
 | `RUNWELL_RELEASES_REPO` | Where releases are published | `Martin-Business-Consultants/runwellv2` |
@@ -157,9 +157,9 @@ visitors' real addresses are recorded and `ASSUME_SSL` isn't needed.
 ### Requests by email
 
 Clients can email a request instead of signing in to the portal. Mail to the requests address
-becomes a request: work on the sender's client that nobody has taken on yet (the subject its
+becomes a request: tasks on the sender's client that nobody has taken on yet (the subject its
 title, the message its description, attachments its documents); a known contact gets a short
-reply, and their replies to it become notes on the same work. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
+reply, and their replies to it become notes on the same tasks. Runwell can't receive mail itself, so an inbound email service forwards the address to it:
 
 1. Choose the address in Settings > Email (for example `requests@yourcompany.com`).
 2. Set up inbound mail for it at Postmark, Mailgun, SendGrid or Mandrill, or on your own mail server

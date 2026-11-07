@@ -20,7 +20,7 @@ methods, and anything under `Agent::`, `Upgrade`, `PluginChange` or `Setting`'s 
 
 - It owns its tables, prefixed with its key (`time_tracking_entries`), pointing at core records by
   id. It never adds columns to, or writes rows in, core tables except through the core's own model
-  verbs (`todo.update(status: …)`, `client.record_event!(…)`).
+  verbs (`task.update(status: …)`, `client.record_event!(…)`).
 - It registers everything in its engine's `config.to_prepare`, keyed by its key, and its
   controllers and subscribers check `Runwell::Plugins.enabled?(key)`. The core renders a plugin's
   registrations only while it's on.
@@ -57,31 +57,31 @@ Slots, and the locals each partial gets:
 | Slot | Where | Locals | Since |
 | --- | --- | --- | --- |
 | `:client_panel` | A tab on each client | `client:` | 2.0 |
-| `:engagement_panel` | A tab on each engagement | `engagement:` | 2.0 |
-| `:todo_panel` | A tab on each piece of work | `todo:` | 2.0 |
+| `:work_panel` | A tab on each work | `work:` | 2.0 |
+| `:task_panel` | A tab on each piece of tasks | `task:` | 2.0 |
 | `:nav_actions` | A button in the nav's foot | none | 2.0 |
 | `:portal_home` | The client portal's home | `client:` | 2.0 |
-| `:portal_engagement_panel` | An engagement in the portal | `engagement:` | 2.0 |
+| `:portal_work_panel` | A piece of work in the portal | `work:` | 2.0 |
 | `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
-| `:engagement_aside` | An engagement's sidebar, under its sections and details | `engagement:` | 3.0 |
-| `:engagement_meta` | The line under an engagement's title: a status badge or a short fact (an inline element) | `engagement:` | 3.0 |
-| `:todo_aside` | A piece of work's sidebar, above Details (requests are work, so this replaces `:request_aside`) | `todo:` | 3.0 |
+| `:work_aside` | A piece of work's sidebar, under its sections and details | `work:` | 3.0 |
+| `:work_meta` | The line under a piece of work's title: a status badge or a short fact (an inline element) | `work:` | 3.0 |
+| `:task_aside` | A piece of tasks's sidebar, above Details (requests are tasks, so this replaces `:request_aside`) | `task:` | 3.0 |
 | `:scope_item_aside` | A section's (scope item's) sidebar, above Details | `scope_item:` | 2.18 |
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
 
 **Removed in 3.0:** `:request_aside` and `:commitment_row`, with the `Commitment` and `Request`
-models: commitments and requests became work (see Models). A plugin that filled `:request_aside`
-fills `:todo_aside` instead (`todo.request?` says whether nobody has taken it on yet). Also
+models: commitments and requests became tasks (see Models). A plugin that filled `:request_aside`
+fills `:task_aside` instead (`task.request?` says whether nobody has taken it on yet). Also
 `:approval_page` and `:draft_version`, with agreements, which left the core for the Agreements
-plugin: an engagement's own tab is `:engagement_panel`, its sidebar `:engagement_aside` and its
-title line `:engagement_meta`.
+plugin: a piece of work's own tab is `:work_panel`, its sidebar `:work_aside` and its
+title line `:work_meta`.
 
 A slot partial declares strict locals on its first line, like every core partial. The row slot
-(`:note_row`) renders once per row: work out anything shared once a request (a
+(`:note_row`) renders once per row: tasks out anything shared once a request (a
 `CurrentAttributes` of the plugin's own), never a query per row. A shortcut only lists a key on the
-`?` sheet; the plugin's control declares it with `data-keys`, which is what makes it work. A nav or
+`?` sheet; the plugin's control declares it with `data-keys`, which is what makes it tasks. A nav or
 settings path lambda runs in the view and may return nil to hide the link. Since 2.26 each person
 chooses which plugins' nav links they see and in what order (Settings › Your account), so a plugin
 can't count on its place in the nav or on a particular `g` number. A settings page's
@@ -99,10 +99,10 @@ checkbox) for on/off switches (3.0), and the shared partials `layouts/shared/emp
 `quick_filter` and `index_toolbar` (2.0, stable), and `notes/section` (`subject:`, any record with notes:
 the composer and its notes, posting to the full page and back; `permanent: false` on a page that
 swaps one record's notes for another's in place; documented in 2.25.2, stable), and
-`todos/owner_picker` (`todo:`, `labelled:`; who's on a todo, changed in place: since 2.22,
-documented in 2.25.4, stable), and `todos/ai_brief` (`todo:`, `labelled:`; copies the todo's brief for a
+`tasks/owner_picker` (`task:`, `labelled:`; who's on a task, changed in place: since 2.22,
+documented in 2.25.4, stable), and `tasks/ai_brief` (`task:`, `labelled:`; copies the task's brief for a
 local AI, `c` on a keyboard item: documented in 2.28, stable). The brief itself is
-`Todo::Brief.new(todo, base_url:, person:).to_s` (Markdown: the work, scope, notes, other dated work,
+`Task::Brief.new(task, base_url:, person:).to_s` (Markdown: the tasks, scope, notes, other dated tasks,
 plugins' sections and the `runwell` commands to report back; documented in 2.28, stable). Design tokens for its CSS are in
 [theming.md](theming.md) (2.12, stable).
 
@@ -122,7 +122,7 @@ documents for markup written by hand (`btn`, `icon-button`, `pill`, `card` and i
 `list-row` and its parts, `field`, `badge`, `tabs`, `alert`, `table`, `dl.details`, `empty`,
 `stack`, `button-row`, `muted`…); its README lists them. Its Stimulus controllers (`rune-*`) may
 be used from markup. Runwell's own classes (an area's `record-page`, `settings-section`,
-`work-group`…) are still not an API. A plugin's stylesheet reads the tokens in
+`task-group`…) are still not an API. A plugin's stylesheet reads the tokens in
 [theming.md](theming.md), never the core's class names.
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
@@ -150,11 +150,11 @@ you're on), and the bar, from `BulkHelper`: `bulk_bar(delete:) { … }` around `
 `bulk_button`, `bulk_date` and `bulk_delete`. (`bulk_copy`, added in 2.28, is **removed in 3.0**:
 copying is a plugin's own controller, reading the picked boxes,
 `[data-bulk-target~='item']:checked`; My day's `my-day--copy-prompt` does it.) The bar shows while anything is picked, and each of
-its forms is sent with the picked ids as `ids[]`. For work, the core's own `bulk_todos_path`
-(PATCH `todo[status]`, `todo[owner_id]`, `todo[due_on]`, `todo[client_visible]`; DELETE) runs each
-todo's verbs and redirects back. Documented in 2.25.4, stable.
+its forms is sent with the picked ids as `ids[]`. For tasks, the core's own `bulk_tasks_path`
+(PATCH `task[status]`, `task[owner_id]`, `task[due_on]`, `task[client_visible]`; DELETE) runs each
+task's verbs and redirects back. Documented in 2.25.4, stable.
 
-Dragging items between lists is the core's `drag-and-drop` Stimulus controller (the Work board's):
+Dragging items between lists is the core's `drag-and-drop` Stimulus controller (the Tasks board's):
 on a wrapper, `data-controller="drag-and-drop"` with
 `data-drag-and-drop-dragged-item-class` (`drag-and-drop__dragged-item`) and
 `data-drag-and-drop-hover-container-class` (`drag-and-drop__hover-container`), and
@@ -201,7 +201,7 @@ Good practice, because people will run your plugin on installs you'll never see:
 - One job per controller, small, named for what it does, with a comment saying so and what it reads.
   Do in the browser only what has to happen there; the rest stays on the server, so agents (which
   never run JavaScript) can do everything a person can.
-- Work without it where you can: a form that still submits, a link that still goes somewhere.
+- Tasks without it where you can: a form that still submits, a link that still goes somewhere.
 - Listen on the controller's own element, not `document` or `window`; if you must (a `turbo:morph`),
   remove the listener in `disconnect()`. Never `preventDefault` an event the core handles.
 - Turbo morphs pages in place: build what you add from server markup where you can, and expect
@@ -219,7 +219,7 @@ Good practice, because people will run your plugin on installs you'll never see:
 | `Runwell::Plugins.nightly key, -> { … }` | 2.0 | Stable |
 
 `roles:` is any of `owner`, `manager`, `member`. Check a permission with `user.can?(:name)` or `can?`
-in views. A nightly task should enqueue a job rather than do slow work itself; one plugin failing
+in views. A nightly task should enqueue a job rather than do slow tasks itself; one plugin failing
 doesn't stop the others.
 
 ## Models
@@ -227,36 +227,36 @@ doesn't stop the others.
 | Hook | Since | Status |
 | --- | --- | --- |
 | `ActiveSupport.on_load(:runwell_client) { has_many … }` | 2.0 | Stable |
-| `ActiveSupport.on_load(:runwell_engagement) { … }` | 2.0 | Stable |
-| `ActiveSupport.on_load(:runwell_todo) { … }` | 2.0 | Stable |
+| `ActiveSupport.on_load(:runwell_work) { … }` | 2.0 | Stable |
+| `ActiveSupport.on_load(:runwell_task) { … }` | 2.0 | Stable |
 | `ActiveSupport.on_load(:runwell_user) { … }` | 2.0 | Stable |
 
 Add associations, scopes and validations there; never columns. Core models a plugin may read and
-call verbs on: `Client`, `Contact`, `Engagement`, `ScopeItem`, `Todo`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
+call verbs on: `Client`, `Contact`, `Work`, `ScopeItem`, `Task`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
 `Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
 
-**Changed in 3.0:** `Commitment` and `Request` are gone; both are work. A todo may sit straight on
-a client: `todo.engagement` can be nil, and `todo.client` (a column now, `client_id`) is the one
-to read, nil only for an email from an unmatched sender. A request is a todo nobody has taken on
-or started, `Todo.requests` (`todo.request?`), with who asked (`todo.contact`, `sender_name`,
-`sender_email`, `requester_name`) and how (`todo.source`). A promise is a todo with a due date,
+**Changed in 3.0:** `Commitment` and `Request` are gone; both are tasks. A task may sit straight on
+a client: `task.work` can be nil, and `task.client` (a column now, `client_id`) is the one
+to read, nil only for an email from an unmatched sender. A request is a task nobody has taken on
+or started, `Task.requests` (`task.request?`), with who asked (`task.contact`, `sender_name`,
+`sender_email`, `requester_name`) and how (`task.source`). A promise is a task with a due date,
 owned by whoever it's assigned to.
 
 **Changed in 3.0, agreements:** `AgreementVersion`, `Approval` and `ApprovalLink` are gone from the
 core, with sending, snapshots, client decisions and approval links (the Agreements plugin keeps its
 own). Their tables (`agreement_versions`, `approvals`, `approval_links`) stay, unread, for that
 plugin to import from, until a later release drops them; events, notes and documents that pointed
-at a version or a decision now point at its engagement. An engagement is active until closed
-(`engagement.state` is "active" or "closed", `active?`, `closed?`, `internal?`); nothing about it
-waits on a client. `engagement.agreed_amount_cents`, `current_version`, `draft_version`,
-`agreed_items` and the rest are gone, and approving creates no work. A `ScopeItem` is a section of
-its engagement (`belongs_to :engagement`, `engagement.scope_items` in order; `description`,
-`position`, `delivery_state` from its work); it has no price or estimate. `contact.can_approve?`
+at a version or a decision now point at its work. A piece of work is active until closed
+(`work.state` is "active" or "closed", `active?`, `closed?`, `internal?`); nothing about it
+waits on a client. `work.agreed_amount_cents`, `current_version`, `draft_version`,
+`agreed_items` and the rest are gone, and approving creates no tasks. A `ScopeItem` is a section of
+its work (`belongs_to :work`, `work.scope_items` in order; `description`,
+`position`, `delivery_state` from its tasks); it has no price or estimate. `contact.can_approve?`
 stays: who may say yes for their company, for a plugin to use. Times a client reads go inside
 `client.in_time_zone { … }` (stable since 2.0).
 
-A todo can have several people on it (2.22, stable): `todo.owner` stays the one who leads it, as
-before, and `todo.owners` (lead first), `todo.other_owners` and `Todo.assigned_to(user)` (work
+A task can have several people on it (2.22, stable): `task.owner` stays the one who leads it, as
+before, and `task.owners` (lead first), `task.other_owners` and `Task.assigned_to(user)` (tasks
 someone leads or is on) read the rest. Setting `owner` replaces the lead and keeps the others.
 
 ## Events
@@ -269,18 +269,18 @@ Every `Event` is published from a job after it's saved, never inside the request
 `Current.user`: read who did it from `event.actor_user` / `event.actor`, and where from
 `event.source`. Its `subject` is the record and `kind` one of:
 
-`client.created`, `engagement.created`, `engagement.closed` (payload `outcome`: completed or
-cancelled, since 2.17), `engagement.reopened` (2.17), `engagement.erased`, `todo.converted` (2.17),
-`todo.created`, `todo.status`, `todo.requested` (3.0: a client asked for it, from the portal or by
-email, or someone logged it; the subject is the todo), `note.added`, `note.deleted`, `document.added`.
+`client.created`, `work.created`, `work.closed` (payload `outcome`: completed or
+cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
+`task.created`, `task.status`, `task.requested` (3.0: a client asked for it, from the portal or by
+email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`.
 
 **Removed in 3.0:** `commitment.added`, `commitment.done`, `commitment.missed`,
-`commitment.dropped`, `request.received` (now `todo.requested`), `request.replied` (replies
+`commitment.dropped`, `request.received` (now `task.requested`), `request.replied` (replies
 to the acknowledgement are no longer taken in), `request.promoted`, `request.dismissed`, and
 `agreement.sent`, `agreement.emailed`, `agreement.approved` and `agreement.changes_requested`
-(the Agreements plugin records its own kinds on the engagement), and `question.answered` (the
+(the Agreements plugin records its own kinds on the work), and `question.answered` (the
 `Question` model and its `answer_question` / `dismiss_question` tools are gone). Events recorded before keep their
-kind, re-pointed at the work (or engagement, or client) they became.
+kind, re-pointed at the tasks (or work, or client) they became.
 
 New kinds may be added in any minor release; existing kinds keep their name and payload keys.
 
@@ -290,7 +290,7 @@ New kinds may be added in any minor release; existing kinds keep their name and 
 | --- | --- | --- |
 | `agent_tool name, on:, title:, description:, params:, confirm:, next_tools:` in a controller | 2.0 | Stable |
 | `agent_exempt action, reason:` | 2.0 | Stable |
-| `Runwell::Plugins.agent_brief key, ->(todo, base_url) { markdown or nil }` | 2.0 | Stable |
+| `Runwell::Plugins.agent_brief key, ->(task, base_url) { markdown or nil }` | 2.0 | Stable |
 | `Runwell::Plugins.agent_workflow key, title, steps` | 2.1 | Stable |
 | `Agent::Dispatch.run_as(user_or_contact, tool, arguments, name:)` | 2.18 | Experimental |
 | `Agent::Catalogue.for(user)`, `.for_contact(contact)`, `.find(name)` and a tool's `name`, `title`, `description`, `read?`, `confirm`, `input_schema` | 2.18 | Experimental |
@@ -311,7 +311,7 @@ a `summary`. A write needs nothing extra: its redirect and notice become the too
 | `Runwell::Plugins.ai_prompt key, label, types:` | 2.16 | Experimental |
 
 The assistant itself is the AI plugin (2.18; before, the core). A one-click question in its Ask
-panel, on the given record types (`Client`, `Engagement`, `Todo`,
+panel, on the given record types (`Client`, `Work`, `Task`,
 `ScopeItem`; `Request` until 3.0) or every page. The assistant answers through the agent tools, so a plugin's
 declared tools are already within its reach while the plugin is on.
 
@@ -346,8 +346,27 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 
 ## Changes to this contract
 
+**6.0** renamed the core's two nouns everywhere, with no aliases: engagements are **Work** and
+todos are **Tasks**. A plugin moving to 6.0 renames what it uses (and sets `requires: ">= 6.0"`):
+
+| Before 6.0 | From 6.0 |
+| --- | --- |
+| `Engagement`, `engagements`, `engagement_id`, `/engagements/P-3` | `Work`, `works`, `work_id`, `/work/P-3` |
+| `Todo`, `todos`, `todo_id`, `/work/42` | `Task`, `tasks`, `task_id`, `/tasks/42` |
+| slots `:engagement_panel`, `:engagement_aside`, `:engagement_meta`, `:portal_engagement_panel` | `:work_panel`, `:work_aside`, `:work_meta`, `:portal_work_panel` |
+| slots `:todo_panel`, `:todo_aside` | `:task_panel`, `:task_aside` |
+| load hooks `:runwell_engagement`, `:runwell_todo` | `:runwell_work`, `:runwell_task` |
+| events `engagement.*`, `todo.*` | `work.*`, `task.*` |
+| tools `*_engagement`, `*_work` (todos), `list_work` | `*_work`, `*_task`, `list_tasks` |
+| `term(:engagement)`, `term(:work)` | `term(:work)`, `term(:task)` |
+| permissions `close_engagements`, `erase_engagements` | `close_works`, `erase_works` |
+
+A plugin's own tables that point at core records by `engagement_id` or `todo_id`, or store a
+polymorphic type of `"Engagement"` or `"Todo"`, need a migration of their own; the core's 6.0
+migration renames only the core's tables, columns and stored types.
+
 **5.0** ignores `enabled_by_default:` (every plugin starts off) and removed the core's home page, the briefing ("Needs You"), with its two extension points:
-the `:home_top` slot and `Runwell::Plugins.briefing`. The app opens on Work. A plugin that showed
+the `:home_top` slot and `Runwell::Plugins.briefing`. The app opens on Tasks. A plugin that showed
 something on home gives it a page of its own with `Runwell::Plugins.nav` (a dashboard is a plugin's
 to make). Until a plugin drops them, `briefing` is a no-op that logs a warning and a `:home_top`
 registration is kept but rendered nowhere, so an older plugin still boots.

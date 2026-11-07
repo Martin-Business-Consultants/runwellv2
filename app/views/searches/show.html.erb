@@ -1,6 +1,6 @@
 <% @page_title = @query ? "Search results for \"#{@query}\"" : "Search" %>
 <%# The breadcrumb (Home › Search) is the page's title. %>
-<%= parent_page term(:work, count: 2), todos_path %>
+<%= parent_page term(:task, count: 2), tasks_path %>
 
 <%# /search: the bar's search box and results, framed on the page. %>
 <div class="search-page">

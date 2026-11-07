@@ -1,0 +1,133 @@
+<% @page_title = "#{@work.ref} #{@work.title}" %>
+<% tabs = [
+     record_tab("tasks", term(:task, count: 2), count: @work.tasks.open.count),
+     record_tab("notes", "Notes", count: @work.notes.count),
+     record_tab("documents", "Documents", count: @work.documents.count),
+     record_tab("history", "History")
+   ].compact + plugin_record_tabs(:work_panel) %>
+<% tab = current_record_tab(tabs, "tasks") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+<% next_step = work_next_step(@work) %>
+
+<%= parent_page term(:work, count: 2), works_path %>
+<%= turbo_stream_from @work %>
+
+<section class="record-page">
+  <header class="record-page__header">
+    <div class="record-page__heading">
+      <div class="record-page__title-row">
+        <h1 class="page-title"><%= @page_title %></h1>
+        <% if @work.description.present? %>
+          <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
+            <button type="button" class="icon-button" title="About this <%= term(:work).downcase %>" aria-haspopup="dialog" data-action="rune-dialog#open">
+              <%= icon_tag "info" %>
+              <span class="visually-hidden">About <%= @work.ref %></span>
+            </button>
+            <dialog class="dialog dialog--lg" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="work_about_title">
+              <div class="dialog__box">
+                <header class="dialog__header">
+                  <h2 class="dialog__title" id="work_about_title"><%= @page_title %></h2>
+                  <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
+                </header>
+                <div class="dialog__body record-card__prose"><%= rich_text @work.description %></div>
+              </div>
+            </dialog>
+          </div>
+        <% end %>
+      </div>
+      <p class="record-meta record-page__description">
+        <%= status_tag @work.state_label, highlight: @work.active? %>
+        <%= link_to @work.client.name, @work.client %>
+        <span><%= @work.label_name %> · <%= @work.recurring? ? "Recurring" : "Fixed scope" %></span>
+        <% if @work.internal? %>
+          <span>Internal</span>
+        <% end %>
+        <%= plugin_slots(:work_meta, work: @work) %>
+        <% if @work.closed? %>
+          <span><%= @work.state_label %> <%= l @work.closed_at.to_date, format: :long %><%= ": #{@work.close_reason}" if @work.close_reason.present? %></span>
+        <% end %>
+      </p>
+      <% if next_step %>
+        <p class="record-page__next"><%= next_step %></p>
+      <% end %>
+    </div>
+    <div class="button-row">
+      <%= link_to edit_work_path(@work), class: "btn btn--secondary", data: { keys: "e" } do %>
+        <%= icon_tag "pencil" %>
+        <span>Edit</span>
+        <kbd class="hide-on-touch">E</kbd>
+      <% end %>
+      <%= render "layouts/shared/sidebar_toggle" %>
+    </div>
+  </header>
+
+  <div class="record-page__main">
+    <turbo-frame id="record_tab" target="_top">
+      <div class="record-tabs">
+        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+        <div class="record-tabs__panel">
+          <% case tab %>
+          <% when "tasks" %>
+            <% if @task_view == "board" %>
+              <section class="card record-card" id="tasks">
+                <header class="card__head">
+                  <h2 class="card__title"><%= term(:task, count: 2) %></h2>
+                  <p class="card__hint">Everyone’s, by status. Drag a card to move it.</p>
+                  <div class="card__action"><%= render "tasks/view_switch", current: "board" %></div>
+                </header>
+                <div class="card__content">
+                  <%= render "tasks/board/columns", board: @board %>
+                </div>
+              </section>
+            <% else %>
+              <%= render "tasks/section", work: @work, state: @task_state, item: @task_item %>
+            <% end %>
+          <% when "notes" %>
+            <%= render "notes/section", subject: @work %>
+          <% when "documents" %>
+            <%= render "documents/section", subject: @work %>
+          <% when "history" %>
+            <%= render "events/timeline", subject: @work, expanded: true %>
+          <% end %>
+          <% if plugin_partial %>
+            <%= render plugin_partial, work: @work %>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  </div>
+
+  <aside class="record-page__aside">
+    <%= render "works/sidebar", work: @work, current: (tab == "tasks" ? (@task_item || "all") : nil) %>
+    <%= plugin_slots(:work_aside, work: @work) %>
+
+    <% if can?(:close_works) || (@work.closed? && can?(:erase_works)) %>
+      <section class="card record-card">
+        <header class="card__head">
+          <% if @work.closed? %>
+            <h2 class="card__title"><%= @work.state_label %></h2>
+            <p class="card__hint">Off the open list. Its <%= term(:task, count: 2).downcase %> and history stay.</p>
+          <% else %>
+            <h2 class="card__title">Finish</h2>
+            <p class="card__hint">Mark it complete once it’s delivered, or cancel it.</p>
+          <% end %>
+        </header>
+        <div class="card__content record-card__stack">
+          <% if can?(:close_works) %>
+            <% if @work.closed? %>
+              <%= button_to reopen_work_path(@work), class: "btn btn--secondary btn--sm" do %>
+                <%= icon_tag "refresh" %> <span>Reopen</span>
+              <% end %>
+            <% else %>
+              <%= render "works/close", work: @work %>
+            <% end %>
+          <% end %>
+
+          <% if @work.closed? && can?(:erase_works) %>
+            <%= render "works/erase", work: @work %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </aside>
+</section>

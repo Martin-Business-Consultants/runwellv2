@@ -1,8 +1,0 @@
-<%# locals: () %>
-<%# What an empty Work list says: work is never added here, so say where it comes from. %>
-<% if Todo.exists? %>
-  <%= render "layouts/shared/empty", text: "No #{term(:work, count: 2).downcase} matches these filters." %>
-<% else %>
-  <%= render "layouts/shared/empty", text: "No #{term(:work, count: 2).downcase} yet. It’s added on #{term(:engagement, count: 2).downcase} and #{term(:client, count: 2).downcase}.",
-        action_text: "Go to #{term(:engagement, count: 2).downcase}", action_path: engagements_path(state: "open") %>
-<% end %>

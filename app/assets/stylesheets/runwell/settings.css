@@ -14,12 +14,21 @@
 .settings-header__description { color: var(--text-muted); font-size: var(--text-read); }
 
 /* The nav (settings/_nav, and a plugin's section_nav): ghost links grouped under small muted
-/* labels, the current one tinted. Sticky beside the page; a scrolling row over it when narrow.
-/* It sticks just under the panel's bar (rune's .panel-bar, 3rem, sticky at the top) and stops short
-/* of the window's foot, so all of it is in view and it scrolls on its own while the page scrolls. */
-.settings-nav {
-  position: sticky; top: calc(3rem + var(--s-2)); display: flex; flex-direction: column; gap: var(--s-1);
-  max-height: calc(100dvh - 3rem - var(--s-2) - var(--s-6)); overflow-y: auto; overscroll-behavior: contain;
+/* labels, the current one tinted; a scrolling row over the page when narrow. */
+.settings-nav { display: flex; flex-direction: column; gap: var(--s-1); }
+
+/* Wide, a settings page is two panes in a panel the window's height: the nav and the page each
+/* scroll on their own, so the nav's foot is always in reach whatever the page's length (sticky
+/* couldn't: the nav starts below the header, so a short page never scrolled it fully into view). */
+@media (min-width: 861px) {
+  body:has(.settings-layout) .app .panel { height: calc(100dvh - 2 * var(--s-2)); min-height: 0; }
+  :root[data-sidenav="collapsed"] body:has(.settings-layout) .app .panel { height: 100dvh; }
+  body:has(.settings-layout) #main { flex: 1 1 auto; min-height: 0; padding-bottom: 0; }
+  .settings-layout { flex: 1 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+  .settings-layout .settings-nav,
+  .settings-layout__page { align-self: stretch; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .settings-layout .settings-nav { padding-bottom: var(--s-6); }
+  .settings-layout__page { padding-bottom: calc(var(--s-6) * 2); }
 }
 /* A heading has room above it, but not the first (a plugin's section_nav_heading comes wrapped
 /* in a span in development, hence the second selector). */
@@ -93,6 +102,8 @@
 /* adds in development can't break it; the box clips the first one's). */
 .settings-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); overflow: hidden; }
 .settings-list--scroll { max-height: 28rem; overflow-y: auto; }
+/* Rows keep their own height in a list that scrolls (a flex column would squeeze them together). */
+.settings-list > * { flex-shrink: 0; }
 .settings-list .list-row { flex-wrap: wrap; gap: var(--s-3); padding: var(--s-3); border-radius: 0; box-shadow: 0 -1px 0 var(--line); }
 .settings-list .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading); }
 /* A title with a badge or a key beside it. */
@@ -241,3 +252,10 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 /* The users table's name cell: the avatar beside the name. */
 .users-table__name { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
+
+/* A small table on a settings page (Past updates): rune's table, scrolling past a screenful, its
+/* last column to the right; a row's detail (what went wrong) runs under it, across the table. */
+.settings-table { max-height: 28rem; overflow-y: auto; }
+.settings-table .settings-table__end { text-align: right; }
+.settings-table__detail td { padding-top: 0; }
+.settings-table__detail .settings-log { margin: 0; white-space: pre-wrap; }

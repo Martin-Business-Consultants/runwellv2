@@ -1,0 +1,108 @@
+<%# locals: (work:, state: nil, item: nil) %>
+<%# A piece of work's work by scope item. Open work by default; the filter shows done or all.
+    Each scope item's "done of total" always counts all of its work. item: one scope item's work
+    alone (an id, or "other" for work outside the scope), picked in the sidebar's scope list. %>
+<% state ||= "open" %>
+<% picked = item.is_a?(Integer) ? work.scope_items.find_by(id: item) : nil %>
+<% focus = picked || item == "other" %>
+<section class="card record-card" id="tasks">
+  <header class="card__head">
+    <h2 class="card__title"><%= term(:task, count: 2) %></h2>
+    <p class="card__hint">
+      <% if focus %>
+        Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.
+      <% else %>
+        By <%= term(:scope_item).downcase %>, soonest due first.
+      <% end %>
+    </p>
+    <div class="card__action task-section__actions">
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
+            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+      <%= render "tasks/view_switch", current: "list" %>
+    </div>
+  </header>
+
+  <% tasks = work.tasks.includes(:owner, :scope_item, :client, { assignments: :user }, :work).order(:due_on, :position) %>
+  <% tasks = tasks.where(scope_item: picked) if focus %>
+  <% all_groups = tasks.group_by(&:scope_item) %>
+  <% shown = tasks.select { |task| state == "all" || (state == "done") == (task.status == "done") } %>
+  <% groups = shown.group_by(&:scope_item) %>
+  <% items = (work.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
+
+  <div class="card__content record-card__stack">
+    <% if focus %>
+      <% done = tasks.count { |task| task.status == "done" } %>
+      <div class="list-row list-row--outline task-focus">
+        <div class="list-row__content">
+          <h3 class="list-row__title task-focus__title"><%= picked ? picked.description : "Other tasks" %></h3>
+          <span class="list-row__desc task-focus__count"><%= done %> of <%= tasks.size %> done</span>
+        </div>
+        <% if picked %>
+          <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>
+          <%= link_to picked, class: "btn btn--secondary btn--sm", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
+            <span>Open</span>
+            <%= icon_tag "arrow-right" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# One list of groups, tight together. A section whose only work is named the same shows just
+        that row, not the name twice. %>
+    <div class="task-groups">
+    <% items.each do |item| %>
+      <%# herb:key item.id %>
+      <% group = groups.fetch(item, []) %>
+      <% everything = all_groups.fetch(item, []) %>
+      <% single = everything.size == 1 && group.size == 1 && group.first.title.strip.casecmp?(item.description.strip) %>
+      <div class="task-group">
+        <% unless single || focus %>
+          <div class="task-group__header">
+            <%= link_to item.description, work_path(work, request.query_parameters.merge("tab" => "tasks", "item" => item.id)), class: "task-group__name" %>
+            <span class="task-group__count"><%= everything.count { |task| task.status == "done" } %> of <%= everything.size %></span>
+            <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+          </div>
+        <% end %>
+        <ul class="record-list">
+          <%= render partial: "tasks/task", collection: group, as: :task %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% other = groups.fetch(nil, []) %>
+    <% other_all = all_groups.fetch(nil, []) %>
+    <% if other.any? %>
+      <div class="task-group">
+        <% unless focus %>
+        <div class="task-group__header">
+          <span class="task-group__name">Other work</span>
+          <span class="task-group__count"><%= other_all.count { |task| task.status == "done" } %> of <%= other_all.size %></span>
+        </div>
+        <% end %>
+        <ul class="record-list">
+          <%= render partial: "tasks/task", collection: other, as: :task %>
+        </ul>
+      </div>
+    <% end %>
+    </div>
+
+    <% if tasks.none? %>
+      <% if focus %>
+        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> here yet. Add the first below.</p>
+      <% else %>
+        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> yet. Add the first below.</p>
+      <% end %>
+    <% elsif shown.none? %>
+      <p class="record-card__empty">
+        <%= state == "open" ? "Nothing open: all #{tasks.size} done." : "Nothing done yet." %>
+        <%= link_to "Show all", work_path(work, request.query_parameters.merge("tasks" => "all")) %>
+      </p>
+    <% end %>
+  </div>
+
+  <% unless work.closed? %>
+    <footer class="card__footer">
+      <%= render "tasks/add", work: work, scope_item: picked %>
+    </footer>
+  <% end %>
+</section>

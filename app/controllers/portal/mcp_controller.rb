@@ -9,7 +9,7 @@ class Portal::McpController < Portal::BaseController
   INSTRUCTIONS = <<~TEXT
     You act for a client of a business (or of whoever runs this Runwell), through its portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for and their company.
 
-    `portal_engagements` lists what we run for them (engagements, named by ref like WO-12, or by title); `portal_engagement` shows one: its sections, the work shared with them, and documents. `portal_work` lists all shared work; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
+    `portal_works` lists what we run for them (work, named by ref like WO-12, or by title); `portal_work` shows one: its sections, the tasks shared with them, and documents. `portal_tasks` lists all shared tasks; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
 
     Errors carry a stable `code` (usage, not_found, ambiguous, auth, refused, invalid, read_only, paused, rate_limited, failed) and a `hint`; branch on the code.
   TEXT

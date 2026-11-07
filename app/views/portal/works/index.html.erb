@@ -1,0 +1,43 @@
+<% @page_title = term(:work, count: 2) %>
+
+<% content_for :header do %>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
+  <p class="portal-page-header__description">Everything we run for you, and where each one stands.</p>
+<% end %>
+
+<% if @works.any? %>
+  <section class="card card--flush portal-card">
+    <div class="table-wrap">
+      <table class="table portal-table">
+        <thead>
+          <tr>
+            <th class="portal-table__ref">Ref</th>
+            <th>Title</th>
+            <th class="portal-table__secondary">Type</th>
+            <th class="portal-table__status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @works.each do |work| %>
+            <%# herb:key work.id %>
+            <tr>
+              <td class="portal-table__ref nowrap"><%= work.ref %></td>
+              <td><%= link_to work.title, portal_work_path(work), class: "row-link" %></td>
+              <td class="portal-table__secondary muted"><%= work.label_name %></td>
+              <td class="portal-table__status"><%= status_tag work.state_label, highlight: work.active? %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% else %>
+  <%= render "layouts/shared/empty", text: "Nothing here yet." %>
+<% end %>
+
+<% plugins = plugin_slots(:portal_home, client: current_contact.client) %>
+<% if plugins.present? %>
+  <section class="card portal-card portal-slot">
+    <%= plugins %>
+  </section>
+<% end %>

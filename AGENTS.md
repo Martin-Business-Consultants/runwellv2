@@ -48,7 +48,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | `bin/rails test` | Minitest with fixtures |
 | `bin/rubocop` | Lint (omakase) |
 | `bundle exec herb lint app/views` | Lint templates (Herb) |
-| `bin/rails import:unfold_general` | Move work off the "General" projects a v1 import made onto their clients (a dry run; `[apply]` does it) |
+| `bin/rails import:unfold_general` | Move tasks off the "General" projects a v1 import made onto their clients (a dry run; `[apply]` does it) |
 | `bin/rails search:reindex` | Rebuild the search index from every searchable record |
 | `bin/rails agent:coverage` | Every staff action with its agent tool, or why it has none |
 | `bin/rails agent:scenarios` | A manager's, an employee's and a client's requests played through the tools (rolled back) |
@@ -56,56 +56,62 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 
 ## The five things the core answers
 
+Two nouns carry the core, the same in the schema, the code, routes, tools, events and the UI:
+**Work** (`Work`, `works`, `/work/P-3`: a project, work order or service run for a client; it was
+"engagement" until 6.0) and **Task** (`Task`, `tasks`, `/tasks/42`: something to do, on a piece of
+work or a client; it was "todo", and on screen "work", until 6.0). Settings > Names can still call
+them something else on screen (`term(:work)`, `term(:task)`).
+
 1. **Who we work for, and who can say yes** — `Client`, `Contact` (`portal_access`,
    `can_approve`)
-2. **What we run for them** — `Engagement` (ref like WO-12, P-3, S-4; label project /
+2. **What we run for them** — `Work` (ref like WO-12, P-3, S-4; label project /
    work_order / service; shape fixed / recurring), active from the start until closed
-   (`Engagement#state`: active or closed). Its sections are `ScopeItem`s (the term `scope_item`,
-   "Sections" by default; `engagement.scope_items`, positioned), each grouping work and showing
+   (`Work#state`: active or closed). Its sections are `ScopeItem`s (the term `scope_item`,
+   "Sections" by default; `work.scope_items`, positioned), each grouping tasks and showing
    how it's going (`delivery_state`); no price or estimate. A client marked `internal` is the
-   business itself: its engagements are internal projects (`Engagement#internal?`). Nothing is
+   business itself: its work is its own internal projects (`Work#internal?`). Nothing is
    "billable": everything is a project, work order or service. Agreements (a document the client
    signs) are a plugin's (`runwell-agreements`), not the core's
-3. **What is happening** — `Todo`, at `/work` (old `/todos` links redirect; helpers stay `todo_*`) (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
-   done; due; table or kanban, opening on your own work, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A todo
-   sits on an engagement (its client follows) or straight on a client (`todos.client_id`;
-   `engagement_id` optional), and nil client only for an email from an unmatched sender. A promise
-   is work with a due date: whoever it's assigned to owns it (there are no client-owned promises).
+3. **What is happening** — `Task`, at `/tasks` (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
+   done; due; table or kanban, opening on your own tasks, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A task
+   sits on a piece of work (its client follows) or straight on a client (`tasks.client_id`;
+   `work_id` optional), and nil client only for an email from an unmatched sender. A promise
+   is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).
    `Event` (append-only, every write of consequence), `Note`
-4. **What came in** — a request is work nobody has taken on or started (`Todo.requests`:
-   unassigned and planned, derived, whoever added it), at `/requests`. A todo keeps who asked
+4. **What came in** — a request is a task nobody has taken on or started (`Task.requests`:
+   unassigned and planned, derived, whoever added it), at `/requests`. A task keeps who asked
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
    Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
-   emails create them (`todo.requested`)
-5. **What needs a human** — their own work, filtered on Work (`owner: "me"`, `due:` overdue,
+   emails create them (`task.requested`)
+5. **What needs a human** — their own tasks, filtered on Tasks (`owner: "me"`, `due:` overdue,
    today or week, `status:` in review or blocked), and their notifications (mentions). The app
-   opens on Work (`root`); the core has no home dashboard (the briefing, "Needs You", went in 5.0:
+   opens on Tasks (`root`); the core has no home dashboard (the briefing, "Needs You", went in 5.0:
    one belongs in a plugin, with its own page and nav link). An agent that needs a person assigns
-   them work or mentions them in a note; there is no separate question inbox.
+   them tasks or mentions them in a note; there is no separate question inbox.
 
-An engagement ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
-`Engagement#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
-(`reopen!`, `engagement.reopened`) puts it back.
+A piece of work ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
+`Work#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
+(`reopen!`, `work.reopened`) puts it back.
 
-Commitments and the `Request` model were folded into work in 3.0, and `Question` removed. Their
+Commitments and the `Request` model were folded into tasks in 3.0, and `Question` removed. Their
 tables (`commitments`, `requests`, `questions`) are left, unread, for a later release to drop; the 3.0 migrations moved their rows and
-history onto todos (or, for a client's promise, its engagement or client).
+history onto tasks (or, for a client's promise, its work or client).
 
 Agreements left the core in 3.0 for the Agreements plugin. Their tables (`agreement_versions`,
 `approvals`, `approval_links`, and `scope_items.agreement_version_id`, `price_cents`,
 `internal_estimate`, `settings.client_agent_approvals`) are left, unread, for the plugin to import
-from and a later release to drop; the 3.0 migration put each scope item on its engagement and
-re-pointed versions' and decisions' events, notes and documents at their engagement.
+from and a later release to drop; the 3.0 migration put each scope item on its work and
+re-pointed versions' and decisions' events, notes and documents at their work.
 
 Rules the code enforces: events are immutable (the one exception: an owner erasing a closed
-engagement for good, `Engagement#erase!`, typing its ref; the client keeps an `engagement.erased`
+work for good, `Work#erase!`, typing its ref; the client keeps an `work.erased`
 event); every event has a source.
 
 ## Conventions
 
 - Rich models, skinny controllers, no service objects. Domain verbs are model
   methods (`close!`, `reopen!`, `move!`, `assign!`)
-- State is derived, never typed in (`Engagement#state`, `ScopeItem#delivery_state`)
+- State is derived, never typed in (`Work#state`, `ScopeItem#delivery_state`)
 - Views are ERB templates rendering models directly; no serializers
 - The core keeps no money, but plugins do, the same way: integer cents everywhere: columns, params, agent tools (`price_cents: "integer"`)
   and JSON (`*_cents` beside the formatted dollars). Dollars exist only on screen: a form
@@ -171,8 +177,8 @@ client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-re
 `<%# herb:slots client %>` templates. A branch holding Ruby output (a path, a form, a CSRF token)
 makes every toggle re-run the whole controller action and page, so a form opened in place is
 always rendered and only hidden: `<div hidden="<%= !open %>">` around it,
-`hidden="<%= open %>"` on its trigger, and `aria-pressed="<%= tab == "todo" %>"` for a pressed
-choice, never a class picked by `if` (`layouts/shared/_confirm`, `engagements/_close`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
+`hidden="<%= open %>"` on its trigger, and `aria-pressed="<%= tab == "task" %>"` for a pressed
+choice, never a class picked by `if` (`layouts/shared/_confirm`, `works/_close`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
 wrapper carries `data-controller="state-focus" data-state-focus-state-value="open"`, which focuses
 it when the state changes (the guide's `useState` pattern). Esc closes it, even from a field: its
 Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
@@ -181,9 +187,9 @@ focuses its `autofocus` field.
 Stay on the page you're working from; bring the rest to it. Every state still has a real URL, so
 Back, refresh and links work, and there's no client-side router:
 
-- **The side panel**: a task opens beside the page (`todos/_panel` in `layouts/shared/_side_panel`,
+- **The side panel**: a task opens beside the page (`tasks/_panel` in `layouts/shared/_side_panel`,
   the `side-panel` controller on `<body>`), its state the page's own URL plus `?task=42`. A link
-  that opens a task keeps `todo_path` as its href and adds `data: side_panel_data(todo)` (Cmd-click
+  that opens a task keeps `task_path` as its href and adds `data: side_panel_data(task)` (Cmd-click
   still opens the task's page). The layout renders the panel on a full load; a request for the
   `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
   action). Esc or ✕ closes it (Back if it was opened here), and it follows `j` / `k`
@@ -197,12 +203,16 @@ Back, refresh and links work, and there's no client-side router:
   removing `dom_id(record, :row)` (every row partial's `<tr>` id), and `refuse_in_place` says why
   where you are
 - **Live**: models that people watch include `LiveRefreshes` and name what a change touches
-  (`live_streams`: the record, what it sits on, `:work` / `:engagements` / `:clients`); pages
+  (`live_streams`: the record, what it sits on, `:tasks` / `:works` / `:clients`); pages
   subscribe with `turbo_stream_from`, and Turbo morphs them when someone else changes something
   (the tab that made the change ignores its own). Imports stay quiet. Notifications refresh the
   person's page (`turbo_stream_from Current.user, :notifications` in the layout)
 - **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
   shows after 200ms
+- **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
+  the `flash` frame), floating in the bottom right above the bell, never pushing the page; a notice
+  goes by itself, an alert stays until closed. Runwell sets only `--toast-bottom` / `--toast-z`
+  (`runwell/components.css`)
 
 Page changes use the browser's own view transitions, no JavaScript: Turbo renders its visits
 through them (`<meta name="view-transition" content="same-origin">` in `layouts/shared/_head`) and
@@ -241,16 +251,16 @@ Boards are Fizzy's board wholesale, not a new take on it: the same
 `card-columns` markup and data attributes, `column_tag` / `column_frame_tag`
 (`ColumnsHelper`, verbatim), the stream / doing columns / closed anatomy, an
 expander per column, maximize pages, cards in column frames (each column's first page rendered
-with the board, `todo_board_page` and `todos/board/_cards`, the rest loading from the column's
+with the board, `task_board_page` and `tasks/board/_cards`, the rest loading from the column's
 address as it scrolls), card
 previews in the index cards' markup (`app-card app-card--compact`), and drops posting to one endpoint per
 destination (`Columns::…::Drops::{Streams,Columns,Closures}Controller`) that
-answer with a morphing `turbo_stream.replace` of the target column. The Work
-board (`todos/board/*`, `todos/columns/show`, `columns/todos/drops/*`) is the
-reference. Two departures: column colors come from classes (`runwell/work.css`), not inline
-styles; and cards keep a manual order (`Todo#board_position`, positioned per status). A column
+answer with a morphing `turbo_stream.replace` of the target column. The Tasks
+board (`tasks/board/*`, `tasks/columns/show`, `columns/tasks/drops/*`) is the
+reference. Two departures: column colors come from classes (`runwell/tasks.css`), not inline
+styles; and cards keep a manual order (`Task#board_position`, positioned per status). A column
 marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
-`before` (the card it now sits before) for `Todo#move!`.
+`before` (the card it now sits before) for `Task#move!`.
 
 Staff pages are rune_ui's shell (`app_shell` in the application layout): a left nav
 (`layouts/shared/_sidenav`, `runwell.css`) beside the page in an inset panel. The nav has the install at the top, home and the core sections with icons under Workspace
@@ -262,14 +272,14 @@ too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from
 and `@page_title` (`breadcrumb_items`, through rune_ui's `crumbs`). Below 860px the nav slides in
 over the page. Every index shows its records as a table (there's no
 cards view since 5.0), and has no heading: the nav marks the current section. The controller sets
-`@view = index_view` ("table"; Work adds `extra: %w[board]`, read from `?view=`). The page starts with
+`@view = index_view` ("table"; Tasks adds `extra: %w[board]`, read from `?view=`). The page starts with
 `render "layouts/shared/index_toolbar", view: @view, new_text:, new_path:`: the page's
 quick_filter pills on the left (wrap them in `<% content_for :index_filters do %>` before
 rendering the toolbar), and on the right the New button, with the Table / Board icon toggle
-where an index has a second view (Work), spanning the page's column. Then the data table
+where an index has a second view (Tasks), spanning the page's column. Then the data table
 (`render "ui/data_table"`, below), whose
 last cell per row is `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
-action the record doesn't allow: engagements delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
+action the record doesn't allow: work delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
 column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
 index toolbar with `content_for :index_bulk`) takes the toolbar's row while rows are picked, in the
 filters' own pills and menus (`bulk_menu`, `bulk_button`, `bulk_date`, and `delete:` `bulk_delete`
@@ -290,53 +300,53 @@ A record's page, and its new and edit pages, are a `record-page` (`runwell/recor
 header row across the top (`record-page__header`: `record-page__heading` with
 `<h1 class="page-title"><%= @page_title %></h1>` and a muted `record-page__description`, then
 the record's actions in a `button-row` as secondary buttons, Edit and Copy for AI, beside the
-sidebar toggle `]`), then the working column (`record-page__main`, 2/3: the description, work,
+sidebar toggle `]`), then the working column (`record-page__main`, 2/3: the description, tasks,
 the form) beside the sidebar (`record-page__aside`, 1/3: Details as a `dl.details`, the smaller
 sections such as contacts and plugin panels, notes or history, delete or archive). Both columns
 are stacks of rune `card`s. New pages use the sidebar for what comes next (`record-steps`) and
 related records. Never a lone centered card for a form. A record with several sections (clients,
-engagements, work, scope items) puts them in tabs in the working column: `record_tab(key, label,
+work, tasks, scope items) puts them in tabs in the working column: `record_tab(key, label,
 count:)` plus `plugin_record_tabs(:client_panel)` (one tab per plugin panel),
 `current_record_tab(tabs, default)`, and `render "layouts/shared/record_tabs", variant: "pill"`
 inside `<turbo-frame id="record_tab" target="_top">`. A tab is a `?tab=` link that only reloads
 the frame; the first heading in a tab is hidden since the tab names it. The sidebar keeps
 Details, the few things always needed (contacts), History, and destructive actions. An
-engagement is the exception: its facts are one line under the title (`record-meta`, with
-plugins' `:engagement_meta`) and its next step a muted line under that; its description opens from
-an info button beside the title (a dialog, no Overview card); its Work tab shows the work by
-section or, with the List / Board switch (`?work_view=board`, `todos/_view_switch`), as the Work
-board for everyone's work on it (`@board_filters`, which `todo_board_filters` hands the columns and
+work is the exception: its facts are one line under the title (`record-meta`, with
+plugins' `:work_meta`) and its next step a muted line under that; its description opens from
+an info button beside the title (a dialog, no Overview card); its Tasks tab shows the tasks by
+section or, with the List / Board switch (`?task_view=board`, `tasks/_view_switch`), as the Tasks
+board for everyone's tasks on it (`@board_filters`, which `task_board_filters` hands the columns and
 drops); History is a tab, and the sidebar is its sections
-(`engagements/_scope`, where they're added): all work, each section with done of total, and
-other work, each a `?item=` link that shows just that work in the Work tab, where its todos are
+(`works/_scope`, where they're added): all tasks, each section with done of total, and
+other tasks, each a `?item=` link that shows just that work in the Tasks tab, where its tasks are
 added. A section's add action is one small secondary button with the add icon after its list
 (`record-add`), a `<details>` when it opens a form; the one primary button on a page is its next
 step. Up a level is `parent_page label, path`, called in the template: a `<link rel="up">` that
 Esc follows and the panel bar's breadcrumb shows, never a Back button.
 
 Guide people through the hierarchy rather than documenting it. A record page says what happens
-next (`engagement_next_step` under the engagement's state). An empty list says where its records
-come from and links there (`todos/_blank`), since Work is added on the
-engagement or client (or from anywhere with the quick action, `g w n`), never from its index. Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
+next (`work_next_step` under the work's state). An empty list says where its records
+come from and links there (`tasks/_blank`), since Tasks is added on the
+work or client (or from anywhere with the quick action, `g t n`, which New task on the Tasks index opens too). Help (`settings/helps`: the overview, Connecting an MCP and Using with AI, nested under Help
 in the Settings sidebar) uses `term()` for every name, and the `?` sheet links to it.
 
 People show as their avatar, never their name: `person_tag user` (name as the tooltip and
 for screen readers; `fallback: "Unassigned"` for nobody). Only a list of the people
-themselves (Users) prints names beside the avatars. Who's on a todo is Fizzy's
-assignments (`Assignment`, `Todo::Assignable`): `owner` is the lead and everyone on it, the lead
-too, has an assignment (`todo.owners`, lead first; `Todo.assigned_to(user)` for "mine"). It changes
-in place with `render "todos/owner_picker", todo:`, a menu where each click puts a person on or
-takes them off (`Todos::AssignmentsController`); the first on leads, and taking off the lead hands
+themselves (Users) prints names beside the avatars. Who's on a task is Fizzy's
+assignments (`Assignment`, `Task::Assignable`): `owner` is the lead and everyone on it, the lead
+too, has an assignment (`task.owners`, lead first; `Task.assigned_to(user)` for "mine"). It changes
+in place with `render "tasks/owner_picker", task:`, a menu where each click puts a person on or
+takes them off (`Tasks::AssignmentsController`); the first on leads, and taking off the lead hands
 it on. Setting `owner_id` directly replaces the lead and keeps the rest; `other_owner_ids` sets the
-rest. Show them with `todo_owners_tag todo` (preload `assignments: :user`). A todo's status
-changes in place with `todos/status_dot`.
+rest. Show them with `task_owners_tag task` (preload `assignments: :user`). A task's status
+changes in place with `tasks/status_dot`.
 
 Filters on an index page are Fizzy's quick filters above the list, not
 buttons inside the card: a row of
 `render "layouts/shared/quick_filter", title:, param:, options:, current:` in
 `content_for :index_filters`, which the index toolbar shows. Each choice is a link that
 swaps one query param, so filters are bookmarkable and Back works; the
-controller reads the params (`engagements#index`). Don't drive a list with
+controller reads the params (`works#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
 Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter
@@ -416,17 +426,17 @@ ReActionView rules:
   (`<%= note.presence || tag.span("None") %>`): it rendered the fallback even with a note.
   Write `<% if note.present? %> … <% else %> … <% end %>`
 - Don't mix a Ruby condition and a state read in one `if`/`elsif` chain
-  (`if engagement.closed? … elsif starting`): the state change is
+  (`if work.closed? … elsif starting`): the state change is
   never sent. Nest the state `if` inside the Ruby one
 - State in attributes is reactive: `hidden="<%= !open %>"` (dropped while false),
-  `aria-pressed="<%= tab == "todo" %>"` and `<% if open %>hidden<% end %>` update in the browser;
-  `class="<%= "x" if tab == "todo" %>"` updates too, but only by asking the server. Never render a
+  `aria-pressed="<%= tab == "task" %>"` and `<% if open %>hidden<% end %>` update in the browser;
+  `class="<%= "x" if tab == "task" %>"` updates too, but only by asking the server. Never render a
   partial with state more than once on a page: ReActionView 0.6 sends the server only the first
   copy's state (`steering()` keys by file), so the others' toggles do nothing
   (`settings/plugins/_plugin` shows its switch by
   CSS `:has(:checked)` instead). For a per-row or inline "add / resolve" form, use a native
   `<details>` with a button-styled `<summary>`, which the morph after submit
-  closes again (`todos/_add`)
+  closes again (`tasks/_add`)
 - Several forms for the same model on one page take
   `form_with …, namespace: dom_id(record)` so field ids stay unique
 - Default optional locals to `nil` (`<%# locals: (icon: nil) %>`) and apply
@@ -484,11 +494,11 @@ one place they are documented for people: add a new key there.
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (always asks first): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
-| `g` + `c e w b u n s` | Clients, engagements, work, board, users, notifications, settings; `g 1`… plugin pages |
-| `n` `v` `/` | New record, next view (Work: table / board), focus the page filter |
+| `g` + `c w t b u n s` | Clients, work, tasks, board, users, notifications, settings; `g 1`… plugin pages |
+| `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |
-| `g w n` | Add work (the quick action) to an engagement or client picked in it, the one on screen to start; `g w` waits a moment for the `n`, vim style |
+| `g t n` | Add a task (the quick action) to a piece of work or client picked in it, the one on screen to start; `g t` waits a moment for the `n`, vim style |
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
@@ -530,11 +540,11 @@ Files live in Active Storage (`storage/` locally). Two places:
   dropped, pasted or uploaded files through Lexxy's direct uploads, and `rich_text`
   renders them with the `active_storage/blobs/_blob` partials (styled by Lexxy's content CSS). Client-facing editors
   stay text only (`attachments="false"`)
-- A Documents section (`render "documents/section", subject:`) on clients, engagements,
-  scope items, todos and requests: a `Document` per file (`Documentable`), with who
+- A Documents section (`render "documents/section", subject:`) on clients, work,
+  scope items, tasks and requests: a `Document` per file (`Documentable`), with who
   uploaded it and a `client_visible` switch. Files are added from the quick action tray (Document), whose
   modal holds the dashed drop target (`document_drop_target`, `.upload-drop`). The portal lists only
-  client-visible files (`Engagement#client_documents`)
+  client-visible files (`Work#client_documents`)
 
 ## Plugins
 
@@ -586,7 +596,7 @@ described in `docs/plugins.md`.
 The tray at the bottom right (`A`, `quick_actions/_tray`) is Fizzy's tray. At the top of the
 fan is a record picker (Fizzy's filter + combobox) set to the record on screen
 (`current_record`) and able to pick any other; below it, one entry per action: Note,
-Document and Work in the core (`g w n` opens Work's straight away, on an engagement or a client), plus any a plugin registers
+Document and Task in the core (`g t n` opens the task form straight away, on a piece of work or a client), plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal
 (`quick_actions#new`, loaded into the `quick_action` frame) with the same picker. Documents
@@ -605,8 +615,8 @@ An inbound service forwards the address in Settings > Email
 the install's own `Setting.inbound_ingress` / `inbound_password` (Settings > Email, or a plugin such as
 Cloudflare via `Setting#receive_mail_through!`; `config/initializers/action_mailbox.rb` reads them
 per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: each message
-becomes a request, work nobody has taken on (`source` "email"): the subject its title, the message
-its description (`Todo::EmailBody` cuts quoted mail and signatures, preferring the text part),
+becomes a request, tasks nobody has taken on (`source` "email"): the subject its title, the message
+its description (`Task::EmailBody` cuts quoted mail and signatures, preferring the text part),
 attachments its documents (internal until shared), and the sender matched to a contact (and so a
 client), or left with no client until someone picks one. A known contact gets
 `RequestMailer#received`, a short acknowledgement with no reply address of its own: anything new
@@ -615,10 +625,10 @@ they send is a request of its own. Automatic replies and our own mail are droppe
 ## Clients and the portal
 
 Clients are `Contact`s, never `User`s: no password, no staff role. Two switches per contact:
-`portal_access` (sign in by emailed link, see the client's shared work and documents, send
+`portal_access` (sign in by emailed link, see the client's shared tasks and documents, send
 requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
-a client sees is decided per record (`client_visible` on work and documents); there are no
+a client sees is decided per record (`client_visible` on tasks and documents); there are no
 client roles.
 
 The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
@@ -629,14 +639,14 @@ model rules) is in `docs/plugins.md`. Read it before changing a contract they us
 ## People and permissions
 
 Three fixed roles (`User::Role`): owner (everything, including settings, plugins and
-people), manager (closes engagements, deletes) and member
-(does the work). Each permission in `User::Role::PERMISSIONS` names the roles that have it;
+people), manager (closes work, deletes) and member
+(does the tasks). Each permission in `User::Role::PERMISSIONS` names the roles that have it;
 plugins add theirs with `Runwell::Plugins.permission key, :name, name:, roles:`. No custom
 roles or permission builder. Check with `user.can?(:delete_records)`, and in views `can?`.
 
 - Every controller declares its rule, or its actions are refused before they run
   (`Authorization`): `allow_staff` for anyone signed in, plus
-  `require_permission :close_engagements, only: :close`. An action with no rule raises
+  `require_permission :close_works, only: :close`. An action with no rule raises
   `Authorization::MissingRule`. Public pages (`allow_unauthenticated_access`) skip it
 - Rules about a record live on the model and are checked in the action
   (`Document#deletable_by?`: its uploader, or anyone who may delete records)
@@ -682,7 +692,7 @@ do, through the same controllers: there is no separate API.
   `json.merge! agent_ref(record)` (type, id, `record` "Type:id", display name, `url`) and give
   every view a `summary`. Rich text goes out through `agent_text`
 - **In-place forms answer with a stream**: a form inside a section on the record's own page (the
-  notes composer, a Work section's Add a todo) sends `inline`, and its action renders a turbo
+  notes composer, a Tasks section's Add a task) sends `inline`, and its action renders a turbo
   stream replacing that section and the flash rather than redirecting back to a whole new page;
   anything else (agents, the quick action tray, a plain HTML post) still gets the redirect
 - **Writes need nothing extra**: `AgentResponses` turns the redirect + notice into
@@ -700,10 +710,10 @@ do, through the same controllers: there is no separate API.
   person's permissions exactly (`can?` delegates), can't sign in, and is kept out of pickers and
   mentions (`User.people`). Agent writes carry `Current.source = "agent"` and the app's name as
   the event's actor label. Model verbs default `source:` to `Current.source`, never `"app"`
-- The AI button on work (`todos/_ai_brief`, key `c`) copies `Todo::Brief` from
-  `/todos/:id/brief` (also the `brief_work` tool): the work, agreed scope, notes, other dated work and
+- The AI button on tasks (`tasks/_ai_brief`, key `c`) copies `Task::Brief` from
+  `/tasks/:id/brief` (also the `brief_task` tool): the tasks, agreed scope, notes, other dated tasks and
   the `runwell` commands to report back. Plugins add sections with
-  `Runwell::Plugins.agent_brief key, ->(todo, base_url) { markdown }` (Code adds repos and a branch)
+  `Runwell::Plugins.agent_brief key, ->(task, base_url) { markdown }` (Code adds repos and a branch)
 - Auth: `AccessToken` (personal from Settings > Connected apps, or OAuth), digests only.
   OAuth 2.1: discovery at `/.well-known/oauth-*`, dynamic registration, PKCE (S256), consent at
   `/oauth/authorization`, hourly tokens with refresh, revocation. `/mcp` takes bearer tokens
@@ -733,7 +743,7 @@ do, through the same controllers: there is no separate API.
   `replayed: true`; and the call is logged (`AgentCall`, 90 days), shown per connection in
   Connected apps, where a person pauses one and an owner sees everyone's
 - **`changes`** is how a scheduled agent catches up: events after a cursor (or since a time),
-  oldest first, optionally for one client or engagement. MCP prompts (`Agent::Prompts`) and
+  oldest first, optionally for one client or work. MCP prompts (`Agent::Prompts`) and
   resources (`Agent::Resources`, runwell:// URIs read through the show tools) sit beside the tools
 - **Clients' agents**: an `AccessToken` (or `OauthGrant`) belongs to a user or a contact. Staff
   surfaces take staff tokens only (`authenticate_staff`); the portal takes a contact's
@@ -751,7 +761,7 @@ The third way to use AI with Runwell, beside a local harness over MCP (coding be
 chat app over MCP, is an assistant inside the app: the AI plugin
 (`Martin-Business-Consultants/runwell-ai`, key `ai`; its AGENTS.md is the guide). Until 2.18 it was
 in the core. The core keeps only what the plugin reaches it through: the slots it fills (the nav's
-Ask button, home, the client, work and section sidebars, each note row, the
+Ask button, home, the client, tasks and section sidebars, each note row, the
 portal's header), `Runwell::Plugins.shortcut` for its `i` key,
 `Runwell::Plugins.ai_prompt` (other plugins' questions for it), and `Agent::Dispatch.run_as`, which
 runs a tool as the person with a one-call `assistant` token. `ruby_llm` stays in the Gemfile, since
@@ -761,7 +771,7 @@ left from the core's AI, read by the plugin's first migrations, and dropped in a
 
 ## Custom fields
 
-What an install records about clients, engagements and work beyond the core (a plumber's
+What an install records about clients, work and tasks beyond the core (a plumber's
 property address, a firm's matter number, a studio's client website) is a custom field, not a
 column: the core only holds what every business needs. Defined in Settings > Fields
 (`CustomField`: model, label, a key fixed at creation, kind, choices, `listed` as a table
@@ -789,7 +799,7 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 ## Webhooks
 
 Settings > Webhooks (owners; agents may only `list_webhooks`) sends events to outside addresses:
-`WebhookEndpoint` (url, encrypted secret, optional kinds like `todo.*`, `include_security` for
+`WebhookEndpoint` (url, encrypted secret, optional kinds like `task.*`, `include_security` for
 User / Setting events), dispatched from `EventPublishJob`, one `WebhookDelivery` per event,
 delivered by `WebhookDeliveryJob` with retries (about a day). The body is JSON (`id`, `kind`,
 `occurred_at`, `actor`, `subject` with name and url, `payload`), signed as
@@ -832,11 +842,11 @@ release, once no code reads them. No migration may depend on a person running a 
 ## Settings and names
 
 Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
-client, engagement, scope item and work, and each engagement type's name, plural, ref
+client, work, scope item and tasks, and each work type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
-`Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,
-`term(:engagement, count: 2)`, `label_term(label)` and `label_options(current)` — never
-hard-code "Engagement", "Project", "Client" or "Work". Keys (`project`, `work_order`,
+`Setting#terminology` (one row, single tenant). In views use `term(:work)`,
+`term(:work, count: 2)`, `label_term(label)` and `label_options(current)` — never
+hard-code "Work", "Project", "Client" or "Tasks". Keys (`project`, `work_order`,
 `service`) never change. A new prefix applies to new refs only.
 
 ## Appearance

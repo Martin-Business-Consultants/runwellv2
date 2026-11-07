@@ -3,7 +3,7 @@ module SearchesHelper
   def search_result_path(record)
     case record
     when Contact then client_path(record.client)
-    when Todo then todo_path(record)
+    when Task then task_path(record)
     when ScopeItem then scope_item_path(record)
     when Note then search_result_path(record.subject)
     when Document then search_result_path(record.documentable)
@@ -24,14 +24,23 @@ module SearchesHelper
   def search_result_kind(record)
     case record
     when Client then term(:client, count: 2)
-    when Engagement then term(:engagement, count: 2)
-    when Todo then term(:work)
+    when Work then term(:work, count: 2)
+    when Task then term(:task)
     when ScopeItem then term(:scope_item, count: 2)
     else record.model_name.human.pluralize
     end
   end
 
-  SEARCH_ICONS = { "Client" => "everyone", "Contact" => "person", "Engagement" => "clipboard", "Todo" => "check-circle",
+  # A result's link: it closes the bar, and a task opens in the side panel (side_panel_link_to).
+  def search_result_link_to(result, **options, &block)
+    if result.is_a?(Task)
+      side_panel_link_to(result, data: { action: "bar#reset" }, **options, &block)
+    else
+      link_to(search_result_path(result), data: { turbo_frame: "_top", action: "bar#reset" }, **options, &block)
+    end
+  end
+
+  SEARCH_ICONS = { "Client" => "everyone", "Contact" => "person", "Work" => "clipboard", "Task" => "check-circle",
     "ScopeItem" => "board", "Note" => "comment", "Document" => "attachment" }.freeze
 
   def search_result_icon(record) = SEARCH_ICONS.fetch(record.class.name, "search")

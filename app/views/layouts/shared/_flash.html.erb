@@ -1,5 +1,6 @@
 <%# locals: () %>
-<%# Notices and alerts (rune_ui's flash), in a frame so a turbo stream can replace them. %>
+<%# Notices and alerts as toasts in the bottom right (rune_ui's flash, toast: true), in a frame so a
+    turbo stream can replace them. %>
 <%= turbo_frame_tag :flash do %>
-  <%= flash_messages %>
+  <%= flash_messages(toast: true) %>
 <% end %>

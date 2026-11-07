@@ -20,11 +20,11 @@ module Agent
 
     # The name columns each kind of record is called by.
     FIELDS = { "Client" => %w[name], "Contact" => %w[name email], "User" => %w[name email_address],
-               "Engagement" => %w[title], "Todo" => %w[title], "ScopeItem" => %w[description] }.freeze
+               "Work" => %w[title], "Task" => %w[title], "ScopeItem" => %w[description] }.freeze
 
     # Parameters that hold an id, and the kind of record they name.
-    PARAMS = { "client_id" => "Client", "contact_id" => "Contact", "engagement_id" => "Engagement", "owner_id" => "User",
-               "user_id" => "User", "todo_id" => "Todo", "scope_item_id" => "ScopeItem" }.freeze
+    PARAMS = { "client_id" => "Client", "contact_id" => "Contact", "work_id" => "Work", "owner_id" => "User",
+               "user_id" => "User", "task_id" => "Task", "scope_item_id" => "ScopeItem" }.freeze
 
     REF = /\A[A-Za-z]+-\d+\z/
 
@@ -32,16 +32,16 @@ module Agent
       def types = FIELDS.keys
       def id?(value) = value.is_a?(Integer) || value.to_s.match?(/\A\d+\z/)
 
-      # Records of the type that text names, best first: an engagement's ref, then names equal to
+      # Records of the type that text names, best first: a piece of work's ref, then names equal to
       # it (any case), then starting with it, then containing it, then full-text search. For a
-      # client's agent (client:), only that client's engagements and shared work, nothing else.
+      # client's agent (client:), only that client's work and shared work, nothing else.
       def candidates(type, text, limit: 8, client: nil)
         text = text.to_s.strip
         return [] if text.blank? || !FIELDS.key?(type)
 
         scope = client ? within(client, type) : base(type)
         return [] if scope.nil?
-        if type == "Engagement" && text.match?(REF)
+        if type == "Work" && text.match?(REF)
           return Array(scope.find_by(ref: text.upcase))
         end
 
@@ -69,7 +69,7 @@ module Agent
       def id_for(type, value, client: nil) = id?(value) ? value : resolve(type, value, client: client).id
 
       def describe(record)
-        client = record.is_a?(Client) ? nil : (record.try(:client) || record.try(:engagement)&.client)
+        client = record.is_a?(Client) ? nil : (record.try(:client) || record.try(:work)&.client)
         { "type" => record.class.name, "id" => record.id, "record" => "#{record.class.name}:#{record.id}", "ref" => record.try(:ref),
           "name" => label(record), "client" => client&.name }.compact
       end
@@ -77,8 +77,8 @@ module Agent
       private
         def within(client, type)
           case type
-          when "Engagement" then client.engagements
-          when "Todo" then Todo.client_visible.where(client_id: client.id)
+          when "Work" then client.works
+          when "Task" then Task.client_visible.where(client_id: client.id)
           end
         end
 
@@ -93,7 +93,7 @@ module Agent
         def label(record)
           case record
           when User then record.display_name
-          when Engagement then "#{record.ref} #{record.title}"
+          when Work then "#{record.ref} #{record.title}"
           else record.try(:name) || record.try(:title) || record.try(:subject) || record.try(:description).to_s.truncate(80)
           end
         end

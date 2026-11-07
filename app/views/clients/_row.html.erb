@@ -5,11 +5,11 @@
   <td data-column="name"><%= link_to client.name, client, class: "row-link" %></td>
   <td data-column="status"><%= render "clients/status_picker", client: client %></td>
   <td data-column="contacts"><%= contact_stack client.contacts.reject(&:archived?).sort_by(&:name) %></td>
-  <td class="data-table__number" data-column="engagements"><%= client.engagements.count { !it.closed? } %></td>
+  <td class="data-table__number" data-column="works"><%= client.works.count { !it.closed? } %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>
     <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, client.custom_value(field)) %></td>
   <% end %>
   <%= render "layouts/shared/row_actions", name: client.name, edit_path: edit_client_path(client), delete_path: client_path(client),
-        delete_message: "This removes its contacts, " + term(:work, count: 2).downcase + " and notes. A " + term(:client).downcase + " with " + term(:engagement, count: 2).downcase + " can’t be deleted." %>
+        delete_message: "This removes its contacts, " + term(:task, count: 2).downcase + " and notes. A " + term(:client).downcase + " with " + term(:work, count: 2).downcase + " can’t be deleted." %>
 </tr>

@@ -1,0 +1,35 @@
+<% @page_title = term(:work, count: 2) %>
+<%= turbo_stream_from :works %>
+<% listed = CustomField.for("Work").listed.to_a %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Show…", param: :state, current: @state,
+        options: Work.filter_options(Work.filter_counts(label: @label)) %>
+  <%= render "layouts/shared/quick_filter", title: "Type…", param: :label, current: @label,
+        options: [ [ "All types", "all" ] ] + Setting.current.enabled_labels.map { [ label_term(it, count: 2), it ] } %>
+<% end %>
+<% if @view == "table" %>
+  <% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_works_path, noun: term(:work, count: 2).downcase, message: "Only those with no work yet are deleted; the rest are skipped (close them instead).") : nil) do %>
+    <% if can?(:close_works) %>
+      <%= bulk_menu bulk_works_closure_path, method: :post, name: "outcome", label: "Close as", choices: [ [ "Completed", "completed" ], [ "Cancelled", "cancelled" ] ] %>
+    <% end %>
+  <% end %>
+  <% end %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:work).downcase, new_path: new_work_path, new_modal: true %>
+
+<% if @works.any? %>
+  <% columns = [ ui_column(:ref, "Ref", sort: :ref, width: [ @column_widths[:ref], "Ref" ], hideable: false),
+                 ui_column(:title, "Title", sort: :title, width: [ @column_widths[:title], "Title" ]),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
+                 ui_column(:type, "Type", sort: :type, width: :pill),
+                 ui_column(:state, "State", width: :status),
+                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+  <%= render "ui/data_table", id: "works", columns: columns, rows: @works, row: "works/row", as: :work,
+        row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+<% end %>
+
+<% if @works.none? %>
+  <%= render "layouts/shared/empty", text: "No #{term(:work, count: 2).downcase} match." %>
+<% end %>

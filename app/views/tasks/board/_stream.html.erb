@@ -1,0 +1,18 @@
+<%# locals: (count:, board:) %>
+<%# The planned stream: like the doing columns, its first page of cards comes with the board and
+    the rest load from Tasks::ColumnsController as it scrolls, so a board with hundreds of planned
+    tasks opens at once and without a wait. %>
+<%= column_tag id: "planned-tasks", name: "Planned", drop_url: columns_task_drops_stream_path("__id__", task_board_filters), collapsed: false, selected: "true", class: "cards--maybe", data: {
+  drag_and_strum_target: "container",
+  drag_and_drop_sortable: true,
+  collapsible_columns_target: "column maybeColumn",
+  action: "focus->collapsible-columns#focusOnColumn"
+} do %>
+  <header class="cards__header">
+    <%= render "tasks/board/expander", title: "Planned", count: count, column_id: "planned-tasks", status: "planned" %>
+    <%= render "tasks/board/maximize", column_path: tasks_column_path("planned", task_board_filters) %>
+  </header>
+  <%= column_frame_tag "planned_cards" do %>
+    <%= render "tasks/board/cards", status: "planned", page: task_board_page(board, "planned") %>
+  <% end %>
+<% end %>
