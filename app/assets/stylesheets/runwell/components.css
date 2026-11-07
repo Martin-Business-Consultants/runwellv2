@@ -162,10 +162,10 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .bulk-bar__count:hover { background: var(--accent-soft); }
 .bulk-bar__end { margin-left: auto; }
 
-/* ======================================================================= 5 Index cards (the Cards view) */
+/* ======================================================================= 5 Cards */
 
-/* layouts/shared/_card: a ref and context line, the title, and a footer of badges with the
-/* people on it. The whole card is its link. */
+/* The board's cards (app-card, todos/display/_preview) and a maximized column's grid of them
+/* (todos/columns/show). Indexes are tables only since 5.0. */
 .cards--grid { width: 100%; }
 .cards--grid .cards__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); align-items: stretch; gap: var(--s-4); }
 .cards--grid :is(.pagination-link, .empty) { grid-column: 1 / -1; }

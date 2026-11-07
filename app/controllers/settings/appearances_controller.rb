@@ -13,12 +13,23 @@ class Settings::AppearancesController < Settings::BaseController
       setting.record_event!("settings.custom_css", payload: { digest: (setting.custom_css_digest if setting.custom_css) }) if setting.saved_change_to_custom_css?
       setting.logo.purge if params[:remove] == "logo"
       setting.favicon.purge if params[:remove] == "favicon"
-      redirect_to settings_appearance_path, notice: "Appearance saved."
+      redirect_to settings_appearance_path(tab: appearance_tab), notice: "Appearance saved."
     else
-      # Keep what was typed (a stylesheet it refused) on the page, with why.
+      # Keep what was typed (a stylesheet it refused) on the page, with why, on its tab.
       @setting = setting
+      params[:tab] = appearance_tab
       ActiveRecord::Associations::Preloader.new(records: [ @setting ], associations: %i[logo_attachment favicon_attachment]).call
       render :show, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  # The tab the change came from, so the page comes back on it.
+  def appearance_tab
+    setting = params.fetch(:setting, {})
+    if setting.key?(:custom_css) || setting.key?(:custom_css_everywhere) then "css"
+    elsif setting.key?(:logo) || setting.key?(:favicon) || params[:remove].present? then "brand"
     end
   end
 end

@@ -1,6 +1,7 @@
 class SignupsController < ApplicationController
   allow_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_signup_path, alert: "Try again later." }
+  bot_checked fallback: -> { new_signup_path }
   before_action :redirect_authenticated_user
   before_action :require_no_users
 

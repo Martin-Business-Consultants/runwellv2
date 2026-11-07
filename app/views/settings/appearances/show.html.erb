@@ -1,7 +1,18 @@
 <% @page_title = "Appearance" %>
+<% tabs = [
+     record_tab("style", "Style"),
+     record_tab("brand", "Logo and favicon"),
+     record_tab("css", "Custom CSS")
+   ] %>
+<% tab = current_record_tab(tabs, "style") %>
 <%= render "settings/header", current: :appearance %>
 
 <div class="settings-page">
+  <turbo-frame id="record_tab" class="settings-tabs" target="_top">
+    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+    <div class="settings-tabs__panel">
+      <% case tab %>
+      <% when "style" %>
   <section class="settings-section">
     <header class="settings-section__head">
       <h2>Appearance</h2>
@@ -41,34 +52,7 @@
     <% end %>
   </section>
 
-  <section class="settings-section" id="custom-css">
-    <header class="settings-section__head">
-      <h2>Custom CSS</h2>
-      <p class="settings-section__description">
-        Make Runwell your own by giving its design tokens new values: colors, fonts, corners, spacing.
-        Copy the brief, paste it into any AI with your logo or website, and paste its answer here. The rules are in
-        <%= link_to "the theming guide", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/theming.md", target: "_blank", rel: "noopener" %>.
-        Add <code>?theme=off</code> to any address to see a page without it.
-      </p>
-      <div class="settings-section__actions">
-        <button type="button" class="btn btn--secondary btn--sm" data-controller="copy-to-clipboard" data-copy-to-clipboard-url-value="<%= settings_theme_brief_path(format: :text) %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">
-          <%= icon_tag "ai" %> <span>Copy brief for AI</span>
-        </button>
-      </div>
-    </header>
-    <% if @setting.errors[:custom_css].any? %>
-      <p class="settings-error">Custom CSS <%= @setting.errors[:custom_css].to_sentence %>. Nothing was saved.</p>
-    <% end %>
-    <%= form_with model: @setting, url: settings_appearance_path, method: :patch, namespace: "custom_css" do |form| %>
-      <%= form.text_area :custom_css, class: "settings-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --lch-accent: 58% 0.14 40;\n  --radius-scale: 1.4;\n}", aria: { label: "Custom CSS" } %>
-      <label class="checkbox">
-        <%= form.check_box :custom_css_everywhere %>
-        <span>Use it on <%= term(:client).downcase %> pages too: the portal</span>
-      </label>
-      <div><button type="submit" class="btn btn--primary">Save CSS</button></div>
-    <% end %>
-  </section>
-
+      <% when "brand" %>
   <section class="settings-section">
     <header class="settings-section__head">
       <h2>Logo and favicon</h2>
@@ -100,4 +84,36 @@
       </div>
     <% end %>
   </section>
+      <% when "css" %>
+  <section class="settings-section" id="custom-css">
+    <header class="settings-section__head">
+      <h2>Custom CSS</h2>
+      <p class="settings-section__description">
+        Make Runwell your own by giving its design tokens new values: colors, fonts, corners, spacing.
+        Copy the brief, paste it into any AI with your logo or website, and paste its answer here. The rules are in
+        <%= link_to "the theming guide", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/theming.md", target: "_blank", rel: "noopener" %>.
+        Add <code>?theme=off</code> to any address to see a page without it.
+      </p>
+      <div class="settings-section__actions">
+        <button type="button" class="btn btn--secondary btn--sm" data-controller="copy-to-clipboard" data-copy-to-clipboard-url-value="<%= settings_theme_brief_path(format: :text) %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">
+          <%= icon_tag "ai" %> <span>Copy brief for AI</span>
+        </button>
+      </div>
+    </header>
+    <% if @setting.errors[:custom_css].any? %>
+      <p class="settings-error">Custom CSS <%= @setting.errors[:custom_css].to_sentence %>. Nothing was saved.</p>
+    <% end %>
+    <%= form_with model: @setting, url: settings_appearance_path, method: :patch, namespace: "custom_css" do |form| %>
+      <%= form.text_area :custom_css, class: "settings-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --lch-accent: 58% 0.14 40;\n  --radius-scale: 1.4;\n}", aria: { label: "Custom CSS" } %>
+      <label class="checkbox">
+        <%= form.check_box :custom_css_everywhere %>
+        <span>Use it on <%= term(:client).downcase %> pages too: the portal</span>
+      </label>
+      <div><button type="submit" class="btn btn--primary">Save CSS</button></div>
+    <% end %>
+  </section>
+
+      <% end %>
+    </div>
+  </turbo-frame>
 </div>

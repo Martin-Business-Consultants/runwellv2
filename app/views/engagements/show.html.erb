@@ -14,7 +14,26 @@
 <section class="record-page">
   <header class="record-page__header">
     <div class="record-page__heading">
-      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="record-page__title-row">
+        <h1 class="page-title"><%= @page_title %></h1>
+        <% if @engagement.description.present? %>
+          <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
+            <button type="button" class="icon-button" title="About this <%= term(:engagement).downcase %>" aria-haspopup="dialog" data-action="rune-dialog#open">
+              <%= icon_tag "info" %>
+              <span class="visually-hidden">About <%= @engagement.ref %></span>
+            </button>
+            <dialog class="dialog dialog--lg" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="engagement_about_title">
+              <div class="dialog__box">
+                <header class="dialog__header">
+                  <h2 class="dialog__title" id="engagement_about_title"><%= @page_title %></h2>
+                  <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
+                </header>
+                <div class="dialog__body record-card__prose"><%= rich_text @engagement.description %></div>
+              </div>
+            </dialog>
+          </div>
+        <% end %>
+      </div>
       <p class="record-meta record-page__description">
         <%= status_tag @engagement.state_label, highlight: @engagement.active? %>
         <%= link_to @engagement.client.name, @engagement.client %>
@@ -27,6 +46,9 @@
           <span><%= @engagement.state_label %> <%= l @engagement.closed_at.to_date, format: :long %><%= ": #{@engagement.close_reason}" if @engagement.close_reason.present? %></span>
         <% end %>
       </p>
+      <% if next_step %>
+        <p class="record-page__next"><%= next_step %></p>
+      <% end %>
     </div>
     <div class="button-row">
       <%= link_to edit_engagement_path(@engagement), class: "btn btn--secondary", data: { keys: "e" } do %>
@@ -39,27 +61,26 @@
   </header>
 
   <div class="record-page__main">
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Overview</h2>
-        <% if next_step %>
-          <p class="card__hint"><%= next_step %></p>
-        <% end %>
-      </header>
-      <% if @engagement.description.present? %>
-        <div class="card__content">
-          <div class="record-card__prose"><%= rich_text @engagement.description %></div>
-        </div>
-      <% end %>
-    </section>
-
     <turbo-frame id="record_tab" target="_top">
       <div class="record-tabs">
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
         <div class="record-tabs__panel">
           <% case tab %>
           <% when "work" %>
-            <%= render "todos/section", engagement: @engagement, state: @work_state, item: @work_item %>
+            <% if @work_view == "board" %>
+              <section class="card record-card" id="work">
+                <header class="card__head">
+                  <h2 class="card__title"><%= term(:work, count: 2) %></h2>
+                  <p class="card__hint">Everyone’s, by status. Drag a card to move it.</p>
+                  <div class="card__action"><%= render "todos/view_switch", current: "board" %></div>
+                </header>
+                <div class="card__content">
+                  <%= render "todos/board/columns", board: @board %>
+                </div>
+              </section>
+            <% else %>
+              <%= render "todos/section", engagement: @engagement, state: @work_state, item: @work_item %>
+            <% end %>
           <% when "notes" %>
             <%= render "notes/section", subject: @engagement %>
           <% when "documents" %>

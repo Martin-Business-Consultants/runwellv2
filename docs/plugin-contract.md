@@ -38,8 +38,8 @@ methods, and anything under `Agent::`, `Upgrade`, `PluginChange` or `Setting`'s 
 | --- | --- | --- |
 | `Runwell::Plugins.register key, name:, version:, description:, author:, enabled_by_default:, requires:, homepage:` | 2.0 | Stable |
 
-`requires:` is a gem requirement on the core's `VERSION`. `enabled_by_default:` should be false for
-anything published: an owner switches a plugin on.
+`requires:` is a gem requirement on the core's `VERSION`. `enabled_by_default:` is accepted and
+ignored since 5.0: every plugin starts off until an owner switches it on.
 
 ## Views
 
@@ -63,7 +63,6 @@ Slots, and the locals each partial gets:
 | `:portal_home` | The client portal's home | `client:` | 2.0 |
 | `:portal_engagement_panel` | An engagement in the portal | `engagement:` | 2.0 |
 | `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
-| `:home_top` | Home, above the briefing | none | 2.18 |
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
 | `:engagement_aside` | An engagement's sidebar, under its sections and details | `engagement:` | 3.0 |
 | `:engagement_meta` | The line under an engagement's title: a status badge or a short fact (an inline element) | `engagement:` | 3.0 |
@@ -212,11 +211,10 @@ Good practice, because people will run your plugin on installs you'll never see:
 - Nothing secret in the browser: keys and tokens stay on the server.
 - A plugin whose JavaScript needs 2.29 says `requires: ">= 2.29.0"`; on an older core it isn't loaded.
 
-## Home, permissions and the nightly run
+## Permissions and the nightly run
 
 | Call | Since | Status |
 | --- | --- | --- |
-| `Runwell::Plugins.briefing key, title, partial:, items: ->(user) { … }` | 2.0 | Stable |
 | `Runwell::Plugins.permission key, :name, name:, roles:` | 2.0 | Stable |
 | `Runwell::Plugins.nightly key, -> { … }` | 2.0 | Stable |
 
@@ -347,6 +345,12 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 | `MailerHelper`: `mail_heading`, `mail_button`, `mail_quote`, `mail_small`, `content_for :preheader / :reason` | 2.10 | Stable |
 
 ## Changes to this contract
+
+**5.0** ignores `enabled_by_default:` (every plugin starts off) and removed the core's home page, the briefing ("Needs You"), with its two extension points:
+the `:home_top` slot and `Runwell::Plugins.briefing`. The app opens on Work. A plugin that showed
+something on home gives it a page of its own with `Runwell::Plugins.nav` (a dashboard is a plugin's
+to make). Until a plugin drops them, `briefing` is a no-op that logs a warning and a `:home_top`
+registration is kept but rendered nowhere, so an older plugin still boots.
 
 **4.0** moved the core's UI from nobuild_ui and Fizzy's stylesheets to rune_ui. Removed: every
 `ui-*` class and nobuild_ui's helpers (`ui_button`, `ui_link_button`, `ui_button_classes`,

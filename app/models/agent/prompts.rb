@@ -7,10 +7,10 @@ module Agent
 
     STAFF = [
       Spec.new("plan_my_day", "Plan my day", "What needs me today, and what to do first.", [],
-        ->(_) { "Call `briefing`: my own work by when it's due, then what's waiting on me (work in review I lead, blocked work I'm on, unread mentions). Tell me, in a short list, what needs me today and what to start with. Don't change anything." }),
+        ->(_) { "Call `list_work` with owner: me and due: overdue, then due: today, then due: week, and with owner: me and status: in_review and blocked. Tell me, in a short list, what needs me today and what to start with. Don't change anything." }),
       Spec.new("standup", "Standup", "What changed across the team since yesterday, by engagement.",
         [ { name: "since", description: "How far back, like 24h or 3d (default 24h)" } ],
-        ->(args) { "Call `changes` with since: #{args[:since].presence || "24h"} (and again with after: the cursor while more is true). Summarise by engagement: what moved, what came in, what was sent or decided, who did it. Then list anything blocked or overdue from `briefing`. Keep it short enough to read aloud." }),
+        ->(args) { "Call `changes` with since: #{args[:since].presence || "24h"} (and again with after: the cursor while more is true). Summarise by engagement: what moved, what came in, what was sent or decided, who did it. Then list anything blocked (`list_work` status: blocked) or overdue (due: overdue). Keep it short enough to read aloud." }),
       Spec.new("assign_unassigned", "Assign unassigned work", "Go through work nobody is on and propose who should take it.", [],
         ->(_) { "Call `list_work` with owner: none for work nobody is on. For each, read it with `show_work` and propose who should take it (from `list_people` or who's on related work), or that it should be removed, with why. Ask me before assigning or removing anything, one at a time." }),
       Spec.new("client_update", "Weekly client update", "Draft this week's update for a client, from what happened.",

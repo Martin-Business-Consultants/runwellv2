@@ -1,6 +1,6 @@
-# The plugins Runwell's authors publish, offered in Settings > Plugins. Each is its own public
-# repository with releases; any other repository holding a Runwell plugin installs the same way,
-# by name. Nothing here is installed until someone installs it.
+# The plugins Runwell's authors publish. Not offered anywhere since 5.0 (a plugin is added only by
+# its GitHub repository, in Settings > Plugins): kept so their tables stay out of db/schema.rb
+# (`tables:`) and a plugin switched on before plugins lived on the server comes back on boot.
 - key: agreements
   repo: Martin-Business-Consultants/runwell-agreements
   name: Agreements

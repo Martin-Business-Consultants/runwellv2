@@ -1,74 +1,7 @@
-/* Home (briefings), Notifications, Search, Quick actions and the bar, on rune_ui's tokens
+/* Notifications, Search, Quick actions and the bar, on rune_ui's tokens
 /* (docs/rune-ui-migration.md). Unlayered, so these win over rune's components.
 /*
-/* 1 Home   2 The bar and search   3 Trays   4 Notifications   5 Quick actions */
-
-/* ======================================================================= 1 Home */
-
-/* A greeting with the ways in to work, four counts, then Your work (a table grouped by when it's
-/* due) beside cards of what's waiting on the person. */
-.home { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
-.home-heading { align-items: flex-end; }
-.home-heading__title { letter-spacing: -.025em; }
-
-/* Four counts across where there's room, two below. Each card is its list's link. */
-.home-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
-@media (min-width: 1200px) { .home-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
-/* A faint wash of the accent from the foot, flat in dark. */
-.home-stat { color: var(--text); text-decoration: none; background-image: linear-gradient(to top, color-mix(in oklch, var(--accent) 5%, var(--panel)), var(--panel)); transition: border-color .12s; }
-.home-stat:hover { border-color: var(--line-strong); color: var(--text); }
-html[data-theme="dark"] .home-stat { background-image: none; }
-@media (prefers-color-scheme: dark) { html:not([data-theme]) .home-stat { background-image: none; } }
-.home-stat .home-stat__value { font-size: 1.875rem; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.025em; line-height: 1.1; }
-.home-stat__icon { color: var(--text-muted); }
-.home-stat--alert :is(.home-stat__value, .home-stat__icon) { color: var(--danger); }
-.home-stat__note { color: var(--text-muted); }
-
-/* A newer release: the icon, the title over the versions, and its button across from them.
-/* Placed by class, not child combinators, since ERB tooling may wrap the icon and button. */
-.home-update { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--s-3); }
-.home-update .alert__icon { grid-column: 1; grid-row: 1 / span 2; }
-.home-update :is(.alert__title, .alert__body) { grid-column: 2; }
-.home-update .home-update__action { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
-
-.home-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--s-4); }
-@media (min-width: 1100px) { .home-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
-.home-side { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
-
-/* Your work: status, title, where, due; a tinted heading row per group. The card is the frame,
-/* so the table runs to its edges, lined up with the card's head. */
-.home-work__scroll { overflow-x: auto; }
-.home-work__table { table-layout: fixed; }
-.home-work__table :is(th, td):first-child { padding-left: var(--s-5); }
-.home-work__table :is(th, td):last-child { padding-right: var(--s-5); }
-.home-work__col--status { width: 3.5rem; }
-.home-work__col--where { width: 34%; }
-.home-work__col--due { width: 8.5rem; }
-.home-work__group th { background: var(--layer-1); color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
-.home-work__group-label { display: inline-flex; align-items: center; gap: var(--s-2); }
-.home-work__more { color: var(--text-muted); text-decoration: underline; text-underline-offset: 4px; }
-.home-work__more:hover { color: var(--text); }
-.home-work__title, .home-work__where { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.home-work__where { color: var(--text-muted); }
-.home-work__table .home-work__due { color: var(--text-muted); text-align: right; white-space: nowrap; }
-.home-work__table .home-work__due--late { color: var(--danger); }
-.home-work__empty { padding-bottom: var(--s-5); color: var(--text-muted); }
-
-/* What's waiting: a card per section, its count beside the title, a row per thing (who, what,
-/* where, when), lined up with the card's head. */
-.home-panel__title { display: flex; align-items: center; gap: var(--s-2); }
-.home-list { margin: 0; list-style: none; }
-.card--flush > .home-list { padding: var(--s-1); }
-.home-list__link { padding-inline: calc(var(--s-5) - var(--s-1)); }
-.home-list__link .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
-.home-list__meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.home-list__time { flex: 0 0 auto; align-self: flex-start; color: var(--text-muted); font-size: var(--text-meta); white-space: nowrap; }
-.home-list__time--late { color: var(--danger); }
-
-/* All caught up: rune's empty state with a check in a tile over it. */
-.home-empty h2 { color: var(--text); }
-.home-empty__icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius); background: var(--layer-2); color: var(--text); }
+/* 2 The bar and search   3 Trays   4 Notifications   5 Quick actions */
 
 /* ======================================================================= 2 The bar and search */
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -518,7 +518,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_140000) do
     t.string "smtp_security", default: "starttls", null: false
     t.boolean "prices", default: true, null: false
     t.string "text_size", default: "default", null: false
-    t.boolean "require_two_factor", default: false, null: false
+    t.boolean "require_two_factor", default: true, null: false
     t.text "custom_css"
     t.boolean "custom_css_everywhere", default: false, null: false
     t.boolean "providers_only", default: false, null: false
@@ -531,6 +531,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_140000) do
     t.integer "ai_monthly_budget_cents"
     t.boolean "ai_portal", default: false, null: false
     t.json "ai_test"
+    t.string "bot_check_provider"
+    t.string "bot_check_site_key"
+    t.string "bot_check_secret_key"
   end
 
   create_table "sign_in_providers", force: :cascade do |t|

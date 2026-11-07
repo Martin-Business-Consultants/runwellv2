@@ -266,3 +266,8 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
 .status-picker__trigger { display: inline-flex; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; font: inherit; cursor: pointer; }
 .status-picker__trigger:hover .badge { filter: brightness(.95); }
 .status-picker__display { display: contents; }
+
+/* An engagement's title with its info button (the description, in a dialog), and the next step
+/* under the meta line, where the Overview card used to be. */
+.record-page__title-row { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
+.record-page__next { color: var(--text-muted); font-size: var(--text-meta); }

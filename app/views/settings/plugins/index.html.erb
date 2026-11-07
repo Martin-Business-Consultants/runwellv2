@@ -1,6 +1,5 @@
 <% @page_title = "Plugins" %>
 <%= render "settings/header", current: :plugins %>
-<% available = Runwell::PluginCatalog.available %>
 
 <turbo-frame id="plugins" target="_top">
   <div class="settings-page">
@@ -19,7 +18,7 @@
     <section class="settings-section">
       <header class="settings-section__head">
         <h2>Installed plugins</h2>
-        <p class="settings-section__description">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. A plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
+        <p class="settings-section__description">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. Runwell comes with none, and a plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
         <div class="settings-section__actions">
           <%= button_to settings_plugins_check_path, class: "btn btn--secondary btn--sm" do %>
             <%= icon_tag "refresh" %>
@@ -48,27 +47,8 @@
     <section class="settings-section">
       <header class="settings-section__head">
         <h2>Add a plugin</h2>
-        <p class="settings-section__description">From the catalog, or any other by its GitHub repository. Runwell installs its latest release.</p>
+        <p class="settings-section__description">By its GitHub repository, as owner/repo. Runwell installs its latest release; it starts off until you switch it on above.</p>
       </header>
-      <% if available.any? %>
-        <ul class="settings-plugins">
-          <% available.each do |entry| %>
-            <%# herb:key entry.key %>
-            <li class="card">
-              <header class="card__head">
-                <h3 class="card__title"><%= entry.name %></h3>
-              </header>
-              <p class="card__content"><%= entry.description %></p>
-              <footer class="card__footer">
-                <%= button_to settings_plugins_installations_path, params: { repo: entry.key }, class: "btn btn--secondary btn--sm" do %>
-                  <%= icon_tag "add" %>
-                  <span>Install</span>
-                <% end %>
-              </footer>
-            </li>
-          <% end %>
-        </ul>
-      <% end %>
 
       <%= form_with url: settings_plugins_installations_path, class: "field" do |form| %>
         <%= form.label :repo, "GitHub repository", class: "field__label" %>

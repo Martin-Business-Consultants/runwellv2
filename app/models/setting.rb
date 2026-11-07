@@ -4,7 +4,6 @@ class Setting < ApplicationRecord
   include CustomCss, Eventful
 
   TERMS = %w[client engagement scope_item work].freeze
-  INDEX_VIEWS = %w[cards table].freeze
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
   RADII = { "sharp" => "Sharp", "fizzy" => "Soft", "round" => "Round" }.freeze
@@ -20,7 +19,6 @@ class Setting < ApplicationRecord
   has_one_attached :logo
   has_one_attached :favicon
 
-  validates :index_view, inclusion: { in: INDEX_VIEWS }
   validates :theme, inclusion: { in: THEMES.keys }
   validates :radius, inclusion: { in: RADII.keys }
   validates :scheme, inclusion: { in: SCHEMES.keys }
@@ -72,6 +70,15 @@ class Setting < ApplicationRecord
       authentication: (:plain if smtp_username.present?), enable_starttls_auto: smtp_security == "starttls", tls: smtp_security == "tls",
       open_timeout: 5, read_timeout: 10 }.compact
   end
+
+  # A check that a person, not a bot, sent the sign-in, sign-up and password reset forms
+  # (BotCheck): the provider and its keys, from Settings > Email > Bot checks. Off until all three are set.
+  BOT_CHECK_PROVIDERS = { "recaptcha" => "Google reCAPTCHA (v2, the checkbox)", "turnstile" => "Cloudflare Turnstile" }.freeze
+  encrypts :bot_check_secret_key
+  normalizes :bot_check_provider, :bot_check_site_key, :bot_check_secret_key, with: ->(value) { value.to_s.strip.presence }
+  validates :bot_check_provider, inclusion: { in: BOT_CHECK_PROVIDERS.keys }, allow_nil: true
+
+  def bot_check? = bot_check_provider.present? && bot_check_site_key.present? && bot_check_secret_key.present?
 
   # How requests' mail reaches Runwell (Action Mailbox): the service forwarding it, and the password
   # it signs in with. The server's environment wins (INBOUND_EMAIL_INGRESS, RAILS_INBOUND_EMAIL_PASSWORD);

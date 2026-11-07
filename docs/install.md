@@ -181,7 +181,7 @@ release, and removes one; each restarts Runwell, which migrates and loads it. Th
 server's shell:
 
 ```sh
-bin/rails "plugins:install[time_tracking]"                      # or owner/repo
+bin/rails "plugins:install[Martin-Business-Consultants/runwell-time-tracking]"
 bin/rails "plugins:update[time_tracking]"
 bin/rails "plugins:remove[time_tracking]"                       # its tables stay
 bin/rails plugins:list

@@ -1,15 +1,16 @@
 <% @page_title = "Email" %>
 <% tabs = [
      record_tab("sender", "Sender"),
-     record_tab("server", "Mail server"),
-     record_tab("receiving", "Receiving")
+     record_tab("smtp", "SMTP"),
+     record_tab("receiving", "Receiving"),
+     record_tab("bots", "Bot checks")
    ] %>
 <% tab = current_record_tab(tabs, "sender") %>
 <%= render "settings/header", current: :email %>
 
 <div class="settings-page">
   <turbo-frame id="record_tab" class="settings-tabs" target="_top">
-    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab %>
+    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
     <div class="settings-tabs__panel">
       <% case tab %>
       <% when "sender" %>
@@ -37,7 +38,7 @@
           <div><button type="submit" class="btn btn--primary">Save</button></div>
         <% end %>
       </section>
-      <% when "server" %>
+      <% when "smtp" %>
       <section class="settings-section">
         <header class="settings-section__head">
           <h2>How it goes out</h2>
@@ -59,9 +60,7 @@
         </p>
 
         <% unless Setting.smtp_from_environment? %>
-          <%= tag.details class: "settings-fold", open: @setting.smtp_address.blank? do %>
-            <summary class="btn btn--secondary btn--sm"><%= @setting.smtp_address.present? ? "Change the mail server" : "Add a mail server" %></summary>
-            <%= form_with model: @setting, url: settings_email_smtp_path, method: :patch, scope: :smtp, class: "settings-subform" do |form| %>
+            <%= form_with model: @setting, url: settings_email_smtp_path, method: :patch, scope: :smtp, class: "settings-form" do |form| %>
               <div class="field-row">
                 <div class="field">
                   <%= form.label :smtp_address, "Server", class: "field__label" %>
@@ -89,7 +88,6 @@
               <p class="field__hint">The password is stored encrypted. Save, then send a test email below to check it.</p>
               <div><button type="submit" class="btn btn--primary">Save</button></div>
             <% end %>
-          <% end %>
         <% end %>
 
         <%= form_with url: settings_email_test_message_path, class: "field" do |form| %>
@@ -166,6 +164,37 @@
               <p class="field__hint">The service signs in with it as <code>actionmailbox</code>. It was made for this install; it isn’t shown anywhere else.</p>
             <% end %>
           <% end %>
+        <% end %>
+      </section>
+      <% when "bots" %>
+      <section class="settings-section">
+        <header class="settings-section__head">
+          <h2>Bot checks</h2>
+          <p class="settings-section__description">
+            A check that a person, not a bot, is signing in, asking for a sign-in link (staff and <%= term(:client, count: 2).downcase %>), signing up or resetting a password.
+            Make a site for this install’s address with the provider, then paste its two keys here. Leave a key blank to switch the check off.
+          </p>
+        </header>
+        <%= form_with model: @setting, url: settings_email_bot_check_path, method: :patch, scope: :bot_check, class: "settings-form" do |form| %>
+          <div class="field">
+            <%= form.label :bot_check_provider, "Provider", class: "field__label" %>
+            <%= form.select :bot_check_provider, Setting::BOT_CHECK_PROVIDERS.invert, { include_blank: "Off", selected: @setting.bot_check_provider } %>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <%= form.label :bot_check_site_key, "Site key", class: "field__label" %>
+              <%= form.text_field :bot_check_site_key, value: @setting.bot_check_site_key, autocomplete: "off", spellcheck: false %>
+            </div>
+            <div class="field">
+              <%= form.label :bot_check_secret_key, "Secret key", class: "field__label" %>
+              <%= secret_field form, :bot_check_secret_key, placeholder: (@setting.bot_check_secret_key.present? ? "Saved: leave blank to keep it" : "") %>
+            </div>
+          </div>
+          <p class="field__hint">
+            reCAPTCHA: a v2 “I’m not a robot” site at google.com/recaptcha/admin. Turnstile: a widget in Cloudflare’s dashboard. The secret key is stored encrypted.
+            <% if @setting.bot_check? %>On now, with <%= Setting::BOT_CHECK_PROVIDERS[@setting.bot_check_provider] %>.<% else %>Off now.<% end %>
+          </p>
+          <div><button type="submit" class="btn btn--primary">Save</button></div>
         <% end %>
       </section>
       <% end %>

@@ -1,4 +1,6 @@
 <% @page_title = "Fields" %>
+<% tabs = CustomField::MODELS.map { record_tab(it.underscore, custom_field_model_name(it, count: 2), count: @fields.fetch(it, []).size) } %>
+<% tab = current_record_tab(tabs, tabs.first.key) %>
 <%= render "settings/header", current: :fields %>
 
 <div class="settings-page">
@@ -9,7 +11,10 @@
     </header>
   </section>
 
-  <% CustomField::MODELS.each do |model| %>
+  <turbo-frame id="record_tab" class="settings-tabs" target="_top">
+    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+    <div class="settings-tabs__panel">
+  <% CustomField::MODELS.select { it.underscore == tab }.each do |model| %>
     <%# herb:key model %>
     <% fields = @fields.fetch(model, []) %>
     <section class="settings-section">
@@ -112,4 +117,6 @@
       </details>
     </section>
   <% end %>
+    </div>
+  </turbo-frame>
 </div>

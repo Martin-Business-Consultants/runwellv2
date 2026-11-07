@@ -1,8 +1,0 @@
-<%# locals: (release:) %>
-<%# For owners: a newer release is out. Settings > Updates installs it. %>
-<div class="alert alert--info home-update" role="status">
-  <%= icon_tag "megaphone", class: "alert__icon" %>
-  <p class="alert__title">Runwell <%= release.version %> is out</p>
-  <p class="alert__body">This install runs <%= Runwell::VERSION %>.</p>
-  <%= link_to "See what’s new", settings_updates_path, class: button_classes(variant: :secondary, size: :sm, extra: "home-update__action") %>
-</div>

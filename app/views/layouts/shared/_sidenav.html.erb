@@ -1,11 +1,11 @@
 <%# locals: () %>
-<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, Needs You and the
+<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, the
     core sections, then what plugins add, and at the foot the page filter (/), plugins' actions,
     the shortcut sheet (?) and the signed-in person, whose menu holds their account, settings,
     the theme, help and signing out. The current section is marked (aria-current). %>
 <nav class="sidebar" id="sidenav" aria-label="Main">
   <div class="sidebar__top">
-    <%= link_to root_path, class: "sidebar__brand", title: "Needs You (g h)", data: { keys: "g h" } do %>
+    <%= link_to root_path, class: "sidebar__brand" do %>
       <span class="sidebar__brand-text">
         <span class="sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
         <span class="sidebar__brand-sub"><%= term(:client, count: 2) %> and work</span>
@@ -14,7 +14,6 @@
   </div>
 
   <%= sidebar_section "Workspace" %>
-  <%= sidenav_link_to "Needs You", root_path, icon: "home", current: request.path == root_path %>
   <%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %>
   <%= sidenav_link_to term(:engagement, count: 2), engagements_path, icon: "clipboard", keys: "g e" %>
   <%= sidenav_link_to term(:work, count: 2), todos_path, icon: "board", keys: "g w" %>

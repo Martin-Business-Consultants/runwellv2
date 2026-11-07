@@ -1,7 +1,18 @@
 <% @page_title = "Names" %>
+<% tabs = [
+     record_tab("things", "Things"),
+     record_tab("types", term(:engagement) + " types")
+   ] %>
+<% tab = current_record_tab(tabs, "things") %>
 <%= render "settings/header", current: :names %>
 
-<%= form_with url: settings_names_path, method: :patch, class: "settings-page", data: { controller: "form" } do %>
+<div class="settings-page">
+  <turbo-frame id="record_tab" class="settings-tabs" target="_top">
+    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+    <div class="settings-tabs__panel">
+      <% case tab %>
+      <% when "things" %>
+<%= form_with url: settings_names_path, method: :patch, class: "settings-form", data: { controller: "form" } do %>
   <section class="settings-section">
     <header class="settings-section__head">
       <h2>What things are called</h2>
@@ -23,6 +34,10 @@
     </div>
   </section>
 
+  <div><button type="submit" class="btn btn--primary" data-form-target="submit">Save names</button></div>
+<% end %>
+      <% when "types" %>
+<%= form_with url: settings_names_path, method: :patch, class: "settings-form", data: { controller: "form" } do %>
   <section class="settings-section">
     <header class="settings-section__head">
       <h2><%= term(:engagement) %> types</h2>
@@ -47,5 +62,9 @@
     </div>
   </section>
 
-  <div><button type="submit" class="btn btn--primary" data-form-target="submit">Save names</button></div>
+  <div><button type="submit" class="btn btn--primary" data-form-target="submit">Save types</button></div>
 <% end %>
+      <% end %>
+    </div>
+  </turbo-frame>
+</div>

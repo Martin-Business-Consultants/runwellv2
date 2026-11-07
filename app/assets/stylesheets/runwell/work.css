@@ -43,7 +43,10 @@
 
 /* The small in-place pickers on work rows (and a client's status): a trigger with its popup
 /* (components.css) under it, or pinned beside it by fixed-popup. */
-.row-picker { position: relative; display: inline-block; }
+/* A flex box centred on the line, not an inline block on the text's baseline: the baseline left a
+/* descender's gap under the owners' avatars and the status dot, so Work's rows stood a few pixels
+/* taller than every other table's. */
+.row-picker { position: relative; display: inline-flex; vertical-align: middle; }
 .row-picker .popup { min-width: 11em; max-height: min(22em, 70dvh); overflow-y: auto; }
 
 /* The status picker's trigger: the dot in a round hover target; labelled (the todo's page), a
@@ -280,3 +283,6 @@ a.work-group__name:hover { color: var(--text); text-decoration: underline; text-
   0%, 80% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+/* An engagement's Work card: the Open / Done / All filter beside the List / Board switch. */
+.work-section__actions { display: flex; align-items: center; gap: var(--s-2); }

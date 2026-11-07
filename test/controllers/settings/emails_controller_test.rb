@@ -20,7 +20,7 @@ class Settings::EmailsControllerTest < ActionDispatch::IntegrationTest
 
     perform_enqueued_jobs { post settings_email_test_message_path, params: { to: "someone@example.com" } }
 
-    assert_redirected_to settings_email_path(tab: "server")
+    assert_redirected_to settings_email_path(tab: "smtp")
     assert_equal [ "hello@brem.io" ], ActionMailer::Base.deliveries.last.from
     assert_equal "Brem", ActionMailer::Base.deliveries.last[:from].display_names.first
   end

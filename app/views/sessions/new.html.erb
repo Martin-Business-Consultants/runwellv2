@@ -22,6 +22,7 @@
           <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
         </div>
 
+        <%= bot_check_tag %>
         <button type="submit" id="log_in" class="btn btn--primary btn--block" data-form-target="submit">Sign in</button>
       <% end %>
 

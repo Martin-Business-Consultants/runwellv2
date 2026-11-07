@@ -1,4 +1,5 @@
 class TodosController < ApplicationController
+  include TodoBoardScoped
   allow_staff
   require_permission :delete_records, only: :destroy
   agent_tool :list_work, on: :index, title: "List work (todos)",
@@ -30,7 +31,8 @@ class TodosController < ApplicationController
   def index
     @view = index_view(extra: %w[board])
     @status = params[:status].presence_in(STATUS_FILTERS) || "open"
-    @owner = params[:owner].presence || "any"
+    # The page opens on your own work; agents (JSON) list everyone unless they ask.
+    @owner = params[:owner].presence || (request.format.json? ? "any" : "me")
     @engagement = params[:engagement].presence || "all"
     @due = params[:due].presence_in(Todo::DUE_FILTERS.keys) || "any"
 
@@ -122,16 +124,7 @@ class TodosController < ApplicationController
       render turbo_stream: streams
     end
 
-    # The owner param as an id: "me" is the person (for their agent too, the person it acts for),
-    # "none" nobody, a name the person it names; the Work page's own filter sends ids.
-    def owner_filter
-      case @owner
-      when "any" then "any"
-      when "me" then current_user.person.id
-      when "none" then nil
-      else Agent::Resolver.id?(@owner) ? @owner : Agent::Resolver.candidates("User", @owner).first&.id || 0
-      end
-    end
+    def owner_filter = owner_filter_for(@owner)
 
     def home_name(home) = home.is_a?(Engagement) ? "#{home.ref} #{home.title}" : home.name
 

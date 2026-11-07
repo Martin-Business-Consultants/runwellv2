@@ -10,9 +10,6 @@ json.plugins @plugins do |plugin|
   json.adds Runwell::Plugins.additions(plugin.key)
 end
 json.failed_to_load InstalledPlugins.failed
-json.available Runwell::PluginCatalog.available do |entry|
-  json.extract! entry, :key, :repo, :name, :description
-end
 json.changes @changes do |change|
   json.extract! change, :id, :key, :repo, :action, :from_version, :to_version, :status, :message, :created_at, :finished_at
 end

@@ -18,21 +18,7 @@
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:engagement).downcase, new_path: new_engagement_path %>
 
-<% if @view == "cards" %>
-  <section class="cards cards--grid">
-    <div class="cards__list">
-      <%= with_automatic_pagination :engagements_cards, @page do %>
-        <% @engagements.each do |engagement| %>
-          <%# herb:key engagement.id %>
-          <%= render "layouts/shared/card", path: engagement_path(engagement), title: engagement.title, id_label: engagement.ref,
-                context: engagement.client.name,
-                meta: [ engagement.label_name ],
-                status: engagement.state_label, highlight: engagement.active? %>
-        <% end %>
-      <% end %>
-    </div>
-  </section>
-<% elsif @engagements.any? %>
+<% if @engagements.any? %>
   <% columns = [ ui_column(:ref, "Ref", sort: :ref, width: [ @column_widths[:ref], "Ref" ], hideable: false),
                  ui_column(:title, "Title", sort: :title, width: [ @column_widths[:title], "Title" ]),
                  ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),

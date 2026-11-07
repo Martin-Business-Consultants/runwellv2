@@ -9,6 +9,9 @@ module ActiveSupport
     fixtures :all
 
     setup { Current.source = "test" }
+    # Installs require two-factor sign-in by default; the tests cover the core with it optional,
+    # and those about the requirement switch it on themselves.
+    setup { Setting.current.update_columns(require_two_factor: false) }
 
     # One piece of work per section of a fixture engagement, named after it.
     def work_per_section!(engagement)

@@ -10,7 +10,7 @@
   <%= render "layouts/shared/quick_filter", title: "Due…", param: :due, current: @due,
         options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
-        options: [ [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
+        options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + todo_owner_options.map { |name, id| [ name, id.to_s ] } %>
   <%= render "layouts/shared/quick_filter", title: "Engagement…", param: :engagement, current: @engagement,
         options: [ [ "All engagements", "all" ] ] + todo_engagement_filter_options(@engagement) %>
 <% end %>
@@ -28,25 +28,6 @@
 
 <% if @view == "board" %>
   <%= render "todos/board/columns", board: @board %>
-<% elsif @view == "cards" %>
-  <section class="cards cards--grid">
-    <div class="cards__list">
-      <%= with_automatic_pagination :todos_cards, @page do %>
-        <% @todos.each do |todo| %>
-          <%# herb:key todo.id %>
-          <% overdue = todo.status != "done" && todo.due_on&.past? %>
-          <%= render "layouts/shared/card", path: todo_path(todo), title: todo.title, id_label: todo_ref(todo),
-                context: todo_client_name(todo),
-                meta: [ ("Due " + l(todo.due_on, format: :short) if todo.due_on) ],
-                people: todo_owners_tag(todo, fallback: "Unassigned"),
-                status: overdue ? "Overdue" : todo.status.humanize, highlight: todo.status == "done" %>
-        <% end %>
-      <% end %>
-    </div>
-  </section>
-  <% if @todos.none? %>
-    <%= render "todos/blank" %>
-  <% end %>
 <% else %>
   <% columns = [ ui_column(:title, term(:work), sort: :title, width: [ @column_widths[:title], term(:work) ], hideable: false),
                  ui_column(:engagement, term(:engagement), sort: :engagement, width: [ @column_widths[:engagement], term(:engagement) ]),

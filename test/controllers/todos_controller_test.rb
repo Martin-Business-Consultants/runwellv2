@@ -9,7 +9,7 @@ class TodosControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index in table and board views with filters" do
-    get todos_path(view: "table")
+    get todos_path(view: "table", owner: "any")
     assert_response :success
     assert_select "table.data-table tbody tr[data-filter-target=item]", 2
     get todos_path(view: "board")

@@ -15,9 +15,10 @@
         By <%= term(:scope_item).downcase %>, soonest due first.
       <% end %>
     </p>
-    <div class="card__action">
+    <div class="card__action work-section__actions">
       <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :work, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+      <%= render "todos/view_switch", current: "list" %>
     </div>
   </header>
 

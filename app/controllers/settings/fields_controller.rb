@@ -21,9 +21,9 @@ class Settings::FieldsController < Settings::BaseController
   def create
     field = CustomField.new(params.expect(field: %i[model_type label kind choices listed client_visible]))
     if field.save
-      redirect_to settings_fields_path, notice: "Added #{field.label} to #{model_name(field)}."
+      redirect_to settings_fields_path(tab: field.model_type.to_s.underscore.presence), notice: "Added #{field.label} to #{model_name(field)}."
     else
-      redirect_to settings_fields_path, alert: field.errors.full_messages.to_sentence
+      redirect_to settings_fields_path(tab: field.model_type.to_s.underscore.presence), alert: field.errors.full_messages.to_sentence
     end
   end
 
@@ -32,15 +32,15 @@ class Settings::FieldsController < Settings::BaseController
     archived = attributes.delete(:archived)
     attributes[:archived_at] = ActiveModel::Type::Boolean.new.cast(archived) ? (@field.archived_at || Time.current) : nil unless archived.nil?
     if @field.update(attributes)
-      redirect_to settings_fields_path, notice: "Saved #{@field.label}."
+      redirect_to settings_fields_path(tab: @field.model_type.underscore), notice: "Saved #{@field.label}."
     else
-      redirect_to settings_fields_path, alert: @field.errors.full_messages.to_sentence
+      redirect_to settings_fields_path(tab: @field.model_type.underscore), alert: @field.errors.full_messages.to_sentence
     end
   end
 
   def destroy
     @field.update!(archived_at: Time.current)
-    redirect_to settings_fields_path, notice: "Archived #{@field.label}. Its values are kept."
+    redirect_to settings_fields_path(tab: @field.model_type.underscore), notice: "Archived #{@field.label}. Its values are kept."
   end
 
   private

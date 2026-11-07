@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
   agent_exempt :destroy, reason: "signing a browser out; revoke a token in Settings > Connected apps"
 
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  bot_checked fallback: -> { new_session_path }
 
   layout "public"
 

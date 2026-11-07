@@ -1,20 +1,20 @@
 # The core's extension points. A plugin (a Rails engine installed on the server, see
 # InstalledPlugins and github.com/Martin-Business-Consultants/runwell-time-tracking) registers
 # itself and what it adds here; the core renders whatever is registered for plugins that are
-# switched on (Settings > Plugins) and never names a plugin. Plugins start off unless their
-# manifest says enabled_by_default: true.
+# switched on (Settings > Plugins) and never names a plugin. Every plugin starts off (a manifest's
+# enabled_by_default is ignored since 5.0), and an install has none until one is added by its
+# GitHub repository.
 #
 #   Runwell::Plugins.register :time_tracking, name: "Time tracking", version: "0.1.0",
 #     description: "Timers and logged time on work, with a weekly timesheet."
 #   Runwell::Plugins.slot :todo_panel, :time_tracking, "time_tracking/slots/todo_panel"
 #   Runwell::Plugins.nav :time_tracking, "Time", -> { time_tracking_timesheet_path }
-#   Runwell::Plugins.briefing :time_tracking, "Timers running", partial: "...", items: ->(user) { ... }
 #   Runwell::Plugins.permission :time_tracking, :view_everyones_time, name: "See everyone's time", roles: %w[owner manager]
 #   Runwell::Plugins.quick_action :time_tracking, label: "Time", icon: "history", partial: "...", types: %w[Client Engagement Todo]
 #
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
 # :engagement_panel (engagement:), :todo_panel (todo:), :email_inbound (no locals; Settings > Email,
-# where requests' mail comes in), :home_top (no locals; home, above the briefing), :client_aside
+# where requests' mail comes in), :client_aside
 # (client:), :engagement_aside (engagement:, its sidebar), :engagement_meta (engagement:, the line under
 # its title: a status badge or a short fact), :todo_aside (todo:, a piece of work's sidebar),
 # :scope_item_aside (scope_item:) and :note_row (note:), inside each row; in the
@@ -34,7 +34,6 @@ module Runwell
       # requires: a Gem::Requirement on the core's version (">= 2.1"), checked against VERSION.
       def compatible? = requires.blank? || Gem::Requirement.new(requires).satisfied_by?(Gem::Version.new(Runwell::VERSION))
     end
-    Briefing = Struct.new(:title, :partial, :items, keyword_init: true)
     # A question the Ask panel offers in one click (types: the records it suits, nil for any page).
     AiPrompt = Struct.new(:label, :types, keyword_init: true) do
       def applies_to?(subject) = types.nil? || types.map(&:to_s).include?(subject.class.name)
@@ -45,13 +44,12 @@ module Runwell
 
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", engagement_panel: "Engagement panel", todo_panel: "Work panel",
       email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_engagement_panel: "Portal engagement panel",
-      home_top: "Home", client_aside: "Client sidebar", engagement_aside: "Engagement sidebar", engagement_meta: "Engagement title line",
+      client_aside: "Client sidebar", engagement_aside: "Engagement sidebar", engagement_meta: "Engagement title line",
       todo_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header" }.freeze
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }
     mattr_reader :nav_items, default: {}
-    mattr_reader :briefings, default: {}
     mattr_reader :quick_actions, default: {}
     mattr_reader :permissions, default: Hash.new { |hash, key| hash[key] = {} }
     mattr_reader :portal_nav_items, default: {}
@@ -84,8 +82,10 @@ module Runwell
         nav_items[key] = [ label, path, icon ]
       end
 
-      def briefing(key, title, partial:, items:)
-        briefings[key] = Briefing.new(title: title, partial: partial, items: items)
+      # Removed in 5.0 with the home briefing. Kept as a no-op only so a plugin that still calls it
+      # boots; it is not part of the contract (docs/plugin-contract.md, Removed).
+      def briefing(key, *, **)
+        Rails.logger.warn("[Runwell] #{key} calls Runwell::Plugins.briefing, removed in 5.0; it does nothing")
       end
 
       # A link in the client portal's nav, to a page from a Portal::BaseController.
@@ -146,13 +146,13 @@ module Runwell
       end
 
       def enabled?(key)
-        manifest = manifests[key.to_sym] or return false
-        Setting.current.plugin_enabled?(key, default: manifest.enabled_by_default)
+        return false unless manifests.key?(key.to_sym)
+        # Every plugin starts off, whatever its manifest says, until the owner switches it on.
+        Setting.current.plugin_enabled?(key, default: false)
       end
 
       def enabled_slots(name) = slots[name].select { |key, _| enabled?(key) }
       def enabled_nav_items = nav_items.select { |key, _| enabled?(key) }
-      def enabled_briefings = briefings.select { |key, _| enabled?(key) }
       def enabled_quick_actions = quick_actions.select { |key, _| enabled?(key) }
       def enabled_portal_nav_items = portal_nav_items.select { |key, _| enabled?(key) }
       def enabled_settings_pages = settings_pages.select { |key, _| enabled?(key) }
@@ -168,7 +168,6 @@ module Runwell
       def additions(key)
         slots.filter_map { |name, entries| SLOT_NAMES.fetch(name, name.to_s.humanize) if entries.key?(key) } +
           Array(nav_items[key]&.first&.then { "Nav: #{it}" }) +
-          Array(briefings[key]&.title&.then { "Home: #{it}" }) +
           Array(quick_actions[key]&.label&.then { "Quick action: #{it}" }) +
           permissions[key].values.map { "Permission: #{it[:name]}" } +
           Array(portal_nav_items[key]&.first&.then { "Portal: #{it}" }) +

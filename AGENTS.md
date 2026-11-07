@@ -48,6 +48,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | `bin/rails test` | Minitest with fixtures |
 | `bin/rubocop` | Lint (omakase) |
 | `bundle exec herb lint app/views` | Lint templates (Herb) |
+| `bin/rails import:unfold_general` | Move work off the "General" projects a v1 import made onto their clients (a dry run; `[apply]` does it) |
 | `bin/rails search:reindex` | Rebuild the search index from every searchable record |
 | `bin/rails agent:coverage` | Every staff action with its agent tool, or why it has none |
 | `bin/rails agent:scenarios` | A manager's, an employee's and a client's requests played through the tools (rolled back) |
@@ -66,7 +67,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    "billable": everything is a project, work order or service. Agreements (a document the client
    signs) are a plugin's (`runwell-agreements`), not the core's
 3. **What is happening** — `Todo`, at `/work` (old `/todos` links redirect; helpers stay `todo_*`) (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
-   done; due; table or kanban; agents finish into in review for a person to mark done). A todo
+   done; due; table or kanban, opening on your own work, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A todo
    sits on an engagement (its client follows) or straight on a client (`todos.client_id`;
    `engagement_id` optional), and nil client only for an email from an unmatched sender. A promise
    is work with a due date: whoever it's assigned to owns it (there are no client-owned promises).
@@ -76,14 +77,11 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
    Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
    emails create them (`todo.requested`)
-5. **What needs a human** — `Briefing` builds the home page for one person: a line of counts,
-   **Your work** (their open work: overdue, due today, the week after, in progress with no date
-   that close) and **Waiting on you** (work in review they lead, blocked work they're on, unread
-   mentions, plugins' briefing items). Each count links to Work filtered the same way (`due:`,
-   `status:`, `owner: "me"`). An agent that needs a person assigns them work or mentions them in a
-   note; there is no separate question inbox. The first-run checklist (`Setup`) is Settings > Setup, where
-   owners land from the gear until its required steps are done; it checks itself off from what
-   exists
+5. **What needs a human** — their own work, filtered on Work (`owner: "me"`, `due:` overdue,
+   today or week, `status:` in review or blocked), and their notifications (mentions). The app
+   opens on Work (`root`); the core has no home dashboard (the briefing, "Needs You", went in 5.0:
+   one belongs in a plugin, with its own page and nav link). An agent that needs a person assigns
+   them work or mentions them in a note; there is no separate question inbox.
 
 An engagement ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
 `Engagement#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
@@ -225,16 +223,14 @@ each person's own order and choice of them, Settings > Your account > Your menu,
 their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
 too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from `parent_page`
 and `@page_title` (`breadcrumb_items`, through rune_ui's `crumbs`). Below 860px the nav slides in
-over the page. Every index shows its records as cards or a table, and has no
-heading: the nav marks the current section. The controller sets `@view = index_view`
-(Work adds `extra: %w[board]`), which reads `?view=` or the install's default (Settings >
-Views). The page starts with
+over the page. Every index shows its records as a table (there's no
+cards view since 5.0), and has no heading: the nav marks the current section. The controller sets
+`@view = index_view` ("table"; Work adds `extra: %w[board]`, read from `?view=`). The page starts with
 `render "layouts/shared/index_toolbar", view: @view, new_text:, new_path:`: the page's
 quick_filter pills on the left (wrap them in `<% content_for :index_filters do %>` before
-rendering the toolbar), and on the right the Cards / Table icon toggle and the New button,
-spanning the page's column. Then either a `cards cards--grid` grid of
-`render "layouts/shared/card", path:, title:, id_label:, context:, meta:, status:`
-(a rune `card`, its status a badge) or the data table (`render "ui/data_table"`, below), whose
+rendering the toolbar), and on the right the New button, with the Table / Board icon toggle
+where an index has a second view (Work), spanning the page's column. Then the data table
+(`render "ui/data_table"`, below), whose
 last cell per row is `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
 action the record doesn't allow: engagements delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
 column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
@@ -244,7 +240,7 @@ where New sits; `BulkHelper`),
 each posting to a `Bulk::` controller that runs the record's own verb on each picked row with
 `BulkAction#apply_to_each` (skipped ones named), with an agent tool beside it. Lists page Fizzy's way (geared_pagination, `PaginationHelper`, the `pagination`
 controller): the action wraps its records in `paginate` (HTML only; JSON for agents stays whole),
-the cards grid wraps its loop in `with_automatic_pagination :name_cards, @page`, and a table's
+and a table's
 `<tbody id="<%= pagination_frame_id_for(:name_rows, @page.number) %>">` ends with
 `table_next_page_row :name_rows, @page, columns:` on a `<table>` carrying the pagination
 controller in discard-frame mode. The next page loads as you scroll. Mark each card or row `data-filter-target="item"` so "/"
@@ -269,7 +265,11 @@ inside `<turbo-frame id="record_tab" target="_top">`. A tab is a `?tab=` link th
 the frame; the first heading in a tab is hidden since the tab names it. The sidebar keeps
 Details, the few things always needed (contacts), History, and destructive actions. An
 engagement is the exception: its facts are one line under the title (`record-meta`, with
-plugins' `:engagement_meta`), History is a tab, and the sidebar is its sections
+plugins' `:engagement_meta`) and its next step a muted line under that; its description opens from
+an info button beside the title (a dialog, no Overview card); its Work tab shows the work by
+section or, with the List / Board switch (`?work_view=board`, `todos/_view_switch`), as the Work
+board for everyone's work on it (`@board_filters`, which `todo_board_filters` hands the columns and
+drops); History is a tab, and the sidebar is its sections
 (`engagements/_scope`, where they're added): all work, each section with done of total, and
 other work, each a `?item=` link that shows just that work in the Work tab, where its todos are
 added. A section's add action is one small secondary button with the add icon after its list
@@ -447,8 +447,8 @@ one place they are documented for people: add a new key there.
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (always asks first): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
-| `g` + `h c e w b u n s` | Home, clients, engagements, work, board, users, notifications, settings; `g 1`… plugin pages |
-| `n` `v` `/` | New record, next view (cards / table / board), focus the page filter |
+| `g` + `c e w b u n s` | Clients, engagements, work, board, users, notifications, settings; `g 1`… plugin pages |
+| `n` `v` `/` | New record, next view (Work: table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |
 | `g w n` | Add work (the quick action) to an engagement or client picked in it, the one on screen to start; `g w` waits a moment for the `n`, vim style |
@@ -504,7 +504,8 @@ Files live in Active Storage (`storage/` locally). Two places:
 The core has no money or time; plugins add them. A plugin is a Rails engine in a public GitHub
 repository of its own, never in this one: the thirteen Runwell publishes are
 `Martin-Business-Consultants/runwell-<name>` (`config/plugins.yml`). It is installed onto the
-server, like a WordPress plugin: Settings > Plugins downloads the repository's latest release
+server, like a WordPress plugin: an install starts with none, and the only way one arrives is its
+GitHub repository (owner/repo) in Settings > Plugins, which downloads the repository's latest release
 into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
 `config/installed_plugins.rb` loads it at boot, outside Bundler, so it can use only the core's
 gems. Its migrations run after the core's on `db:migrate` / `db:prepare` (`plugins:migrate`), its
@@ -526,7 +527,7 @@ published as `"event.runwell"` (from `EventPublishJob`, so subscribers read the 
 event), the helpers and partials a plugin may use, and the version each arrived in. Changing or
 adding one means updating that page in the same commit (a new one says `Since` the next
 release); removing or changing a stable one waits for a major version. Plugins are off until the
-owner switches them on (`Setting#plugin_states`); the core renders only what's registered by
+owner switches them on, whatever their manifest says (`Setting#plugin_states`); the core renders only what's registered by
 plugins that are on, and a plugin's controllers and subscribers check
 `Runwell::Plugins.enabled?(key)`. A settings page nests under Plugins with
 `render "settings/header", current: key`, and keeps keys in `encrypts` columns shown with
@@ -610,8 +611,9 @@ roles or permission builder. Check with `user.can?(:delete_records)`, and in vie
 - Two-factor sign-in (`User::TwoFactor`, `rotp`): a code from an authenticator app after the
   password (`Sessions::TwoFactorsController`, the pending sign-in in the session cookie for five
   minutes and five tries), or one of ten single-use recovery codes (HMAC digests, shown once). Set
-  up and turned off (password) in Settings > Your account; an owner requires it for everyone
-  (`Setting#require_two_factor`, Users), which sends anyone without it to set it up
+  up and turned off (password) in Settings > Your account. It's required of everyone by default
+  (`Setting#require_two_factor`, on for a new install; whoever manages people switches it in
+  Settings > Your account, where Security used to be), which sends anyone without it to set it up
   (`Authentication#require_two_factor_setup`, browser sessions only), and resets someone's who
   lost their phone. Tokens and the portal are untouched; agents can't change any of it
 - The one other way in is an emailed link for anyone who switches it on (`User#passwordless`,
@@ -740,7 +742,7 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 `user.role_changed`, `user.profile_changed`, `user.password_set`, `user.password_reset_sent`,
 `user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`,,
 `user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
-`settings.plugin`, `settings.custom_css`, `settings.webhook`. Those subjects
+`settings.plugin`, `settings.custom_css`, `settings.webhook`, `settings.bot_check`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
 
 ## Webhooks
@@ -769,8 +771,8 @@ repository is public (FSL-1.1-MIT, `LICENSE.md`). A release is a `vX.Y.Z` tag ma
 `bin/release 2.1.0` (writes `VERSION`, commits, tags, pushes); `.github/workflows/release.yml`
 publishes it. Nothing that names a deployment or a client is tracked (`config/deploy*.yml`,
 `.kamal/secrets*` and QA source files are ignored): everything committed is public. `Release` is the newest one GitHub lists, checked
-nightly (`ReleaseCheckJob`) and by Check now, kept on `Setting#latest_release`. Owners see it on
-home (`briefings/_update`) and in Settings > Updates, whose button makes an `Upgrade`: `in_place`
+nightly (`ReleaseCheckJob`) and by Check now, kept on `Setting#latest_release`. Owners see it in
+Settings > Updates, whose button makes an `Upgrade`: `in_place`
 (any Docker install) downloads the release's bundle into the data volume and restarts on it,
 like WordPress (`Upgrade::InPlace`, run by `bin/docker-entrypoint`); each bundle carries its Ruby
 (`ruby/`, switched to by `config/bundled_ruby.rb` from `config/boot.rb` and `bin/thrust`, checked by
@@ -788,7 +790,7 @@ release, once no code reads them. No migration may depend on a person running a 
 
 ## Settings and names
 
-Settings (the gear, `/settings`) has Setup (the first-run checklist), Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`; the first setup step), Appearance, Names, Fields, Views, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, engagement, scope item and work, and each engagement type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:engagement)`,

@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   include Authorization # after Authentication, so its check runs once the session is loaded
   include AgentTools, AgentResponses
   include TableSorting
+  include BotChecked
   include NPlusOneDetection
   allow_browser versions: :modern
   # ReActionView registers its slots format, and Rails then answers a bare "*/*" (a plain fetch(),
@@ -46,7 +47,7 @@ class ApplicationController < ActionController::Base
   # How an index shows its records: the view in the URL, else this install's default
   # (Settings > Views). Some indexes add their own, like Work's board.
   def index_view(extra: [])
-    params[:view].presence_in(Setting::INDEX_VIEWS + extra) || Setting.current.index_view
+    params[:view].presence_in(%w[table] + extra) || "table"
   end
 
   TABLE_PAGE_SIZE = 13
@@ -59,7 +60,7 @@ class ApplicationController < ActionController::Base
   def paginate(records)
     return records unless request.format.html? || request.format.symbol == :slots
 
-    set_page_and_extract_portion_from records, per_page: (TABLE_PAGE_SIZE if @view == "table")
+    set_page_and_extract_portion_from records, per_page: TABLE_PAGE_SIZE
     @page.records
   end
 end

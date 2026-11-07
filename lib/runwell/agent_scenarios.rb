@@ -29,7 +29,7 @@ module Runwell
     private
       def project_manager(manager, member)
         as(manager, "Sarah (manager)")
-        say("What needs me today?", "briefing") { it["status"] == "ok" }
+        say("What needs me today?", "list_work", owner: "me", due: "today") { it["status"] == "ok" }
         client = Client.order(:id).first
         say("Pull up #{client.name.split.first}", "show_client", id: client.name.split.first) { it["status"] == "ok" || it["code"] == "ambiguous" }
         engagement = Engagement.where.not(ref: nil).order(:id).first

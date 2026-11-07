@@ -1,4 +1,4 @@
-# Settings > Security: require two-factor sign-in of everyone on the team. Anyone without it is
+# Settings > Your account (for those who manage people): require two-factor sign-in of everyone on the team. Anyone without it is
 # sent to set it up on their next page (Authentication#require_two_factor_setup).
 class Settings::TwoFactorRequirementsController < ApplicationController
   require_permission :manage_people
@@ -10,6 +10,6 @@ class Settings::TwoFactorRequirementsController < ApplicationController
     required = params.dig(:setting, :require_two_factor) == "1"
     Setting.current.update!(require_two_factor: required)
     Setting.current.record_event!("settings.two_factor_required", payload: { required: required })
-    redirect_to settings_security_path, notice: required ? "Two-factor sign-in is now required. Anyone without it sets it up on their next page." : "Two-factor sign-in is optional again."
+    redirect_to settings_account_path(anchor: "two-factor"), notice: required ? "Two-factor sign-in is now required. Anyone without it sets it up on their next page." : "Two-factor sign-in is optional again."
   end
 end

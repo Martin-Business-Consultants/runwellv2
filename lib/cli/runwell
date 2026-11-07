@@ -468,7 +468,7 @@ def skill_text = <<~MARKDOWN
   `runwell` runs any Runwell tool: `runwell tools` lists them for your role, `runwell help <tool>` shows inputs.
   You act as the person's agent ("Ted's agent via Claude Code"), with exactly their role.
 
-  - Start with `runwell briefing` (what needs a person now); find anything with `runwell search --q "…"`.
+  - Start with `runwell list_work --owner me` (the person's own work); find anything with `runwell search --q "…"`.
   - Engagements go by ref (`--ref P-3`, `--engagement_ref WO-12`). Tools taking `--record` want "Type:id" (`Todo:12`), as each result's `record` shows.
   - Names work where ids do: `--id "Bloom"`, `--todo.owner_id priya`, `--ref "Spanish pages"`, `--record "Client:Bloom"`. An `ambiguous` answer (exit 10) lists `candidates`: ask the person which one, then use its id. `runwell resolve --q "…"` looks a name up.
   - On a schedule, use `runwell changes --since 24h`, keep the `cursor` it gives, and next time pass `--after <cursor>` to hear only what's new.
@@ -500,7 +500,7 @@ def skill_text = <<~MARKDOWN
 
   ## Routines people ask for
 
-  - "Every morning, go through `runwell briefing` and tell me what needs me, most urgent first."
+  - "Every morning, go through `runwell list_work --owner me` and tell me what needs me, most urgent first."
   - "Go through the requests: for each, suggest who should take it on, and ask before assigning."
   - "Find overdue work, and draft a note to each owner."
   - "Before a client call, summarise everything on <client> since last week." (`runwell changes --client_id "<client>" --since 7d`)

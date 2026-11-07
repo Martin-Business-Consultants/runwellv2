@@ -27,6 +27,7 @@ Rails.application.config.to_prepare do
     "camera" => '<path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h1.5l1-1.5h3l1 1.5H12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5z"/><circle cx="8" cy="8.25" r="2.25"/>',
     "caret-down" => '<path d="m4.5 6.5 3.5 3.5 3.5-3.5"/>',
     "check" => '<path d="m3.5 8.5 3 3 6-7"/>',
+    "info" => '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.25v3.5"/><circle cx="8" cy="5.25" r=".6" fill="currentColor"/>',
     "check-circle" => '<circle cx="8" cy="8" r="5.5"/><path d="m5.75 8.25 1.5 1.5 3-3.25"/>',
     "clipboard" => '<rect x="3.5" y="3" width="9" height="11" rx="1.5"/><path d="M6 3V2h4v1M6 7h4M6 10h2.5"/>',
     "close" => '<path d="m4.5 4.5 7 7M11.5 4.5l-7 7"/>',

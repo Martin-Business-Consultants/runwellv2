@@ -7,6 +7,6 @@ class Settings::Emails::TestMessagesController < Settings::BaseController
   def create
     to = params[:to].presence || current_user.email_address
     TestEmailJob.send_later(to)
-    redirect_to settings_email_path(tab: "server"), notice: "Sending a test email to #{to}. This page says how it went."
+    redirect_to settings_email_path(tab: "smtp"), notice: "Sending a test email to #{to}. This page says how it went."
   end
 end

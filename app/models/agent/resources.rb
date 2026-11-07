@@ -6,7 +6,6 @@ module Agent
     Template = Data.define(:uri_template, :name, :title, :description, :tool, :parameter)
 
     STAFF = [
-      Template.new("runwell://briefing", "briefing", "Briefing", "What needs a person now.", "briefing", nil),
       Template.new("runwell://engagements/{ref}", "engagement", "Engagement", "An engagement by its ref (WO-12) or title: sections, work, notes.", "show_engagement", "ref"),
       Template.new("runwell://clients/{id}", "client", "Client", "A client by id or name: contacts, engagements, open work, notes.", "show_client", "id"),
       Template.new("runwell://work/{id}", "work", "Work", "A piece of work by id or title.", "show_work", "id")

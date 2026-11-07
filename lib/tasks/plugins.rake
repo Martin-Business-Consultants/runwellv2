@@ -11,8 +11,6 @@ namespace :plugins do
       note = InstalledPlugins.failed[name] ? "  (didn't load: #{InstalledPlugins.failed[name]})" : ""
       puts "#{state}  #{name.ljust(22)} #{InstalledPlugins.versions[name].to_s.ljust(8)} #{source}#{note}"
     end
-    available = Runwell::PluginCatalog.available.map(&:key)
-    puts "\nAvailable: #{available.join(", ")}" if available.any?
   end
 
   desc "Run installed plugins' migrations (db:migrate and db:prepare do it too)"
@@ -24,9 +22,9 @@ namespace :plugins do
     end
   end
 
-  desc "Install a plugin's latest release from GitHub: bin/rails \"plugins:install[owner/repo]\" (or a key from config/plugins.yml)"
+  desc "Install a plugin's latest release from GitHub: bin/rails \"plugins:install[owner/repo]\" "
   task :install, [ :repo ] => :environment do |_task, args|
-    repo = Runwell::PluginCatalog.find(args[:repo])&.repo || args[:repo]
+    repo = args[:repo]
     change = PluginChange.create!(action: "install", repo: repo)
     finish_plugin_change change
   end

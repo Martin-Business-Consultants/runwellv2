@@ -179,20 +179,12 @@ module Import
       close!(engagement, "Ended in Runwell v1", at: time(row["updated_at"])) if row["completed"] == 1 || row["status"] != "active"
     end
 
-    # Work v1 kept on a client with no project or service goes under one "General" engagement
-    # per client, so v2 has somewhere to hang it.
+    # Work v1 kept on a client with no project or service is work straight on that client here.
     def import_general_work
       todos_where("#{NO_PROJECT} AND #{NO_SERVICE}").group_by { it["partner_id"] }.each do |partner_id, todos|
         client = @clients[partner_id] or next @skipped[:todos] << "#{todos.size} with no client"
 
-        engagement = client.engagements.create!(
-          label: "project", shape: "fixed", title: "General",
-          description: "<p>Work that had no project in Runwell v1.</p>",
-          created_by: actor, created_at: time(todos.map { it["created_at"] }.min))
-        @engagements["general:#{partner_id}"] = engagement
-        @counts[:general_engagements] += 1
-
-        todos.each { import_todo(it, engagement) }
+        todos.each { import_todo(it, nil, client: client) }
       end
     end
 
@@ -224,14 +216,15 @@ module Import
 
     # --- Work ----------------------------------------------------------------------------
 
-    def import_todo(row, engagement)
+    # Onto the engagement, or straight onto the client when it had none (engagement nil).
+    def import_todo(row, engagement, client: nil)
       return if @todos.key?(row["id"])
 
       scope_item = @items["milestone:#{row["milestone_id"]}"] || @items["item:#{row["work_order_item_id"]}"]
-      scope_item = nil if scope_item && scope_item.engagement != engagement
+      scope_item = nil if scope_item && (engagement.nil? || scope_item.engagement != engagement)
       owners = todo_owners[row["id"]] || []
       status = TODO_STATUSES.fetch(row["status"], "planned")
-      todo = engagement.todos.create!(
+      todo = (engagement ? engagement.todos : client.todos).create!(
         title: row["name"], status: status, scope_item: scope_item,
         description: rich("Todo", row["id"], "description") || row["description"].presence,
         owner: @users[owners.first], due_on: row["due_date"], client_visible: row["client_visible"] == 1,

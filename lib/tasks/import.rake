@@ -17,3 +17,10 @@ namespace :import do
     Import::V1Archive.new(args[:filename], tenant: args[:tenant]).run
   end
 end
+
+namespace :import do
+  desc "Move work off the General projects a v1 import made, onto their clients, and erase those projects: bin/rails import:unfold_general (a dry run), then \"import:unfold_general[apply]\""
+  task :unfold_general, [ :apply ] => :environment do |_task, args|
+    Import::UnfoldGeneral.new(apply: args[:apply] == "apply").run
+  end
+end

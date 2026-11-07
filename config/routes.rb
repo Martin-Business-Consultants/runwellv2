@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "briefings#show"
+  root "todos#index"
 
   get "theme/:digest", to: "themes#show", as: :theme_stylesheet, constraints: { digest: /[0-9a-f]+/ }, format: false
   resource :session
@@ -27,7 +27,6 @@ Rails.application.routes.draw do
   resources :invitations, only: %i[show update], param: :token
   resources :passwords, param: :token
 
-  resource :briefing, only: :show
   resource :me, only: :show, controller: :me
 
   # Agents: the MCP server, and OAuth for connectors (see Agent::, Oauth::)
@@ -62,7 +61,6 @@ Rails.application.routes.draw do
   get "settings/people/:id", to: redirect("/users/%{id}")
 
   namespace :settings do
-    resource :setup, only: :show
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
     resource :theme_brief, only: :show
@@ -72,18 +70,17 @@ Rails.application.routes.draw do
       resource :recovery_codes, only: :create, module: :two_factors
     end
     resource :two_factor_requirement, only: :update
-    resource :security, only: :show
     resource :roles, only: :show
     resource :passwordless, only: :update
     resource :names, only: %i[show update]
     resources :exports, only: %i[index create show]
     resource :audit_log, only: :show
     resources :webhooks, only: %i[index create update destroy]
-    resource :views, only: %i[show update]
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails
       resource :inbound, only: :update, module: :emails
       resource :smtp, only: :update, module: :emails
+      resource :bot_check, only: :update, module: :emails
     end
     resources :fields, only: %i[index create update destroy]
     namespace :plugins do

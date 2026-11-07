@@ -13,21 +13,7 @@
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:client).downcase, new_path: new_client_path %>
 
-<% if @clients.any? && @view == "cards" %>
-  <section class="cards cards--grid">
-    <div class="cards__list">
-      <%= with_automatic_pagination :clients_cards, @page do %>
-        <% @clients.each do |client| %>
-          <%# herb:key client.id %>
-          <%= render "layouts/shared/card", path: client_path(client), title: client.name, id_label: term(:client),
-                context: listed.first && custom_field_text(listed.first, client.custom_value(listed.first)),
-                meta: [ pluralize(client.contacts.count { !it.archived? }, "contact"), pluralize(client.engagements.count { !it.closed? }, "open " + term(:engagement).downcase, plural: "open " + term(:engagement, count: 2).downcase) ],
-                status: client.status, highlight: client.status == "active" %>
-        <% end %>
-      <% end %>
-    </div>
-  </section>
-<% elsif @clients.any? %>
+<% if @clients.any? %>
   <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
                  ui_column(:status, "Status", sort: :status, width: :status),
                  ui_column(:contacts, "Contacts", width: :avatars),

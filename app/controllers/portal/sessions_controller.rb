@@ -1,6 +1,7 @@
 class Portal::SessionsController < Portal::BaseController
   skip_before_action :require_contact, only: %i[new create show]
   rate_limit to: 5, within: 3.minutes, only: :create, with: -> { redirect_to new_portal_session_path, alert: "Try again later." }
+  bot_checked fallback: -> { new_portal_session_path }
 
   layout "public"
 

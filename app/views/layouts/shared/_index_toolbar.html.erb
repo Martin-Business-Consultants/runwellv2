@@ -14,7 +14,7 @@
     <% end %>
   </div>
   <div class="index-toolbar__end">
-    <% if view %>
+    <% if view && extra_views.present? %>
       <%= render "layouts/shared/view_toggle", current: view, extra: extra_views %>
     <% end %>
     <% if new_path %>

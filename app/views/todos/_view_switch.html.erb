@@ -1,0 +1,12 @@
+<%# locals: (current:) %>
+<%# An engagement's work as a list by section or as the Work board: icon tabs in its card's head,
+    each a link swapping ?work_view= inside the record tab. %>
+<nav class="tabs tabs--icons" aria-label="Show as">
+  <% [ [ "list", "List", "column-left" ], [ "board", "Board", "board" ] ].each do |key, label, icon| %>
+    <%# herb:key key %>
+    <%= link_to url_for(request.query_parameters.merge("tab" => "work", "work_view" => key)), class: "tabs__tab", title: label,
+          aria: { current: (key == current) ? "page" : "false", label: label }, data: { turbo_action: "replace" } do %>
+      <%= icon_tag icon %>
+    <% end %>
+  <% end %>
+</nav>

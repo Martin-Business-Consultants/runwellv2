@@ -10,7 +10,9 @@ module TodosBoardHelper
     { "in_progress" => "var(--color-card-4)", "in_review" => "var(--color-card-6)", "blocked" => "var(--color-card-8)" }.fetch(status)
   end
 
+  # The filters the board's column frames and drops carry: the page's query (Work), or what the
+  # page set (@board_filters: an engagement's Work tab shows everyone's work on it).
   def todo_board_filters
-    request.query_parameters.slice("owner", "engagement")
+    @board_filters || request.query_parameters.slice("owner", "engagement").reverse_merge("owner" => "me")
   end
 end

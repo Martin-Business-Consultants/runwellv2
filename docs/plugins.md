@@ -245,5 +245,5 @@ to pick from. A meeting repeats through a `Meetings::Series` (every weekday, cho
 week or two, or monthly on the same weekday), planned a week ahead and nightly; changing the series
 changes the meetings still to come. At the end of the day each
 person writes a `Meetings::Report` (what went well, what didn't, why, what's next), read a day at a
-time across the team. Home (`:home_top`) shows your priorities and next meeting, and asks for the
-report from the afternoon on.
+time across the team. Until 5.0, home (`:home_top`) showed your priorities and next meeting and asked for the report
+from the afternoon on; with the core's home gone, that belongs on a page of the plugin's own.

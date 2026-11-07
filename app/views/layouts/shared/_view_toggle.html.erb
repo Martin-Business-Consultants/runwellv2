@@ -1,7 +1,7 @@
 <%# locals: (current:, extra: nil) %>
-<%# How an index shows its records, as small icon tabs beside its New button. Each choice keeps
-    the page's other filters. %>
-<% views = [ [ "cards", "Cards", "grid" ], [ "table", "Table", "column-left" ] ] + Array(extra) %>
+<%# How an index shows its records, as small icon tabs beside its New button: a table, and any
+    other view the index offers (Work's board). Each choice keeps the page's other filters. %>
+<% views = [ [ "table", "Table", "column-left" ] ] + Array(extra) %>
 <% following = views[(views.index { |key, _label, _icon| key == current } || -1) + 1]&.first || views.first.first %>
 <nav class="tabs tabs--icons" aria-label="View">
   <% views.each do |key, label, icon| %>

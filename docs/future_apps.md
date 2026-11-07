@@ -30,7 +30,8 @@ reading engagements and todos by id. Estimates stay internal inputs to pricing.
 
 ## Dashboards, daily reports, weekly work
 
-Dropped. The briefing ("Needs you") is the one home page. Boards over the core
+Dropped. The core has no home page since 5.0 (the briefing, "Needs you", went): it opens on
+Work, and a dashboard is a plugin's to make. Boards over the core
 queries (overdue work, awaiting client, blocked work) can be generated as
 read-only views later; they must not carry state of their own.
 

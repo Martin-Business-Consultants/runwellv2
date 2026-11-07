@@ -5,6 +5,7 @@
 class Sessions::LinksController < ApplicationController
   allow_unauthenticated_access
   rate_limit to: 5, within: 3.minutes, only: :create, with: -> { redirect_to new_session_link_path, alert: "Try again later." }
+  bot_checked fallback: -> { new_session_link_path }
 
   layout "public"
 

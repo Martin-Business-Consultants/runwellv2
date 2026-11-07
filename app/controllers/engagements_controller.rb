@@ -40,6 +40,12 @@ class EngagementsController < ApplicationController
     # section or the one picked in the sidebar (?item=12, or "other" for work in none).
     @work_state = params[:work].presence_in(%w[open done all]) || "open"
     @work_item = params[:item] == "other" ? "other" : params[:item].presence&.to_i
+    # Its work as a list by section, or as the Work board (?work_view=board) for everyone's work on it.
+    @work_view = params[:work_view] == "board" ? "board" : "list"
+    if @work_view == "board"
+      @board_filters = { "owner" => "any", "engagement" => @engagement.ref }
+      @board = Todo.filtered(owner: "any", engagement: @engagement.ref)
+    end
   end
 
   def new

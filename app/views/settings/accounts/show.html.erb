@@ -41,6 +41,12 @@
     <% if @user.two_factor? %>
       <%= render "settings/accounts/two_factor_changes", required: Setting.current.require_two_factor? %>
     <% end %>
+    <% if can?(:manage_people) %>
+      <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "settings-group__card", data: { controller: "form" } do |form| %>
+        <%= switch_field form, :require_two_factor, label: "Require it for everyone", submit_on_change: true,
+              hint: "On unless you turn it off. After their password, everyone enters a code from an authenticator app; anyone without it sets it up on their next page. #{term(:client, count: 2).upcase_first} sign in by emailed link and aren’t affected." %>
+      <% end %>
+    <% end %>
   </section>
 
   <section class="settings-section">
