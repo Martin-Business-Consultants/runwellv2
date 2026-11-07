@@ -11,29 +11,35 @@
 .bar__placeholder { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .bar__backdrop, .bar__footer { display: none; }
 
-/* Open (the placeholder hides once S is pressed): a command box a third of the way down, over a
-/* dimmed, blurred page, fading and zooming in. */
+/* Open (the placeholder hides once S is pressed): a command box a fifth of the way down, over a
+/* dimmed page, fading and zooming in: a large field across its top, the results under it. */
 @keyframes home-overlay-in { from { opacity: 0; scale: .95; } }
 .bar:has(.bar__placeholder[hidden]) {
-  inset: 33.333% 0 auto 0; z-index: calc(var(--z-tray) + 10); width: calc(100% - 2rem); max-height: calc(66.666dvh - 1rem); margin-inline: auto; padding: var(--s-1);
-  overflow: hidden; border-radius: var(--radius-panel); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
+  inset: 18% 0 auto 0; z-index: calc(var(--z-tray) + 10); width: calc(100% - 2rem); max-height: calc(78dvh - 1rem); margin-inline: auto; padding: 0;
+  overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); color: var(--text);
+  box-shadow: 0 24px 64px -12px rgb(0 0 0 / .28), var(--shadow-popover);
   pointer-events: auto; animation: home-overlay-in .1s ease-out;
 }
-@media (min-width: 640px) { .bar:has(.bar__placeholder[hidden]) { width: 24rem; } }
-.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .1); }
-.bar__input { flex: 0 0 auto; padding: var(--s-1) var(--s-1) 0; }
+@media (min-width: 640px) { .bar:has(.bar__placeholder[hidden]) { width: 40rem; } }
+.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .28); }
+.bar__input { flex: 0 0 auto; padding: 0; }
+/* In the bar the field is the box's top edge: large, no frame or fill of its own, a rule under it,
+/* its icon in the brand's colour while you type. */
+.bar .search-box { height: 3.25rem; padding: 0 var(--s-2) 0 var(--s-4); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; }
+.bar .search-box .search-box__input { font-size: var(--text-read); }
+.bar .search-box:focus-within .search-box__icon { color: var(--accent); }
 
 /* The results under the box, whether or not their dialog is open: before a search the hint,
 /* after one the results. Empty, they take no room. */
 .bar .bar__modal {
-  position: static; z-index: auto; display: block; width: auto; max-width: none; height: auto; max-height: 18rem; margin: 0; padding: 0;
+  position: static; z-index: auto; display: block; width: auto; max-width: none; height: auto; max-height: min(28rem, 55dvh); margin: 0; padding: var(--s-1);
   overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; border: 0; background: none; color: inherit;
 }
 .bar .bar__modal:not(:has(.search-results)) { display: none; }
 .bar:has(.bar__placeholder[hidden]) .bar__footer {
   display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: var(--s-4);
-  margin: var(--s-1) calc(var(--s-1) * -1) calc(var(--s-1) * -1); padding: var(--s-2) var(--s-3);
-  border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--text-meta);
+  margin: 0; padding: var(--s-2) var(--s-4);
+  border-top: 1px solid var(--line); background: var(--layer-1); color: var(--text-muted); font-size: var(--text-meta);
 }
 @media (any-hover: none) { .bar:has(.bar__placeholder[hidden]) .bar__footer { display: none; } }
 .bar__footer-key { display: inline-flex; align-items: center; gap: 6px; }
@@ -51,13 +57,14 @@
 .search-results { display: block; }
 .search-results__empty { padding: var(--s-5) var(--s-2); color: var(--text-muted); text-align: center; }
 .search-results__group { padding: var(--s-1); overflow: hidden; }
-.search-results__group + .search-results__group { margin-inline: calc(var(--s-1) * -1); padding-inline: var(--s-2); border-top: 1px solid var(--line); }
-.search-results__heading { padding: 6px var(--s-2); color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); line-height: var(--leading-tight); }
+.search-results__group + .search-results__group { border-top: 1px solid var(--line); }
+.search-results__heading { padding: var(--s-2) var(--s-2) var(--s-1); color: var(--text-faint); font-size: var(--text-xs); font-weight: var(--weight-strong); letter-spacing: .04em; line-height: var(--leading-tight); text-transform: uppercase; }
 .search-results__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .search-results__result { display: flex; align-items: center; gap: var(--s-2); padding: 6px var(--s-2); border-radius: var(--radius); color: var(--text); text-decoration: none; user-select: none; }
-.search-results__result:is(:hover, :focus-visible) { background: var(--layer-2); color: var(--text); box-shadow: none; }
+/* The result under the pointer or keys: the brand's tint, its icon in the brand's colour. */
+.search-results__result:is(:hover, :focus-visible) { background: var(--brand-tint); color: var(--text); box-shadow: none; }
 .search-results__icon { color: var(--text-muted); }
-.search-results__result:is(:hover, :focus-visible) .search-results__icon { color: var(--text); }
+.search-results__result:is(:hover, :focus-visible) .search-results__icon { color: var(--accent); }
 .search-results__text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .search-results__title, .search-results__excerpt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search-results__title { font-weight: var(--weight-strong); }
@@ -70,6 +77,7 @@
 /* /search: the same box and results, framed on the page. */
 .search-page { display: flex; flex-direction: column; width: min(100%, 42rem); margin: var(--s-4) auto 0; padding: var(--s-1); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); }
 .search-page .search-box { margin: var(--s-1) var(--s-1) 0; }
+.search-page .search-box:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
 .search-page .search-box:has(.search-box__input:placeholder-shown) .search-box__reset { display: none; }
 
 /* ======================================================================= 3 Trays */

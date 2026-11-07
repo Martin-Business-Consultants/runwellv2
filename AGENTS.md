@@ -371,6 +371,11 @@ the data table, the bulk bar, index cards, hint mode, form widgets) and one file
 (`runwell/home`, `work`, `records`, `settings`, `public`). The styleguide is at `/ui` in
 development. Build new markup with it:
 
+- The brand's colour (`--accent`, Settings > Appearance) marks what's chosen, current or under the
+  keys: `--brand-tint` / `--brand-tint-strong` (mixed from `--accent`, so they follow any scheme,
+  light or dark) behind it and `--accent` on its icon (menus, comboboxes, the selected row, the
+  current nav entry, search results), plus checkboxes and selected text. New highlight states use
+  them rather than a grey layer
 - Tokens are rune's: `--page`, `--panel`, `--layer-1..3`, `--text`, `--text-muted`,
   `--text-faint`, `--line`, `--line-strong`, `--hover`, `--accent`, `--accent-soft`, `--ok`,
   `--danger`, `--attention`; space `--s-1..6`; `--radius-*`; `--control-h`, `--control-h-sm`,
@@ -492,6 +497,10 @@ ReActionView rules:
   relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe. It's fuzzy: exact
   matches first, then words starting with what was typed or a typo or two from it, taken from the
   index's vocabulary (`Search::Vocabulary`, fts5vocab). Agent name resolution passes `fuzzy: false`
+- Results show as you type (`bar#searchAsYouType`, from two characters; the /search page through
+  `form#debouncedSubmit`), grouped in a fixed order: clients, work, tasks, then people (the team, by
+  name or email, `Search#people`, a direct lookup since users aren't indexed), then the rest
+  (`SearchesHelper::SEARCH_PRIORITY`)
 - The search bar is Fizzy's (`bar/_bar`, `bar_controller`), rendered in the
   application layout footer for signed-in staff. It shows only once opened (`s`, ⌘K): the
   bottom of staff pages stays clear but for the quick actions' + and the notification bell (`runwell/home.css`)

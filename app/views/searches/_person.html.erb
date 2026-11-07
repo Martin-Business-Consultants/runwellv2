@@ -1,0 +1,12 @@
+<%# locals: (person:) %>
+<%# A team member in search results: their avatar, name and address, to their page in Users. %>
+<li>
+  <%= link_to user_path(person), class: "search-results__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
+    <span class="search-results__icon"><%= person_tag person %></span>
+    <span class="search-results__text">
+      <span class="search-results__title"><%= person.display_name %></span>
+      <span class="search-results__excerpt"><%= person.email_address %></span>
+    </span>
+    <span class="search-results__context"><%= person.role.capitalize %></span>
+  <% end %>
+</li>

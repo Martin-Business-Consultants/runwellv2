@@ -6,6 +6,6 @@
 <div class="search-page">
   <%= render "searches/form", query_terms: @query, turbo_action: "advance", target_turbo_frame: "bar_content", cancel_path: root_path %>
   <%= turbo_frame_tag "bar_content" do %>
-    <%= render "searches/results", results: @search.results, query: @query %>
+    <%= render "searches/results", results: @search.results, query: @query, people: @search.people %>
   <% end %>
 </div>

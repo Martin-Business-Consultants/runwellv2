@@ -16,17 +16,24 @@ module SearchesHelper
     search_client_names[record.search_client_id] unless record.is_a?(Client)
   end
 
-  # Results in groups by kind, the kinds in the order of their best match: [[label, records], …].
-  def search_result_groups(results)
-    Array(results).group_by { search_result_kind(it) }.to_a
+  # Results by kind, the kinds in a fixed order (clients, work, tasks, then people, then the
+  # rest), each kind's results in order of relevance. people: the team members who match.
+  SEARCH_PRIORITY = %w[Client Work Task User Contact ScopeItem Note Document].freeze
+
+  def search_result_groups(results, people: [])
+    records = Array(results) + Array(people)
+    records.group_by { it.class.name }
+      .sort_by { |type, _| SEARCH_PRIORITY.index(type) || SEARCH_PRIORITY.size }
+      .map { |_type, group| [ search_result_kind(group.first), group ] }
   end
 
   def search_result_kind(record)
     case record
     when Client then term(:client, count: 2)
     when Work then term(:work, count: 2)
-    when Task then term(:task)
+    when Task then term(:task, count: 2)
     when ScopeItem then term(:scope_item, count: 2)
+    when User then "People"
     else record.model_name.human.pluralize
     end
   end

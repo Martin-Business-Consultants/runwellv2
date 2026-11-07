@@ -17,9 +17,20 @@ class Search
 
   attr_reader :terms
 
+  PEOPLE_LIMIT = 5
+
   def initialize(terms, fuzzy: true)
     @terms = clean(terms.to_s)
     @fuzzy = fuzzy
+  end
+
+  # The team (people, not their agents) by name or email address: they aren't in the search index,
+  # so a direct lookup, shown after clients, work and tasks.
+  def people
+    return User.none if terms.blank?
+
+    like = "%#{User.sanitize_sql_like(terms.delete('"').downcase)}%"
+    User.people.active.where("lower(name) LIKE :q OR lower(email_address) LIKE :q", q: like).order(:name).limit(PEOPLE_LIMIT)
   end
 
   def results

@@ -19,7 +19,7 @@
         data: {
           search_form_target: "searchInput",
           bar_target: "searchInput",
-          action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
+          action: (cancel_path ? "input->form#debouncedSubmit" : "input->bar#searchAsYouType keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset") } %>
   <button hidden>Search</button>
   <button type="button" class="icon-button search-box__reset" title="Close search" aria-label="Close search" data-action="search-form#clearInput">
     <%= icon_tag "close" %>

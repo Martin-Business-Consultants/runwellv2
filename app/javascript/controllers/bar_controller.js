@@ -31,6 +31,15 @@ export default class extends Controller {
     this.dialogOutlet.open()
   }
 
+  // Results as you type: a moment after the last key, from two characters on (Enter still
+  // searches at once). The field stays focused while the results under it change.
+  searchAsYouType() {
+    clearTimeout(this.typingTimer)
+    this.typingTimer = setTimeout(() => {
+      if (this.searchInputTarget.value.trim().length >= 2) this.showModalAndSubmit()
+    }, 180)
+  }
+
   search(event) {
     this.#showItem(this.searchTarget)
     this.#hideItem(this.buttonsContainerTarget)

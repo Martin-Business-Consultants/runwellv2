@@ -1,21 +1,25 @@
-<%# locals: (results:, query:) %>
-<%# The results: grouped by kind (in order of their best match), each group under a small muted
-    heading. Not rune's .search (a search field), so its own block. %>
+<%# locals: (results:, query:, people: nil) %>
+<%# The results: grouped by kind, clients first, then work, tasks and people (search_result_groups),
+    each group under a small muted heading. Not rune's .search (a search field), so its own block. %>
 <section class="search-results">
   <% if query.nil? %>
     <p class="search-results__empty">
       Search <%= term(:client, count: 2).downcase %>, contacts, <%= term(:work, count: 2).downcase %>, <%= term(:task, count: 2).downcase %>, notes and documents.
     </p>
-  <% elsif results.empty? %>
+  <% elsif results.empty? && people.blank? %>
     <p class="search-results__empty">No results found.</p>
   <% end %>
 
-  <% search_result_groups(results).each do |kind, group| %>
+  <% search_result_groups(results, people: people).each do |kind, group| %>
     <%# herb:key kind %>
     <div class="search-results__group" role="group" aria-label="<%= kind %>">
       <div class="search-results__heading" aria-hidden="true"><%= kind %></div>
       <ul class="search-results__list">
-        <%= render partial: "searches/result", collection: group %>
+        <% if group.first.is_a?(User) %>
+          <%= render partial: "searches/person", collection: group, as: :person %>
+        <% else %>
+          <%= render partial: "searches/result", collection: group %>
+        <% end %>
       </ul>
     </div>
   <% end %>
