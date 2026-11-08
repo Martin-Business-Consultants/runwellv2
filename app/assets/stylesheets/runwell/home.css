@@ -182,3 +182,19 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 
 /* Open, search floats above everything else that floats: the side panel, the trays, toasts. */
 .bar:has(.bar__placeholder[hidden]) { z-index: calc(var(--z-tray) + 10); }
+
+/* The task's quick action (quick_actions/task): where it goes beside what needs doing on the first
+/* row, then its rows of fields (two to a row: lead and who else, due and the client switch) full
+/* width. Its form takes no box (display: contents) so the title joins the dialog's grid; it still
+/* submits as one. Stacked on a phone. */
+.quick-action__single { display: contents; }
+.quick-action__row { align-items: end; }
+.quick-action__switch { justify-content: flex-end; min-height: var(--control-h); }
+@media (min-width: 640px) {
+  .quick-action .dialog__box:has(.quick-action__lead-field) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
+  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__form { display: contents; }
+  .quick-action .dialog__box:has(.quick-action__lead-field) :is(.quick-action__header, .quick-action__single .field, .quick-action__row, .dialog__actions) { grid-column: 1 / -1; }
+  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__header { grid-row: 1; }
+  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__where { grid-row: 2; grid-column: 1; }
+  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__single .quick-action__lead-field { grid-row: 2; grid-column: 2; }
+}

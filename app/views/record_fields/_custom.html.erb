@@ -1,0 +1,33 @@
+<%# locals: (record:, field:, form: nil, form_id: nil) %>
+<%# One custom field (Settings > Fields): its input, or its value. Every field the record has
+    shows, set or not, so a page always says what's recorded about it. A field only some roles see
+    (CustomField#visible_to) carries a lock for those who can; owners set who in template mode
+    (record_fields/visibility), beside the field while arranging. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">
+      <%= field.label %>
+      <% unless field.everyone? %>
+        <span class="field-lock" title="<%= field.visible_to_label %> see it"><%= icon_tag "lock" %></span>
+      <% end %>
+    </span>
+    <%= custom_field_input_for(record, field, form_id: form_id) %>
+  </label>
+  <%= render "record_fields/visibility", field: field %>
+<% else %>
+  <% value = record.custom_value(field) %>
+  <dt>
+    <%= field.label %>
+    <% unless field.everyone? %>
+      <span class="field-lock" title="<%= field.visible_to_label %> see it"><%= icon_tag "lock" %></span>
+    <% end %>
+  </dt>
+  <dd>
+    <% if value.nil? || value == "" %>
+      <span class="muted">Not set</span>
+    <% else %>
+      <%= custom_field_display(field, value) %>
+    <% end %>
+    <%= render "record_fields/visibility", field: field %>
+  </dd>
+<% end %>

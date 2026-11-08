@@ -1,0 +1,6 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <%= switch_field form, :internal, label: "Internal", hint: "This is us. Its #{term(:work, count: 2).downcase} is our own.", form: form_id %>
+<% elsif record.internal? %>
+  <dt>Internal</dt><dd>This is us: its <%= term(:work, count: 2).downcase %> is our own</dd>
+<% end %>

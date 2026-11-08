@@ -1,0 +1,19 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Due</span>
+    <%= date_input form, :due_on, form: form_id %>
+  </label>
+<% else %>
+  <dt>Due</dt>
+  <dd>
+    <% if record.due_on %>
+      <%= l record.due_on, format: :long %>
+      <% if record.status != "done" && record.due_on.past? %>
+        <%= status_tag "Overdue", highlight: true %>
+      <% end %>
+    <% else %>
+      <span class="muted">No date</span>
+    <% end %>
+  </dd>
+<% end %>

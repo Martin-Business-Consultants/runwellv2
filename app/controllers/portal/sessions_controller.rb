@@ -1,5 +1,6 @@
 class Portal::SessionsController < Portal::BaseController
   skip_before_action :require_contact, only: %i[new create show]
+  skip_before_action :refuse_writes_while_previewing, only: :destroy
   rate_limit to: 5, within: 3.minutes, only: :create, with: -> { redirect_to new_portal_session_path, alert: "Try again later." }
   bot_checked fallback: -> { new_portal_session_path }
 
@@ -25,7 +26,13 @@ class Portal::SessionsController < Portal::BaseController
     redirect_to session.delete(:portal_return_to).presence&.then { it.start_with?("/portal") ? it : nil } || portal_root_path
   end
 
+  # Signing out of a preview ends the preview, back to the contact's page.
   def destroy
+    if Current.previewing?
+      cookies.delete(:portal_preview)
+      return redirect_to(edit_contact_path(Current.preview_contact), notice: "Back to your own view.")
+    end
+
     Current.portal_session&.destroy
     cookies.delete(:portal_session_id)
     redirect_to new_portal_session_path, status: :see_other

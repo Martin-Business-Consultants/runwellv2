@@ -1,0 +1,8 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# A client's name: the page's heading on show. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Name</span>
+    <%= form.text_field :name, required: true, autofocus: record.new_record?, autocomplete: "off", placeholder: "Acme Inc.", form: form_id %>
+  </label>
+<% end %>

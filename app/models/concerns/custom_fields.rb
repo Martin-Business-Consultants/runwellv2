@@ -14,6 +14,7 @@ module CustomFields
     after_save :save_custom_field_inputs
   end
 
+  # The fields the person looking may see (CustomField.for): reading and setting both go through it.
   def custom_fields = CustomField.for(self.class.name)
 
   def custom_fields=(inputs)
@@ -27,14 +28,17 @@ module CustomFields
     custom_fields.filter_map { |field| (value = values[field.id]) && [ field, field.cast(value.value) ] }
   end
 
+  # A field's value. The field comes from a list already filtered for the viewer (CustomField.for,
+  # RecordLayout), so this doesn't check again (a table reads it once per row).
   def custom_value(field) = custom_values.find { it.custom_field_id == field.id }&.then { field.cast(it.value) }
 
   # key → typed value, for agents.
   def custom_field_hash = custom_field_values.to_h { |field, value| [ field.key, value ] }
 
-  # Plain text of every value, for search.
+  # Plain text of every value everyone may see, for search (a restricted field's value would show
+  # in a result's highlight to someone who can't see it).
   def custom_search_text
-    CustomValue.where(subject: self).pluck(:value).map { Rails::HTML5::FullSanitizer.new.sanitize(it) }.join(" ")
+    CustomValue.where(subject: self, custom_field: CustomField.for_everyone).pluck(:value).map { Rails::HTML5::FullSanitizer.new.sanitize(it) }.join(" ")
   end
 
   private

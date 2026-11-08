@@ -61,6 +61,7 @@ Rails.application.routes.draw do
   get "settings/people/:id", to: redirect("/users/%{id}")
 
   namespace :settings do
+    resources :layouts, only: %i[show update destroy], param: :kind
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
     resource :theme_brief, only: :show
@@ -116,7 +117,9 @@ Rails.application.routes.draw do
   end
 
   resources :clients do
-    resources :contacts, only: %i[new create edit update destroy], shallow: true
+    resources :contacts, only: %i[new create edit update destroy], shallow: true do
+      resource :preview, only: %i[create destroy], module: :contacts
+    end
     resources :works, only: :create, path: "work"
     resources :tasks, only: :create
   end

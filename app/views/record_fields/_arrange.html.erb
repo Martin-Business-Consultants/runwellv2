@@ -1,0 +1,28 @@
+<%# locals: (layout:, noun:) %>
+<%# Template mode for owners: a button beside the page's actions, and the bar it opens across the
+    top of the page (record-layout controller on the page): drag fields between the columns, or
+    focus one and use the arrow keys (← → a column, ↑ ↓ its place, Delete hides it); hidden fields
+    wait in the bar's tray. Done saves the arrangement for everyone, for this kind of record's
+    new, edit and show pages alike. %>
+<% if can?(:manage_settings) %>
+  <div class="layout-bar" data-record-layout-target="bar" hidden>
+    <div class="layout-bar__text">
+      <strong>Arranging <%= noun %> fields for everyone</strong>
+      <span class="layout-bar__hint">Drag them between the columns, or pick one and use the arrows: <kbd>←</kbd> <kbd>→</kbd> a column, <kbd>↑</kbd> <kbd>↓</kbd> its place, <kbd>Delete</kbd> hides it.</span>
+    </div>
+    <div class="layout-bar__hidden">
+      <span class="layout-bar__label">Hidden</span>
+      <div class="layout-bar__tray" data-record-layout-target="zone" data-zone="hidden">
+        <% layout.hidden.each do |key| %>
+          <%# herb:key key %>
+          <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>"></div>
+        <% end %>
+      </div>
+    </div>
+    <div class="layout-bar__actions">
+      <button type="button" class="btn btn--ghost btn--sm" data-action="record-layout#reset">Reset</button>
+      <button type="button" class="btn btn--secondary btn--sm" data-action="record-layout#cancel" data-keys="esc">Cancel</button>
+      <button type="button" class="btn btn--primary btn--sm" data-action="record-layout#done">Done</button>
+    </div>
+  </div>
+<% end %>

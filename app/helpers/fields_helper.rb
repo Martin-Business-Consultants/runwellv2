@@ -14,7 +14,7 @@ module FieldsHelper
       safe_join([
         text_field_tag(nil, cents.to_i.zero? ? nil : Money.format(cents).delete_prefix("$"), **options,
           inputmode: "decimal", autocomplete: "off", data: { money_target: "display", action: "input->money#update blur->money#format" }),
-        hidden_field_tag(name, cents.nil? ? "" : cents.to_i, id: nil, data: { money_target: "cents" })
+        hidden_field_tag(name, cents.nil? ? "" : cents.to_i, id: nil, form: options[:form], data: { money_target: "cents" })
       ])
     end
   end
@@ -82,8 +82,10 @@ module FieldsHelper
   def date_picker(name, value, id:, **options)
     date = value.is_a?(Date) ? value : (Date.iso8601(value.to_s) rescue nil)
     data = DATE_FIELD_DATA.merge(options.delete(:data) || {}) { |key, ours, theirs| key == :action ? "#{ours} #{theirs}" : theirs }
+    # form: the id of a form it sits outside of (a record page's sidebar), for the value it sends.
+    form = options.delete(:form)
     tag.span(class: "date-picker", data: { controller: "date-field" }) do
-      hidden_field_tag(name, date&.iso8601, id: nil, data: { date_field_target: "value" }) +
+      hidden_field_tag(name, date&.iso8601, id: nil, form: form, data: { date_field_target: "value" }) +
         text_field_tag(nil, date&.strftime(DATE_FIELD_FORMAT), id: id, readonly: true, autocomplete: "off",
           placeholder: options.delete(:placeholder) || "Pick a date", data: data, **options)
     end

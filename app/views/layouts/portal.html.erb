@@ -8,6 +8,17 @@
   <body class="portal-layout">
     <a href="#main" class="skip-link" data-turbo="false">Skip to main content</a>
     <div id="global-container">
+      <% if Current.previewing? %>
+        <div class="portal-preview" role="status">
+          <span>
+            Viewing as <strong><%= current_contact.name %></strong> at <%= current_contact.client.name %>: what they see. Nothing you do here is sent.
+            <% unless current_contact.portal? %>
+              <span class="portal-preview__note">They can’t sign in yet: <%= current_contact.portal_access? ? "they have no email address" : "portal access is off" %>.</span>
+            <% end %>
+          </span>
+          <%= button_to "Stop viewing", contact_preview_path(current_contact), method: :delete, class: button_classes(variant: :secondary, size: :sm), form: { data: { turbo: false } } %>
+        </div>
+      <% end %>
       <header class="portal-topbar" id="header">
         <div class="portal-topbar__inner">
           <%= link_to portal_root_path, class: "sidebar__brand portal-topbar__brand" do %>

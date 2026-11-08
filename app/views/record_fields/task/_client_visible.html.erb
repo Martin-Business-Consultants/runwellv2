@@ -1,0 +1,6 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <%= switch_field form, :client_visible, label: "Visible to the client", form: form_id %>
+<% else %>
+  <dt>Client sees it</dt><dd><%= record.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>
+<% end %>

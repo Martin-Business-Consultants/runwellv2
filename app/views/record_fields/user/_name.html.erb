@@ -1,0 +1,7 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Name</span>
+    <%= form.text_field :name, required: true, autocomplete: "off", form: form_id %>
+  </label>
+<% end %>

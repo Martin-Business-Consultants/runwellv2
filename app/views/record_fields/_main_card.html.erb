@@ -1,0 +1,33 @@
+<%# locals: (layout:, record:, form_id:, title:, submit:, cancel:, hint: nil, url: nil, scope: nil, hidden: nil, modal: nil) %>
+<%# A new or edit page's working column (template mode): its fields (RecordLayout's main, and in a
+    modal, which has no sidebar, the aside's too), then the <form> itself as the card's footer.
+    Every field sits outside the form and joins it by form_id, so the sidebar's can too. %>
+<% builder = record_fields_builder(record, scope: scope) %>
+<%= render "layouts/shared/errors", record: record %>
+<section class="card record-form">
+  <header class="card__head">
+    <h2 class="card__title"><%= title %></h2>
+    <% if hint %>
+      <p class="card__hint"><%= hint %></p>
+    <% end %>
+  </header>
+  <div class="card__content">
+    <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id %>
+    <% if modal %>
+      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: builder, form_id: form_id %>
+    <% end %>
+  </div>
+  <%= form_with model: record, url: url, scope: scope, id: form_id, class: "card__footer card__footer--bordered record-form__footer",
+        data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do %>
+    <% (hidden || {}).each do |name, value| %>
+      <%# herb:key name %>
+      <%= hidden_field_tag name, value, id: nil %>
+    <% end %>
+    <% if modal %>
+      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+    <% else %>
+      <%= link_to "Cancel", cancel, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% end %>
+    <button type="submit" class="btn btn--primary" data-form-target="submit"><span><%= submit %></span></button>
+  <% end %>
+</section>

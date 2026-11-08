@@ -1,0 +1,10 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# On show, everyone on it in one picker (the lead first), so "Also on it" draws nothing there. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Lead</span>
+    <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" }, form: form_id %>
+  </label>
+<% else %>
+  <dt>On it</dt><dd><%= render "tasks/owner_picker", task: record, labelled: true %></dd>
+<% end %>

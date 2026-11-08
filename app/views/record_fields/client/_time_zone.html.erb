@@ -1,0 +1,17 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Time zone</span>
+    <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" }, form: form_id %>
+    <span class="field__hint">Their portal and emails show times in it.</span>
+  </label>
+<% else %>
+  <dt>Time zone</dt>
+  <dd>
+    <% if record.own_time_zone? %>
+      <%= record.time_zone %> · <%= l Time.current.in_time_zone(record.zone), format: "%-l:%M %p" %> there now
+    <% else %>
+      Same as ours
+    <% end %>
+  </dd>
+<% end %>

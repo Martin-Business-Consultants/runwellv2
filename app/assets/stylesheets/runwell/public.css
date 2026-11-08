@@ -124,3 +124,12 @@
 /* Making a key: the name takes the room, Read only and the button beside it, wrapping when narrow. */
 .portal-token-form { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
 .portal-token-form__name { flex: 1 1 12rem; width: auto; }
+
+/* Viewing the portal as a contact (Contacts::PreviewsController): a bar across the top saying whose
+/* view it is, in the brand's tint, with Stop viewing. */
+.portal-preview {
+  position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-2) var(--s-4);
+  padding: var(--s-2) var(--s-4); background: var(--brand-tint-strong); color: var(--text); font-size: var(--text-meta); text-align: center;
+}
+.portal-preview form { display: inline-flex; }
+.portal-preview__note { color: var(--text-muted); }

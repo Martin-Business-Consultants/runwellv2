@@ -22,7 +22,7 @@
         <dt><%= work.state_label %></dt><dd><%= l work.closed_at.to_date, format: :long %><%= ": #{work.close_reason}" if work.close_reason.present? %></dd>
       <% end %>
     </dl>
-    <%= render "custom_fields/values", record: work %>
+    <%= render "record_fields/zone", layout: record_layout(:work), zone: "aside", record: work %>
   </div>
 
   <div class="card__content record-card__stack" hidden="<%= pane != "scope" %>">

@@ -1,0 +1,9 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Status</span>
+    <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, form: form_id %>
+  </label>
+<% else %>
+  <dt>Status</dt><dd><%= status_tag record.status.humanize, highlight: record.status == "active" %></dd>
+<% end %>

@@ -6,6 +6,7 @@ class Portal::BaseController < ApplicationController
   allow_unauthenticated_access # the client's own surface: not a staff agent tool
   layout "portal"
   before_action :require_contact
+  before_action :refuse_writes_while_previewing
   around_action :in_client_time_zone
   helper_method :current_contact, :client
 
@@ -17,6 +18,7 @@ class Portal::BaseController < ApplicationController
   # off, is signed out even with a live cookie (and their tokens stop working).
   def require_contact
     return require_contact_token if bearer_request?
+    return if previewing_as_contact
 
     Current.portal_session ||= Session.find_by(id: cookies.signed[:portal_session_id]) if cookies.signed[:portal_session_id]
     return if Current.contact&.portal?
@@ -26,6 +28,28 @@ class Portal::BaseController < ApplicationController
     cookies.delete(:portal_session_id)
     session[:portal_return_to] = request.fullpath if request.get?
     redirect_to new_portal_session_path
+  end
+
+  # Someone on staff viewing as a contact (Contacts::PreviewsController): their staff session must
+  # still be good, or the preview is dropped and the portal asks for a sign-in as usual.
+  def previewing_as_contact
+    return unless (id = cookies.signed[:portal_preview])
+
+    if (staff = find_session_by_cookie) && (contact = Contact.find_by(id: id))
+      Current.session = staff
+      Current.preview_contact = contact
+    else
+      cookies.delete(:portal_preview)
+      nil
+    end
+  end
+
+  # A preview only looks: sending a request, connecting an app or anything else that writes would
+  # do it in the client's name.
+  def refuse_writes_while_previewing
+    return unless Current.previewing? && !request.get? && !request.head?
+
+    redirect_back fallback_location: portal_root_path, alert: "You’re viewing as #{current_contact.name}: nothing is sent or changed."
   end
 
   def require_contact_token

@@ -213,8 +213,13 @@ export default class extends Controller {
     return true
   }
 
+  // The form a field belongs to: its own (a field outside it names it with form="…"), the one
+  // around it, or the one a group of fields outside it names (data-form-for, a record page's
+  // sidebar of properties).
   #save(event) {
-    const form = event.target.closest?.("form") || document.activeElement?.closest("form")
+    const element = event.target.closest ? event.target : document.activeElement
+    const form = element?.form || element?.closest("form") ||
+      document.getElementById(element?.closest("[data-form-for]")?.dataset.formFor || "")
     if (!form) return
 
     event.preventDefault()

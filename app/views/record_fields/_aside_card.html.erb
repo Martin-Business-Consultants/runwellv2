@@ -1,0 +1,16 @@
+<%# locals: (layout:, record:, form_id: nil, scope: nil, title: nil) %>
+<%# A record page's sidebar column of fields (template mode, RecordLayout's aside): inputs joined
+    to the page's form on new and edit (form_id), values on show. It shows only when it has
+    something in it, or while arranging. %>
+<section class="card record-card record-fields-card">
+  <header class="card__head">
+    <h2 class="card__title"><%= title || (form_id ? "Properties" : "Details") %></h2>
+  </header>
+  <div class="card__content">
+    <% if form_id %>
+      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: record_fields_builder(record, scope: scope), form_id: form_id %>
+    <% else %>
+      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record %>
+    <% end %>
+  </div>
+</section>

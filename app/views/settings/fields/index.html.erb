@@ -74,6 +74,7 @@
                       <%= form.check_box :client_visible %>
                       <span>Shown to the client in the portal</span>
                     </label>
+                    <%= field_visibility_inputs "field[visible_to][]", field %>
                     <div><button type="submit" class="btn btn--primary btn--sm">Save</button></div>
                   <% end %>
                 </details>
@@ -112,6 +113,7 @@
             <%= form.check_box :client_visible %>
             <span>Shown to the client in the portal</span>
           </label>
+          <%= field_visibility_inputs "field[visible_to][]", CustomField.new, namespace: "new_#{model.downcase}" %>
           <div><button type="submit" class="btn btn--primary btn--sm">Add field</button></div>
         <% end %>
       </details>

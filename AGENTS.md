@@ -682,7 +682,11 @@ plugins). Two switches per contact:
 requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
 a client sees is decided per record (`client_visible` on tasks and documents); there are no
-client roles.
+client roles. Staff see it for themselves with View as on a contact's page
+(`Contacts::PreviewsController`, `contact.previewed`): the portal as that contact, read-only (a
+signed `portal_preview` cookie beside the staff session; `Current.preview_contact`,
+`Portal::BaseController#refuse_writes_while_previewing`), with a bar to stop. A portal controller
+that writes needs nothing for it: any non-GET is refused while previewing.
 
 The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
@@ -836,7 +840,57 @@ each value against its kind, and search indexes them. Forms render them with
 `custom_field_inputs form, record` (a helper, since partials can't render in `form_with`);
 pages with `render "custom_fields/values", record:`. Rules: information only, nothing acts on
 a custom field; never required; a kind can't change once it has values; archiving keeps
-values; a plugin keeps its own data in its own tables, never in a custom field.
+values; a plugin keeps its own data in its own tables, never in a custom field. On record pages
+they're laid out one by one with the rest (`custom.<key>`, Template mode below).
+
+Who on staff sees a field is a permission on the field (`CustomField#visible_to`: the roles besides
+owners who see it; nil for everyone, `[]` for owners only), set in Settings > Fields or from its
+"who sees it" pill while arranging (`record_fields/visibility`). It's enforced where values are
+read, not where they're drawn: `CustomField.for(model)` leaves a field out for anyone else
+(`seen_by(Current.user)`, an agent counting as its person), and every page, table column, the side
+panel, JSON for agents and saving (`record.custom_fields`) goes through it; search indexes only
+fields everyone sees (`custom_search_text`), and a restricted field is never shown to clients. A
+new place that reads custom values reads them through `CustomField.for` or `record.custom_fields`,
+never `CustomValue` directly.
+
+## Template mode
+
+Owners arrange each kind of record's fields for the whole install, on the record's own pages: the
+layout icon in the header (`record_fields/arrange_button`) opens a bar (`record_fields/arrange`,
+the `record-layout` controller) where fields are dragged between the working column, the sidebar
+and a Hidden tray, or moved with the keys (← → a column, ↑ ↓ their place, Delete hides, Enter
+brings one back); Done saves (`Settings::LayoutsController`, `arrange_layout` / `reset_layout` /
+`show_layout`, `settings.layout` in the audit log). One arrangement per kind (`client`, `work`,
+`task`, `contact`, `user`; a person's page is one column, so order only) drives its new, edit and
+show pages alike (`RecordLayout`, kept on `Setting#layouts`), and for tasks the side panel (its
+fields in that order, hidden ones left out) and the quick-action form (its rows: what needs doing beside
+where it goes, the details, lead beside who else, due beside the client switch, in the order of
+each row's first field; a hidden field drops out of its row). Custom fields start in the sidebar on clients and work, the working column elsewhere. Each field is a partial,
+`record_fields/<kind>/_<key>` (custom fields `record_fields/_custom`), drawing an input when given
+a form builder and its value (a `dt`/`dd`, or nothing when the header already shows it) without;
+`record_fields/zone` lays out a column, `record_fields/main_card` and `aside_card` the cards.
+
+The limits, kept on purpose so this stays a way to arrange a page and doesn't become a form
+builder:
+
+- **Placement, order and visibility only**, on record pages. Nothing changes what's stored, what's
+  required or what an agent can set, and a hidden field still shows wherever else the record does
+  (the side panel, tables, the portal, exports). Required fields can't be hidden
+- **One layout per kind per install**, set by owners. No per-person or per-role layouts, no
+  conditions ("show when…"), no required custom fields. Who may see a custom field is a
+  permission on the field itself (Custom fields, above), set from template mode but enforced
+  everywhere its value goes; everyone sees the same arrangement, less the fields they can't see. Layouts are stored per kind so a per-label
+  variant (`work:service`) could come later without changing their shape
+- **Headers and in-place widgets stay hand-built**: titles, the work's meta line and info button,
+  status and owner pickers. Fields are what move
+- **Field keys are a contract** (`RecordLayout::DEFAULTS`, docs/plugin-contract.md): renaming one
+  needs a migration of saved layouts; a field a release adds joins its default column, one it
+  removes is dropped
+- **Fields live outside the `<form>`** and join it by id (`form="…"`, the `form_id` local), so a
+  field can sit in either column and still save. Every field widget must respect it: helpers
+  take `form:` (`date_input`, `money_field_tag`, `rich_text_field form_id:`, comboboxes copy it to
+  their hidden fields, `custom_field_input_for`), and JavaScript finds a field's form with
+  `element.form` (or `[data-form-for]` around buttons), never `closest("form")`
 
 ## Audit log
 
@@ -847,7 +901,7 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 `user.role_changed`, `user.profile_changed`, `user.password_set`, `user.password_reset_sent`,
 `user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`,,
 `user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
-`settings.plugin`, `settings.custom_css`, `settings.webhook`, `settings.bot_check`. Those subjects
+`settings.plugin`, `settings.custom_css`, `settings.webhook`, `settings.bot_check`, `settings.layout`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
 
 ## Webhooks

@@ -3,6 +3,11 @@
 # that needs behaviour is a real column or a plugin's own table. Optional, never required; a
 # field that's no longer wanted is archived, keeping its values, so history still reads right.
 # The key is set once from the label and never changes, so agents and imports can rely on it.
+#
+# Who sees it: everyone on staff, or only some roles (visible_to; owners see every field). That's
+# a permission, not a layout: CustomField.for leaves a field out for anyone else, so their pages,
+# the side panel, tables, agents and saves never see or set it; search indexes only fields everyone
+# sees, and a restricted field never reaches the client portal.
 class CustomField < ApplicationRecord
   MODELS = %w[Client Work Task].freeze
   KINDS = %w[text long_text number money date boolean choice link].freeze
@@ -12,7 +17,12 @@ class CustomField < ApplicationRecord
   has_many :values, class_name: "CustomValue", dependent: :destroy
   positioned on: :model_type
 
+  # The roles that may see a field besides owners, who see every one.
+  RESTRICTABLE_ROLES = User::ROLES - %w[owner]
+
   normalizes :label, with: ->(value) { value.to_s.strip }
+  # The roles besides owners who see it: every one is everyone (nil); none is owners only ([]).
+  normalizes :visible_to, with: ->(roles) { (Array(roles).map(&:to_s) & RESTRICTABLE_ROLES).then { it.size == RESTRICTABLE_ROLES.size ? nil : it } }
   normalizes :choices, with: ->(value) { Array(value.is_a?(String) ? value.split(/[\n,]/) : value).map { it.to_s.strip }.compact_blank.uniq }
 
   validates :model_type, inclusion: { in: MODELS }
@@ -23,12 +33,35 @@ class CustomField < ApplicationRecord
   validate :kind_is_fixed, on: :update
 
   before_validation(on: :create) { self.key = label.to_s.parameterize(separator: "_").presence if key.blank? }
+  # A field only some of the team may see is never shown to clients.
+  before_save { self.client_visible = false unless everyone? }
 
   scope :active, -> { where(archived_at: nil) }
   scope :ordered, -> { order(:position) }
   scope :listed, -> { where(listed: true) }
 
-  def self.for(model) = active.where(model_type: model.to_s).ordered
+  # The fields someone may see: every one for owners and for no one in particular (a job, an
+  # import, the portal, which filters by client_visible); for anyone else on staff (or their
+  # agent), those for everyone and those naming their role.
+  scope :seen_by, ->(user) {
+    person = user&.person
+    next all if person.nil? || person.owner?
+
+    where("custom_fields.visible_to IS NULL OR EXISTS (SELECT 1 FROM json_each(custom_fields.visible_to) WHERE json_each.value = ?)", person.role)
+  }
+  scope :for_everyone, -> { where(visible_to: nil) }
+
+  def self.for(model, viewer: Current.user) = active.where(model_type: model.to_s).seen_by(viewer).ordered
+
+  def everyone? = visible_to.nil?
+  def seen_by_role?(role) = role == "owner" || everyone? || visible_to.include?(role)
+
+  # Who sees it, in words: "Everyone", or "Owners and managers".
+  def visible_to_label
+    return "Everyone" if everyone?
+
+    ([ "owners" ] + visible_to.map { "#{it}s" }).to_sentence.capitalize.then { visible_to.empty? ? "Owners only" : it }
+  end
 
   def archived? = archived_at.present?
   def kind_label = KIND_LABELS.fetch(kind)

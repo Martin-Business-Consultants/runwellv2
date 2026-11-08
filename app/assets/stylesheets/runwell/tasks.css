@@ -321,3 +321,5 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* The Tasks table's list context (data-task-list for status changes): no box of its own. */
 .task-list { display: contents; }
+/* The description (record_fields/task/description) takes the panel's full width under its label. */
+.task-panel__details dd.record-fields__prose { grid-column: 1 / -1; }

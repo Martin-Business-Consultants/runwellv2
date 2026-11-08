@@ -1,0 +1,8 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# Fixed once it exists. On show it's in the line under the title. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label"><%= term(:client) %></span>
+    <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "Choose a client" }, required: true, disabled: record.persisted?, form: form_id %>
+  </label>
+<% end %>

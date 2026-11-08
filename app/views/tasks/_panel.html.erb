@@ -1,7 +1,7 @@
 <%# locals: (task:) %>
 <%# A task in the side panel (layouts/shared/_side_panel), beside the page you opened it from:
-    where it sits, its title, status, who's on it, due date and section, each saved as you change
-    it, its description and its notes. Saving refreshes the page under it in place
+    where it sits, its title, then its fields in the install's order (status, who's on it, due
+    date and section saved as you change them), and its notes. Saving refreshes the page under it in place
     (TasksController#update), and others' changes arrive live (turbo_stream_from). Open goes to
     its own page; Esc or ✕ closes it. %>
 <section class="task-panel" id="<%= dom_id(task, :panel) %>" aria-label="<%= task.title %>">
@@ -34,33 +34,38 @@
     <%= form.text_field :title, class: "task-panel__title", required: true, autocomplete: "off", aria: { label: "Title" }, data: { action: "change->form#submit" } %>
   <% end %>
 
+  <%# Its fields in the install's order (template mode, RecordLayout: the working column's, then
+      the sidebar's; hidden ones left out). Due and the section save as you change them; the rest
+      are the show page's own (record_fields/task/*), pickers included. %>
+  <% layout = record_layout(:task) %>
   <dl class="details task-panel__details">
-    <dt>Status</dt><dd><%= render "tasks/status_dot", task: task, labelled: true %></dd>
-    <dt>On it</dt><dd><%= render "tasks/owner_picker", task: task, labelled: true %></dd>
-    <dt>Due</dt>
-    <dd>
-      <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_due), class: "task-panel__field", data: { controller: "form" } do |form| %>
-        <%= hidden_field_tag :inline, "panel", id: nil %>
-        <%= date_input form, :due_on, aria: { label: "Due" }, data: { action: "change->form#submit" } %>
+    <% (layout.main + layout.aside).each do |key| %>
+      <%# herb:key key %>
+      <% if key == "due" %>
+        <dt>Due</dt>
+        <dd>
+          <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_due), class: "task-panel__field", data: { controller: "form" } do |form| %>
+            <%= hidden_field_tag :inline, "panel", id: nil %>
+            <%= date_input form, :due_on, aria: { label: "Due" }, data: { action: "change->form#submit" } %>
+          <% end %>
+        </dd>
+      <% elsif key == "home" && task.work %>
+        <dt><%= term(:scope_item) %></dt>
+        <dd>
+          <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
+            <%= hidden_field_tag :inline, "panel", id: nil %>
+            <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other tasks" }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
+          <% end %>
+        </dd>
+      <% elsif layout.custom?(key) %>
+        <%= render "record_fields/custom", record: task, field: layout.custom_field(key) %>
+      <% else %>
+        <%= render record_field_partial(layout, key), record: task %>
       <% end %>
-    </dd>
-    <% if task.work %>
-      <dt><%= term(:scope_item) %></dt>
-      <dd>
-        <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
-          <%= hidden_field_tag :inline, "panel", id: nil %>
-          <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other tasks" }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
-        <% end %>
-      </dd>
     <% end %>
   </dl>
 
   <div class="task-panel__description">
-    <% if task.description.present? %>
-      <div class="record-card__prose"><%= rich_text task.description %></div>
-    <% else %>
-      <p class="muted">No description.</p>
-    <% end %>
     <%= link_to edit_task_path(task), class: "btn btn--secondary btn--sm", data: { turbo_frame: "_top" } do %>
       <%= icon_tag "pencil" %>
       <span>Edit details</span>

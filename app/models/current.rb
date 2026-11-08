@@ -1,10 +1,13 @@
 class Current < ActiveSupport::CurrentAttributes
   attribute :session, :access_token, :portal_session, :source, :settings
+  # Someone on staff viewing the portal as this contact (Contacts::PreviewsController): read-only.
+  attribute :preview_contact
   # Set only inside Work#erase!, so plugins' records that refuse deletion know it's an erase.
   attribute :erasing
 
   # The client's contact on the portal: signed in by link, or acting through their token.
-  def contact = portal_session&.contact || access_token&.contact
+  def contact = preview_contact || portal_session&.contact || access_token&.contact
+  def previewing? = preview_contact.present?
 
   # Signed in with a browser session, or acting through a bearer token: then as the token's
   # person's agent (User::Agent), so the history says "Ted's agent via Claude".

@@ -2,22 +2,28 @@
 
 <%= parent_page @client.name, @client %>
 
-<section class="record-page">
+<% layout = record_layout(:contact) %>
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:contact) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a contact’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title">Add a contact at <%= @client.name %></h1>
       <p class="record-page__description">Someone you deal with there. Portal access and approval are off until you switch them on.</p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
   <div class="record-page__main">
-    <%= render "contacts/form", contact: @contact %>
+    <%= render "record_fields/main_card", layout: layout, record: @contact, form_id: "contact_form", title: "Contact",
+          hint: "Someone at #{@contact.client.name} you deal with.", submit: "Add contact", url: client_contacts_path(@client), cancel: client_path(@client) %>
   </div>
 
   <aside class="record-page__aside">
+    <%= render "record_fields/aside_card", layout: layout, record: @contact, form_id: "contact_form", title: "Access" %>
     <%= render "contacts/sidebar", client: @client, contact: @contact %>
   </aside>
 </section>

@@ -2,7 +2,7 @@
 <%# A record's custom field values, label beside value. client: only the fields shown to clients
     (the portal). Each pair sits in a row element (display: contents) so herb:key has one root. %>
 <% values = record.custom_field_values %>
-<% values = values.select { |field, _| field.client_visible } if client %>
+<% values = values.select { |field, _| field.client_visible && field.everyone? } if client %>
 <% if values.any? %>
   <dl class="details custom-fields">
     <% values.each do |field, value| %>

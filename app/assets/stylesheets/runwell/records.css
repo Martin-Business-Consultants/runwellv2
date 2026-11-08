@@ -202,10 +202,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* A short field (a status) beside a long one (a time zone). */
 @media (min-width: 640px) { .record-form__row--narrow-first { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
 
-/* Three short fields to a row (a task's section or client, who asked, how it came in): narrower
-/* than rune's pairs, so all three fit beside each other in the working column. */
-.field-row--3 { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
-
 /* A group of fields under its own heading (a fieldset's legend). A legend sits outside the
 /* fieldset's flow, so its space below is its own padding, not the group's gap. */
 .record-form__group { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
@@ -284,3 +280,58 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* card inside loses its own. */
 .record-modal .record-form { border: 0; box-shadow: none; background: none; }
 .record-modal__body { padding: var(--s-2); }
+
+/* ======================================================================= Template mode */
+
+/* A record page's fields in the install's order (RecordLayout, record_fields/zone): inputs on new
+/* and edit, a details list on show (label beside value in the sidebar, stacked in the working
+/* column). A sidebar card of fields shows only when one of them has something to show. */
+.record-fields { display: flex; flex-direction: column; gap: var(--s-4); }
+dl.record-fields { display: grid; }
+dl.record-fields .layout-field { display: contents; }
+dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
+dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
+.record-fields__prose { overflow-wrap: anywhere; }
+.record-fields-card:not(:has(dt, .field, .setting-row, .field--inline)) { display: none; }
+.record-form__footer { flex-direction: row; justify-content: flex-end; }
+
+/* Arranging (record-layout controller): each field a block that moves, its inputs inert; each
+/* column a drop area; the bar across the top with the Hidden tray. */
+.record-page--arranging .record-fields-card { display: flex; }
+.record-page--arranging [data-zone] { min-height: 3rem; padding: var(--s-2); border-radius: var(--radius); background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.record-page--arranging dl.record-fields { display: flex; flex-direction: column; gap: var(--s-2); }
+.record-page--arranging .layout-field {
+  display: grid; position: relative; gap: var(--s-1) var(--s-3); padding: var(--s-2) var(--s-3);
+  border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); cursor: grab;
+}
+.record-page--arranging dl.record-fields .layout-field { grid-template-columns: max-content minmax(0, 1fr); }
+.record-page--arranging .layout-field:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong)); }
+.record-page--arranging .layout-field:focus-visible { outline: none; border-style: solid; border-color: var(--accent); box-shadow: var(--ring); }
+.record-page--arranging .layout-field:not(:has(dt, .field, .setting-row, .field--inline))::before,
+.layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--text-muted); }
+.layout-field--dragging { opacity: .4; }
+
+.layout-bar {
+  position: sticky; top: var(--s-2); z-index: 20; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4);
+  padding: var(--s-3) var(--s-4); border-radius: var(--radius-lg); background: var(--brand-tint-strong); box-shadow: var(--shadow-popover);
+}
+.layout-bar__text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: 2px; min-width: 0; }
+.layout-bar__hint { color: var(--text-muted); font-size: var(--text-meta); }
+.layout-bar__hidden { display: flex; flex: 1 1 14rem; align-items: center; gap: var(--s-2); min-width: 0; }
+.layout-bar__label { color: var(--text-muted); font-size: var(--text-meta); }
+.layout-bar__tray { display: flex; flex: 1; flex-wrap: wrap; gap: var(--s-1); min-height: 2.25rem; padding: 4px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
+.layout-bar__tray .layout-field { display: inline-flex; padding: 2px var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--layer-1); font-size: var(--text-meta); cursor: grab; }
+.layout-bar__tray .layout-field * { display: none; }
+.layout-bar__actions { display: flex; gap: var(--s-2); }
+
+/* A custom field only some roles see: a lock beside its label; and, while arranging, the pill that
+/* says who and opens the roles to tick (record_fields/visibility). */
+.field-lock { display: inline-flex; color: var(--text-faint); vertical-align: middle; }
+.field-lock .icon { width: .75rem; height: .75rem; }
+.layout-field__control { display: none; }
+.record-page--arranging .layout-field__control { display: inline-flex; }
+.layout-field__visibility { gap: 4px; font-size: var(--text-meta); }
+.layout-visibility[popover] { margin: auto; padding: var(--s-4); border: 0; border-radius: var(--radius-lg); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); }
+.layout-visibility[popover]:popover-open { display: flex; flex-direction: column; gap: var(--s-3); animation: rune-pop var(--motion-fast) var(--ease); }
+.layout-visibility__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
+.field-visibility { display: flex; flex-direction: column; gap: var(--s-1); margin: 0; padding: 0; border: 0; }

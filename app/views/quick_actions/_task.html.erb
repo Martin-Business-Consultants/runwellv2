@@ -1,30 +1,56 @@
 <%# locals: (form_id:) %>
 <%# A task from anywhere (g t n, or the tray): what needs doing, who leads it and who else is on it,
-    and when, on the work or client picked above. Nobody leading it makes it a request. %>
+    when, and whether the client sees it, on the work or client picked above. Nobody leading it
+    makes it a request.
+    Its few fields go in rows: what needs doing (beside where it goes, in the dialog), the details,
+    lead beside who else, due beside the client switch. The rows follow the order the install
+    arranged a task's fields (template mode, RecordLayout: a row comes where its first field is),
+    and a hidden field drops out of its row; the title is required, so it's always there. %>
 <% me = Current.user.person %>
+<% layout = record_layout(:task) %>
+<% shown = layout.main + layout.aside %>
+<% rows = [ %w[title], %w[description], %w[lead others], %w[due client_visible] ]
+     .map { |row| row & shown }.reject(&:empty?)
+     .sort_by { |row| shown.index(row.first) } %>
 <%= form_with model: Task.new, url: tasks_path, id: form_id, namespace: "quick_action", class: "quick-action__form", data: { turbo_frame: "_top" } do |form| %>
-  <div class="field">
-    <%= form.label :title, "What needs doing", class: "field__label" %>
-    <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "Send the proposal…", autofocus: true %>
-  </div>
-  <div class="field">
-    <span class="field__label">Details <span class="quick-action__optional">Optional</span></span>
-    <%= rich_text_field form, :description, placeholder: "Anything that helps…" %>
-  </div>
-  <div class="field-row">
-    <div class="field">
-      <%= form.label :owner_id, "Lead", class: "field__label" %>
-      <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned", selected: me.id } %>
+  <% rows.each do |row| %>
+    <%# herb:key row.join("-") %>
+    <div class="<%= row.size > 1 ? "field-row quick-action__row" : "quick-action__single" %>">
+      <% row.each do |key| %>
+        <%# herb:key key %>
+        <% if key == "title" %>
+          <div class="field quick-action__lead-field">
+            <%= form.label :title, "What needs doing", class: "field__label" %>
+            <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "Send the proposal…", autofocus: true %>
+          </div>
+        <% elsif key == "description" %>
+          <div class="field">
+            <span class="field__label">Details <span class="quick-action__optional">Optional</span></span>
+            <%= rich_text_field form, :description, placeholder: "Anything that helps…" %>
+          </div>
+        <% elsif key == "lead" %>
+          <div class="field">
+            <%= form.label :owner_id, "Lead", class: "field__label" %>
+            <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned", selected: me.id } %>
+          </div>
+        <% elsif key == "others" %>
+          <div class="field">
+            <%= form.label :other_owner_ids, "Also on it", class: "field__label" %>
+            <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else" }, multiple: true %>
+          </div>
+        <% elsif key == "due" %>
+          <div class="field">
+            <%= form.label :due_on, "Due", class: "field__label" %>
+            <%= date_input form, :due_on %>
+          </div>
+        <% elsif key == "client_visible" %>
+          <div class="field quick-action__switch">
+            <%= switch_field form, :client_visible, label: "Visible to the client" %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
-    <div class="field">
-      <%= form.label :due_on, "Due", class: "field__label" %>
-      <%= date_input form, :due_on %>
-    </div>
-  </div>
-  <div class="field">
-    <%= form.label :other_owner_ids, "Also on it", class: "field__label" %>
-    <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else" }, multiple: true %>
-  </div>
+  <% end %>
   <div class="dialog__actions">
     <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
     <button type="submit" class="btn btn--primary">Add <%= term(:task).downcase %></button>

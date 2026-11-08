@@ -2,22 +2,32 @@
 
 <%= parent_page @contact.client.name, @contact.client %>
 
-<section class="record-page">
+<% layout = record_layout(:contact) %>
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:contact) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a contact’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">A contact at <%= link_to @contact.client.name, @contact.client %></p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
+      <%= button_to contact_preview_path(@contact), class: button_classes(variant: :secondary), form: { data: { turbo: false } },
+            title: "Open the client portal as #{@contact.name_was}, read-only" do %>
+        <%= icon_tag "eye" %><span>View as <%= @contact.name_was %></span>
+      <% end %>
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
   <div class="record-page__main">
-    <%= render "contacts/form", contact: @contact %>
+    <%= render "record_fields/main_card", layout: layout, record: @contact, form_id: "contact_form", title: "Contact",
+          hint: "Someone at #{@contact.client.name} you deal with.", submit: "Save changes", url: contact_path(@contact), cancel: client_path(@contact.client) %>
   </div>
 
   <aside class="record-page__aside">
+    <%= render "record_fields/aside_card", layout: layout, record: @contact, form_id: "contact_form", title: "Access" %>
     <%= render "contacts/sidebar", client: @contact.client, contact: @contact %>
 
     <% if can?(:delete_records) %>

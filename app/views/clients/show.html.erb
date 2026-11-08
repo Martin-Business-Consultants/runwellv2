@@ -12,7 +12,10 @@
 <%= parent_page term(:client, count: 2), clients_path %>
 <%= turbo_stream_from @client %>
 
-<section class="record-page record-page--tabbed">
+<% layout = record_layout(:client) %>
+<section class="record-page record-page--tabbed" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:client) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:client).downcase}’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
@@ -22,6 +25,7 @@
       </p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= link_to edit_client_path(@client), class: "btn btn--secondary", data: { keys: "e" } do %>
         <%= icon_tag "pencil" %>
         <span>Edit</span>
@@ -32,6 +36,14 @@
   </header>
 
   <div class="record-page__main">
+    <%# Its fields as the install arranged them (template mode): the working column's here; the
+        sidebar's in Details. %>
+    <section class="card record-card record-fields-card">
+      <div class="card__content">
+        <%= render "record_fields/zone", layout: layout, zone: "main", record: @client, stacked: true %>
+      </div>
+    </section>
+
     <turbo-frame id="record_tab" target="_top">
       <div class="record-tabs">
         <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
@@ -99,29 +111,7 @@
 
   <aside class="record-page__aside">
     <%= plugin_slots(:client_aside, client: @client) %>
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content record-card__stack">
-        <dl class="details">
-          <dt>Status</dt><dd><%= status_tag @client.status.humanize, highlight: @client.status == "active" %></dd>
-          <% if @client.internal? %>
-            <dt>Internal</dt><dd>This is us: our own projects</dd>
-          <% end %>
-          <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
-          <dt>Time zone</dt>
-          <dd>
-            <% if @client.own_time_zone? %>
-              <%= @client.time_zone %> · <%= l Time.current.in_time_zone(@client.zone), format: "%-l:%M %p" %> there now
-            <% else %>
-              Same as ours
-            <% end %>
-          </dd>
-        </dl>
-        <%= render "custom_fields/values", record: @client %>
-      </div>
-    </section>
+    <%= render "record_fields/aside_card", layout: layout, record: @client %>
 
     <section class="card record-card">
       <header class="card__head">

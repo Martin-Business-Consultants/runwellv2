@@ -272,7 +272,8 @@ Every `Event` is published from a job after it's saved, never inside the request
 `client.created`, `work.created`, `work.closed` (payload `outcome`: completed or
 cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
 `task.created`, `task.status`, `task.requested` (3.0: a client asked for it, from the portal or by
-email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`.
+email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,
+`contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject).
 
 **Removed in 3.0:** `commitment.added`, `commitment.done`, `commitment.missed`,
 `commitment.dropped`, `request.received` (now `task.requested`), `request.replied` (replies
@@ -343,6 +344,17 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 | --- | --- | --- |
 | Mailers inheriting `ApplicationMailer` (the layout, the sender, the install's address in links) | 2.0 | Stable |
 | `MailerHelper`: `mail_heading`, `mail_button`, `mail_quote`, `mail_small`, `content_for :preheader / :reason` | 2.10 | Stable |
+
+## Record layouts
+
+Template mode (5.1.3, Experimental) lets an install's owners arrange each kind of record's fields:
+`RecordLayout.for(kind)` (`client`, `work`, `task`, `contact`, `user`) has `main`, `aside` and `hidden`, each a
+list of field keys in order, and `required?(key)`. The core's keys are `RecordLayout::DEFAULTS`;
+custom fields are `custom.<key>`. A key is stable once released: a renamed key comes with a
+migration of saved layouts. Layouts change only where fields show on the record's pages, never
+what's stored or required. Plugins can't add fields to a layout yet; their panels stay in the
+record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners), and
+`settings.layout` is a security event (Settings > Audit log).
 
 ## Changes to this contract
 

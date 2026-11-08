@@ -13,7 +13,7 @@
             <span class="visually-hidden">Close</span>
           </button>
         </header>
-        <div class="field">
+        <div class="field quick-action__where">
           <span class="field__label">Where it goes</span>
           <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
         </div>

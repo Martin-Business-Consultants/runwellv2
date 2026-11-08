@@ -19,6 +19,8 @@ Rails.application.config.to_prepare do
     "bell-alert" => '<path d="M4 11.5V7a4 4 0 0 1 6.2-3.35M12 7v4.5l1 1H3"/><path d="M6.5 14a1.5 1.5 0 0 0 3 0"/><circle cx="12.25" cy="3.75" r="1.5"/>',
     "bell-off" => bell_off,
     "board" => '<rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6.25 3v10M9.75 3v6"/>',
+    # Template mode: a page's two columns with fields in them.
+    "layout" => '<rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M9.5 3v10M4.75 6h2.75M4.75 8.5h2.75M11.25 6h.5"/>',
     "board-add" => '<path d="M13.5 8V4.5A1.5 1.5 0 0 0 12 3H4a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 4 13h4M6.25 3v10M9.75 3v4"/><path d="M12 10v4M10 12h4"/>',
     "bolt" => '<path d="M9 2 3.5 9H8l-1 5 5.5-7H8z"/>',
     "bookmark" => '<path d="M4.5 2.5h7v11L8 11l-3.5 2.5z" fill="currentColor"/>',

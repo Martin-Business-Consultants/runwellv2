@@ -1,0 +1,8 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Email address</span>
+    <%= form.email_field :email_address, required: true, autocomplete: "off", form: form_id %>
+    <span class="field__hint">They sign in with it, and Runwell’s email goes there.<% unless record == Current.user %> Changing it signs them out everywhere.<% end %></span>
+  </label>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_180000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -219,6 +219,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_160000) do
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "visible_to"
     t.index ["model_type", "key"], name: "index_custom_fields_on_model_type_and_key", unique: true
     t.index ["model_type", "position"], name: "index_custom_fields_on_model_type_and_position"
   end
@@ -515,6 +516,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_160000) do
     t.string "bot_check_provider"
     t.string "bot_check_site_key"
     t.string "bot_check_secret_key"
+    t.json "layouts", default: {}, null: false
   end
 
   create_table "sign_in_providers", force: :cascade do |t|

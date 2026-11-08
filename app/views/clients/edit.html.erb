@@ -2,47 +2,39 @@
 
 <%= parent_page @client.name_was, @client %>
 
-<section class="record-page">
+<% layout = record_layout(:client) %>
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:client) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:client).downcase}’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">Changes show everywhere they appear, the portal included.</p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
   <div class="record-page__main">
-    <%= render "clients/form", client: @client, internal_aside: true %>
+    <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
+          submit: "Save changes", cancel: client_path(@client) %>
   </div>
 
   <aside class="record-page__aside">
+    <%= render "record_fields/aside_card", layout: layout, record: @client, form_id: "client_form" %>
+
     <section class="card record-card">
       <header class="card__head">
         <h2 class="card__title">Details</h2>
       </header>
       <div class="card__content">
         <dl class="details">
-          <dt>Status</dt><dd><%= status_tag @client.status_was.to_s.humanize, highlight: @client.status_was == "active" %></dd>
           <dt>Contacts</dt><dd><%= @client.contacts.active.count %></dd>
           <dt><%= term(:work, count: 2) %></dt><dd><%= @client.works.count %></dd>
           <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
         </dl>
-      </div>
-    </section>
-
-    <%# Saved with the form beside it (the form attribute), on Save changes. %>
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Internal</h2>
-        <p class="card__hint">Saved with the form, on Save changes.</p>
-      </header>
-      <div class="card__content">
-        <div class="record-form__toggle">
-          <label class="record-form__toggle-text" for="<%= dom_id(@client, :internal) %>">This is us. Its work is our own.</label>
-          <%= switch_tag { hidden_field_tag("client[internal]", "0", id: nil, form: dom_id(@client, :form), autocomplete: "off") + check_box_tag("client[internal]", "1", @client.internal?, id: dom_id(@client, :internal), role: "switch", form: dom_id(@client, :form)) } %>
-        </div>
       </div>
     </section>
 

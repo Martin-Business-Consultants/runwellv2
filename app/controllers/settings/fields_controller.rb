@@ -5,10 +5,10 @@ class Settings::FieldsController < Settings::BaseController
     description: "Every field an install added to clients (Client), work (Work) and tasks (Task), with the key to set it by (custom_fields: { key: value } on create/update tools) and its kind."
   agent_tool :create_custom_field, on: :create, title: "Add a custom field",
     description: "kind: #{CustomField::KINDS.join(", ")}. choices (for choice): separated by commas. listed: a column in the index table. client_visible: shown in the client portal (works).",
-    params: { field: { model_type: CustomField::MODELS, label: "string!", kind: CustomField::KINDS, choices: "string", listed: "boolean", client_visible: "boolean" } }
+    params: { field: { model_type: CustomField::MODELS, label: "string!", kind: CustomField::KINDS, choices: "string", listed: "boolean", client_visible: "boolean", visible_to: "string[]" } }
   agent_tool :update_custom_field, on: :update, title: "Change a custom field",
-    description: "Rename it, change its choices, whether it's listed or shown to clients, its position (1 is first), or restore an archived one (archived: false). Its kind and key don't change.",
-    params: { field: { label: "string", choices: "string", listed: "boolean", client_visible: "boolean", position: "integer", archived: "boolean" } }
+    description: "Rename it, change its choices, whether it's listed or shown to clients, who on staff sees it (visible_to: the roles besides owners who see it, from #{CustomField::RESTRICTABLE_ROLES.join(" and ")}: all of them for everyone, [] for owners only), its position (1 is first), or restore an archived one (archived: false). Its kind and key don't change. A field only some roles see is left out for everyone else wherever values go (pages, tables, agents, search), and never shown to clients.",
+    params: { field: { label: "string", choices: "string", listed: "boolean", client_visible: "boolean", visible_to: "string[]", position: "integer", archived: "boolean" } }
   agent_tool :archive_custom_field, on: :destroy, title: "Archive a custom field",
     description: "Hides it from forms, pages and agents. Its values are kept, and update_custom_field with archived: false brings it back."
 
@@ -19,7 +19,7 @@ class Settings::FieldsController < Settings::BaseController
   end
 
   def create
-    field = CustomField.new(params.expect(field: %i[model_type label kind choices listed client_visible]))
+    field = CustomField.new(params.expect(field: [ :model_type, :label, :kind, :choices, :listed, :client_visible, visible_to: [] ]))
     if field.save
       redirect_to settings_fields_path(tab: field.model_type.to_s.underscore.presence), notice: "Added #{field.label} to #{model_name(field)}."
     else
@@ -28,10 +28,12 @@ class Settings::FieldsController < Settings::BaseController
   end
 
   def update
-    attributes = params.expect(field: %i[label choices listed client_visible position archived])
+    attributes = params.expect(field: [ :label, :choices, :listed, :client_visible, :position, :archived, visible_to: [] ])
     archived = attributes.delete(:archived)
     attributes[:archived_at] = ActiveModel::Type::Boolean.new.cast(archived) ? (@field.archived_at || Time.current) : nil unless archived.nil?
     if @field.update(attributes)
+      return head(:no_content) if request.format.json? && params[:inline] # template mode's roles control
+
       redirect_to settings_fields_path(tab: @field.model_type.underscore), notice: "Saved #{@field.label}."
     else
       redirect_to settings_fields_path(tab: @field.model_type.underscore), alert: @field.errors.full_messages.to_sentence

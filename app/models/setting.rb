@@ -3,7 +3,7 @@
 # bot checks, what it calls things and which plugins are on.
 class Setting < ApplicationRecord
   include Eventful, CustomCss
-  include Appearance, Address, TimeZone, Mail, BotCheck, Terminology, Plugins
+  include Appearance, Address, TimeZone, Mail, BotCheck, Terminology, Plugins, Layouts
 
   def self.current
     Current.settings ||= first_or_create!

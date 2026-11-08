@@ -1,28 +1,35 @@
 <% @page_title = "New " + term(:client).downcase %>
 <% recent = Client.order(created_at: :desc).limit(6).to_a %>
+<% layout = record_layout(:client) %>
 <% if turbo_frame_request_id == "modal" %>
   <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
-    <%= render "clients/form", client: @client, modal: true %>
+    <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
+          submit: "Add client", cancel: clients_path, modal: true %>
   <% end %>
 <% else %>
 <%= parent_page term(:client, count: 2), clients_path %>
 
-<section class="record-page">
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:client) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:client).downcase}’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">Someone you work for. Contacts, <%= term(:work, count: 2).downcase %> and <%= term(:task, count: 2).downcase %> come next.</p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
   <div class="record-page__main">
-    <%= render "clients/form", client: @client %>
+    <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
+          submit: "Add client", cancel: clients_path %>
   </div>
 
   <aside class="record-page__aside">
+    <%= render "record_fields/aside_card", layout: layout, record: @client, form_id: "client_form" %>
     <section class="card record-card">
       <header class="card__head">
         <h2 class="card__title">What comes next</h2>

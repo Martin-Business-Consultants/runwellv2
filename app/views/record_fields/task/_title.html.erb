@@ -1,0 +1,8 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# A task's title: the page's heading on show. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Title</span>
+    <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off", form: form_id %>
+  </label>
+<% end %>

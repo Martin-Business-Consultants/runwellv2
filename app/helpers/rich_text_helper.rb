@@ -4,12 +4,14 @@ module RichTextHelper
   # A Lexxy editor writing HTML straight into a text column. Staff editors carry Fizzy's @
   # prompt and take dropped or pasted files (Active Storage direct uploads); client-facing
   # editors are text only.
-  def rich_text_field(form, method, placeholder: nil, staff: false)
-    rich_text_field_tag(form.field_name(method), form.object.try(method), id: form.field_id(method), placeholder: placeholder, staff: staff)
+  # form: the id of a form the editor sits outside of (a record page's sidebar, template mode); the
+  # editor is form-associated, so it joins that form.
+  def rich_text_field(form, method, placeholder: nil, staff: false, form_id: nil)
+    rich_text_field_tag(form.field_name(method), form.object.try(method), id: form.field_id(method), placeholder: placeholder, staff: staff, form_id: form_id)
   end
 
-  def rich_text_field_tag(name, value, id:, placeholder: nil, staff: false)
-    options = { name: name, id: id, value: editor_content(value), placeholder: placeholder, class: "lexxy-content" }
+  def rich_text_field_tag(name, value, id:, placeholder: nil, staff: false, form_id: nil)
+    options = { name: name, id: id, value: editor_content(value), placeholder: placeholder, class: "lexxy-content", form: form_id }
     if staff
       options[:data] = { direct_upload_url: rails_direct_uploads_url, blob_url_template: rails_service_blob_url(":signed_id", ":filename") }
     else

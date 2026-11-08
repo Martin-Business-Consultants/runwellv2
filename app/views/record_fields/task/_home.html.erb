@@ -1,0 +1,24 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# Where it sits: its work's section, or (straight on a client) which client. %>
+<% if form %>
+  <% if record.work %>
+    <label class="field">
+      <span class="field__label"><%= term(:scope_item) %></span>
+      <%= form.select :scope_item_id, record.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, form: form_id %>
+    </label>
+  <% else %>
+    <label class="field">
+      <span class="field__label"><%= term(:client) %></span>
+      <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" }, form: form_id %>
+    </label>
+  <% end %>
+<% else %>
+  <dt><%= term(:client) %></dt>
+  <dd>
+    <% if record.client %>
+      <%= link_to record.client.name, record.client %>
+    <% else %>
+      <span class="muted">None matched</span>
+    <% end %>
+  </dd>
+<% end %>

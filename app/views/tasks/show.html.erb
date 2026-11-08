@@ -14,7 +14,10 @@
 <% end %>
 
 <%= turbo_stream_from @task %>
-<section class="record-page">
+<% layout = record_layout(:task) %>
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:task) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:task).downcase}’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
@@ -35,6 +38,7 @@
       </p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= render "tasks/ai_brief", task: @task, labelled: true %>
       <%= link_to edit_task_path(@task), class: "btn btn--secondary", data: { keys: "e" } do %>
         <%= icon_tag "pencil" %>
@@ -46,17 +50,11 @@
   </header>
 
   <div class="record-page__main">
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Description</h2>
-      </header>
-      <div class="card__content record-card__stack">
-        <% if @task.description.present? %>
-          <div class="record-card__prose"><%= rich_text @task.description %></div>
-        <% else %>
-          <p class="record-card__empty">No description.</p>
-        <% end %>
-        <%= render "custom_fields/values", record: @task %>
+    <%# Its fields as the install arranged them (template mode): the working column's here,
+        stacked; the sidebar's in Details. %>
+    <section class="card record-card record-fields-card">
+      <div class="card__content">
+        <%= render "record_fields/zone", layout: layout, zone: "main", record: @task, stacked: true %>
       </div>
     </section>
 
@@ -80,44 +78,7 @@
 
   <aside class="record-page__aside">
     <%= plugin_slots(:task_aside, task: @task) %>
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content">
-        <dl class="details">
-          <dt>Status</dt><dd><%= render "tasks/status_dot", task: @task, labelled: true %></dd>
-          <dt>On it</dt><dd><%= render "tasks/owner_picker", task: @task, labelled: true %></dd>
-          <dt>Due</dt>
-          <dd>
-            <% if @task.due_on %>
-              <%= l @task.due_on, format: :long %>
-              <% if @task.status != "done" && @task.due_on.past? %>
-                <%= status_tag "Overdue", highlight: true %>
-              <% end %>
-            <% else %>
-              <span class="muted">No date</span>
-            <% end %>
-          </dd>
-          <dt><%= term(:client) %></dt>
-          <dd>
-            <% if @task.client %>
-              <%= link_to @task.client.name, @task.client %>
-            <% else %>
-              <span class="muted">None matched</span>
-            <% end %>
-          </dd>
-          <% if @task.requester_name.present? %>
-            <dt>Requested by</dt><dd><%= @task.requester_name %><% if @task.sender_email.present? && @task.contact.nil? %> <span class="muted">(<%= @task.sender_email %>)</span><% end %></dd>
-          <% end %>
-          <dt>Came in</dt><dd><%= @task.source.humanize %>, <%= l @task.created_at.to_date, format: :short %></dd>
-          <dt>Client sees it</dt><dd><%= @task.client_visible? ? "Yes, in the portal" : "No, internal" %></dd>
-          <% if @task.completed_at %>
-            <dt>Done</dt><dd><%= l @task.completed_at.to_date, format: :short %></dd>
-          <% end %>
-        </dl>
-      </div>
-    </section>
+    <%= render "record_fields/aside_card", layout: layout, record: @task %>
 
     <%= render "events/timeline", subject: @task %>
   </aside>

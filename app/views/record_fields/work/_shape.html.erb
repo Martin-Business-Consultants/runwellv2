@@ -1,0 +1,8 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# Fixed once it exists. On show it's in the line under the title. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Shape</span>
+    <%= form.select :shape, [ [ "Fixed scope", "fixed" ], [ "Recurring", "recurring" ] ], {}, disabled: record.persisted?, form: form_id %>
+  </label>
+<% end %>

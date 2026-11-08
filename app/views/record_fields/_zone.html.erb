@@ -1,0 +1,33 @@
+<%# locals: (layout:, zone:, record:, form: nil, form_id: nil, stacked: nil) %>
+<%# One column of a record page's fields, in the install's order (RecordLayout): inputs when given
+    a form builder (new and edit; each joins the form by form_id), else values as a details list
+    (show; stacked puts each label over its value, for the working column). Each field is a
+    .layout-field the arranging controller can move. %>
+<% keys = zone == "main" ? layout.main : layout.aside %>
+<% if form %>
+  <div class="record-fields record-form__body" data-record-layout-target="zone" data-zone="<%= zone %>" data-form-for="<%= form_id %>">
+    <% keys.each do |key| %>
+      <%# herb:key key %>
+      <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>"<% if layout.required?(key) %> data-layout-required="true"<% end %>>
+        <% if layout.custom?(key) %>
+          <%= render "record_fields/custom", record: record, field: layout.custom_field(key), form: form, form_id: form_id %>
+        <% else %>
+          <%= render record_field_partial(layout, key), record: record, form: form, form_id: form_id %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <dl class="<%= class_names("details record-fields", "record-fields--stacked": stacked) %>" data-record-layout-target="zone" data-zone="<%= zone %>">
+    <% keys.each do |key| %>
+      <%# herb:key key %>
+      <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>"<% if layout.required?(key) %> data-layout-required="true"<% end %>>
+        <% if layout.custom?(key) %>
+          <%= render "record_fields/custom", record: record, field: layout.custom_field(key) %>
+        <% else %>
+          <%= render record_field_partial(layout, key), record: record %>
+        <% end %>
+      </div>
+    <% end %>
+  </dl>
+<% end %>

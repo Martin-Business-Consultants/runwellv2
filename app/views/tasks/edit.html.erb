@@ -2,113 +2,31 @@
 
 <%= parent_page @task.title_was, @task %>
 
-<section class="record-page">
+<% layout = record_layout(:task) %>
+<section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:task) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:task).downcase}’s" %>
   <header class="record-page__header">
     <div class="record-page__heading">
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">What it is, who’s on it and when it’s due, and where it came from.</p>
+      <p class="record-page__description">What it is, and beside it who’s on it, when it’s due and where it came from.</p>
     </div>
     <div class="button-row">
+      <%= render "record_fields/arrange_button" %>
       <%= render "layouts/shared/sidebar_toggle" %>
     </div>
   </header>
 
+  <%# Fields as the install arranged them (template mode, RecordLayout): the working column's in
+      the form's card, the sidebar's in Properties, all saved by the one form (task_form). %>
   <div class="record-page__main">
-    <%= render "layouts/shared/errors", record: @task %>
-
-    <%= form_with model: @task, class: "card record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-      <%= hidden_field_tag :from_edit, "1" %>
-
-      <div class="card__content record-form__body">
-        <fieldset class="record-form__group">
-          <legend><%= term(:task) %></legend>
-          <label class="field">
-            <span class="field__label">Title</span>
-            <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off" %>
-          </label>
-
-          <label class="field">
-            <span class="field__label">Description</span>
-            <%= rich_text_field form, :description, staff: true %>
-          </label>
-
-          <div class="field-row">
-            <label class="field">
-              <span class="field__label">Status</span>
-              <%= form.select :status, task_status_options, {} %>
-            </label>
-
-            <label class="field">
-              <span class="field__label">Due</span>
-              <%= date_input form, :due_on %>
-            </label>
-          </div>
-        </fieldset>
-
-        <hr class="separator">
-
-        <fieldset class="record-form__group">
-          <legend>Who’s on it</legend>
-          <div class="field-row">
-            <label class="field">
-              <span class="field__label">Lead</span>
-              <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" } %>
-              <span class="field__hint">The one person it’s up to.</span>
-            </label>
-
-            <label class="field">
-              <span class="field__label">Also on it</span>
-              <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else", selected: @task.other_owners.map(&:id) }, multiple: true %>
-              <span class="field__hint">Anyone else working on it.</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <hr class="separator">
-
-        <fieldset class="record-form__group">
-          <legend>Where it belongs</legend>
-          <div class="field-row field-row--3">
-            <% if @task.work %>
-              <label class="field">
-                <span class="field__label"><%= term(:scope_item) %></span>
-                <%= form.select :scope_item_id, @task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" } %>
-              </label>
-            <% else %>
-              <label class="field">
-                <span class="field__label"><%= term(:client) %></span>
-                <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" } %>
-              </label>
-            <% end %>
-
-            <label class="field">
-              <span class="field__label">Requested by</span>
-              <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,
-                    { include_blank: "Nobody in particular" } %>
-            </label>
-
-            <label class="field">
-              <span class="field__label">Came in by</span>
-              <%= form.text_field :source, required: true, autocomplete: "off", placeholder: "app, email, phone…" %>
-            </label>
-          </div>
-
-          <%= switch_field form, :client_visible, label: "Visible to the client", hint: "Shown in the client’s portal, with its status and due date." %>
-
-          <%= custom_field_inputs form, @task %>
-        </fieldset>
-      </div>
-
-      <footer class="card__footer card__footer--bordered">
-        <%= link_to "Cancel", task_path(@task), class: "btn btn--secondary", data: { form_target: "cancel" } %>
-        <button type="submit" class="btn btn--primary" data-form-target="submit">
-          <span>Save changes</span>
-        </button>
-      </footer>
-    <% end %>
+    <%= render "record_fields/main_card", layout: layout, record: @task, form_id: "task_form", title: term(:task),
+          submit: "Save changes", cancel: task_path(@task), hidden: { from_edit: "1" } %>
   </div>
 
   <aside class="record-page__aside">
+    <%= render "record_fields/aside_card", layout: layout, record: @task, form_id: "task_form" %>
+
     <section class="card record-card">
       <header class="card__head">
         <h2 class="card__title">Details</h2>
