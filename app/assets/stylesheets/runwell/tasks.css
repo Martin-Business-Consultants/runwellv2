@@ -310,6 +310,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-panel--leaving { animation: task-panel-out var(--motion-out) var(--ease-in) forwards; pointer-events: none; }
 @media (max-width: 639px) { .task-panel { inset: 0; width: 100vw; border: 0; border-radius: 0; } }
 
+/* The panel while its task loads (layouts/shared/_side_panel's placeholder): the title, and quiet
+/* lines where the fields go, gently pulsing. Reduced motion keeps them still. */
+.task-panel__skeleton { height: .8rem; border-radius: var(--radius-sm, 4px); background: var(--layer-2, var(--hover)); animation: task-panel-pulse 1.2s var(--ease) infinite alternate; }
+.task-panel__context .task-panel__skeleton { display: inline-block; width: 8rem; vertical-align: middle; }
+.task-panel__skeleton--short { width: 55%; }
+@keyframes task-panel-pulse { to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .task-panel__skeleton { animation: none; } }
 .task-panel__header { display: flex; align-items: center; gap: var(--s-2); }
 .task-panel__context { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
 .task-panel__context a { color: inherit; }

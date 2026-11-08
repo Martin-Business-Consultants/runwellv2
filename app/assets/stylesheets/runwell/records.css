@@ -158,6 +158,11 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* Writing a note above a record's notes (notes/_section): one box, the editor on top (toolbar
 /* always shown, so focusing it shifts nothing), the kind, source and Add note along its foot. */
+/* The side panel's composer before it's wanted (notes/_section deferred): a line that looks like
+/* the empty editor; clicking it brings the editor in its place. */
+.note-composer__trigger { width: 100%; min-height: 4.5rem; padding: var(--s-3); border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); color: var(--text-faint); font: inherit; font-size: var(--text-read); text-align: start; cursor: text; }
+.note-composer__trigger:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line-strong)); }
+.note-composer__trigger:focus-visible { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
 .note-composer { gap: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); transition: border-color .12s, box-shadow .12s; }
 .note-composer:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
 .note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }

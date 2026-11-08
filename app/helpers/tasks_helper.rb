@@ -15,7 +15,7 @@ module TasksHelper
   # template (data: some_method) is written by Herb as a literal data="{…}" attribute.
   def side_panel_link_to(task, content = nil, data: {}, **options, &block)
     action = [ data[:action], "side-panel#open" ].compact.join(" ")
-    data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id)
+    data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, side_panel_title_param: task.title, turbo_prefetch: false)
     block ? link_to(task_path(task), data: data, **options, &block) : link_to(content, task_path(task), data: data, **options)
   end
 

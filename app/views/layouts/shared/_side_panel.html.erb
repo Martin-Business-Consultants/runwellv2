@@ -2,6 +2,25 @@
 <%# The side panel's frame (side-panel controller): empty, or the task named by ?task= on the page
     you're on (tasks/_panel). The layout renders it, and so does ApplicationController for a frame
     request, which skips the page's own work. %>
+<%# What the panel shows the moment a task is clicked, before its frame arrives: the panel with the
+    task's title (from the link) and quiet lines where its fields go. %>
+<template data-side-panel-target="placeholder">
+  <section class="task-panel task-panel--loading" id="task_panel_loading" aria-busy="true" aria-label="Loading">
+    <header class="task-panel__header">
+      <p class="task-panel__context"><span class="task-panel__skeleton task-panel__skeleton--short"></span></p>
+      <div class="task-panel__actions">
+        <button type="button" class="icon-button" title="Close (Esc)" data-action="side-panel#close">
+          <%= icon_tag "close" %>
+          <span class="visually-hidden">Close</span>
+        </button>
+      </div>
+    </header>
+    <p class="task-panel__title task-panel__title--static" data-side-panel-title></p>
+    <div class="task-panel__skeleton"></div>
+    <div class="task-panel__skeleton"></div>
+    <div class="task-panel__skeleton task-panel__skeleton--short"></div>
+  </section>
+</template>
 <turbo-frame id="side_panel" data-side-panel-target="frame">
   <% if task %>
     <%= render "tasks/panel", task: task %>
