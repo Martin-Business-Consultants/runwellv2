@@ -22,7 +22,8 @@
   <% end %>
 
   <div class="table-wrap">
-    <table class="<%= class_names("table data-table", "data-table--fixed": fixed) %>" id="<%= id %>_table" data-data-table-target="table">
+    <% min_width = (ui_data_table_min_width_class(columns, selectable: selectable, actions: actions) if fixed) %>
+    <table class="<%= class_names("table data-table", min_width, "data-table--fixed": fixed) %>" id="<%= id %>_table" data-data-table-target="table">
       <% if fixed %>
         <%= ui_data_table_colgroup columns, selectable: selectable, actions: actions %>
       <% end %>

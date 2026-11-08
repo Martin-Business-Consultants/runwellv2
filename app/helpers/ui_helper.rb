@@ -52,6 +52,19 @@ module UiHelper
     end
   end
 
+  # The table's least width, as a class (data-table--min-wN, in characters): every fitted column's
+  # width and padding, plus room for the growing column (GROW_MIN), so a narrow window scrolls the
+  # table sideways rather than squeezing the column that names each row to nothing.
+  GROW_MIN = 28
+  CELL_PADDING = 4
+
+  def ui_data_table_min_width_class(columns, selectable:, actions:)
+    grow = columns.find(&:grow) || columns.find { !it.hideable } || columns.first
+    widths = [ *(:select if selectable), *columns.reject { it.equal?(grow) }.map(&:width), *(:actions if actions) ]
+    total = widths.sum { column_characters(it) + CELL_PADDING } + GROW_MIN + CELL_PADDING
+    "data-table--min-w#{((total / 10.0).ceil * 10).clamp(40, 240)}"
+  end
+
   # A fitted column's width in characters: its shape's, or its longest value's (capped), and never
   # narrower than its header.
   def column_characters(width)
