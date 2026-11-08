@@ -1,11 +1,12 @@
-<%# locals: (layout:, zone:, record:, form: nil, form_id: nil, stacked: nil) %>
+<%# locals: (layout:, zone:, record:, form: nil, form_id: nil, stacked: nil, except: nil, paired: nil) %>
 <%# One column of a record page's fields, in the install's order (RecordLayout): inputs when given
     a form builder (new and edit; each joins the form by form_id), else values as a details list
     (show; stacked puts each label over its value, for the working column). Each field is a
-    .layout-field the arranging controller can move. %>
-<% keys = zone == "main" ? layout.main : layout.aside %>
+    .layout-field the arranging controller can move. except: a field drawn elsewhere (beside the
+    card's heading); paired: two fields to a row (a modal's sidebar fields). %>
+<% keys = (zone == "main" ? layout.main : layout.aside) - [ except ] %>
 <% if form %>
-  <div class="record-fields record-form__body" data-record-layout-target="zone" data-zone="<%= zone %>" data-form-for="<%= form_id %>">
+  <div class="<%= class_names("record-fields record-form__body", "record-fields--paired": paired) %>" data-record-layout-target="zone" data-zone="<%= zone %>" data-form-for="<%= form_id %>">
     <% keys.each do |key| %>
       <%# herb:key key %>
       <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>"<% if layout.required?(key) %> data-layout-required="true"<% end %>>

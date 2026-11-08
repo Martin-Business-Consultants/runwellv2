@@ -16,7 +16,7 @@ module RecordLayoutHelper
 
     labels = {
       "name" => "Name", "status" => "Status", "time_zone" => "Time zone", "internal" => "Internal",
-      "title" => "Title", "description" => "Description", "client" => term(:client), "label" => "Label", "shape" => "Shape",
+      "title" => "Title", "description" => "Description", "client" => term(:client), "label" => "#{term(:work)} type", "shape" => "Shape",
       "due" => "Due", "lead" => "Lead", "others" => "Also on it", "home" => "#{term(:scope_item)} or #{term(:client).downcase}",
       "requested_by" => "Requested by", "source" => "Came in by", "client_visible" => "Visible to the client",
       "email_address" => "Email address", "role" => "Role", "email" => "Email", "phone" => "Phone",

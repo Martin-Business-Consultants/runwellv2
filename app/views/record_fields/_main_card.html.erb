@@ -1,18 +1,25 @@
-<%# locals: (layout:, record:, form_id:, title:, submit:, cancel:, hint: nil, url: nil, scope: nil, hidden: nil, modal: nil) %>
+<%# locals: (layout:, record:, form_id:, title:, submit:, cancel:, hint: nil, url: nil, scope: nil, hidden: nil, modal: nil, head_key: nil) %>
 <%# A new or edit page's working column (template mode): its fields (RecordLayout's main, and in a
     modal, which has no sidebar, the aside's too), then the <form> itself as the card's footer.
-    Every field sits outside the form and joins it by form_id, so the sidebar's can too. %>
+    Every field sits outside the form and joins it by form_id, so the sidebar's can too.
+    head_key: one field drawn beside the heading instead (a modal's who-it's-for: the work's
+    client), and left out of the columns below; the modal's sidebar fields go two to a row. %>
 <% builder = record_fields_builder(record, scope: scope) %>
 <%= render "layouts/shared/errors", record: record %>
 <section class="card record-form">
-  <header class="card__head">
+  <header class="<%= class_names("card__head", "record-form__head--field": head_key) %>">
     <%= layout_text_tag layout, "main.title", title, class: "card__title" %>
     <%= layout_text_tag layout, "main.hint", hint, tag: :p, class: "card__hint" %>
+    <% if head_key %>
+      <div class="card__action record-form__head-field">
+        <%= render record_field_partial(layout, head_key), record: record, form: builder, form_id: form_id %>
+      </div>
+    <% end %>
   </header>
   <div class="card__content">
-    <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id %>
+    <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id, except: head_key %>
     <% if modal %>
-      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: builder, form_id: form_id %>
+      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: builder, form_id: form_id, except: head_key, paired: true %>
     <% end %>
   </div>
   <%= form_with model: record, url: url, scope: scope, id: form_id, class: "card__footer card__footer--bordered record-form__footer",

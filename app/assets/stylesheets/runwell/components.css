@@ -415,6 +415,10 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
 .person-cell > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* A switch beside its label (switch_field without a hint, .field--inline): a centred row with a
+/* gap, as rune_ui's next release makes it on its own; carried until then. */
+.field--inline { display: flex; flex-direction: row; align-items: center; gap: var(--s-2); }
+
 /* rune_ui's column convention for plain tables (the portal's, settings lists), carried here until
 /* the next rune_ui release reaches this install's Gemfile.lock; then this block goes. */
 .table:not(.table--even, :has(colgroup)) :is(th, td):not(:first-child) { width: 1%; white-space: nowrap; }

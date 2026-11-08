@@ -367,3 +367,15 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--line-strong); border-radius: 2px; cursor: text; }
 .record-page--arranging [data-layout-text]:focus { outline: none; border-bottom-color: var(--accent); background: var(--brand-tint); }
 .record-page--arranging [data-layout-text]:empty::before { content: attr(data-placeholder); color: var(--text-faint); }
+
+/* A modal's form card (record_fields/main_card, head_key): who it's for beside the heading, and
+/* the fields that would be a sidebar two to a row (work type and shape), stacking on a phone. */
+.record-form__head--field { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem); }
+.record-form__head-field { align-self: center; }
+.record-form__head-field .field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.record-fields--paired { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); align-items: start; }
+.record-form__head-field .field { flex: 1; min-width: 0; }
+@media (max-width: 639px) {
+  .record-form__head--field { grid-template-columns: minmax(0, 1fr); }
+  .record-form__head--field .record-form__head-field { grid-column: 1; grid-row: auto; padding-top: var(--s-2); }
+}
