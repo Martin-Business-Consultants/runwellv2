@@ -251,7 +251,6 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 .person-page__name { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
 /* The users table's name cell: the avatar beside the name. */
-.users-table__name { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
 
 /* A small table on a settings page (Past updates): rune's table, scrolling past a screenful, its
 /* last column to the right; a row's detail (what went wrong) runs under it, across the table. */

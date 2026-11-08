@@ -2,14 +2,14 @@
 <%# One piece of work in the index's data table (ui/_data_table): the cells in the columns' order. %>
 <tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
   <%= bulk_select_cell task, task.title %>
+  <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
   <td data-column="title"><%= side_panel_link_to task, task.title %></td>
-  <td class="nowrap" data-column="work">
+  <td data-column="work">
     <% if task.work %>
-      <%= link_to task.work.ref, task.work, class: "task-table__ref" %>
+      <%= link_to task.work.title, task.work, class: "task-table__work", title: "#{task.work.label_name} #{task.work.ref}" %>
     <% end %>
   </td>
   <td class="muted" data-column="client"><%= task.client&.name %></td>
-  <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
   <td class="nowrap" data-column="due"><%= render "tasks/due", task: task %></td>
   <td class="data-table__center" data-column="status"><%= render "tasks/status_dot", task: task %></td>
   <% listed.each do |field| %>

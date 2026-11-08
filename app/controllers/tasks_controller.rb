@@ -20,7 +20,7 @@ class TasksController < ApplicationController
   before_action :set_task, only: %i[show edit update destroy brief]
 
   sortable_columns title: "tasks.title",
-    work: [ "works.ref", ->(scope) { scope.left_joins(:work) } ],
+    work: [ "works.title", ->(scope) { scope.left_joins(:work) } ],
     client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ],
     owner: [ "owners.name", ->(scope) { scope.joins("LEFT JOIN users owners ON owners.id = tasks.owner_id") } ],
     due: "tasks.due_on",

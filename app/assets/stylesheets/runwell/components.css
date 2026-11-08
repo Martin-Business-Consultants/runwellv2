@@ -413,3 +413,7 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] .icon { color: var(--accent); }
 .record-list__row[data-keyboard-current], .list-row[data-keyboard-current] { background: var(--brand-tint); }
+
+/* A person in a table's cell (person_cell): the owner column's avatar, then the name. */
+.person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.person-cell > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -312,7 +312,11 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-page--arranging .layout-field:hover::after { opacity: 1; }
 .record-page--arranging .layout-field:focus-visible { outline: none; background: var(--brand-tint); box-shadow: var(--ring); }
 /* A details list stays a list of rows: label column, value column. */
-.record-page--arranging dl.record-fields { display: flex; flex-direction: column; gap: 2px; }
+/* Every row runs the column's full width, so each grip sits at the left edge, one under another
+/* (rune's details list centres its items, which a flex column would turn into centred rows). */
+.record-page--arranging [data-zone] { align-items: stretch; justify-items: stretch; }
+.record-page--arranging dl.record-fields { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+.record-page--arranging .layout-field { width: auto; justify-self: stretch; }
 .record-page--arranging dl.record-fields .layout-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-height: 2rem; }
 .record-page--arranging dl.record-fields--stacked .layout-field { grid-template-columns: minmax(0, 1fr); }
 /* A form (new and edit pages) reads as the same rows while arranging: label beside a one-line

@@ -32,10 +32,10 @@
 <% if @view == "board" %>
   <%= render "tasks/board/columns", board: @board %>
 <% else %>
-  <% columns = [ ui_column(:title, term(:task), sort: :title, width: [ @column_widths[:title], term(:task) ], hideable: false),
+  <% columns = [ ui_column(:owner, "Owner", sort: :owner, width: :avatar),
+                 ui_column(:title, term(:task), sort: :title, width: [ @column_widths[:title], term(:task) ], hideable: false),
                  ui_column(:work, term(:work), sort: :work, width: [ @column_widths[:work], term(:work) ]),
                  ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
-                 ui_column(:owner, "Owner", sort: :owner, width: :avatar),
                  ui_column(:due, "Due", sort: :due, width: [ 28, "Due" ]),
                  ui_column(:status, "Status", sort: :status, width: :status, align: :center),
                  *listed.map { ui_column("field_#{it.id}", it.label) } ] %>

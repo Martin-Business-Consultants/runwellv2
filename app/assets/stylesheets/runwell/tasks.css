@@ -87,11 +87,16 @@
 /* ======================================================================= 3 The table */
 
 /* A piece of work's ref in its cell: plain ink, the accent under the pointer. */
-.task-table__ref { color: var(--text); text-decoration: none; }
-.task-table__ref:hover { color: var(--accent); }
+.task-table__work { color: var(--text); text-decoration: none; }
+.task-table__work:hover { color: var(--accent); }
 
 /* A due date with Overdue beside it. */
 .task-due { display: inline-flex; align-items: center; gap: var(--s-2); }
+/* Changed in place: the date reads as text until it's pointed at or picked, then shows its field. */
+.task-due__form { display: inline-flex; }
+.task-due .date-picker input { width: 7.25rem; height: var(--control-h-sm); padding-inline: 6px; border-color: transparent; background: transparent; box-shadow: none; cursor: pointer; }
+.task-due .date-picker input:is(:hover, :focus) { border-color: var(--line-strong); background: var(--panel); }
+.task-due .date-picker input::placeholder { color: var(--text-faint); }
 
 /* ======================================================================= 4 The board */
 

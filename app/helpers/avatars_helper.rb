@@ -20,6 +20,15 @@ module AvatarsHelper
     avatar(user.display_name, url: user_avatar_path(user), size: size == :large ? :lg : :md, class: "person")
   end
 
+  # A person in a table's cell (Users, and anywhere a row names someone): the same avatar as a
+  # task's owner (person_tag), then their name, so every table's rows are the default height.
+  def person_cell(user, label: nil, path: nil)
+    name = label || user.display_name
+    tag.span(class: "person-cell") do
+      safe_join([ person_tag(user), (path ? link_to(name, path) : tag.span(name)) ])
+    end
+  end
+
   # A client's contacts as overlapping circles of initials (rune_ui's avatar_stack): the first `limit`, then "+N" for the
   # rest. Each name is its tooltip and what a screen reader hears.
   def contact_stack(contacts, limit: 3)
