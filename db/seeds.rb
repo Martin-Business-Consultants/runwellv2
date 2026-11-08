@@ -48,8 +48,8 @@ if Client.none?
 
   # --- Harbor Dental Group: three offices, new website plus local search -------------------
   harbor = Client.create!(name: "Harbor Dental Group", custom_fields: { "website" => "https://harbordental.example" })
-  lena = harbor.contacts.create!(portal_access: true, name: "Dr. Lena Ortiz", role: "Owner", email: "lena@harbordental.example", phone: "555-0142", can_approve: true)
-  mia = harbor.contacts.create!(portal_access: true, name: "Mia Chen", role: "Office manager", email: "mia@harbordental.example", phone: "555-0143")
+  lena = harbor.contacts.create!(portal_access: true, name: "Dr. Lena Ortiz", title: "Owner", email: "lena@harbordental.example", phone: "555-0142", can_approve: true)
+  mia = harbor.contacts.create!(portal_access: true, name: "Mia Chen", title: "Office manager", email: "mia@harbordental.example", phone: "555-0143")
 
   site = harbor.works.create!(label: "project", title: "Website rebuild", created_by: ted,
     description: "<p>A new site for all three offices: service pages, a provider directory, online booking and location pages that support local search.</p>",
@@ -84,8 +84,8 @@ if Client.none?
 
   # --- Summit Roofing: Google Ads, plus storm-season landing pages --------------------------
   summit = Client.create!(name: "Summit Roofing Co", custom_fields: { "website" => "https://summitroofing.example" })
-  greg = summit.contacts.create!(portal_access: true, name: "Greg Halvorsen", role: "Owner", email: "greg@summitroofing.example", phone: "555-0171", can_approve: true)
-  tasha = summit.contacts.create!(portal_access: true, name: "Tasha Reid", role: "Marketing coordinator", email: "tasha@summitroofing.example")
+  greg = summit.contacts.create!(portal_access: true, name: "Greg Halvorsen", title: "Owner", email: "greg@summitroofing.example", phone: "555-0171", can_approve: true)
+  tasha = summit.contacts.create!(portal_access: true, name: "Tasha Reid", title: "Marketing coordinator", email: "tasha@summitroofing.example")
 
   ads = summit.works.create!(label: "service", shape: "recurring", title: "Google Ads management", created_by: ted,
     description: "<p>Search campaigns for roof repair and replacement across the metro area, with call tracking and a monthly report.</p>",
@@ -106,14 +106,14 @@ if Client.none?
 
   # --- Bloom & Vine Florist: a holiday work order ----------------------------------------------
   bloom = Client.create!(name: "Bloom & Vine Florist", custom_fields: { "website" => "https://bloomandvine.example" })
-  rosa = bloom.contacts.create!(portal_access: true, name: "Rosa Delgado", role: "Owner", email: "rosa@bloomandvine.example", can_approve: true)
+  rosa = bloom.contacts.create!(portal_access: true, name: "Rosa Delgado", title: "Owner", email: "rosa@bloomandvine.example", can_approve: true)
   holiday = bloom.works.create!(label: "work_order", title: "Holiday ordering updates", created_by: sarah,
     description: "<p>Holiday collections, delivery cut-off banners and a same-day delivery page.</p>")
   sections.(holiday, [ "Holiday collection pages", "Delivery cut-off banners" ])
 
   # --- Northside Physical Therapy: local search, with a second location on hold --------------
   northside = Client.create!(name: "Northside Physical Therapy", custom_fields: { "website" => "https://northsidept.example" })
-  omar = northside.contacts.create!(portal_access: true, name: "Omar Haddad", role: "Clinic director", email: "omar@northsidept.example", can_approve: true)
+  omar = northside.contacts.create!(portal_access: true, name: "Omar Haddad", title: "Clinic director", email: "omar@northsidept.example", can_approve: true)
   local = northside.works.create!(label: "service", shape: "recurring", title: "Local search and reviews", created_by: priya,
     description: "<p>Google Business Profile, review generation and a monthly report for the clinic.</p>")
   sections.(local, [ "Profile management", "Review generation" ])
@@ -125,7 +125,7 @@ if Client.none?
 
   # --- Coastal Kitchen & Bath: a prospect --------------------------------------------------
   coastal = Client.create!(name: "Coastal Kitchen & Bath", custom_fields: { "website" => "https://coastalkb.example" })
-  dana = coastal.contacts.create!(portal_access: true, name: "Dana Whitfield", role: "Co-owner", email: "dana@coastalkb.example", phone: "555-0190", can_approve: true)
+  dana = coastal.contacts.create!(portal_access: true, name: "Dana Whitfield", title: "Co-owner", email: "dana@coastalkb.example", phone: "555-0190", can_approve: true)
   proposal = coastal.works.create!(label: "project", title: "New website and portfolio", created_by: ted,
     description: "<p>A portfolio-led site with project galleries, a consultation request form and showroom location pages.</p>",
     estimate_notes: "<p>They have about 60 project photos; galleries need a simple CMS.</p>")
@@ -137,7 +137,7 @@ if Client.none?
 
   # --- Riverbend Law: a former client with a finished project -------------------------------
   riverbend = Client.create!(name: "Riverbend Law", custom_fields: { "website" => "https://riverbendlaw.example" }, status: "former")
-  alan = riverbend.contacts.create!(portal_access: true, name: "Alan Brooks", role: "Managing partner", email: "alan@riverbendlaw.example", can_approve: true)
+  alan = riverbend.contacts.create!(portal_access: true, name: "Alan Brooks", title: "Managing partner", email: "alan@riverbendlaw.example", can_approve: true)
   done = riverbend.works.create!(label: "project", title: "Practice area pages", created_by: ted,
     description: "<p>Twelve practice area pages and attorney bios.</p>")
   sections.(done, [ "Practice area pages" ])

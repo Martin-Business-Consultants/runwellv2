@@ -13,6 +13,9 @@ module ActiveSupport
     # and those about the requirement switch it on themselves.
     setup { Setting.current.update_columns(require_two_factor: false) }
 
+    # People at clients are users with the client role (users.yml), read as Contacts.
+    def contacts(name) = Contact.find(users(name).id)
+
     # One piece of work per section of a fixture work, named after it.
     def tasks_per_section!(work)
       work.scope_items.map { work.tasks.create!(title: it.description, scope_item: it) }

@@ -17,5 +17,7 @@ module RecordTabsHelper
     params[:tab].presence_in(tabs.map(&:key)) || default
   end
 
-  def record_tab_path(key) = url_for(request.query_parameters.merge(tab: key))
+  # Another tab closes the side panel: its link leaves ?task= out (and the side panel controller
+  # lets the open panel fade away).
+  def record_tab_path(key) = url_for(request.query_parameters.except("task").merge(tab: key))
 end

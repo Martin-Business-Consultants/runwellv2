@@ -18,7 +18,7 @@ class Portal::BaseController < ApplicationController
   def require_contact
     return require_contact_token if bearer_request?
 
-    Current.portal_session ||= PortalSession.find_by(id: cookies.signed[:portal_session_id]) if cookies.signed[:portal_session_id]
+    Current.portal_session ||= Session.find_by(id: cookies.signed[:portal_session_id]) if cookies.signed[:portal_session_id]
     return if Current.contact&.portal?
 
     Current.portal_session&.destroy

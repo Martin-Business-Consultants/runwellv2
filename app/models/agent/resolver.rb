@@ -19,7 +19,7 @@ module Agent
     end
 
     # The name columns each kind of record is called by.
-    FIELDS = { "Client" => %w[name], "Contact" => %w[name email], "User" => %w[name email_address],
+    FIELDS = { "Client" => %w[name], "Contact" => %w[name email_address], "User" => %w[name email_address],
                "Work" => %w[title], "Task" => %w[title], "ScopeItem" => %w[description] }.freeze
 
     # Parameters that hold an id, and the kind of record they name.

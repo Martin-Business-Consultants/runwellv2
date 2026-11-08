@@ -10,11 +10,13 @@ module User::Agent
     belongs_to :agent_owner, class_name: "User", optional: true, inverse_of: :agent
     has_one :agent, class_name: "User", foreign_key: :agent_owner_id, inverse_of: :agent_owner, dependent: :restrict_with_error
 
-    scope :people, -> { where(agent_owner_id: nil) }
+    # The team: people on staff, not their agents and not clients' contacts (pickers, mentions,
+    # sign-in, Users).
+    scope :people, -> { where(agent_owner_id: nil).where.not(role: User::CLIENT) }
     scope :agents, -> { where.not(agent_owner_id: nil) }
 
     validate :agent_owner_is_a_person, if: :agent?
-    after_create_commit :create_agent_later, unless: :agent?
+    after_create_commit :create_agent_later, unless: -> { agent? || client? }
     after_update :sync_agent, if: -> { !agent? && agent && (saved_change_to_role? || saved_change_to_name?) }
   end
 

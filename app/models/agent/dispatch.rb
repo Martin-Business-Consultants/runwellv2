@@ -22,7 +22,7 @@ module Agent
     # straight after. Answers the tool's JSON. name: what the history says it came through
     # ("Ted's agent via Runwell AI"). For a plugin's in-app assistant; see docs/plugin-contract.md.
     def self.run_as(person, tool, arguments, name:)
-      owner = person.is_a?(Contact) ? { contact: person } : { user: person }
+      owner = person.client? ? { contact: Contact.find(person.id) } : { user: person }
       token = AccessToken.issue!(**owner, name: name, kind: "assistant")
       new(tool, arguments, token: token.plaintext, base_url: "#{Runwell.protocol}://#{Runwell.host}").call
     ensure

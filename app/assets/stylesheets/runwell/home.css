@@ -12,16 +12,16 @@
 .bar__backdrop, .bar__footer { display: none; }
 
 /* Open (the placeholder hides once S is pressed): a command box a fifth of the way down, over a
-/* dimmed page, fading and zooming in: a large field across its top, the results under it. */
-@keyframes home-overlay-in { from { opacity: 0; scale: .95; } }
+/* dimmed page, popping in as every dialog does (rune's --motion): a large field across its top,
+/* the results under it. */
 .bar:has(.bar__placeholder[hidden]) {
   inset: 18% 0 auto 0; z-index: calc(var(--z-tray) + 10); width: calc(100% - 2rem); max-height: calc(78dvh - 1rem); margin-inline: auto; padding: 0;
   overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); color: var(--text);
   box-shadow: 0 24px 64px -12px rgb(0 0 0 / .28), var(--shadow-popover);
-  pointer-events: auto; animation: home-overlay-in .1s ease-out;
+  pointer-events: auto; animation: rune-pop var(--motion) var(--ease);
 }
 @media (min-width: 640px) { .bar:has(.bar__placeholder[hidden]) { width: 40rem; } }
-.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .28); }
+.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .28); animation: rune-fade var(--motion) var(--ease); }
 .bar__input { flex: 0 0 auto; padding: 0; }
 /* In the bar the field is the box's top edge: large, no frame or fill of its own, a rule under it,
 /* its icon in the brand's colour while you type. */
@@ -91,7 +91,7 @@
 .tray__dialog[open] {
   position: absolute; inset: auto 0 3rem auto; display: flex; flex-direction: column-reverse; width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem);
   margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
-  transform-origin: bottom right; animation: home-overlay-in .1s ease-out;
+  transform-origin: bottom right; animation: rune-pop var(--motion) var(--ease);
 }
 .tray__item { position: relative; }
 

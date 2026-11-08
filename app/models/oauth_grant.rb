@@ -4,14 +4,13 @@ class OauthGrant < ApplicationRecord
   LIFETIME = 10.minutes
 
   belongs_to :oauth_client
-  belongs_to :user, optional: true
-  belongs_to :contact, optional: true
+  include HeldByPerson
 
   attr_reader :code
 
   def self.issue!(client:, redirect_uri:, code_challenge:, user: nil, contact: nil, read_only: false)
     code = SecureRandom.urlsafe_base64(32)
-    create!(oauth_client: client, user: user, contact: contact, redirect_uri: redirect_uri, code_challenge: code_challenge, read_only: read_only,
+    create!(oauth_client: client, **holder(user: user, contact: contact), redirect_uri: redirect_uri, code_challenge: code_challenge, read_only: read_only,
       code_digest: AccessToken.digest(code), expires_at: LIFETIME.from_now).tap { it.instance_variable_set(:@code, code) }
   end
 

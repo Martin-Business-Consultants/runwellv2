@@ -33,6 +33,6 @@ class Sessions::LinksController < ApplicationController
 
   private
     def link_user
-      @link_user ||= User.find_by_token_for(:link_sign_in, params[:token])&.then { it if it.active? && it.passwordless? }
+      @link_user ||= User.find_by_token_for(:link_sign_in, params[:token])&.then { it if it.active? && it.staff? && it.passwordless? }
     end
 end

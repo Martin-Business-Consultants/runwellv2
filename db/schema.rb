@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_160000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -577,7 +577,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_090000) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "email_address", null: false
+    t.string "email_address"
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -593,8 +593,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_090000) do
     t.json "otp_recovery_codes"
     t.boolean "passwordless", default: false, null: false
     t.datetime "link_signed_in_at"
+    t.integer "client_id"
+    t.string "title"
+    t.string "phone"
+    t.boolean "portal_access", default: false, null: false
+    t.boolean "can_approve", default: false, null: false
+    t.integer "legacy_contact_id"
     t.index ["agent_owner_id"], name: "index_users_on_agent_owner_id", unique: true
+    t.index ["client_id"], name: "index_users_on_client_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["legacy_contact_id"], name: "index_users_on_legacy_contact_id", unique: true
   end
 
   create_table "webhook_deliveries", force: :cascade do |t|
@@ -697,6 +705,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_090000) do
   add_foreign_key "tasks", "users", column: "owner_id"
   add_foreign_key "tasks", "works"
   add_foreign_key "upgrades", "users", column: "requested_by_id"
+  add_foreign_key "users", "clients"
   add_foreign_key "users", "users", column: "agent_owner_id"
   add_foreign_key "webhook_deliveries", "events"
   add_foreign_key "webhook_deliveries", "webhook_endpoints"

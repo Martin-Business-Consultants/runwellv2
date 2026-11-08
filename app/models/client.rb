@@ -35,7 +35,7 @@ class Client < ApplicationRecord
   # Runs the block with times shown in the client's zone: its portal, its client-facing pages and emails.
   def in_time_zone(&) = Time.use_zone(zone, &)
 
-  def approvers = contacts.where(can_approve: true, archived_at: nil)
+  def approvers = contacts.active.where(can_approve: true)
 
   def to_param = id.to_s
 

@@ -346,6 +346,23 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 
 ## Changes to this contract
 
+**7.0** folded a client's contacts into users: a contact is a `User` with the role `client`
+(`User::Role::CLIENT`), and `Contact` is that slice of users (`class Contact < User`, a default
+scope), so `Contact`, `contact_id`, `task.contact`, `client.contacts`, `current_contact` and the
+`*_contact` tools read as before, and contacts show in Users beside the team. What changed:
+
+| Before 7.0 | From 7.0 |
+| --- | --- |
+| a contact's id (the `contacts` table) | a new user id: `users.legacy_contact_id` holds the old one |
+| `contact.role` (their job title) | `contact.title`; `role` is `"client"` |
+| `contact.email`, `contact.archived_at` | still read and written (aliases of `email_address`, `deactivated_at`) |
+| `PortalSession` | `Session` (`contact.portal_sessions`); a session, token or grant reads `user` for staff and `contact` for a client's person (`HeldByPerson`) |
+| `User.people` | the team only: never a client's person; `User.clients`, `User.staff`, `user.client?` |
+
+A plugin whose own tables keep a `contact_id` repoints it in a migration of its own:
+`UPDATE agreements_approvals SET contact_id = (SELECT id FROM users WHERE legacy_contact_id = agreements_approvals.contact_id)`.
+The core's `contacts` and `portal_sessions` tables are left, unread, for a later release to drop.
+
 **6.0** renamed the core's two nouns everywhere, with no aliases: engagements are **Work** and
 todos are **Tasks**. A plugin moving to 6.0 renames what it uses (and sets `requires: ">= 6.0"`):
 

@@ -15,7 +15,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.active? && !user.agent?
+    if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.active? && !user.agent? && user.staff?
       sign_in_after_first_step user
     else
       record_failed_sign_in(User.people.find_by(email_address: params[:email_address].to_s.strip.downcase), "password")

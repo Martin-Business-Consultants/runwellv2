@@ -410,7 +410,10 @@ function hintFor(keys) {
   ).join(" ")
 }
 
+// A key on something out of sight (a closed menu, a hidden dialog) does nothing, unless the element
+// says it works from anywhere (data-keys-anywhere: Settings, in the account menu, is g s).
 function usable(element) {
+  if (element.hasAttribute("data-keys-anywhere")) return true
   return !element.closest("[hidden], dialog:not([open])") && element.checkVisibility()
 }
 

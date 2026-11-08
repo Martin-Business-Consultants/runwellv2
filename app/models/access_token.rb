@@ -11,8 +11,7 @@ class AccessToken < ApplicationRecord
   OAUTH_LIFETIME = 1.hour
   REFRESH_LIFETIME = 90.days
 
-  belongs_to :user, optional: true
-  belongs_to :contact, optional: true
+  include HeldByPerson
   belongs_to :oauth_client, optional: true
   has_many :agent_calls, dependent: :delete_all
   has_many :agent_idempotency_keys, dependent: :delete_all
@@ -34,7 +33,7 @@ class AccessToken < ApplicationRecord
     # A new token; its plaintext is readable once, on the returned record.
     def issue!(name:, user: nil, contact: nil, kind: "personal", oauth_client: nil, read_only: false)
       plaintext = generate
-      attrs = { user: user, contact: contact, name: name, kind: kind, oauth_client: oauth_client, token_digest: digest(plaintext), read_only: read_only }
+      attrs = { **holder(user: user, contact: contact), name: name, kind: kind, oauth_client: oauth_client, token_digest: digest(plaintext), read_only: read_only }
       refresh = nil
       attrs[:expires_at] = ASSISTANT_LIFETIME.from_now if kind == "assistant"
       if kind == "oauth"

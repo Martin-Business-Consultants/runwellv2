@@ -119,8 +119,10 @@ module Import
 
         client = @clients[row["partner_id"]] or next
         email = row["email_address"].to_s.strip.downcase.presence
-        if email && (other = Contact.find_by(email: email))
-          @skipped[:contact_emails] << "#{row["name"]} on #{client.name} keeps no email: #{email} is their contact at #{other.client.name}"
+        # Addresses are unique across everyone (contacts are users): one already taken, by another
+        # client's contact or someone on staff, stays with them.
+        if email && (other = User.find_by(email_address: email))
+          @skipped[:contact_emails] << "#{row["name"]} on #{client.name} keeps no email: #{email} is #{other.client? ? "their contact at #{other.client&.name}" : "on the team"}"
           email = nil
         end
         reachable = email.present? && active?(row)

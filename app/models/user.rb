@@ -7,15 +7,19 @@ class User < ApplicationRecord
   # signing in with it moves link_signed_in_at.
   generates_token_for(:link_sign_in, expires_in: 15.minutes) { link_signed_in_at }
   has_many :sessions, dependent: :destroy
+  # Someone at a client (the client role, Contact) belongs to it.
+  belongs_to :client, optional: true
   has_many :tasks, foreign_key: :owner_id, dependent: :nullify, inverse_of: :owner
   has_many :notifications, dependent: :destroy
   has_many :access_tokens, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   validates :name, presence: true
-  validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  # Staff sign in with their address; a client's contact (Contact) may have only a phone.
+  validates :email_address, presence: true, unless: :client?
+  validates :email_address, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
 
-  before_validation :become_owner, on: :create, if: -> { User.none? }
+  before_validation :become_owner, on: :create, if: -> { !client? && User.none? }
   after_update :record_role_change, if: :saved_change_to_role?
 
   def display_name = name.presence || email_address

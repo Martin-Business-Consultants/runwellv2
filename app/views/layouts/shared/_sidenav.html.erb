@@ -41,7 +41,7 @@
     <%= menu account, up: true, trigger_class: "sidebar__account" do %>
       <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), settings_account_path %>
       <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Settings and help"), tag.kbd("G S") ]), settings_path,
-            data: { keys: "g s" }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
+            data: { keys: "g s", keys_anywhere: true }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
       <button type="button" class="menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
         <%= icon_tag "moon", class: "theme-toggle__moon" %>
         <%= icon_tag "sun", class: "theme-toggle__sun" %>

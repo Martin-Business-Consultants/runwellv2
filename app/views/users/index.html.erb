@@ -2,6 +2,8 @@
 <% manage = can?(:manage_people) %>
 
 <% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Who…", param: :who, current: @who,
+        options: [ [ "Everyone", "everyone" ], [ "The team", "team" ], [ "#{term(:client, count: 2)}’ people", "clients" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
         options: [ [ "Active (#{@counts["active"]})", "active" ], [ "Deactivated (#{@counts["deactivated"]})", "deactivated" ], [ "All (#{@counts.values.sum})", "all" ] ] %>
 <% end %>
@@ -23,7 +25,7 @@
   <%= render "ui/data_table", id: "users", columns: columns, rows: @people, row: "users/row", as: :person,
         row_locals: { manage: manage }, page: @page, selectable: manage, actions: true %>
 <% else %>
-  <%= render "layouts/shared/empty", text: "No #{@status} users.", action_text: "Show all", action_path: users_path(status: "all", view: params[:view]) %>
+  <%= render "layouts/shared/empty", text: "No #{@status} users.", action_text: "Show all", action_path: users_path(status: "all", who: "everyone", view: params[:view]) %>
 <% end %>
 
 <% if manage && @invitations.any? %>

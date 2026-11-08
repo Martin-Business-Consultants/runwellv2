@@ -62,7 +62,7 @@ Two nouns carry the core, the same in the schema, the code, routes, tools, event
 work or a client; it was "todo", and on screen "work", until 6.0). Settings > Names can still call
 them something else on screen (`term(:work)`, `term(:task)`).
 
-1. **Who we work for, and who can say yes** — `Client`, `Contact` (`portal_access`,
+1. **Who we work for, and who can say yes** — `Client`, `Contact` (a user with the client role; `portal_access`,
    `can_approve`)
 2. **What we run for them** — `Work` (ref like WO-12, P-3, S-4; label project /
    work_order / service; shape fixed / recurring), active from the start until closed
@@ -547,7 +547,7 @@ one place they are documented for people: add a new key there.
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
 Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-focus` focuses
-it instead, `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
+it instead, `data-keys-anywhere` works while the element is out of sight (in a closed menu), `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
 ⌘ on a Mac, Ctrl elsewhere). A key declared inside an item fires for the selected item only
 (`row_actions` marks edit `e` and delete `d`); one outside any item is the page's. Show the
 key on the button with `<kbd class="hide-on-touch">`.
@@ -668,7 +668,16 @@ they send is a request of its own. Automatic replies and our own mail are droppe
 
 ## Clients and the portal
 
-Clients are `Contact`s, never `User`s: no password, no staff role. Two switches per contact:
+Someone at a client is a user with the client role (`User::Role::CLIENT`), and `Contact` is that
+slice of users (`class Contact < User`, a default scope; `Contact.polymorphic_name` keeps "Contact"
+in search and events). They show in Users beside the team (Who…: everyone, the team, clients'
+people), open on their contact page, have no permissions and no password (a random one), and never
+reach a staff surface: `User.people` (pickers, mentions, sign-in) is the team only, password and
+link sign-in refuse them, and a `Session`, `AccessToken` or `OauthGrant` reads `user` for staff
+and `contact` for a client's person off the same `user_id` (`HeldByPerson`). Their job title is
+`title` (`role` is the client role); `email` and `archived_at` alias `email_address` and
+`deactivated_at`. Folded in by 7.0 (`users.legacy_contact_id` keeps each old contact id for
+plugins). Two switches per contact:
 `portal_access` (sign in by emailed link, see the client's shared tasks and documents, send
 requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
@@ -684,7 +693,8 @@ model rules) is in `docs/plugins.md`. Read it before changing a contract they us
 
 Three fixed roles (`User::Role`): owner (everything, including settings, plugins and
 people), manager (closes work, deletes) and member
-(does the tasks). Each permission in `User::Role::PERMISSIONS` names the roles that have it;
+(does the tasks), plus client for someone at a client (a `Contact`: no permissions, the portal
+only; Clients and the portal, above). Each permission in `User::Role::PERMISSIONS` names the roles that have it;
 plugins add theirs with `Runwell::Plugins.permission key, :name, name:, roles:`. No custom
 roles or permission builder. Check with `user.can?(:delete_records)`, and in views `can?`.
 
@@ -882,6 +892,12 @@ In production `db:migrate` and `db:prepare` back up every database with pending 
 first (`lib/tasks/backup.rake`). Updates run unattended, so **every migration must be safe on a
 live install**: add columns and tables in one release; remove or rename them only in a later
 release, once no code reads them. No migration may depend on a person running a task by hand.
+SQLite copies and drops a table to rename, change or remove one of its columns (`rename_column`,
+`change_column`, `remove_column`), and inside a migration's transaction foreign keys stay on, so the
+drop cascades: renaming a column on `tasks` in 6.0 deleted every assignment
+(`20261108150000_restore_task_lead_assignments`). Before altering a table's columns, check what
+points at it with `on_delete: :cascade` and copy those rows aside and back, or use
+`execute "ALTER TABLE … RENAME COLUMN …"`, which SQLite does in place.
 
 ## Settings and names
 

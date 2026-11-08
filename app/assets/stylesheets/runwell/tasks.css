@@ -294,10 +294,15 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
   display: flex; flex-direction: column; gap: var(--s-4); width: var(--task-panel-width);
   padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain;
   border: 1px solid var(--line); border-radius: var(--radius-panel, var(--radius-lg)); background: var(--panel);
-  box-shadow: var(--shadow-popover); animation: task-panel-in .14s var(--ease, ease-out);
+  box-shadow: var(--shadow-popover); animation: rune-slide var(--motion) var(--ease);
 }
-@keyframes task-panel-in { from { opacity: 0; translate: 1rem 0; } }
-@media (prefers-reduced-motion: reduce) { .task-panel { animation: none; } }
+/* rune's motion: in, the slide every sheet and toast takes; following another task, the panel
+/* stays put and its contents fade over; out, quicker, back the way it came (the side-panel
+/* controller waits for it). Reduced motion makes them instant (rune's tokens). */
+@keyframes task-panel-out { to { opacity: 0; translate: 1rem 0; } }
+.task-panel:is(.task-panel--following, .task-panel--still) { animation: none; }
+.task-panel--following > * { animation: rune-fade var(--motion-fast) var(--ease); }
+.task-panel--leaving { animation: task-panel-out var(--motion-out) var(--ease-in) forwards; pointer-events: none; }
 @media (max-width: 639px) { .task-panel { inset: 0; width: 100vw; border: 0; border-radius: 0; } }
 
 .task-panel__header { display: flex; align-items: center; gap: var(--s-2); }

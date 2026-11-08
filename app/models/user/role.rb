@@ -1,10 +1,12 @@
-# What a person may do. Three fixed roles; each permission names the roles that have it.
+# What a person may do. Three fixed staff roles; each permission names the roles that have it.
 # Plugins add their own (Runwell::Plugins.permission). There is no permission builder:
-# an install that needs finer control adds a plugin.
+# an install that needs finer control adds a plugin. A fourth, client, is someone at a client
+# (Contact): no permissions, no staff sign-in, only the portal, and never in staff pickers.
 module User::Role
   extend ActiveSupport::Concern
 
   ROLES = %w[owner manager member].freeze
+  CLIENT = "client"
 
   ROLE_DESCRIPTIONS = {
     "owner" => "Everything, including settings, plugins and people",
@@ -21,13 +23,15 @@ module User::Role
   }.freeze
 
   included do
-    validates :role, inclusion: { in: ROLES }
+    validates :role, inclusion: { in: ROLES + [ CLIENT ] }
     validate :keeps_an_owner, on: :update
 
     scope :active, -> { where(deactivated_at: nil) }
     scope :deactivated, -> { where.not(deactivated_at: nil) }
     scope :owners, -> { where(role: "owner") }
     scope :ordered, -> { order(:name) }
+    scope :staff, -> { where.not(role: CLIENT) }
+    scope :clients, -> { where(role: CLIENT) }
   end
 
   class_methods do
@@ -36,6 +40,8 @@ module User::Role
   end
 
   def owner? = role == "owner"
+  def client? = role == CLIENT
+  def staff? = !client?
   # An agent is active only while its person is.
   def active? = deactivated_at.nil? && (!agent? || agent_owner&.active?)
   def deactivated? = !active?

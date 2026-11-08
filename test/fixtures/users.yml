@@ -11,3 +11,29 @@ sarah:
   name: Sarah Staff
   role: manager
   password_digest: <%= password_digest %>
+
+# People at clients (Contact: the client role).
+ann:
+  client: acme
+  name: Ann Approver
+  email_address: ann@acme.example
+  role: client
+  title: Director
+  can_approve: true
+  password_digest: <%= password_digest %>
+
+bob:
+  client: acme
+  name: Bob Requester
+  email_address: bob@acme.example
+  role: client
+  can_approve: false
+  password_digest: <%= password_digest %>
+
+gina:
+  client: globex
+  name: Gina Globex
+  email_address: gina@globex.example
+  role: client
+  can_approve: true
+  password_digest: <%= password_digest %>

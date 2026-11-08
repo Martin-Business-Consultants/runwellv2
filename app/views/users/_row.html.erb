@@ -1,20 +1,40 @@
 <%# locals: (person:, manage:) %>
-<%# One person in the users index's data table (ui/_data_table): the cells in the columns' order. %>
+<%# One person in the users index's data table (ui/_data_table): the cells in the columns' order.
+    Someone at a client (the client role) shows their client and portal access and opens on their
+    contact page; the bulk bar's roles are the team's, so they have no checkbox. %>
+<% client = person.client? %>
+<% path = client ? edit_contact_path(person) : user_path(person) %>
 <tr id="<%= dom_id(person, :row) %>" data-filter-target="item">
   <% if manage %>
-    <%= bulk_select_cell person, person.display_name %>
+    <% if client %>
+      <td class="data-table__select"></td>
+    <% else %>
+      <%= bulk_select_cell person, person.display_name %>
+    <% end %>
   <% end %>
   <td data-column="name">
     <span class="users-table__name">
       <%= avatar_preview_tag person, hidden_for_screen_reader: true %>
-      <span><%= link_to person.display_name, user_path(person) %><%= " (you)" if person == Current.user %></span>
+      <span><%= link_to person.display_name, path %><%= " (you)" if person == Current.user %></span>
     </span>
   </td>
   <td class="muted" data-column="email"><%= person.email_address %></td>
-  <td data-column="role"><%= person.role.capitalize %></td>
+  <td data-column="role">
+    <% if client %>
+      <%= term(:client) %><% if person.client %> · <%= link_to person.client.name, client_path(person.client) %><% end %>
+    <% else %>
+      <%= person.role.capitalize %>
+    <% end %>
+  </td>
   <td data-column="status">
     <% if person.deactivated? %>
-      <%= status_tag "Deactivated" %>
+      <%= status_tag(client ? "Archived" : "Deactivated") %>
+    <% elsif client %>
+      <% if person.portal_access? %>
+        <%= badge "Portal", tone: :ok, title: "Signs in to the client portal by emailed link" %>
+      <% else %>
+        <%= status_tag "Active" %>
+      <% end %>
     <% elsif person.two_factor? %>
       <%= badge "Two-factor", tone: :ok, title: "Signs in with a code from an authenticator app" %>
     <% elsif Setting.current.require_two_factor? %>
@@ -23,5 +43,5 @@
       <%= status_tag "Active" %>
     <% end %>
   </td>
-  <%= render "layouts/shared/row_actions", name: person.display_name, edit_path: (user_path(person) if manage) %>
+  <%= render "layouts/shared/row_actions", name: person.display_name, edit_path: (client ? path : (path if manage)) %>
 </tr>

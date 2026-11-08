@@ -2,6 +2,10 @@ json.summary "#{pluralize(@people.size, "#{@status == "all" ? "" : "#{@status} "
 json.people @people do |person|
   json.merge! agent_ref(person)
   json.extract! person, :email_address, :role
+  if person.client?
+    json.client agent_ref(person.client)
+    json.extract! person, :title, :portal_access, :can_approve
+  end
   json.active person.active?
   json.two_factor person.two_factor?
   json.agent(person.agent && agent_user(person.agent))

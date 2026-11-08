@@ -47,8 +47,8 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
       post client_contacts_path(clients(:acme)), params: { contact: { name: "Cy", email: "cy@acme.example", can_approve: true } }
     end
     contact = Contact.last
-    patch contact_path(contact), params: { contact: { role: "CFO" } }
-    assert_equal "CFO", contact.reload.role
+    patch contact_path(contact), params: { contact: { title: "CFO" } }
+    assert_equal "CFO", contact.reload.title
     delete contact_path(contact)
     assert contact.reload.archived?
     assert_redirected_to client_path(clients(:acme))
