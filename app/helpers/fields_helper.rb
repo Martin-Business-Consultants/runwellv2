@@ -88,4 +88,10 @@ module FieldsHelper
           placeholder: options.delete(:placeholder) || "Pick a date", data: data, **options)
     end
   end
+
+  # A select as a combobox (Choices.js, the choices controller): the wrapper carries the controller,
+  # since Choices moves the <select> itself (ComboboxFormBuilder wraps every form select in this).
+  def combobox_tag(&block)
+    tag.span(capture(&block), class: "combobox", data: { controller: "choices" })
+  end
 end

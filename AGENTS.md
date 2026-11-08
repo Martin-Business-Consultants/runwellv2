@@ -139,9 +139,11 @@ event); every event has a source.
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
   highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
 - Every select is a combobox (Choices.js, vendored through importmap, the `choices` controller):
-  the default form builder (`ComboboxFormBuilder`) adds the controller to `form.select`,
-  `time_zone_select`, `collection_select` and `grouped_collection_select`; a `select_tag` adds
-  `data: { controller: "choices" }` itself, and `combobox: false` keeps a plain `<select>`. It's
+  the default form builder (`ComboboxFormBuilder`) wraps `form.select`,
+  `time_zone_select`, `collection_select` and `grouped_collection_select` in `combobox_tag`, the
+  wrapper that carries the controller (never the `<select>`: Choices moves it, and a controller whose
+  element moves reconnects without end); a `select_tag` goes in `combobox_tag { … }` itself, and
+  `combobox: false` keeps a plain `<select>`. It's
   drawn on rune's tokens (`runwell/components.css`), fires `change` on the select (save-on-change
   forms work), and comes down before Turbo renders or streams over it and back up after
 - Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): a calendar

@@ -433,3 +433,6 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] .icon { color: var(--accent); }
 .record-list__row[data-keyboard-current], .list-row[data-keyboard-current] { background: var(--brand-tint); }
+
+/* A combobox's wrapper (combobox_tag) takes no box: the field lays out as the select did. */
+.combobox { display: contents; }

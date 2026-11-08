@@ -6,7 +6,9 @@ import Choices from "choices.js"
 // <select> stays the field the form sends, and Choices fires change on it, so forms that save on
 // change keep working. Turbo morphs pages and streamed sections against the server's plain
 // <select>, which would fight Choices' markup, so the combobox comes down before Turbo renders,
-// caches or applies a stream, and goes back up after.
+// caches or applies a stream, and goes back up after. The controller is on a wrapper around the
+// <select> (combobox_tag), never the select: Choices moves the select, and a controller whose own
+// element moves is disconnected and connected again, over and over.
 const FILTER_FROM = 8
 
 export default class extends Controller {
@@ -24,11 +26,16 @@ export default class extends Controller {
     this.teardown()
   }
 
-  setup() {
-    if (this.choices || !this.element.isConnected || this.element.closest("template")) return
+  get select() {
+    return this.element.querySelector("select")
+  }
 
-    this.choices = new Choices(this.element, {
-      searchEnabled: this.element.options.length >= FILTER_FROM,
+  setup() {
+    const select = this.select
+    if (this.choices || !select || !this.element.isConnected || this.element.closest("template")) return
+
+    this.choices = new Choices(select, {
+      searchEnabled: select.options.length >= FILTER_FROM,
       searchPlaceholderValue: "Type to filter…",
       shouldSort: false,
       itemSelectText: "",
