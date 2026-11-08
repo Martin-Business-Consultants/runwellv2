@@ -1,0 +1,7 @@
+<%# locals: (unread:, read:) %>
+<%# New for you, then previously seen: what Mark all as read answers with (a turbo stream
+    replacing this), so the page doesn't reload. %>
+<div id="notifications_lists" class="notifications-page__lists">
+  <%= render "notifications/index/unread_notifications", unread: unread %>
+  <%= render "notifications/index/read_notifications", read: read %>
+</div>

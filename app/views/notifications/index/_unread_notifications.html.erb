@@ -7,7 +7,7 @@
     <p class="card__hint">Mentions you haven’t opened yet.</p>
     <% if unread.any? %>
       <div class="card__action">
-        <%= button_to "Mark all as read", bulk_reading_path, class: button_classes(variant: :secondary, size: :sm), form: { data: { turbo: false } }, data: { action: "badge#clear" } %>
+        <%= button_to "Mark all as read", bulk_reading_path, class: button_classes(variant: :secondary, size: :sm), data: { action: "badge#clear" } %>
       </div>
     <% end %>
   </header>

@@ -7,6 +7,9 @@ class Notifications::BulkReadingsController < ApplicationController
 
     if from_tray?
       head :ok
+    elsif request.format.turbo_stream?
+      render turbo_stream: turbo_stream.replace("notifications_lists", partial: "notifications/index/lists",
+        locals: { unread: Notification.none, read: Current.user.notifications.read.ordered.preloaded.limit(100) })
     else
       redirect_to notifications_path
     end

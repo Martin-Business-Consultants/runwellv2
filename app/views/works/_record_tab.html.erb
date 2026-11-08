@@ -1,0 +1,39 @@
+<%# locals: (work:, tabs: nil) %>
+<%# A piece of work's tabs and the one showing: on its page, and on its own when a tab is picked
+    (WorksController#show answers a record_tab frame request with just this, not the whole page). %>
+<% tabs ||= work_record_tabs(work) %>
+<% tab = current_record_tab(tabs, "tasks") %>
+<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+<turbo-frame id="record_tab" target="_top">
+  <div class="record-tabs">
+    <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
+    <div class="record-tabs__panel">
+      <% case tab %>
+      <% when "tasks" %>
+        <% if @task_view == "board" %>
+          <section class="card record-card" id="tasks">
+            <header class="card__head">
+              <h2 class="card__title"><%= term(:task, count: 2) %></h2>
+              <p class="card__hint">Everyone’s, by status. Drag a card to move it.</p>
+              <div class="card__action"><%= render "tasks/view_switch", current: "board" %></div>
+            </header>
+            <div class="card__content">
+              <%= render "tasks/board/columns", board: @board %>
+            </div>
+          </section>
+        <% else %>
+          <%= render "tasks/section", work: work, state: @task_state, item: @task_item %>
+        <% end %>
+      <% when "notes" %>
+        <%= render "notes/section", subject: work %>
+      <% when "documents" %>
+        <%= render "documents/section", subject: work %>
+      <% when "history" %>
+        <%= render "events/timeline", subject: work, expanded: true %>
+      <% end %>
+      <% if plugin_partial %>
+        <%= render plugin_partial, work: work %>
+      <% end %>
+    </div>
+  </div>
+</turbo-frame>

@@ -14,7 +14,13 @@ class Tasks::DiscussionsController < ApplicationController
     note = task.notes.new(body: params.expect(note: [ :body ])[:body], kind: "internal", client_visible: true,
       author: current_user, source: Current.source || "app")
     if note.save
-      redirect_back fallback_location: task, notice: "Sent to #{task.client.name}: it’s on the #{Setting.current.term(:task).downcase} in their portal."
+      notice = "Sent to #{task.client.name}: it’s on the #{Setting.current.term(:task).downcase} in their portal."
+      # From the composer: just the notes and the notice, as adding a note does.
+      if params[:inline] == "notes" && request.format.turbo_stream?
+        return render turbo_stream: [ turbo_stream.replace(helpers.dom_id(task, :notes_feed), partial: "notes/feed", locals: { subject: task }),
+                                      turbo_stream_flash(notice: notice) ]
+      end
+      redirect_back fallback_location: task, notice: notice
     else
       redirect_back fallback_location: task, alert: note.errors.full_messages.to_sentence
     end

@@ -151,6 +151,7 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 
 /* /notifications: a card of the new over a card of the seen. */
 .notifications-page { display: flex; flex-direction: column; gap: var(--s-5); width: min(100%, 42rem); margin-inline: auto; }
+.notifications-page__lists { display: contents; }
 .notifications-list__empty { padding: 2.5rem var(--s-4); color: var(--text-muted); text-align: center; }
 .notifications-list:has(.tray__item--notification) .notifications-list__empty { display: none; }
 .notifications-list--read:not(:has(.tray__item--notification)) { display: none; }

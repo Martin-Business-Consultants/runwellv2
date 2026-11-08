@@ -7,20 +7,24 @@ import { Datepicker } from "vanillajs-datepicker"
 // t picks today, + and - move a day, Backspace or Delete clears it. A change is announced as
 // input and change on the field people see, so forms that save on change keep working. Both
 // fields come from the server, so a morph puts them back as they should be; the calendar follows.
+// The server already shows the date, so the calendar is built only when it's wanted (the field
+// pressed, focused, or a shortcut): a table of fifty due dates doesn't build fifty calendars.
 const FORMAT = "M d, yyyy"
 
 export default class extends Controller {
   static targets = [ "value", "display" ]
 
   connect() {
-    this.#build()
     this.changed = this.changed.bind(this)
     this.sync = this.#sync.bind(this)
-    this.displayTarget.addEventListener("changeDate", this.changed)
-    document.addEventListener("turbo:morph", this.sync)
+    this.wanted = this.#ensure.bind(this)
+    this.displayTarget.addEventListener("pointerdown", this.wanted)
+    this.displayTarget.addEventListener("focus", this.wanted)
   }
 
   disconnect() {
+    this.displayTarget.removeEventListener("pointerdown", this.wanted)
+    this.displayTarget.removeEventListener("focus", this.wanted)
     this.displayTarget.removeEventListener("changeDate", this.changed)
     document.removeEventListener("turbo:morph", this.sync)
     this.picker?.destroy()
@@ -29,6 +33,8 @@ export default class extends Controller {
 
   shortcut(event) {
     if (event.metaKey || event.ctrlKey || event.altKey) return
+    if (![ "t", "T", "+", "=", "-", "_", "Backspace", "Delete" ].includes(event.key)) return
+    this.#ensure()
 
     switch (event.key) {
       case "t": case "T": this.picker.setDate(new Date()); break
@@ -54,6 +60,15 @@ export default class extends Controller {
     this.picker.hide() // before a form that saves on change redraws the page under it
     this.displayTarget.dispatchEvent(new Event("input", { bubbles: true }))
     this.displayTarget.dispatchEvent(new Event("change", { bubbles: true }))
+  }
+
+  // The calendar, the first time it's wanted; it then follows the hidden field through morphs.
+  #ensure() {
+    if (this.picker) return
+
+    this.#build()
+    this.displayTarget.addEventListener("changeDate", this.changed)
+    document.addEventListener("turbo:morph", this.sync)
   }
 
   #shift(days) {

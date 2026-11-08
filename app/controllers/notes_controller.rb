@@ -34,6 +34,12 @@ class NotesController < ApplicationController
 
     subject = note.subject
     note.destroy!
-    redirect_back fallback_location: subject || root_path, notice: "Note deleted."
+    # From a notes feed in the browser: that feed again (wherever it is) and the notice, no reload.
+    if request.format.turbo_stream? && subject
+      render turbo_stream: [ turbo_stream.replace(helpers.dom_id(subject, :notes_feed), partial: "notes/feed", locals: { subject: subject }),
+                             turbo_stream_flash(notice: "Note deleted.") ]
+    else
+      redirect_back fallback_location: subject || root_path, notice: "Note deleted."
+    end
   end
 end

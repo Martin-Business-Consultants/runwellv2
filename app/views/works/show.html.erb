@@ -1,12 +1,6 @@
 <% @page_title = @work.title %>
-<% tabs = [
-     record_tab("tasks", term(:task, count: 2), count: @work.tasks.open.count),
-     record_tab("notes", "Notes", count: @work.notes.count),
-     record_tab("documents", "Documents", count: @work.documents.count),
-     record_tab("history", "History")
-   ].compact + plugin_record_tabs(:work_panel) %>
+<% tabs = work_record_tabs(@work) %>
 <% tab = current_record_tab(tabs, "tasks") %>
-<% plugin_partial = tabs.find { it.key == tab }&.partial %>
 <% next_step = work_next_step(@work) %>
 
 <%= parent_page term(:work, count: 2), works_path %>
@@ -75,39 +69,7 @@
       </div>
     </section>
 
-    <turbo-frame id="record_tab" target="_top">
-      <div class="record-tabs">
-        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
-        <div class="record-tabs__panel">
-          <% case tab %>
-          <% when "tasks" %>
-            <% if @task_view == "board" %>
-              <section class="card record-card" id="tasks">
-                <header class="card__head">
-                  <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-                  <p class="card__hint">Everyone’s, by status. Drag a card to move it.</p>
-                  <div class="card__action"><%= render "tasks/view_switch", current: "board" %></div>
-                </header>
-                <div class="card__content">
-                  <%= render "tasks/board/columns", board: @board %>
-                </div>
-              </section>
-            <% else %>
-              <%= render "tasks/section", work: @work, state: @task_state, item: @task_item %>
-            <% end %>
-          <% when "notes" %>
-            <%= render "notes/section", subject: @work %>
-          <% when "documents" %>
-            <%= render "documents/section", subject: @work %>
-          <% when "history" %>
-            <%= render "events/timeline", subject: @work, expanded: true %>
-          <% end %>
-          <% if plugin_partial %>
-            <%= render plugin_partial, work: @work %>
-          <% end %>
-        </div>
-      </div>
-    </turbo-frame>
+    <%= render "works/record_tab", work: @work, tabs: tabs %>
   </div>
 
   <aside class="record-page__aside">

@@ -30,6 +30,8 @@ class ClientsController < ApplicationController
   def show
     @work_state = Work.filter_from(params, :works)
     @task_state = Task.state_filter(params[:tasks])
+    # A tab picked on the page: just the tabs' frame, not the whole page around it.
+    render partial: "clients/record_tab", locals: { client: @client } if turbo_frame_request_id == "record_tab"
   end
 
   def new

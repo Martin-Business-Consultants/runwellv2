@@ -1,4 +1,14 @@
 module WorksHelper
+  # A piece of work's tabs, with their counts and plugins' panels (works/_record_tab).
+  def work_record_tabs(work)
+    [
+      record_tab("tasks", term(:task, count: 2), count: work.tasks.open.count),
+      record_tab("notes", "Notes", count: work.notes.count),
+      record_tab("documents", "Documents", count: work.documents.count),
+      record_tab("history", "History")
+    ] + plugin_record_tabs(:work_panel)
+  end
+
   # One line under a piece of work's title saying where it stands and what comes next.
   def work_next_step(work)
     if work.closed?

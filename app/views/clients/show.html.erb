@@ -1,13 +1,6 @@
 <% @page_title = @client.name %>
 <% contacts = @client.contacts.active.ordered.to_a %>
-<% tabs = [
-     record_tab("works", term(:work, count: 2), count: @client.works.count),
-     record_tab("tasks", term(:task, count: 2), count: @client.tasks.open.count),
-     record_tab("notes", "Notes", count: @client.notes.count),
-     record_tab("documents", "Documents", count: @client.documents.count)
-   ] + plugin_record_tabs(:client_panel) %>
-<% tab = current_record_tab(tabs, "works") %>
-<% plugin_partial = tabs.find { it.key == tab }&.partial %>
+<% tabs = client_record_tabs(@client) %>
 
 <%= parent_page term(:client, count: 2), clients_path %>
 <%= turbo_stream_from @client %>
@@ -44,69 +37,7 @@
       </div>
     </section>
 
-    <turbo-frame id="record_tab" target="_top">
-      <div class="record-tabs">
-        <%= render "layouts/shared/record_tabs", tabs: tabs, current: tab, variant: "pill" %>
-        <div class="record-tabs__panel">
-          <% case tab %>
-          <% when "works" %>
-            <section class="card record-card" id="works">
-              <header class="card__head">
-                <h2 class="card__title"><%= term(:work, count: 2) %></h2>
-                <p class="card__hint">What we run for <%= @client.name %>.</p>
-                <div class="card__action">
-                  <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :works, current: @work_state,
-                        options: Work.filter_options, counts: Work.filter_counts(scope: @client.works) %>
-                </div>
-              </header>
-
-              <div class="card__content">
-                <% works = Work.filtered(state: @work_state, scope: @client.works) %>
-                <% if works.any? %>
-                  <ul class="record-list">
-                    <% works.each do |work| %>
-                      <%# herb:key work.id %>
-                      <li data-filter-target="item">
-                        <%= link_to work, class: "list-row" do %>
-                          <span class="list-row__content">
-                            <span class="list-row__title"><%= work.title %></span>
-                            <span class="list-row__desc"><%= work.label_name %></span>
-                          </span>
-                          <span class="list-row__meta"><%= status_tag work.state_label, highlight: work.active? %></span>
-                        <% end %>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% elsif @client.works.exists? %>
-                  <p class="record-card__empty">
-                    None <%= Work.filter_options.to_h.invert.fetch(@work_state).downcase %>.
-                    <%= link_to "Show all", client_path(@client, works: "all") %>
-                  </p>
-                <% else %>
-                  <p class="record-card__empty">No <%= term(:work, count: 2).downcase %> yet.</p>
-                <% end %>
-              </div>
-
-              <footer class="card__footer">
-                <%= link_to new_work_path(client_id: @client.id), class: "btn btn--secondary btn--sm" do %>
-                  <%= icon_tag "add" %>
-                  <span>New <%= term(:work).downcase %></span>
-                <% end %>
-              </footer>
-            </section>
-          <% when "tasks" %>
-            <%= render "tasks/client_section", client: @client, state: @task_state %>
-          <% when "notes" %>
-            <%= render "notes/section", subject: @client %>
-          <% when "documents" %>
-            <%= render "documents/section", subject: @client %>
-          <% end %>
-          <% if plugin_partial %>
-            <%= render plugin_partial, client: @client %>
-          <% end %>
-        </div>
-      </div>
-    </turbo-frame>
+    <%= render "clients/record_tab", client: @client, tabs: tabs %>
   </div>
 
   <aside class="record-page__aside">

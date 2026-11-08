@@ -30,7 +30,11 @@ class DocumentsController < ApplicationController
   def update
     document = Document.find(params[:id])
     document.update!(client_visible: params.dig(:document, :client_visible) == "1")
-    redirect_back fallback_location: root_path, notice: document.client_visible? ? "The client can see #{document.filename}." : "#{document.filename} is internal."
+    notice = document.client_visible? ? "The client can see #{document.filename}." : "#{document.filename} is internal."
+    # The switch already shows the change: the notice is all there is to answer.
+    return render(turbo_stream: turbo_stream_flash(notice: notice)) if request.format.turbo_stream?
+
+    redirect_back fallback_location: root_path, notice: notice
   end
 
   def destroy
@@ -38,6 +42,11 @@ class DocumentsController < ApplicationController
     return deny_access unless document.deletable_by?(current_user)
 
     document.destroy!
-    redirect_back fallback_location: root_path, notice: "#{document.filename} removed."
+    notice = "#{document.filename} removed."
+    if request.format.turbo_stream?
+      render turbo_stream: [ turbo_stream.remove(helpers.dom_id(document, :row)), turbo_stream_flash(notice: notice) ]
+    else
+      redirect_back fallback_location: root_path, notice: notice
+    end
   end
 end

@@ -20,7 +20,7 @@
       <ul class="record-list">
         <% documents.each do |document| %>
           <%# herb:key document.id %>
-          <li class="list-row document-row" data-filter-target="item">
+          <li class="list-row document-row" id="<%= dom_id(document, :row) %>" data-filter-target="item">
             <%= render "documents/link", document: document, meta: safe_join([ number_to_human_size(document.byte_size), person_tag(document.uploaded_by).presence, "#{time_ago_in_words(document.created_at)} ago" ].compact, " · ") %>
 
             <span class="list-row__actions">

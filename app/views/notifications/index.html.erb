@@ -5,6 +5,5 @@
 
 <div class="notifications-page" data-controller="badge navigable-list" data-badge-unread-class="unread" data-action="keydown@document->navigable-list#navigate" data-navigable-list-actionable-items-value="true"
       data-navigable-list-focus-on-selection-value="false">
-  <%= render "notifications/index/unread_notifications", unread: @unread %>
-  <%= render "notifications/index/read_notifications", read: @read %>
+  <%= render "notifications/index/lists", unread: @unread, read: @read %>
 </div>
