@@ -71,6 +71,35 @@
       </div>
     </section>
 
+    <% if Upgrade::Hoster.placed? %>
+      <section class="settings-section">
+        <header class="settings-section__head">
+          <h2>No-downtime updates</h2>
+          <p class="settings-section__description">
+            This install runs on KamalCloud. With a token from there, an update deploys the new release beside this one and
+            switches over once it’s healthy: nobody sees an error page, and a release that can’t start never replaces this one.
+          </p>
+        </header>
+        <% if ENV["HOSTER_TOKEN"].present? %>
+          <p class="muted">Using the HOSTER_TOKEN set on KamalCloud.</p>
+        <% else %>
+          <%= form_with model: Setting.current, url: settings_updates_hoster_token_path, method: :patch, scope: :setting, class: "settings-form" do |form| %>
+            <div class="field">
+              <%= form.label :hoster_token, "KamalCloud token", class: "field__label" %>
+              <%= secret_field form, :hoster_token, placeholder: "From KamalCloud, Settings > Connected apps" %>
+              <p class="field__hint">An admin’s personal token from <%= link_to "KamalCloud", Upgrade::Hoster.url, target: "_blank", rel: "noopener" %> (Settings &gt; Connected apps), so it can change this app’s image and deploy it. Stored encrypted.</p>
+            </div>
+            <div class="button-row">
+              <button type="submit" class="btn btn--primary btn--sm">Save</button>
+            </div>
+          <% end %>
+          <% if Setting.current.hoster_token.present? %>
+            <%= button_to "Remove the token", settings_updates_hoster_token_path, method: :delete, class: "btn btn--ghost btn--sm" %>
+          <% end %>
+        <% end %>
+      </section>
+    <% end %>
+
     <% if @upgrade %>
       <section class="settings-section" data-controller="poll" data-action="turbo:frame-missing@document->poll#keep">
         <header class="settings-section__head">
@@ -82,11 +111,15 @@
           <% end %>
           <div class="list-row__content">
             <p class="list-row__title">Started <%= time_ago_in_words(@upgrade.created_at) %> ago<% if @upgrade.requested_by %> by <%= @upgrade.requested_by.display_name %><% end %></p>
-            <p class="list-row__desc">The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running. This page checks every few seconds.</p>
+            <% if @upgrade.via == "hoster" %>
+              <p class="list-row__desc">KamalCloud is starting <%= @upgrade.to_version %> beside this install. It backs up and migrates as it starts, and traffic moves to it once it’s healthy; until then <%= Runwell::VERSION %> keeps serving. This page checks every few seconds.</p>
+            <% else %>
+              <p class="list-row__desc">The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running. This page checks every few seconds.</p>
+            <% end %>
           </div>
         </div>
         <% if @upgrade.external_url %>
-          <p><%= link_to "Follow the deploy on GitHub", @upgrade.external_url, target: "_blank", rel: "noopener" %></p>
+          <p><%= link_to(@upgrade.via == "hoster" ? "Follow the deploy on KamalCloud" : "Follow the deploy on GitHub", @upgrade.external_url, target: "_blank", rel: "noopener") %></p>
         <% end %>
       </section>
     <% elsif @release&.newer? %>

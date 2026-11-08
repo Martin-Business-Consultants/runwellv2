@@ -11,5 +11,6 @@ class Portal::WorksController < Portal::BaseController
 
   def show
     @work = client.works.includes(scope_items: :tasks).find_by_ref!(params[:ref])
+    @task_state = Task.state_filter(params[:tasks])
   end
 end

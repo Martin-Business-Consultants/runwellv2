@@ -2,7 +2,7 @@
 # to see their work and send requests. A personal token (shown once), or OAuth from the app; see
 # what each did, and disconnect any. Only a person in the browser manages these.
 class Portal::ConnectedAppsController < Portal::BaseController
-  agent_exempt :index, :create, :destroy, reason: "access tokens are managed by a person in the browser"
+  browser_only :index, :create, :destroy, reason: "access tokens are managed by a person in the browser"
 
   def index
     load_tokens

@@ -2,7 +2,7 @@
 # until it's resumed. Your own connections, or anyone's for an owner.
 class Settings::ConnectedApps::PausesController < ApplicationController
   allow_staff
-  agent_exempt :create, :destroy, reason: "access tokens are managed by a person in the browser"
+  browser_only :create, :destroy, reason: "access tokens are managed by a person in the browser"
 
   before_action :set_token
 

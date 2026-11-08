@@ -295,19 +295,39 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-fields-card:not(:has(dt, .field, .setting-row, .field--inline)) { display: none; }
 .record-form__footer { flex-direction: row; justify-content: flex-end; }
 
-/* Arranging (record-layout controller): each field a block that moves, its inputs inert; each
-/* column a drop area; the bar across the top with the Hidden tray. */
+/* Arranging (record-layout controller): the page keeps its own look, label beside value, and only
+/* hints at what moves: each column a faint dashed outline, each field a hover tint and a grip,
+/* its inputs inert; the bar across the top with the Hidden tray. */
 .record-page--arranging .record-fields-card { display: flex; }
-.record-page--arranging [data-zone] { min-height: 3rem; padding: var(--s-2); border-radius: var(--radius); background: color-mix(in srgb, var(--accent) 5%, transparent); }
-.record-page--arranging dl.record-fields { display: flex; flex-direction: column; gap: var(--s-2); }
+.record-page--arranging [data-zone] { min-height: 2.5rem; border-radius: var(--radius); outline: 1px dashed color-mix(in srgb, var(--line-strong) 70%, transparent); outline-offset: 6px; }
 .record-page--arranging .layout-field {
-  display: grid; position: relative; gap: var(--s-1) var(--s-3); padding: var(--s-2) var(--s-3);
-  border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); cursor: grab;
+  position: relative; margin-inline: calc(var(--s-2) * -1); padding: var(--s-1) var(--s-2) var(--s-1) var(--s-5);
+  border-radius: var(--radius-sm); text-align: start; cursor: grab; transition: background .12s;
 }
-.record-page--arranging dl.record-fields .layout-field { grid-template-columns: max-content minmax(0, 1fr); }
-.record-page--arranging .layout-field:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong)); }
-.record-page--arranging .layout-field:focus-visible { outline: none; border-style: solid; border-color: var(--accent); box-shadow: var(--ring); }
-.record-page--arranging .layout-field:not(:has(dt, .field, .setting-row, .field--inline))::before,
+.record-page--arranging .layout-field::after {
+  content: ""; position: absolute; top: 50%; left: var(--s-1); width: .5rem; height: .875rem; translate: 0 -50%; opacity: .55;
+  background: radial-gradient(circle, var(--text-faint) 1.1px, transparent 1.4px) 0 0 / 4px 4px;
+}
+.record-page--arranging .layout-field:hover { background: var(--hover); }
+.record-page--arranging .layout-field:hover::after { opacity: 1; }
+.record-page--arranging .layout-field:focus-visible { outline: none; background: var(--brand-tint); box-shadow: var(--ring); }
+/* A details list stays a list of rows: label column, value column. */
+.record-page--arranging dl.record-fields { display: flex; flex-direction: column; gap: 2px; }
+.record-page--arranging dl.record-fields .layout-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-height: 2rem; }
+.record-page--arranging dl.record-fields--stacked .layout-field { grid-template-columns: minmax(0, 1fr); }
+/* A form (new and edit pages) reads as the same rows while arranging: label beside a one-line
+/* glimpse of its input, hints hidden, a rich text editor cropped, the "who sees it" pill at the
+/* row's end. */
+.record-page--arranging .record-fields:not(dl) { gap: 2px; }
+.record-page--arranging .record-fields:not(dl) .layout-field:has(.layout-field__control) { display: flex; align-items: center; gap: var(--s-2); }
+.record-page--arranging .record-fields:not(dl) .layout-field .field { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-width: 0; }
+.record-page--arranging .record-fields:not(dl) :is(.field__hint, .setting-row__hint) { display: none; }
+.record-page--arranging .record-fields:not(dl) .field__label { color: var(--text-muted); font-weight: var(--weight); }
+.record-page--arranging .record-fields:not(dl) lexxy-editor { max-height: 2.25rem; min-height: 0; overflow: hidden; }
+.record-page--arranging .record-fields:not(dl) lexxy-editor :is(lexxy-toolbar, .lexxy-editor__toolbar) { display: none; }
+.record-page--arranging .record-fields:not(dl) .setting-row { padding-block: 0; }
+.record-page--arranging dd:has(.layout-field__control) { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.record-page--arranging .layout-field:not(:has(dt, .field, .setting-row, .field--inline, .card))::before,
 .layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--text-muted); }
 .layout-field--dragging { opacity: .4; }
 
@@ -322,6 +342,8 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .layout-bar__tray { display: flex; flex: 1; flex-wrap: wrap; gap: var(--s-1); min-height: 2.25rem; padding: 4px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
 .layout-bar__tray .layout-field { display: inline-flex; padding: 2px var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--layer-1); font-size: var(--text-meta); cursor: grab; }
 .layout-bar__tray .layout-field * { display: none; }
+.layout-bar__tray .layout-field { margin: 0; }
+.layout-bar__tray .layout-field::after { display: none; }
 .layout-bar__actions { display: flex; gap: var(--s-2); }
 
 /* A custom field only some roles see: a lock beside its label; and, while arranging, the pill that
@@ -330,8 +352,14 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .field-lock .icon { width: .75rem; height: .75rem; }
 .layout-field__control { display: none; }
 .record-page--arranging .layout-field__control { display: inline-flex; }
-.layout-field__visibility { gap: 4px; font-size: var(--text-meta); }
+.layout-field__visibility { gap: 4px; height: 1.5rem; padding: 0 var(--s-2); font-size: var(--text-xs); }
 .layout-visibility[popover] { margin: auto; padding: var(--s-4); border: 0; border-radius: var(--radius-lg); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); }
 .layout-visibility[popover]:popover-open { display: flex; flex-direction: column; gap: var(--s-3); animation: rune-pop var(--motion-fast) var(--ease); }
 .layout-visibility__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
 .field-visibility { display: flex; flex-direction: column; gap: var(--s-1); margin: 0; padding: 0; border: 0; }
+
+/* While arranging, card headings (and the line under each) are written in place: a dashed line
+/* under them, and a placeholder where there's none yet. */
+.record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--line-strong); border-radius: 2px; cursor: text; }
+.record-page--arranging [data-layout-text]:focus { outline: none; border-bottom-color: var(--accent); background: var(--brand-tint); }
+.record-page--arranging [data-layout-text]:empty::before { content: attr(data-placeholder); color: var(--text-faint); }

@@ -2,8 +2,8 @@
 # or set one for them (they're signed out everywhere). Your own is changed in Your account.
 class Users::PasswordsController < ApplicationController
   require_permission :manage_people
-  agent_exempt :create, reason: "a password reset is sent by a person in the browser"
-  agent_exempt :update, reason: "passwords are set by a person in the browser, never by an agent"
+  browser_only :create, reason: "a password reset is sent by a person in the browser"
+  browser_only :update, reason: "passwords are set by a person in the browser, never by an agent"
 
   before_action :set_person
 

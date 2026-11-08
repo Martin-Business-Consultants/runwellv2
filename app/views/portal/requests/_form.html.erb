@@ -1,0 +1,25 @@
+<%# locals: (request_record:, modal: nil) %>
+<%# A request's subject and details. In the modal (New request over the page) Cancel closes it and
+    the form submits to the whole page; on its own page Cancel goes back to the requests. %>
+<%= render "layouts/shared/errors", record: request_record %>
+<%= form_with model: request_record, scope: :request, url: portal_requests_path, class: "portal-form",
+      data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do |form| %>
+  <div class="field">
+    <%= form.label :subject, "Subject", class: "field__label" %>
+    <%= form.text_field :subject, value: request_record.title, required: true, autofocus: true, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="<%= form.field_id(:body) %>">Details</label>
+    <%= rich_text_field_tag form.field_name(:body), request_record.description, id: form.field_id(:body) %>
+  </div>
+
+  <div class="button-row portal-form__actions">
+    <% if modal %>
+      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+    <% else %>
+      <%= link_to "Cancel", portal_requests_path, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+    <% end %>
+    <button type="submit" class="btn btn--primary" data-form-target="submit">Send request</button>
+  </div>
+<% end %>

@@ -1,9 +1,10 @@
-<%# locals: (text:, action_text: nil, action_path: nil) %>
+<%# locals: (text:, action_text: nil, action_path: nil, action_frame: nil) %>
 <%# What an empty list says, and where its records come from: one quiet line in a dashed box
-    (rune_ui's empty state), with a link to the next step when there is one. %>
+    (rune_ui's empty state), with a link to the next step when there is one (action_frame: the
+    frame it opens in, "modal" for a form over the page). %>
 <div class="empty">
   <p><%= text %></p>
   <% if action_path %>
-    <%= link_to action_text, action_path %>
+    <%= link_to action_text, action_path, data: { turbo_frame: action_frame } %>
   <% end %>
 </div>

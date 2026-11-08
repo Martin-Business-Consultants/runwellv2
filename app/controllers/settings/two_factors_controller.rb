@@ -5,7 +5,7 @@
 class Settings::TwoFactorsController < ApplicationController
   allow_staff
   skip_before_action :require_two_factor_setup, only: %i[new create]
-  agent_exempt :create, :destroy, reason: "two-factor sign-in is set up by a person in the browser"
+  browser_only :create, :destroy, reason: "two-factor sign-in is set up by a person in the browser"
 
   def new
     return redirect_to(settings_account_path, notice: "Two-factor sign-in is already on.") if Current.user.two_factor?

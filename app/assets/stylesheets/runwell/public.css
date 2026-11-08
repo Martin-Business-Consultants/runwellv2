@@ -133,3 +133,10 @@
 }
 .portal-preview form { display: inline-flex; }
 .portal-preview__note { color: var(--text-muted); }
+
+/* The portal's task filter above its table, and a task's title opening the side sheet. */
+.portal-filter { display: flex; justify-content: flex-start; }
+.portal-task-link { color: inherit; text-decoration: none; }
+.portal-task-link:hover .list-row, a.portal-task-link:hover { color: var(--text); }
+.portal-task-link .list-row:hover { background: var(--hover); }
+td a.portal-task-link:hover { text-decoration: underline; }

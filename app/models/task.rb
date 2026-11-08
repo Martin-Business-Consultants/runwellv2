@@ -48,6 +48,8 @@ class Task < ApplicationRecord
   # A Tasks section's filter (?tasks= on a piece of work's or a client's page): open by default.
   STATE_FILTERS = %w[open done all].freeze
   def self.state_filter(value) = value.presence_in(STATE_FILTERS) || "open"
+  # Those tasks of a scope in a state (open, done, all).
+  def self.state_scope(scope, state) = { "open" => scope.open, "done" => scope.where(status: "done") }.fetch(state, scope)
   # The section a piece of work's Tasks show alone (?item=): a section's id, "other" for tasks in
   # none, or nil for all of them.
   def self.section_focus(value) = value == "other" ? "other" : value.presence&.to_i

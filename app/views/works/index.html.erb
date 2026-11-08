@@ -20,10 +20,9 @@
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:work).downcase, new_path: new_work_path, new_modal: true %>
 
 <% if @works.any? %>
-  <% columns = [ ui_column(:ref, "Ref", sort: :ref, width: [ @column_widths[:ref], "Ref" ], hideable: false),
-                 ui_column(:title, "Title", sort: :title, width: [ @column_widths[:title], "Title" ]),
-                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
+  <% columns = [ ui_column(:title, "Title", sort: :title, width: [ @column_widths[:title], "Title" ], hideable: false),
                  ui_column(:type, "Type", sort: :type, width: :pill),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
                  ui_column(:state, "State", width: :status),
                  *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
   <%= render "ui/data_table", id: "works", columns: columns, rows: @works, row: "works/row", as: :work,

@@ -1,0 +1,56 @@
+<%# locals: (task:) %>
+<%# A shared task in the portal's side sheet: the staff panel's component (tasks/_panel), read-only
+    and only what the client may see: where it sits, its status and date, what they asked, its
+    description, its client-visible documents and custom fields. Esc or ✕ closes it. %>
+<section class="task-panel" id="<%= dom_id(task, :portal_panel) %>" aria-label="<%= task.title %>">
+  <header class="task-panel__header">
+    <p class="task-panel__context">
+      <% if task.work %>
+        <%= link_to "#{task.work.ref} #{task.work.title}", portal_work_path(task.work), data: { turbo_frame: "_top" } %>
+      <% else %>
+        <span><%= term(:task) %></span>
+      <% end %>
+    </p>
+    <div class="task-panel__actions">
+      <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close keydown.esc@document->side-panel#close">
+        <%= icon_tag "close" %>
+        <span class="visually-hidden">Close</span>
+      </button>
+    </div>
+  </header>
+
+  <h2 class="task-panel__title task-panel__title--static"><%= task.title %></h2>
+
+  <dl class="details task-panel__details">
+    <dt>Status</dt><dd><%= status_tag task.status.humanize, highlight: task.status == "done" %></dd>
+    <dt>Due</dt>
+    <dd>
+      <% if task.due_on %>
+        <%= l task.due_on, format: :long %>
+      <% else %>
+        <span class="muted">No date</span>
+      <% end %>
+    </dd>
+    <% if task.scope_item %>
+      <dt><%= term(:scope_item) %></dt><dd><%= task.scope_item.description %></dd>
+    <% end %>
+    <% if task.contact && task.contact.client_id == current_contact.client_id %>
+      <dt>Asked by</dt><dd><%= task.contact.name %></dd>
+    <% end %>
+  </dl>
+
+  <div class="task-panel__description">
+    <% if task.description.present? %>
+      <div class="record-card__prose"><%= rich_text task.description %></div>
+    <% else %>
+      <p class="muted">No description.</p>
+    <% end %>
+  </div>
+
+  <%= render "custom_fields/values", record: task, client: true %>
+
+  <% documents = task.documents.select(&:client_visible) %>
+  <% if documents.any? %>
+    <%= render "portal/works/documents", documents: documents %>
+  <% end %>
+</section>

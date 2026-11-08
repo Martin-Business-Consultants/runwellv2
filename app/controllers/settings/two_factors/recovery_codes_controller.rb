@@ -2,7 +2,7 @@
 # password, since whoever has these can sign in without the phone.
 class Settings::TwoFactors::RecoveryCodesController < ApplicationController
   allow_staff
-  agent_exempt :create, reason: "recovery codes are shown to a person in the browser"
+  browser_only :create, reason: "recovery codes are shown to a person in the browser"
 
   def create
     if !Current.user.two_factor?

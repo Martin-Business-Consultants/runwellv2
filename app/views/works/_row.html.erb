@@ -2,10 +2,9 @@
 <%# One work in the index's data table (ui/_data_table): the cells in the columns' order. %>
 <tr id="<%= dom_id(work, :row) %>" data-filter-target="item">
   <%= bulk_select_cell work, work.ref %>
-  <td class="nowrap" data-column="ref"><%= link_to work.ref, work, class: "row-link" %></td>
   <td data-column="title"><%= link_to work.title, work, class: "work-row__title" %></td>
+  <td data-column="type"><%= badge work.label_name, tone: :outline %></td>
   <td data-column="client"><%= link_to work.client.name, work.client, class: "work-row__client" %></td>
-  <td class="muted" data-column="type"><%= work.label_name %></td>
   <td data-column="state"><%= status_tag work.state_label, highlight: work.active? %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>

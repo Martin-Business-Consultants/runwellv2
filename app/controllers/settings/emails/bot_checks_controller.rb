@@ -1,6 +1,6 @@
 # The bot check on the public forms (BotCheck): Settings > Email > Bot checks.
 class Settings::Emails::BotChecksController < Settings::BaseController
-  agent_exempt :update, reason: "a provider's secret key is entered by a person in the browser"
+  browser_only :update, reason: "a provider's secret key is entered by a person in the browser"
 
   def update
     attributes = params.expect(bot_check: %i[bot_check_provider bot_check_site_key bot_check_secret_key])

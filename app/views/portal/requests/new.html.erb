@@ -1,32 +1,23 @@
 <% @page_title = "Ask for something" %>
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <header class="dialog__header">
+      <div>
+        <h2 class="dialog__title"><%= @page_title %></h2>
+        <p class="dialog__hint">A change, a question, something new. We’ll get back to you.</p>
+      </div>
+    </header>
+    <%= render "portal/requests/form", request_record: @request_record, modal: true %>
+  <% end %>
+<% else %>
+  <% content_for :header do %>
+    <h1 class="portal-page-header__title"><%= @page_title %></h1>
+    <p class="portal-page-header__description">A change, a question, something new. We’ll get back to you.</p>
+  <% end %>
 
-<% content_for :header do %>
-  <h1 class="portal-page-header__title"><%= @page_title %></h1>
-  <p class="portal-page-header__description">A change, a question, something new. We’ll get back to you.</p>
+  <section class="card portal-card portal-form-card">
+    <div class="card__content">
+      <%= render "portal/requests/form", request_record: @request_record %>
+    </div>
+  </section>
 <% end %>
-
-<section class="card portal-card portal-form-card">
-  <div class="card__content">
-    <%= render "layouts/shared/errors", record: @request_record %>
-
-    <%= form_with model: @request_record, scope: :request, url: portal_requests_path, class: "portal-form",
-          data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
-      <div class="field">
-        <%= form.label :subject, "Subject", class: "field__label" %>
-        <%= form.text_field :subject, value: @request_record.title, required: true, autofocus: true, autocomplete: "off" %>
-      </div>
-
-      <div class="field">
-        <label class="field__label" for="<%= form.field_id(:body) %>">Details</label>
-        <%= rich_text_field_tag form.field_name(:body), @request_record.description, id: form.field_id(:body) %>
-      </div>
-
-      <div class="button-row portal-form__actions">
-        <%= link_to "Cancel", portal_requests_path, class: "btn btn--secondary" %>
-        <button type="submit" class="btn btn--primary" data-form-target="submit">Send request</button>
-      </div>
-
-      <%= link_to "Cancel and go back", portal_root_path, data: { form_target: "cancel" }, hidden: true %>
-    <% end %>
-  </div>
-</section>

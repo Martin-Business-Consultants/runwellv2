@@ -2,7 +2,7 @@
 # out, deactivate them.
 class Users::SessionsController < ApplicationController
   require_permission :manage_people
-  agent_exempt :destroy, reason: "signing someone out is a person's call, in the browser"
+  browser_only :destroy, reason: "signing someone out is a person's call, in the browser"
 
   def destroy
     person = User.people.find(params[:user_id])

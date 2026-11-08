@@ -2,7 +2,7 @@
 # connections). Agents can't revoke tokens, so this is a person's job.
 class Users::ConnectionsController < ApplicationController
   require_permission :manage_people
-  agent_exempt :destroy, reason: "agents can't revoke tokens"
+  browser_only :destroy, reason: "agents can't revoke tokens"
 
   def destroy
     person = User.people.find(params[:user_id])

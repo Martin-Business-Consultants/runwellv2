@@ -4,7 +4,7 @@
     something in it, or while arranging. %>
 <section class="card record-card record-fields-card">
   <header class="card__head">
-    <h2 class="card__title"><%= title || (form_id ? "Properties" : "Details") %></h2>
+    <%= layout_text_tag layout, "aside.title", title || (form_id ? "Properties" : "Details"), class: "card__title" %>
   </header>
   <div class="card__content">
     <% if form_id %>

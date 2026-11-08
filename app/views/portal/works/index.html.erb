@@ -11,7 +11,6 @@
       <table class="table portal-table">
         <thead>
           <tr>
-            <th class="portal-table__ref">Ref</th>
             <th>Title</th>
             <th class="portal-table__secondary">Type</th>
             <th class="portal-table__status">Status</th>
@@ -21,9 +20,8 @@
           <% @works.each do |work| %>
             <%# herb:key work.id %>
             <tr>
-              <td class="portal-table__ref nowrap"><%= work.ref %></td>
               <td><%= link_to work.title, portal_work_path(work), class: "row-link" %></td>
-              <td class="portal-table__secondary muted"><%= work.label_name %></td>
+              <td class="portal-table__secondary"><%= badge work.label_name, tone: :outline %></td>
               <td class="portal-table__status"><%= status_tag work.state_label, highlight: work.active? %></td>
             </tr>
           <% end %>

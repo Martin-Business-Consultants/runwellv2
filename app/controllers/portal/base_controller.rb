@@ -5,14 +5,31 @@
 class Portal::BaseController < ApplicationController
   allow_unauthenticated_access # the client's own surface: not a staff agent tool
   layout "portal"
+  skip_before_action :render_side_panel
   before_action :require_contact
+  # Again, now the client's token is known (require_contact): a read-only one changes nothing here
+  # either, whether through the portal's MCP or straight at an action.
+  before_action :refuse_read_only_writes
   before_action :refuse_writes_while_previewing
+  before_action :render_portal_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
   around_action :in_client_time_zone
-  helper_method :current_contact, :client
+  helper_method :current_contact, :client, :portal_side_panel_task
 
   private
 
   def current_contact = Current.contact
+
+  # A task shared with this client, opened in the side sheet (?task=): only theirs, only shared.
+  def portal_side_panel_task
+    return unless current_contact && params[:task].present?
+
+    @portal_side_panel_task ||= client.tasks.client_visible.includes(:work, :scope_item).find_by(id: params[:task])
+  end
+
+  # Opening or closing the sheet loads just its frame (the side-panel controller), as on staff pages.
+  def render_portal_side_panel
+    render partial: "portal/tasks/side_panel", locals: { task: portal_side_panel_task }, layout: false
+  end
 
   # Checked on every request: an archived contact, or one whose portal access was switched
   # off, is signed out even with a live cookie (and their tokens stop working).

@@ -686,7 +686,14 @@ client roles. Staff see it for themselves with View as on a contact's page
 (`Contacts::PreviewsController`, `contact.previewed`): the portal as that contact, read-only (a
 signed `portal_preview` cookie beside the staff session; `Current.preview_contact`,
 `Portal::BaseController#refuse_writes_while_previewing`), with a bar to stop. A portal controller
-that writes needs nothing for it: any non-GET is refused while previewing.
+that writes needs nothing for it: any non-GET is refused while previewing. While previewing, an
+owner can also arrange the portal's page for a piece of work (template mode, the `portal_work`
+layout: its cards, any of which can be hidden; a client never sees the controls). A shared task
+opens in the same side sheet as staff pages (the `side-panel` controller on the portal's
+`<body>`, `?task=`, `Portal::BaseController#render_portal_side_panel`, `portal/tasks/_panel`),
+read-only and limited to the client's client-visible tasks; task lists open on open tasks
+(`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
+layout's `modal` frame).
 
 The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
@@ -742,7 +749,10 @@ do, through the same controllers: there is no separate API.
   (a list is `"integer[]"`, or `[ { title: "string!" } ]` for a list of objects; `[ "a", "b" ]`
   is one of those values)
   or `agent_exempt :preview, reason: "…"` (`AgentTools`). `new`/`edit` and public pages are
-  exempt on their own. An undeclared action raises in development and test;
+  exempt on their own. `agent_exempt` only keeps an action out of the tools; what only a person
+  may do in the browser (tokens, passwords, two-factor, sign-in methods, secrets and keys to other
+  services, webhooks, View as) is `browser_only`, which also refuses any token that calls it
+  straight (`forbidden`), so a token can't mint another or change how someone signs in An undeclared action raises in development and test;
   `bin/rails agent:coverage` lists them all. Keep `params:` in step with the action's
   `params.expect` (types: string, text, integer, number, boolean, date, file, an array of
   values, a nested hash; `!` = required; path params come from the route)
@@ -861,7 +871,8 @@ the `record-layout` controller) where fields are dragged between the working col
 and a Hidden tray, or moved with the keys (← → a column, ↑ ↓ their place, Delete hides, Enter
 brings one back); Done saves (`Settings::LayoutsController`, `arrange_layout` / `reset_layout` /
 `show_layout`, `settings.layout` in the audit log). One arrangement per kind (`client`, `work`,
-`task`, `contact`, `user`; a person's page is one column, so order only) drives its new, edit and
+`task`, `contact`, `user`; a person's page is one column, so order only; and `portal_work`, the
+portal's cards, Clients and the portal below) drives its new, edit and
 show pages alike (`RecordLayout`, kept on `Setting#layouts`), and for tasks the side panel (its
 fields in that order, hidden ones left out) and the quick-action form (its rows: what needs doing beside
 where it goes, the details, lead beside who else, due beside the client switch, in the order of
@@ -931,7 +942,11 @@ repository is public (FSL-1.1-MIT, `LICENSE.md`). A release is a `vX.Y.Z` tag ma
 publishes it. Nothing that names a deployment or a client is tracked (`config/deploy*.yml`,
 `.kamal/secrets*` and QA source files are ignored): everything committed is public. `Release` is the newest one GitHub lists, checked
 nightly (`ReleaseCheckJob`) and by Check now, kept on `Setting#latest_release`. Owners see it in
-Settings > Updates, whose button makes an `Upgrade`: `in_place`
+Settings > Updates, whose button makes an `Upgrade`: `hoster` (an install on KamalCloud, whose Runwell
+template passes `HOSTER_URL` / `HOSTER_APP` / `HOSTER_ENVIRONMENT`, given an admin's KamalCloud token in
+Settings > Updates or `HOSTER_TOKEN`) moves the app's image tag and deploys it through KamalCloud's API,
+so kamal-proxy starts the new container beside the old and switches only once it's healthy: no downtime,
+and a release that can't boot never replaces the running one (`Upgrade::Hoster`); `in_place`
 (any Docker install) downloads the release's bundle into the data volume and restarts on it,
 like WordPress (`Upgrade::InPlace`, run by `bin/docker-entrypoint`); each bundle carries its Ruby
 (`ruby/`, switched to by `config/bundled_ruby.rb` from `config/boot.rb` and `bin/thrust`, checked by

@@ -20,13 +20,32 @@ module RecordLayoutHelper
       "due" => "Due", "lead" => "Lead", "others" => "Also on it", "home" => "#{term(:scope_item)} or #{term(:client).downcase}",
       "requested_by" => "Requested by", "source" => "Came in by", "client_visible" => "Visible to the client",
       "email_address" => "Email address", "role" => "Role", "email" => "Email", "phone" => "Phone",
-      "portal_access" => "Portal access", "can_approve" => "Can approve"
+      "portal_access" => "Portal access", "can_approve" => "Can approve",
+      "overview" => "Overview", "sections" => term(:scope_item, count: 2), "tasks" => term(:task, count: 2),
+      "details" => "Details", "documents" => "Documents", "plugins" => "From plugins"
     }
     labels.fetch(key, key.humanize)
+  end
+
+  # A card's heading or the line under it, as the install renamed it (RecordLayout#text), else the
+  # default. While arranging, an owner edits it in place (record-layout controller); a missing
+  # line under a heading is there, hidden, to be written in.
+  def layout_text_tag(layout, slot, default, tag: :h2, class: nil)
+    text = layout.text(slot, default)
+    content_tag(tag, text, class: binding.local_variable_get(:class), hidden: text.blank?,
+      data: { layout_text: slot, layout_default: default.to_s, placeholder: tag == :h2 ? "Heading" : "A line under the heading" })
   end
 
   # The partial that draws a field (an input with a form, its value without).
   def record_field_partial(layout, key)
     layout.custom?(key) ? "record_fields/custom" : "record_fields/#{layout.kind}/#{key}"
+  end
+
+  # A portal task row's link: the task opens in the side sheet over the page (side-panel
+  # controller, ?task=), read-only (portal/tasks/panel). Built here so its data attributes stay
+  # attributes (Herb writes a computed data hash in a template as text).
+  def portal_task_link_to(task, &block)
+    link_to url_for(request.query_parameters.merge("task" => task.id)), class: "portal-task-link",
+      data: { turbo_frame: "_top", action: "side-panel#open", side_panel_task_param: task.id }, &block
   end
 end

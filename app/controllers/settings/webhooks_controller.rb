@@ -3,7 +3,7 @@
 # only list them (without secrets).
 class Settings::WebhooksController < Settings::BaseController
   agent_tool :list_webhooks, on: :index, title: "List webhooks", description: "The addresses events are sent to, which kinds, and how delivery is going. Secrets aren't included."
-  agent_exempt :create, :update, :destroy, reason: "webhooks send data out of the install, so a person sets them up in the browser"
+  browser_only :create, :update, :destroy, reason: "webhooks send data out of the install, so a person sets them up in the browser"
 
   def index
     @endpoints = WebhookEndpoint.ordered.to_a

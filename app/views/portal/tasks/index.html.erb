@@ -5,6 +5,12 @@
   <p class="portal-page-header__description">What we are working on for you.</p>
 <% end %>
 
+<%# Open by default (the filter swaps ?status=); a task opens in the side sheet, read-only. %>
+<div class="portal-filter">
+  <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :status, current: @state,
+        options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: @counts %>
+</div>
+
 <% if @tasks.any? %>
   <section class="card card--flush portal-card">
     <div class="table-wrap">
@@ -21,7 +27,7 @@
           <% @tasks.each do |task| %>
             <%# herb:key task.id %>
             <tr>
-              <td class="portal-table__title"><%= task.title %></td>
+              <td class="portal-table__title"><%= portal_task_link_to(task) { task.title } %></td>
               <td class="portal-table__secondary muted">
                 <% if task.work %>
                   <%= link_to "#{task.work.ref} #{task.work.title}", portal_work_path(task.work), class: "portal-table__link" %>
@@ -42,5 +48,5 @@
     </div>
   </section>
 <% else %>
-  <%= render "layouts/shared/empty", text: "No " + term(:task, count: 2).downcase + " to show yet." %>
+  <%= render "layouts/shared/empty", text: (@state == "done" ? "Nothing done yet." : @state == "open" ? "Nothing open right now." : "No " + term(:task, count: 2).downcase + " to show yet.") %>
 <% end %>

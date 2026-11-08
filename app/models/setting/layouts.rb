@@ -5,8 +5,8 @@ module Setting::Layouts
 
   def layout(kind) = RecordLayout.new(kind, layouts.to_h[kind.to_s])
 
-  def arrange_layout!(kind, main:, aside:, hidden:)
-    arranged = layout(kind).arranged(main: main, aside: aside, hidden: hidden)
+  def arrange_layout!(kind, main:, aside:, hidden:, text: nil)
+    arranged = layout(kind).arranged(main: main, aside: aside, hidden: hidden, text: text)
     update!(layouts: layouts.to_h.merge(kind.to_s => arranged))
     record_event!("settings.layout", payload: { kind: kind.to_s, layout: arranged })
   end

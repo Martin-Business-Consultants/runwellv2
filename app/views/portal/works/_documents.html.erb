@@ -3,7 +3,8 @@
 <% if documents.any? %>
   <section class="card card--flush portal-card">
     <header class="card__head card__head--bordered">
-      <h2 class="card__title">Documents</h2>
+      <%= layout_text_tag record_layout(:portal_work), "documents.title", "Documents", class: "card__title" %>
+      <%= layout_text_tag record_layout(:portal_work), "documents.hint", nil, tag: :p, class: "card__hint" %>
     </header>
 
     <ul class="list portal-documents">

@@ -10,98 +10,44 @@
   <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <div class="portal-page-header__meta">
     <%= status_tag @work.state_label, highlight: @work.active? %>
+    <% if Current.previewing? %>
+      <%= render "record_fields/arrange_button" %>
+    <% end %>
   </div>
 <% end %>
 
-<% items = @work.scope_items %>
-<% tasks = @work.tasks.client_visible %>
-<% panels = plugin_slots(:portal_work_panel, work: @work) %>
-
-<div class="portal-grid">
-  <div class="portal-grid__main">
-    <% if @work.description.present? %>
-      <section class="card portal-card">
-        <header class="card__head">
-          <h2 class="card__title">Overview</h2>
-        </header>
-        <div class="card__content portal-prose">
-          <%= rich_text @work.description %>
-        </div>
-      </section>
+<%# Its cards in the order an owner arranged them while viewing the portal as a client (template
+    mode, RecordLayout "portal_work"; hidden ones left out). The arranging bar and button show only
+    then: a client never sees them. %>
+<% layout = record_layout(:portal_work) %>
+<div class="portal-grid" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:portal_work) %>"
+  data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
+  <% if Current.previewing? %>
+    <%= render "record_fields/arrange", layout: layout, noun: "this page’s" %>
+  <% end %>
+  <div class="portal-grid__main" data-record-layout-target="zone" data-zone="main">
+    <% layout.main.each do |key| %>
+      <%# herb:key key %>
+      <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>">
+        <% if key == "tasks" %>
+          <%= render "portal/works/cards/tasks", work: @work, state: @task_state %>
+        <% else %>
+          <%= render "portal/works/cards/#{key}", work: @work %>
+        <% end %>
+      </div>
     <% end %>
-
-    <section class="card card--flush portal-card">
-      <header class="card__head card__head--bordered">
-        <h2 class="card__title"><%= term(:scope_item, count: 2) %></h2>
-        <p class="card__hint">What this covers, and how far along each part is.</p>
-      </header>
-      <% if items.any? %>
-        <ul class="list">
-          <% items.each do |item| %>
-            <%# herb:key item.id %>
-            <li class="list-row">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= item.description %></p>
-              </div>
-              <div class="list-row__actions">
-                <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <%= empty_state "Nothing listed yet.", compact: true %>
-      <% end %>
-    </section>
-
-    <section class="card card--flush portal-card">
-      <header class="card__head card__head--bordered">
-        <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-        <p class="card__hint">What we’re doing on it for you.</p>
-      </header>
-      <% if tasks.any? %>
-        <ul class="list">
-          <% tasks.each do |task| %>
-            <%# herb:key task.id %>
-            <li class="list-row">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= task.title %></p>
-                <% if task.due_on %>
-                  <p class="list-row__desc">Due <%= l task.due_on, format: :short %></p>
-                <% end %>
-              </div>
-              <div class="list-row__actions">
-                <%= status_tag task.status.humanize, highlight: task.status == "done" %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <%= empty_state "No work to show yet.", compact: true %>
-      <% end %>
-    </section>
   </div>
 
-  <aside class="portal-grid__side">
-    <section class="card portal-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content">
-        <dl class="details portal-details">
-          <dt>Type</dt>
-          <dd><%= @work.label_name %></dd>
-        </dl>
-        <%= render "custom_fields/values", record: @work, client: true %>
+  <aside class="portal-grid__side" data-record-layout-target="zone" data-zone="aside">
+    <% layout.aside.each do |key| %>
+      <%# herb:key key %>
+      <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>">
+        <% if key == "tasks" %>
+          <%= render "portal/works/cards/tasks", work: @work, state: @task_state %>
+        <% else %>
+          <%= render "portal/works/cards/#{key}", work: @work %>
+        <% end %>
       </div>
-    </section>
-
-    <%= render "portal/works/documents", documents: @work.client_documents %>
-
-    <% if panels.present? %>
-      <section class="card portal-card portal-slot">
-        <%= panels %>
-      </section>
     <% end %>
   </aside>
 </div>

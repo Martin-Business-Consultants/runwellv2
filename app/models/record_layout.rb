@@ -18,12 +18,23 @@ class RecordLayout
     "work" => { main: %w[title description], aside: %w[client label shape], required: %w[title client] },
     "task" => { main: %w[title description], aside: %w[status due lead others home requested_by source client_visible], required: %w[title source] },
     "user" => { main: %w[name email_address role], aside: [], required: %w[name email_address role] },
-    "contact" => { main: %w[name title email phone], aside: %w[portal_access can_approve], required: %w[name] }
+    "contact" => { main: %w[name title email phone], aside: %w[portal_access can_approve], required: %w[name] },
+    # The client portal's page for a piece of work: its cards, arranged by an owner viewing the
+    # portal as a client (View as). Any can be hidden.
+    "portal_work" => { main: %w[overview sections tasks], aside: %w[details documents plugins], required: [] }
   }.freeze
   KINDS = DEFAULTS.keys.freeze
-  MODELS = { "client" => "Client", "work" => "Work", "task" => "Task", "user" => "User", "contact" => "Contact" }.freeze
+  MODELS = { "client" => "Client", "work" => "Work", "task" => "Task", "user" => "User", "contact" => "Contact", "portal_work" => nil }.freeze
   # A kind whose pages have no sidebar to arrange into (a person's page).
   SINGLE_COLUMN = %w[user].freeze
+
+  # Card headings an install may rename (and the line under each), by slot: a record's form card and
+  # its sidebar card; the portal's cards.
+  PORTAL_CARDS = %w[overview sections tasks details documents].freeze
+  TEXT_SLOTS = Hash.new(%w[main.title main.hint aside.title]).merge(
+    "portal_work" => PORTAL_CARDS.flat_map { [ "#{it}.title", "#{it}.hint" ] }
+  ).freeze
+  TEXT_LIMIT = 120
 
   attr_reader :kind, :main, :aside, :hidden
 
@@ -36,7 +47,12 @@ class RecordLayout
 
     @kind = kind.to_s
     @main, @aside, @hidden = arrange(saved || {})
+    @text = clean_text((saved || {}).to_h.stringify_keys["text"])
   end
+
+  # A card's heading or the line under it as the install renamed it, else the default.
+  def text(slot, default = nil) = @text.fetch(slot.to_s, default)
+  def renamed = @text
 
   def keys = main + aside + hidden
   def zones = single_column? ? %w[main hidden] : ZONES
@@ -47,19 +63,28 @@ class RecordLayout
 
   # The arrangement as stored: only known keys, each once, required ones never hidden. A key the
   # page didn't send keeps its column (a page that shows only some fields can still save).
-  def arranged(main:, aside:, hidden:)
+  # Renamed headings: only the kind's slots, plain text, trimmed; a blank one goes back to its default.
+  def arranged(main:, aside:, hidden:, text: nil)
     sent = { "main" => clean(main), "aside" => (single_column? ? [] : clean(aside)), "hidden" => clean(hidden) - required_keys }
     sent["aside"] -= sent["hidden"]
     sent["main"] -= sent["aside"] + sent["hidden"]
     (keys - sent.values.flatten).each { |key| sent[zone_of(key)] << key }
-    sent
+    sent.merge("text" => text.nil? ? @text : @text.merge(clean_text(text, keep_blank: true)).compact_blank)
   end
 
   private
-    def custom_fields = @custom_fields ||= CustomField.for(MODELS.fetch(kind)).to_a
+    def custom_fields = @custom_fields ||= (MODELS.fetch(kind) ? CustomField.for(MODELS.fetch(kind)).to_a : [])
     def all_keys = DEFAULTS[kind][:main] + DEFAULTS[kind][:aside] + custom_fields.map { "custom.#{it.key}" }
 
     def single_column? = SINGLE_COLUMN.include?(kind)
+
+    # Only this kind's slots, as plain text; blank means back to the default (kept while merging a
+    # page's edits, so clearing one there clears it).
+    def clean_text(text, keep_blank: false)
+      text.to_h.stringify_keys.slice(*TEXT_SLOTS[kind])
+        .transform_values { ActionController::Base.helpers.strip_tags(it.to_s).squish.truncate(TEXT_LIMIT) }
+        .then { keep_blank ? it : it.compact_blank }
+    end
     def required_keys = DEFAULTS[kind][:required]
     def clean(list) = Array(list).map(&:to_s).uniq & all_keys
 

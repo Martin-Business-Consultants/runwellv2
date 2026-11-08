@@ -59,7 +59,7 @@ class ApplicationController < ActionController::Base
   # A read-only token reads everything its person can and changes nothing. The MCP endpoint
   # is itself a POST; the write tools it dispatches come back through here and are refused.
   def refuse_read_only_writes
-    return unless Current.access_token&.read_only? && !request.get? && !request.head? && !is_a?(McpController)
+    return unless Current.access_token&.read_only? && !request.get? && !request.head? && !is_a?(McpController) && !is_a?(Portal::McpController)
 
     render json: { status: "error", code: "read_only", summary: "This token is read-only: it can’t change anything.", hint: Agent::Errors.hint("read_only") }, status: :forbidden
   end

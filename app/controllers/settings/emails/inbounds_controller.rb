@@ -1,7 +1,7 @@
 # How requests' mail comes in (Settings > Email), when the server's environment doesn't say: the
 # service forwarding it, with a password made for it the first time.
 class Settings::Emails::InboundsController < Settings::BaseController
-  agent_exempt :update, reason: "it makes the password a mail service signs in with, shown to a person in the browser"
+  browser_only :update, reason: "it makes the password a mail service signs in with, shown to a person in the browser"
 
   def update
     ingress = params.dig(:inbound, :ingress).presence_in(%w[relay postmark sendgrid])

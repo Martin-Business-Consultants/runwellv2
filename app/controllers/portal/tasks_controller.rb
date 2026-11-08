@@ -1,8 +1,12 @@
 class Portal::TasksController < Portal::BaseController
   agent_tool :portal_tasks, on: :index, title: "The work being done for you",
-    description: "Everything shared with you, on your work or not, with its status and due date."
+    description: "Everything shared with you, on your work or not, with its status and due date. status: open (the default), done or all.",
+    params: { status: %w[open done all] }
 
   def index
-    @tasks = Task.client_visible.where(client: client).includes(:work, :scope_item).order(:due_on)
+    @state = Task.state_filter(params[:status])
+    shared = Task.client_visible.where(client: client)
+    @counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count }
+    @tasks = Task.state_scope(shared, @state).includes(:work, :scope_item).order(:due_on)
   end
 end

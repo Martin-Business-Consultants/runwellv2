@@ -4,8 +4,8 @@
 # ends with Stop viewing or when the browser closes. Recorded on the contact's history.
 class Contacts::PreviewsController < ApplicationController
   allow_staff
-  agent_exempt :create, reason: "a browser preview of the portal; an agent reads what a client sees through the portal's own tools with the client's token"
-  agent_exempt :destroy, reason: "ends a browser preview of the portal"
+  browser_only :create, reason: "a browser preview of the portal; an agent reads what a client sees through the portal's own tools with the client's token"
+  browser_only :destroy, reason: "ends a browser preview of the portal"
 
   def create
     contact = Contact.active.find(params[:contact_id])

@@ -1,6 +1,7 @@
 module UpdatesHelper
   def update_method_description
     case Upgrade.via
+    when "hoster" then "KamalCloud: it deploys the new release beside this one and switches over once it’s healthy, with no downtime"
     when "github" then "The Deploy workflow on GitHub (#{Release::Github.repo}#{", destination #{Upgrade::Github.destination}" if Upgrade::Github.destination.present?})"
     when "local" then "bin/update on this server"
     when "in_place" then "Itself: it downloads the release and restarts on it"

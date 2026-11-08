@@ -6,10 +6,8 @@
 <%= render "layouts/shared/errors", record: record %>
 <section class="card record-form">
   <header class="card__head">
-    <h2 class="card__title"><%= title %></h2>
-    <% if hint %>
-      <p class="card__hint"><%= hint %></p>
-    <% end %>
+    <%= layout_text_tag layout, "main.title", title, class: "card__title" %>
+    <%= layout_text_tag layout, "main.hint", hint, tag: :p, class: "card__hint" %>
   </header>
   <div class="card__content">
     <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id %>

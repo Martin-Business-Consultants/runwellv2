@@ -1,0 +1,40 @@
+<%# locals: (work:, state:) %>
+<%# The tasks shared with the client: open by default (the filter swaps ?tasks=), each opening in
+    the side sheet, read-only. %>
+<% shared = work.tasks.client_visible %>
+<% counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count } %>
+<% tasks = Task.state_scope(shared, state).order(:due_on, :position, :id) %>
+<section class="card card--flush portal-card">
+  <header class="card__head card__head--bordered">
+    <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
+    <%= layout_text_tag record_layout(:portal_work), "tasks.hint", "What we’re doing on it for you.", tag: :p, class: "card__hint" %>
+    <div class="card__action">
+      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
+            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: counts %>
+    </div>
+  </header>
+  <% if tasks.any? %>
+    <ul class="list">
+      <% tasks.each do |task| %>
+        <%# herb:key task.id %>
+        <li>
+          <%= portal_task_link_to(task) do %>
+            <span class="list-row">
+              <span class="list-row__content">
+                <span class="list-row__title"><%= task.title %></span>
+                <% if task.due_on %>
+                  <span class="list-row__desc">Due <%= l task.due_on, format: :short %></span>
+                <% end %>
+              </span>
+              <span class="list-row__actions">
+                <%= status_tag task.status.humanize, highlight: task.status == "done" %>
+              </span>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= empty_state(state == "done" ? "Nothing done yet." : "Nothing open right now.", compact: true) %>
+  <% end %>
+</section>

@@ -22,6 +22,7 @@ export default class extends Controller {
     this.element.classList.add("record-page--arranging")
     this.barTarget.hidden = false
     this.#fields.forEach(field => this.#arrangeable(field))
+    this.#texts.forEach(text => this.#editable(text))
     this.#fields[0]?.focus()
   }
 
@@ -34,6 +35,11 @@ export default class extends Controller {
     this.zoneTargets.forEach(zone => {
       body.append(`layout[${zone.dataset.zone}][]`, "")
       this.#keys(zone).forEach(key => body.append(`layout[${zone.dataset.zone}][]`, key))
+    })
+    // Renamed headings: what was written, or blank where it's back to the default.
+    this.#texts.forEach(text => {
+      const written = text.textContent.trim()
+      body.append(`layout[text][${text.dataset.layoutText}]`, written === text.dataset.layoutDefault ? "" : written)
     })
     await this.#send("PATCH", body)
   }
@@ -111,6 +117,21 @@ export default class extends Controller {
     field.focus()
   }
 
+  get #texts() {
+    return Array.from(this.element.querySelectorAll("[data-layout-text]"))
+  }
+
+  // A card's heading (or the line under it) written in place: one line, Enter finishes it.
+  #editable(text) {
+    text.hidden = false
+    text.contentEditable = "plaintext-only"
+    text.spellcheck = true
+    text.addEventListener("keydown", event => {
+      if (event.key === "Enter") { event.preventDefault(); text.blur() }
+      event.stopPropagation()
+    })
+  }
+
   get #fields() {
     return this.zoneTargets.flatMap(zone => this.#fieldsIn(zone))
   }
@@ -138,8 +159,8 @@ export default class extends Controller {
   // Everything in a field goes inert while it's being moved, but its controls (who sees it).
   #inert(element) {
     Array.from(element.children).forEach(child => {
-      if (child.matches("[data-layout-control]")) return
-      child.querySelector("[data-layout-control]") ? this.#inert(child) : (child.inert = true)
+      if (child.matches("[data-layout-control], [data-layout-text]")) return
+      child.querySelector("[data-layout-control], [data-layout-text]") ? this.#inert(child) : (child.inert = true)
     })
   }
 

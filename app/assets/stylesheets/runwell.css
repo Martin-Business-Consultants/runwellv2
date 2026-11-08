@@ -128,6 +128,10 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 .portal-topbar__inner { display: flex; align-items: center; gap: 0 var(--s-5); width: 100%; max-width: var(--portal-width); min-height: 3.5rem; margin: 0 auto; padding: 0 var(--s-5); }
 .portal-topbar__brand { flex: 0 1 auto; min-width: 0; }
 .portal-topbar__brand .sidebar__logo { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; font-size: var(--text-meta); }
+/* An uploaded logo keeps its own shape: the bar's height (less a little air), as wide as it is,
+/* no badge behind it, then the client's name. The letter fallback stays a small badge. */
+.portal-topbar__brand .sidebar__logo:has(img) { width: auto; height: 2.5rem; max-width: 12rem; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+.portal-topbar__brand .sidebar__logo:has(img) img { width: auto; height: 100%; max-width: 100%; object-fit: contain; }
 .portal-topbar__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 
 /* The sections as ghost buttons, the current one on a tint. */

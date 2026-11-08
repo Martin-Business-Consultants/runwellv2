@@ -11,6 +11,15 @@
 module AgentTools
   extend ActiveSupport::Concern
 
+  private
+    def refuse_tokens
+      return unless request.authorization.to_s.start_with?("Bearer ")
+
+      render json: { status: "error", code: "forbidden", summary: "Only a person can do this, in the browser: tokens can’t.", hint: Agent::Errors.hint("forbidden") }, status: :forbidden
+    end
+
+  public
+
   class Undeclared < StandardError; end
 
   AUTO_EXEMPT = { "new" => "a form page; use the create tool", "edit" => "a form page; use the update tool" }.freeze
@@ -38,6 +47,16 @@ module AgentTools
 
     def agent_exempt(*actions, reason:)
       self.agent_declarations = agent_declarations.merge(actions.to_h { [ it.to_s, { exempt: reason } ] })
+    end
+
+    # Exempt, and refused to any token: what only a person does in the browser (tokens, passwords,
+    # two-factor, keys to other services, data leaving the install, previews). agent_exempt alone
+    # only keeps an action out of the tools; a token could still call it straight. This answers
+    # forbidden instead, so a token can never mint another, change how someone signs in, or set a
+    # secret, whoever it belongs to.
+    def browser_only(*actions, reason:)
+      agent_exempt(*actions, reason: reason)
+      before_action :refuse_tokens, only: actions
     end
 
     def agent_declaration_for(action)

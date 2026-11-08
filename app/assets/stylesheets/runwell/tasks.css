@@ -323,3 +323,4 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-list { display: contents; }
 /* The description (record_fields/task/description) takes the panel's full width under its label. */
 .task-panel__details dd.record-fields__prose { grid-column: 1 / -1; }
+.task-panel__title--static { margin: 0; padding: 0; }

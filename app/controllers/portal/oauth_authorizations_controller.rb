@@ -2,7 +2,7 @@
 # brings them back here), they see the app and what it may do as them, and say yes or no. The
 # token it gets reaches their portal only (Portal::McpController).
 class Portal::OauthAuthorizationsController < Portal::BaseController
-  agent_exempt :show, :create, reason: "a client approving an app in the browser"
+  browser_only :show, :create, reason: "a client approving an app in the browser"
   include OauthAuthorizing
 
   layout "public"

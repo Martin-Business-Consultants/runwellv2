@@ -1,6 +1,8 @@
 # One update of this install to a newer release, started by an owner from Settings > Updates.
 # How it happens depends on how the install runs (`Upgrade.via`):
 #
+#   hoster    an install on KamalCloud with a token: moves the app's image tag and deploys it
+#             there, switched over by kamal-proxy with no downtime (Upgrade::Hoster)
 #   in_place  a Docker install: downloads the release's bundle into its data volume and
 #             restarts on it, the way WordPress updates itself (Upgrade::InPlace)
 #   github    a Docker install deployed with Kamal: starts the repository's Deploy workflow
@@ -9,8 +11,9 @@
 #             background, which restarts Puma when it's done (Upgrade::Local)
 #   manual    none of these: Settings > Updates shows the command to run instead
 #
-# RUNWELL_UPDATES picks one; left unset, a checkout with a .env is local, a Docker install with
-# RUNWELL_GITHUB_TOKEN is github, and any other Docker install is in_place. It succeeds when
+# RUNWELL_UPDATES picks one; left unset, a checkout with a .env is local, an install on KamalCloud
+# with its token is hoster, a Docker install with RUNWELL_GITHUB_TOKEN is github, and any other
+# Docker install is in_place. It succeeds when
 # this install boots on the new version; a failed run, or no word within TIMEOUT, fails it. The
 # old version keeps running meanwhile.
 class Upgrade < ApplicationRecord
@@ -18,7 +21,7 @@ class Upgrade < ApplicationRecord
 
   class Refused < StandardError; end
 
-  VIAS = %w[in_place github local manual].freeze
+  VIAS = %w[hoster in_place github local manual].freeze
   TIMEOUT = 45.minutes
 
   belongs_to :requested_by, class_name: "User"
@@ -30,13 +33,14 @@ class Upgrade < ApplicationRecord
     return configured if VIAS.include?(configured)
 
     if Rails.root.join(".git").exist? && Rails.root.join(".env").exist? then "local"
+    elsif Upgrade::Hoster.available? then "hoster"
     elsif Release::Github.token then "github"
     elsif Upgrade::InPlace.available? then "in_place"
     else "manual"
     end
   end
 
-  def self.available? = via == "local" || via == "in_place" || (via == "github" && Release::Github.token.present?)
+  def self.available? = via.in?(%w[local in_place]) || (via == "github" && Release::Github.token.present?) || (via == "hoster" && Upgrade::Hoster.available?)
 
   # Updates the install to the release, as the person who asked. Refuses when that release
   # isn't newer, updating isn't set up, or an update is already running.
@@ -54,7 +58,7 @@ class Upgrade < ApplicationRecord
 
   def run
     runner.start
-  rescue Release::Github::Error, SystemCallError => error
+  rescue Release::Github::Error, Upgrade::Hoster::Error, SystemCallError, Net::OpenTimeout, Net::ReadTimeout => error
     fail! error.message
   end
 
@@ -66,11 +70,11 @@ class Upgrade < ApplicationRecord
     else
       runner.check
     end
-  rescue Release::Github::Error => error
+  rescue Release::Github::Error, Upgrade::Hoster::Error, Net::OpenTimeout, Net::ReadTimeout => error
     Rails.error.report(error, context: { upgrade: id })
   end
 
   def tag = "v#{to_version}"
 
-  def runner = { "in_place" => Upgrade::InPlace, "github" => Upgrade::Github, "local" => Upgrade::Local }.fetch(via).new(self)
+  def runner = { "hoster" => Upgrade::Hoster, "in_place" => Upgrade::InPlace, "github" => Upgrade::Github, "local" => Upgrade::Local }.fetch(via).new(self)
 end

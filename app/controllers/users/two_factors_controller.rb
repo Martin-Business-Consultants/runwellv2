@@ -3,7 +3,7 @@
 # the install requires it).
 class Users::TwoFactorsController < ApplicationController
   require_permission :manage_people
-  agent_exempt :destroy, reason: "sign-in security is changed by a person in the browser"
+  browser_only :destroy, reason: "sign-in security is changed by a person in the browser"
 
   def destroy
     person = User.people.find(params[:user_id])

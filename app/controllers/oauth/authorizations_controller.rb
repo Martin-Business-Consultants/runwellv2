@@ -5,7 +5,7 @@
 class Oauth::AuthorizationsController < ApplicationController
   prepend_before_action :hand_clients_to_portal, only: :show
   allow_staff
-  agent_exempt :show, :create, reason: "a person approving an app in the browser"
+  browser_only :show, :create, reason: "a person approving an app in the browser"
   include OauthAuthorizing
 
   layout "public"

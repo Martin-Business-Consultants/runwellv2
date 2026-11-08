@@ -1,0 +1,24 @@
+<%# locals: (work:) %>
+<section class="card card--flush portal-card">
+  <header class="card__head card__head--bordered">
+    <%= layout_text_tag record_layout(:portal_work), "sections.title", term(:scope_item, count: 2), class: "card__title" %>
+    <%= layout_text_tag record_layout(:portal_work), "sections.hint", "What this covers, and how far along each part is.", tag: :p, class: "card__hint" %>
+  </header>
+  <% if work.scope_items.any? %>
+    <ul class="list">
+      <% work.scope_items.each do |item| %>
+        <%# herb:key item.id %>
+        <li class="list-row">
+          <div class="list-row__content">
+            <p class="list-row__title"><%= item.description %></p>
+          </div>
+          <div class="list-row__actions">
+            <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= empty_state "Nothing listed yet.", compact: true %>
+  <% end %>
+</section>

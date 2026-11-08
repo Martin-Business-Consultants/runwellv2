@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_190000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -517,6 +517,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_180000) do
     t.string "bot_check_site_key"
     t.string "bot_check_secret_key"
     t.json "layouts", default: {}, null: false
+    t.string "hoster_token"
   end
 
   create_table "sign_in_providers", force: :cascade do |t|

@@ -1,6 +1,6 @@
 # The outgoing mail server, saved in the app when the environment names none (Settings > Email).
 class Settings::Emails::SmtpsController < Settings::BaseController
-  agent_exempt :update, reason: "a mail server's password is entered by a person in the browser"
+  browser_only :update, reason: "a mail server's password is entered by a person in the browser"
 
   def update
     attributes = params.expect(smtp: %i[smtp_address smtp_port smtp_username smtp_password smtp_security])

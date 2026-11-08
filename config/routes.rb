@@ -97,6 +97,7 @@ Rails.application.routes.draw do
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
       resource :failures, only: :destroy, module: :updates
+      resource :hoster_token, only: %i[update destroy], module: :updates
     end
   end
 

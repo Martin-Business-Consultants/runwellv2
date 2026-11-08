@@ -7,3 +7,5 @@ RecordLayout::ZONES.each do |zone|
     json.required @layout.required?(key)
   end
 end
+json.text_slots RecordLayout::TEXT_SLOTS[@layout.kind]
+json.renamed @layout.renamed

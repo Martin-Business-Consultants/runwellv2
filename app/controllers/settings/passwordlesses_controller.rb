@@ -1,7 +1,7 @@
 # Settings > Your account: sign in with an emailed link as well as the password.
 class Settings::PasswordlessesController < ApplicationController
   allow_staff
-  agent_exempt :update, reason: "how a person signs in is changed by them in the browser"
+  browser_only :update, reason: "how a person signs in is changed by them in the browser"
 
   def update
     on = params.dig(:user, :passwordless) == "1"

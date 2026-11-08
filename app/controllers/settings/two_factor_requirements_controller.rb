@@ -4,7 +4,7 @@ class Settings::TwoFactorRequirementsController < ApplicationController
   require_permission :manage_people
   # An owner who just required it can still change their mind before setting up their own.
   skip_before_action :require_two_factor_setup
-  agent_exempt :update, reason: "sign-in security is changed by a person in the browser"
+  browser_only :update, reason: "sign-in security is changed by a person in the browser"
 
   def update
     required = params.dig(:setting, :require_two_factor) == "1"
