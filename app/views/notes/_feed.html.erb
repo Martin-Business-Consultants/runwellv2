@@ -13,7 +13,13 @@
           <div class="record-feed__body">
             <div class="record-feed__head">
               <p class="record-feed__meta dot-list">
-                <span class="badge badge--outline"><%= note.kind.humanize %></span>
+                <% if note.from_client? %>
+                  <%= badge "From the client", tone: :accent %>
+                <% elsif note.client_visible? %>
+                  <%= badge "Shared with the client", tone: :accent %>
+                <% else %>
+                  <span class="badge badge--outline"><%= note.kind.humanize %></span>
+                <% end %>
                 <time datetime="<%= note.occurred_at.iso8601 %>"><%= l(note.occurred_at, format: :short) %></time>
                 <% if note.source.present? %>
                   <span><%= note.source %></span>

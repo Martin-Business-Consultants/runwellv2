@@ -138,3 +138,19 @@
 .portal-task-link:hover .list-row, a.portal-task-link:hover { color: var(--text); }
 .portal-task-link .list-row:hover { background: var(--hover); }
 td a.portal-task-link:hover { text-decoration: underline; }
+
+/* A shared task in the portal's side sheet (portal/tasks/panel): the task above, its discussion
+/* below, each half scrolling on its own, the reply pinned at the foot. */
+.task-panel.portal-task { overflow: hidden; gap: 0; padding-bottom: 0; }
+.portal-task__about { display: flex; flex: 1 1 0; flex-direction: column; gap: var(--s-4); min-height: 0; overflow-y: auto; padding: var(--s-2) 0 var(--s-4); }
+.portal-task__discussion { display: flex; flex: 1 1 0; flex-direction: column; gap: var(--s-3); min-height: 0; margin-inline: calc(var(--s-4) * -1); padding: var(--s-3) var(--s-4) var(--s-4); border-top: 1px solid var(--line); background: var(--layer-1); }
+.portal-task__discussion-title { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.portal-thread { display: flex; flex: 1; flex-direction: column; gap: var(--s-3); min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.portal-thread__message { max-width: 85%; padding: var(--s-2) var(--s-3); border-radius: var(--radius-lg); background: var(--panel); }
+.portal-thread__message--mine { align-self: flex-end; background: var(--brand-tint); }
+.portal-thread__meta { display: flex; gap: var(--s-2); margin: 0 0 2px; color: var(--text-muted); font-size: var(--text-xs); }
+.portal-thread__text { overflow-wrap: anywhere; }
+.portal-thread__empty { flex: 1; margin: 0; }
+.portal-thread__reply { display: flex; flex-direction: column; gap: var(--s-2); }
+.portal-thread__reply lexxy-editor { min-height: 4rem; max-height: 10rem; overflow-y: auto; background: var(--panel); }
+.portal-thread__actions { display: flex; justify-content: flex-end; }

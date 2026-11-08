@@ -144,6 +144,7 @@ Rails.application.routes.draw do
     scope module: :tasks do
       resources :assignments, only: :create
       resource :status, only: :update
+      resource :discussion, only: :create
     end
   end
 
@@ -171,7 +172,10 @@ Rails.application.routes.draw do
     resource :session, only: %i[new create destroy]
     get "session/:token", to: "sessions#show", as: :session_link
     resources :works, param: :ref, path: "work", only: %i[index show]
-    resources :tasks, only: :index
+    resources :tasks, only: :index do
+      resources :notes, only: :create, module: :tasks
+    end
+    resources :documents, only: :index
     resources :requests, only: %i[index new create]
     resource :me, only: :show
     post "mcp", to: "mcp#create", as: :mcp

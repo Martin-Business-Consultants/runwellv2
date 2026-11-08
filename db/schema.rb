@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_200000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -324,6 +324,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_190000) do
     t.string "source", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "client_visible", default: false, null: false
     t.index ["author_id"], name: "index_notes_on_author_id"
     t.index ["subject_type", "subject_id", "occurred_at"], name: "index_notes_on_subject_type_and_subject_id_and_occurred_at"
   end

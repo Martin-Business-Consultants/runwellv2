@@ -19,6 +19,12 @@ class Note < ApplicationRecord
   before_validation { self.occurred_at ||= Time.current }
 
   scope :recent, -> { order(occurred_at: :desc) }
+  # A task's discussion with the client (client_visible): what the portal shows on it, oldest first.
+  scope :client_visible, -> { where(client_visible: true) }
+  scope :discussion, -> { client_visible.order(:occurred_at, :id) }
+
+  # Written by the client's own person (a contact), from the portal.
+  def from_client? = author&.client?
 
   # Its author (or the author's person, for a note an agent wrote), or anyone who may delete records.
   def deletable_by?(user)

@@ -1,0 +1,21 @@
+<% @page_title = "Documents" %>
+
+<% content_for :header do %>
+  <h1 class="portal-page-header__title"><%= @page_title %></h1>
+  <p class="portal-page-header__description">Every file we’ve shared with you, newest first.</p>
+<% end %>
+
+<% if @documents.any? %>
+  <section class="card card--flush portal-card">
+    <ul class="list portal-documents">
+      <% @documents.each do |document| %>
+        <%# herb:key document.id %>
+        <li class="list-row">
+          <%= render "documents/link", document: document, meta: portal_document_meta(document) %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% else %>
+  <%= render "layouts/shared/empty", text: "Nothing shared yet." %>
+<% end %>

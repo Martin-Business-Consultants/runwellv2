@@ -16,11 +16,10 @@
     <%= person_cell person, label: (person == Current.user ? "#{person.display_name} (you)" : nil), path: path %>
   </td>
   <td class="muted" data-column="email"><%= person.email_address %></td>
-  <td data-column="role">
-    <% if client %>
-      <%= term(:client) %><% if person.client %> · <%= link_to person.client.name, client_path(person.client) %><% end %>
-    <% else %>
-      <%= person.role.capitalize %>
+  <td data-column="role"><%= client ? term(:client) : person.role.capitalize %></td>
+  <td data-column="client">
+    <% if person.client %>
+      <%= link_to person.client.name, client_path(person.client) %>
     <% end %>
   </td>
   <td data-column="status">

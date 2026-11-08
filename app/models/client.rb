@@ -37,6 +37,18 @@ class Client < ApplicationRecord
 
   def approvers = contacts.active.where(can_approve: true)
 
+  # Every document shared with this client, newest first: on the client itself, on its work, its
+  # work's sections, and the tasks it can see (on its work or straight on it). The portal's Documents.
+  def client_documents
+    works_ids = works.select(:id)
+    shared_tasks = Task.client_visible.where(client_id: id).select(:id)
+    Document.client_visible.where(documentable: self)
+      .or(Document.client_visible.where(documentable_type: "Work", documentable_id: works_ids))
+      .or(Document.client_visible.where(documentable_type: "ScopeItem", documentable_id: ScopeItem.where(work_id: works_ids).select(:id)))
+      .or(Document.client_visible.where(documentable_type: "Task", documentable_id: shared_tasks))
+      .recent.includes(:documentable, file_attachment: :blob)
+  end
+
   def to_param = id.to_s
 
   def search_title = name

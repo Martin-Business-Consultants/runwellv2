@@ -15,7 +15,8 @@ class UsersController < ApplicationController
 
   STATUSES = %w[active deactivated].freeze
   WHO = { "everyone" => -> { User.where(agent_owner_id: nil) }, "team" => -> { User.people }, "clients" => -> { User.clients } }.freeze
-  sortable_columns name: "users.name", email: "users.email_address", role: "users.role"
+  sortable_columns name: "users.name", email: "users.email_address", role: "users.role",
+    client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ]
 
   def index
     @view = index_view
@@ -23,7 +24,7 @@ class UsersController < ApplicationController
     @who = params[:who].presence_in(WHO.keys) || "everyone"
     people = WHO[@who].call
     scope = @status == "all" ? people : people.public_send(@status)
-    @column_widths = column_widths(scope, :name, :email) if @view == "table"
+    @column_widths = column_widths(scope, :name, :email, :client) if @view == "table"
     @people = paginate sorted(scope.includes(:agent, :client).ordered)
     @counts = { "active" => people.active.count, "deactivated" => people.deactivated.count }
     @invitations = can?(:manage_people) ? Invitation.pending.ordered.includes(:invited_by).to_a : []

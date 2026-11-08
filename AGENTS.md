@@ -701,7 +701,12 @@ owner can also arrange the portal's page for a piece of work (template mode, the
 layout: its cards, any of which can be hidden; a client never sees the controls). A shared task
 opens in the same side sheet as staff pages (the `side-panel` controller on the portal's
 `<body>`, `?task=`, `Portal::BaseController#render_portal_side_panel`, `portal/tasks/_panel`),
-read-only and limited to the client's client-visible tasks; task lists open on open tasks
+read-only and limited to the client's client-visible tasks, its lower half the task's discussion
+with the client: notes shared on it (`Note#client_visible`, `Note.discussion`), which the client
+answers there (`Portal::Tasks::NotesController`, `portal_reply_on_task`) and staff send with Send to
+client in the task's notes (`Tasks::DiscussionsController`, `reply_to_client`, which confirms);
+every other note stays internal. Documents is a portal menu item of its own
+(`Portal::DocumentsController`, `Client#client_documents`). Task lists open on open tasks
 (`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
 layout's `modal` frame).
 

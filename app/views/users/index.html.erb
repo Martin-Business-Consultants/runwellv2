@@ -21,6 +21,7 @@
   <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
                  ui_column(:email, "Email address", sort: :email, width: [ @column_widths[:email], "Email address" ]),
                  ui_column(:role, "Role", sort: :role, width: :pill),
+                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
                  ui_column(:status, "Status", width: :status) ] %>
   <%= render "ui/data_table", id: "users", columns: columns, rows: @people, row: "users/row", as: :person,
         row_locals: { manage: manage }, page: @page, selectable: manage, actions: true %>
