@@ -83,7 +83,9 @@ Rails.application.routes.draw do
       resource :smtp, only: :update, module: :emails
       resource :bot_check, only: :update, module: :emails
     end
-    resources :fields, only: %i[index create update destroy]
+    resources :fields, only: %i[index create update destroy] do
+      resource :position, only: :create, module: :fields
+    end
     namespace :plugins do
       resources :installations, only: :create
       resource :check, only: :create

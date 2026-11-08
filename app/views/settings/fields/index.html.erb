@@ -26,10 +26,20 @@
       </header>
 
       <% if fields.any? %>
-        <ul class="settings-list">
+        <%# Dragged by the handle into a new place (the core's drag-and-drop controller, sortable:
+            each drop posts the field it now sits before). Archived fields stay where they are. %>
+        <ul class="settings-list settings-fields" data-controller="drag-and-drop"
+          data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= settings_field_position_path("__id__") %>"
+          data-drag-and-drop-dragged-item-class="drag-and-drop__dragged-item" data-drag-and-drop-hover-container-class="drag-and-drop__hover-container"
+          data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
           <% fields.each do |field| %>
             <%# herb:key field.id %>
-            <li class="list-row settings-field" data-filter-target="item">
+            <li class="list-row settings-field" data-filter-target="item"<% unless field.archived? %> data-drag-and-drop-target="item" data-id="<%= field.id %>"<% end %>>
+              <% if field.archived? %>
+                <span class="settings-field__handle settings-field__handle--off" aria-hidden="true"></span>
+              <% else %>
+                <span class="settings-field__handle" draggable="true" title="Drag to move <%= field.label %>" aria-label="Drag to move <%= field.label %>"><%= icon_tag "move" %></span>
+              <% end %>
               <div class="list-row__content">
                 <p class="list-row__title">
                   <%= field.label %>
@@ -43,10 +53,6 @@
                 <% if field.archived? %>
                   <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "btn btn--secondary btn--sm" %>
                 <% else %>
-                  <%= button_to settings_field_path(field), method: :patch, params: { field: { position: field.position - 1 } }, class: "icon-button", title: "Move up", disabled: field == fields.first do %>
-                    <%= icon_tag "arrow-up" %>
-                    <span class="visually-hidden">Move <%= field.label %> up</span>
-                  <% end %>
                   <%= render "layouts/shared/delete_dialog", name: field.label, path: settings_field_path(field),
                         message: "It’s archived: hidden from forms, pages and agents, with its values kept. You can restore it." %>
                 <% end %>

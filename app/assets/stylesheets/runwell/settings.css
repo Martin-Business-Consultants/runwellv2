@@ -84,6 +84,13 @@
 .settings-fold > summary { width: fit-content; }
 /* A field's Change (Fields): at the end of its row, and across the row once open. */
 .settings-field__change[open] { flex-basis: 100%; }
+/* A field's drag handle (the core's drag-and-drop controller): grab it to move the row. The row
+   being dragged shows dashed where it will land; archived rows keep an empty slot to stay aligned. */
+.settings-field__handle { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.25rem; align-self: center; color: var(--text-faint); cursor: grab; }
+.settings-field__handle:hover { color: var(--text-muted); }
+.settings-field__handle:active { cursor: grabbing; }
+.settings-field__handle--off { cursor: default; }
+.settings-field.drag-and-drop__dragged-item { background: var(--brand-tint, var(--hover)); box-shadow: inset 0 0 0 1px var(--accent); opacity: .7; }
 .settings-field__change[open] > summary { align-self: flex-end; }
 .settings-subform { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--radius-lg); }
 
