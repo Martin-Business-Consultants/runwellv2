@@ -127,8 +127,8 @@ class Work < ApplicationRecord
 
   def to_param = ref
 
-  def search_title = "#{ref} #{title}"
-  def search_content = description
+  def search_title = title
+  def search_content = [ ref, description ].compact_blank.join(" ")
 
   ActiveSupport.run_load_hooks(:runwell_work, self)
 

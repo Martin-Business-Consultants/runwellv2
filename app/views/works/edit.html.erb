@@ -1,6 +1,6 @@
-<% @page_title = "Edit #{@work.ref}" %>
+<% @page_title = "Edit #{@work.title_was}" %>
 
-<%= parent_page @work.ref, @work %>
+<%= parent_page @work.title_was, @work %>
 
 <% layout = record_layout(:work) %>
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:work) %>"

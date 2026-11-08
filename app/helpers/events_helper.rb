@@ -8,7 +8,7 @@ module EventsHelper
     case subject
     when nil then "#{event.subject_type} #{event.subject_id} (gone)"
     when Setting then "Settings"
-    when Work then "#{subject.ref} #{subject.title}"
+    when Work then subject.title
     else subject.try(:display_name) || subject.try(:name) || subject.try(:title) || subject.try(:subject) || "#{event.subject_type} #{event.subject_id}"
     end
   end

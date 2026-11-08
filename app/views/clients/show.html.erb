@@ -69,7 +69,7 @@
                       <li data-filter-target="item">
                         <%= link_to work, class: "list-row" do %>
                           <span class="list-row__content">
-                            <span class="list-row__title"><span class="record-list__ref"><%= work.ref %></span> <%= work.title %></span>
+                            <span class="list-row__title"><%= work.title %></span>
                             <span class="list-row__desc"><%= work.label_name %></span>
                           </span>
                           <span class="list-row__meta"><%= status_tag work.state_label, highlight: work.active? %></span>

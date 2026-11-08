@@ -30,7 +30,7 @@
               <td class="portal-table__title"><%= portal_task_link_to(task) { task.title } %></td>
               <td class="portal-table__secondary muted">
                 <% if task.work %>
-                  <%= link_to "#{task.work.ref} #{task.work.title}", portal_work_path(task.work), class: "portal-table__link" %>
+                  <%= link_to task.work.title, portal_work_path(task.work), class: "portal-table__link" %>
                 <% else %>
                   General
                 <% end %>

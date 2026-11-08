@@ -55,7 +55,7 @@ class WorksController < ApplicationController
   def create
     @work = Work.new(work_params.merge(created_by: current_user))
     if @work.save
-      redirect_to @work, notice: "#{@work.ref} started: add its #{Setting.current.term(:task, count: 2).downcase} as they come up."
+      redirect_to @work, notice: "#{@work.title} started: add its #{Setting.current.term(:task, count: 2).downcase} as they come up."
     else
       render :new, status: :unprocessable_entity
     end
@@ -66,7 +66,7 @@ class WorksController < ApplicationController
 
   def update
     if @work.update(work_params.except(:client_id, :shape))
-      redirect_to @work, notice: "#{@work.ref} updated."
+      redirect_to @work, notice: "#{@work.title} updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -75,11 +75,11 @@ class WorksController < ApplicationController
   def destroy
     if @work.deletable?
       @work.destroy!
-      return remove_row(@work, notice: "#{@work.ref} deleted.") if row_removal?
+      return remove_row(@work, notice: "#{@work.title} deleted.") if row_removal?
 
-      redirect_to works_path, notice: "#{@work.ref} deleted."
+      redirect_to works_path, notice: "#{@work.title} deleted."
     else
-      alert = "#{@work.ref} has #{Setting.current.term(:task, count: 2).downcase} on it, so it can’t be deleted. Close it instead."
+      alert = "#{@work.title} has #{Setting.current.term(:task, count: 2).downcase} on it, so it can’t be deleted. Close it instead."
       return refuse_in_place(alert) if row_removal?
 
       redirect_back fallback_location: @work, alert: alert
@@ -88,14 +88,14 @@ class WorksController < ApplicationController
 
   def close
     @work.close!(reason: params[:reason].presence, outcome: params[:outcome])
-    redirect_to @work, notice: "#{@work.ref} #{@work.close_outcome}."
+    redirect_to @work, notice: "#{@work.title} #{@work.close_outcome}."
   end
 
   def reopen
-    return redirect_to(@work, alert: "#{@work.ref} is open.") unless @work.closed?
+    return redirect_to(@work, alert: "#{@work.title} is open.") unless @work.closed?
 
     @work.reopen!
-    redirect_to @work, notice: "#{@work.ref} is open again."
+    redirect_to @work, notice: "#{@work.title} is open again."
   end
 
   private

@@ -9,7 +9,7 @@
   <header class="task-panel__header">
     <p class="task-panel__context">
       <% if task.work %>
-        <%= link_to task.work.ref + " " + task.work.title, task.work, data: { turbo_frame: "_top" } %>
+        <%= link_to task.work.title, task.work, data: { turbo_frame: "_top" } %>
       <% elsif task.client %>
         <%= link_to task.client.name, task.client, data: { turbo_frame: "_top" } %>
       <% else %>

@@ -21,25 +21,6 @@ module TableSortingHelper
   # How many characters a column of each fixed shape needs (its content never changes width).
   COLUMN_SHAPES = { select: 4, avatar: 7, avatars: 10, date: 15, age: 16, status: 13, pill: 11, number: 14, button: 12, actions: 11, text: 16 }.freeze
 
-  # The table's column widths, so they hold still whatever the sort or page (with
-  # `table-layout: fixed`, data-table--fixed). One entry per column: [characters, header] for a
-  # text column (from column_widths: its longest value, and never narrower than its header), or
-  # a shape from COLUMN_SHAPES. Each column gets its share of the total as a percentage, so the
-  # table always fits its page; the shares depend only on the data, never on the rows showing.
-  def table_colgroup(*columns)
-    characters = columns.map do |column|
-      next COLUMN_SHAPES.fetch(column) if column.is_a?(Symbol)
-
-      length, header = column
-      [ length.to_i, header.to_s.length + 4 ].max
-    end
-    total = characters.sum.to_f
-
-    tag.colgroup do
-      safe_join(characters.map { tag.col(class: "data-table__col--p#{(it / total * 100).round.clamp(1, 100)}") })
-    end
-  end
-
   # Under a table: how many rows are showing, then Previous, the page numbers (the current one,
   # its neighbours, the first and the last, with gaps between) and Next. Nothing for one page.
   def table_pagination(page)

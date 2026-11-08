@@ -10,7 +10,8 @@
     row is a partial rendering one <tr data-filter-target="item">: bulk_select_cell first when
     selectable, then a <td data-column="key"> per column in order, then layouts/shared/row_actions
     when actions. The Columns menu sits in the actions column's header, or above the table. row_locals go to every row (what all rows share, so it's read once). Unless
-    fixed: false, the columns' widths hold still (table_colgroup). %>
+    fixed: false, the columns' widths hold still (ui_data_table_colgroup: the identifying column
+    takes the leftover width, the rest fit their content). %>
 <% hideable = columns.select(&:hideable) %>
 <% fixed = true if fixed.nil? %>
 <div class="data-table-wrap" data-controller="<%= actions ? "data-table row-delete" : "data-table" %>" data-data-table-key-value="<%= id %>">

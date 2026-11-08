@@ -122,7 +122,7 @@ class TasksController < ApplicationController
       end
     end
 
-    def home_name(home) = home.is_a?(Work) ? "#{home.ref} #{home.title}" : home.name
+    def home_name(home) = home.is_a?(Work) ? home.title : home.name
 
     # Where the task lives: its work, else its client, else the requests it's among.
     def task_home = @task.work || @task.client || tasks_path(owner: "none")

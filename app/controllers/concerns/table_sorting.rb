@@ -39,7 +39,7 @@ module TableSorting
   # How wide each text column must be, in characters: its longest value across the whole list
   # (every page, so sorting or paging never moves a column), from the same expressions and joins
   # as sorting. Bold titles run wider than `ch`, hence the allowance; capped so one long title
-  # wraps instead of taking the table. For table_colgroup.
+  # wraps instead of taking the table. For ui_data_table_colgroup.
   def column_widths(scope, *keys, min: 6, max: 40)
     measured = keys.map(&:to_s).select { table_sorts.key?(it) }
     return {} if measured.empty?

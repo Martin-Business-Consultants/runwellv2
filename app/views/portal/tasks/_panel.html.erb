@@ -6,7 +6,7 @@
   <header class="task-panel__header">
     <p class="task-panel__context">
       <% if task.work %>
-        <%= link_to "#{task.work.ref} #{task.work.title}", portal_work_path(task.work), data: { turbo_frame: "_top" } %>
+        <%= link_to task.work.title, portal_work_path(task.work), data: { turbo_frame: "_top" } %>
       <% else %>
         <span><%= term(:task) %></span>
       <% end %>

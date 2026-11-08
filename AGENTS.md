@@ -165,6 +165,10 @@ event); every event has a source.
   and test (it raises, so the test fails). Preload what a page or JSON view reads (`includes`); a
   loop that queries per record on purpose goes in `Prosopite.allow_stack_paths`
   (`config/initializers/prosopite.rb`). `PROSOPITE_RAISE=0 bin/rails test` logs them all at once
+- People read a piece of work's title, never its ref: breadcrumbs, headings, lists, notices,
+  notifications and the portal say "Spring landing page", not "P-19" or "P-19 Spring landing page".
+  The ref stays what addresses it (`/work/P-19`, `to_param`), what agents name it by and what
+  search still matches; and a delete confirms by typing the title
 - Write for anyone running something: a business of any kind, a team, or a person managing a home,
   a wedding or a trip. Never "agency" or any one industry's jargon in what people or agents read;
   the core's nouns come from Settings > Names (`term`)
@@ -429,7 +433,13 @@ development. Build new markup with it:
 - Index tables are the **data table** (`ui/_data_table`, `runwell/components.css`): describe the
   columns with `ui_column(key, label, sort:, width:, align:, hideable:)` and pass a row partial
   (`clients/_row`: `bulk_select_cell`, then `<td data-column="key">` per column in order, then
-  `layouts/shared/row_actions`). It brings sortable headers (TableSorting), the checkbox column
+  `layouts/shared/row_actions`). Columns follow one convention (rune_ui's, for every table): the
+  column that identifies the row takes the leftover width (`hideable: false`, or `grow: true`
+  where that isn't it), and every other column is as wide as its content (measured from the data
+  by `column_widths`, or a `COLUMN_SHAPES` shape), long text in it capped, so narrow facts sit
+  together one gap apart. Order follows meaning (the identifier, what describes it, then state),
+  and alignment the data (text and pills left, numbers right). A plain `.table` does the same on its
+  own: its first column (or `.table__grow`) grows. It brings sortable headers (TableSorting), the checkbox column
   (bulk actions), a Columns menu that hides columns (`data-table` controller, per browser), fixed
   widths (`table_colgroup`) and `table_pagination`. What every row shares goes in `row_locals:`
   so it's read once (Prosopite)

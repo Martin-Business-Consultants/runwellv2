@@ -20,7 +20,7 @@ class WorksControllerTest < ActionDispatch::IntegrationTest
     tasks_per_section!(@landing)
     get work_path(@landing)
     assert_response :success
-    assert_select "h1.page-title", "WO-1 Spring landing page"
+    assert_select "h1.page-title", "Spring landing page"
     assert_select ".record-meta", /Active/
     assert_select "#tasks .task-group > ul > li", 2
     assert_select ".scope-nav__item", 3

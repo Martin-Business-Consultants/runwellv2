@@ -7,7 +7,7 @@
 <div class="work-finish" data-controller="state-focus" data-state-focus-state-value="closing">
   <div class="work-finish__choices" hidden="<%= closing != "" %>">
     <button type="button" class="btn btn--secondary btn--sm" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-    <button type="button" class="btn btn--ghost btn--sm work-finish__danger" title="Cancel <%= work.ref %>" data-herb-set="closing=cancelled">
+    <button type="button" class="btn btn--ghost btn--sm work-finish__danger" title="Cancel <%= work.title %>" data-herb-set="closing=cancelled">
       <%= icon_tag "close-circle" %>
       <span>Cancel it</span>
     </button>
@@ -15,7 +15,7 @@
 
   <div hidden="<%= closing != "completed" %>">
     <%= form_with url: close_work_path(work), namespace: dom_id(work, :complete), class: "work-finish__form" do |form| %>
-      <strong>Mark <%= work.ref %> complete?</strong>
+      <strong>Mark <%= work.title %> complete?</strong>
       <span class="work-finish__text">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="completed">
       <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
@@ -28,7 +28,7 @@
 
   <div hidden="<%= closing != "cancelled" %>">
     <%= form_with url: close_work_path(work), namespace: dom_id(work, :cancel), class: "work-finish__form" do |form| %>
-      <strong>Cancel <%= work.ref %>?</strong>
+      <strong>Cancel <%= work.title %>?</strong>
       <span class="work-finish__text">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
       <input type="hidden" name="outcome" value="cancelled">
       <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>

@@ -107,9 +107,7 @@
 .portal-table :is(th, td):first-child { padding-left: var(--s-5); }
 .portal-table :is(th, td):last-child { padding-right: var(--s-5); }
 .portal-table__title { font-weight: var(--weight-strong); }
-.portal-table__ref { width: 1px; font-weight: var(--weight-strong); }
-.portal-table__date { width: 1px; }
-.portal-table :is(th, td).portal-table__status { width: 1px; text-align: right; }
+/* Column widths follow rune_ui's convention (the title grows, the rest fit their content). */
 .portal-table__link { color: inherit; text-decoration: none; }
 .portal-table__link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
 @media (max-width: 639px) { .portal-table__secondary { display: none; } }

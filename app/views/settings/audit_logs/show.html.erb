@@ -18,7 +18,7 @@
     </div>
 
     <% if @events.any? %>
-      <% columns = [ ui_column(:when, "When", hideable: false), ui_column(:what, "What", hideable: false), ui_column(:who, "Who", hideable: false), ui_column(:on, "On", hideable: false), ui_column(:details, "Details", hideable: false) ] %>
+      <% columns = [ ui_column(:when, "When", hideable: false), ui_column(:what, "What", hideable: false), ui_column(:who, "Who", hideable: false), ui_column(:on, "On", hideable: false), ui_column(:details, "Details", hideable: false, grow: true) ] %>
       <%= render "ui/data_table", id: "audit", columns: columns, rows: @events, row: "settings/audit_logs/row", as: :event, page: @page, fixed: false %>
     <% else %>
       <%= render "layouts/shared/empty", text: "Nothing in this area and period." %>

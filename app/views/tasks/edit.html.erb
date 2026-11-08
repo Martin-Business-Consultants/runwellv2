@@ -34,7 +34,7 @@
       <div class="card__content">
         <dl class="details">
           <% if @task.work %>
-            <dt><%= term(:work) %></dt><dd><%= link_to "#{@task.work.ref} #{@task.work.title}", @task.work %></dd>
+            <dt><%= term(:work) %></dt><dd><%= link_to @task.work.title, @task.work %></dd>
           <% end %>
           <% if @task.client %>
             <dt><%= term(:client) %></dt><dd><%= link_to @task.client.name, @task.client %></dd>

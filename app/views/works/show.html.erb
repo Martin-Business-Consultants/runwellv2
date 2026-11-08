@@ -1,4 +1,4 @@
-<% @page_title = "#{@work.ref} #{@work.title}" %>
+<% @page_title = @work.title %>
 <% tabs = [
      record_tab("tasks", term(:task, count: 2), count: @work.tasks.open.count),
      record_tab("notes", "Notes", count: @work.notes.count),
@@ -24,7 +24,7 @@
           <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
             <button type="button" class="icon-button" title="About this <%= term(:work).downcase %>" aria-haspopup="dialog" data-action="rune-dialog#open">
               <%= icon_tag "info" %>
-              <span class="visually-hidden">About <%= @work.ref %></span>
+              <span class="visually-hidden">About <%= @work.title %></span>
             </button>
             <dialog class="dialog dialog--lg" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="work_about_title">
               <div class="dialog__box">

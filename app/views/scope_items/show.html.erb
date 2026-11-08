@@ -7,7 +7,7 @@
    ] %>
 <% tab = current_record_tab(tabs, "tasks") %>
 
-<%= parent_page @work.ref, @work %>
+<%= parent_page @work.title, @work %>
 <%= turbo_stream_from @item %>
 
 <section class="record-page record-page--tabbed">
@@ -16,7 +16,7 @@
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %>
-        <span>A <%= term(:scope_item).downcase %> of <%= link_to "#{@work.ref} #{@work.title}", @work %></span>
+        <span>A <%= term(:scope_item).downcase %> of <%= link_to @work.title, @work %></span>
       </p>
     </div>
     <div class="button-row">
@@ -73,7 +73,7 @@
         <dl class="details">
           <dt>Delivery</dt><dd><%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %></dd>
           <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
-          <dt><%= term(:work) %></dt><dd><%= link_to "#{@work.ref} #{@work.title}", @work %></dd>
+          <dt><%= term(:work) %></dt><dd><%= link_to @work.title, @work %></dd>
           <dt><%= term(:client) %></dt><dd><%= link_to @work.client.name, @work.client %></dd>
         </dl>
       </div>

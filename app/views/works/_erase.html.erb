@@ -11,17 +11,17 @@
   </button>
   <div hidden="<%= !erasing %>">
     <%= form_with url: work_erasure_path(work), class: "work-finish__form erase-work__form", data: { turbo_action: "advance" } do |form| %>
-      <strong>Delete <%= work.ref %> for good?</strong>
+      <strong>Delete <%= work.title %> for good?</strong>
       <span class="work-finish__text">
         It removes the <%= term(:work).downcase %> with its <%= term(:scope_item, count: 2).downcase %>, its <%= term(:task, count: 2).downcase %>,
         notes, documents and history. There’s no undo; the <%= term(:client).downcase %> keeps one note that it was deleted.
       </span>
       <label class="field">
-        <span class="field__label">Type <strong><%= work.ref %></strong> to confirm</span>
-        <%= form.text_field :confirm_ref, autocomplete: "off", required: true, autofocus: true, aria: { label: "Type #{work.ref} to confirm" } %>
+        <span class="field__label">Type <strong><%= work.title %></strong> to confirm</span>
+        <%= form.text_field :confirm_ref, autocomplete: "off", required: true, autofocus: true, aria: { label: "Type #{work.title} to confirm" } %>
       </label>
       <div class="work-finish__actions">
-        <button type="submit" class="btn btn--danger btn--sm">Delete <%= work.ref %> permanently</button>
+        <button type="submit" class="btn btn--danger btn--sm">Delete <%= work.title %> permanently</button>
         <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="erasing">Cancel</button>
       </div>
     <% end %>

@@ -7,7 +7,7 @@ module TasksHelper
   # hundreds of pieces of work, most with nothing to show here), and the one chosen, whatever it is.
   def task_work_filter_options(current)
     works = Work.where(id: Task.open.select(:work_id)).or(Work.where(ref: current)).order(:ref)
-    works.map { |work| [ "#{work.ref} #{work.title}", work.ref ] }
+    works.map { |work| [ work.title, work.ref ] }
   end
 
   # A link that opens a task in the side panel (side-panel controller); its href stays the task's own
@@ -115,15 +115,15 @@ module TasksHelper
 
   def task_details(task, with_work: false)
     [
-      (task.work&.ref if with_work),
+      (task.work&.title if with_work),
       (task.client&.name if with_work),
       (l(task.due_on, format: :short) if task.due_on),
       ("Internal" unless task.client_visible?)
     ].compact.join(" · ")
   end
 
-  # Where a task sits, for a card or a row: its work's ref, else nothing.
-  def task_ref(task) = task.work&.ref
+  # Where a task sits, for a card or a row: its work's title, else nothing.
+  def task_ref(task) = task.work&.title
 
   # Its client's name, or that nobody matched (an email from an unknown sender).
   def task_client_name(task) = task.client&.name || "No #{term(:client).downcase} matched"

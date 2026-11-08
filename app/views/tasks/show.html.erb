@@ -8,7 +8,7 @@
 <% plugin_partial = tabs.find { it.key == tab }&.partial %>
 
 <% if home %>
-  <%= parent_page(@task.scope_item&.description || @task.work&.ref || @task.client.name, home) %>
+  <%= parent_page(@task.scope_item&.description || @task.work&.title || @task.client.name, home) %>
 <% else %>
   <%= parent_page term(:task, count: 2), tasks_path(owner: "none") %>
 <% end %>
@@ -23,7 +23,7 @@
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <% if @task.work %>
-          <%= link_to "#{@task.work.ref} #{@task.work.title}", @task.work %>
+          <%= link_to @task.work.title, @task.work %>
           <span aria-hidden="true">›</span>
           <% if @task.scope_item %>
             <%= link_to @task.scope_item.description, @task.scope_item %>
