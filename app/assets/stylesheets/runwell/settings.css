@@ -259,3 +259,8 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 .settings-table .settings-table__end { text-align: right; }
 .settings-table__detail td { padding-top: 0; }
 .settings-table__detail .settings-log { margin: 0; white-space: pre-wrap; }
+
+/* An update under way (Settings > Updates): who started it beside what happens next, flush with
+/* the section's heading rather than padded like a list's row. */
+.upgrade-status { padding-inline: 0; }
+.upgrade-status .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading, 1.5); }

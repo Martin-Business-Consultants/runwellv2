@@ -21,8 +21,25 @@ fi
 # If running the rails server then create or migrate the databases (primary, cache, queue,
 # cable), and installed plugins' tables after them. A database with migrations to run is backed
 # up first (lib/tasks/backup.rake).
+#
+# A release the install updated itself to that can't migrate (a failing migration) would stop the
+# install starting at all. It falls back to the image's own version instead: the release is set
+# aside as releases/failed, the database was backed up first and its failed migration rolled
+# back, and Settings > Updates shows the update as failed (Upgrade#reconcile!).
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
+  if ! ./bin/rails db:prepare; then
+    if [ "$PWD" != "/rails" ] && [ -L "$current" ]; then
+      echo "Runwell $(cat VERSION) couldn't migrate; starting the image's $(cat /rails/VERSION) instead" >&2
+      rm -rf "$RUNWELL_DATA_DIR/releases/failed"
+      mv "$(readlink -f "$current")" "$RUNWELL_DATA_DIR/releases/failed"
+      rm -f "$current"
+      cd /rails
+      export BUNDLE_PATH=/usr/local/bundle
+      ./bin/rails db:prepare
+    else
+      exit 1
+    fi
+  fi
 fi
 
 exec "${@}"

@@ -30,6 +30,7 @@ class FoldContactsIntoUsers < ActiveRecord::Migration[8.1]
         SELECT contacts.name,
                CASE WHEN contacts.email IS NULL OR contacts.email = ''
                       OR EXISTS (SELECT 1 FROM users taken WHERE taken.email_address = lower(contacts.email))
+                      OR EXISTS (SELECT 1 FROM contacts earlier WHERE lower(earlier.email) = lower(contacts.email) AND earlier.id < contacts.id)
                     THEN NULL ELSE lower(contacts.email) END,
                '!', 'client', contacts.client_id, contacts.role, contacts.phone, contacts.portal_access, contacts.can_approve,
                contacts.archived_at, contacts.id, contacts.created_at, contacts.updated_at
@@ -49,8 +50,14 @@ class FoldContactsIntoUsers < ActiveRecord::Migration[8.1]
         execute "UPDATE users SET password_digest = #{connection.quote(digest)} WHERE id = #{id.to_i}"
       end
       execute "DELETE FROM portal_sessions"
-      # Their search entries follow them (Contact keeps its type name, Contact.polymorphic_name).
-      execute "UPDATE searchable_documents SET searchable_id = (SELECT users.id FROM users WHERE users.legacy_contact_id = searchable_documents.searchable_id) WHERE searchable_type = 'Contact'" if table_exists?(:searchable_documents)
+      # Their search entries follow them (Contact keeps its type name, Contact.polymorphic_name). In
+      # two passes, through negative ids: (type, id) is unique, and an old contact id can be another
+      # contact's new user id. Entries for a contact that's gone are dropped.
+      if table_exists?(:searchable_documents)
+        execute "UPDATE searchable_documents SET searchable_id = -searchable_id WHERE searchable_type = 'Contact' AND searchable_id > 0"
+        execute "UPDATE searchable_documents SET searchable_id = (SELECT users.id FROM users WHERE users.legacy_contact_id = -searchable_documents.searchable_id) WHERE searchable_type = 'Contact' AND searchable_id < 0 AND EXISTS (SELECT 1 FROM users WHERE users.legacy_contact_id = -searchable_documents.searchable_id)"
+        execute "DELETE FROM searchable_documents WHERE searchable_type = 'Contact' AND searchable_id < 0"
+      end
     end
   end
 

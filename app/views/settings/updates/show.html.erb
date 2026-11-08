@@ -76,11 +76,15 @@
         <header class="settings-section__head">
           <h2>Updating to <%= @upgrade.to_version %></h2>
         </header>
-        <p>
-          Started <%= time_ago_in_words(@upgrade.created_at) %> ago by <%= person_tag @upgrade.requested_by %>.
-          The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running.
-          This page checks every few seconds.
-        </p>
+        <div class="list-row list-row--tall upgrade-status">
+          <% if @upgrade.requested_by %>
+            <div class="list-row__media"><%= person_tag @upgrade.requested_by %></div>
+          <% end %>
+          <div class="list-row__content">
+            <p class="list-row__title">Started <%= time_ago_in_words(@upgrade.created_at) %> ago<% if @upgrade.requested_by %> by <%= @upgrade.requested_by.display_name %><% end %></p>
+            <p class="list-row__desc">The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running. This page checks every few seconds.</p>
+          </div>
+        </div>
         <% if @upgrade.external_url %>
           <p><%= link_to "Follow the deploy on GitHub", @upgrade.external_url, target: "_blank", rel: "noopener" %></p>
         <% end %>
