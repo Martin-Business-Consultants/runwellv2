@@ -311,18 +311,18 @@ dialog:has(.datepicker.active) { overflow: visible; }
 /* Money (money_field): the dollars people type and the cents sent, laid out as the one field. */
 .money-field { display: contents; }
 
-/* Rich text (rich_text_field, Lexxy): rune_ui's lexxy.css frames the editor; here it takes the
-/* app's faces and corners, and the ring every other field shows on focus. */
+/* Rich text (rich_text_field, Lexxy): the app's faces and the ring every other field shows on
+/* focus, but Lexxy's own corners (--lexxy-radius, its frame a toolbar gap rounder), never the
+/* app's: Corners would make a tall editor a pill. */
 :root {
   --lexxy-font-base: var(--font-sans);
   --lexxy-font-mono: var(--font-mono);
-  --lexxy-radius: var(--radius-xs);
   --lexxy-focus-ring-color: var(--accent);
 }
-lexxy-editor { font-size: var(--text-read); }
+lexxy-editor { border-radius: calc(var(--lexxy-radius) + var(--lexxy-toolbar-gap, 2px)); font-size: var(--text-read); }
 lexxy-editor:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
 lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); }
-.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) { border-radius: var(--radius-sm); background: transparent; }
+.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) { border-radius: var(--lexxy-radius); background: transparent; }
 .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):is([aria-pressed="true"], [aria-expanded="true"]) { background: var(--layer-2); color: var(--text); }
 @media (any-hover: hover) {
   .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):hover:not([aria-pressed="true"]) { background: var(--hover); color: var(--text); }
@@ -365,51 +365,28 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 
 /* ======================================================================= Comboboxes */
 
-/* Every form select is a combobox (Choices.js, the choices controller): the field looks like the
-/* app's other fields, and its choices open in a menu like the app's popups, with a filter box once
-/* there are more than a few. Drawn here on rune's tokens rather than Choices' own stylesheet, so
-/* Appearance reaches it. */
-.choices { position: relative; width: 100%; overflow: visible; font-size: inherit; }
-.choices:focus { outline: none; }
-.choices__inner {
-  display: flex; align-items: center; width: 100%; min-height: var(--control-h); padding: 0 1.75rem 0 .625rem;
+/* Every form select is a combobox (ComboboxHelper, Fizzy's): a trigger drawn as the app's other
+/* fields, opening the app's popup of choices, with a filter box once there are more than a few. */
+.combobox { position: relative; display: flex; width: 100%; min-width: 0; }
+.combobox__trigger {
+  display: flex; align-items: center; gap: var(--s-2); width: 100%; height: var(--control-h); padding: 0 .5rem 0 .625rem;
   border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text);
-  cursor: pointer; transition: border-color .12s, box-shadow .12s;
+  font: inherit; text-align: start; cursor: pointer; transition: border-color .12s, box-shadow .12s;
 }
-.choices.is-focused .choices__inner, .choices.is-open .choices__inner { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-.choices.is-disabled .choices__inner { opacity: .6; cursor: not-allowed; }
-.choices[data-type*="select-one"]::after {
-  content: ""; position: absolute; top: 50%; right: .7rem; width: .4rem; height: .4rem; border-right: 1.5px solid var(--text-muted);
-  border-bottom: 1.5px solid var(--text-muted); transform: translateY(-70%) rotate(45deg); pointer-events: none;
-}
-.choices[data-type*="select-one"].is-open::after { transform: translateY(-30%) rotate(-135deg); }
-.choices__list { margin: 0; padding: 0; list-style: none; }
-.choices__list--single { flex: 1; min-width: 0; }
-.choices__list--single .choices__item { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.choices__placeholder { color: var(--text-faint); }
-.choices__list--dropdown {
-  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; overflow: hidden;
-  border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow-popover);
-}
-.choices__list--dropdown.is-active { display: block; animation: choices-in .1s ease-out; }
-.choices.is-flipped .choices__list--dropdown { top: auto; bottom: calc(100% + 4px); }
-@keyframes choices-in { from { opacity: 0; transform: translateY(-2px); } }
-.choices__list--dropdown .choices__list { max-height: 16rem; padding: 4px; overflow-y: auto; overscroll-behavior: contain; }
-.choices__list--dropdown .choices__item { padding: 6px var(--s-2); border-radius: calc(5px * var(--radius-scale)); color: var(--text); cursor: pointer; }
-.choices__list--dropdown .choices__item.is-highlighted { background: var(--hover); }
-.choices__list--dropdown .choices__item.is-selected { font-weight: var(--weight-strong); }
-.choices__list--dropdown .choices__item--disabled { opacity: .5; cursor: default; }
-.choices__list--dropdown :is(.choices__notice, .has-no-results, .has-no-choices) { color: var(--text-muted); cursor: default; }
-.choices__heading { padding: 6px var(--s-2) 2px; color: var(--text-faint); font-size: var(--text-xs); font-weight: var(--weight-strong); }
-.choices__list--dropdown .choices__input {
-  display: block; width: calc(100% - 8px); height: var(--control-h-sm); margin: 4px 4px 0; padding: 0 .5rem;
-  border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--layer-1); color: var(--text); font: inherit; font-size: var(--text-meta);
-}
-.choices__list--dropdown .choices__input:focus { outline: none; border-color: var(--line-strong); box-shadow: none; }
+.combobox__trigger:hover { border-color: color-mix(in srgb, var(--text) 30%, var(--line-strong)); }
+.combobox__trigger:focus-visible, .combobox:has(.popup[open]) .combobox__trigger { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+.combobox__trigger:disabled { opacity: .6; cursor: not-allowed; }
+.combobox__trigger .icon { flex: none; color: var(--text-muted); }
+.combobox__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The popup is at least as wide as its field. */
+.combobox__popup { min-width: 100%; }
+.popup__group { padding: var(--s-2) var(--s-3) 2px; color: var(--text-faint); font-size: var(--text-xs); font-weight: var(--weight-strong); }
+.popup__group:not(:has(~ .popup__item:not([hidden]))) { display: none; }
 /* A small select (select--sm, the note composer's kind) stays small. */
-.choices:has(.select--sm) .choices__inner { min-height: var(--control-h-sm); font-size: var(--text-meta); }
+.combobox--sm { width: auto; }
+.combobox--sm .combobox__trigger { height: var(--control-h-sm); font-size: var(--text-meta); }
 /* In a row of fields or a compact form, the combobox fills its place as the select did. */
-.task-panel__field .choices { max-width: 16rem; }
+.task-panel__field .combobox { max-width: 16rem; }
 
 /* ======================================================================= The brand's colour */
 

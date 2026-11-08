@@ -11,4 +11,3 @@ pin "lexxy"
 pin "@rails/activestorage", to: "activestorage.esm.js"
 pin "@rails/request.js", to: "@rails--request.js" # @0.0.13
 pin "vanillajs-datepicker" # @1.3.4
-pin "choices.js" # @11.2.4

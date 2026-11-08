@@ -138,14 +138,16 @@ event); every event has a source.
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
   highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
-- Every select is a combobox (Choices.js, vendored through importmap, the `choices` controller):
-  the default form builder (`ComboboxFormBuilder`) wraps `form.select`,
-  `time_zone_select`, `collection_select` and `grouped_collection_select` in `combobox_tag`, the
-  wrapper that carries the controller (never the `<select>`: Choices moves it, and a controller whose
-  element moves reconnects without end); a `select_tag` goes in `combobox_tag { … }` itself, and
-  `combobox: false` keeps a plain `<select>`. It's
-  drawn on rune's tokens (`runwell/components.css`), fires `change` on the select (save-on-change
-  forms work), and comes down before Turbo renders or streams over it and back up after
+- Every select is a combobox, Fizzy's: a button opening the app's popup of choices (`combobox` or,
+  for `multiple`, `multi-selection-combobox`, with `dialog`, `navigable-list` and, past
+  `ComboboxHelper::COMBOBOX_FILTER_AT` choices, a filter box, `popup-filter`), writing hidden fields.
+  The default form builder (`ComboboxFormBuilder`) renders `form.select`, `time_zone_select`,
+  `collection_select` and `grouped_collection_select` as usual and `combobox_tag` (`ComboboxHelper`)
+  rebuilds that `<select>` as the combobox, so include_blank (sent as ""), selected, disabled and
+  optgroups behave as in a select; a `select_tag` goes in `combobox_tag { … }`, and
+  `combobox: false` keeps a plain `<select>`. The hidden fields and the chosen item come from the
+  server, so a morph keeps them. A pick fires `change` on its field, and the select's `data-action`
+  moves to the wrapper, so save-on-change forms (`change->form#submit`) work
 - Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): a calendar
   (vanillajs-datepicker, vendored in `vendor/javascript`, through the `date-field` controller) on a
   read-only field showing "Oct 20, 2026", beside a hidden field holding YYYY-MM-DD, which is what's
@@ -908,9 +910,9 @@ for the larger sizes.
 Every border radius in the stylesheets goes through two variables so Corners reaches the
 whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill shapes are
 `var(--radius-pill, 99rem)`, true circles stay `50%`, and every control (buttons, inputs,
-selects, toggles, tags) uses `var(--radius-control)` so they always match. A multi-line field (a textarea, the Lexxy editor) is a box, not a control: it takes
-`var(--radius-lg)`, since round corners make the control radius a pill (rune_ui's forms and
-lexxy stylesheets). Write new CSS
+selects, toggles, tags) uses `var(--radius-control)` so they always match. A textarea is a box, not a control: it takes
+`var(--radius-lg)`, since round corners make the control radius a pill (rune_ui's forms
+stylesheet). The Lexxy editor keeps Lexxy's own corners (`--lexxy-radius`), never the app's. Write new CSS
 the same way.
 Schemes and fonts override the palette's unlayered tokens, so they are unlayered too.
 Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: values for the design tokens

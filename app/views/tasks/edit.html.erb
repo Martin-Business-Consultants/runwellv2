@@ -49,46 +49,48 @@
 
         <fieldset class="record-form__group">
           <legend>Who’s on it</legend>
-          <label class="field">
-            <span class="field__label">Lead</span>
-            <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" } %>
-            <span class="field__hint">The one person it’s up to.</span>
-          </label>
+          <div class="field-row">
+            <label class="field">
+              <span class="field__label">Lead</span>
+              <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" } %>
+              <span class="field__hint">The one person it’s up to.</span>
+            </label>
 
-          <fieldset class="owner-checklist">
-            <legend class="owner-checklist__legend">Also on it</legend>
-            <%= hidden_field_tag "task[other_owner_ids][]", "", id: nil %>
-            <div class="owner-checklist__people">
-              <% others = @task.other_owners.map(&:id) %>
-              <% task_people.each do |person| %>
-                <%# herb:key person.id %>
-                <label class="owner-checklist__person">
-                  <%= check_box_tag "task[other_owner_ids][]", person.id, others.include?(person.id), id: "task_other_owner_#{person.id}" %>
-                  <%= person_tag person %>
-                  <span><%= person.display_name %></span>
-                </label>
-              <% end %>
-            </div>
-          </fieldset>
+            <fieldset class="owner-checklist">
+              <legend class="owner-checklist__legend">Also on it</legend>
+              <%= hidden_field_tag "task[other_owner_ids][]", "", id: nil %>
+              <div class="owner-checklist__people">
+                <% others = @task.other_owners.map(&:id) %>
+                <% task_people.each do |person| %>
+                  <%# herb:key person.id %>
+                  <label class="owner-checklist__person">
+                    <%= check_box_tag "task[other_owner_ids][]", person.id, others.include?(person.id), id: "task_other_owner_#{person.id}" %>
+                    <%= person_tag person %>
+                    <span><%= person.display_name %></span>
+                  </label>
+                <% end %>
+              </div>
+            </fieldset>
+          </div>
         </fieldset>
 
         <hr class="separator">
 
         <fieldset class="record-form__group">
           <legend>Where it belongs</legend>
-          <% if @task.work %>
-            <label class="field">
-              <span class="field__label"><%= term(:scope_item) %></span>
-              <%= form.select :scope_item_id, @task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" } %>
-            </label>
-          <% else %>
-            <label class="field">
-              <span class="field__label"><%= term(:client) %></span>
-              <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" } %>
-            </label>
-          <% end %>
+          <div class="field-row field-row--3">
+            <% if @task.work %>
+              <label class="field">
+                <span class="field__label"><%= term(:scope_item) %></span>
+                <%= form.select :scope_item_id, @task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" } %>
+              </label>
+            <% else %>
+              <label class="field">
+                <span class="field__label"><%= term(:client) %></span>
+                <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" } %>
+              </label>
+            <% end %>
 
-          <div class="field-row">
             <label class="field">
               <span class="field__label">Requested by</span>
               <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name,

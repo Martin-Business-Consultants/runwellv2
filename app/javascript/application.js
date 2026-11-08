@@ -6,7 +6,7 @@ import "behaviors"
 import { highlightCode } from "lexxy"
 
 // Turbo's progress bar after 200ms rather than 500, so a slower page says it's coming.
-window.Turbo?.setProgressBarDelay?.(200)
+if (window.Turbo?.config) window.Turbo.config.drive.progressBarDelay = 200
 
 // Lexxy's Prism has no JSON: the grammar from Prism's own json component, for code_block.
 window.Prism.languages.json ||= {

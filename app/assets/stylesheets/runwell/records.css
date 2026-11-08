@@ -160,7 +160,7 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* always shown, so focusing it shifts nothing), the kind, source and Add note along its foot. */
 .note-composer { gap: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); transition: border-color .12s, box-shadow .12s; }
 .note-composer:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-.note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: var(--radius) var(--radius) 0 0; background: transparent; box-shadow: none; }
+.note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .note-composer .lexxy-editor__content { min-height: 3lh; }
 
 .note-composer__footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); padding: 6px; border-top: 1px solid var(--line); }
@@ -201,6 +201,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .record-form__body { gap: var(--s-4); }
 /* A short field (a status) beside a long one (a time zone). */
 @media (min-width: 640px) { .record-form__row--narrow-first { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
+
+/* Three short fields to a row (a task's section or client, who asked, how it came in): narrower
+/* than rune's pairs, so all three fit beside each other in the working column. */
+.field-row--3 { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
 
 /* A group of fields under its own heading (a fieldset's legend). A legend sits outside the
 /* fieldset's flow, so its space below is its own padding, not the group's gap. */

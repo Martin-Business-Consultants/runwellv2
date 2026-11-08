@@ -1,8 +1,5 @@
-# Every form's selects are comboboxes (Choices.js): select, time_zone_select, collection_select and
-# grouped_collection_select come wrapped in <span class="combobox" data-controller="choices">.
-# The controller sits on the wrapper, not the <select>: Choices moves the select into markup of its
-# own, and a Stimulus controller whose element moves is disconnected and connected again, which
-# would tear the combobox down and build it up without end. combobox: false keeps a plain <select>.
+# Every form's selects are comboboxes (ComboboxHelper: Fizzy's popup of choices, built from the
+# <select> Rails renders). combobox: false keeps a plain <select>.
 class ComboboxFormBuilder < ActionView::Helpers::FormBuilder
   def select(method, choices = nil, options = {}, html_options = {}, &block)
     combobox(html_options) { super(method, choices, options, it, &block) }
