@@ -217,15 +217,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .record-form__toggle:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
 .record-form__toggle-text { min-width: 0; color: var(--text-muted); }
 
-/* "Also on it" on a piece of work's edit page: the team as chips, picked ones tinted. */
-.owner-checklist { display: flex; flex-direction: column; min-width: 0; }
-.owner-checklist__legend { padding-bottom: 6px; font-weight: var(--weight-strong); }
-.owner-checklist__people { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-.owner-checklist__person { display: inline-flex; align-items: center; gap: var(--s-2); padding: 6px var(--s-3) 6px var(--s-2); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; transition: background .12s, border-color .12s; }
-.owner-checklist__person:hover { background: var(--hover); }
-.owner-checklist__person:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
-.owner-checklist__person:has(:focus-visible) { box-shadow: var(--ring); }
-.owner-checklist__person input:focus-visible { box-shadow: none; }
 
 /* ======================================================================= 10 Work sidebar */
 

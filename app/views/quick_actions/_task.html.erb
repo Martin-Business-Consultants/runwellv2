@@ -21,20 +21,10 @@
       <%= date_input form, :due_on %>
     </div>
   </div>
-  <details class="quick-action__more">
-    <summary class="quick-action__more-toggle"><%= icon_tag "caret-down" %> Also on it</summary>
-    <div class="quick-action__people">
-      <input type="hidden" name="task[other_owner_ids][]" value="" form="<%= form_id %>">
-      <% task_people.each do |person| %>
-        <%# herb:key person.id %>
-        <label class="quick-action__person">
-          <%= check_box_tag "task[other_owner_ids][]", person.id, false, id: "quick_action_other_owner_#{person.id}", form: form_id %>
-          <%= person_tag person %>
-          <span><%= person.display_name %></span>
-        </label>
-      <% end %>
-    </div>
-  </details>
+  <div class="field">
+    <%= form.label :other_owner_ids, "Also on it", class: "field__label" %>
+    <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else" }, multiple: true %>
+  </div>
   <div class="dialog__actions">
     <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
     <button type="submit" class="btn btn--primary">Add <%= term(:task).downcase %></button>

@@ -56,21 +56,11 @@
               <span class="field__hint">The one person it’s up to.</span>
             </label>
 
-            <fieldset class="owner-checklist">
-              <legend class="owner-checklist__legend">Also on it</legend>
-              <%= hidden_field_tag "task[other_owner_ids][]", "", id: nil %>
-              <div class="owner-checklist__people">
-                <% others = @task.other_owners.map(&:id) %>
-                <% task_people.each do |person| %>
-                  <%# herb:key person.id %>
-                  <label class="owner-checklist__person">
-                    <%= check_box_tag "task[other_owner_ids][]", person.id, others.include?(person.id), id: "task_other_owner_#{person.id}" %>
-                    <%= person_tag person %>
-                    <span><%= person.display_name %></span>
-                  </label>
-                <% end %>
-              </div>
-            </fieldset>
+            <label class="field">
+              <span class="field__label">Also on it</span>
+              <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else", selected: @task.other_owners.map(&:id) }, multiple: true %>
+              <span class="field__hint">Anyone else working on it.</span>
+            </label>
           </div>
         </fieldset>
 
