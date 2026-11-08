@@ -45,6 +45,8 @@
         <%= render "layouts/shared/side_panel", task: side_panel_task %>
         <%= turbo_stream_from Current.user, :notifications %>
         <turbo-frame id="modal"></turbo-frame>
+        <%# The menus' templates rows copy from, once, out of every row and panel (TasksHelper#page_template). %>
+        <%= yield :page_templates %>
       <% end %>
       <% if authenticated? %>
         <%= render "layouts/shared/hint_legend" %>

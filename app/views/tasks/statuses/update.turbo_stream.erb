@@ -1,6 +1,7 @@
 <%# The task's new status everywhere it shows: the list it was changed in (its section again on a
     piece of work's or client's page; its row, or its row gone if the filter now leaves it out, on
-    the Tasks index), its pickers, due date and side panel. Targets the page lacks are skipped. %>
+    the Tasks index), its pickers, due date and side panel, which closes when the change came from
+    it and the task left the list. Targets the page lacks are skipped. %>
 <% if @list&.kind == "work" && @task.work %>
   <%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/section", locals: { work: @task.work, state: @list.state, item: @list.item } %>
 <% elsif @list&.kind == "client" && @task.client %>
@@ -14,4 +15,9 @@
 <%= turbo_stream.replace dom_id(@task, :status_labelled), partial: "tasks/status_dot", locals: { task: @task, labelled: true, options_on_page: true } %>
 <%= turbo_stream.replace dom_id(@task, :due), partial: "tasks/due", locals: { task: @task } %>
 <%= turbo_stream.replace dom_id(@task, :panel), method: :morph, partial: "tasks/panel", locals: { task: @task } %>
+<%# Changed from the side panel and gone from the list under it (marked done in an Open list): the
+    panel closes as well (side-panel controller). %>
+<% if params[:panel] && @list && !@list.shows?(@task) %>
+  <%= turbo_stream.action :close_side_panel, "side_panel" %>
+<% end %>
 <%= turbo_stream_flash(notice: @notice, alert: @alert) %>

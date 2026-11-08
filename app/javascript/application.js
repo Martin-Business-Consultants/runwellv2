@@ -8,6 +8,12 @@ import { highlightCode } from "lexxy"
 // Turbo's progress bar after 200ms rather than 500, so a slower page says it's coming.
 if (window.Turbo?.config) window.Turbo.config.drive.progressBarDelay = 200
 
+// <turbo-stream action="close_side_panel">: an answer closing the side panel (a task marked done from
+// it leaves the list under it). The side-panel controller closes it the way ✕ does, history included.
+if (window.Turbo?.StreamActions) {
+  window.Turbo.StreamActions.close_side_panel = () => document.dispatchEvent(new CustomEvent("side-panel:close-requested"))
+}
+
 // Lexxy's Prism has no JSON: the grammar from Prism's own json component, for code_block.
 window.Prism.languages.json ||= {
   property: { pattern: /(^|[^\\])"(?:\\.|[^\\"\r\n])*"(?=\s*:)/, lookbehind: true, greedy: true },

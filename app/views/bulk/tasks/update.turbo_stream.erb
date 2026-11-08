@@ -1,0 +1,17 @@
+<%# Several tasks changed from the table's bulk bar: each that leaves the table's list (marked done in
+    an Open list) goes, the rest are redrawn in place, and the notice shows. A section's list (a piece
+    of work's or a client's Tasks) comes back whole. %>
+<% list = Task::List.from(params.fetch(:list, {}), task: nil) %>
+<% listed = CustomField.for("Task").listed.to_a %>
+<% if list&.section? %>
+  <%= turbo_stream.refresh request_id: nil %>
+<% else %>
+  <% @bulk_changed.each do |task| %>
+    <% if list && !list.shows?(task) %>
+      <%= turbo_stream.remove dom_id(task, :row) %>
+    <% else %>
+      <%= turbo_stream.replace dom_id(task, :row), method: :morph, partial: "tasks/row", locals: { task: task, listed: listed } %>
+    <% end %>
+  <% end %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

@@ -22,6 +22,8 @@ export default class extends Controller {
     this.rendering = this.rendering.bind(this)
     window.addEventListener("popstate", this.popped, true) // capture: before Turbo's own listener
     this.leaving = this.leaving.bind(this)
+    this.closeRequested = () => { if (this.#isOpen) this.close() }
+    document.addEventListener("side-panel:close-requested", this.closeRequested)
     if (this.hasFrameTarget) this.frameTarget.addEventListener("turbo:before-frame-render", this.rendering)
     document.addEventListener("turbo:before-fetch-request", this.leaving)
   }
@@ -30,6 +32,7 @@ export default class extends Controller {
     window.removeEventListener("popstate", this.popped, true)
     if (this.hasFrameTarget) this.frameTarget.removeEventListener("turbo:before-frame-render", this.rendering)
     document.removeEventListener("turbo:before-fetch-request", this.leaving)
+    document.removeEventListener("side-panel:close-requested", this.closeRequested)
   }
 
   // A record's tab (or the List / Board switch, in the same frame) takes you somewhere else on the

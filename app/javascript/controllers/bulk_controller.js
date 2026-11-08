@@ -35,14 +35,22 @@ export default class extends Controller {
     if (!this.hasBarTarget || !this.barTargets.some(bar => bar.contains(form))) return
 
     form.querySelectorAll("input[data-bulk-id]").forEach(input => input.remove())
-    this.#picked.forEach(item => {
-      const input = document.createElement("input")
-      input.type = "hidden"
-      input.name = "ids[]"
-      input.value = item.value
-      input.dataset.bulkId = ""
-      form.append(input)
-    })
+    this.#picked.forEach(item => this.#carry(form, "ids[]", item.value))
+
+    // The table's list (data-task-list: which, and its filter), so the answer drops the rows the
+    // change takes out of it (a task marked done leaves an Open list) rather than reloading.
+    const list = document.querySelector("[data-task-list]")
+    if (list) {
+      this.#carry(form, "list[kind]", list.dataset.taskList)
+      if (list.dataset.taskListState) this.#carry(form, "list[state]", list.dataset.taskListState)
+    }
+  }
+
+  #carry(form, name, value) {
+    const input = document.createElement("input")
+    Object.assign(input, { type: "hidden", name, value })
+    input.dataset.bulkId = ""
+    form.append(input)
   }
 
   // After an action, the page comes back with the same rows: start with none picked.

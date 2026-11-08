@@ -41,8 +41,12 @@ export default class extends Controller {
     if (this.labelledValue) this.#hidden(form, "labelled", "1")
 
     // In a Tasks list (data-task-list: which list, its filter, the section in focus), the change
-    // says so, and the answer brings that list back as it now stands.
-    const list = this.element.closest("[data-task-list]")
+    // says so, and the answer brings that list back as it now stands. From the side panel, which
+    // sits in no list, it's the list on the page underneath (one per page), and it says it came
+    // from the panel: a task that leaves the list closes the panel too.
+    const panel = this.element.closest(".task-panel")
+    const list = this.element.closest("[data-task-list]") || (panel && document.querySelector("[data-task-list]"))
+    if (panel) this.#hidden(form, "panel", "1")
     if (list) {
       this.#hidden(form, "list[kind]", list.dataset.taskList)
       if (list.dataset.taskListState) this.#hidden(form, "list[state]", list.dataset.taskListState)

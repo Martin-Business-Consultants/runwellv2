@@ -1,0 +1,5 @@
+<%# Several tasks removed from the table's bulk bar: their rows go, and the notice shows. %>
+<% @bulk_changed.each do |task| %>
+  <%= turbo_stream.remove dom_id(task, :row) %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

@@ -23,11 +23,23 @@ module TasksHelper
   def task_people = @task_people ||= User.active.people.ordered.to_a
 
   # The status picker's choices, on the page once like the owner picker's.
+  # A <template> a row's menu copies from (picker#fill): printed once, at the foot of the page
+  # (yield :page_templates in the layout), never inside a row or a panel, so removing a row (a task
+  # leaving a list) or closing the panel can't take it away from every other menu. A side panel
+  # loaded on its own (its frame) carries its own; a stream answer needs none, the page has them.
+  def page_template(html)
+    return html if turbo_frame_request_id == "side_panel"
+    return if request.format.turbo_stream?
+
+    content_for(:page_templates, html)
+    nil
+  end
+
   def task_status_options_template
     return if @task_status_options_rendered
 
     @task_status_options_rendered = true
-    tag.template(id: "task-status-options") do
+    html = tag.template(id: "task-status-options") do
       safe_join(Task::STATUSES.map do |status|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { picker_value: status }) do
           tag.button(type: "submit", name: "task[status]", value: status, class: "popup__btn", data: { action: "picker#choose" }) do
@@ -38,6 +50,7 @@ module TasksHelper
         end
       end)
     end
+    page_template(html)
   end
 
   # The owners picker's people, on the page once like the others; each click puts that person on
@@ -51,19 +64,20 @@ module TasksHelper
     return if @task_status_popup_rendered
 
     @task_status_popup_rendered = true
-    tag.template(id: "task-status-popup") do
+    html = tag.template(id: "task-status-popup") do
       safe_join([ tag.strong("Status", class: "popup__title"),
         form_with(url: "#", method: :patch, authenticity_token: false, data: { picker_target: "form" }) do
           tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
         end ])
     end
+    page_template(html)
   end
 
   def task_owner_popup_template
     return if @task_owner_popup_rendered
 
     @task_owner_popup_rendered = true
-    tag.template(id: "task-owner-popup") do
+    html = tag.template(id: "task-owner-popup") do
       safe_join([
         tag.input(type: "search", class: "owner-picker__search", placeholder: "Who’s on it…", autocomplete: "off", aria: { label: "Find a person" },
           data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" }),
@@ -72,13 +86,14 @@ module TasksHelper
         end,
         tag.p("The first on leads.", class: "owner-picker__hint") ])
     end
+    page_template(html)
   end
 
   def task_assignee_options_template
     return if @task_assignee_options_rendered
 
     @task_assignee_options_rendered = true
-    tag.template(id: "task-assignee-options") do
+    html = tag.template(id: "task-assignee-options") do
       safe_join(task_people.map do |person|
         tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id }) do
           tag.button(type: "submit", name: "assignee_id", value: person.id, class: "popup__btn", data: { action: "picker#choose" }) do
@@ -89,6 +104,7 @@ module TasksHelper
         end
       end)
     end
+    page_template(html)
   end
 
   # Everyone on a task as overlapping avatars (rune_ui's avatar stack), the lead first and
