@@ -91,7 +91,10 @@ them something else on screen (`term(:work)`, `term(:task)`).
 
 A piece of work ends closed, as completed (delivered) or cancelled (`close_outcome`, shown by
 `Work#state_label`; the state key stays "closed"), from Details or the bulk bar; reopening
-(`reopen!`, `work.reopened`) puts it back.
+(`reopen!`, `work.reopened`) puts it back. Setting a client dormant or former sunsets it
+(`Client::Sunset`): its open work closes as cancelled and its open tasks are marked done, each with
+the reason in its history, and the client records `client.sunset`; setting it active again reopens
+nothing.
 
 Commitments and the `Request` model were folded into tasks in 3.0, and `Question` removed. Their
 tables (`commitments`, `requests`, `questions`) are left, unread, for a later release to drop; the 3.0 migrations moved their rows and

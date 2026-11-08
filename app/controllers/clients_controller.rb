@@ -10,7 +10,7 @@ class ClientsController < ApplicationController
     description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose works are internal projects.",
     params: { client: { name: "string!", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }, next_tools: %i[create_contact create_work]
   agent_tool :update_client, on: :update, title: "Change a client",
-    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose works are internal projects.",
+    description: "time_zone: where the client is, as a Rails name (\"Pacific Time (US & Canada)\") or IANA (\"America/Los_Angeles\"); blank means ours. Their portal, client-facing pages and emails show times in it. internal: yourself (the business or person running Runwell), whose works are internal projects. Setting it dormant or former closes its open work as cancelled and marks its open tasks done; setting it active again reopens nothing.",
     params: { client: { name: "string", status: Client::STATUSES, time_zone: "string", internal: "boolean", custom_fields: {} } }
   agent_tool :delete_client, on: :destroy, title: "Delete a client",
     description: "Removes the client with its contacts, tasks and notes. A client with work can’t be deleted: set its status to former instead."
@@ -54,9 +54,9 @@ class ClientsController < ApplicationController
 
     if saved
       if params[:from_list]
-        redirect_back fallback_location: clients_path, notice: "#{@client.name} is #{@client.status.humanize.downcase}."
+        redirect_back fallback_location: clients_path, notice: [ "#{@client.name} is #{@client.status.humanize.downcase}.", @client.sunset_summary ].compact.join(" ")
       else
-        redirect_to @client, notice: "Client updated."
+        redirect_to @client, notice: [ "Client updated.", @client.sunset_summary ].compact.join(" ")
       end
     elsif params[:from_list]
       redirect_back fallback_location: clients_path, alert: @client.errors.full_messages.to_sentence
@@ -85,7 +85,11 @@ class ClientsController < ApplicationController
     def answer_in_place(saved)
       @client.reload unless saved
       streams = [ turbo_stream.replace(helpers.dom_id(@client, :status), partial: "clients/status_picker", locals: { client: @client }) ]
-      streams << turbo_stream_flash(alert: @client.errors.full_messages.to_sentence) unless saved
+      if saved
+        streams << turbo_stream_flash(notice: "#{@client.name} is #{@client.status.humanize.downcase}. #{@client.sunset_summary}") if @client.sunset_summary
+      else
+        streams << turbo_stream_flash(alert: @client.errors.full_messages.to_sentence)
+      end
       render turbo_stream: streams
     end
 

@@ -119,16 +119,17 @@ work and tasks (a polymorphic `trackable`, like notes and documents, with the wo
 client kept alongside so totals roll up), totals on work, a weekly timesheet, and "Log time"
 in the quick action tray. No live timers.
 
-`runwell-agreements` (Agreements, 3.0) holds what the core no longer does: an agreement on an
-work (a title and rich text, any price written in it) under the install's logo, sent to the
-client's approvers as a PDF (Prawn, bundled by the core for plugins) and signed on a public page by
-typed name, the signed PDF stamped with the name, date and address and kept with the work.
-Approving records the yes; it creates no tasks. It fills the work's tab, sidebar and title
-line (`:work_panel`, `:work_aside`, `:work_meta`) and the portal's work
-panel, and imports the agreements the core kept before 3.0 (`agreement_versions`, `approvals`).
-Until Stripe, QuickBooks, Reporting and Factory are updated for 3.0, the parts of them that read
-agreement versions and approvals (payment links on approval, a service's amount, approved but not
-invoiced, queueing on approval) don't work.
+`runwell-agreements` (Agreements, 3.0; 2.0 of the plugin for 5.2) holds what the core no longer does:
+the documents sent to a client (proposals, contracts, work orders, change orders, agreements,
+letters) on a client or one of its pieces of work, written from templates (cloned and reworked,
+with placeholders filled in) and drawn in looks (layout, accent colour, font, logo, header and
+footer, custom CSS for the page), sent as a PDF (Prawn, bundled by the core for plugins) and, when
+one asks for it, signed on a public page or in the portal by typed or drawn signature, the signed
+PDF stamped with the signature, date and address and kept with the record. Approving records the
+yes; it creates no tasks. It fills the client's and work's tabs and the work's title line
+(`:client_panel`, `:work_panel`, `:work_meta`) and the portal's work panel, has pages of its own
+(the nav, with a sidebar for documents, templates and looks), and imports the agreements the core
+kept before 3.0 (`agreement_versions`, `approvals`).
 
 `runwell-ai` (AI) is the reference for a plugin that runs agent tools for a person and fills the
 row and sidebar slots: an assistant inside the app (Ask, `i`) and one-click suggestions on records,

@@ -58,6 +58,10 @@ class Task < ApplicationRecord
   # Nobody has taken it on or started it: a request, waiting for someone to be assigned.
   scope :requests, -> { where(owner_id: nil, status: "planned") }
 
+  # Why the status changed, when something other than a person changed it (a client's sunset);
+  # kept in the event's payload as reason.
+  attr_accessor :status_reason
+
   after_update_commit :record_status_change, if: :saved_change_to_status?
   before_save :stamp_completion
 
@@ -113,7 +117,7 @@ class Task < ApplicationRecord
   end
 
   def record_status_change
-    record_event!("task.status", payload: { from: status_before_last_save, to: status })
+    record_event!("task.status", payload: { from: status_before_last_save, to: status, reason: status_reason }.compact)
   end
 
   ActiveSupport.run_load_hooks(:runwell_task, self)

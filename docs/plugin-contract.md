@@ -273,7 +273,10 @@ Every `Event` is published from a job after it's saved, never inside the request
 cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
 `task.created`, `task.status`, `task.requested` (3.0: a client asked for it, from the portal or by
 email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,
-`contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject).
+`contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject), `client.sunset` (5.2.2: the client was set dormant or former and its open work closed as
+cancelled and open tasks marked done; payload `status`, `reason`, `works` (their refs) and `tasks` (how
+many); each piece of work also records `work.closed` with that `reason`, and each task `task.status`
+with a `reason` in its payload).
 
 **Removed in 3.0:** `commitment.added`, `commitment.done`, `commitment.missed`,
 `commitment.dropped`, `request.received` (now `task.requested`), `request.replied` (replies

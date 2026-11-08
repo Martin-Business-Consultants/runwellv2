@@ -1,6 +1,7 @@
 class Client < ApplicationRecord
   include Eventful, Noted, Searchable, Documentable, CustomFields
   include LiveRefreshes, RecordsCreation
+  include Sunset
 
   STATUSES = %w[active dormant former].freeze
 
