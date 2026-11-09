@@ -96,6 +96,7 @@ class Work < ApplicationRecord
 
     summary = { ref: ref, title: title, tasks: tasks.count }
     transaction do
+      clear_legacy_rows!
       Current.set(erasing: true) { destroy! }
       client.record_event!("work.erased", actor: actor, source: source, payload: summary)
     end
@@ -186,6 +187,25 @@ class Work < ApplicationRecord
 
   private
     def live_streams = [ self, :works, client ]
+
+    # Rows in the tables left unread since 3.0 (commitments, and agreement versions with their
+    # approvals and links, from before Agreements was a plugin) that still point at this work by
+    # engagement_id: their foreign keys would refuse erasing it, so they go first. Nothing reads them.
+    def clear_legacy_rows!
+      db = self.class.connection
+      if db.table_exists?(:agreement_versions)
+        versions = db.select_values("SELECT id FROM agreement_versions WHERE engagement_id = #{id.to_i}").map(&:to_i)
+        if versions.any?
+          list = versions.join(",")
+          db.execute("DELETE FROM approval_links WHERE agreement_version_id IN (#{list})") if db.table_exists?(:approval_links)
+          db.execute("DELETE FROM approvals WHERE agreement_version_id IN (#{list})") if db.table_exists?(:approvals)
+          db.execute("UPDATE scope_items SET agreement_version_id = NULL WHERE agreement_version_id IN (#{list})") if db.column_exists?(:scope_items, :agreement_version_id)
+          db.execute("UPDATE agreement_versions SET superseded_by_id = NULL WHERE superseded_by_id IN (#{list})")
+          db.execute("DELETE FROM agreement_versions WHERE id IN (#{list})")
+        end
+      end
+      db.execute("DELETE FROM commitments WHERE engagement_id = #{id.to_i}") if db.table_exists?(:commitments)
+    end
 
     def record_retype
       record_event!("work.retyped", payload: { from: label_before_last_save, to: label })
