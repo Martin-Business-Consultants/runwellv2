@@ -6,11 +6,6 @@
 # server, so a morph puts back what was saved. A pick fires change on its hidden field, so
 # data-action="change->form#submit" (moved from the select to the wrapper) still saves on change.
 module ComboboxHelper
-  # Past this many choices, the popup opens with a box to filter them. A select marked
-  # data-combobox-filter="always" has the box however few its choices (a page's filters, which are
-  # searched by habit).
-  COMBOBOX_FILTER_AT = 8
-
   def combobox_tag(&block)
     select = Nokogiri::HTML5.fragment(capture(&block)).at_css("select")
     return capture(&block) unless select
@@ -29,8 +24,8 @@ module ComboboxHelper
       chosen = [ options.find { !it[:disabled] } ].compact if chosen.empty? && !multiple
       label = select["aria-label"]
       field = { name: select["name"], form: select["form"], disabled: select.key?("disabled") }
+      # data-combobox-filter (5.7.1, when only some had the box) is still accepted and does nothing.
       field_data = select.attributes.filter_map { |name, attr| [ name.delete_prefix("data-").underscore, attr.value ] if name.start_with?("data-") && !name.in?(%w[data-action data-combobox-filter]) }.to_h
-      filter = select["data-combobox-filter"] == "always" || options.size > COMBOBOX_FILTER_AT
 
       controller = multiple ? "multi-selection-combobox" : "combobox"
       wrapper = tag.div(class: class_names("combobox", "combobox--sm": select["class"].to_s.include?("select--sm"), "combobox--multiple": multiple),
@@ -52,7 +47,7 @@ module ComboboxHelper
             tag.span(chosen.map { it[:text] }.to_sentence.presence || none, class: "combobox__label", data: { "#{controller.underscore}_target": "label" }) + icon_tag("caret-down")
           end,
           tag.dialog(class: "popup combobox__popup", aria: { label: label }, data: { dialog_target: "dialog" }) do
-            safe_join([ (combobox_filter if filter), tag.ul(combobox_items(options, chosen, controller, multiple), class: "popup__list", role: "listbox") ])
+            safe_join([ combobox_filter, tag.ul(combobox_items(options, chosen, controller, multiple), class: "popup__list", role: "listbox") ])
           end
         ])
       end
@@ -74,6 +69,7 @@ module ComboboxHelper
       [ *fields, template ]
     end
 
+    # Every combobox opens with a box to filter its choices, however few: one way to pick across the app.
     def combobox_filter
       search_field_tag(nil, nil, id: nil, placeholder: "Filter…", autocomplete: "off", aria: { label: "Filter the choices" },
         data: { "1p-ignore": "true", popup_filter_target: "input", dialog_target: "focusMouse", action: "input->popup-filter#filter" })

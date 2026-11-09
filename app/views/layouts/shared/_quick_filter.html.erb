@@ -1,24 +1,14 @@
 <%# locals: (title:, param:, options:, current:) %>
-<%# A quick filter: a pill showing the current choice, opening a menu of the others (Runwell's
-    popup underneath, so it keeps its keys). Each choice is a link that swaps one query param, so
-    filters are bookmarkable. %>
-<div class="quick-filter" data-filter-show="true" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
-  <button type="button" class="pill" aria-haspopup="menu" data-action="click->dialog#toggle:stop">
-    <span><%= options.to_h.invert.fetch(current, options.first.first) %></span>
-    <%= icon_tag "caret-down" %>
-  </button>
-
-  <%= popup_menu label: title, title: title do %>
-    <ul class="popup__list" role="listbox">
-      <% options.each do |text, value| %>
-        <%# herb:key value %>
-        <li class="popup__item" role="checkbox" aria-checked="<%= value == current %>">
-          <%= link_to url_for(request.query_parameters.merge(param.to_s => value)), class: "popup__btn", data: { turbo_action: "replace" } do %>
-            <span class="popup__label"><%= text %></span>
-            <%= icon_tag "check", class: "checked" %>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
+<%# A quick filter on an index: the app's combobox (the small kind, with its search box), its choice
+    swapping one query param of this page's address, so filters are bookmarkable and Back works. The
+    page's other params ride along as hidden fields; picking submits at once and replaces the
+    address. The same combobox every select in the app is. %>
+<%= form_with url: request.path, method: :get, class: "quick-filter", data: { filter_show: "true", controller: "form", turbo_action: "replace" } do |form| %>
+  <% request.query_parameters.except(param.to_s).each do |name, value| %>
+    <%# herb:key name %>
+    <% if value.is_a?(String) %>
+      <input type="hidden" name="<%= name %>" value="<%= value %>">
+    <% end %>
   <% end %>
-</div>
+  <%= form.select param, options, { selected: current }, class: "select--sm", aria: { label: title.to_s.delete_suffix("…") }, data: { action: "change->form#submit" } %>
+<% end %>

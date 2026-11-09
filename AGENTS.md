@@ -157,10 +157,10 @@ event); every event has a source.
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
   highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
-- Every select is a combobox, Fizzy's: a button opening the app's popup of choices (`combobox` or,
-  for `multiple`, `multi-selection-combobox`, with `dialog`, `navigable-list` and, past
-  `ComboboxHelper::COMBOBOX_FILTER_AT` choices, or always with `data: { combobox_filter: "always" }` on the select (a
-  page's filters), a filter box, `popup-filter`), writing hidden fields.
+- Every select is a combobox, Fizzy's, and every combobox has a box to search its choices: a button
+  opening the app's popup of choices (`combobox` or, for `multiple`, `multi-selection-combobox`, with
+  `dialog`, `navigable-list` and the filter box, `popup-filter`), writing hidden fields. It's the one
+  way to pick anywhere in the app, an index's filters included (`quick_filter`, below).
   The default form builder (`ComboboxFormBuilder`) renders `form.select`, `time_zone_select`,
   `collection_select` and `grouped_collection_select` as usual and `combobox_tag` (`ComboboxHelper`)
   rebuilds that `<select>` as the combobox, so include_blank (sent as ""), selected, disabled and
@@ -402,11 +402,11 @@ changes in place with `tasks/status_dot`. Both pickers show a choice before the 
 (`picker` controller): the avatars redraw from each person's avatar template, a row a new status
 takes out of its list fades, and a save that fails outright is put back.
 
-Filters on an index page are Fizzy's quick filters above the list, not
-buttons inside the card: a row of
+Filters on an index page sit above the list, not inside the card: a row of
 `render "layouts/shared/quick_filter", title:, param:, options:, current:` in
-`content_for :index_filters`, which the index toolbar shows. Each choice is a link that
-swaps one query param, so filters are bookmarkable and Back works; the
+`content_for :index_filters`, which the index toolbar shows. Each is the app's combobox (the small
+kind, `select--sm`, with its search box) in a GET form of its own that swaps one query param,
+carrying the page's others, so filters are bookmarkable and Back works; the
 controller reads the params (`works#index`). Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 

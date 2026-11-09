@@ -188,9 +188,11 @@ is `data-controller="my-day--copy-prompt"`. Nothing to register, and no way to n
 outside the plugin's key, so two plugins, or a plugin and the core, can't collide.
 
 A plugin's `form.select` (or `combobox_tag { select_tag … }`) is the core's combobox, like every
-select: past eight choices it opens with a box to filter them, and `data: { combobox_filter: "always" }`
-on the select gives it that box however few its choices (5.7.1). `class: "select--sm"` makes it the
-small kind, as wide as its choice, for a row of filters.
+select, and opens with a box to search its choices (5.7.2; before, only past eight choices, or with
+`data: { combobox_filter: "always" }`, which is still accepted and now does nothing).
+`class: "select--sm"` makes it the small kind, as wide as its choice, for a row of filters. The
+`quick_filter` partial (same locals as ever) draws that combobox since 5.7.2, in a GET form of its
+own, instead of a pill and menu of links.
 
 What a plugin's JavaScript may lean on: the three packages in the table (pinned by the core, kept
 across 2.x), its own modules, and these core controllers from its markup, with the data attributes
