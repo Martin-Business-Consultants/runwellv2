@@ -11,6 +11,7 @@ Rails.application.config.to_prepare do
     "arrow-left" => '<path d="M13 8H3M7 4 3 8l4 4"/>',
     "arrow-right" => '<path d="M3 8h10M9 4l4 4-4 4"/>',
     "arrow-up" => '<path d="M8 13V3M4 7l4-4 4 4"/>',
+    "arrow-up-right" => '<path d="M5 11 11 5M6 5h5v5"/>',
     "art" => '<path d="M8 2.5a5.5 5.5 0 1 0 0 11c1 0 1.25-.75.75-1.5s0-1.75 1-1.75H11a2.5 2.5 0 0 0 2.5-2.5c0-2.9-2.5-5.25-5.5-5.25z"/><circle cx="5.25" cy="7" r=".6"/><circle cx="7.5" cy="5" r=".6"/><circle cx="10.25" cy="6" r=".6"/>',
     "assigned" => '<circle cx="6.5" cy="5.5" r="2.5"/><path d="M2 13.5a4.5 4.5 0 0 1 7.5-3.35"/><path d="m10 12 1.5 1.5 3-3"/>',
     "attachment" => '<path d="M12.5 7.5 8 12a3 3 0 0 1-4.25-4.25l4.75-4.75a2 2 0 0 1 2.83 2.83L6.6 10.55a1 1 0 0 1-1.42-1.42L9.5 4.8"/>',

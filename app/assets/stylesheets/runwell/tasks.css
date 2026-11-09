@@ -362,3 +362,19 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-quick-add__form:focus-within .task-quick-add__icon { color: var(--accent); }
 .task-quick-add__hint { visibility: hidden; }
 .task-quick-add__form:focus-within .task-quick-add__hint { visibility: visible; }
+
+/* A task row's title and details open the side panel through the title's link, stretched over
+   both; the ↗ after the title sits above it and goes to the task's own page, showing while the row
+   is pointed at or focused (always on touch). */
+.task-item__main { position: relative; }
+.task-item__heading { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
+.task-item__link { color: inherit; text-decoration: none; }
+.task-item__link::after { content: ""; position: absolute; inset: 0; }
+.task-item__open {
+  position: relative; z-index: 1; display: inline-grid; flex: none; place-items: center; padding: 2px;
+  border-radius: var(--radius-control); color: var(--text-faint); opacity: 0; transition: opacity 80ms ease-out;
+}
+.task-item__open .icon { width: .9rem; height: .9rem; }
+.task-item__open:hover { background: var(--hover); color: var(--text); }
+.task-item:hover .task-item__open, .task-item:focus-within .task-item__open, .task-item[data-keyboard-current] .task-item__open { opacity: 1; }
+@media (hover: none) { .task-item__open { opacity: 1; } }

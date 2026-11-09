@@ -1,13 +1,20 @@
 <%# locals: (task:, with_work: nil) %>
 <%# A task in a record's Tasks card: its status to change in place, its title and details (the
-    link), then Overdue, who's on it and Copy for AI. The rows are the record pages' record-list;
+    title's link, stretched over both, opens the side panel), a ↗ after the title to its own page,
+    then Overdue, who's on it and Copy for AI. The rows are the record pages' record-list;
     tasks.css adds what's particular to tasks. %>
 <li id="<%= dom_id(task, :item) %>" data-filter-target="item" class="record-list__row task-item">
   <%= render "tasks/status_dot", task: task %>
-  <%= side_panel_link_to task, class: "record-list__main" do %>
-    <span class="record-list__title"><%= task.title %></span>
+  <div class="record-list__main task-item__main">
+    <span class="task-item__heading">
+      <%= side_panel_link_to task, task.title, class: "record-list__title task-item__link" %>
+      <%= link_to task_path(task), class: "task-item__open", title: "Open on its own page", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "arrow-up-right" %>
+        <span class="visually-hidden">Open <%= task.title %> on its own page</span>
+      <% end %>
+    </span>
     <span class="record-list__description"><%= task_details(task, with_work: with_work) %></span>
-  <% end %>
+  </div>
 
   <span class="record-list__actions">
     <% if task.status != "done" && task.due_on&.past? %>
