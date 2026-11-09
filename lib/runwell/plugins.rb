@@ -62,6 +62,8 @@ module Runwell
     mattr_reader :quick_actions, default: {}
     mattr_reader :permissions, default: Hash.new { |hash, key| hash[key] = {} }
     mattr_reader :portal_nav_items, default: {}
+    # The core's portal pages a plugin's page may stand in for (portal_nav replaces:).
+    REPLACEABLE_PORTAL_PAGES = %i[documents].freeze
     mattr_reader :settings_pages, default: {}
     mattr_reader :nightly_tasks, default: {}
     mattr_reader :stylesheets, default: Hash.new { |hash, key| hash[key] = [] }
@@ -99,10 +101,18 @@ module Runwell
         Rails.logger.warn("[Runwell] #{key} calls Runwell::Plugins.briefing, removed in 5.0; it does nothing")
       end
 
-      # A link in the client portal's nav, to a page from a Portal::BaseController.
-      def portal_nav(key, label, path)
-        portal_nav_items[key] = [ label, path ]
+      # A link in the client portal's nav, to a page from a Portal::BaseController. replaces: one of
+      # the core's own portal pages (REPLACEABLE_PORTAL_PAGES) the plugin's page stands in for: its
+      # link takes that one's place in the nav, and the core's page sends people to it.
+      def portal_nav(key, label, path, replaces: nil)
+        raise ArgumentError, "#{key} can't replace the portal's #{replaces}" if replaces && !replaces.in?(REPLACEABLE_PORTAL_PAGES)
+
+        portal_nav_items[key] = [ label, path, replaces ]
       end
+
+      # The switched-on plugin's portal link standing in for one of the core's portal pages, or nil:
+      # [label, path].
+      def portal_replacement(page) = enabled_portal_nav_items.values.find { it[2] == page }&.first(2)
 
       # A tab in Settings, for people who may manage settings (require_permission :manage_settings).
       def settings(key, label, path)

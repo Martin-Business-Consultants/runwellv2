@@ -400,10 +400,18 @@ declared tools are already within its reach while the plugin is on.
 | Call | Since | Status |
 | --- | --- | --- |
 | `Runwell::Plugins.portal_nav key, label, -> { path or nil }` | 2.0 | Stable |
+| `portal_nav … replaces: :documents` | 5.13 | Stable |
 | Controllers inheriting `Portal::BaseController` (`current_contact`, `client`) | 2.0 | Stable |
 
 A portal page sees only the signed-in contact's client, and shows a client only what is marked
 for them (`client_visible`).
+
+`replaces:` names one of the core's own portal pages the plugin's page stands in for (only
+`:documents`, `Runwell::Plugins::REPLACEABLE_PORTAL_PAGES`). While the plugin is on, its link
+takes that page's place in the portal nav (under the plugin's label) and the core's page redirects
+people to it; agents' `portal_documents` tool still answers with the core's list. Switch the plugin
+off and the core's page is back. A plugin that also runs on cores before 5.13 checks for the keyword
+first (`Runwell::Plugins.method(:portal_nav).parameters`).
 
 ## Public pages
 

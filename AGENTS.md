@@ -754,7 +754,8 @@ sections, all of a client's shared tasks), unranked ones after, and a drop puts 
 the one it now sits above. Each move records `client.prioritized` or `work.prioritized`, so the team
 sees it in History; a task's side panel says where the client puts it, and staff JSON carries
 `client_priority`. Not while staff view as the client. Documents is a portal menu item of its own
-(`Portal::DocumentsController`, `Client#client_documents`). Task lists open on open tasks
+(`Portal::DocumentsController`, `Client#client_documents`); a plugin can stand in for it
+(`portal_nav … replaces: :documents`: its link takes the item's place and the page redirects to it). Task lists open on open tasks
 (`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
 layout's `modal` frame).
 

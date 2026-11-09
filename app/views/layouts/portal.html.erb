@@ -29,7 +29,7 @@
           <nav class="portal-nav" aria-label="Portal">
             <%= link_to term(:work, count: 2), portal_root_path, class: "portal-nav__link", aria: { current: (request.path == portal_root_path || request.path.start_with?("/portal/works")) ? "page" : "false" } %>
             <%= link_to term(:task, count: 2), portal_tasks_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_tasks_path)) ? "page" : "false" } %>
-            <%= link_to "Documents", portal_documents_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_documents_path)) ? "page" : "false" } %>
+            <%= portal_page_link :documents, "Documents", portal_documents_path, class: "portal-nav__link" %>
             <%= plugin_portal_nav_links(class: "portal-nav__link") %>
             <%= link_to "Requests", portal_requests_path, class: "portal-nav__link", aria: { current: (request.path == portal_requests_path) ? "page" : "false" } %>
           </nav>

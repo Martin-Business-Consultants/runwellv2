@@ -82,9 +82,20 @@ module PluginsHelper
 
   # A plugin's path lambda may return nil to leave its link out (nothing to show this client).
   def plugin_portal_nav_links(**options)
-    safe_join(Runwell::Plugins.enabled_portal_nav_items.values.filter_map do |label, path|
+    safe_join(Runwell::Plugins.enabled_portal_nav_items.values.filter_map do |label, path, replaces|
+      next if replaces
+
       url = instance_exec(&path)
-      link_to(label, url, **options) if url
+      link_to(label, url, **options, aria: { current: (url && request.path.start_with?(url.split("?").first)) ? "page" : "false" }) if url
     end)
+  end
+
+  # The portal's link to one of its own pages (page: :documents), or the switched-on plugin's link
+  # standing in for it (Runwell::Plugins.portal_nav replaces:).
+  def portal_page_link(page, label, path, **options)
+    if (replacement = Runwell::Plugins.portal_replacement(page)) && (url = instance_exec(&replacement.last))
+      label, path = replacement.first, url
+    end
+    link_to label, path, **options, aria: { current: request.path.start_with?(path.split("?").first) ? "page" : "false" }
   end
 end
