@@ -5,6 +5,12 @@
   <p class="portal-page-header__description">Everything we run for you, and where each one stands. Drag them into the order that matters most to you: we’ll see it.</p>
 <% end %>
 
+<%# Active work by default; the filter swaps ?state=. %>
+<div class="portal-filter">
+  <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :state, current: @state,
+        options: [ [ "Active", "active" ], [ "Closed", "closed" ], [ "All", "all" ] ], counts: @counts %>
+</div>
+
 <% if @works.any? %>
   <%# In the client's order of priority (ClientPrioritized): each row drags by its grip (the core's
       drag-and-drop), posting the row it now sits above. Staff viewing as them see the grips inactive. %>
@@ -38,7 +44,7 @@
     </div>
   </section>
 <% else %>
-  <%= render "layouts/shared/empty", text: "Nothing here yet." %>
+  <%= render "layouts/shared/empty", text: { "active" => "Nothing active right now.", "closed" => "Nothing closed yet." }.fetch(@state, "Nothing here yet.") %>
 <% end %>
 
 <% plugins = plugin_slots(:portal_home, client: current_contact.client) %>
