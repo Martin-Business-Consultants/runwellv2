@@ -344,17 +344,21 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-leaving { opacity: .4; transition: opacity .2s ease; }
 @media (prefers-reduced-motion: reduce) { .task-leaving { transition: none; } }
 
-/* A section's quick add (tasks/quick_add): the line under its list, quiet until pointed at or
-   typed in. */
-.task-quick-add__form { flex-direction: row; align-items: center; gap: var(--s-2); padding-block: var(--s-1); }
-.task-quick-add__icon { flex: none; width: 1rem; height: 1rem; color: var(--text-faint); }
-.task-quick-add__input {
-  flex: 1; min-width: 0; height: var(--control-h-sm); padding-inline: var(--s-3) var(--s-2);
-  border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text); font: inherit;
+/* A section's quick add (tasks/quick_add): the line under its list, drawn as one more task row
+   being typed: its + sits where a task's status dot does (the same box: the dot, its padding and the
+   trigger's), and what's typed starts where titles start, in their weight. No hover or focus
+   fill; the + takes the accent while it's being typed in. */
+.task-quick-add__form { flex-direction: row; align-items: center; gap: var(--s-3); padding-block: var(--s-2); }
+.task-quick-add__icon {
+  flex: none; box-sizing: content-box; width: calc(.95rem + 3px); height: calc(.95rem + 3px); padding: .35rem;
+  margin-left: calc(-1 * var(--s-1)); color: var(--text-faint);
 }
-.task-quick-add__input::placeholder { color: var(--text-faint); }
-.task-quick-add__input:hover { background: var(--hover); }
-.task-quick-add__input:focus { outline: none; background: var(--layer-1); }
+.task-quick-add__input {
+  flex: 1; min-width: 0; height: auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none;
+  color: var(--text); font: inherit; font-weight: var(--weight-strong);
+}
+.task-quick-add__input::placeholder { color: var(--text-faint); font-weight: var(--weight); }
+.task-quick-add__input:focus, .task-quick-add__input:focus-visible { outline: none; box-shadow: none; }
 .task-quick-add__form:focus-within .task-quick-add__icon { color: var(--accent); }
 .task-quick-add__hint { visibility: hidden; }
 .task-quick-add__form:focus-within .task-quick-add__hint { visibility: visible; }
