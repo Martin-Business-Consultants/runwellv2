@@ -44,7 +44,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | Command | Purpose |
 | --- | --- |
 | `bin/setup` | Gems, npm, db:prepare, seeds |
-| `bin/dev` | Rails + jobs (`Procfile.dev`) |
+| `bin/dev` | Rails (`Procfile.dev`); jobs run inside it in development (Active Job's async adapter), so there is no `bin/jobs` |
 | `bin/rails test` | Minitest with fixtures |
 | `bin/rubocop` | Lint (omakase) |
 | `bundle exec herb lint app/views` | Lint templates (Herb) |
