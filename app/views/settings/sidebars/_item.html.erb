@@ -2,7 +2,7 @@
 <%# A page in the sidebar being arranged: a core section or a plugin's, dragged or moved with the keys. %>
 <% name, icon = nav_item_name(item) %>
 <li class="nav-editor__item" draggable="true" tabindex="0" data-nav-key="<%= item %>" aria-label="<%= name %>: drag, or use the arrow keys to move it">
-  <%= icon_tag "move", class: "nav-editor__grip" %>
+  <%= icon_tag "grip", class: "nav-editor__grip" %>
   <%= icon_tag icon %>
   <span class="nav-editor__name"><%= name %></span>
   <% if NavLayout.plugin_key(item) %>
