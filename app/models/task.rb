@@ -5,13 +5,14 @@
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
-  include LiveRefreshes, RecordsCreation, ClientPrioritized
+  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable
 
   # A request from outside (a client in the portal or through their agent, or an email): set by
   # whoever makes it, so its history says task.requested, credited to who asked, not task.created.
   attr_accessor :requested
 
   mentionable_fields :description
+  filters_text_on "tasks.title", "works.title", "works.ref", "clients.name", "tasks.sender_name", "tasks.sender_email", joins: %i[work client]
 
   # in_review: finished by whoever did it (often an agent), waiting for a person to check and
   # mark it done.

@@ -77,10 +77,19 @@ class ApplicationController < ActionController::Base
   # numbered pages under it (table_pagination), so call it after setting @view. Agents reading
   # JSON get every record, as before. A ReActionView state request (the slots format) renders the
   # same page, so it pages too.
+  # A page of the list, filtered first by the page filter's words (?q=, TextFilterable) so "/"
+  # reaches every page of it, not just the rows already loaded; the layout marks the page so the
+  # filter asks the server (filter controller).
   def paginate(records)
+    records = text_filtered(records)
     return records unless request.format.html? || request.format.symbol == :slots
 
+    @filters_remotely = true
     set_page_and_extract_portion_from records, per_page: TABLE_PAGE_SIZE
     @page.records
+  end
+
+  def text_filtered(records)
+    params[:q].present? && records.respond_to?(:filter_text) ? records.filter_text(params[:q]) : records
   end
 end

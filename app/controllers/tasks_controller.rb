@@ -40,7 +40,7 @@ class TasksController < ApplicationController
 
     scope = Task.filtered(owner: owner_filter, work: @work_filter)
     scope = scope.public_send(Task::DUE_FILTERS[@due]) unless @due == "any"
-    @board = scope
+    @board = text_filtered(scope)
     scope = scope.open if @status == "open"
     scope = scope.where(status: @status) unless @status.in?(%w[open all])
     @column_widths = column_widths(scope, :title, :work, :client) if @view == "table"

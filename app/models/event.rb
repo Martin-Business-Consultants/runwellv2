@@ -1,5 +1,9 @@
 # Append-only. A correction is another event.
 class Event < ApplicationRecord
+  include TextFilterable
+
+  # The audit log's filter: what happened, who did it (or the app they did it through) and its details.
+  filters_text_on "events.kind", "events.actor", "events.subject_type", "events.payload", "users.name", joins: :actor_user
   belongs_to :subject, polymorphic: true
   belongs_to :actor_user, class_name: "User", optional: true
 

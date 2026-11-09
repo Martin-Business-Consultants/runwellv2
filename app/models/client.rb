@@ -1,6 +1,8 @@
 class Client < ApplicationRecord
   include Eventful, Noted, Searchable, Documentable, CustomFields
-  include LiveRefreshes, RecordsCreation
+  include LiveRefreshes, RecordsCreation, TextFilterable
+
+  filters_text_on "clients.name", "(SELECT group_concat(users.name || ' ' || COALESCE(users.email_address, ''), ' ') FROM users WHERE users.client_id = clients.id)"
 
   # Any status moves to any other. Every change records client.status (from, to), first; setting it
   # dormant or former then sunsets its open work and tasks (Client::Sunset).

@@ -19,6 +19,6 @@ module TasksBoardHelper
   # The filters the board's column frames and drops carry: the page's query (Tasks), or what the
   # page set (@board_filters: a piece of work's Tasks tab shows everyone's tasks on it).
   def task_board_filters
-    @board_filters || request.query_parameters.slice("owner", "work").reverse_merge("owner" => "me")
+    @board_filters || request.query_parameters.slice("owner", "work", "q").reverse_merge("owner" => "me")
   end
 end

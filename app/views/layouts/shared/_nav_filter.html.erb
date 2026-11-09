@@ -1,9 +1,10 @@
 <%# locals: () %>
-<%# "/" filters the rows of the current page (Fizzy's filter controller on #global-container).
+<%# "/" filters the rows of the current page (Fizzy's filter controller on #global-container) and,
+    on a paginated list, every page of it: the server's matches replace the list (?q=, TextFilterable).
     It's out of sight in the nav until "/" focuses it, and stays a field while it holds text. It hides on pages with nothing to filter (runwell.css). %>
-<label class="nav-filter" title="Filter this page (/)">
+<label class="nav-filter" title="Filter (/)">
   <kbd class="nav-filter__key" aria-hidden="true">/</kbd>
-  <input type="search" class="nav-filter__input" placeholder="Filter this page…" autocomplete="off" autocorrect="off" data-1p-ignore="true" aria-label="Filter this page"
+  <input type="search" class="nav-filter__input" placeholder="Filter…" autocomplete="off" autocorrect="off" data-1p-ignore="true" aria-label="Filter"
     data-filter-target="input" data-keys="/" data-keys-focus
     data-action="input->filter#filter keydown.esc->filter#clearInput keydown.esc->filter#filter:stop">
 </label>

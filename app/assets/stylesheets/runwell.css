@@ -62,7 +62,7 @@ turbo-frame { display: contents; }
 /* only on pages with rows to filter; a filtered-out row stays hidden whatever its display. */
 .nav-filter { display: inline-flex; align-items: center; gap: 6px; height: var(--control-h-sm); padding: 0 6px; border: 1px solid transparent; border-radius: var(--radius-control); color: var(--text-muted); cursor: text; }
 .nav-filter:hover { background: var(--hover); }
-#global-container:not(:has([data-filter-target~="item"])) .nav-filter { display: none; }
+#global-container:not(:has([data-filter-target~="item"], [data-filter-remote])) .nav-filter { display: none; }
 .nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) { flex: 1; border-color: var(--line-strong); background: var(--panel); }
 .nav-filter:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
 .nav-filter__input { width: 0; height: auto; padding: 0; border: 0; background: none; box-shadow: none; color: inherit; font-size: var(--text-meta); transition: width .15s var(--ease); }

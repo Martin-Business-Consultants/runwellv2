@@ -23,7 +23,7 @@
       <%= app_shell sidebar: render("layouts/shared/sidenav"), main: page, storage_key: "sidenav", shortcuts: false,
             toggle: render("layouts/shared/sidenav_toggle"), flash: render("layouts/shared/flash"),
             attributes: { id: "global-container", data: { controller: "filter" } },
-            main_attributes: { id: "main", data: { controller: "bulk", action: "submit->bulk#include turbo:submit-end->bulk#done" } } %>
+            main_attributes: { id: "main", data: { controller: "bulk", action: "submit->bulk#include turbo:submit-end->bulk#done", filter_remote: (true if @filters_remotely) } } %>
     <% else %>
       <div id="global-container" data-controller="filter">
         <main id="main" class="main main--narrow">

@@ -3,9 +3,10 @@
 class Work < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
   include Refs, CustomFields
-  include LiveRefreshes, RecordsCreation, ClientPrioritized
+  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable
 
   mentionable_fields :description
+  filters_text_on "works.title", "works.ref", "clients.name", joins: :client
 
   # The system types' keys. Deprecated (5.9): an install has its own types now (WorkType, Settings
   # > Names > Types); ask Work.labels for every key. Kept for plugins until 7.0.

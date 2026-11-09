@@ -1,5 +1,7 @@
 class User < ApplicationRecord
-  include Named, Avatar, Mentionable, Role, Agent, TwoFactor, Access, Eventful, NavPlugins
+  include Named, Avatar, Mentionable, Role, Agent, TwoFactor, Access, Eventful, NavPlugins, TextFilterable
+
+  filters_text_on "users.name", "users.email_address", "users.title"
 
   has_secure_password
 

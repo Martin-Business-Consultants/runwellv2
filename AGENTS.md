@@ -351,7 +351,13 @@ controller in discard-frame mode. The next page loads as you scroll. Mark each c
 filters it. The filter itself is one control at the foot of the nav
 (`layouts/shared/nav_filter`): out of sight until "/" focuses it, and absent on pages with
 nothing to filter. Pages never render their own. The filter controller lives on
-`#global-container`.
+`#global-container`. On a paginated list it reaches every page, not just the rows loaded: `paginate`
+filters by `?q=` (`TextFilterable`: each model names the columns its list matches with
+`filters_text_on`, joins included; each word typed must appear in one of them) and marks `#main`
+`data-filter-remote`, so the filter also asks the server and swaps `#main`'s content for its
+matches, the address keeping `q` (Back, refresh, sorting, quick filters and the next pages carry
+it). The Tasks board's columns take `q` too (`TaskBoardScoped`). A new paginated model declares
+`filters_text_on`.
 
 A record's page, and its new and edit pages, are a `record-page` (`runwell/records.css`): a
 header row across the top (`record-page__header`: `record-page__heading` with
