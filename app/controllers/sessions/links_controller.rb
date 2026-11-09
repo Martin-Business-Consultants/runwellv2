@@ -1,5 +1,6 @@
-# Signing in by emailed link, for people who switched it on (Settings > Your account). Asking
-# always answers the same, so nobody learns who has an account. The link opens a page with a
+# Signing in by emailed link, for people who switched it on (Settings > Your account); someone on
+# the team who hasn't is emailed how to. Asking always answers the same, so nobody learns who has
+# an account. The link opens a page with a
 # button rather than signing in on the GET, since mail scanners open links before people do; it
 # works once, for 15 minutes, and two-factor sign-in still follows.
 class Sessions::LinksController < ApplicationController
@@ -14,7 +15,12 @@ class Sessions::LinksController < ApplicationController
 
   def create
     user = User.people.active.find_by(email_address: params[:email_address].to_s.strip.downcase)
-    SessionMailer.with(user: user).link.deliver_later if user&.passwordless?
+    # A link for those who switched it on; for anyone else on the team, how to switch it on.
+    if user&.passwordless?
+      SessionMailer.with(user: user).link.deliver_later
+    elsif user
+      SessionMailer.with(user: user).link_off.deliver_later
+    end
     redirect_to new_session_path, notice: "If that address can sign in by link, one is on its way. It works for 15 minutes."
   end
 

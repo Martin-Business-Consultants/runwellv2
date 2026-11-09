@@ -1,0 +1,7 @@
+<% content_for :preheader, "Sign in with your password, then switch on signing in by email." %>
+<% content_for :reason, "Someone asked for a sign-in link for this address. If it wasn’t you, ignore this email: nothing happens." %>
+<%= mail_heading "Signing in by email isn’t on yet" %>
+<p>You asked for a link to sign in to <%= Setting.current.brand_name %>, but signing in by email is switched off for your account, so no link was sent.</p>
+<p>Sign in with your password this time, then switch on <strong>Sign in with an emailed link</strong> in Settings › Your account. After that, a link comes whenever you ask.</p>
+<%= mail_button "Sign in with your password", @url %>
+<%= mail_small "Forgot your password? Reset it from the sign-in page." %>

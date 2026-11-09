@@ -1,0 +1,6 @@
+<% content_for :reason, "Someone asked for a sign-in link for this address. If it wasn't you, ignore this email: nothing happens." %>
+You asked for a link to sign in to <%= Setting.current.brand_name %>, but signing in by email is switched off for your account, so no link was sent.
+
+Sign in with your password this time, then switch on "Sign in with an emailed link" in Settings > Your account (<%= @account_url %>). After that, a link comes whenever you ask.
+
+Sign in: <%= @url %>
