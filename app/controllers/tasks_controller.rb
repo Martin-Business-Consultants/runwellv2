@@ -2,8 +2,12 @@ class TasksController < ApplicationController
   include TaskBoardScoped
   allow_staff
   require_permission :delete_records, only: :destroy
+
+  # The list's status filter: open (the default), all, or one status short of done (all shows those).
+  STATUS_FILTERS = (%w[open all] + Task::STATUSES.without("done")).freeze
+
   agent_tool :list_tasks, on: :index, title: "List tasks",
-    params: { status: %w[open all planned in_progress in_review blocked], owner: "string", work: "string", due: %w[overdue today week] },
+    params: { status: STATUS_FILTERS, owner: "string", work: "string", due: %w[overdue today week] },
     description: "Tasks across all work. status: open (default), all, or one status; owner: me (the person you act for), none (nobody's on it), any, or a person’s id or name (tasks they lead or are on); work: a ref or all; due: overdue, today or week (the seven days after today)."
   agent_tool :show_task, on: :show, title: "Show a task"
   agent_tool :create_task, on: :create, title: "Add a task to a piece of work or a client",
@@ -25,8 +29,6 @@ class TasksController < ApplicationController
     owner: [ "owners.name", ->(scope) { scope.joins("LEFT JOIN users owners ON owners.id = tasks.owner_id") } ],
     due: "tasks.due_on",
     status: "CASE tasks.status #{Task::STATUSES.each_with_index.map { |status, index| "WHEN '#{status}' THEN #{index}" }.join(" ")} END"
-
-  STATUS_FILTERS = %w[open all planned in_progress in_review blocked].freeze
 
   def index
     @view = index_view(extra: %w[board])

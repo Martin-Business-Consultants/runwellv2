@@ -269,7 +269,8 @@ Every `Event` is published from a job after it's saved, never inside the request
 `Current.user`: read who did it from `event.actor_user` / `event.actor`, and where from
 `event.source`. Its `subject` is the record and `kind` one of:
 
-`client.created`, `work.created`, `work.closed` (payload `outcome`: completed or
+`client.created`, `client.status` (5.3: its status changed; payload `from` and `to`, recorded before
+any `client.sunset` the change brings), `work.created`, `work.closed` (payload `outcome`: completed or
 cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
 `task.created`, `task.status`, `task.requested` (3.0: a client asked for it, from the portal or by
 email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,

@@ -1,8 +1,9 @@
 class Client < ApplicationRecord
   include Eventful, Noted, Searchable, Documentable, CustomFields
   include LiveRefreshes, RecordsCreation
-  include Sunset
 
+  # Any status moves to any other. Every change records client.status (from, to), first; setting it
+  # dormant or former then sunsets its open work and tasks (Client::Sunset).
   STATUSES = %w[active dormant former].freeze
 
   # Restrictions first, so a client with agreed work is refused before anything is destroyed.
@@ -14,6 +15,11 @@ class Client < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }
+
+  # Before Sunset, whose callback follows, so the change comes first in its history.
+  after_update :record_status_change, if: :saved_change_to_status?
+  include Sunset
+
   validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) + TZInfo::Timezone.all_identifiers }, message: "isn’t a time zone we know" }, allow_nil: true
 
   # A Rails zone name ("Pacific Time (US & Canada)"); an IANA one ("America/Los_Angeles") is
@@ -60,4 +66,8 @@ class Client < ApplicationRecord
 
   private
     def live_streams = [ self, :clients ]
+
+    def record_status_change
+      record_event!("client.status", payload: { from: status_before_last_save, to: status })
+    end
 end

@@ -20,12 +20,18 @@ class Task::List
 
   def section? = kind.in?(%w[work client])
 
-  def shows?(task)
+  def shows?(task) = keeps?(task.status)
+
+  def keeps?(status)
     case state
     when "all" then true
-    when "open" then task.status != "done"
-    when "done" then task.status == "done"
-    else task.status == state
+    when "open" then status != "done"
+    when "done" then status == "done"
+    else status == state
     end
   end
+
+  # The statuses it keeps, which the page carries (data-task-list-keeps) so the status picker can
+  # fade a task moved out of them at once, without a copy of this rule in JavaScript.
+  def keeps = Task::STATUSES.select { keeps?(it) }
 end

@@ -8,8 +8,9 @@ import { Controller } from "@hotwired/stimulus"
 // or off and the menu stays open; the avatars and names beside it (stack, empty and names targets)
 // change at once from each choice's own avatar, and the answer then replaces them.
 //
-// A task's status (task value) in a list that won't keep it (marked done in an Open list, the rule
-// Task::List#shows? keeps on the server) fades its row at once; the answer then removes it. If the
+// A task's status (task value) in a list that won't keep it (marked done in an Open list: the list
+// names the statuses it keeps, data-task-list-keeps, from Task::List#keeps) fades its row at once;
+// the answer then removes it. If the
 // save fails outright (no answer, or an error), the choice is put back.
 export default class extends Controller {
   static targets = [ "display", "list", "form", "stack", "empty", "names" ]
@@ -160,20 +161,13 @@ export default class extends Controller {
 
     const panel = this.element.closest(".task-panel")
     const list = this.element.closest("[data-task-list]") || (panel && document.querySelector("[data-task-list]"))
-    if (!list || this.#keeps(list.dataset.taskListState || "open", status)) return
+    const keeps = list?.dataset.taskListKeeps?.split(" ")
+    if (!keeps || keeps.includes(status)) return
 
     const row = panel ? (document.getElementById(`row_task_${this.taskValue}`) || document.getElementById(`item_task_${this.taskValue}`))
       : this.element.closest("[data-filter-target~=item]")
     row?.classList.add("task-leaving")
     this.#leavingRow = row
-  }
-
-  // Task::List#shows?, for the list's filter.
-  #keeps(state, status) {
-    if (state === "all") return true
-    if (state === "open") return status !== "done"
-    if (state === "done") return status === "done"
-    return status === state
   }
 
   #leavingRow = null

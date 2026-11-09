@@ -3,7 +3,7 @@ class ClientsController < ApplicationController
   require_permission :delete_records, only: :destroy
   agent_tool :list_clients, on: :index, title: "List clients",
     description: "Active clients unless status says otherwise: active (the default), dormant, former or all.",
-    params: { status: "string" }
+    params: { status: Client::STATUSES + %w[all] }
   agent_tool :show_client, on: :show, title: "Show a client",
     description: "A client with its contacts, work, open tasks, notes and documents.", next_tools: %i[create_contact create_work add_note]
   agent_tool :create_client, on: :create, title: "Add a client",

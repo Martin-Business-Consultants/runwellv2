@@ -5,15 +5,17 @@
 class UsersController < ApplicationController
   allow_staff
   require_permission :manage_people, only: :update
+  # Who a list shows: active (the default) or deactivated people, each a User scope; or all.
+  STATUSES = %w[active deactivated].freeze
+
   agent_tool :list_people, on: :index, title: "List people: the team and clients' contacts",
     description: "Active people unless status says otherwise: active (the default), deactivated or all. who: everyone (the default), team (staff) or clients (clients' contacts, role client). For people who manage people, also pending invitations and what each role can do.",
-    params: { status: "string", who: %w[everyone team clients] }
+    params: { status: STATUSES + %w[all], who: %w[everyone team clients] }
   agent_tool :show_person, on: :show, title: "Show someone on the team",
     description: "Their name, address and role. For people who manage people, also whether they're active and how they sign in (two-factor, connected apps, open sessions, recent sign-ins)."
   agent_tool :update_person, on: :update, title: "Change someone’s name, address or role",
     params: { user: { name: "string", email_address: "string", role: User::ROLES } }
 
-  STATUSES = %w[active deactivated].freeze
   WHO = { "everyone" => -> { User.where(agent_owner_id: nil) }, "team" => -> { User.people }, "clients" => -> { User.clients } }.freeze
   sortable_columns name: "users.name", email: "users.email_address", role: "users.role",
     client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ]

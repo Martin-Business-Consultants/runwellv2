@@ -87,7 +87,18 @@ class Work < ApplicationRecord
   # How it ended: completed (delivered) or cancelled (stopped before then). Either way it's closed.
   CLOSE_OUTCOMES = %w[completed cancelled].freeze
 
+  # A move its state doesn't allow (closing what's closed, reopening what's open), refused by the
+  # verb itself; the page, the bulk bar and the tools ask closable? / reopenable? first, to say why.
+  class Refused < StandardError; end
+
+  # Its moves: active closes (completed or cancelled), closed reopens. To change how it ended,
+  # reopen it and close it again, so its history tells both.
+  def closable? = active?
+  def reopenable? = closed?
+
   def close!(reason: nil, outcome: "completed", actor: Current.user, source: Current.source || "app")
+    raise Refused, "#{title} is already #{state_label.downcase}." unless closable?
+
     outcome = outcome.presence_in(CLOSE_OUTCOMES) || "completed"
     transaction do
       update!(closed_at: Time.current, close_reason: reason, close_outcome: outcome)
@@ -97,6 +108,8 @@ class Work < ApplicationRecord
 
   # Closed by mistake, or work starting again: open as it was, its history keeping both.
   def reopen!(actor: Current.user, source: Current.source || "app")
+    raise Refused, "#{title} is open." unless reopenable?
+
     transaction do
       update!(closed_at: nil, close_reason: nil, close_outcome: nil)
       record_event!("work.reopened", actor: actor, source: source)

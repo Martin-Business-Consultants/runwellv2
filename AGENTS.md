@@ -125,6 +125,22 @@ event); every event has a source.
 - Patches to Rails and gems live in `lib/rails_ext`, one file each, required by
   `config/initializers/extensions.rb` (Fizzy's layout); none in initializers
 - State is derived, never typed in (`Work#state`, `ScopeItem#delivery_state`)
+- A state machine's rules live on its model, and every surface asks the model rather than keeping
+  its own copy: its states in a constant (`Task::STATUSES`, `Client::STATUSES`, `Work::CLOSE_OUTCOMES`,
+  `BackgroundRun::STATUSES`), which tool params, filters and pickers derive from; each move a verb
+  that refuses a move the state doesn't allow (`Work#close!` raises `Work::Refused` when it's
+  closed), with a predicate the page, the bulk bar and the controller ask first so they can say why
+  (`closable?`, `reopenable?`); and one event per real change (`task.status`, `client.status`,
+  `work.closed` / `work.reopened`), so history, `changes`, webhooks and plugins all see it. A rule
+  the browser needs comes from the server (a Tasks list names the statuses it keeps,
+  `data-task-list-keeps` from `Task::List#keeps`), never a JavaScript copy. The machines: a task's
+  status (any to any; agents finish into in review), a piece of work (active, then closed as
+  completed or cancelled, reopened), a client's status (any to any; dormant or former sunsets,
+  `Client::Sunset`), a person (active, deactivated), a token (live, paused, revoked, expired), an
+  invitation (pending, accepted, expired), a webhook endpoint (on, switched off after
+  `MAX_FAILURES`), an update or plugin change (running, then succeeded or failed, `BackgroundRun`),
+  an export (queued, working, ready or failed), a notification (unread, read); and, derived, a
+  section's delivery state and a task being a request
 - Views are ERB templates rendering models directly; no serializers
 - The core keeps no money, but plugins do, the same way: integer cents everywhere: columns, params, agent tools (`price_cents: "integer"`)
   and JSON (`*_cents` beside the formatted dollars). Dollars exist only on screen: a form

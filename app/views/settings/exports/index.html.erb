@@ -57,7 +57,7 @@
                 By <%= export.user.display_name %>
                 <% if export.ready? %>
                   · <%= number_with_delimiter(export.rows_count) %> records, <%= pluralize(export.files_count, "file") %>, <%= number_to_human_size(export.archive.byte_size) %>
-                <% elsif export.state == "failed" %>
+                <% elsif export.failed? %>
                   · failed: <%= export.error %>
                 <% else %>
                   · being made…

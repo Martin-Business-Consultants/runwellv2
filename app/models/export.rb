@@ -14,6 +14,8 @@ require "csv"
 # Built in a job (ExportJob); kept for a week.
 class Export < ApplicationRecord
   KINDS = %w[data backup].freeze
+  # queued until its job starts, working while it builds, then ready (to download) or failed.
+  STATES = %w[queued working ready failed].freeze
   BACKUP_FORMAT = "runwell-backup"
   KEEP_FOR = 7.days
   SKIPPED_TABLES = %w[
@@ -27,6 +29,7 @@ class Export < ApplicationRecord
   has_one_attached :archive
 
   validates :kind, inclusion: { in: KINDS }
+  validates :state, inclusion: { in: STATES }
 
   scope :ordered, -> { order(created_at: :desc) }
   scope :expired, -> { where(created_at: ...KEEP_FOR.ago) }
@@ -34,6 +37,7 @@ class Export < ApplicationRecord
   def self.expire_old! = expired.find_each(&:destroy!)
 
   def ready? = state == "ready"
+  def failed? = state == "failed"
   def backup? = kind == "backup"
   def filename = "runwell-#{backup? ? "backup" : "export"}-#{created_at.strftime("%Y-%m-%d-%H%M")}.zip"
 

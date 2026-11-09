@@ -1,6 +1,9 @@
 module TasksHelper
   def task_status_options = Task::STATUSES.map { |status| [ status.humanize, status ] }
 
+  # A Tasks list's statuses, for its data-task-list-keeps (Task::List#keeps).
+  def task_list_keeps(state) = Task::List.new(kind: "index", state: state).keeps.join(" ")
+
   def task_owner_options = User.active.people.ordered.map { |user| [ user.display_name, user.id ] }
 
   # The Tasks page's work filter: only work with open tasks (a large install has
