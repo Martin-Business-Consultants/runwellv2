@@ -315,10 +315,14 @@ marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and 
 `before` (the card it now sits before) for `Task#move!`.
 
 Staff pages are rune_ui's shell (`app_shell` in the application layout): a left nav
-(`layouts/shared/_sidenav`, `runwell.css`) beside the page in an inset panel. The nav has the install at the top, home and the core sections with icons under Workspace
-(`sidenav_link_to`, which marks the current one), plugin links under Plugins (`nav_plugin_items`:
-each person's own order and choice of them, Settings > Your account > Your menu,
-`User::NavPlugins`; `g 1`… follow it), and at its foot the signed-in person, whose menu holds
+(`layouts/shared/_sidenav`, `runwell.css`) beside the page in an inset panel. The nav has the install at the top, then its
+sections as the install arranges them (`NavLayout`, Settings > Sidebar, kept in `Setting#layouts["nav"]`:
+named sections in order, or unnamed for no heading, holding the core's pages and plugins' together
+in any order, and a Hidden tray; arranged like template mode, by dragging or the keys, with the
+`nav-layout` controller, or the `arrange_sidebar` tool; `nav_sections` draws it, `sidenav_link_to`
+marks the current one). Plugins have no section of their own: one switched on later joins the end
+of the first section. Each person can still hide plugins for themselves (Settings > Your account >
+Your menu, `User::NavPlugins`), and `g 1`… number the plugins shown, in order. At its foot the signed-in person, whose menu holds
 their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
 too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from `parent_page`
 and `@page_title` (`breadcrumb_items`, through rune_ui's `crumbs`). Below 860px the nav slides in
@@ -1009,7 +1013,7 @@ points at it with `on_delete: :cascade` and copy those rows aside and back, or u
 
 ## Settings and names
 
-Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Sidebar (the nav, `NavLayout`), Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, work, scope item and tasks, and each work type's name, plural, ref
 prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:work)`,

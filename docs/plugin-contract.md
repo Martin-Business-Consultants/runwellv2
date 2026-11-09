@@ -83,9 +83,10 @@ A slot partial declares strict locals on its first line, like every core partial
 (`:note_row`) renders once per row: tasks out anything shared once a request (a
 `CurrentAttributes` of the plugin's own), never a query per row. A shortcut only lists a key on the
 `?` sheet; the plugin's control declares it with `data-keys`, which is what makes it tasks. A nav or
-settings path lambda runs in the view and may return nil to hide the link. Since 2.26 each person
-chooses which plugins' nav links they see and in what order (Settings › Your account), so a plugin
-can't count on its place in the nav or on a particular `g` number. A settings page's
+settings path lambda runs in the view and may return nil to hide the link. Where a plugin's link
+sits is the install's (Settings › Sidebar, 5.7: among the core's pages, in a section an owner names,
+or hidden), and each person can hide it for themselves (Settings › Your account), so a plugin can't
+count on its place in the nav or on a particular `g` number. A settings page's
 controller says `require_permission :manage_settings` and starts its view with
 `render "settings/header", current: key`.
 

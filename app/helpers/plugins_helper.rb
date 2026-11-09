@@ -13,19 +13,61 @@ module PluginsHelper
     end)
   end
 
-  # The same links for the left nav, one list item each, under the core's sections.
-  # The plugins' nav items that are on, as the signed-in person arranges them (Settings > Your
-  # account: their order, without the ones they hide).
-  def nav_plugin_items
-    items = Runwell::Plugins.enabled_nav_items
-    (person = Current.user&.person) ? person.arrange_nav_items(items) : items
+  # The left nav as the install arranges it (NavLayout, Settings > Sidebar) for the signed-in
+  # person: [[section label, [[label, url, icon, keys], …]], …], leaving out plugins they hide (Your
+  # menu) and links whose path is nil, then sections with nothing left. Plugins' pages are numbered
+  # g 1, g 2… in the order they show.
+  def nav_sections
+    @nav_sections ||= begin
+      person = Current.user&.person
+      plugins = Runwell::Plugins.enabled_nav_items
+      number = 0
+      Setting.current.nav_layout.sections.filter_map do |section|
+        links = section["items"].filter_map do |item|
+          key = NavLayout.plugin_key(item)
+          next core_nav_link(item) unless key
+          next if person&.nav_plugin_hidden?(key)
+
+          label, path, icon = plugins[key]
+          url = path && instance_exec(&path)
+          next unless url
+
+          [ label, url, icon || "grid", "g #{number += 1}" ]
+        end
+        [ section["label"], links ] if links.any?
+      end
+    end
   end
 
-  def plugin_sidenav_links
-    safe_join(nav_plugin_items.values.each_with_index.filter_map do |(label, path, icon), index|
-      url = instance_exec(&path)
-      sidenav_link_to(label, url, icon: icon || "grid", keys: "g #{index + 1}") if url
-    end)
+  # The plugins' pages in the nav, with their go-to keys, for the shortcut sheet.
+  def nav_plugin_shortcuts = nav_sections.flat_map(&:last).select { it[3]&.match?(/\Ag \d+\z/) }
+
+  # A core section in the nav: [label, path, icon, keys].
+  def core_nav_link(item)
+    case item
+    when "clients" then [ term(:client, count: 2), clients_path, "everyone", "g c" ]
+    when "works" then [ term(:work, count: 2), works_path, "clipboard", "g w" ]
+    when "tasks" then [ term(:task, count: 2), tasks_path, "board", "g t" ]
+    when "users" then [ "Users", users_path, "person", "g u" ]
+    end
+  end
+
+  # Every switched-on plugin's page, in the install's sidebar order (hidden ones last), for Your
+  # menu: [[key, label, icon], …].
+  def nav_menu_items
+    layout = Setting.current.nav_layout
+    items = layout.sections.flat_map { it["items"] } + layout.hidden
+    plugins = Runwell::Plugins.enabled_nav_items
+    items.filter_map { NavLayout.plugin_key(it) }.select { plugins.key?(it) }.map { |key| [ key.to_s, plugins[key][0], plugins[key][2] || "grid" ] }
+  end
+
+  # An item's name and icon for arranging the sidebar: a core section or a plugin's page.
+  def nav_item_name(item)
+    key = NavLayout.plugin_key(item)
+    return core_nav_link(item)&.values_at(0, 2) unless key
+
+    label, _path, icon = Runwell::Plugins.enabled_nav_items[key]
+    [ label || key.to_s.humanize, icon || "grid" ]
   end
 
   # A plugin's path lambda may return nil to leave its link out (nothing to show this client).

@@ -1,6 +1,7 @@
 <%# locals: () %>
-<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, the
-    core sections, then what plugins add, and at the foot the page filter (/), plugins' actions,
+<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, then its sections
+    as Settings > Sidebar arranges them (NavLayout: the core's and plugins' pages together, under
+    headings the install names), and at the foot the page filter (/), plugins' actions,
     the shortcut sheet (?) and the signed-in person, whose menu holds their account, settings,
     the theme, help and signing out. The current section is marked (aria-current). %>
 <nav class="sidebar" id="sidenav" aria-label="Main">
@@ -13,15 +14,15 @@
     <% end %>
   </div>
 
-  <%= sidebar_section "Workspace" %>
-  <%= sidenav_link_to term(:client, count: 2), clients_path, icon: "everyone", keys: "g c" %>
-  <%= sidenav_link_to term(:work, count: 2), works_path, icon: "clipboard", keys: "g w" %>
-  <%= sidenav_link_to term(:task, count: 2), tasks_path, icon: "board", keys: "g t" %>
-  <%= sidenav_link_to "Users", users_path, icon: "person", keys: "g u" %>
-
-  <% if nav_plugin_items.any? %>
-    <%= sidebar_section "Plugins" %>
-    <%= plugin_sidenav_links %>
+  <% nav_sections.each_with_index do |(label, links), index| %>
+    <%# herb:key index %>
+    <% if label.present? %>
+      <%= sidebar_section label %>
+    <% end %>
+    <% links.each do |link_label, url, icon, keys| %>
+      <%# herb:key url %>
+      <%= sidenav_link_to link_label, url, icon: icon, keys: keys %>
+    <% end %>
   <% end %>
 
   <div class="sidebar__tools">

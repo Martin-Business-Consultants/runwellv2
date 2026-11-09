@@ -1,0 +1,14 @@
+<%# locals: (label:, items:) %>
+<%# One section of the sidebar being arranged: its name (blank for no heading) and its pages. %>
+<section class="nav-editor__section" data-nav-layout-target="section">
+  <header class="nav-editor__section-head">
+    <input type="text" class="nav-editor__label" value="<%= label %>" maxlength="<%= NavLayout::LABEL_MAX %>" placeholder="No heading"
+      aria-label="Section name" autocomplete="off" data-1p-ignore="true" data-nav-layout-target="label">
+    <button type="button" class="icon-button" title="Remove this section (its pages move up a section)" data-action="nav-layout#removeSection">
+      <%= icon_tag "trash" %><span class="visually-hidden">Remove this section</span>
+    </button>
+  </header>
+  <ul class="nav-editor__items" data-nav-layout-target="zone" data-zone="section">
+    <%= render partial: "settings/sidebars/item", collection: items, as: :item %>
+  </ul>
+</section>

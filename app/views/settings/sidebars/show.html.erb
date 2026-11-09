@@ -1,0 +1,51 @@
+<% @page_title = "Sidebar" %>
+<%= render "settings/header", current: :sidebar %>
+<%# Settings > Sidebar (NavLayout): the nav down the left, for everyone. Each section is a card:
+    its name written in place (blank for no heading) and its pages, dragged between sections or into
+    Hidden, or moved with the keys (↑ ↓ a place, across sections at the ends; Delete hides; Enter
+    brings a hidden one back). Add section adds an empty one; removing a section moves its pages up
+    a section. Save sends it all (nav-layout controller); nothing changes until then. %>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Sidebar</h2>
+      <p class="settings-section__description">
+        The menu on the left, for everyone: name its sections, put the core’s pages and your plugins’ in whatever order suits, and hide what nobody uses.
+        Plugins sit among the rest; each person can still hide a plugin for themselves (Your menu).
+      </p>
+    </header>
+
+    <div class="nav-editor" data-controller="nav-layout" data-nav-layout-url-value="<%= settings_sidebar_path %>"
+      data-action="dragstart->nav-layout#dragstart dragover->nav-layout#dragover drop->nav-layout#drop dragend->nav-layout#dragend keydown->nav-layout#keydown">
+      <div class="nav-editor__sections" data-nav-layout-target="sections">
+        <% @layout.sections.each_with_index do |section, index| %>
+          <%# herb:key index %>
+          <%= render "settings/sidebars/section", label: section["label"], items: section["items"] %>
+        <% end %>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="btn btn--secondary btn--sm" data-action="nav-layout#addSection"><%= icon_tag "add" %> <span>Add section</span></button>
+      </div>
+
+      <section class="nav-editor__hidden" aria-label="Hidden">
+        <h3 class="nav-editor__hidden-title">Hidden <span class="muted small">Out of the sidebar for everyone. Drag a page here, or press Delete on it.</span></h3>
+        <ul class="nav-editor__items nav-editor__items--hidden" data-nav-layout-target="zone" data-zone="hidden">
+          <%= render partial: "settings/sidebars/item", collection: @layout.hidden, as: :item %>
+        </ul>
+      </section>
+
+      <template data-nav-layout-target="template">
+        <%= render "settings/sidebars/section", label: "", items: [] %>
+      </template>
+
+      <div class="button-row nav-editor__actions">
+        <button type="button" class="btn btn--primary" data-action="nav-layout#save">Save sidebar</button>
+        <% if @layout.customized? %>
+          <%= render "layouts/shared/confirm", trigger: "Put it back as it came", title: "Put the sidebar back as it came?",
+                body: "One section, Workspace, with every page in it. Section names and what’s hidden go.", button: "Put it back", path: settings_sidebar_path, icon: "refresh" %>
+        <% end %>
+      </div>
+    </div>
+  </section>
+</div>

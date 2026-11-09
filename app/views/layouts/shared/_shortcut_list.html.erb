@@ -23,9 +23,9 @@
       <dt><kbd>g</kbd><kbd>t</kbd></dt><dd><%= term(:task, count: 2) %></dd>
       <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:task, count: 2) %> board</dd>
       <dt><kbd>g</kbd><kbd>u</kbd></dt><dd>Users</dd>
-      <% nav_plugin_items.values.each_with_index do |(label, _path), index| %>
-        <%# herb:key label %>
-        <dt><kbd>g</kbd><kbd><%= index + 1 %></kbd></dt><dd><%= label %></dd>
+      <% nav_plugin_shortcuts.each do |label, _url, _icon, keys| %>
+        <%# herb:key keys %>
+        <dt><kbd>g</kbd><kbd><%= keys.delete_prefix("g ") %></kbd></dt><dd><%= label %></dd>
       <% end %>
       <dt><kbd>g</kbd><kbd>n</kbd></dt><dd>Notifications</dd>
       <dt><kbd>g</kbd><kbd>s</kbd></dt><dd>Settings</dd>

@@ -270,3 +270,26 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 /* the section's heading rather than padded like a list's row. */
 .upgrade-status { padding-inline: 0; }
 .upgrade-status .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading, 1.5); }
+
+/* Settings > Sidebar (settings/sidebars): each section a card, its name written in place over its
+   pages; pages drag between sections and the Hidden tray (nav-layout controller). */
+.nav-editor { display: flex; flex-direction: column; gap: var(--s-4); }
+.nav-editor__sections { display: flex; flex-direction: column; gap: var(--s-3); }
+.nav-editor__section { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+.nav-editor__section-head { display: flex; align-items: center; gap: var(--s-2); }
+.nav-editor__label { flex: 1; font-weight: var(--weight-strong); }
+.nav-editor__items { display: flex; flex-direction: column; gap: 2px; min-height: 2.25rem; margin: 0; padding: var(--s-1); border: 1px dashed transparent; border-radius: var(--radius-md); list-style: none; }
+.nav-editor__items:empty { border-color: var(--line); }
+.nav-editor__items--hidden { border-color: var(--line); background: var(--layer-1); }
+.nav-editor__item {
+  display: flex; align-items: center; gap: var(--s-2); min-height: var(--row-h); padding: 0 var(--s-2);
+  border-radius: var(--radius-md); background: var(--panel); cursor: grab;
+}
+.nav-editor__item:hover { background: var(--hover); }
+.nav-editor__item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nav-editor__item--dragging { opacity: .5; }
+.nav-editor__grip { color: var(--text-faint); }
+.nav-editor__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-editor__hidden { display: flex; flex-direction: column; gap: var(--s-2); }
+.nav-editor__hidden-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); margin: 0; font-size: var(--text-ui); font-weight: var(--weight-strong); }
+.nav-editor__actions { padding-top: var(--s-2); border-top: 1px solid var(--line); }
