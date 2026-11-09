@@ -14,7 +14,6 @@
       <table class="table portal-table" data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_work_priority_path("__id__") %>">
         <thead>
           <tr>
-            <th class="portal-sortable__grip-cell"><span class="visually-hidden">Order</span></th>
             <th>Title</th>
             <th class="portal-table__secondary">Type</th>
             <th class="portal-table__status">Status</th>
@@ -24,12 +23,12 @@
           <% @works.each do |work| %>
             <%# herb:key work.id %>
             <tr data-drag-and-drop-target="item" data-id="<%= work.ref %>">
-              <td class="portal-sortable__grip-cell">
+              <td class="portal-sortable__cell">
                 <% if sortable %>
                   <span class="portal-sortable__grip" draggable="true" title="Drag to put <%= work.title %> in your order"><%= icon_tag "grip" %></span>
                 <% end %>
+                <%= link_to work.title, portal_work_path(work), class: "row-link", draggable: "false" %>
               </td>
-              <td><%= link_to work.title, portal_work_path(work), class: "row-link", draggable: "false" %></td>
               <td class="portal-table__secondary"><%= badge work.label_name, tone: :outline %></td>
               <td class="portal-table__status"><%= status_tag work.state_label, highlight: work.active? %></td>
             </tr>
