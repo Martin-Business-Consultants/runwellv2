@@ -185,9 +185,15 @@ Rails.application.routes.draw do
     root "works#index"
     resource :session, only: %i[new create destroy]
     get "session/:token", to: "sessions#show", as: :session_link
-    resources :works, param: :ref, path: "work", only: %i[index show]
+    resources :works, param: :ref, path: "work", only: %i[index show] do
+      resource :priority, only: :create, module: :works
+    end
+    resources :scope_items, only: [] do
+      resource :priority, only: :create, module: :scope_items
+    end
     resources :tasks, only: :index do
       resources :notes, only: :create, module: :tasks
+      resource :priority, only: :create, module: :tasks
     end
     resources :documents, only: :index
     resources :requests, only: %i[index new create]

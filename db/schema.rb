@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_09_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -446,6 +446,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "work_id"
+    t.integer "client_priority"
     t.index ["agreement_version_id"], name: "index_scope_items_on_agreement_version_id"
     t.index ["work_id"], name: "index_scope_items_on_work_id"
   end
@@ -555,6 +556,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_120000) do
     t.string "sender_name"
     t.string "sender_email"
     t.string "repeat"
+    t.integer "client_priority"
     t.index ["client_id"], name: "index_tasks_on_client_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
@@ -676,6 +678,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_120000) do
     t.datetime "updated_at", null: false
     t.string "close_outcome"
     t.string "cadence"
+    t.integer "client_priority"
     t.index ["client_id"], name: "index_works_on_client_id"
     t.index ["created_by_id"], name: "index_works_on_created_by_id"
     t.index ["ref"], name: "index_works_on_ref", unique: true

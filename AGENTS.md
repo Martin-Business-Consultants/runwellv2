@@ -738,7 +738,16 @@ read-only and limited to the client's client-visible tasks, its lower half the t
 with the client: notes shared on it (`Note#client_visible`, `Note.discussion`), which the client
 answers there (`Portal::Tasks::NotesController`, `portal_reply_on_task`) and staff send with Send to
 client in the task's notes (`Tasks::DiscussionsController`, `reply_to_client`, which confirms);
-every other note stays internal. Documents is a portal menu item of its own
+every other note stays internal. A client puts their things in their own order of priority by dragging them in the portal (the core's
+drag-and-drop, by a grip): their pieces of work (Your work), each work's sections, and the tasks
+shared with them, on Tasks or within a section on a work's page (`ClientPrioritized`,
+`client_priority` on works, scope items and tasks; `Portal::{Works,ScopeItems,Tasks}::PrioritiesController`,
+tools `portal_prioritize_work`, `_section`, `_task`). It's kept apart from the team's order
+(`position`), so neither undoes the other: one ranking per peer group (a client's works, a work's
+sections, all of a client's shared tasks), unranked ones after, and a drop puts the record before
+the one it now sits above. Each move records `client.prioritized` or `work.prioritized`, so the team
+sees it in History; a task's side panel says where the client puts it, and staff JSON carries
+`client_priority`. Not while staff view as the client. Documents is a portal menu item of its own
 (`Portal::DocumentsController`, `Client#client_documents`). Task lists open on open tasks
 (`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
 layout's `modal` frame).

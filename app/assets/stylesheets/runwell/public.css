@@ -139,6 +139,21 @@
 .portal-task-link .list-row:hover { background: var(--hover); }
 td a.portal-task-link:hover { text-decoration: underline; }
 
+/* The client's order of priority (ClientPrioritized): rows, sections and tasks drag by a grip at
+/* their start (the core's drag-and-drop); the one being dragged is tinted. */
+.portal-sortable__grip-cell { width: 1.75rem; padding-right: 0 !important; }
+.portal-sortable__grip { display: inline-grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; color: var(--text-muted); cursor: grab; touch-action: none; }
+.portal-sortable__grip:hover { color: var(--text); }
+.portal-sortable__grip:active { cursor: grabbing; }
+.portal-sortable__grip .icon { width: 1rem; height: 1rem; }
+.portal-sortable__item { display: flex; align-items: center; gap: var(--s-1); }
+li.portal-sortable__item { padding-left: var(--s-3); }
+.portal-sortable__item > .portal-task-link { flex: 1 1 auto; min-width: 0; }
+.portal-sortable--dragging { background: var(--brand-tint, var(--hover)); opacity: .75; }
+.portal-task-group { display: flex; flex-direction: column; }
+.portal-task-group + .portal-task-group { border-top: 1px solid var(--line); }
+.portal-task-group__heading { margin: 0; padding: var(--s-3) var(--s-5) 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+
 /* A shared task in the portal's side sheet (portal/tasks/panel): the task above, its discussion
 /* below, each half scrolling on its own, the reply pinned at the foot. */
 .task-panel.portal-task { overflow: hidden; gap: 0; padding-bottom: 0; }

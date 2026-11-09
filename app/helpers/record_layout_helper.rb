@@ -45,7 +45,7 @@ module RecordLayoutHelper
   # controller, ?task=), read-only (portal/tasks/panel). Built here so its data attributes stay
   # attributes (Herb writes a computed data hash in a template as text).
   def portal_task_link_to(task, &block)
-    link_to url_for(request.query_parameters.merge("task" => task.id)), class: "portal-task-link",
+    link_to url_for(request.query_parameters.merge("task" => task.id)), class: "portal-task-link", draggable: "false",
       data: { turbo_frame: "_top", action: "side-panel#open", side_panel_task_param: task.id, side_panel_title_param: task.title, turbo_prefetch: false }, &block
   end
 end

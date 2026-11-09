@@ -3,7 +3,7 @@
 class Work < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable
   include Refs, CustomFields
-  include LiveRefreshes, RecordsCreation
+  include LiveRefreshes, RecordsCreation, ClientPrioritized
 
   mentionable_fields :description
 
@@ -176,6 +176,12 @@ class Work < ApplicationRecord
   def search_content = [ ref, description ].compact_blank.join(" ")
 
   ActiveSupport.run_load_hooks(:runwell_work, self)
+
+  # Its client's ranking (ClientPrioritized): every piece of work they have, newest first unranked.
+  def client_priority_peers = client.works.unscope(:order)
+  def client_priority_fallback = [ created_at: :desc ]
+  def priority_subject = client
+  def priority_name = title
 
   private
     def live_streams = [ self, :works, client ]

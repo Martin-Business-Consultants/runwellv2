@@ -7,12 +7,17 @@ json.work do
   json.per_period @work.recurring?
   json.description agent_text(@work.description)
 
-  json.sections @work.scope_items do |item|
+  json.sections ScopeItem.in_client_order(@work.scope_items) do |item|
+    json.id item.id
     json.name item.description
+    json.your_priority item.client_priority
     json.delivery item.delivery_state
   end
 
-  json.tasks @work.tasks.client_visible.order(:due_on) do |task|
+  json.tasks @work.tasks.client_visible.by_client_priority.order(:due_on, :position, :id) do |task|
+    json.id task.id
+    json.section_id task.scope_item_id
+    json.your_priority task.client_priority
     json.title task.title
     json.status task.status
     json.due_on task.due_on

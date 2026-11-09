@@ -1,5 +1,7 @@
 json.summary "#{pluralize @tasks.size, "task"} shared with you, #{@tasks.count { it.status != "done" }} not done yet"
 json.tasks @tasks do |task|
+  json.id task.id
+  json.your_priority task.client_priority
   json.title task.title
   json.status task.status
   json.due_on task.due_on

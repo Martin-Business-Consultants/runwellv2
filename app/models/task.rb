@@ -5,7 +5,7 @@
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
-  include LiveRefreshes, RecordsCreation
+  include LiveRefreshes, RecordsCreation, ClientPrioritized
 
   # A request from outside (a client in the portal or through their agent, or an email): set by
   # whoever makes it, so its history says task.requested, credited to who asked, not task.created.
@@ -85,6 +85,12 @@ class Task < ApplicationRecord
   def move!(status:, position: nil, before: nil)
     update!(status: status, position: position || :last, board_position: board_placement(status, before))
   end
+
+  # Its client's ranking (ClientPrioritized): every task shared with them, soonest due unranked.
+  def client_priority_peers = Task.client_visible.where(client_id: client_id)
+  def client_priority_fallback = [ :due_on, :position, :id ]
+  def priority_subject = work || client
+  def priority_name = title
 
   def search_title = title
   def search_content = [ description, sender_name, sender_email ].compact_blank.join(" ")

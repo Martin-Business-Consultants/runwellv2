@@ -1,9 +1,15 @@
 <%# locals: (work:, state:) %>
-<%# The tasks shared with the client: open by default (the filter swaps ?tasks=), each opening in
-    the side sheet, read-only. %>
+<%# The tasks shared with the client, open by default (the filter swaps ?tasks=), grouped by section
+    in the client's order and, within each, in their order of priority (ClientPrioritized: one
+    order for all their tasks, the same as on Tasks). Each drags by its grip within its section;
+    each opens in the side sheet, read-only. %>
 <% shared = work.tasks.client_visible %>
 <% counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count } %>
-<% tasks = Task.state_scope(shared, state).order(:due_on, :position, :id) %>
+<% tasks = Task.state_scope(shared, state).by_client_priority.order(:due_on, :position, :id).to_a %>
+<% by_section = tasks.group_by(&:scope_item_id) %>
+<% groups = ScopeItem.in_client_order(work.scope_items).filter_map { |item| [ item.description, by_section[item.id] ] if by_section[item.id] } %>
+<% groups << [ (groups.any? ? "Other " + term(:task, count: 2).downcase : nil), by_section[nil] ] if by_section[nil] %>
+<% sortable = !Current.previewing? %>
 <section class="card card--flush portal-card">
   <header class="card__head card__head--bordered">
     <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
@@ -14,26 +20,40 @@
     </div>
   </header>
   <% if tasks.any? %>
-    <ul class="list">
-      <% tasks.each do |task| %>
-        <%# herb:key task.id %>
-        <li>
-          <%= portal_task_link_to(task) do %>
-            <span class="list-row">
-              <span class="list-row__content">
-                <span class="list-row__title"><%= task.title %></span>
-                <% if task.due_on %>
-                  <span class="list-row__desc">Due <%= l task.due_on, format: :short %></span>
+    <% groups.each do |heading, group| %>
+      <%# herb:key heading.to_s %>
+      <%# Its own drag-and-drop, so a task moves only within its section. %>
+      <div class="portal-task-group" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
+        <% if heading %>
+          <h3 class="portal-task-group__heading"><%= heading %></h3>
+        <% end %>
+        <div data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_task_priority_path("__id__") %>">
+          <ul class="list" data-drag-drop-item-container>
+            <% group.each do |task| %>
+              <%# herb:key task.id %>
+              <li class="portal-sortable__item" data-drag-and-drop-target="item" data-id="<%= task.id %>">
+                <% if sortable && group.size > 1 %>
+                  <span class="portal-sortable__grip" draggable="true" title="Drag to put <%= task.title %> in your order"><%= icon_tag "grip" %></span>
                 <% end %>
-              </span>
-              <span class="list-row__actions">
-                <%= status_tag task.status.humanize, highlight: task.status == "done" %>
-              </span>
-            </span>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
+                <%= portal_task_link_to(task) do %>
+                  <span class="list-row">
+                    <span class="list-row__content">
+                      <span class="list-row__title"><%= task.title %></span>
+                      <% if task.due_on %>
+                        <span class="list-row__desc">Due <%= l task.due_on, format: :short %></span>
+                      <% end %>
+                    </span>
+                    <span class="list-row__actions">
+                      <%= status_tag task.status.humanize, highlight: task.status == "done" %>
+                    </span>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
   <% else %>
     <%= empty_state(state == "done" ? "Nothing done yet." : "Nothing open right now.", compact: true) %>
   <% end %>

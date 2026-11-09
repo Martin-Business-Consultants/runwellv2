@@ -256,7 +256,9 @@ switch them off. `Work::LABELS` still holds those three and is deprecated: it go
 `Work.labels` (or `WorkType.cached`) instead, falling back to `Work::LABELS` on an older core. Keys
 never change; a type merged into another moves its work (`work.retyped`) and is deleted. A piece of
 work also has `cadence` (how often recurring work comes round, `Cadence::KEYS`), and a task `repeat`
-(the same keys: marking it done makes the next one, `Task::Repeats`).
+(the same keys: marking it done makes the next one, `Task::Repeats`). Works, scope items and tasks
+have `client_priority` (5.10): the client's own order, set in the portal (`ClientPrioritized`,
+`by_client_priority`, `in_client_order`), nil until they order them.
 
 Custom fields (5.5, stable): `record.custom_field_hash` (key → typed value, only the fields the
 person may see) and `CustomField.dates_between(range, viewer: Current.user)`, every date field's
@@ -337,7 +339,9 @@ Every `Event` is published from a job after it's saved, never inside the request
 `client.created`, `client.status` (5.3: its status changed; payload `from` and `to`, recorded before
 any `client.sunset` the change brings), `work.created`, `work.closed` (payload `outcome`: completed or
 cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
-`work.retyped` (5.9: its type changed, by a person or a merge; payload `from` and `to`, type keys;
+`client.prioritized` and `work.prioritized` (5.10: a client reordered their priorities in the
+portal; the subject is the client, for their works, or the work, for its sections and tasks; payload
+`kind` (work, scope_item or task), `id`, `name`, `rank` and `of`), `work.retyped` (5.9: its type changed, by a person or a merge; payload `from` and `to`, type keys;
 its ref stays), `task.created`, `task.status`, `task.repeated` (5.9: a repeating task marked done made
 the next one; payload `next_task_id`, `due_on`, `repeat`), `task.requested` (3.0: a client asked for it, from the portal or by
 email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,

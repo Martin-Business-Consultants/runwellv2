@@ -1,7 +1,7 @@
 # A section of a piece of work: a part of what it delivers, grouping the work under it. Added,
 # renamed, reordered and removed on the work; its state comes from its work.
 class ScopeItem < ApplicationRecord
-  include LiveRefreshes
+  include LiveRefreshes, ClientPrioritized
   include Noted, Documentable
 
   belongs_to :work, inverse_of: :scope_items
@@ -25,6 +25,12 @@ class ScopeItem < ApplicationRecord
   end
 
   def progress = [ tasks.count { |task| task.status == "done" }, tasks.size ]
+
+  # Its work's ranking for the client (ClientPrioritized), the team's order unranked.
+  def client_priority_peers = work.scope_items.unscope(:order)
+  def client_priority_fallback = [ :position ]
+  def priority_subject = work
+  def priority_name = description
 
   private
     def live_streams = [ self, work ]

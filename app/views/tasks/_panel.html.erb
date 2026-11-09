@@ -72,6 +72,10 @@
         <%= render record_field_partial(layout, key), record: task %>
       <% end %>
     <% end %>
+    <%# Where the client puts it, once they've ordered their tasks in the portal (ClientPrioritized). %>
+    <% if task.client_visible? && task.client_priority %>
+      <dt><%= term(:client) %>’s priority</dt><dd><%= task.client_rank_label %> on their list</dd>
+    <% end %>
   </dl>
 
   <div class="task-panel__description">

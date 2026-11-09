@@ -130,8 +130,14 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 .portal-topbar__brand .sidebar__logo { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; font-size: var(--text-meta); }
 /* An uploaded logo keeps its own shape: the bar's height (less a little air), as wide as it is,
 /* no badge behind it, then the client's name. The letter fallback stays a small badge. */
-.portal-topbar__brand .sidebar__logo:has(img) { width: auto; height: 2.5rem; max-width: 12rem; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
-.portal-topbar__brand .sidebar__logo:has(img) img { width: auto; height: 100%; max-width: 100%; object-fit: contain; }
+/* The image sets its own height and its width follows from its shape (capped, so a wide wordmark
+/* can't push the nav away); the box around it is a plain flex box that shrinks to the image, never
+/* the grid badge sized by the file's natural width, which left a gap beside a square or large one. */
+.portal-topbar__brand .sidebar__logo:has(img) { display: flex; align-items: center; width: auto; height: auto; border-radius: 0; background: none; box-shadow: none; overflow: hidden; }
+.portal-topbar__brand .sidebar__logo:has(img) img { display: block; width: auto; height: 2.25rem; max-width: 12rem; max-height: 2.25rem; border-radius: 0; object-fit: contain; object-position: left center; }
+@media (max-width: 640px) {
+  .portal-topbar__brand .sidebar__logo:has(img) img { height: 1.75rem; max-height: 1.75rem; max-width: 7rem; }
+}
 .portal-topbar__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 
 /* The sections as ghost buttons, the current one on a tint. */
