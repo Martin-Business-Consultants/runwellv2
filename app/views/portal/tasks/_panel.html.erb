@@ -2,8 +2,9 @@
 <%# A shared task in the portal's side sheet: the staff panel's component (tasks/_panel), in two
     halves. Above, read-only and only what the client may see: where it sits, its status and date,
     what they asked, its description, its client-visible documents and custom fields. Below, the
-    discussion: the notes either side shared on it (Note.discussion), oldest first, and a reply
-    (Portal::Tasks::NotesController; not while staff view as the client). Esc or ✕ closes it. %>
+    discussion: the notes either side shared on it (Note.discussion), oldest first, and a reply in
+    the editor (Portal::Tasks::NotesController). Staff viewing as the client see the editor as the
+    client does, with Send off: a preview writes nothing. Esc or ✕ closes it. %>
 <section class="task-panel portal-task" id="<%= dom_id(task, :portal_panel) %>" aria-label="<%= task.title %>">
   <header class="task-panel__header">
     <p class="task-panel__context">
@@ -77,14 +78,15 @@
     <% else %>
       <p class="muted portal-thread__empty">Nothing here yet. Ask a question or add something, and the team sees it on this <%= term(:task).downcase %>.</p>
     <% end %>
-    <% unless Current.previewing? %>
-      <%= form_with url: portal_task_notes_path(task), scope: :note, class: "portal-thread__reply", namespace: dom_id(task, :portal_reply),
-            data: { controller: "form", action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
-        <%= rich_text_field_tag form.field_name(:body), nil, id: form.field_id(:body), placeholder: "Write a message…" %>
-        <div class="portal-thread__actions">
-          <button type="submit" class="btn btn--primary btn--sm">Send</button>
-        </div>
-      <% end %>
+    <%= form_with url: portal_task_notes_path(task), scope: :note, class: "portal-thread__reply", namespace: dom_id(task, :portal_reply),
+          data: { controller: "form", action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
+      <%= rich_text_field_tag form.field_name(:body), nil, id: form.field_id(:body), placeholder: "Write a message…" %>
+      <div class="portal-thread__actions">
+        <% if Current.previewing? %>
+          <span class="portal-thread__preview muted small">You’re viewing as <%= current_contact.name %>, so nothing is sent.</span>
+        <% end %>
+        <%= tag.button "Send", type: "submit", class: "btn btn--primary btn--sm", disabled: Current.previewing? %>
+      </div>
     <% end %>
   </section>
 </section>
