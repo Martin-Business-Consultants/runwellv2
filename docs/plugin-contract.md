@@ -269,6 +269,14 @@ anything outside the range; a source that raises is reported and left out. It na
 work, so a calendar filtered to one leaves these out, and its search matches their title by the
 text it contains.
 
+| `Runwell::Plugins.away key, ->(range) { { user_id => [dates], everyone: [dates] } }` | 5.8 | Experimental |
+| `Runwell::Plugins.away_between(range)` | 5.8 | Experimental |
+
+Who's away on which days (time off, a holiday for `everyone`), for pickers that put people on
+things: the task owner picker marks someone "Out" on the task's due date. `away_between` merges
+every switched-on plugin's into `{ user_id => Set of dates, everyone: Set }`; a source that raises
+is reported and left out.
+
 ## Search
 
 | Call | Since | Status |

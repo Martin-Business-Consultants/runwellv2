@@ -92,17 +92,25 @@ module TasksHelper
 
   # The owners picker's people, on the page once like the others; each click puts that person on
   # the task or takes them off (Tasks::AssignmentsController). Each carries their avatar as the
-  # trigger draws it (a <template>), so the picker shows who's on at once, before the answer.
+  # trigger draws it (a <template>), so the picker shows who's on at once, before the answer, and
+  # the days they're away in the months around now (Runwell::Plugins.away: time off, holidays), so
+  # the picker marks them Out on the task's due date.
+  AWAY_WINDOW_BACK = 30
+  AWAY_WINDOW_AHEAD = 180
+
   def task_assignee_options_template
     return if @task_assignee_options_rendered
 
     @task_assignee_options_rendered = true
+    away = Runwell::Plugins.away_between((Date.current - AWAY_WINDOW_BACK)..(Date.current + AWAY_WINDOW_AHEAD))
     html = tag.template(id: "task-assignee-options") do
       safe_join(task_people.map do |person|
-        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id }) do
+        days = (away.fetch(person.id, Set.new) | away.fetch(:everyone, Set.new)).map(&:iso8601).sort
+        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id, picker_away: days.join(" ").presence }) do
           tag.button(type: "submit", name: "assignee_id", value: person.id, class: "popup__btn", data: { action: "picker#choose" }) do
             safe_join([ avatar_image_tag(person, class: "avatar owner-picker__avatar", alt: ""),
               tag.span(person.display_name, class: "popup__label"),
+              tag.span("Out", class: "owner-picker__away", title: "Away on the day it’s due"),
               icon_tag("check", class: "checked") ])
           end +
           tag.template(person_tag(person), data: { picker_avatar: true })

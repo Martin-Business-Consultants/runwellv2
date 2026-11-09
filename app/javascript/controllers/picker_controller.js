@@ -14,7 +14,7 @@ import { Controller } from "@hotwired/stimulus"
 // save fails outright (no answer, or an error), the choice is put back.
 export default class extends Controller {
   static targets = [ "display", "list", "form", "stack", "empty", "names" ]
-  static values = { current: String, options: String, multiple: Boolean, popup: String, url: String, labelled: Boolean, task: String }
+  static values = { current: String, options: String, multiple: Boolean, popup: String, url: String, labelled: Boolean, task: String, due: String }
 
   connect() {
     this.confirmed = this.currentValue
@@ -39,6 +39,8 @@ export default class extends Controller {
     this.listTarget.append(template.content.cloneNode(true))
     this.listTarget.querySelectorAll("[data-picker-value]").forEach(item => {
       item.setAttribute("aria-checked", current.includes(item.dataset.pickerValue))
+      // Away on the task's due date (data-picker-away, from Runwell::Plugins.away): marked Out.
+      item.toggleAttribute("data-away-on-due", !!this.dueValue && (item.dataset.pickerAway || "").split(" ").includes(this.dueValue))
     })
   }
 

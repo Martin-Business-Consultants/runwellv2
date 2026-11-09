@@ -11,7 +11,7 @@
 <% end %>
 <div class="row-picker owner-picker" id="<%= dom_id(task, labelled ? :owner_labelled : :owner) %>" data-controller="dialog fixed-popup filter picker" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
   data-picker-multiple-value="true" data-picker-current-value="<%= task.owners.map(&:id).join(",") %>" data-picker-options-value="task-assignee-options"
-  data-picker-popup-value="task-owner-popup" data-picker-url-value="<%= task_assignments_path(task) %>"<% if labelled %> data-picker-labelled-value="true"<% end %>
+  data-picker-popup-value="task-owner-popup" data-picker-url-value="<%= task_assignments_path(task) %>" data-picker-due-value="<%= task.due_on&.iso8601 %>"<% if labelled %> data-picker-labelled-value="true"<% end %>
   data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->picker#fill dialog:show->fixed-popup#place dialog:close->fixed-popup#close dialog:close->filter#clearInput">
   <%= render "tasks/owners", task: task, labelled: labelled %>
 

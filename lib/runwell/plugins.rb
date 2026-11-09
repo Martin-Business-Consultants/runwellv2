@@ -70,6 +70,7 @@ module Runwell
     mattr_reader :ai_prompts, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :shortcuts, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :date_sources, default: {}
+    mattr_reader :away_sources, default: {}
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -131,6 +132,22 @@ module Runwell
         date_sources[key] = source
       end
 
+      # Who's away when, for pickers that put people on things (the task owner picker marks someone
+      # "Out" on a task's due date): ->(range) { { user_id => [dates], everyone: [dates] } }.
+      def away(key, source)
+        away_sources[key] = source
+      end
+
+      # Every switched-on plugin's away days in a range, merged: { user_id => Set of dates }, with
+      # :everyone for days off for all (a holiday). A source that fails is reported and left out.
+      def away_between(range)
+        enabled_away_sources.each_with_object(Hash.new { |hash, key| hash[key] = Set.new }) do |(key, source), away|
+          source.call(range).to_h.each { |who, dates| away[who].merge(Array(dates).select { range.cover?(it) }) }
+        rescue StandardError => error
+          Rails.error.report(error, context: { plugin: key, extension: :away })
+        end
+      end
+
       # Every switched-on plugin's dated things in a range, as the viewer may see them, each marked
       # with its plugin. A source that fails is reported and left out, so one plugin can't empty a
       # calendar.
@@ -187,6 +204,7 @@ module Runwell
       def enabled_nightly_tasks = nightly_tasks.select { |key, _| enabled?(key) }
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
       def enabled_date_sources = date_sources.select { |key, _| enabled?(key) }
+      def enabled_away_sources = away_sources.select { |key, _| enabled?(key) }
       def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
       def enabled_ai_prompts = ai_prompts.select { |key, _| enabled?(key) }.values.flatten.map { [ nil, it ] }
       def enabled_shortcuts = shortcuts.select { |key, _| enabled?(key) }.values.flatten
@@ -203,7 +221,8 @@ module Runwell
           Array(settings_pages[key]&.first&.then { "Settings: #{it}" }) +
           Array(("Nightly sync" if nightly_tasks.key?(key))) +
           Array(("AI brief" if agent_briefs.key?(key))) +
-          Array(("Calendar dates" if date_sources.key?(key)))
+          Array(("Calendar dates" if date_sources.key?(key))) +
+          Array(("Who's away" if away_sources.key?(key)))
       end
     end
   end
