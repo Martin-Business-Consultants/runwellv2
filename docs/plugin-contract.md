@@ -187,6 +187,11 @@ assets (compiled on boot in production, like its stylesheets), and registers eve
 is `data-controller="my-day--copy-prompt"`. Nothing to register, and no way to name a controller
 outside the plugin's key, so two plugins, or a plugin and the core, can't collide.
 
+A plugin's `form.select` (or `combobox_tag { select_tag … }`) is the core's combobox, like every
+select: past eight choices it opens with a box to filter them, and `data: { combobox_filter: "always" }`
+on the select gives it that box however few its choices (5.7.1). `class: "select--sm"` makes it the
+small kind, as wide as its choice, for a row of filters.
+
 What a plugin's JavaScript may lean on: the three packages in the table (pinned by the core, kept
 across 2.x), its own modules, and these core controllers from its markup, with the data attributes
 their own pages use: `form` (`submit`, `debouncedSubmit`, `cancel`, `form-target="submit"`),

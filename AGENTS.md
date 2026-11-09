@@ -159,7 +159,8 @@ event); every event has a source.
   highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
 - Every select is a combobox, Fizzy's: a button opening the app's popup of choices (`combobox` or,
   for `multiple`, `multi-selection-combobox`, with `dialog`, `navigable-list` and, past
-  `ComboboxHelper::COMBOBOX_FILTER_AT` choices, a filter box, `popup-filter`), writing hidden fields.
+  `ComboboxHelper::COMBOBOX_FILTER_AT` choices, or always with `data: { combobox_filter: "always" }` on the select (a
+  page's filters), a filter box, `popup-filter`), writing hidden fields.
   The default form builder (`ComboboxFormBuilder`) renders `form.select`, `time_zone_select`,
   `collection_select` and `grouped_collection_select` as usual and `combobox_tag` (`ComboboxHelper`)
   rebuilds that `<select>` as the combobox, so include_blank (sent as ""), selected, disabled and
