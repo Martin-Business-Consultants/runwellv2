@@ -219,7 +219,8 @@ Back, refresh and links work, and there's no client-side router:
   that opens a task keeps `task_path` as its href and adds `data: side_panel_data(task)` (Cmd-click
   still opens the task's page). The layout renders the panel on a full load; a request for the
   `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
-  action). Esc or ✕ closes it (Back if it was opened here), and it follows `j` / `k`
+  action). Esc, ✕ or a click outside it closes it (Back if it was opened here; a click on another task
+  follows it instead, and dialogs, popovers and toasts keep it open), and it follows `j` / `k`
   (`keyboard:select`), with the tasks above and below fetched ahead (as a hovered task's link is). It loads by setting its frame's `src` and records the address through
   Turbo's history (no page visit runs under it). Its fields save on change with `inline=panel`,
   answered by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows

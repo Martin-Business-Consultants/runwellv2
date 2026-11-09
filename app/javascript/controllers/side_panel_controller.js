@@ -18,6 +18,10 @@ import { Controller } from "@hotwired/stimulus"
 // follows without waiting. Any change on the page (a form sent, a stream arriving) drops everything
 // fetched, so a panel is never stale.
 //
+// A click outside it closes it, as Esc does, unless it's on another task (which the panel then
+// follows), in a dialog, popover, the modal or a toast, or a press that began inside the panel (a
+// selection dragged out). Pressed and released both count, so the click is a real click off.
+//
 // It shows at once when a task is clicked (a placeholder with its title, from the layout's
 // template) and eases in; the task's own panel fades in over it when it arrives. Its contents cross-fade when it follows another task (the panel
 // itself stays put), and it fades out before it closes: each frame render waits for the panel's
@@ -25,6 +29,7 @@ import { Controller } from "@hotwired/stimulus"
 const PREFETCH_DELAY = 60
 const PREFETCH_TTL = 10_000
 const PREFETCH_KEPT = 4
+const KEEPS_OPEN = "[data-side-panel-task-param], dialog, [popover], #modal, #flash, #quick_action"
 
 export default class extends Controller {
   static targets = [ "frame", "placeholder" ]
@@ -49,6 +54,11 @@ export default class extends Controller {
     if (this.hasFrameTarget) this.frameTarget.addEventListener("turbo:before-fetch-request", this.usePrefetched)
     document.addEventListener("turbo:submit-start", this.dropPrefetched)
     document.addEventListener("turbo:before-stream-render", this.dropPrefetched)
+
+    this.pressed = this.pressed.bind(this)
+    this.clicked = this.clicked.bind(this)
+    document.addEventListener("pointerdown", this.pressed, true)
+    document.addEventListener("click", this.clicked, true)
   }
 
   disconnect() {
@@ -61,7 +71,23 @@ export default class extends Controller {
     if (this.hasFrameTarget) this.frameTarget.removeEventListener("turbo:before-fetch-request", this.usePrefetched)
     document.removeEventListener("turbo:submit-start", this.dropPrefetched)
     document.removeEventListener("turbo:before-stream-render", this.dropPrefetched)
+    document.removeEventListener("pointerdown", this.pressed, true)
+    document.removeEventListener("click", this.clicked, true)
     clearTimeout(this.hoverTimer)
+  }
+
+  // A click off the panel (capture: before anything under it stops the click going further).
+  pressed(event) {
+    this.pressedOff = this.#isOpen && this.#off(event)
+  }
+
+  clicked(event) {
+    const pressedOff = this.pressedOff
+    this.pressedOff = false
+    if (!pressedOff || !this.#isOpen || !this.#off(event) || !this.#currentId) return
+    if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+    this.close()
   }
 
   // A pointer resting on a task's link: fetch its panel, unless it's the one showing or already fetched.
@@ -189,6 +215,11 @@ export default class extends Controller {
 
   get #isOpen() {
     return this.hasFrameTarget && this.frameTarget.querySelector(".task-panel")
+  }
+
+  #off({ target }) {
+    if (!(target instanceof Element) || !target.isConnected) return false
+    return !this.frameTarget.contains(target) && !target.closest(KEEPS_OPEN)
   }
 
   get #currentId() {
