@@ -4,7 +4,10 @@ gem "bcrypt"
 gem "bootsnap", require: false
 gem "csv"
 gem "geared_pagination"
-gem "herb"
+# Herb 0.11.2 (and ReActionView 0.6.1, which needs it) serializes with Prism 2.1, and the bundle
+# can't have prism 2 while rubocop-ast pins it to 1.x: every page with state failed to render
+# ("Invalid serialization"). Lift both pins together once rubocop-ast allows prism 2.
+gem "herb", "0.11.1"
 gem "image_processing"
 gem "importmap-rails"
 gem "jbuilder"
@@ -20,7 +23,7 @@ gem "rune_ui", github: "Martin-Business-Consultants/rune_ui", branch: "main" # t
 gem "puma"
 gem "rails"
 gem "rails-active_search"
-gem "reactionview"
+gem "reactionview", "0.6.0" # pinned with herb, above
 gem "rotp"
 gem "rqrcode"
 gem "ruby_llm"
