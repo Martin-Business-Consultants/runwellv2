@@ -13,8 +13,9 @@
 // settled, leave and disconnect, each given the element and its context.
 import { Runtime } from "reactionview"
 import open from "behaviors/open"
+import keepOpen from "behaviors/keep-open"
 
-const BEHAVIORS = { open }
+const BEHAVIORS = { open, "keep-open": keepOpen }
 
 const runtime = Runtime.start({ state: { debounce: 150, refetch: "off" } })
 for (const [ attribute, behavior ] of Object.entries(BEHAVIORS)) runtime.behaviors.define(attribute, behavior)

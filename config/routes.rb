@@ -138,6 +138,10 @@ Rails.application.routes.draw do
     resources :scope_items, only: %i[show create update destroy], shallow: true
     resources :tasks, only: :create
   end
+  # A section dragged to a new place on its work's Tasks tab.
+  resources :scope_items, only: [] do
+    resource :move, only: :create, module: :scope_items
+  end
 
   namespace :tasks do
     resources :columns, only: :show

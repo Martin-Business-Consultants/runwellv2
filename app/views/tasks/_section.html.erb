@@ -1,9 +1,13 @@
-<%# locals: (work:, state: nil, item: nil) %>
+<%# locals: (work:, state: nil, item: nil, open_item: nil) %>
 <%# A piece of work's work by scope item. Open work by default; the filter shows done or all.
     Each scope item's "done of total" always counts all of its work. item: one scope item's work
     alone (an id, or "other" for work outside the scope), picked in the sidebar's scope list.
     While it's open and not showing done, each section ends in a quick add (tasks/quick_add), and
-    a section with no tasks yet shows too, so its first can be typed straight in. %>
+    a section with no tasks yet shows too, so its first can be typed straight in. Each section is an
+    accordion: the first open, and any empty one, and the one a task was just added to (open_item);
+    the rest closed, and each stays as someone left it through a refresh (the keep-open behavior).
+    Sections drag by their grip to a new place (the core's drag-and-drop, ScopeItems::MovesController).
+    The + beside the hint adds a section. %>
 <% state ||= "open" %>
 <% focus_item = item %>
 <% quick = !work.closed? && state != "done" %>
@@ -12,13 +16,19 @@
 <section class="card record-card" id="tasks" data-task-list="work" data-task-list-state="<%= state %>" data-task-list-keeps="<%= task_list_keeps(state) %>"<% if item %> data-task-list-item="<%= item %>"<% end %>>
   <header class="card__head">
     <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-    <p class="card__hint">
+    <div class="card__hint task-section__hint">
       <% if focus %>
-        Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.
+        <span>Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.</span>
       <% else %>
-        By <%= term(:scope_item).downcase %>, soonest due first.
+        <span>By <%= term(:scope_item).downcase %>, soonest due first.</span>
+        <% unless work.closed? %>
+          <details class="task-section__new">
+            <summary class="icon-button task-section__add" title="Add a <%= term(:scope_item).downcase %>"><%= icon_tag "add" %><span class="visually-hidden">Add a <%= term(:scope_item).downcase %></span></summary>
+            <%= render "scope_items/new", work: work %>
+          </details>
+        <% end %>
       <% end %>
-    </p>
+    </div>
     <div class="card__action task-section__actions">
       <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
@@ -51,56 +61,82 @@
       </div>
     <% end %>
 
-    <%# One list of groups, tight together. A section whose only work is named the same shows just
-        that row, not the name twice. %>
-    <div class="task-groups">
-    <% items.each do |item| %>
-      <%# herb:key item.id %>
-      <% group = groups.fetch(item, []) %>
-      <% everything = all_groups.fetch(item, []) %>
-      <% single = everything.size == 1 && group.size == 1 && group.first.title.strip.casecmp?(item.description.strip) %>
-      <div class="task-group">
-        <% unless single || focus %>
-          <div class="task-group__header">
-            <%= link_to item.description, work_path(work, request.query_parameters.merge("tab" => "tasks", "item" => item.id)), class: "task-group__name" %>
-            <span class="task-group__count"><%= everything.count { |task| task.status == "done" } %> of <%= everything.size %></span>
-            <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
-          </div>
-        <% end %>
-        <ul class="record-list">
-          <%= render partial: "tasks/task", collection: group, as: :task %>
-        </ul>
-        <% if quick %>
-          <%= render "tasks/quick_add", work: work, scope_item: item, state: state, item: focus_item %>
-        <% end %>
+    <%# One list of sections, tight together: each an accordion that drags by its grip to a new place. %>
+    <div class="task-groups" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="task-group--dragging" data-drag-and-drop-hover-container-class="task-groups--hover"
+      data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
+      <div class="task-groups__sections" data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= scope_item_move_path("__id__") %>">
+        <div class="task-groups__list" data-drag-drop-item-container>
+          <% items.each_with_index do |item, index| %>
+            <%# herb:key item.id %>
+            <% group = groups.fetch(item, []) %>
+            <% everything = all_groups.fetch(item, []) %>
+            <% if focus %>
+              <div class="task-group">
+                <ul class="record-list">
+                  <%= render partial: "tasks/task", collection: group, as: :task %>
+                </ul>
+                <% if quick %>
+                  <%= render "tasks/quick_add", work: work, scope_item: item, state: state, item: focus_item %>
+                <% end %>
+              </div>
+            <% else %>
+              <details class="task-group" data-keep-open data-drag-and-drop-target="item" data-id="<%= item.id %>" <% if index.zero? || group.empty? || item.id.to_s == open_item.to_s %>open<% end %>>
+                <summary class="task-group__header">
+                  <% unless work.closed? %>
+                    <span class="task-group__grip" draggable="true" title="Drag to move this <%= term(:scope_item).downcase %>"><%= icon_tag "grip" %></span>
+                  <% end %>
+                  <%= icon_tag "caret-down", class: "task-group__caret" %>
+                  <%= link_to item.description, work_path(work, request.query_parameters.merge("tab" => "tasks", "item" => item.id)), class: "task-group__name" %>
+                  <span class="task-group__count"><%= everything.count { |task| task.status == "done" } %> of <%= everything.size %></span>
+                  <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+                </summary>
+                <ul class="record-list">
+                  <%= render partial: "tasks/task", collection: group, as: :task %>
+                </ul>
+                <% if quick %>
+                  <%= render "tasks/quick_add", work: work, scope_item: item, state: state, item: focus_item %>
+                <% end %>
+              </details>
+            <% end %>
+          <% end %>
+        </div>
       </div>
-    <% end %>
 
     <% other = groups.fetch(nil, []) %>
     <% other_all = all_groups.fetch(nil, []) %>
     <% if other.any? || (quick && (focus_item == "other" || (!focus && work.scope_items.none?))) %>
-      <div class="task-group">
-        <% unless focus %>
-        <div class="task-group__header">
-          <span class="task-group__name">Other work</span>
-          <span class="task-group__count"><%= other_all.count { |task| task.status == "done" } %> of <%= other_all.size %></span>
+      <% if focus %>
+        <div class="task-group">
+          <ul class="record-list">
+            <%= render partial: "tasks/task", collection: other, as: :task %>
+          </ul>
+          <% if quick %>
+            <%= render "tasks/quick_add", work: work, state: state, item: focus_item %>
+          <% end %>
         </div>
-        <% end %>
-        <ul class="record-list">
-          <%= render partial: "tasks/task", collection: other, as: :task %>
-        </ul>
-        <% if quick %>
-          <%= render "tasks/quick_add", work: work, state: state, item: focus_item %>
-        <% end %>
-      </div>
+      <% else %>
+        <details class="task-group task-group--other" data-keep-open <% if items.empty? || other.empty? || open_item.to_s == "other" %>open<% end %>>
+          <summary class="task-group__header">
+            <%= icon_tag "caret-down", class: "task-group__caret" %>
+            <span class="task-group__name">Other <%= term(:task, count: 2).downcase %></span>
+            <span class="task-group__count"><%= other_all.count { |task| task.status == "done" } %> of <%= other_all.size %></span>
+          </summary>
+          <ul class="record-list">
+            <%= render partial: "tasks/task", collection: other, as: :task %>
+          </ul>
+          <% if quick %>
+            <%= render "tasks/quick_add", work: work, state: state, item: focus_item %>
+          <% end %>
+        </details>
+      <% end %>
     <% end %>
     </div>
 
     <% if tasks.none? %>
       <% if focus %>
-        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> here yet. Add the first below.</p>
+        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> here yet. Type the first above.</p>
       <% else %>
-        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> yet. Add the first below.</p>
+        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> yet. Type the first into a <%= term(:scope_item).downcase %> above, or add a <%= term(:scope_item).downcase %> with +.</p>
       <% end %>
     <% elsif shown.none? %>
       <p class="record-card__empty">
@@ -109,10 +145,4 @@
       </p>
     <% end %>
   </div>
-
-  <% unless work.closed? %>
-    <footer class="card__footer">
-      <%= render "tasks/add", work: work, scope_item: picked %>
-    </footer>
-  <% end %>
 </section>
