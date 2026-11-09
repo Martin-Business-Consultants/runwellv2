@@ -20,7 +20,7 @@
       <% if scope_item %>
         <%= form.hidden_field :scope_item_id, value: scope_item.id %>
       <% elsif work %>
-        <%= form.select :scope_item_id, work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other tasks" }, aria: { label: term(:scope_item) } %>
+        <%= form.select :scope_item_id, work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other " + term(:task, count: 2).downcase }, aria: { label: term(:scope_item) } %>
       <% end %>
     </div>
     <div class="record-add__actions">

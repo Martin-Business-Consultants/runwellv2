@@ -39,9 +39,9 @@
     </section>
 
     <% if can?(:delete_records) %>
-      <%= render "layouts/shared/confirm", trigger: "Delete this client", title: "Delete #{@client.name_was}?",
+      <%= render "layouts/shared/confirm", trigger: "Delete this " + term(:client).downcase, title: "Delete #{@client.name_was}?",
             body: "This removes the #{term(:client).downcase} with its contacts, #{term(:task, count: 2).downcase} and notes. One with #{term(:work, count: 2).downcase} can’t be deleted.",
-            button: "Delete client", path: client_path(@client) %>
+            button: "Delete " + term(:client).downcase, path: client_path(@client) %>
     <% end %>
   </aside>
 </section>

@@ -28,7 +28,7 @@
           <% if @task.scope_item %>
             <%= link_to @task.scope_item.description, @task.scope_item %>
           <% else %>
-            <span>Other tasks</span>
+            <span>Other <%= term(:task, count: 2).downcase %></span>
           <% end %>
         <% elsif @task.client %>
           <%= link_to @task.client.name, @task.client %> <span aria-hidden="true">›</span> <span>Not on any <%= term(:work).downcase %></span>

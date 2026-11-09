@@ -17,6 +17,7 @@ class Bulk::UsersController < ApplicationController
       end
     elsif changes[:status] == "deactivated"
       apply_to_each(people, done: "Deactivated %{count}", fallback: users_path) do |person|
+        next "that’s you" if person == current_user.person
         next "already deactivated" if person.deactivated?
         person.deactivate! || person.errors.full_messages.to_sentence
       end

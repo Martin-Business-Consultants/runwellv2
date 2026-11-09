@@ -1,7 +1,7 @@
 # A sample business: a small studio doing websites, local search (Google Business Profiles, citations,
 # reviews) and paid ads, with clients at every stage. Logins: ted@brem.io (owner), Sarah
 # (manager) and the members below, all with the password "password". Users are idempotent; the sample
-# sample is only created into an empty database (bin/rails db:seed:replant to redo it).
+# is only created into an empty database (bin/rails db:seed:replant to redo it).
 #
 # Never in production: db:prepare seeds a database it creates, and a new install starts empty
 # so its first visitor signs up as the owner (SignupsController).

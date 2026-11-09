@@ -5,7 +5,7 @@ The core of project management: for a business, a team, or anything you run. See
 and `docs/future_apps.md` for what was deliberately left out.
 
 ```sh
-bin/setup      # gems, npm, database, seeds
+bin/setup      # gems, database, seeds
 bin/dev        # http://localhost:3000, sign in as ted@brem.io / password
 bin/rails test
 ```
@@ -16,4 +16,4 @@ use it, change it and run it for yourself or your clients, but not to offer a co
 product; each release becomes MIT two years after it's published.
 
 Client portal: `/portal` (magic link by email; in development read it at
-`/letter_opener`). Approval links: `/approve/<token>`.
+`/letter_opener`).

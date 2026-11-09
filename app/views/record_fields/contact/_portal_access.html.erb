@@ -1,4 +1,4 @@
-<%# locals: (record:, form: nil, form_id: nil) %>
+<%# locals: (form: nil, form_id: nil, **) %>
 <% if form %>
   <%= switch_field form, :portal_access, label: "Can sign in to the client portal", hint: "Signs in with an emailed link, sees this client’s shared tasks and documents, and sends requests.", form: form_id %>
 <% end %>

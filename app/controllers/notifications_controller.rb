@@ -6,14 +6,14 @@ class NotificationsController < ApplicationController
   MAX_UNREAD_NOTIFICATIONS = 500
 
   def index
-    @unread = Current.user.notifications.unread.ordered.preloaded.limit(MAX_UNREAD_NOTIFICATIONS)
-    @read = Current.user.notifications.read.ordered.preloaded.limit(100)
+    @unread = Current.user.person.notifications.unread.ordered.preloaded.limit(MAX_UNREAD_NOTIFICATIONS)
+    @read = Current.user.person.notifications.read.ordered.preloaded.limit(100)
   end
 
   # Fizzy reads a notification when its card opens. Here the target can be any record, so
   # following a notification reads it on the way there.
   def show
-    notification = Current.user.notifications.find(params[:id])
+    notification = Current.user.person.notifications.find(params[:id])
     notification.read
     redirect_to helpers.search_result_path(notification.notifiable_target)
   end

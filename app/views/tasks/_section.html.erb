@@ -48,7 +48,7 @@
       <% done = tasks.count { |task| task.status == "done" } %>
       <div class="list-row list-row--outline task-focus">
         <div class="list-row__content">
-          <h3 class="list-row__title task-focus__title"><%= picked ? picked.description : "Other tasks" %></h3>
+          <h3 class="list-row__title task-focus__title"><%= picked ? picked.description : "Other " + term(:task, count: 2).downcase %></h3>
           <span class="list-row__desc task-focus__count"><%= done %> of <%= tasks.size %> done</span>
         </div>
         <% if picked %>

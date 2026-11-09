@@ -37,8 +37,7 @@
 
 /* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
 .btn { --btn-border-radius: var(--radius-control, var(--radius-lg)); }
-.input, .input--select, .input--upload, .input--actor { --input-border-radius: var(--radius-control, var(--radius-lg)); }
-.input--upload { border-radius: var(--radius-control, var(--radius-lg)); }
+.input, .input--select { --input-border-radius: var(--radius-control, var(--radius-lg)); }
 
 /* An uploaded logo sits where the wordmark was, at the wordmark's height. */
 @layer components {

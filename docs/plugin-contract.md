@@ -58,7 +58,7 @@ Slots, and the locals each partial gets:
 | --- | --- | --- | --- |
 | `:client_panel` | A tab on each client | `client:` | 2.0 |
 | `:work_panel` | A tab on each work | `work:` | 2.0 |
-| `:task_panel` | A tab on each piece of tasks | `task:` | 2.0 |
+| `:task_panel` | A tab on each task | `task:` | 2.0 |
 | `:nav_actions` | A button in the nav's foot | none | 2.0 |
 | `:portal_home` | The client portal's home | `client:` | 2.0 |
 | `:portal_work_panel` | A piece of work in the portal | `work:` | 2.0 |
@@ -66,7 +66,7 @@ Slots, and the locals each partial gets:
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
 | `:work_aside` | A piece of work's sidebar, under its sections and details | `work:` | 3.0 |
 | `:work_meta` | The line under a piece of work's title: a status badge or a short fact (an inline element) | `work:` | 3.0 |
-| `:task_aside` | A piece of tasks's sidebar, above Details (requests are tasks, so this replaces `:request_aside`) | `task:` | 3.0 |
+| `:task_aside` | A task's sidebar, above Details (requests are tasks, so this replaces `:request_aside`) | `task:` | 3.0 |
 | `:scope_item_aside` | A section's (scope item's) sidebar, above Details | `scope_item:` | 2.18 |
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
@@ -255,7 +255,7 @@ Types), no longer a fixed list. A piece of work keeps its type's key in `work.la
 install's order (`key`, `name_one`, `name_other`, `prefix`, `shape`, `cadence`, `archived?`,
 `system?`), `WorkType.active_keys` those offered for new work, and `work.work_type` its type.
 Project, work order and service are always there (`WorkType::SYSTEM_KEYS`), though an install can
-switch them off. `Work::LABELS` still holds those three and is deprecated: it goes in 7.0, so read
+switch them off. `Work::LABELS` still holds those three and is deprecated: it goes in the next major version (6.0), so read
 `Work.labels` (or `WorkType.cached`) instead, falling back to `Work::LABELS` on an older core. Keys
 never change; a type merged into another moves its work (`work.retyped`) and is deleted. A piece of
 work also has `cadence` (how often recurring work comes round, `Cadence::KEYS`), and a task `repeat`
@@ -445,12 +445,12 @@ record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners),
 
 ## Changes to this contract
 
-**7.0** folded a client's contacts into users: a contact is a `User` with the role `client`
+**5.1.1** folded a client's contacts into users: a contact is a `User` with the role `client`
 (`User::Role::CLIENT`), and `Contact` is that slice of users (`class Contact < User`, a default
 scope), so `Contact`, `contact_id`, `task.contact`, `client.contacts`, `current_contact` and the
 `*_contact` tools read as before, and contacts show in Users beside the team. What changed:
 
-| Before 7.0 | From 7.0 |
+| Before 5.1.1 | From 5.1.1 |
 | --- | --- |
 | a contact's id (the `contacts` table) | a new user id: `users.legacy_contact_id` holds the old one |
 | `contact.role` (their job title) | `contact.title`; `role` is `"client"` |
@@ -462,10 +462,10 @@ A plugin whose own tables keep a `contact_id` repoints it in a migration of its 
 `UPDATE agreements_approvals SET contact_id = (SELECT id FROM users WHERE legacy_contact_id = agreements_approvals.contact_id)`.
 The core's `contacts` and `portal_sessions` tables are left, unread, for a later release to drop.
 
-**6.0** renamed the core's two nouns everywhere, with no aliases: engagements are **Work** and
-todos are **Tasks**. A plugin moving to 6.0 renames what it uses (and sets `requires: ">= 6.0"`):
+**5.0.3** renamed the core's two nouns everywhere, with no aliases: engagements are **Work** and
+todos are **Tasks**. A plugin moving to 5.0.3 renames what it uses (and sets `requires: ">= 5.0.3"`):
 
-| Before 6.0 | From 6.0 |
+| Before 5.0.3 | From 5.0.3 |
 | --- | --- |
 | `Engagement`, `engagements`, `engagement_id`, `/engagements/P-3` | `Work`, `works`, `work_id`, `/work/P-3` |
 | `Todo`, `todos`, `todo_id`, `/work/42` | `Task`, `tasks`, `task_id`, `/tasks/42` |
@@ -478,7 +478,7 @@ todos are **Tasks**. A plugin moving to 6.0 renames what it uses (and sets `requ
 | permissions `close_engagements`, `erase_engagements` | `close_works`, `erase_works` |
 
 A plugin's own tables that point at core records by `engagement_id` or `todo_id`, or store a
-polymorphic type of `"Engagement"` or `"Todo"`, need a migration of their own; the core's 6.0
+polymorphic type of `"Engagement"` or `"Todo"`, need a migration of their own; the core's 5.0.3
 migration renames only the core's tables, columns and stored types.
 
 **5.0** ignores `enabled_by_default:` (every plugin starts off) and removed the core's home page, the briefing ("Needs You"), with its two extension points:

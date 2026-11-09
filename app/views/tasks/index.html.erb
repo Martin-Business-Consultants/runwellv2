@@ -6,13 +6,13 @@
 <% content_for :index_filters do %>
   <% unless @view == "board" %>
     <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
-          options: [ [ "Open tasks", "open" ], [ "All tasks", "all" ], [ "In progress", "in_progress" ], [ "In review", "in_review" ], [ "Blocked", "blocked" ] ] %>
+          options: [ [ "Open " + term(:task, count: 2).downcase, "open" ], [ "All " + term(:task, count: 2).downcase, "all" ] ] + Task::STATUSES.without("done").map { [ it.humanize, it ] } %>
   <% end %>
   <%= render "layouts/shared/quick_filter", title: "Due…", param: :due, current: @due,
         options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
         options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + task_owner_options.map { |name, id| [ name, id.to_s ] } %>
-  <%= render "layouts/shared/quick_filter", title: "Work…", param: :work, current: @work_filter,
+  <%= render "layouts/shared/quick_filter", title: term(:work) + "…", param: :work, current: @work_filter,
         options: [ [ "All " + term(:work, count: 2).downcase, "all" ] ] + task_work_filter_options(@work_filter) %>
 <% end %>
 <% if @view == "table" %>

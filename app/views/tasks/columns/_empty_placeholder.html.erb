@@ -1,5 +1,5 @@
 <%# locals: () %>
-<%# An empty column: "No work here", or on the board (where cards can be dragged) "Drag work here".
-    work.css shows the one that fits. %>
-<div class="empty cards__blank cards__blank--default">No work here</div>
-<div class="empty cards__blank cards__blank--drag">Drag work here</div>
+<%# An empty column: "No tasks here", or on the board (where cards can be dragged) "Drag tasks here".
+    tasks.css shows the one that fits. %>
+<div class="empty cards__blank cards__blank--default">No <%= term(:task, count: 2).downcase %> here</div>
+<div class="empty cards__blank cards__blank--drag">Drag <%= term(:task, count: 2).downcase %> here</div>

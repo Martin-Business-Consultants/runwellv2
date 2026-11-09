@@ -43,8 +43,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 
 | Command | Purpose |
 | --- | --- |
-| `bin/setup` | Gems, npm, db:prepare, seeds |
-| `bin/dev` | Rails (`Procfile.dev`); jobs run inside it in development (Active Job's async adapter), so there is no `bin/jobs` |
+| `bin/setup` | Gems, db:prepare, seeds |
+| `bin/dev` | Rails (`Procfile.dev`); jobs run inside it in development (Active Job's async adapter), so development needs no `bin/jobs` (production can run it beside the web, `docs/install.md`) |
 | `bin/rails test` | Minitest with fixtures |
 | `bin/rubocop` | Lint (omakase) |
 | `bundle exec herb lint app/views` | Lint templates (Herb) |
@@ -58,8 +58,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 
 Two nouns carry the core, the same in the schema, the code, routes, tools, events and the UI:
 **Work** (`Work`, `works`, `/work/P-3`: a project, work order or service run for a client; it was
-"engagement" until 6.0) and **Task** (`Task`, `tasks`, `/tasks/42`: something to do, on a piece of
-work or a client; it was "todo", and on screen "work", until 6.0). Settings > Names can still call
+"engagement" until 5.0) and **Task** (`Task`, `tasks`, `/tasks/42`: something to do, on a piece of
+work or a client; it was "todo", and on screen "work", until 5.0). Settings > Names can still call
 them something else on screen (`term(:work)`, `term(:task)`).
 
 1. **Who we work for, and who can say yes** — `Client`, `Contact` (a user with the client role; `portal_access`,
@@ -152,7 +152,7 @@ event); every event has a source.
   writing HTML into the plain text column. In forms use
   `rich_text_field form, :body`; to display use `rich_text record.body`, which
   sanitizes and keeps older plain-text values readable. Never a `text_area`.
-  No attachments (no Active Storage). Search indexes the plain text
+  Staff editors take files (Documents, below); client-facing editors are text only. Search indexes the plain text
   (`Searchable#to_search_document`)
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
@@ -233,7 +233,7 @@ Back, refresh and links work, and there's no client-side router:
 
 - **The side panel**: a task opens over the page (`tasks/_panel` in `layouts/shared/_side_panel`,
   the `side-panel` controller on `<body>`), its state the page's own URL plus `?task=42`. A link
-  that opens a task keeps `task_path` as its href and adds `data: side_panel_data(task)` (Cmd-click
+  that opens a task is `side_panel_link_to task`, which keeps `task_path` as its href (Cmd-click
   still opens the task's page). The layout renders the panel on a full load; a request for the
   `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
   action). Esc, ✕ or a click outside it closes it (Back if it was opened here; a click on another task
@@ -336,7 +336,7 @@ rendering the toolbar), and on the right the New button, with the Table / Board 
 where an index has a second view (Tasks), spanning the page's column. Then the data table
 (`render "ui/data_table"`, below), whose
 last cell per row is `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
-action the record doesn't allow: work delete only while never sent). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
+action the record doesn't allow: work delete only while it has no tasks). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
 column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
 index toolbar with `content_for :index_bulk`) takes the toolbar's row while rows are picked, in the
 filters' own pills and menus (`bulk_menu`, `bulk_button`, `bulk_date`, and `delete:` `bulk_delete`
@@ -373,7 +373,7 @@ count:)` plus `plugin_record_tabs(:client_panel)` (one tab per plugin panel),
 `current_record_tab(tabs, default)`, and `render "layouts/shared/record_tabs", variant: "pill"`
 inside `<turbo-frame id="record_tab" target="_top">`. A tab is a `?tab=` link that only reloads
 the frame; the first heading in a tab is hidden since the tab names it. The sidebar keeps
-Details, the few things always needed (contacts), History, and destructive actions. An
+Details, the few things always needed (contacts), History, and destructive actions. A piece of
 work is the exception: its facts are one line under the title (`record-meta`, with
 plugins' `:work_meta`) and its next step a muted line under that; its description opens from
 an info button beside the title (a dialog, no Overview card); its Tasks tab shows the tasks by
@@ -429,7 +429,7 @@ the theming contract (`_global`, `appearance`, `font-face`), `rune-theme` (point
 at the palette), `runwell` (the shell: sidebar, page filter, settings layout, sign-in and portal
 layouts), `runwell/components` (what every area shares: popups, the index toolbar and filters,
 the data table, the bulk bar, index cards, hint mode, form widgets) and one file per area
-(`runwell/home`, `work`, `records`, `settings`, `public`). The styleguide is at `/ui` in
+(`runwell/home`, `tasks`, `records`, `settings`, `public`). The styleguide is at `/ui` in
 development. Build new markup with it:
 
 - The brand's colour (`--accent`, Settings > Appearance) marks what's chosen, current or under the
@@ -612,7 +612,7 @@ renders `render "layouts/shared/new_button", text: "Add a client", path: new_cli
 
 ## Mentions and notifications
 
-Fizzy's, wholesale. Staff editors take `rich_text_field form, :body, mentions: true`,
+Fizzy's, wholesale. Staff editors take `rich_text_field form, :body, staff: true`,
 which adds the `<lexxy-prompt trigger="@">` fed by `prompts/users`. A mention is an
 Action Text attachment (`application/vnd.actiontext.mention`) holding the user's sgid,
 stored in the HTML column. A model with rich text includes `Mentions` and names its
@@ -642,7 +642,7 @@ Files live in Active Storage (`storage/` locally). Two places:
 ## Plugins
 
 The core has no money or time; plugins add them. A plugin is a Rails engine in a public GitHub
-repository of its own, never in this one: the thirteen Runwell publishes are
+repository of its own, never in this one: the fourteen Runwell publishes are
 `Martin-Business-Consultants/runwell-<name>` (`config/plugins.yml`). It is installed onto the
 server, like a WordPress plugin: an install starts with none, and the only way one arrives is its
 GitHub repository (owner/repo) in Settings > Plugins, which downloads the repository's latest release
@@ -725,7 +725,7 @@ reach a staff surface: `User.people` (pickers, mentions, sign-in) is the team on
 link sign-in refuse them, and a `Session`, `AccessToken` or `OauthGrant` reads `user` for staff
 and `contact` for a client's person off the same `user_id` (`HeldByPerson`). Their job title is
 `title` (`role` is the client role); `email` and `archived_at` alias `email_address` and
-`deactivated_at`. Folded in by 7.0 (`users.legacy_contact_id` keeps each old contact id for
+`deactivated_at`. Folded in by 5.1 (`users.legacy_contact_id` keeps each old contact id for
 plugins). Two switches per contact:
 `portal_access` (sign in by emailed link, see the client's shared tasks and documents, send
 requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
@@ -761,7 +761,7 @@ sees it in History; a task's side panel says where the client puts it, and staff
 (`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
 layout's `modal` frame).
 
-The plugins Runwell publishes (AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
+The plugins Runwell publishes (Agreements, AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
 and what it's the reference for (portal pages, webhooks, middleware, unattended agents, money,
 model rules) is in `docs/plugins.md`. Read it before changing a contract they use.
@@ -976,7 +976,7 @@ period, and downloads as CSV. Security events have the person (`User`) or the in
 (`Setting`) as their subject: `user.signed_in` (method, two_factor, ip, browser),
 `user.sign_in_failed`, `user.two_factor_enabled / _disabled / _reset`, `user.recovery_codes_renewed`,
 `user.role_changed`, `user.profile_changed`, `user.password_set`, `user.password_reset_sent`,
-`user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`,,
+`user.signed_out_everywhere`, `user.connections_revoked`, `user.deactivated / reactivated`,
 `user.link_sign_in_on / _off`, `user.exported`, `settings.two_factor_required`,
 `settings.plugin`, `settings.custom_css`, `settings.webhook`, `settings.bot_check`, `settings.layout`. Those subjects
 (`Event::SECURITY_SUBJECTS`) stay out of `changes`. A new security-relevant action records one.
@@ -1029,7 +1029,7 @@ live install**: add columns and tables in one release; remove or rename them onl
 release, once no code reads them. No migration may depend on a person running a task by hand.
 SQLite copies and drops a table to rename, change or remove one of its columns (`rename_column`,
 `change_column`, `remove_column`), and inside a migration's transaction foreign keys stay on, so the
-drop cascades: renaming a column on `tasks` in 6.0 deleted every assignment
+drop cascades: renaming a column on `tasks` in 5.0 deleted every assignment
 (`20261108150000_restore_task_lead_assignments`). Before altering a table's columns, check what
 points at it with `on_delete: :cascade` and copy those rows aside and back, or use
 `execute "ALTER TABLE … RENAME COLUMN …"`, which SQLite does in place.

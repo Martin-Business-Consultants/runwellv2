@@ -5,6 +5,8 @@ class WebhookDeliveryJob < ApplicationJob
 
   def perform(delivery)
     return unless delivery.webhook_endpoint.active?
+    # Its event went with a deleted record: nothing left to send.
+    return if delivery.event.nil? && !delivery.ping?
 
     delivery.deliver!
   end

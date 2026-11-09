@@ -16,6 +16,9 @@ class WebhookDelivery < ApplicationRecord
 
   def ok? = status_code.to_i.between?(200, 299)
 
+  # A test from Settings, not an event (an event's record may since have been deleted).
+  def ping? = kind == "ping"
+
   def deliver!
     body = JSON.generate(body_hash)
     timestamp = Time.current.to_i.to_s

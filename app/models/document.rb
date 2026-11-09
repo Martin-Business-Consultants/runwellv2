@@ -16,6 +16,8 @@ class Document < ApplicationRecord
   validate :file_within_limit
 
   scope :recent, -> { order(created_at: :desc) }
+  # What a list of them reads per row: its file and who uploaded it.
+  scope :preloaded, -> { includes(:uploaded_by, file_attachment: :blob) }
   scope :client_visible, -> { where(client_visible: true) }
 
   delegate :filename, :byte_size, :content_type, to: :file

@@ -49,7 +49,7 @@ class WorksController < ApplicationController
       @board = Task.filtered(owner: "any", work: @work.ref)
     end
     # A tab picked on the page: just the tabs' frame, not the whole page around it.
-    render partial: "works/record_tab", locals: { work: @work } if turbo_frame_request_id == "record_tab"
+    render partial: "works/record_tab", locals: { work: @work, task_state: @task_state, task_item: @task_item, task_view: @task_view, board: @board } if turbo_frame_request_id == "record_tab"
   end
 
   def new

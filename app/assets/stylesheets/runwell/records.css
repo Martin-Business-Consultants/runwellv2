@@ -78,7 +78,6 @@ html[data-sidebar="collapsed"] .record-page__header .sidebar-toggle .icon { tran
 /* A row that is the list item itself (documents, work) keeps to the column. */
 .record-list > li.list-row, li.record-list__row { margin-inline: 0; padding-inline: 0; }
 
-.record-list__ref { color: var(--text-muted); font-weight: var(--weight); }
 .record-list__badges { display: flex; flex-wrap: wrap; gap: var(--s-1); padding-top: 2px; }
 
 /* The work partials' own row names (tasks/_task), drawn as .list-row's parts. */
@@ -86,8 +85,7 @@ html[data-sidebar="collapsed"] .record-page__header .sidebar-toggle .icon { tran
 a.record-list__row:hover { background: var(--hover); color: var(--text); }
 .record-list__main { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; color: inherit; text-decoration: none; }
 .record-list__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
-.record-list__description, .record-list__meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
-.record-list__meta { flex-shrink: 0; }
+.record-list__description { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
 .record-list__actions { display: flex; flex-shrink: 0; align-items: center; gap: var(--s-2); }
 
 /* A contact's portal access and approval, as icons at the end of their row. */
@@ -113,7 +111,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* One scope item's work alone: its name, how much is done, its state and a way to its page. */
 .task-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); }
-.task-focus__text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
 .task-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-read); font-weight: 600; }
 
 /* Adding work or a scope item in place: a small button that opens its form below it. */
@@ -205,18 +202,11 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* at its foot. Short fields pair up in a .field-row, which stacks when narrow. */
 .record-form__body { gap: var(--s-4); }
 /* A short field (a status) beside a long one (a time zone). */
-@media (min-width: 640px) { .record-form__row--narrow-first { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
 
 /* A group of fields under its own heading (a fieldset's legend). A legend sits outside the
 /* fieldset's flow, so its space below is its own padding, not the group's gap. */
-.record-form__group { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
-.record-form__group > legend { padding-bottom: var(--s-3); font-size: var(--text-read); }
 
 /* A switch with its explanation as one box (an edit page's sidebar): tinted once it's on. */
-.record-form__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); transition: background .12s, border-color .12s; }
-.record-form__toggle:hover { background: var(--hover); }
-.record-form__toggle:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
-.record-form__toggle-text { min-width: 0; color: var(--text-muted); }
 
 
 /* ======================================================================= 10 Work sidebar */
@@ -368,8 +358,8 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .field-visibility { display: flex; flex-direction: column; gap: var(--s-1); margin: 0; padding: 0; border: 0; }
 
 /* While arranging, card headings (and the line under each) are written in place: a dashed line
-/* under them, and a placeholder where there's none yet. */
-.record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--line-strong); border-radius: 2px; cursor: text; }
+   under them, and a placeholder where there’s none yet. */
+.record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--line-strong); border-radius: calc(2px * var(--radius-scale, 1)); cursor: text; }
 .record-page--arranging [data-layout-text]:focus { outline: none; border-bottom-color: var(--accent); background: var(--brand-tint); }
 .record-page--arranging [data-layout-text]:empty::before { content: attr(data-placeholder); color: var(--text-faint); }
 

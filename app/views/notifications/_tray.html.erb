@@ -2,14 +2,14 @@
 <%# The bell in the bottom right corner (g n) and its popover: a header with the way to every
     notification and Clear all, over the newest few as list rows (notifications/trays/show). The
     dialog stacks in reverse, so the header sits on top while the rows come first for the keys. %>
-<section class="tray tray--notifications" data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:render#update" data-dialog-sizing-value="false">
+<section class="tray tray--notifications" data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:frame-render->badge#update" data-dialog-sizing-value="false">
   <dialog class="tray__dialog"
       aria-label="Notifications"
       data-controller="navigable-list"
       data-dialog-target="dialog"
       data-navigable-list-actionable-items-value="true"
       data-navigable-list-reverse-navigation-value="true"
-      data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset turbo-visit->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
+      data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
     <turbo-frame id="notifications" src="<%= notifications_tray_path %>" refresh="morph" data-controller="frame-reloader" data-action="focus@window->frame-reloader#reload"></turbo-frame>
 
     <p class="tray__empty">You’re all caught up.</p>

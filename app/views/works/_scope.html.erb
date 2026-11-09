@@ -6,7 +6,7 @@
 <% statuses = work.tasks.pluck(:scope_item_id, :status).group_by(&:first).transform_values { |rows| rows.map(&:last) } %>
 <% items = work.scope_items.to_a %>
 <% rows = items.map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
-<% rows << [ "other", "Other tasks", statuses[nil] ] if statuses[nil] %>
+<% rows << [ "other", "Other " + term(:task, count: 2).downcase, statuses[nil] ] if statuses[nil] %>
 <% everything = statuses.values.flatten %>
 <% filters = request.query_parameters.slice("tasks") %>
 

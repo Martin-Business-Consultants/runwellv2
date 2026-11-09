@@ -35,9 +35,12 @@ end
 
 # ReActionView only gives the app's own app/views its slots resolver, so a plugin's partials
 # (plugin_slots) were missing whenever a state change re-rendered the page. Plugins get it too.
+# Plugins live in RUNWELL_DATA_DIR/plugins (InstalledPlugins), linked there by plugins:link, so
+# their engines are matched by real path.
 ActiveSupport.on_load(:action_controller_base) do
+  plugin_roots = InstalledPlugins.loaded.values.map { it.realpath.to_s }
   Rails.application.railties.grep(Rails::Engine).each do |engine|
-    next unless engine.root.to_s.start_with?(Rails.root.join("engines").to_s)
+    next unless engine.root.realpath.to_s.in?(plugin_roots)
 
     engine.paths["app/views"].existent.each { prepend_view_path ReActionView::Slots::Resolver.new(it) }
   end

@@ -107,7 +107,7 @@ class WorkType < ApplicationRecord
   end
 
   # Its work moves onto `into` (refs kept, each recording work.retyped), then it goes.
-  def merge_into!(into, actor: Current.user, source: Current.source || "app")
+  def merge_into!(into, actor: Current.user, source: Current.source)
     raise Refused, "#{name_one} is a system type: switch it off (archive it) instead." if system?
     raise Refused, "Pick another type to merge #{name_one} into." if into.nil? || into == self
 

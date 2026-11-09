@@ -6,6 +6,8 @@ class Event < ApplicationRecord
   filters_text_on "events.kind", "events.actor", "events.subject_type", "events.payload", "users.name", joins: :actor_user
   belongs_to :subject, polymorphic: true
   belongs_to :actor_user, class_name: "User", optional: true
+  # Deleting a record deletes its history; its webhook deliveries stay in the log, unlinked.
+  has_many :webhook_deliveries, dependent: :nullify
 
   validates :kind, :source, :occurred_at, presence: true
 

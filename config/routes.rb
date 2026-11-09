@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   root "tasks#index"
 
   get "theme/:digest", to: "themes#show", as: :theme_stylesheet, constraints: { digest: /[0-9a-f]+/ }, format: false
-  resource :session
+  resource :session, only: %i[ new create destroy ]
   get "session/two_factor", to: "sessions/two_factors#new", as: :new_session_two_factor
   post "session/two_factor", to: "sessions/two_factors#create", as: :session_two_factor
   get "session/link", to: "sessions/links#new", as: :new_session_link
@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   end
   get "signup", to: redirect("/signup/new")
   resources :invitations, only: %i[show update], param: :token
-  resources :passwords, param: :token
+  resources :passwords, param: :token, only: %i[ new create edit update ]
 
   resource :me, only: :show, controller: :me
 
@@ -131,7 +131,6 @@ Rails.application.routes.draw do
     resources :contacts, only: %i[new create edit update destroy], shallow: true do
       resource :preview, only: %i[create destroy], module: :contacts
     end
-    resources :works, only: :create, path: "work"
     resources :tasks, only: :create
   end
 

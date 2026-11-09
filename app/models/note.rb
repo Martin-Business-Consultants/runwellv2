@@ -3,7 +3,8 @@ class Note < ApplicationRecord
 
   # Its record's history says a note was added or deleted (and of what kind).
   after_create_commit -> { subject.record_event!("note.added", payload: { kind: kind }) }, if: :subject_records_events?
-  after_destroy_commit -> { subject.record_event!("note.deleted", payload: { kind: kind }) }, if: :subject_records_events?
+  # Not when its record is going too: there's no history left to write to.
+  after_destroy_commit -> { subject.record_event!("note.deleted", payload: { kind: kind }) }, if: -> { subject_records_events? && !destroyed_by_association }
   include Searchable, Mentions
 
   mentionable_fields :body

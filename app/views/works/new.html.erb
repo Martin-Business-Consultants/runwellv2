@@ -5,7 +5,7 @@
 <% if turbo_frame_request_id == "modal" %>
   <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
     <%= render "record_fields/main_card", layout: layout, record: @work, form_id: "work_form", title: term(:work), hint: "Who it’s for, what kind it is, and what it covers.",
-          submit: "Draft work", cancel: works_path, modal: true, head_key: "client" %>
+          submit: "Start " + term(:work).downcase, cancel: works_path, modal: true, head_key: "client" %>
   <% end %>
 <% else %>
 <%= parent_page term(:work, count: 2), works_path %>
@@ -18,7 +18,7 @@
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <% if client&.internal? %>
-          <%= client.name %> is internal: one of your own projects.
+          <%= client.name %> is internal: its <%= term(:work, count: 2).downcase %> are your own.
         <% else %>
           It’s active from the start: add its <%= term(:scope_item, count: 2).downcase %> and <%= term(:task, count: 2).downcase %> next.
         <% end %>
@@ -32,7 +32,7 @@
 
   <div class="record-page__main">
     <%= render "record_fields/main_card", layout: layout, record: @work, form_id: "work_form", title: term(:work), hint: "Who it’s for, what kind it is, and what it covers.",
-          submit: "Draft work", cancel: works_path %>
+          submit: "Start " + term(:work).downcase, cancel: works_path %>
   </div>
 
   <aside class="record-page__aside">

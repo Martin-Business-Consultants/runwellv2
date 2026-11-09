@@ -7,7 +7,7 @@ class Users::DeactivationsController < ApplicationController
   before_action :set_person
 
   def create
-    return redirect_back_or_to(users_path, alert: "You can’t deactivate yourself.") if @person == current_user
+    return redirect_back_or_to(users_path, alert: "You can’t deactivate yourself.") if @person == current_user.person
 
     @person.deactivate!
     redirect_back_or_to users_path, notice: "#{@person.display_name} is deactivated."
@@ -22,6 +22,6 @@ class Users::DeactivationsController < ApplicationController
 
   private
     def set_person
-      @person = User.find(params[:user_id])
+      @person = User.people.find(params[:user_id])
     end
 end

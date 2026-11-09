@@ -27,7 +27,7 @@ module Runwellv2
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # Times are stored in UTC and shown in the agency's zone: Eastern unless TIME_ZONE names another
+    # Times are stored in UTC and shown in the install's zone: Eastern unless TIME_ZONE names another
     # (a Rails name like "Pacific Time (US & Canada)" or an IANA one like "America/Chicago"). A client
     # with its own zone (Client#time_zone) sees its portal, client-facing pages and emails in that zone.
     config.time_zone = ENV.fetch("TIME_ZONE", "Eastern Time (US & Canada)")

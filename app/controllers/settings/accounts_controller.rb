@@ -9,12 +9,12 @@ class Settings::AccountsController < ApplicationController
     params: { user: { text_size: Setting::TEXT_SIZES.keys + [ "" ] } }
 
   def show
-    @user = Current.user
+    @user = Current.user.person
   end
 
   def update
     text_size = params.expect(user: [ :text_size ])[:text_size].presence
-    Current.user.update!(text_size: text_size.presence_in(Setting::TEXT_SIZES.keys))
+    Current.user.person.update!(text_size: text_size.presence_in(Setting::TEXT_SIZES.keys))
     redirect_to settings_account_path, notice: text_size ? "Text size set to #{Setting::TEXT_SIZES[text_size]}." : "Text size follows the install's default."
   end
 end

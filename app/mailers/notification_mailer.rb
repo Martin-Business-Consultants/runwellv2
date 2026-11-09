@@ -1,6 +1,4 @@
 class NotificationMailer < ApplicationMailer
-  helper :searches
-
   def notification(notification)
     @notification = notification
     @mention = notification.source

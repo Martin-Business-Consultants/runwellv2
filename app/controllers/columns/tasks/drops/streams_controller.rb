@@ -6,5 +6,7 @@ class Columns::Tasks::Drops::StreamsController < ApplicationController
   def create
     @task.move!(status: "planned", before: params[:before])
     @count = board_tasks.where(status: "planned").count
+  rescue ActiveRecord::RecordInvalid => error
+    refuse_move(error)
   end
 end

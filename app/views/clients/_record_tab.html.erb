@@ -1,4 +1,4 @@
-<%# locals: (client:, tabs: nil) %>
+<%# locals: (client:, work_state:, task_state:, tabs: nil) %>
 <%# A client's tabs and the one showing: on its page, and on its own when a tab is picked
     (ClientsController#show answers a record_tab frame request with just this, not the whole page). %>
 <% tabs ||= client_record_tabs(client) %>
@@ -15,13 +15,13 @@
             <h2 class="card__title"><%= term(:work, count: 2) %></h2>
             <p class="card__hint">What we run for <%= client.name %>.</p>
             <div class="card__action">
-              <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :works, current: @work_state,
+              <%= render "layouts/shared/segmented_filter", label: "Show " + term(:work, count: 2).downcase, param: :works, current: work_state,
                     options: Work.filter_options, counts: Work.filter_counts(scope: client.works) %>
             </div>
           </header>
 
           <div class="card__content">
-            <% works = Work.filtered(state: @work_state, scope: client.works) %>
+            <% works = Work.filtered(state: work_state, scope: client.works) %>
             <% if works.any? %>
               <ul class="record-list">
                 <% works.each do |work| %>
@@ -39,7 +39,7 @@
               </ul>
             <% elsif client.works.exists? %>
               <p class="record-card__empty">
-                None <%= Work.filter_options.to_h.invert.fetch(@work_state).downcase %>.
+                None <%= Work.filter_options.to_h.invert.fetch(work_state).downcase %>.
                 <%= link_to "Show all", client_path(client, works: "all") %>
               </p>
             <% else %>
@@ -55,7 +55,7 @@
           </footer>
         </section>
       <% when "tasks" %>
-        <%= render "tasks/client_section", client: client, state: @task_state %>
+        <%= render "tasks/client_section", client: client, state: task_state %>
       <% when "notes" %>
         <%= render "notes/section", subject: client %>
       <% when "documents" %>

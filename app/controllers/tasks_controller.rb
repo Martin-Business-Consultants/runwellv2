@@ -10,7 +10,7 @@ class TasksController < ApplicationController
     params: { status: STATUS_FILTERS, owner: "string", work: "string", due: %w[overdue today week] },
     description: "Tasks across all work. status: open (default), all, or one status; owner: me (the person you act for), none (nobody's on it), any, or a person’s id or name (tasks they lead or are on); work: a ref or all; due: overdue, today or week (the seven days after today)."
   agent_tool :show_task, on: :show, title: "Show a task"
-  agent_tool :create_task, on: :create, title: "Add a task to a piece of work or a client",
+  agent_tool :create_task, on: :create, route: "/tasks", title: "Add a task to a piece of work or a client",
     description: "Give work_ref for a task on a piece of work, or task.client_id for a task straight on a client. owner_id: who leads it; other_owner_ids: anyone else on it. A task with nobody on it is a request until someone takes it on. A promise with a date is a task with a due date; repeat (weekly, biweekly, monthly, quarterly, yearly) makes the next one each time it's done. contact_id: the client contact who asked for it; source: how it came in (app, phone, email…).",
     params: { work_ref: "string", task: { title: "string!", description: "text", client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", repeat: Cadence::KEYS, custom_fields: {} } }
   agent_tool :update_task, on: :update, title: "Change a task",

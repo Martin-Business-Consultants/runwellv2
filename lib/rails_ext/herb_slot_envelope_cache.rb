@@ -9,7 +9,8 @@ module HerbSlotEnvelopeCache
   def self.views_version
     return :static unless Rails.application.config.enable_reloading
 
-    Dir.glob(Rails.root.join("{app,engines}/**/views/**/*.erb").to_s).map { File.mtime(it).to_r }.max
+    view_dirs = [ Rails.root.join("app/views") ] + InstalledPlugins.loaded.values.map { it.join("app/views") }
+    view_dirs.flat_map { Dir.glob(it.join("**/*.erb").to_s) }.map { File.mtime(it).to_r }.max
   end
 
   def envelope(entry_point, params: {})

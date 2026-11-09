@@ -13,7 +13,7 @@ class ScopeItemsController < ApplicationController
   def show
     @item = ScopeItem.includes(work: :client).find(params[:id])
     @work = @item.work
-    @tasks = @item.tasks.includes(:owner, assignments: :user).order(:due_on, :position)
+    @tasks = @item.tasks.includes(:owner, :client, :contact, :custom_values, :scope_item, work: :client, assignments: :user).order(:due_on, :position)
   end
 
   def create

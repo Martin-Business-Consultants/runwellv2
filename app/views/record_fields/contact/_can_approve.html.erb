@@ -1,4 +1,4 @@
-<%# locals: (record:, form: nil, form_id: nil) %>
+<%# locals: (form: nil, form_id: nil, **) %>
 <% if form %>
   <%= switch_field form, :can_approve, label: "Can approve", hint: "Can say yes for their company when something needs their approval.", form: form_id %>
 <% end %>

@@ -14,7 +14,7 @@
       <h1 class="page-title"><%= @page_title %></h1>
       <p class="record-page__description">
         <%= status_tag @client.status.humanize, highlight: @client.status == "active" %>
-        <span><%= @client.internal? ? "Internal: our own projects" : term(:client) %> since <%= l @client.created_at.to_date, format: :long %></span>
+        <span><%= @client.internal? ? "Internal: our own " + term(:work, count: 2).downcase : term(:client) %> since <%= l @client.created_at.to_date, format: :long %></span>
       </p>
     </div>
     <div class="button-row">
@@ -37,7 +37,7 @@
       </div>
     </section>
 
-    <%= render "clients/record_tab", client: @client, tabs: tabs %>
+    <%= render "clients/record_tab", client: @client, tabs: tabs, work_state: @work_state, task_state: @task_state %>
   </div>
 
   <aside class="record-page__aside">

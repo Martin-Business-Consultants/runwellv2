@@ -4,7 +4,7 @@
 - key: agreements
   repo: Martin-Business-Consultants/runwell-agreements
   name: Agreements
-  description: "Agreements on engagements: a title and rich text under your logo, sent to the client as a PDF and signed by typed name, kept with the engagement."
+  description: "Agreements on work: a title and rich text under your logo, sent to the client as a PDF and signed by typed name, kept with the work."
 - key: ai
   repo: Martin-Business-Consultants/runwell-ai
   name: AI
@@ -21,7 +21,7 @@
 - key: coding
   repo: Martin-Business-Consultants/runwell-coding
   name: Code
-  description: Git repositories on clients, engagements and work; GitHub pull requests, checks, deploys and issues; branches and briefs for coding agents.
+  description: Git repositories on clients, work and tasks; GitHub pull requests, checks, deploys and issues; branches and briefs for coding agents.
 - key: factory
   repo: Martin-Business-Consultants/runwell-factory
   name: Factory
@@ -29,7 +29,7 @@
 - key: google_ads
   repo: Martin-Business-Consultants/runwell-google-ads
   name: Google Ads
-  description: Read-only Google Ads reporting on engagements, shared with the client in the portal, with alerts when an account stops serving.
+  description: Read-only Google Ads reporting on work, shared with the client in the portal, with alerts when an account stops serving.
 - key: meetings
   repo: Martin-Business-Consultants/runwell-meetings
   name: Meetings
@@ -53,8 +53,8 @@
 - key: stripe_billing
   repo: Martin-Business-Consultants/runwell-stripe-billing
   name: Stripe
-  description: Payment links for engagements, by email; a subscription for a service, a one-time payment for fixed work, each marked paid by Stripe or by hand.
+  description: Payment links for work, by email; a subscription for a service, a one-time payment for fixed work, each marked paid by Stripe or by hand.
 - key: time_tracking
   repo: Martin-Business-Consultants/runwell-time-tracking
   name: Time tracking
-  description: Log time on clients, engagements and work, with totals and a weekly timesheet.
+  description: Log time on clients, work and tasks, with totals and a weekly timesheet.

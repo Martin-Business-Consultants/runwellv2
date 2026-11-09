@@ -4,5 +4,5 @@ json.scope_item do
   json.work agent_ref(@work)
   json.tasks @tasks, partial: "tasks/task", as: :task
   json.notes @item.notes.recent.includes(:author), partial: "notes/note", as: :note
-  json.documents @item.documents.recent, partial: "documents/document", as: :document
+  json.documents @item.documents.recent.preloaded, partial: "documents/document", as: :document
 end

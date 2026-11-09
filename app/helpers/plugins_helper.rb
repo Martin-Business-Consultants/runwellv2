@@ -15,14 +15,6 @@ module PluginsHelper
     strip_tags(html.to_s).strip.present? || html.to_s.match?(/<(img|svg|video|iframe|canvas|input|button|select|textarea)\b/i)
   end
 
-  # A plugin's path lambda may return nil to leave its link out (someone without the permission).
-  def plugin_nav_links(**options)
-    safe_join(Runwell::Plugins.enabled_nav_items.values.each_with_index.filter_map do |(label, path), index|
-      url = instance_exec(&path)
-      nav_link_to(label, url, keys: "g #{index + 1}", **options) if url
-    end)
-  end
-
   # The left nav as the install arranges it (NavLayout, Settings > Sidebar) for the signed-in
   # person: [[section label, [[label, url, icon, keys], …]], …], leaving out plugins they hide (Your
   # menu) and links whose path is nil, then sections with nothing left. Plugins' pages are numbered

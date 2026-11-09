@@ -14,7 +14,7 @@ class McpController < ApplicationController
 
     Anything that reaches a client (an email, portal visibility) answers first with a preview (status needs_confirmation). Tell the person what will happen and call again with confirm: true only after they agree. You act as the person's agent, with exactly their role: what you do is recorded as "<Person>'s agent via <this app>". Each result has a `url` so the person can open it.
 
-    An error carries a stable `code` (usage, not_found, auth, forbidden, refused, invalid, read_only, failed) and a `hint` saying what to do; branch on the code, not the wording. A success may carry `next`: suggested follow-up commands with what's known filled in.
+    An error carries a stable `code` (usage, not_found, ambiguous, auth, forbidden, refused, invalid, read_only, paused, rate_limited, failed) and a `hint` saying what to do; branch on the code, not the wording. A success may carry `next`: suggested follow-up commands with what's known filled in.
   TEXT
 
   def create

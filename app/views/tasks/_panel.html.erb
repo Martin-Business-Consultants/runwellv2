@@ -63,7 +63,7 @@
         <dd>
           <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
             <%= hidden_field_tag :inline, "panel", id: nil %>
-            <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other tasks" }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
+            <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other " + term(:task, count: 2).downcase }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
           <% end %>
         </dd>
       <% elsif layout.custom?(key) %>

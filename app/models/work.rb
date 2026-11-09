@@ -91,7 +91,7 @@ class Work < ApplicationRecord
 
   # Gone for good: a closed work with its sections, tasks, notes, documents and history, for
   # an owner (erase_works) who types the ref to mean it; the client keeps one event saying so.
-  def erase!(actor: Current.user, source: Current.source || "app")
+  def erase!(actor: Current.user, source: Current.source)
     raise ArgumentError, "close it first" unless closed?
 
     summary = { ref: ref, title: title, tasks: tasks.count }
@@ -114,7 +114,7 @@ class Work < ApplicationRecord
   def closable? = active?
   def reopenable? = closed?
 
-  def close!(reason: nil, outcome: "completed", actor: Current.user, source: Current.source || "app")
+  def close!(reason: nil, outcome: "completed", actor: Current.user, source: Current.source)
     raise Refused, "#{title} is already #{state_label.downcase}." unless closable?
 
     outcome = outcome.presence_in(CLOSE_OUTCOMES) || "completed"
@@ -125,7 +125,7 @@ class Work < ApplicationRecord
   end
 
   # Closed by mistake, or work starting again: open as it was, its history keeping both.
-  def reopen!(actor: Current.user, source: Current.source || "app")
+  def reopen!(actor: Current.user, source: Current.source)
     raise Refused, "#{title} is open." unless reopenable?
 
     transaction do
@@ -152,7 +152,7 @@ class Work < ApplicationRecord
 
   # Another type (a merge, or someone changing it): the ref it has stays, since it's in emails and
   # links; its history says what it was.
-  def retype!(key, actor: Current.user, source: Current.source || "app")
+  def retype!(key, actor: Current.user, source: Current.source)
     return if label == key.to_s
 
     from = label

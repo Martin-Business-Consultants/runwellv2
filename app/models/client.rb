@@ -10,10 +10,10 @@ class Client < ApplicationRecord
 
   # Restrictions first, so a client with agreed work is refused before anything is destroyed.
   has_many :works, dependent: :restrict_with_error
-  has_many :contacts, dependent: :destroy
   # Its work, on its work or straight on it. A client with work can't be deleted, so
-  # only work straight on it goes with it.
+  # only work straight on it goes with it. Before its contacts, whose notes on them would hold them.
   has_many :tasks, dependent: :destroy
+  has_many :contacts, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }

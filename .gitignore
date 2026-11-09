@@ -44,9 +44,6 @@
 /.kamal/secrets*
 !/.kamal/secrets.example
 
-# A client's real QA source of truth stays local; examples/acme_storage.yml shows the shape.
-/engines/qa/examples/*
-!/engines/qa/examples/acme_storage.yml
 
 # Personal editor, shell and agent config that can land in the checkout
 /.bash_profile
@@ -61,3 +58,5 @@
 /.vscode
 /.mcp.json
 /.claude/
+
+/node_modules

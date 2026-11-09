@@ -4,7 +4,7 @@
 <% if turbo_frame_request_id == "modal" %>
   <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
     <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
-          submit: "Add client", cancel: clients_path, modal: true %>
+          submit: "Add " + term(:client).downcase, cancel: clients_path, modal: true %>
   <% end %>
 <% else %>
 <%= parent_page term(:client, count: 2), clients_path %>
@@ -25,7 +25,7 @@
 
   <div class="record-page__main">
     <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
-          submit: "Add client", cancel: clients_path %>
+          submit: "Add " + term(:client).downcase, cancel: clients_path %>
   </div>
 
   <aside class="record-page__aside">
