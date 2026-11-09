@@ -29,7 +29,13 @@ class DocumentsController < ApplicationController
 
   def update
     document = Document.find(params[:id])
-    document.update!(client_visible: params.dig(:document, :client_visible) == "1")
+    # A plugin's rule may refuse sharing it (a file in a folder kept from the client): said in words.
+    unless document.update(client_visible: params.dig(:document, :client_visible) == "1")
+      alert = document.errors.full_messages.to_sentence
+      return render(turbo_stream: [ turbo_stream_flash(alert: alert), turbo_stream.refresh(request_id: nil) ]) if request.format.turbo_stream?
+
+      return redirect_back(fallback_location: root_path, alert: alert)
+    end
     notice = document.client_visible? ? "The client can see #{document.filename}." : "#{document.filename} is internal."
     # The switch already shows the change: the notice is all there is to answer.
     return render(turbo_stream: turbo_stream_flash(notice: notice)) if request.format.turbo_stream?

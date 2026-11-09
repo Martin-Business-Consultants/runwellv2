@@ -90,7 +90,9 @@ count on its place in the nav or on a particular `g` number. A settings page's
 controller says `require_permission :manage_settings` and starts its view with
 `render "settings/header", current: key`.
 
-Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
+Helpers a plugin's views may use: `document_drop_target(form, class)` and `document_upload_data` (5.12: the dashed drop box and the
+upload controller's data for a `form_with` that posts `document[files][]`, each file sent straight to storage first),
+`document_preview_kind(document)` (5.12), `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
 `side_panel_link_to` (`task, content = nil, **options` or a block: a link that opens the task over the
 page in the side panel, its href the task's own page for a new tab; 5.5, stable),
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
@@ -241,6 +243,7 @@ doesn't stop the others.
 | `ActiveSupport.on_load(:runwell_work) { … }` | 2.0 | Stable |
 | `ActiveSupport.on_load(:runwell_task) { … }` | 2.0 | Stable |
 | `ActiveSupport.on_load(:runwell_user) { … }` | 2.0 | Stable |
+| `ActiveSupport.on_load(:runwell_document) { … }`: rules on a `Document` (a validation refusing `client_visible` is shown in words wherever the switch is flipped) | 5.12 | Stable |
 
 Add associations, scopes and validations there; never columns. Core models a plugin may read and
 call verbs on: `Client`, `Contact`, `Work`, `ScopeItem`, `Task`, `Note`, `Document`, `Event`, `User` (2.0, stable), and

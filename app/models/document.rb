@@ -27,6 +27,8 @@ class Document < ApplicationRecord
   def search_content = nil
   def search_client_id = documentable.is_a?(Client) ? documentable.id : documentable.try(:client_id) || documentable.try(:client)&.id
 
+  ActiveSupport.run_load_hooks(:runwell_document, self)
+
   private
     def file_within_limit
       errors.add(:file, "is over the #{ActiveSupport::NumberHelper.number_to_human_size(MAX_SIZE)} limit") if file.attached? && file.byte_size > MAX_SIZE
