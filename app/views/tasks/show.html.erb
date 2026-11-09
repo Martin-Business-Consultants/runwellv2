@@ -36,6 +36,7 @@
           <span>No <%= term(:client).downcase %> matched yet: edit it to choose one.</span>
         <% end %>
       </p>
+      <%= plugin_slots(:task_notice, task: @task) %>
     </div>
     <div class="button-row">
       <%= render "record_fields/arrange_button" %>

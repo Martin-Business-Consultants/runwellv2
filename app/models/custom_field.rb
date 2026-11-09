@@ -56,13 +56,27 @@ class CustomField < ApplicationRecord
   # Every date field's value that falls in a range of dates, as the viewer may see them: a list of
   # [record, field, date], each record a Client, Work or Task (a work's launch, a client's renewal).
   # What a calendar reads (the plugin contract, 5.5); one query for the values, one per kind of record.
-  def self.dates_between(range, viewer: Current.user)
-    fields = active.where(kind: "date").seen_by(viewer).index_by(&:id)
+  # With client: only what that client sees in its portal (5.6): fields shown to clients, on the
+  # client itself, its work and the tasks shared with it.
+  def self.dates_between(range, viewer: Current.user, client: nil)
+    fields = active.where(kind: "date")
+    fields = (client ? fields.where(client_visible: true) : fields.seen_by(viewer)).index_by(&:id)
     return [] if fields.empty?
 
-    CustomValue.where(custom_field_id: fields.keys, value: range.first.iso8601..range.last.iso8601).includes(:subject)
+    dated = CustomValue.where(custom_field_id: fields.keys, value: range.first.iso8601..range.last.iso8601).includes(:subject)
       .filter_map { |value| value.subject && [ value.subject, fields.fetch(value.custom_field_id), Date.iso8601(value.value) ] }
+    client ? dated.select { |record, _, _| shown_to_client?(record, client) } : dated
   end
+
+  def self.shown_to_client?(record, client)
+    case record
+    when Client then record.id == client.id
+    when Work then record.client_id == client.id
+    when Task then record.client_id == client.id && record.client_visible?
+    else false
+    end
+  end
+  private_class_method :shown_to_client?
 
   def everyone? = visible_to.nil?
   def seen_by_role?(role) = role == "owner" || everyone? || visible_to.include?(role)

@@ -70,6 +70,7 @@ Slots, and the locals each partial gets:
 | `:scope_item_aside` | A section's (scope item's) sidebar, above Details | `scope_item:` | 2.18 |
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
+| `:task_notice` | Under a task's title, on its page and in its side panel: a short note (render nothing when there's nothing to say) | `task:` | 5.6 |
 
 **Removed in 3.0:** `:request_aside` and `:commitment_row`, with the `Commitment` and `Request`
 models: commitments and requests became tasks (see Models). A plugin that filled `:request_aside`
@@ -241,7 +242,24 @@ Custom fields (5.5, stable): `record.custom_field_hash` (key → typed value, on
 person may see) and `CustomField.dates_between(range, viewer: Current.user)`, every date field's
 value inside a range of dates as `[record, field, date]` (the record a `Client`, `Work` or `Task`;
 `field.label`, `field.key`), leaving out fields the viewer may not see. Never read `CustomValue`
-directly: it ignores who may see a field.
+directly: it ignores who may see a field. With `client:` (5.6) it's what that client sees in the
+portal instead: fields shown to clients, on the client, its work and the tasks shared with it.
+
+## Calendars
+
+| Call | Since | Status |
+| --- | --- | --- |
+| `Runwell::Plugins.dates key, ->(range, viewer) { [ Runwell::Plugins::Dated.new(date:, title:, label:, path:, people:) ] }` | 5.6 | Experimental |
+| `Runwell::Plugins.dates_between(range, viewer:)` | 5.6 | Experimental |
+
+A plugin with dated things of its own (a deadline, a booking, a renewal it keeps) offers them to
+calendars: its source gets a range of dates and the viewer (a `User`) and returns what that person
+may see in it. `label` says what kind it is ("Booking"), `path` where it opens (or nil), `people`
+the Users it's about, so a calendar can filter by person and flag someone who's out.
+`dates_between` gathers every switched-on plugin's, each marked with its `plugin` key, dropping
+anything outside the range; a source that raises is reported and left out. It names no client or
+work, so a calendar filtered to one leaves these out, and its search matches their title by the
+text it contains.
 
 ## Search
 

@@ -33,6 +33,7 @@
     <%= hidden_field_tag :inline, "panel", id: nil %>
     <%= form.text_field :title, class: "task-panel__title", required: true, autocomplete: "off", aria: { label: "Title" }, data: { action: "change->form#submit" } %>
   <% end %>
+  <%= plugin_slots(:task_notice, task: task) %>
 
   <%# Its fields in the install's order (template mode, RecordLayout: the working column's, then
       the sidebar's; hidden ones left out). Due and the section save as you change them; the rest

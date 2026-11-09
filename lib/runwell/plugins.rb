@@ -17,7 +17,8 @@
 # where requests' mail comes in), :client_aside
 # (client:), :work_aside (work:, its sidebar), :work_meta (work:, the line under
 # its title: a status badge or a short fact), :task_aside (task:, a piece of work's sidebar),
-# :scope_item_aside (scope_item:) and :note_row (note:), inside each row; in the
+# :scope_item_aside (scope_item:), :task_notice (task:, under a task's title on its page and in its
+# side panel: a short note) and :note_row (note:), inside each row; in the
 # client portal, :portal_home (client:),
 # :portal_work_panel (work:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
@@ -45,7 +46,15 @@ module Runwell
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", work_panel: "Work panel", task_panel: "Work panel",
       email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_work_panel: "Portal work panel",
       client_aside: "Client sidebar", work_aside: "Work sidebar", work_meta: "Work title line",
-      task_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header" }.freeze
+      task_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header",
+      task_notice: "Task notice" }.freeze
+
+    # Something dated a plugin offers to calendars (Runwell::Plugins.dates): a meeting, a renewal,
+    # a deadline of its own. label says what kind ("Meeting"), path where it opens, people who it's
+    # about (Users), plugin which plugin it came from (filled in by the core).
+    Dated = Data.define(:date, :title, :label, :path, :people, :plugin) do
+      def initialize(date:, title:, label:, path: nil, people: [], plugin: nil) = super
+    end
 
     mattr_reader :manifests, default: {}
     mattr_reader :slots, default: Hash.new { |hash, name| hash[name] = {} }
@@ -60,6 +69,7 @@ module Runwell
     mattr_reader :agent_workflows, default: {}
     mattr_reader :ai_prompts, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :shortcuts, default: Hash.new { |hash, key| hash[key] = [] }
+    mattr_reader :date_sources, default: {}
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -115,6 +125,24 @@ module Runwell
         agent_briefs[key] = builder
       end
 
+      # Dated things for a calendar: ->(range, viewer) { [ Runwell::Plugins::Dated.new(date:, title:, label:, path:, people:) ] },
+      # only what the viewer (a User) may see, inside the range of dates.
+      def dates(key, source)
+        date_sources[key] = source
+      end
+
+      # Every switched-on plugin's dated things in a range, as the viewer may see them, each marked
+      # with its plugin. A source that fails is reported and left out, so one plugin can't empty a
+      # calendar.
+      def dates_between(range, viewer:)
+        enabled_date_sources.flat_map do |key, source|
+          Array(source.call(range, viewer)).select { range.cover?(it.date) }.map { it.with(plugin: key) }
+        rescue StandardError => error
+          Rails.error.report(error, context: { plugin: key, extension: :dates })
+          []
+        end
+      end
+
       # A question for the in-app AI's Ask panel, offered on the given record types (Client,
       # Work, Task, ScopeItem) or, with none, on every page.
       def ai_prompt(key, label, types: nil)
@@ -158,6 +186,7 @@ module Runwell
       def enabled_settings_pages = settings_pages.select { |key, _| enabled?(key) }
       def enabled_nightly_tasks = nightly_tasks.select { |key, _| enabled?(key) }
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
+      def enabled_date_sources = date_sources.select { |key, _| enabled?(key) }
       def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
       def enabled_ai_prompts = ai_prompts.select { |key, _| enabled?(key) }.values.flatten.map { [ nil, it ] }
       def enabled_shortcuts = shortcuts.select { |key, _| enabled?(key) }.values.flatten
@@ -173,7 +202,8 @@ module Runwell
           Array(portal_nav_items[key]&.first&.then { "Portal: #{it}" }) +
           Array(settings_pages[key]&.first&.then { "Settings: #{it}" }) +
           Array(("Nightly sync" if nightly_tasks.key?(key))) +
-          Array(("AI brief" if agent_briefs.key?(key)))
+          Array(("AI brief" if agent_briefs.key?(key))) +
+          Array(("Calendar dates" if date_sources.key?(key)))
       end
     end
   end
