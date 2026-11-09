@@ -53,8 +53,6 @@ module TasksHelper
     page_template(html)
   end
 
-  # The owners picker's people, on the page once like the others; each click puts that person on
-  # the task or takes them off (Tasks::AssignmentsController).
   # The status and owner menus' insides, on the page once like their choices: a row carries only
   # its button and an empty <dialog>, and the picker copies this in the first time it opens,
   # pointing the form at that task (picker controller, url value). Without these each row of a
@@ -89,6 +87,9 @@ module TasksHelper
     page_template(html)
   end
 
+  # The owners picker's people, on the page once like the others; each click puts that person on
+  # the task or takes them off (Tasks::AssignmentsController). Each carries their avatar as the
+  # trigger draws it (a <template>), so the picker shows who's on at once, before the answer.
   def task_assignee_options_template
     return if @task_assignee_options_rendered
 
@@ -100,7 +101,8 @@ module TasksHelper
             safe_join([ avatar_image_tag(person, class: "avatar owner-picker__avatar", alt: ""),
               tag.span(person.display_name, class: "popup__label"),
               icon_tag("check", class: "checked") ])
-          end
+          end +
+          tag.template(person_tag(person), data: { picker_avatar: true })
         end
       end)
     end

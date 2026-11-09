@@ -72,6 +72,8 @@
 .owner-picker__trigger:hover { background: var(--layer-2); }
 .owner-picker__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .owner-picker__empty .icon { width: .8rem; height: .8rem; }
+.owner-picker__empty[hidden] { display: none; }
+.owner-picker__stack { display: contents; }
 .owner-stack { flex: 0 0 auto; vertical-align: middle; }
 .owner-stack .avatar + .avatar { margin-left: -.35rem; }
 .owner-stack > :first-child { position: relative; z-index: 1; }
@@ -336,3 +338,8 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* The description (record_fields/task/description) takes the panel's full width under its label. */
 .task-panel__details dd.record-fields__prose { grid-column: 1 / -1; }
 .task-panel__title--static { margin: 0; padding: 0; }
+
+/* A task whose new status takes it out of the list it's in (picker controller): it fades at once,
+   before the answer removes it. */
+.task-leaving { opacity: .4; transition: opacity .2s ease; }
+@media (prefers-reduced-motion: reduce) { .task-leaving { transition: none; } }

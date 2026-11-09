@@ -220,7 +220,7 @@ Back, refresh and links work, and there's no client-side router:
   still opens the task's page). The layout renders the panel on a full load; a request for the
   `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
   action). Esc or ✕ closes it (Back if it was opened here), and it follows `j` / `k`
-  (`keyboard:select`). It loads by setting its frame's `src` and records the address through
+  (`keyboard:select`), with the tasks above and below fetched ahead (as a hovered task's link is). It loads by setting its frame's `src` and records the address through
   Turbo's history (no page visit runs under it). Its fields save on change with `inline=panel`,
   answered by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows
 - **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) loads the new page
@@ -374,7 +374,9 @@ in place with `render "tasks/owner_picker", task:`, a menu where each click puts
 takes them off (`Tasks::AssignmentsController`); the first on leads, and taking off the lead hands
 it on. Setting `owner_id` directly replaces the lead and keeps the rest; `other_owner_ids` sets the
 rest. Show them with `task_owners_tag task` (preload `assignments: :user`). A task's status
-changes in place with `tasks/status_dot`.
+changes in place with `tasks/status_dot`. Both pickers show a choice before the server answers
+(`picker` controller): the avatars redraw from each person's avatar template, a row a new status
+takes out of its list fades, and a save that fails outright is put back.
 
 Filters on an index page are Fizzy's quick filters above the list, not
 buttons inside the card: a row of

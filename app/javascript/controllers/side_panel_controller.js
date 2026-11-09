@@ -13,8 +13,10 @@ import { Controller } from "@hotwired/stimulus"
 //
 // Hovering a task's link fetches its panel ahead (prefetch, after a short pause, kept 10 seconds),
 // and the frame's own request then takes that response instead of asking again (Turbo's hand-off,
-// event.detail.fetchRequest in turbo:before-fetch-request, as its link prefetching does). Any change
-// on the page (a form sent, a stream arriving) drops what was fetched, so a panel is never stale.
+// event.detail.fetchRequest in turbo:before-fetch-request, as its link prefetching does). While the
+// panel is open, the tasks just above and below the one showing are fetched the same way, so j / k
+// follows without waiting. Any change on the page (a form sent, a stream arriving) drops everything
+// fetched, so a panel is never stale.
 //
 // It shows at once when a task is clicked (a placeholder with its title, from the layout's
 // template) and eases in; the task's own panel fades in over it when it arrives. Its contents cross-fade when it follows another task (the panel
@@ -22,6 +24,7 @@ import { Controller } from "@hotwired/stimulus"
 // way out (Turbo's pausable turbo:before-frame-render), then the new one comes in.
 const PREFETCH_DELAY = 60
 const PREFETCH_TTL = 10_000
+const PREFETCH_KEPT = 4
 
 export default class extends Controller {
   static targets = [ "frame", "placeholder" ]
@@ -39,7 +42,8 @@ export default class extends Controller {
     this.hovered = this.hovered.bind(this)
     this.unhovered = this.unhovered.bind(this)
     this.usePrefetched = this.usePrefetched.bind(this)
-    this.dropPrefetched = () => { this.prefetched = null }
+    this.prefetched = new Map
+    this.dropPrefetched = () => { this.prefetched.clear() }
     this.element.addEventListener("mouseover", this.hovered, { passive: true })
     this.element.addEventListener("mouseout", this.unhovered, { passive: true })
     if (this.hasFrameTarget) this.frameTarget.addEventListener("turbo:before-fetch-request", this.usePrefetched)
@@ -78,12 +82,14 @@ export default class extends Controller {
     clearTimeout(this.hoverTimer)
   }
 
-  // The frame asking for a panel fetched on hover: hand it that response (once).
+  // The frame asking for a panel fetched ahead: hand it that response (once: a body reads once).
   usePrefetched(event) {
-    const prefetched = this.prefetched
-    this.prefetched = null
-    if (event.target !== this.frameTarget || !prefetched) return
-    if (prefetched.url !== event.detail.url.toString() || Date.now() - prefetched.at > PREFETCH_TTL) return
+    if (event.target !== this.frameTarget) return
+
+    const url = event.detail.url.toString()
+    const prefetched = this.prefetched.get(url)
+    this.prefetched.delete(url)
+    if (!prefetched || Date.now() - prefetched.at > PREFETCH_TTL) return
 
     event.detail.fetchRequest = { response: prefetched.response }
   }
@@ -137,6 +143,7 @@ export default class extends Controller {
     this.#load(url)
     this.#record("push", url)
     this.openedHere = true
+    this.#prefetchAround(event.target.closest?.("[data-filter-target~=item]"))
   }
 
   // j / k with the panel open: it follows the row you move to, without adding to history.
@@ -148,6 +155,7 @@ export default class extends Controller {
     const url = this.#urlFor(id)
     this.#load(url)
     this.#record("replace", url)
+    this.#prefetchAround(target)
   }
 
   close(event) {
@@ -211,17 +219,34 @@ export default class extends Controller {
     this.frameTarget.replaceChildren(placeholder)
   }
 
+  // The tasks just before and after this item in the page's list (the items j / k move through),
+  // fetched once the panel's own request is on its way.
+  #prefetchAround(item) {
+    if (!item) return
+
+    const items = Array.from(document.querySelectorAll("[data-filter-target~=item]")).filter(each => each.checkVisibility?.() ?? each.offsetParent)
+    const at = items.indexOf(item)
+    if (at < 0) return
+
+    for (const neighbour of [ items[at + 1], items[at - 1] ]) {
+      this.#prefetch(neighbour?.querySelector("[data-side-panel-task-param]")?.dataset.sidePanelTaskParam)
+    }
+  }
+
   #prefetch(id) {
     if (!id || id === this.#currentId) return
     const url = this.#urlFor(id).toString()
-    if (this.prefetched?.url === url && Date.now() - this.prefetched.at < PREFETCH_TTL) return
+    const kept = this.prefetched.get(url)
+    if (kept && Date.now() - kept.at < PREFETCH_TTL) return
 
     const response = fetch(url, {
       credentials: "same-origin", priority: "low",
       headers: { Accept: "text/html, application/xhtml+xml", "Turbo-Frame": this.frameTarget.id, "X-Sec-Purpose": "prefetch" }
     })
-    response.catch(() => { if (this.prefetched?.response === response) this.prefetched = null })
-    this.prefetched = { url, response, at: Date.now() }
+    response.catch(() => { if (this.prefetched.get(url)?.response === response) this.prefetched.delete(url) })
+    this.prefetched.delete(url)
+    this.prefetched.set(url, { url, response, at: Date.now() })
+    while (this.prefetched.size > PREFETCH_KEPT) this.prefetched.delete(this.prefetched.keys().next().value)
   }
 
   #load(url) {
