@@ -20,8 +20,9 @@ class RecordLayout
     "user" => { main: %w[name email_address role], aside: [], required: %w[name email_address role] },
     "contact" => { main: %w[name title email phone], aside: %w[portal_access can_approve], required: %w[name] },
     # The client portal's page for a piece of work: its cards, arranged by an owner viewing the
-    # portal as a client (View as). Any can be hidden.
-    "portal_work" => { main: %w[overview sections tasks], aside: %w[details documents plugins], required: [] }
+    # portal as a client (View as). Any can be hidden; the tasks fill the page, the sections (which
+    # the client orders) down the side, and the overview and details start hidden.
+    "portal_work" => { main: %w[tasks], aside: %w[sections documents plugins], hidden: %w[overview details], required: [] }
   }.freeze
   KINDS = DEFAULTS.keys.freeze
   MODELS = { "client" => "Client", "work" => "Work", "task" => "Task", "user" => "User", "contact" => "Contact", "portal_work" => nil }.freeze
@@ -74,7 +75,7 @@ class RecordLayout
 
   private
     def custom_fields = @custom_fields ||= (MODELS.fetch(kind) ? CustomField.for(MODELS.fetch(kind)).to_a : [])
-    def all_keys = DEFAULTS[kind][:main] + DEFAULTS[kind][:aside] + custom_fields.map { "custom.#{it.key}" }
+    def all_keys = DEFAULTS[kind][:main] + DEFAULTS[kind][:aside] + DEFAULTS[kind].fetch(:hidden, []) + custom_fields.map { "custom.#{it.key}" }
 
     def single_column? = SINGLE_COLUMN.include?(kind)
 
@@ -108,6 +109,7 @@ class RecordLayout
 
     def default_zone(key)
       return "main" if single_column?
+      return "hidden" if DEFAULTS[kind].fetch(:hidden, []).include?(key)
       return "aside" if DEFAULTS[kind][:aside].include?(key) || (key.start_with?("custom.") && CUSTOM_IN_ASIDE.include?(kind))
 
       "main"

@@ -737,7 +737,9 @@ signed `portal_preview` cookie beside the staff session; `Current.preview_contac
 `Portal::BaseController#refuse_writes_while_previewing`), with a bar to stop. A portal controller
 that writes needs nothing for it: any non-GET is refused while previewing. While previewing, an
 owner can also arrange the portal's page for a piece of work (template mode, the `portal_work`
-layout: its cards, any of which can be hidden; a client never sees the controls). A shared task
+layout: its cards, any of which can be hidden; by default the tasks fill the page, grouped by
+section in the client's order, the sections down the side, and the overview and details hidden; a
+client never sees the controls). A shared task
 opens in the same side sheet as staff pages (the `side-panel` controller on the portal's
 `<body>`, `?task=`, `Portal::BaseController#render_portal_side_panel`, `portal/tasks/_panel`),
 read-only and limited to the client's client-visible tasks, its lower half the task's discussion

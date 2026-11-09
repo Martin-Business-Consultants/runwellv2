@@ -7,8 +7,8 @@
 <% counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count } %>
 <% tasks = Task.state_scope(shared, state).by_client_priority.order(:due_on, :position, :id).to_a %>
 <% by_section = tasks.group_by(&:scope_item_id) %>
-<% groups = ScopeItem.in_client_order(work.scope_items).filter_map { |item| [ item.description, by_section[item.id] ] if by_section[item.id] } %>
-<% groups << [ (groups.any? ? "Other " + term(:task, count: 2).downcase : nil), by_section[nil] ] if by_section[nil] %>
+<% groups = ScopeItem.in_client_order(work.scope_items).filter_map { |item| [ item.description, by_section[item.id], dom_id(item, :tasks) ] if by_section[item.id] } %>
+<% groups << [ (groups.any? ? "Other " + term(:task, count: 2).downcase : nil), by_section[nil], "other_tasks" ] if by_section[nil] %>
 <% sortable = true %>
 <section class="card card--flush portal-card">
   <header class="card__head card__head--bordered">
@@ -23,10 +23,10 @@
     </div>
   </header>
   <% if tasks.any? %>
-    <% groups.each do |heading, group| %>
-      <%# herb:key heading.to_s %>
+    <% groups.each do |heading, group, anchor| %>
+      <%# herb:key anchor %>
       <%# Its own drag-and-drop, so a task moves only within its section. %>
-      <div class="portal-task-group" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
+      <div class="portal-task-group" id="<%= anchor %>" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
         <% if heading %>
           <h3 class="portal-task-group__heading"><%= heading %></h3>
         <% end %>

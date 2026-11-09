@@ -5,10 +5,12 @@ module PortalPrioritizing
   extend ActiveSupport::Concern
 
   private
-    def prioritize(record, before)
+    # refresh: whether the page redraws after a drop (morphing, scroll kept), when other things on it
+    # follow the order (a work's tasks are grouped by its sections).
+    def prioritize(record, before, refresh: false)
       record.prioritize!(before: before, by: current_contact)
       if request.format.turbo_stream?
-        head :no_content
+        refresh ? render(turbo_stream: turbo_stream.refresh(request_id: nil)) : head(:no_content)
       else
         redirect_back fallback_location: portal_root_path, notice: "#{record.priority_name} is now #{record.client_rank_label} on your list."
       end

@@ -1,6 +1,7 @@
 <%# locals: (work:) %>
-<%# The work's sections in the client's order of priority (ClientPrioritized): each drags by its
-    grip into the order that matters most to them, which the team sees. Staff viewing as them see the grips inactive. %>
+<%# The work's sections in the client's order of priority (ClientPrioritized), down the side of the
+    page: each drags by its grip into the order that matters most to them, which the team sees, and
+    the tasks beside follow it; each links to its tasks. Staff viewing as them see the grips inactive. %>
 <% items = ScopeItem.in_client_order(work.scope_items) %>
 <% sortable = items.size > 1 %>
 <section class="card card--flush portal-card" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
@@ -21,7 +22,7 @@
               <%= portal_priority_grip(item.description) %>
             <% end %>
             <div class="list-row__content">
-              <p class="list-row__title"><%= item.description %></p>
+              <a href="#<%= dom_id(item, :tasks) %>" class="list-row__title portal-section-link"><%= item.description %></a>
             </div>
             <div class="list-row__actions">
               <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
