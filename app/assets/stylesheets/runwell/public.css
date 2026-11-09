@@ -153,8 +153,13 @@ td a.portal-task-link:hover { text-decoration: underline; }
 .portal-sortable__hint .icon { width: .875rem; height: .875rem; vertical-align: -2px; }
 .portal-sortable--dragging { background: var(--brand-tint, var(--hover)); opacity: .75; }
 .portal-task-group { display: flex; flex-direction: column; scroll-margin-top: var(--s-6); }
-/* A section in the work's sidebar, linking down to its tasks. */
+/* A section in the work's sidebar: clicking it shows only its tasks; the one chosen (or All) is marked. */
 .portal-section-link { color: var(--text); text-decoration: none; }
+.portal-section-link::after { content: ""; position: absolute; inset: 0; }
+a.portal-section-filter { color: var(--text); text-decoration: none; }
+.portal-section-filter:hover { background: var(--hover); }
+.portal-section-filter[aria-current="page"] { background: var(--brand-tint, var(--layer-2)); }
+.portal-section-filter[aria-current="page"] .list-row__title { font-weight: var(--weight-strong); }
 .portal-section-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .portal-task-group + .portal-task-group { border-top: 1px solid var(--line); }
 .portal-task-group__heading { margin: 0; padding: var(--s-3) var(--s-5) 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }

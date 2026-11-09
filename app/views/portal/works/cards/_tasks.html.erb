@@ -1,9 +1,11 @@
-<%# locals: (work:, state:) %>
+<%# locals: (work:, state:, section: nil) %>
 <%# The tasks shared with the client, open by default (the filter swaps ?tasks=), grouped by section
     in the client's order and, within each, in their order of priority (ClientPrioritized: one
     order for all their tasks, the same as on Tasks). Each drags by its grip within its section;
-    each opens in the side sheet, read-only. %>
+    each opens in the side sheet, read-only. section: only that section's tasks (picked in the
+    sections card). %>
 <% shared = work.tasks.client_visible %>
+<% shared = shared.where(scope_item_id: section.id) if section %>
 <% counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count } %>
 <% tasks = Task.state_scope(shared, state).by_client_priority.order(:due_on, :position, :id).to_a %>
 <% by_section = tasks.group_by(&:scope_item_id) %>
@@ -12,7 +14,11 @@
 <% sortable = true %>
 <section class="card card--flush portal-card">
   <header class="card__head card__head--bordered">
-    <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
+    <% if section %>
+      <h2 class="card__title"><%= section.description %></h2>
+    <% else %>
+      <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
+    <% end %>
     <%= layout_text_tag record_layout(:portal_work), "tasks.hint", "What we’re doing on it for you.", tag: :p, class: "card__hint" %>
     <% if tasks.size > 1 %>
       <p class="card__hint portal-sortable__hint">Drag them by <%= icon_tag "grip" %> into the order that matters most to you.</p>
@@ -27,7 +33,7 @@
       <%# herb:key anchor %>
       <%# Its own drag-and-drop, so a task moves only within its section. %>
       <div class="portal-task-group" id="<%= anchor %>" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
-        <% if heading %>
+        <% if heading && section.nil? %>
           <h3 class="portal-task-group__heading"><%= heading %></h3>
         <% end %>
         <div data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_task_priority_path("__id__") %>">

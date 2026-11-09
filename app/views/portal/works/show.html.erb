@@ -30,7 +30,9 @@
       <%# herb:key key %>
       <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>">
         <% if key == "tasks" %>
-          <%= render "portal/works/cards/tasks", work: @work, state: @task_state %>
+          <%= render "portal/works/cards/tasks", work: @work, state: @task_state, section: @section %>
+        <% elsif key == "sections" %>
+          <%= render "portal/works/cards/sections", work: @work, current: @section %>
         <% else %>
           <%= render "portal/works/cards/#{key}", work: @work %>
         <% end %>
@@ -43,7 +45,9 @@
       <%# herb:key key %>
       <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>">
         <% if key == "tasks" %>
-          <%= render "portal/works/cards/tasks", work: @work, state: @task_state %>
+          <%= render "portal/works/cards/tasks", work: @work, state: @task_state, section: @section %>
+        <% elsif key == "sections" %>
+          <%= render "portal/works/cards/sections", work: @work, current: @section %>
         <% else %>
           <%= render "portal/works/cards/#{key}", work: @work %>
         <% end %>

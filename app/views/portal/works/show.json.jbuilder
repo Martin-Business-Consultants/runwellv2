@@ -14,7 +14,8 @@ json.work do
     json.delivery item.delivery_state
   end
 
-  json.tasks @work.tasks.client_visible.by_client_priority.order(:due_on, :position, :id) do |task|
+  json.section_id @section&.id
+  json.tasks @work.tasks.client_visible.then { @section ? it.where(scope_item_id: @section.id) : it }.by_client_priority.order(:due_on, :position, :id) do |task|
     json.id task.id
     json.section_id task.scope_item_id
     json.your_priority task.client_priority
