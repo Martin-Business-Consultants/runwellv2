@@ -27,6 +27,7 @@ Rails.application.config.to_prepare do
     "bookmark" => '<path d="M4.5 2.5h7v11L8 11l-3.5 2.5z" fill="currentColor"/>',
     "bookmark-outline" => '<path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/>',
     "boost" => '<path d="M8 13.5V6M4.5 9.5 8 6l3.5 3.5M4.5 2.5h7"/>',
+    "calendar" => '<rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/>',
     "camera" => '<path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h1.5l1-1.5h3l1 1.5H12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5z"/><circle cx="8" cy="8.25" r="2.25"/>',
     "caret-down" => '<path d="m4.5 6.5 3.5 3.5 3.5-3.5"/>',
     "check" => '<path d="m3.5 8.5 3 3 6-7"/>',

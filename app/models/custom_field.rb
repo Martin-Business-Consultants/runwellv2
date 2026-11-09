@@ -53,6 +53,17 @@ class CustomField < ApplicationRecord
 
   def self.for(model, viewer: Current.user) = active.where(model_type: model.to_s).seen_by(viewer).ordered
 
+  # Every date field's value that falls in a range of dates, as the viewer may see them: a list of
+  # [record, field, date], each record a Client, Work or Task (a work's launch, a client's renewal).
+  # What a calendar reads (the plugin contract, 5.5); one query for the values, one per kind of record.
+  def self.dates_between(range, viewer: Current.user)
+    fields = active.where(kind: "date").seen_by(viewer).index_by(&:id)
+    return [] if fields.empty?
+
+    CustomValue.where(custom_field_id: fields.keys, value: range.first.iso8601..range.last.iso8601).includes(:subject)
+      .filter_map { |value| value.subject && [ value.subject, fields.fetch(value.custom_field_id), Date.iso8601(value.value) ] }
+  end
+
   def everyone? = visible_to.nil?
   def seen_by_role?(role) = role == "owner" || everyone? || visible_to.include?(role)
 

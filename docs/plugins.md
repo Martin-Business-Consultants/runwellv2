@@ -238,6 +238,14 @@ Stripe connects with OAuth (Stripe Connect) through a broker on the install hold
 keys (`STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_SECRET_KEY`), which hands each install its token
 server to server against a PKCE-style verifier.
 
+`runwell-calendar` (Calendar, 5.5) is the reference for reading the core across a range of dates
+and for a private feed. `Calendar::Schedule` gathers everything dated in a range (tasks by due
+date, its own time off, date custom fields through `CustomField.dates_between`, work closed),
+narrowed by query-param filters and the core's fuzzy `Search`, and works out clashes (someone out
+when their task or a launch lands); the page and its tools (`list_calendar`, `show_calendar_day`,
+`add_time_off`) read the same object. Its .ics link is a public controller finding a digest-stored
+token, made only in the browser (`browser_only`).
+
 `runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
 (`Meetings::Priority`: a task, done when the task is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its

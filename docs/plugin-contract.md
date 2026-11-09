@@ -89,6 +89,8 @@ controller says `require_permission :manage_settings` and starts its view with
 `render "settings/header", current: key`.
 
 Helpers a plugin's views may use: `term`, `label_term`, `person_tag`, `status_tag`, `rich_text`,
+`side_panel_link_to` (`task, content = nil, **options` or a block: a link that opens the task over the
+page in the side panel, its href the task's own page for a new tab; 5.5, stable),
 `rich_text_field`, `date_input`, `money`, `money_field`, `secret_field`, `code_block`, `icon_tag`,
 `can?`, `current_record` (the record on screen, or nil; 2.18), `section_nav`, `section_nav_heading`
 and `section_nav_link` (2.21), `popup_menu` (`label:`, `title:`, `fixed:`, a block: the popup a
@@ -234,6 +236,23 @@ doesn't stop the others.
 Add associations, scopes and validations there; never columns. Core models a plugin may read and
 call verbs on: `Client`, `Contact`, `Work`, `ScopeItem`, `Task`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
 `Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
+
+Custom fields (5.5, stable): `record.custom_field_hash` (key → typed value, only the fields the
+person may see) and `CustomField.dates_between(range, viewer: Current.user)`, every date field's
+value inside a range of dates as `[record, field, date]` (the record a `Client`, `Work` or `Task`;
+`field.label`, `field.key`), leaving out fields the viewer may not see. Never read `CustomValue`
+directly: it ignores who may see a field.
+
+## Search
+
+| Call | Since | Status |
+| --- | --- | --- |
+| `Search.new(terms).results`, `Search.new(terms).people` | 5.5 | Experimental |
+
+The core's search, as the search bar uses it: `results` is up to 50 clients, works, tasks and the
+rest, ranked, matching each typed word exactly, by its start ("acm" finds Acme) or within a typo or
+two ("clinet"); `people` is the team whose name or address contains what was typed. Pass
+`fuzzy: false` for exact matches only. The index catches up a moment after a save.
 
 **Changed in 3.0:** `Commitment` and `Request` are gone; both are tasks. A task may sit straight on
 a client: `task.work` can be nil, and `task.client` (a column now, `client_id`) is the one
