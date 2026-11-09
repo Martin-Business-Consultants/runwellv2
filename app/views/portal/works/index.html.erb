@@ -7,8 +7,8 @@
 
 <% if @works.any? %>
   <%# In the client's order of priority (ClientPrioritized): each row drags by its grip (the core's
-      drag-and-drop), posting the row it now sits above. Not while staff are viewing as them. %>
-  <% sortable = !Current.previewing? %>
+      drag-and-drop), posting the row it now sits above. Staff viewing as them see the grips inactive. %>
+  <% sortable = @works.size > 1 %>
   <section class="card card--flush portal-card" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
     <div class="table-wrap">
       <table class="table portal-table" data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_work_priority_path("__id__") %>">
@@ -25,7 +25,7 @@
             <tr data-drag-and-drop-target="item" data-id="<%= work.ref %>">
               <td class="portal-sortable__cell">
                 <% if sortable %>
-                  <span class="portal-sortable__grip" draggable="true" title="Drag to put <%= work.title %> in your order"><%= icon_tag "grip" %></span>
+                  <%= portal_priority_grip(work.title) %>
                 <% end %>
                 <%= link_to work.title, portal_work_path(work), class: "row-link", draggable: "false" %>
               </td>

@@ -9,11 +9,14 @@
 <% by_section = tasks.group_by(&:scope_item_id) %>
 <% groups = ScopeItem.in_client_order(work.scope_items).filter_map { |item| [ item.description, by_section[item.id] ] if by_section[item.id] } %>
 <% groups << [ (groups.any? ? "Other " + term(:task, count: 2).downcase : nil), by_section[nil] ] if by_section[nil] %>
-<% sortable = !Current.previewing? %>
+<% sortable = true %>
 <section class="card card--flush portal-card">
   <header class="card__head card__head--bordered">
     <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
     <%= layout_text_tag record_layout(:portal_work), "tasks.hint", "What we’re doing on it for you.", tag: :p, class: "card__hint" %>
+    <% if tasks.size > 1 %>
+      <p class="card__hint portal-sortable__hint">Drag them by <%= icon_tag "grip" %> into the order that matters most to you.</p>
+    <% end %>
     <div class="card__action">
       <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
             options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: counts %>
@@ -33,7 +36,7 @@
               <%# herb:key task.id %>
               <li class="portal-sortable__item" data-drag-and-drop-target="item" data-id="<%= task.id %>">
                 <% if sortable && group.size > 1 %>
-                  <span class="portal-sortable__grip" draggable="true" title="Drag to put <%= task.title %> in your order"><%= icon_tag "grip" %></span>
+                  <%= portal_priority_grip(task.title) %>
                 <% end %>
                 <%= portal_task_link_to(task) do %>
                   <span class="list-row">
