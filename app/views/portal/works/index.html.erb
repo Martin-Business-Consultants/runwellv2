@@ -47,7 +47,7 @@
   <%= render "layouts/shared/empty", text: { "active" => "Nothing active right now.", "closed" => "Nothing closed yet." }.fetch(@state, "Nothing here yet.") %>
 <% end %>
 
-<% plugins = plugin_slots(:portal_home, client: current_contact.client) %>
+<% plugins = visible_plugin_slots(:portal_home, client: current_contact.client) %>
 <% if plugins.present? %>
   <section class="card portal-card portal-slot">
     <%= plugins %>

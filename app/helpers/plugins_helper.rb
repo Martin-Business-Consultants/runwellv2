@@ -5,6 +5,16 @@ module PluginsHelper
     safe_join(Runwell::Plugins.enabled_slots(name).values.map { render(it, **locals) })
   end
 
+  # The same, leaving out a plugin that had nothing to show (its partial drew only whitespace,
+  # comments or empty wrappers), so a box around the slot is drawn only when something's in it.
+  def visible_plugin_slots(name, **locals)
+    safe_join(Runwell::Plugins.enabled_slots(name).values.map { render(it, **locals) }.select { visible_markup?(it) })
+  end
+
+  def visible_markup?(html)
+    strip_tags(html.to_s).strip.present? || html.to_s.match?(/<(img|svg|video|iframe|canvas|input|button|select|textarea)\b/i)
+  end
+
   # A plugin's path lambda may return nil to leave its link out (someone without the permission).
   def plugin_nav_links(**options)
     safe_join(Runwell::Plugins.enabled_nav_items.values.each_with_index.filter_map do |(label, path), index|
