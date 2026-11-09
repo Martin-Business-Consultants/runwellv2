@@ -4,7 +4,7 @@
 # email or the portal arrives that way, with who asked (`contact`, or an unmatched sender) and how
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
-  include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable
+  include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
   include LiveRefreshes, RecordsCreation
 
   # A request from outside (a client in the portal or through their agent, or an email): set by

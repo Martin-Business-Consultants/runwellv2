@@ -1,5 +1,5 @@
 json.merge! agent_ref(work)
-json.extract! work, :title, :label, :shape
+json.extract! work, :title, :label, :shape, :cadence
 json.type_name work.label_name
 json.state work.state
 json.state_label work.state_label

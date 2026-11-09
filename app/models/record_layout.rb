@@ -15,8 +15,8 @@ class RecordLayout
   # Each kind's fields as the core arranges them, and those that can't be hidden.
   DEFAULTS = {
     "client" => { main: %w[name], aside: %w[status time_zone internal], required: %w[name] },
-    "work" => { main: %w[title description], aside: %w[client label shape], required: %w[title client] },
-    "task" => { main: %w[title description], aside: %w[status due lead others home requested_by source client_visible], required: %w[title source] },
+    "work" => { main: %w[title description], aside: %w[client label shape cadence], required: %w[title client] },
+    "task" => { main: %w[title description], aside: %w[status due repeat lead others home requested_by source client_visible], required: %w[title source] },
     "user" => { main: %w[name email_address role], aside: [], required: %w[name email_address role] },
     "contact" => { main: %w[name title email phone], aside: %w[portal_access can_approve], required: %w[name] },
     # The client portal's page for a piece of work: its cards, arranged by an owner viewing the

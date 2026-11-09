@@ -10,20 +10,21 @@ module Setting::Terminology
     terminology.dig(key.to_s, form).presence || I18n.t("terms.#{key}.#{form}")
   end
 
+  # Each kind of work's names, prefix and whether it's offered are its WorkType's (Settings >
+  # Names > Types). A key no type has (a plugin's stale value) reads as its words.
   def label_name(label, count: 1)
-    form = count == 1 ? "one" : "other"
-    terminology.dig("labels", label.to_s, form).presence || I18n.t("terms.labels.#{label}.#{form}")
+    WorkType.named(label)&.name(count: count) || label.to_s.humanize.then { count == 1 ? it : it.pluralize }
   end
 
   def label_prefix(label)
-    terminology.dig("labels", label.to_s, "prefix").presence&.upcase || I18n.t("terms.labels.#{label}.prefix")
+    WorkType.named(label)&.prefix
   end
 
   def label_enabled?(label)
-    terminology.dig("labels", label.to_s, "enabled") != false
+    WorkType.named(label)&.archived? == false
   end
 
   def enabled_labels
-    Work::LABELS.select { label_enabled?(it) }
+    WorkType.active_keys
   end
 end

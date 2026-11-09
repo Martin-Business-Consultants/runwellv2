@@ -1,3 +1,3 @@
 json.summary "What this install calls things"
 json.terms(Setting::TERMS.to_h { [ it, { one: term(it.to_sym), other: term(it.to_sym, count: 2) } ] })
-json.labels(Work::LABELS.to_h { [ it, { one: label_term(it), other: label_term(it, count: 2), prefix: Setting.current.label_prefix(it), enabled: Setting.current.enabled_labels.include?(it) } ] })
+json.labels(WorkType.cached.to_h { [ it.key, { one: it.name_one, other: it.name_other, prefix: it.prefix, enabled: !it.archived? } ] })

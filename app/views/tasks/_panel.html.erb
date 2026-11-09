@@ -36,7 +36,7 @@
   <%= plugin_slots(:task_notice, task: task) %>
 
   <%# Its fields in the install's order (template mode, RecordLayout: the working column's, then
-      the sidebar's; hidden ones left out). Due and the section save as you change them; the rest
+      the sidebar's; hidden ones left out). Due, repeats and the section save as you change them; the rest
       are the show page's own (record_fields/task/*), pickers included. %>
   <% layout = record_layout(:task) %>
   <dl class="details task-panel__details">
@@ -48,6 +48,14 @@
           <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_due), class: "task-panel__field", data: { controller: "form" } do |form| %>
             <%= hidden_field_tag :inline, "panel", id: nil %>
             <%= date_input form, :due_on, aria: { label: "Due" }, data: { action: "change->form#submit" } %>
+          <% end %>
+        </dd>
+      <% elsif key == "repeat" %>
+        <dt>Repeats</dt>
+        <dd>
+          <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_repeat), class: "task-panel__field", data: { controller: "form" } do |form| %>
+            <%= hidden_field_tag :inline, "panel", id: nil %>
+            <%= form.select :repeat, Cadence.options, { include_blank: "Never" }, aria: { label: "Repeats" }, data: { action: "change->form#submit" } %>
           <% end %>
         </dd>
       <% elsif key == "home" && task.work %>

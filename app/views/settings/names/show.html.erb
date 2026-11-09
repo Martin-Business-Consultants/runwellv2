@@ -37,33 +37,68 @@
   <div><button type="submit" class="btn btn--primary" data-form-target="submit">Save names</button></div>
 <% end %>
       <% when "types" %>
-<%= form_with url: settings_names_path, method: :patch, class: "settings-form", data: { controller: "form" } do %>
   <section class="settings-section">
     <header class="settings-section__head">
       <h2><%= term(:work) %> types</h2>
-      <p class="settings-section__description">Each type has its own name and ref prefix. A new prefix applies to new refs only; existing refs keep theirs. Switch off a type you don’t use.</p>
+      <p class="settings-section__description">The kinds of <%= term(:work, count: 2).downcase %> you run: each with its own name, ref prefix and way of running. New <%= term(:work).downcase %> starts as its type says. A new prefix applies to new refs only. <%= WorkType.cached.select(&:system?).map(&:name_one).to_sentence %> are always there: switch off any you don’t use.</p>
+      <div class="settings-section__actions">
+        <span class="badge badge--outline"><%= pluralize(@work_types.count { !it.archived? }, "type") %> in use</span>
+      </div>
     </header>
 
-    <div class="stack">
-      <div class="settings-names__type settings-names__type--head" aria-hidden="true">
-        <span>Use</span><span>Singular</span><span>Plural</span><span>Prefix</span>
-      </div>
-      <% Work::LABELS.each do |label| %>
-        <%# herb:key label %>
-        <% field = "terminology[labels][" + label + "]" %>
-        <% id = "terminology_labels_" + label %>
-        <div class="settings-names__type">
-          <%= switch_tag(title: "Use this type", screen_reader_label: "Use #{t("terms.labels.#{label}.one")}") { hidden_field_tag(field + "[enabled]", "0", id: id + "_enabled_off") + check_box_tag(field + "[enabled]", "1", @setting.label_enabled?(label), id: id + "_enabled", role: "switch") } %>
-          <%= text_field_tag field + "[one]", @setting.terminology.dig("labels", label, "one"), id: id + "_one", placeholder: t("terms.labels.#{label}.one"), autocomplete: "off", aria: { label: "Singular" } %>
-          <%= text_field_tag field + "[other]", @setting.terminology.dig("labels", label, "other"), id: id + "_other", placeholder: t("terms.labels.#{label}.other"), autocomplete: "off", aria: { label: "Plural" } %>
-          <%= text_field_tag field + "[prefix]", @setting.terminology.dig("labels", label, "prefix"), id: id + "_prefix", placeholder: t("terms.labels.#{label}.prefix"), autocomplete: "off", maxlength: 4, aria: { label: "Ref prefix" } %>
-        </div>
-      <% end %>
-    </div>
-  </section>
+    <%# Dragged by the handle into a new place (the core's drag-and-drop controller, sortable: each
+        drop posts the type it now sits before). The order is the pickers' and filters'. %>
+    <ul class="settings-list settings-fields" data-controller="drag-and-drop"
+      data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= settings_work_type_position_path("__id__") %>"
+      data-drag-and-drop-dragged-item-class="drag-and-drop__dragged-item" data-drag-and-drop-hover-container-class="drag-and-drop__hover-container"
+      data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
+      <%= render partial: "settings/work_types/work_type", collection: @work_types, as: :work_type, locals: { others: @work_types } %>
+    </ul>
 
-  <div><button type="submit" class="btn btn--primary" data-form-target="submit">Save types</button></div>
-<% end %>
+    <details class="settings-fold">
+      <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add a type</summary>
+      <%= form_with model: WorkType.new, url: settings_work_types_path, scope: :work_type, namespace: "new_work_type", class: "settings-subform" do |form| %>
+        <div class="field-row">
+          <div class="field">
+            <%= form.label :name_one, "Name", class: "field__label" %>
+            <%= form.text_field :name_one, required: true, autocomplete: "off", placeholder: "Retainer", maxlength: 40 %>
+          </div>
+          <div class="field">
+            <%= form.label :name_other, "Plural", class: "field__label" %>
+            <%= form.text_field :name_other, autocomplete: "off", placeholder: "Retainers", maxlength: 40 %>
+          </div>
+          <div class="field">
+            <%= form.label :prefix, "Ref prefix", class: "field__label" %>
+            <%= form.text_field :prefix, required: true, autocomplete: "off", placeholder: "R", maxlength: 4 %>
+          </div>
+        </div>
+        <div class="field">
+          <%= form.label :description, "What it’s for", class: "field__label" %>
+          <%= form.text_field :description, autocomplete: "off", placeholder: "A monthly arrangement for ongoing help" %>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <%= form.label :shape, "Runs as", class: "field__label" %>
+            <%= form.select :shape, WorkType::SHAPES.invert.to_a, {} %>
+          </div>
+          <div class="field">
+            <%= form.label :cadence, "How often", class: "field__label" %>
+            <%= form.select :cadence, Cadence.options, { include_blank: "No set period" } %>
+          </div>
+        </div>
+        <label class="checkbox">
+          <%= form.check_box :check_in %>
+          <span>A check-in each period: a task repeating for whoever starts the <%= term(:work).downcase %>, to look back on the period just gone (recurring only)</span>
+        </label>
+        <div class="field">
+          <%= form.label :starting_sections, "Starts with these " + term(:scope_item, count: 2).downcase, class: "field__label" %>
+          <%= form.text_field :starting_sections, autocomplete: "off", placeholder: "Monthly report, Requests" %>
+          <p class="field__hint">Separated by commas. Leave blank to start with none.</p>
+        </div>
+        <div><button type="submit" class="btn btn--primary btn--sm">Add type</button></div>
+      <% end %>
+    </details>
+  </section>
       <% end %>
     </div>
   </turbo-frame>

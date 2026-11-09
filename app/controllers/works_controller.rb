@@ -4,16 +4,17 @@ class WorksController < ApplicationController
   require_permission :close_works, only: %i[close reopen]
   agent_tool :list_works, on: :index, title: "List works",
     description: "open (the default), internal (open, on the business itself), closed or all.",
-    params: { state: Work::FILTERS, label: Work::LABELS + %w[all] }
+    params: { state: Work::FILTERS, label: -> { Work.labels + %w[all] } }
   agent_tool :show_work, on: :show, title: "Show a piece of work",
     description: "A piece of work with its sections (scope items), tasks, notes, documents and history.",
     next_tools: %i[add_scope_item create_task]
   agent_tool :create_work, on: :create, route: "/work", title: "Start a piece of work",
-    description: "A project, work order or service for a client (or, for the internal client, your own project). It's active from the start: add sections (add_scope_item) to group its tasks, and tasks (create_task).",
-    params: { work: { client_id: "integer!", label: Work::LABELS, shape: Work::SHAPES, title: "string!", description: "text", custom_fields: {} } },
+    description: "A piece of work of one of the install's types (label: list_work_types; project, work order and service to start) for a client (or, for the internal client, your own project). It's active from the start, with its type's starting sections, and runs as its type says (shape fixed or recurring, cadence for recurring) unless shape or cadence is sent: add sections (add_scope_item) to group its tasks, and tasks (create_task).",
+    params: { work: { client_id: "integer!", label: -> { WorkType.active_keys }, shape: Work::SHAPES, cadence: Cadence::KEYS, title: "string!", description: "text", custom_fields: {} } },
     next_tools: %i[add_scope_item create_task]
   agent_tool :update_work, on: :update, title: "Change a piece of work",
-    params: { work: { title: "string", description: "text", label: Work::LABELS, shape: Work::SHAPES, custom_fields: {} } }
+    description: "label moves it to another type (its ref stays); cadence is how often recurring work comes round. Its shape is set when it starts.",
+    params: { work: { title: "string", description: "text", label: -> { WorkType.active_keys }, cadence: Cadence::KEYS, custom_fields: {} } }
   agent_tool :delete_work, on: :destroy, title: "Delete a piece of work",
     description: "Only while it has no tasks: its sections, notes and documents go with it. Otherwise close it."
   agent_tool :close_work, on: :close, title: "Mark a piece of work complete, or cancel it",
@@ -30,7 +31,7 @@ class WorksController < ApplicationController
   def index
     @view = index_view
     @state = Work.filter_from(params)
-    @label = params[:label].presence_in(Work::LABELS) || "all"
+    @label = params[:label].presence_in(Work.labels) || "all"
     scope = Work.filtered(state: @state, label: @label, scope: Work.includes(:custom_values))
     @column_widths = column_widths(scope, :title, :client) if @view == "table"
     @works = paginate sorted(scope)
@@ -52,7 +53,7 @@ class WorksController < ApplicationController
   end
 
   def new
-    @work = Work.new(client_id: params[:client_id], label: params[:label].presence || "work_order")
+    @work = Work.new(client_id: params[:client_id], label: params[:label].presence_in(WorkType.active_keys) || WorkType.active_keys.first)
   end
 
   def create
@@ -113,5 +114,5 @@ class WorksController < ApplicationController
     scope = action_name == "show" ? Work.includes(scope_items: :tasks) : Work
     @work = scope.find_by_ref!(params[:ref])
   end
-  def work_params = params.expect(work: [ :client_id, :label, :shape, :title, :description, custom_fields: {} ])
+  def work_params = params.expect(work: [ :client_id, :label, :shape, :cadence, :title, :description, custom_fields: {} ])
 end

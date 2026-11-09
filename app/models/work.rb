@@ -7,8 +7,13 @@ class Work < ApplicationRecord
 
   mentionable_fields :description
 
-  LABELS = %w[project work_order service].freeze
-  SHAPES = %w[fixed recurring].freeze
+  # The system types' keys. Deprecated (5.9): an install has its own types now (WorkType, Settings
+  # > Names > Types); ask Work.labels for every key. Kept for plugins until 7.0.
+  LABELS = WorkType::SYSTEM_KEYS
+  SHAPES = WorkType::SHAPES.keys.freeze
+
+  # Every work type's key, archived ones too (work keeps a type that's switched off).
+  def self.labels = WorkType.keys
 
   belongs_to :client
   belongs_to :created_by, class_name: "User", optional: true
@@ -16,8 +21,19 @@ class Work < ApplicationRecord
   has_many :tasks, -> { order(:position) }, dependent: :destroy
 
   validates :title, presence: true
-  validates :label, inclusion: { in: LABELS }
+  validates :label, inclusion: { in: ->(_) { Work.labels }, message: "isn’t one of the types in Settings" }
   validates :shape, inclusion: { in: SHAPES }
+  validates :cadence, inclusion: { in: Cadence::KEYS }, allow_nil: true
+  validate :type_is_offered, if: -> { new_record? || will_save_change_to_label? }
+
+  normalizes :cadence, with: ->(cadence) { cadence.to_s.presence }
+  # No shape until it's given one or takes its type's (the column's default is only a backstop).
+  attribute :shape, :string, default: nil
+  # New work runs as its type says unless it was told otherwise: its shape and how often.
+  before_validation :take_type_defaults, on: :create
+  before_validation { self.cadence = nil unless recurring? }
+  after_create :start_from_type
+  after_update :record_retype, if: :saved_change_to_label?
 
   scope :open, -> { where(closed_at: nil) }
   scope :closed, -> { where.not(closed_at: nil) }
@@ -29,7 +45,7 @@ class Work < ApplicationRecord
 
   def self.filtered(state: "open", label: "all", scope: all)
     state = FILTERS.include?(state) ? state : "open"
-    scope = scope.where(label: label) if LABELS.include?(label)
+    scope = scope.where(label: label) if labels.include?(label)
     scope = case state
     when "all" then scope
     when "closed" then scope.closed
@@ -47,7 +63,7 @@ class Work < ApplicationRecord
 
   # How many pieces of work each filter choice would show: one grouped query.
   def self.filter_counts(label: "all", scope: all)
-    scope = scope.where(label: label) if LABELS.include?(label)
+    scope = scope.where(label: label) if labels.include?(label)
     tally = scope.joins(:client).group(Arel.sql("works.closed_at IS NULL"), "clients.internal").count
     open = tally.select { |(open, _), _| open == 1 || open == true }.values.sum
     internal = tally.select { |(open, internal), _| (open == 1 || open == true) && (internal == 1 || internal == true) }.values.sum
@@ -127,6 +143,22 @@ class Work < ApplicationRecord
   end
 
   def label_name = Setting.current.label_name(label)
+  def work_type = WorkType.named(label)
+
+  # How it runs, in words: "Fixed scope", or "Recurring, monthly".
+  def runs = recurring? ? [ "Recurring", Cadence.name(cadence)&.downcase ].compact.join(", ") : "Fixed scope"
+
+  # Another type (a merge, or someone changing it): the ref it has stays, since it's in emails and
+  # links; its history says what it was.
+  def retype!(key, actor: Current.user, source: Current.source || "app")
+    return if label == key.to_s
+
+    from = label
+    transaction do
+      update_columns(label: key.to_s, updated_at: Time.current)
+      record_event!("work.retyped", actor: actor, source: source, payload: { from: from, to: key.to_s })
+    end
+  end
 
   # Every file the client may see for this work: its own, its sections', its work's, and
   # the client's.
@@ -147,4 +179,40 @@ class Work < ApplicationRecord
 
   private
     def live_streams = [ self, :works, client ]
+
+    def record_retype
+      record_event!("work.retyped", payload: { from: label_before_last_save, to: label })
+    end
+
+    def type_is_offered
+      type = work_type
+      errors.add(:base, "#{type.name_one} is switched off in Settings: pick another type") if type&.archived?
+    end
+
+    def take_type_defaults
+      type = work_type
+      self.shape = "fixed" if type.nil? && shape.blank?
+      return unless type
+
+      self.shape = type.shape if shape.blank?
+      self.cadence ||= type.cadence if shape == "recurring"
+    end
+
+    # What its type starts it with: its sections, and for recurring work with a check-in, a task
+    # repeating each period for whoever started it to look back on the one just gone. Not for an
+    # import, which brings its own.
+    def start_from_type
+      type = work_type
+      return if type.nil? || Current.source == "import"
+
+      type.starting_sections.to_a.each { scope_items.create!(description: it) } if scope_items.none?
+      start_check_in(type) if type.check_in? && recurring? && cadence.present?
+    end
+
+    def start_check_in(type)
+      person = created_by&.then { it.agent_owner || it }
+      tasks.create!(title: "#{Cadence.name(cadence)} check-in",
+        description: "<p>How did this #{Cadence.period(cadence)} go? Note what was done, what’s next and anything the #{Setting.current.term(:client).downcase} should hear.</p>",
+        due_on: Cadence.advance(Date.current, cadence), repeat: cadence, owner: person, source: "app")
+    end
 end

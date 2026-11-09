@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_09_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -554,6 +554,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_200000) do
     t.string "source", default: "app", null: false
     t.string "sender_name"
     t.string "sender_email"
+    t.string "repeat"
     t.index ["client_id"], name: "index_tasks_on_client_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
@@ -640,6 +641,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_200000) do
     t.index ["created_by_id"], name: "index_webhook_endpoints_on_created_by_id"
   end
 
+  create_table "work_types", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name_one", null: false
+    t.string "name_other", null: false
+    t.string "prefix", null: false
+    t.text "description"
+    t.boolean "system", default: false, null: false
+    t.string "shape", default: "fixed", null: false
+    t.string "cadence"
+    t.boolean "check_in", default: false, null: false
+    t.json "starting_sections"
+    t.integer "position", null: false
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_work_types_on_key", unique: true
+    t.index ["position"], name: "index_work_types_on_position"
+    t.index ["prefix"], name: "index_work_types_on_prefix", unique: true
+  end
+
   create_table "works", force: :cascade do |t|
     t.integer "client_id", null: false
     t.string "ref", null: false
@@ -654,6 +675,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_200000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "close_outcome"
+    t.string "cadence"
     t.index ["client_id"], name: "index_works_on_client_id"
     t.index ["created_by_id"], name: "index_works_on_created_by_id"
     t.index ["ref"], name: "index_works_on_ref", unique: true

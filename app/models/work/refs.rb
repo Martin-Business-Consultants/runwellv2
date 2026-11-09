@@ -1,5 +1,6 @@
-# Human refs like WO-12, P-3, S-4: one sequence per label. The prefix comes from Settings >
-# Names; changing it applies to new refs only, since refs already given are in emails and links.
+# Human refs like WO-12, P-3, S-4: one sequence per prefix. The prefix is the work's type's
+# (WorkType, Settings > Names > Types); changing it applies to new refs only, since refs already
+# given are in emails and links.
 module Work::Refs
   extend ActiveSupport::Concern
 
@@ -16,9 +17,8 @@ module Work::Refs
 
   def assign_ref
     return if ref.present?
-    return unless label.in?(Work::LABELS)
+    prefix = Setting.current.label_prefix(label) or return
 
-    prefix = Setting.current.label_prefix(label)
     last = Work.where("ref LIKE ?", "#{prefix}-%")
                      .pluck(:ref).map { |r| r.split("-").last.to_i }.max || 0
     self.ref = "#{prefix}-#{last + 1}"

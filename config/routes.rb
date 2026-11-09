@@ -75,6 +75,13 @@ Rails.application.routes.draw do
     resource :roles, only: :show
     resource :passwordless, only: :update
     resource :names, only: %i[show update]
+    resources :work_types, only: %i[index create update destroy] do
+      scope module: :work_types do
+        resource :position, only: :create
+        resource :archive, only: %i[create destroy]
+        resource :merge, only: :create
+      end
+    end
     resources :exports, only: %i[index create show]
     resource :audit_log, only: :show
     resources :webhooks, only: %i[index create update destroy]

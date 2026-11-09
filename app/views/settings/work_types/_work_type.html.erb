@@ -1,0 +1,100 @@
+<%# locals: (work_type:, others:) %>
+<%# One work type on Settings > Names > Types: its names, prefix and how its work runs, with how
+    many pieces of work use it; Change opens its form in place. A system type is switched off and
+    on; one you added is also merged into another (its work moves, refs kept) or, while nothing
+    uses it, deleted. %>
+<% works = term(:work, count: work_type.works_count).downcase %>
+<li class="list-row settings-field" data-filter-target="item" data-drag-and-drop-target="item" data-id="<%= work_type.key %>">
+  <span class="settings-field__handle" draggable="true" title="Drag to move <%= work_type.name_one %>" aria-label="Drag to move <%= work_type.name_one %>"><%= icon_tag "grip" %></span>
+  <div class="list-row__content">
+    <p class="list-row__title">
+      <%= work_type.name_one %>
+      <span class="badge badge--outline"><%= work_type.prefix %>-</span>
+      <% if work_type.system? %>
+        <span class="badge" title="Always there: switch it off if you don’t use it">System</span>
+      <% end %>
+      <% if work_type.archived? %>
+        <span class="badge">Off</span>
+      <% end %>
+    </p>
+    <p class="list-row__desc">
+      <%= [ work_type.name_other, work_type.runs, "#{work_type.works_count} #{works}" ].join(" · ") %>
+      <% if work_type.starting_sections.present? %>
+        · starts with <%= work_type.starting_sections.to_sentence %>
+      <% end %>
+    </p>
+    <% if work_type.description.present? %>
+      <p class="list-row__desc"><%= work_type.description %></p>
+    <% end %>
+  </div>
+  <div class="list-row__actions">
+    <% if work_type.archived? %>
+      <%= button_to "Switch on", settings_work_type_archive_path(work_type), method: :delete, class: "btn btn--secondary btn--sm" %>
+    <% else %>
+      <%= button_to "Switch off", settings_work_type_archive_path(work_type), class: "btn btn--ghost btn--sm",
+            title: "No longer offered for new #{term(:work, count: 2).downcase}; those it has keep it" %>
+    <% end %>
+    <% if work_type.deletable? %>
+      <%= render "layouts/shared/delete_dialog", name: work_type.name_one, path: settings_work_type_path(work_type),
+            message: "Nothing uses it, so it’s gone for good. Its prefix is free for another type." %>
+    <% end %>
+  </div>
+  <details class="settings-fold settings-field__change">
+    <summary class="btn btn--secondary btn--sm">Change</summary>
+    <%= form_with model: work_type, url: settings_work_type_path(work_type), method: :patch, scope: :work_type, namespace: dom_id(work_type), class: "settings-subform" do |form| %>
+      <div class="field-row">
+        <div class="field">
+          <%= form.label :name_one, "Name", class: "field__label" %>
+          <%= form.text_field :name_one, required: true, autocomplete: "off", maxlength: 40 %>
+        </div>
+        <div class="field">
+          <%= form.label :name_other, "Plural", class: "field__label" %>
+          <%= form.text_field :name_other, required: true, autocomplete: "off", maxlength: 40 %>
+        </div>
+        <div class="field">
+          <%= form.label :prefix, "Ref prefix", class: "field__label" %>
+          <%= form.text_field :prefix, required: true, autocomplete: "off", maxlength: 4 %>
+        </div>
+      </div>
+      <p class="field__hint">Key <code><%= work_type.key %></code>, fixed: links, filters and agents name the type by it. A new prefix applies to new refs only.</p>
+      <div class="field">
+        <%= form.label :description, "What it’s for", class: "field__label" %>
+        <%= form.text_field :description, autocomplete: "off" %>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <%= form.label :shape, "Runs as", class: "field__label" %>
+          <%= form.select :shape, WorkType::SHAPES.invert.to_a, {} %>
+        </div>
+        <div class="field">
+          <%= form.label :cadence, "How often", class: "field__label" %>
+          <%= form.select :cadence, Cadence.options, { include_blank: "No set period" } %>
+        </div>
+      </div>
+      <label class="checkbox">
+        <%= form.check_box :check_in %>
+        <span>A check-in each period (recurring only)</span>
+      </label>
+      <div class="field">
+        <%= form.label :starting_sections, "Starts with these " + term(:scope_item, count: 2).downcase, class: "field__label" %>
+        <%= form.text_field :starting_sections, value: work_type.starting_sections.to_a.join(", "), autocomplete: "off" %>
+        <p class="field__hint">Separated by commas. New <%= term(:work).downcase %> only; what’s started keeps its own.</p>
+      </div>
+      <div><button type="submit" class="btn btn--primary btn--sm">Save</button></div>
+    <% end %>
+  </details>
+  <% if work_type.mergeable? %>
+    <% targets = others.reject { it.id == work_type.id } %>
+    <details class="settings-fold settings-field__change">
+      <summary class="btn btn--ghost btn--sm">Merge into…</summary>
+      <%= form_with url: settings_work_type_merge_path(work_type), namespace: dom_id(work_type, :merge), class: "settings-subform" do |form| %>
+        <div class="field">
+          <%= form.label :into, "Move its " + works + " to", class: "field__label" %>
+          <%= form.select :into, targets.map { [ it.name_one, it.key ] }, {} %>
+          <p class="field__hint">Each keeps its ref and notes the change in its history. Then <%= work_type.name_one %> is deleted.</p>
+        </div>
+        <div><button type="submit" class="btn btn--danger btn--sm">Merge <%= work_type.name_one %></button></div>
+      <% end %>
+    </details>
+  <% end %>
+</li>

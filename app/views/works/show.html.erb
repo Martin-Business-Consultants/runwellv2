@@ -35,7 +35,7 @@
       <p class="record-meta record-page__description">
         <%= status_tag @work.state_label, highlight: @work.active? %>
         <%= link_to @work.client.name, @work.client %>
-        <span><%= @work.label_name %> · <%= @work.recurring? ? "Recurring" : "Fixed scope" %></span>
+        <span><%= @work.label_name %> · <%= @work.runs %></span>
         <% if @work.internal? %>
           <span>Internal</span>
         <% end %>

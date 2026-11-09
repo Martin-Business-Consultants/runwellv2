@@ -246,6 +246,18 @@ Add associations, scopes and validations there; never columns. Core models a plu
 call verbs on: `Client`, `Contact`, `Work`, `ScopeItem`, `Task`, `Note`, `Document`, `Event`, `User` (2.0, stable), and
 `Setting.current.record_event!` for a settings change worth the audit log (2.18, stable).
 
+Work types (5.9, stable): an install's kinds of work are records (`WorkType`, Settings > Names >
+Types), no longer a fixed list. A piece of work keeps its type's key in `work.label`, as before;
+`Work.labels` is every type's key (archived ones too), `WorkType.cached` every type in the
+install's order (`key`, `name_one`, `name_other`, `prefix`, `shape`, `cadence`, `archived?`,
+`system?`), `WorkType.active_keys` those offered for new work, and `work.work_type` its type.
+Project, work order and service are always there (`WorkType::SYSTEM_KEYS`), though an install can
+switch them off. `Work::LABELS` still holds those three and is deprecated: it goes in 7.0, so read
+`Work.labels` (or `WorkType.cached`) instead, falling back to `Work::LABELS` on an older core. Keys
+never change; a type merged into another moves its work (`work.retyped`) and is deleted. A piece of
+work also has `cadence` (how often recurring work comes round, `Cadence::KEYS`), and a task `repeat`
+(the same keys: marking it done makes the next one, `Task::Repeats`).
+
 Custom fields (5.5, stable): `record.custom_field_hash` (key → typed value, only the fields the
 person may see) and `CustomField.dates_between(range, viewer: Current.user)`, every date field's
 value inside a range of dates as `[record, field, date]` (the record a `Client`, `Work` or `Task`;
@@ -325,7 +337,9 @@ Every `Event` is published from a job after it's saved, never inside the request
 `client.created`, `client.status` (5.3: its status changed; payload `from` and `to`, recorded before
 any `client.sunset` the change brings), `work.created`, `work.closed` (payload `outcome`: completed or
 cancelled, since 2.17), `work.reopened` (2.17), `work.erased`, `task.converted` (2.17),
-`task.created`, `task.status`, `task.requested` (3.0: a client asked for it, from the portal or by
+`work.retyped` (5.9: its type changed, by a person or a merge; payload `from` and `to`, type keys;
+its ref stays), `task.created`, `task.status`, `task.repeated` (5.9: a repeating task marked done made
+the next one; payload `next_task_id`, `due_on`, `repeat`), `task.requested` (3.0: a client asked for it, from the portal or by
 email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,
 `contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject), `client.sunset` (5.2.2: the client was set dormant or former and its open work closed as
 cancelled and open tasks marked done; payload `status`, `reason`, `works` (their refs) and `tasks` (how
@@ -348,6 +362,7 @@ New kinds may be added in any minor release; existing kinds keep their name and 
 | --- | --- | --- |
 | `agent_tool name, on:, title:, description:, params:, confirm:, next_tools:` in a controller | 2.0 | Stable |
 | `agent_exempt action, reason:` | 2.0 | Stable |
+| A param's spec as a lambda returning one (`label: -> { WorkType.active_keys }`), read each time the tools are listed, for choices the install sets | 5.9 | Stable |
 | `Runwell::Plugins.agent_brief key, ->(task, base_url) { markdown or nil }` | 2.0 | Stable |
 | `Runwell::Plugins.agent_workflow key, title, steps` | 2.1 | Stable |
 | `Agent::Dispatch.run_as(user_or_contact, tool, arguments, name:)` | 2.18 | Experimental |
@@ -407,7 +422,7 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 Template mode (5.1.3, Experimental) lets an install's owners arrange each kind of record's fields:
 `RecordLayout.for(kind)` (`client`, `work`, `task`, `contact`, `user`) has `main`, `aside` and `hidden`, each a
 list of field keys in order, and `required?(key)`. The core's keys are `RecordLayout::DEFAULTS`;
-custom fields are `custom.<key>`. A key is stable once released: a renamed key comes with a
+custom fields are `custom.<key>`. 5.9 added `cadence` (work) and `repeat` (task). A key is stable once released: a renamed key comes with a
 migration of saved layouts. Layouts change only where fields show on the record's pages, never
 what's stored or required. Plugins can't add fields to a layout yet; their panels stay in the
 record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners), and

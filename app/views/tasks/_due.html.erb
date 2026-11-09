@@ -1,11 +1,14 @@
 <%# locals: (task:) %>
 <%# A task's due date on the Tasks table, changed in place: a date field that saves on change
     (inline=panel, answered by tasks/update.turbo_stream, which redraws the task wherever it shows),
-    with Overdue while it's late and not done. Replaced on its own when the status changes in place. %>
+    with Overdue while it's late and not done, and a mark when it repeats. Replaced on its own when the status changes in place. %>
 <span class="task-due" id="<%= dom_id(task, :due) %>">
   <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :row_due), class: "task-due__form", data: { controller: "form" } do |form| %>
     <%= hidden_field_tag :inline, "panel", id: nil %>
     <%= date_input form, :due_on, placeholder: "No date", aria: { label: "Due" }, data: { action: "change->form#submit" } %>
+  <% end %>
+  <% if task.repeats? %>
+    <span class="task-due__repeat" title="Repeats <%= task.repeat_name.downcase %>" aria-label="Repeats <%= task.repeat_name.downcase %>"><%= icon_tag "refresh" %></span>
   <% end %>
   <% if task.status != "done" && task.due_on&.past? %>
     <%= status_tag "Overdue" %>

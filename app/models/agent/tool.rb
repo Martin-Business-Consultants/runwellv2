@@ -93,6 +93,9 @@ module Agent
 
       def schema_for(spec)
         case spec
+        when Proc
+          # Choices the install sets (its work types): read when the tools are listed.
+          schema_for(spec.call)
         when Hash
           { type: "object", properties: spec.to_h { |k, v| [ k.to_s, property_schema(k.to_s, v) ] }, required: spec.select { |_, v| required_spec?(v) }.keys.map(&:to_s) }.compact_blank
         when Array

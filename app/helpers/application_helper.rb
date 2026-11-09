@@ -31,9 +31,10 @@ module ApplicationHelper
   def term(key, count: 1) = Setting.current.term(key, count: count)
   def label_term(label, count: 1) = Setting.current.label_name(label, count: count)
 
+  # The work types to pick from, in the install's order: those switched on, plus `current` (a
+  # piece of work keeps its type when it's switched off).
   def label_options(current = nil)
-    labels = Setting.current.enabled_labels | Array(current).compact
-    Work::LABELS.select { labels.include?(it) }.map { [ label_term(it), it ] }
+    WorkType.cached.select { !it.archived? || it.key == current.to_s }.map { [ it.name_one, it.key ] }
   end
 
   # The page one level up (a record's list, a task's work). Not a button: it's a

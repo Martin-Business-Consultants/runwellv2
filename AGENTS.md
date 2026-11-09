@@ -64,8 +64,8 @@ them something else on screen (`term(:work)`, `term(:task)`).
 
 1. **Who we work for, and who can say yes** — `Client`, `Contact` (a user with the client role; `portal_access`,
    `can_approve`)
-2. **What we run for them** — `Work` (ref like WO-12, P-3, S-4; label project /
-   work_order / service; shape fixed / recurring), active from the start until closed
+2. **What we run for them** — `Work` (ref like WO-12, P-3, S-4; `label` the key of its
+   `WorkType`, below; shape fixed / recurring, and for recurring work a `cadence`), active from the start until closed
    (`Work#state`: active or closed). Its sections are `ScopeItem`s (the term `scope_item`,
    "Sections" by default; `work.scope_items`, positioned), each grouping tasks and showing
    how it's going (`delivery_state`); no price or estimate. A client marked `internal` is the
@@ -137,7 +137,7 @@ event); every event has a source.
   status (any to any; agents finish into in review), a piece of work (active, then closed as
   completed or cancelled, reopened), a client's status (any to any; dormant or former sunsets,
   `Client::Sunset`), a person (active, deactivated), a token (live, paused, revoked, expired), an
-  invitation (pending, accepted, expired), a webhook endpoint (on, switched off after
+  invitation (pending, accepted, expired), a work type (active, archived; deleted only unused, merged only if not a system type: `deletable?`, `mergeable?`, `WorkType::Refused`), a webhook endpoint (on, switched off after
   `MAX_FAILURES`), an update or plugin change (running, then succeeded or failed, `BackgroundRun`),
   an export (queued, working, ready or failed), a notification (unread, read); and, derived, a
   section's delivery state and a task being a request
@@ -1019,12 +1019,35 @@ points at it with `on_delete: :cascade` and copy those rows aside and back, or u
 ## Settings and names
 
 Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Sidebar (the nav, `NavLayout`), Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
-client, work, scope item and tasks, and each work type's name, plural, ref
-prefix and whether it's used. Defaults live in `config/locales/terms.en.yml`; overrides in
+client, work, scope item and tasks. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:work)`,
 `term(:work, count: 2)`, `label_term(label)` and `label_options(current)` — never
-hard-code "Work", "Project", "Client" or "Tasks". Keys (`project`, `work_order`,
-`service`) never change. A new prefix applies to new refs only.
+hard-code "Work", "Project", "Client" or "Tasks".
+
+Its Types tab is the kinds of work, each a record (`WorkType`, `Settings::WorkTypesController`
+and its `archive`, `merge`, `position`; tools `list_work_types`, `create_work_type`,
+`update_work_type`, `delete_work_type`, `archive_work_type`, `restore_work_type`,
+`merge_work_type`): a name, plural, ref prefix (unique, so refs never collide; a new one applies to
+new refs only) and how its work runs: shape (fixed scope or recurring), for recurring a cadence
+(`Cadence`: weekly, every two weeks, monthly, quarterly, yearly) and a check-in (a task repeating
+each period for whoever started the work, to look back on it), and the sections new work starts
+with (`Work#start_from_type`, not for imports). New work takes its type's shape and cadence unless
+told otherwise; work already started keeps its own. Project, work order and service are the system
+types (`WorkType::SYSTEM_KEYS`, put back by `WorkType.ensure_system!` if missing): renamed,
+re-prefixed or switched off, never deleted or merged. A type's key comes from its name and never
+changes (`works.label` holds it); one you added is deleted only while nothing uses it, else
+switched off (archived: not offered for new work, kept by what has it) or merged into another
+(its work moves, refs kept, each recording `work.retyped`). Read types through `WorkType.cached`
+(once per request, `Current.work_types`), `Work.labels` or `label_options`, never a fixed list;
+`Work::LABELS` is the deprecated three. A tool param whose choices are the install's takes a
+lambda (`label: -> { WorkType.active_keys }`).
+
+A task may repeat (`Task::Repeats`, `repeat`: a `Cadence` key, set in its side panel or by the
+task tools): marking it done makes the next one, due a period after it (skipping periods already
+gone), with its title, description, section, people and visibility; the repeat moves onto the new
+task and the old one records `task.repeated`. Nothing repeats on closed work, for a client that
+isn't active, or when a sunset marked it done. The answer to the status change brings the new
+task onto the page (`turbo_stream.refresh`).
 
 ## Appearance
 

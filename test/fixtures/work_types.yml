@@ -1,0 +1,27 @@
+project:
+  key: project
+  name_one: Project
+  name_other: Projects
+  prefix: P
+  system: true
+  shape: fixed
+  position: 1
+
+work_order:
+  key: work_order
+  name_one: Work order
+  name_other: Work orders
+  prefix: WO
+  system: true
+  shape: fixed
+  position: 2
+
+service:
+  key: service
+  name_one: Service
+  name_other: Services
+  prefix: S
+  system: true
+  shape: recurring
+  cadence: monthly
+  position: 3

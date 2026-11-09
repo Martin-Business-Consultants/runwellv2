@@ -4,6 +4,8 @@ class Current < ActiveSupport::CurrentAttributes
   attribute :preview_contact
   # Set only inside Work#erase!, so plugins' records that refuse deletion know it's an erase.
   attribute :erasing
+  # Every WorkType, read once per request (WorkType.cached).
+  attribute :work_types
 
   # The client's contact on the portal: signed in by link, or acting through their token.
   def contact = preview_contact || portal_session&.contact || access_token&.contact

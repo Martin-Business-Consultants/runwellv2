@@ -1,0 +1,11 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# Marking a repeating task done makes the next one (Task::Repeats). %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">Repeats</span>
+    <%= form.select :repeat, Cadence.options, { include_blank: "Never" }, form: form_id %>
+  </label>
+<% elsif record.repeats? %>
+  <dt>Repeats</dt>
+  <dd><%= record.repeat_name %>, the next due <%= l record.next_due_on, format: :long %> once it’s done</dd>
+<% end %>

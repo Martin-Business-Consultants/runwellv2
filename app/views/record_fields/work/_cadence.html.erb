@@ -1,0 +1,10 @@
+<%# locals: (record:, form: nil, form_id: nil) %>
+<%# How often recurring work comes round (blank when it starts: as its type says). On show it's in
+    the line under the title. %>
+<% if form %>
+  <label class="field">
+    <span class="field__label">How often</span>
+    <%= form.select :cadence, Cadence.options, { include_blank: (record.new_record? ? "As its type says" : "No set period") }, form: form_id %>
+    <span class="field__hint">For recurring work only.</span>
+  </label>
+<% end %>

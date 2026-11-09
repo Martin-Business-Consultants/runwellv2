@@ -5,3 +5,7 @@
 <%= turbo_stream.replace dom_id(@task, :item), method: :morph, partial: "tasks/task", locals: { task: @task } %>
 <%= turbo_stream.replace dom_id(@task, :article), method: :morph, partial: "tasks/display/preview", locals: { task: @task, draggable: true } %>
 <%= turbo_stream_flash(notice: (@alert ? nil : "Saved."), alert: @alert) %>
+<%# A repeating task marked done made the next one: the page reloads in place to show it. %>
+<% if @task.repeated_task %>
+  <%= turbo_stream.refresh(request_id: nil) %>
+<% end %>

@@ -16,7 +16,7 @@
     <dl class="details">
       <dt>Status</dt><dd><%= status_tag work.state_label, highlight: work.active? %></dd>
       <dt><%= term(:client) %></dt><dd><%= link_to work.client.name, work.client %></dd>
-      <dt>Type</dt><dd><%= work.label_name %> · <%= work.recurring? ? "Recurring" : "Fixed scope" %></dd>
+      <dt>Type</dt><dd><%= work.label_name %> · <%= work.runs %></dd>
       <dt>Started</dt><dd><%= l work.created_at.to_date, format: :long %></dd>
       <% if work.closed? %>
         <dt><%= work.state_label %></dt><dd><%= l work.closed_at.to_date, format: :long %><%= ": #{work.close_reason}" if work.close_reason.present? %></dd>

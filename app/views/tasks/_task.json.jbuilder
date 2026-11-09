@@ -1,5 +1,5 @@
 json.merge! agent_ref(task)
-json.extract! task, :title, :status, :due_on, :client_visible
+json.extract! task, :title, :status, :due_on, :repeat, :client_visible
 json.overdue task.due_on.present? && task.due_on < Date.current && task.status != "done"
 json.owner agent_user(task.owner)
 json.other_owners task.other_owners.map { agent_user(it) }
