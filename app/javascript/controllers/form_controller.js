@@ -75,6 +75,13 @@ export default class extends Controller {
     this.cancelTarget?.click()
   }
 
+  // Runwell: Esc in a field that's always on the page (a section's quick add) empties the form and
+  // lets go of the field, so the page's keys work again.
+  clear(event) {
+    this.element.reset()
+    event.target.blur()
+  }
+
   preventAttachment(event) {
     event.preventDefault()
   }

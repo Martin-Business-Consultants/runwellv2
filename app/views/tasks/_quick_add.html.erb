@@ -1,0 +1,23 @@
+<%# locals: (work:, scope_item: nil, state: nil, item: nil) %>
+<%# The line under a section's tasks on a piece of work's page: type what needs doing and press
+    Enter, and it's added to that section (or to other tasks) with nobody on it yet. The section
+    comes back in place (tasks/create.turbo_stream.erb) with this field emptied and still focused,
+    so the next one can follow straight away (Esc empties it and lets go); who's on it and when
+    it's due are set on its row.
+    state and item: the section's filter and focus, kept through the answer. %>
+<div class="task-quick-add">
+  <%= form_with model: Task.new, url: work_tasks_path(work), namespace: dom_id(scope_item || work, :quick_task),
+        class: "task-quick-add__form", data: { controller: "form", action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
+    <%= hidden_field_tag :inline, "tasks", id: nil %>
+    <%= hidden_field_tag :inline_state, state, id: nil %>
+    <% if item %>
+      <%= hidden_field_tag :inline_item, item, id: nil %>
+    <% end %>
+    <%= form.hidden_field :scope_item_id, value: scope_item&.id %>
+    <%= icon_tag "add", class: "task-quick-add__icon" %>
+    <%= form.text_field :title, required: true, autocomplete: "off", class: "task-quick-add__input",
+          placeholder: "Add #{term(:task).downcase}…", aria: { label: "Add #{term(:task).downcase} to #{scope_item&.description || "other #{term(:task, count: 2).downcase}"}" },
+          data: { "1p-ignore": "true", action: "keydown.esc->form#clear" } %>
+    <kbd class="task-quick-add__hint hide-on-touch">Enter</kbd>
+  <% end %>
+</div>

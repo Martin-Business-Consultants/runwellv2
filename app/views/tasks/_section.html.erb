@@ -1,8 +1,12 @@
 <%# locals: (work:, state: nil, item: nil) %>
 <%# A piece of work's work by scope item. Open work by default; the filter shows done or all.
     Each scope item's "done of total" always counts all of its work. item: one scope item's work
-    alone (an id, or "other" for work outside the scope), picked in the sidebar's scope list. %>
+    alone (an id, or "other" for work outside the scope), picked in the sidebar's scope list.
+    While it's open and not showing done, each section ends in a quick add (tasks/quick_add), and
+    a section with no tasks yet shows too, so its first can be typed straight in. %>
 <% state ||= "open" %>
+<% focus_item = item %>
+<% quick = !work.closed? && state != "done" %>
 <% picked = item.is_a?(Integer) ? work.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
 <section class="card record-card" id="tasks" data-task-list="work" data-task-list-state="<%= state %>" data-task-list-keeps="<%= task_list_keeps(state) %>"<% if item %> data-task-list-item="<%= item %>"<% end %>>
@@ -27,7 +31,7 @@
   <% all_groups = tasks.group_by(&:scope_item) %>
   <% shown = tasks.select { |task| state == "all" || (state == "done") == (task.status == "done") } %>
   <% groups = shown.group_by(&:scope_item) %>
-  <% items = (work.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) } %>
+  <% items = (work.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) || (quick && !all_groups.key?(item) && (!focus || item == picked)) } %>
 
   <div class="card__content record-card__stack">
     <% if focus %>
@@ -66,12 +70,15 @@
         <ul class="record-list">
           <%= render partial: "tasks/task", collection: group, as: :task %>
         </ul>
+        <% if quick %>
+          <%= render "tasks/quick_add", work: work, scope_item: item, state: state, item: focus_item %>
+        <% end %>
       </div>
     <% end %>
 
     <% other = groups.fetch(nil, []) %>
     <% other_all = all_groups.fetch(nil, []) %>
-    <% if other.any? %>
+    <% if other.any? || (quick && (focus_item == "other" || (!focus && work.scope_items.none?))) %>
       <div class="task-group">
         <% unless focus %>
         <div class="task-group__header">
@@ -82,6 +89,9 @@
         <ul class="record-list">
           <%= render partial: "tasks/task", collection: other, as: :task %>
         </ul>
+        <% if quick %>
+          <%= render "tasks/quick_add", work: work, state: state, item: focus_item %>
+        <% end %>
       </div>
     <% end %>
     </div>

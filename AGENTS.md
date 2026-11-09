@@ -371,7 +371,9 @@ board for everyone's tasks on it (`@board_filters`, which `task_board_filters` h
 drops); History is a tab, and the sidebar is its sections
 (`works/_scope`, where they're added): all tasks, each section with done of total, and
 other tasks, each a `?item=` link that shows just that work in the Tasks tab, where its tasks are
-added. A section's add action is one small secondary button with the add icon after its list
+added. In the Tasks tab each section (and other tasks) ends in a quick add (`tasks/quick_add`): a
+title and Enter adds it there, the section comes back in place with its filter and focus kept and
+the field still focused for the next, and Esc empties it; not on Done, nor on closed work. A section's add action is one small secondary button with the add icon after its list
 (`record-add`), a `<details>` when it opens a form; the one primary button on a page is its next
 step. Up a level is `parent_page label, path`, called in the template: a `<link rel="up">` that
 Esc follows and the panel bar's breadcrumb shows, never a Back button.
