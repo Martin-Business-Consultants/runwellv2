@@ -52,7 +52,7 @@ Rails.application.config.to_prepare do
     "globe" => '<circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.25 3.5 2.25 5.5S9.6 11.9 8 13.5C6.4 11.9 5.75 10 5.75 8S6.4 4.1 8 2.5z"/>',
     "grid" => '<rect x="2.5" y="2.5" width="4.25" height="4.25" rx="1"/><rect x="9.25" y="2.5" width="4.25" height="4.25" rx="1"/><rect x="2.5" y="9.25" width="4.25" height="4.25" rx="1"/><rect x="9.25" y="9.25" width="4.25" height="4.25" rx="1"/>',
     "history" => '<path d="M2.75 8a5.25 5.25 0 1 0 1.55-3.7"/><path d="M2.5 2.75V5h2.25M8 5.25V8l2 1.5"/>',
-    "grip" => '<circle cx="6" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="6" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="6" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    "grip" => '<circle cx="6" cy="4" r="1.25" fill="currentColor" stroke="none"/><circle cx="10" cy="4" r="1.25" fill="currentColor" stroke="none"/><circle cx="6" cy="8" r="1.25" fill="currentColor" stroke="none"/><circle cx="10" cy="8" r="1.25" fill="currentColor" stroke="none"/><circle cx="6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="10" cy="12" r="1.25" fill="currentColor" stroke="none"/>',
     "home" => '<path d="M2.5 7 8 2.5 13.5 7v5.5a1 1 0 0 1-1 1h-3v-4h-3v4h-3a1 1 0 0 1-1-1z"/>',
     "install-edge" => '<path d="M8 2.5v7M5 6.75 8 9.75l3-3M3 11v1.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V11"/>',
     "lifebuoy" => '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.25"/><path d="m4.1 4.1 2.3 2.3M9.6 9.6l2.3 2.3M11.9 4.1 9.6 6.4M6.4 9.6l-2.3 2.3"/>',
