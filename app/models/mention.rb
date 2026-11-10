@@ -12,4 +12,7 @@ class Mention < ApplicationRecord
   def notifiable_target
     source
   end
+
+  def notification_title = "#{mentioner.first_name} mentioned you"
+  def notification_excerpt = source.mentionable_content.to_s
 end

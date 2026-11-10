@@ -1,0 +1,6 @@
+<% content_for :reason, "You're getting this because it's about something we're doing for #{@contact.client.name}. You can turn these off in the portal, under your account." %>
+<%= @note.author&.first_name || Setting.current.brand_name %> wrote to you, on "<%= @task.title %>":
+
+> <%= @note.notification_excerpt.truncate(600) %>
+
+Read and reply: <%= @url %>

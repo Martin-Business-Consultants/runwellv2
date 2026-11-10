@@ -34,9 +34,11 @@ or from **Connected apps** in the portal:
 - One that asks for a key (Muse does) gets a personal key made on that page.
 - On the command line: `runwell login https://your-install --client`.
 
-Their assistant can see their work, the tasks and documents shared with them, and their
-requests, and it can send a request. It never sees anything of another client's, or anything
-internal.
+Their assistant can see their work and how far along it is, the tasks and documents shared with
+them (a task whole, with the messages on it and which they haven't read), and their requests. It
+can send a request (about a piece of work, with a date and files), reply on a task, put their
+things in order of priority and change their own details. A request or a reply is previewed first
+and sent only once they agree. It never sees anything of another client's, or anything internal.
 
 ## What makes it dependable
 

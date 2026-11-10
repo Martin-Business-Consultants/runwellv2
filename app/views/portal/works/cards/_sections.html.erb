@@ -10,7 +10,7 @@
     <%= layout_text_tag record_layout(:portal_work), "sections.title", term(:scope_item, count: 2), class: "card__title" %>
     <%= layout_text_tag record_layout(:portal_work), "sections.hint", "What this covers, and how far along each part is.", tag: :p, class: "card__hint" %>
     <% if sortable %>
-      <p class="card__hint portal-sortable__hint">Drag them by <%= icon_tag "grip" %> into the order that matters most to you; we’ll see it.</p>
+      <p class="card__hint portal-sortable__hint">Move them by <%= icon_tag "grip" %> into the order that matters most to you; we’ll see it.</p>
     <% end %>
   </header>
   <% if items.any? %>

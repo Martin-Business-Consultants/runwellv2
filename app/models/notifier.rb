@@ -6,6 +6,10 @@ class Notifier
       case source
       when Mention
         MentionNotifier.new(source)
+      when Note
+        ClientReplyNotifier.new(source)
+      when Task
+        RequestNotifier.new(source)
       end
     end
   end

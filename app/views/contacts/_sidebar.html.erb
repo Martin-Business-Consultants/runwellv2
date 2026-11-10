@@ -1,6 +1,29 @@
 <%# locals: (client:, contact:) %>
-<%# Beside a contact's form: who else is at the client (what the two switches allow is under each
-    switch in the form). %>
+<%# Beside a contact's form: their use of the portal (when they last signed in, the browsers
+    signed in now and a way to sign them all out), then who else is at the client (what the two
+    switches allow is under each switch in the form). %>
+<% if contact.portal_access? %>
+  <% sessions = contact.portal_sessions.count %>
+  <section class="card record-card">
+    <header class="card__head">
+      <h2 class="card__title">Portal</h2>
+      <p class="card__hint">
+        <% if !contact.portal? %>
+          Can’t sign in yet: they need an email address.
+        <% elsif contact.link_signed_in_at %>
+          Last signed in <%= time_ago_in_words(contact.link_signed_in_at) %> ago<% if sessions.positive? %>, on <%= pluralize sessions, "browser" %> now<% end %>.
+        <% else %>
+          Hasn’t signed in yet. Invite them, above.
+        <% end %>
+      </p>
+    </header>
+    <% if sessions.positive? %>
+      <div class="card__content">
+        <%= button_to "Sign out everywhere", contact_portal_sessions_path(contact), method: :delete, class: "btn btn--secondary btn--sm" %>
+      </div>
+    <% end %>
+  </section>
+<% end %>
 <% others = client.contacts.active.ordered.where.not(id: contact.id).to_a %>
 <section class="card record-card">
   <header class="card__head">

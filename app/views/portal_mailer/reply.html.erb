@@ -1,0 +1,6 @@
+<% content_for :preheader, @note.notification_excerpt.truncate(90) %>
+<% content_for :reason, "You’re getting this because it’s about something we’re doing for #{@contact.client.name}. You can turn these off in the portal, under your account." %>
+<%= mail_heading "#{@note.author&.first_name || Setting.current.brand_name} wrote to you" %>
+<p>On <strong><%= @task.title %></strong>:</p>
+<%= mail_quote @note.notification_excerpt.truncate(600) %>
+<%= mail_button "Read and reply", @url %>

@@ -4,8 +4,10 @@
     what they asked, its description, its client-visible documents and custom fields. Below, the
     discussion: the notes either side shared on it (Note.discussion), oldest first, and a reply in
     the editor (Portal::Tasks::NotesController). Staff viewing as the client see the editor as the
-    client does, with Send off: a preview writes nothing. Esc or ✕ closes it. %>
+    client does, with Send off: a preview writes nothing. Esc or ✕ closes it. Opening it reads its
+    discussion (Portal::BaseController), so the dot on its row wherever it's listed comes off. %>
 <section class="task-panel portal-task" id="<%= dom_id(task, :portal_panel) %>" aria-label="<%= task.title %>">
+  <turbo-stream action="remove" targets="[data-unread-task='<%= task.id %>']"><template></template></turbo-stream>
   <header class="task-panel__header">
     <p class="task-panel__context">
       <% if task.work %>
@@ -26,15 +28,23 @@
   <h2 class="task-panel__title task-panel__title--static"><%= task.title %></h2>
 
   <dl class="details task-panel__details">
-    <dt>Status</dt><dd><%= status_tag task.status.humanize, highlight: task.status == "done" %></dd>
-    <dt>Due</dt>
-    <dd>
-      <% if task.due_on %>
-        <%= l task.due_on, format: :long %>
-      <% else %>
-        <span class="muted">No date</span>
-      <% end %>
-    </dd>
+    <dt>Status</dt><dd><%= portal_status_tag(task) %></dd>
+    <% if task.status == "done" && task.completed_at %>
+      <dt>Done</dt><dd><%= l task.completed_at.in_time_zone.to_date, format: :long %></dd>
+    <% else %>
+      <dt>Due</dt>
+      <dd>
+        <% if task.due_on %>
+          <%= portal_due(task, format: :long) %>
+        <% else %>
+          <span class="muted">No date</span>
+        <% end %>
+      </dd>
+    <% end %>
+    <% people = portal_task_people(task) %>
+    <% if people %>
+      <dt>With</dt><dd><%= people %></dd>
+    <% end %>
     <% if task.scope_item %>
       <dt><%= term(:scope_item) %></dt><dd><%= task.scope_item.description %></dd>
     <% end %>
@@ -53,7 +63,7 @@
 
   <%= render "custom_fields/values", record: task, client: true %>
 
-  <% documents = task.documents.select(&:client_visible) %>
+  <% documents = task.documents.client_visible.recent.includes(file_attachment: :blob).to_a %>
   <% if documents.any? %>
     <%= render "portal/works/documents", documents: documents %>
   <% end %>

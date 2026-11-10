@@ -34,7 +34,7 @@ class Portal::SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, contacts(:ann).portal_sessions.count
     get portal_root_path
     assert_response :success
-    assert_select ".portal-topbar__name", text: "Acme Co"
+    assert_select ".portal-topbar__client", text: "Acme Co"
   end
 
   test "a bad token does not" do

@@ -5,7 +5,9 @@
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
-  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable, RemovesLater
+  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable, RemovesLater, Discussion
+  # A request from outside tells the people who take requests on (Notifier::RequestNotifier).
+  include Notifiable
 
   # A request from outside (a client in the portal or through their agent, or an email): set by
   # whoever makes it, so its history says task.requested, credited to who asked, not task.created.
@@ -80,6 +82,10 @@ class Task < ApplicationRecord
 
   def requester_name = contact&.name || sender_name.presence || sender_email
 
+  # A notification about it: a request that came in.
+  def notification_title = "#{requester_name || "Someone"} asked for something"
+  def notification_excerpt = title
+
 
   # Moves the task to a status (a board column), and on the board to just before `before` (a
   # task id in that column) or, without one, to the end of it.
@@ -138,4 +144,9 @@ class Task < ApplicationRecord
     end
 
     def live_streams = [ self, :tasks, work, client, scope_item ]
+
+    # Only a request from outside notifies anyone (Notifiable would for every task).
+    def notify_recipients_later
+      super if requested && Current.source != "import"
+    end
 end

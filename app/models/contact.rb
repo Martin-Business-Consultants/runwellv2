@@ -27,6 +27,10 @@ class Contact < User
   # Portal sign-in is a signed link, never a password: a contact gets one nobody knows. It works
   # once (signing in moves link_signed_in_at), for an hour.
   generates_token_for(:portal_login, expires_in: 1.hour) { link_signed_in_at }
+  # The link in an invitation (invite_to_portal!): the same, good for a week.
+  generates_token_for(:portal_invite, expires_in: 7.days) { link_signed_in_at }
+  # A portal session nobody has used in this long is over (Portal::BaseController, pruned nightly).
+  PORTAL_SESSION_IDLE = 90.days
   before_validation(on: :create) { self.password = SecureRandom.base58(32) if password_digest.blank? }
 
   scope :with_portal_access, -> { active.where(portal_access: true) }
@@ -39,6 +43,24 @@ class Contact < User
 
   # May sign in to the client portal now.
   def portal? = portal_access? && !archived? && email_address.present?
+
+  # Whoever a sign-in or invitation link was made for, while it's good and they may still sign in.
+  def self.from_portal_link(token)
+    (find_by_token_for(:portal_login, token) || find_by_token_for(:portal_invite, token))&.then { it if it.portal? }
+  end
+
+  # Emails them the way in: what the portal is and a link that signs them in, good for a week.
+  def invite_to_portal!
+    PortalMailer.with(contact: self).invitation.deliver_later
+    record_event!("contact.invited")
+  end
+
+  # Every browser they're signed in to the portal with, signed out (staff, from their page).
+  def sign_out_of_portal!
+    count = portal_sessions.count
+    portal_sessions.destroy_all
+    record_event!("contact.signed_out", payload: { sessions: count })
+  end
 
   # A contact shows as a circle of initials.
   def initials = name.scan(/\b\p{L}/).first(2).join.upcase

@@ -138,7 +138,10 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 @media (max-width: 640px) {
   .portal-topbar__brand .sidebar__logo:has(img) img { height: 1.75rem; max-height: 1.75rem; max-width: 7rem; }
 }
+/* Whose portal it is, and under it the client it's for. */
+.portal-topbar__names { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .portal-topbar__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.portal-topbar__client { min-width: 0; overflow: hidden; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight); text-overflow: ellipsis; white-space: nowrap; }
 
 /* The sections as ghost buttons, the current one on a tint. */
 .portal-nav { display: flex; align-items: center; gap: var(--s-1); min-width: 0; overflow-x: auto; scrollbar-width: none; }
@@ -160,6 +163,7 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 
 .portal-main { max-width: var(--portal-width); padding: var(--s-6) var(--s-5) 4rem; gap: var(--s-5); }
 .portal-footer { width: 100%; max-width: var(--portal-width); margin: 0 auto; padding: 0 var(--s-5) var(--s-6); color: var(--text-faint); font-size: var(--text-meta); text-align: center; }
+.portal-footer a { color: var(--text-muted); }
 
 /* Narrow: the sections take a row of their own under the brand, scrolling sideways, and New
 /* request keeps only its icon. */

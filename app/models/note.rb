@@ -6,6 +6,8 @@ class Note < ApplicationRecord
   # Not when its record is going too: there's no history left to write to.
   after_destroy_commit -> { subject.record_event!("note.deleted", payload: { kind: kind }) }, if: -> { subject_records_events? && !destroyed_by_association }
   include Searchable, Mentions
+  # A client's reply on a task tells whoever is on it (Notifier::ClientReplyNotifier).
+  include Notifiable
 
   mentionable_fields :body
 
@@ -27,6 +29,13 @@ class Note < ApplicationRecord
   # Written by the client's own person (a contact), from the portal.
   def from_client? = author&.client?
 
+  # Part of a task's discussion with the client: shared, on a task.
+  def discussion? = client_visible? && subject_type == "Task"
+
+  # A notification about it: a client's reply.
+  def notification_title = "#{author&.display_name || "A client"} replied"
+  def notification_excerpt = ActionController::Base.helpers.strip_tags(body.to_s).squish
+
   # Its author (or whose agent wrote it), or anyone who may delete records.
   def deletable_by?(user)
     return false unless user
@@ -43,4 +52,16 @@ class Note < ApplicationRecord
     def subject_records_events? = Current.source != "import" && subject.respond_to?(:record_event!)
 
     def live_streams = [ subject, subject.try(:work), subject.try(:client) ]
+
+    # Either way a discussion note goes, the other side hears: a client's reply notifies the team
+    # (Notifiable), and the team's is emailed to the client's people on the task (PortalMailer).
+    def notify_recipients_later
+      return unless discussion? && Current.source != "import"
+
+      if from_client?
+        super
+      else
+        subject.discussion_contacts.each { PortalMailer.with(note: self, contact: it).reply.deliver_later }
+      end
+    end
 end

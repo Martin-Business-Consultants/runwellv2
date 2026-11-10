@@ -78,6 +78,28 @@ export default class extends Controller {
     this.originalDraggedItemCssVariable = null
   }
 
+  // Runwell: the same move without dragging, a place up or down its list: the arrow keys on a
+  // focused grip, or a button on a touch screen (the portal's priorities). The server hears it as
+  // it does a drop.
+  moveUp(event) { this.#moveByStep(event, -1) }
+  moveDown(event) { this.#moveByStep(event, 1) }
+
+  async #moveByStep(event, step) {
+    const item = this.#itemContaining(event.target)
+    const container = item && this.#containerContaining(item)
+    if (!container || !this.#isSortable(container)) { return }
+
+    event.preventDefault()
+    const items = [ ...container.querySelectorAll("[data-drag-and-drop-target~=item]") ]
+    const neighbour = items[items.indexOf(item) + step]
+    if (!neighbour) { return }
+
+    step < 0 ? neighbour.before(item) : neighbour.after(item)
+    event.currentTarget.focus({ preventScroll: true })
+    item.scrollIntoView({ block: "nearest" })
+    await this.#submitDropRequest(item, container)
+  }
+
   // Runwell: cards can be ordered within a sortable column (data-drag-and-drop-sortable). While
   // dragging over one, the card moves to where it would land; the drop then sends the card it
   // now sits before, so the server places it there.

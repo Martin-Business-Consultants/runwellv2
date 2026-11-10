@@ -1,7 +1,6 @@
 <%# locals: (notification:) %>
-<% mention = notification.source %>
-
-<span class="list-row__title"><%= mention.mentioner.first_name %> mentioned you</span>
+<%# What a notification says: who did what (a mention, a client's reply, a request), and the words. %>
+<span class="list-row__title"><%= notification.title %></span>
 <span class="notification__body">
-  <%= mention.source.mentionable_content.truncate(200) %>
+  <%= notification.excerpt.truncate(200) %>
 </span>

@@ -1,7 +1,11 @@
 <%# locals: (notification:) %>
 <% ref, name = notification_target_label(notification.notifiable_target) %>
 <span class="list-row__media notification__avatar">
-  <%= avatar_image_tag notification.creator %>
+  <% if notification.creator %>
+    <%= avatar_image_tag notification.creator %>
+  <% else %>
+    <%= icon_tag "email" %>
+  <% end %>
 </span>
 
 <span class="list-row__content">

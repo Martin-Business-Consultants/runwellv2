@@ -1,10 +1,12 @@
 <%# locals: (request_record:, modal: nil) %>
-<%# A request's subject and details. In the modal (New request over the page) Cancel closes it and
+<%# A request: its subject and details, the piece of work it's about (if any), when it's needed by,
+    and any files to send with it. In the modal (New request over the page) Cancel closes it and
     the form submits inside it: refused, it comes back there; sent, the modal closes over the page
     (Portal::RequestsController). On its own page Cancel goes back to the requests. What's typed
     is kept in the browser until it's sent (the draft controller). %>
+<% works = request_record.client.works.open.by_client_priority.ordered.map { [ it.title, it.ref ] } %>
 <%= render "layouts/shared/errors", record: request_record %>
-<%= form_with model: request_record, scope: :request, url: portal_requests_path, class: "portal-form",
+<%= form_with model: request_record, scope: :request, url: portal_requests_path, multipart: true, class: "portal-form",
       data: { controller: "form draft", draft_key_value: "portal:request:#{request_record.client_id}", action: "keydown.esc->form#cancel" } do |form| %>
   <%= draft_notice %>
   <div class="field">
@@ -15,6 +17,26 @@
   <div class="field">
     <label class="field__label" for="<%= form.field_id(:body) %>">Details</label>
     <%= rich_text_field_tag form.field_name(:body), request_record.description, id: form.field_id(:body) %>
+  </div>
+
+  <div class="field-row">
+    <% if works.any? %>
+      <div class="field">
+        <%= form.label :work, "About", class: "field__label" %>
+        <%= form.select :work, works, { include_blank: "Nothing in particular", selected: request_record.work&.ref } %>
+      </div>
+    <% end %>
+    <div class="field">
+      <%= form.label :due_on, "Needed by", class: "field__label" %>
+      <%= date_input form, :due_on %>
+      <p class="field__hint">Leave it empty if there’s no rush.</p>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= form.label :files, "Files", class: "field__label" %>
+    <%= form.file_field :files, multiple: true, include_hidden: false, class: "portal-form__files" %>
+    <p class="field__hint">A screenshot, a document, anything that helps. Up to <%= number_to_human_size(Document::MAX_SIZE) %> each.</p>
   </div>
 
   <div class="button-row portal-form__actions">

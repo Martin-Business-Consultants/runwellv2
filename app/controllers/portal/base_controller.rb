@@ -12,8 +12,10 @@ class Portal::BaseController < ApplicationController
   before_action :refuse_read_only_writes
   before_action :refuse_writes_while_previewing
   before_action :render_portal_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
+  # Before the page draws, so the task being opened no longer counts as unread on it.
+  before_action :portal_side_panel_task, if: -> { request.get? && params[:task].present? }
   around_action :in_client_time_zone
-  helper_method :current_contact, :client, :portal_side_panel_task
+  helper_method :current_contact, :client, :portal_side_panel_task, :portal_unread_task_ids
 
   private
 
@@ -23,7 +25,17 @@ class Portal::BaseController < ApplicationController
   def portal_side_panel_task
     return unless current_contact && params[:task].present?
 
-    @portal_side_panel_task ||= client.tasks.client_visible.includes(:work, :scope_item).find_by(id: params[:task])
+    @portal_side_panel_task ||= client.tasks.client_visible.includes(:work, :scope_item, :contact, :owner, assignments: :user).find_by(id: params[:task])&.tap { mark_discussion_read(it) }
+  end
+
+  # Opening a task reads its discussion (not for staff viewing as them, nor their agent).
+  def mark_discussion_read(task)
+    task.discussion_read_by!(current_contact) if Current.portal_session && !Current.previewing?
+  end
+
+  # The shared tasks holding a message this contact hasn't read (Task::Discussion), once a request.
+  def portal_unread_task_ids
+    @portal_unread_task_ids ||= current_contact ? Task.unread_discussion_ids(current_contact).to_set : Set.new
   end
 
   # Opening or closing the sheet loads just its frame (the side-panel controller), as on staff pages.
@@ -38,13 +50,21 @@ class Portal::BaseController < ApplicationController
     return if previewing_as_contact
 
     Current.portal_session ||= Session.find_by(id: cookies.signed[:portal_session_id]) if cookies.signed[:portal_session_id]
-    return if Current.contact&.portal?
+    return keep_portal_session_fresh if Current.contact&.portal? && !portal_session_idle?
 
     Current.portal_session&.destroy
     Current.portal_session = nil
     cookies.delete(:portal_session_id)
     session[:portal_return_to] = request.fullpath if request.get? && request.format.html? && !turbo_frame_request?
     redirect_to new_portal_session_path
+  end
+
+  # A session nobody has used in three months is over (Contact::PORTAL_SESSION_IDLE): they sign in
+  # again by emailed link. Its last use is its updated_at, moved on at most once a day.
+  def portal_session_idle? = Current.portal_session.present? && Current.portal_session.updated_at < Contact::PORTAL_SESSION_IDLE.ago
+
+  def keep_portal_session_fresh
+    Current.portal_session.touch if Current.portal_session && Current.portal_session.updated_at < 1.day.ago
   end
 
   # Someone on staff viewing as a contact (Contacts::PreviewsController): their staff session must
@@ -85,6 +105,17 @@ class Portal::BaseController < ApplicationController
   end
 
   def client = current_contact.client
+
+  PAGE_SIZE = 25
+
+  # One page of a portal list for a person (numbered pages under it, table_pagination); their agent
+  # reading JSON gets it whole.
+  def portal_page(records)
+    return records unless request.format.html?
+
+    set_page_and_extract_portion_from records, per_page: PAGE_SIZE
+    @page.records
+  end
 
   # Signed in, the contact sees times in their client's zone; the sign-in pages use ours.
   def in_client_time_zone(&action)

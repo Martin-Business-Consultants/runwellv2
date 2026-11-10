@@ -674,7 +674,10 @@ Action Text attachment (`application/vnd.actiontext.mention`) holding the user's
 stored in the HTML column. A model with rich text includes `Mentions` and names its
 columns (`mentionable_fields :body`); after save it scans them and creates a `Mention`
 per person, which is `Notifiable`: `Notifier.for` picks `Notifier::MentionNotifier`,
-which skips self-mentions and creates a `Notification`. Notifications show in the
+which skips self-mentions and creates a `Notification`. Two more things notify the same way: a
+client's reply on a task and a request from outside (Clients and the portal); a notification says
+what it is through its source (`notification_title`, `notification_excerpt`, `notifiable_target`),
+so the tray, the email and the push need nothing per kind. Notifications show in the
 tray (`notifications/_tray`), which the bell at the right of the panel bar opens (`g n`), and on `/notifications`, and are emailed
 (`NotificationMailer`). Opening one reads it and redirects to its record
 (`notifications#show`). Client-facing editors never get the prompt.
@@ -784,7 +787,8 @@ and `contact` for a client's person off the same `user_id` (`HeldByPerson`). The
 `deactivated_at`. Folded in by 5.1 (`users.legacy_contact_id` keeps each old contact id for
 plugins). Two switches per contact:
 `portal_access` (sign in by emailed link, see the client's shared tasks and documents, send
-requests) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
+requests; Invite to the portal on their page emails what it is with a link good for a week,
+`Contact#invite_to_portal!`, `contact.invited`, and Sign out everywhere ends their sessions) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
 a client sees is decided per record (`client_visible` on tasks and documents); there are no
 client roles. Staff see it for themselves with View as on a contact's page
@@ -802,11 +806,24 @@ read-only and limited to the client's client-visible tasks, its lower half the t
 with the client: notes shared on it (`Note#client_visible`, `Note.discussion`), which the client
 answers there (`Portal::Tasks::NotesController`, `portal_reply_on_task`) and staff send with Send to
 client in the task's notes (`Tasks::DiscussionsController`, `reply_to_client`, which confirms);
-every other note stays internal. A client puts their things in their own order of priority by dragging them in the portal (the core's
+every other note stays internal. The discussion goes both ways by itself: the team's note is emailed
+to the client's people on the task (`PortalMailer#reply`, to `Task#discussion_contacts`: whoever
+asked and anyone who wrote on it, else everyone there with the portal), and a client's reply
+notifies whoever is on the task (`Notifier::ClientReplyNotifier`, `Task#team_watchers`), as a
+request from outside notifies owners and managers (`Notifier::RequestNotifier`,
+`User.request_watchers`). A task holding a message a contact hasn't read is marked wherever it's
+listed and counted on the nav (`DiscussionRead`, `Task.unread_discussion_ids`, read when its sheet
+opens), and something a contact asked for being marked done emails them a minute later, unless it
+was undone (`PortalMailer#done`). A contact turns those two emails off in Your account
+(`portal_emails`). The portal's pages refresh live (`turbo_stream_from client`; the cable takes a
+portal session). A client never reads the team's statuses: `Task#client_status`
+(`Task::CLIENT_STATUSES`: received, planned, in progress, on hold, done; `portal_status_tag`), and a
+date an open task has passed is marked late. A client puts their things in their own order of priority by dragging them in the portal (the core's
 drag-and-drop, by a grip): their pieces of work (Your work), each work's sections, and the tasks
 shared with them, on Tasks or within a section on a work's page (`ClientPrioritized`,
 `client_priority` on works, scope items and tasks; `Portal::{Works,ScopeItems,Tasks}::PrioritiesController`,
-tools `portal_prioritize_work`, `_section`, `_task`). It's kept apart from the team's order
+tools `portal_prioritize_work`, `_section`, `_task`). The grip also takes ↑ and ↓ once focused, and on a touch screen gives way to up and down buttons
+(the drag-and-drop controller's `moveUp` / `moveDown`). It's kept apart from the team's order
 (`position`), so neither undoes the other: one ranking per peer group (a client's works, a work's
 sections, all of a client's shared tasks), unranked ones after, and a drop puts the record before
 the one it now sits above. Each move records `client.prioritized` or `work.prioritized`, so the team
@@ -814,11 +831,23 @@ sees it in History; a task's side panel says where the client puts it, and staff
 `client_priority`. Not while staff view as the client. Documents is a portal menu item of its own
 (`Portal::DocumentsController`, `Client#client_documents`); a plugin can stand in for it
 (`portal_nav … replaces: :documents`: its link takes the item's place and the page redirects to it). Task lists open on open tasks
-(`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
-layout's `modal` frame), submits inside it and, sent, closes over the page; a reply on a task's
+(`?tasks=` on a piece of work, `?status=` on Tasks); Tasks and Documents search by name (`?q=`,
+`portal_search`) and, with Requests, page (`portal_page`, 25 a page). The first page is the client's
+work, each with how many of its shared tasks are done and the next date due; the core draws no
+dashboard there: one is a plugin's (the `:portal_dashboard` slot). Requests lists everything asked
+for on the client's behalf, each opening in the side sheet. New request opens in a modal (the portal
+layout's `modal` frame) taking the piece of work it's about, a needed-by date (the task's due date)
+and files, submits inside it and, sent, closes over the page; files sent with a request or a reply
+become the task's documents, the contact's own and shown to the client (`PortalUploads`); a reply on a task's
 discussion answers in place (`inline=discussion`, `portal/tasks/_discussion`), showing at once while
 it's sent, and both keep unsent words as drafts. The portal has the staff pages' connection line and
-sign-in handling (its own sign-in page is marked too), but no peek and no undo.
+sign-in handling (its own sign-in page is marked too), but no peek and no undo. Your account
+(`Portal::AccountsController`) holds a contact's name, title and phone, the email switch, and where
+they're signed in, with Sign out everywhere else. A portal session nobody has used in 90 days is over
+(`Contact::PORTAL_SESSION_IDLE`, pruned nightly), and a sign-in link carries the page they were
+after (`return_to`), so it lands there on any device. The top bar names the business with the
+client under it; the footer says how to ask for something, by email too when the install takes
+requests that way.
 
 The plugins Runwell publishes (Agreements, AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does

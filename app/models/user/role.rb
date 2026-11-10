@@ -32,6 +32,9 @@ module User::Role
     scope :ordered, -> { order(:name) }
     scope :staff, -> { where.not(role: CLIENT) }
     scope :clients, -> { where(role: CLIENT) }
+    # Who hears that a request came in, or that a client wrote on a task nobody has taken on:
+    # the people who can hand it to someone.
+    scope :request_watchers, -> { people.active.where(role: %w[owner manager]) }
   end
 
   class_methods do

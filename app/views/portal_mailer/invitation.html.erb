@@ -1,0 +1,7 @@
+<% content_for :preheader, "See what we’re doing for you, and ask for anything." %>
+<% content_for :reason, "#{Setting.current.brand_name} gave this address access to the portal for #{@contact.client.name}." %>
+<%= mail_heading "Your portal at #{Setting.current.brand_name}" %>
+<p>Hi <%= @contact.name.split.first %>, we’ve set up a portal for <%= @contact.client.name %>. There you can see what we’re working on for you and how far along it is, read and answer our messages, find the files we’ve shared, and ask for anything new.</p>
+<p>There’s no password: this button signs you in, and next time the sign-in page emails you a fresh link.</p>
+<%= mail_button "Open the portal", @url %>
+<%= mail_small "This link works once, for a week." %>

@@ -20,8 +20,9 @@ json.work do
     json.section_id task.scope_item_id
     json.your_priority task.client_priority
     json.title task.title
-    json.status task.status
+    json.status task.client_status
     json.due_on task.due_on
+    json.late task.late?
   end
 
   json.documents @work.client_documents.includes(file_attachment: :blob) do |document|

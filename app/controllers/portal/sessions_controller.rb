@@ -14,7 +14,7 @@ class Portal::SessionsController < Portal::BaseController
   # Always answer the same way so the form does not reveal which emails exist.
   def create
     if (contact = Contact.with_portal_access.find_by(email: params[:email].to_s.strip.downcase))
-      PortalMailer.with(contact: contact).magic_link.deliver_later
+      PortalMailer.with(**{ contact: contact, return_to: portal_return_path(session[:portal_return_to]) }.compact).magic_link.deliver_later
     end
     redirect_to new_portal_session_path, notice: "If that address belongs to a client contact, a sign-in link is on its way."
   end
@@ -32,7 +32,8 @@ class Portal::SessionsController < Portal::BaseController
     contact.update!(link_signed_in_at: Time.current)
     session_record = contact.portal_sessions.create!(ip_address: request.remote_ip, user_agent: request.user_agent)
     cookies.signed.permanent[:portal_session_id] = { value: session_record.id, httponly: true, same_site: :lax }
-    redirect_to session.delete(:portal_return_to).presence&.then { it.start_with?("/portal") ? it : nil } || portal_root_path
+    # Where they were going: named in the link (it may be opened on another device), else remembered here.
+    redirect_to portal_return_path(params[:return_to]) || portal_return_path(session.delete(:portal_return_to)) || portal_root_path
   end
 
   # Signing out of a preview ends the preview, back to the contact's page.
@@ -49,6 +50,9 @@ class Portal::SessionsController < Portal::BaseController
 
   private
     def link_contact
-      @link_contact ||= Contact.find_by_token_for(:portal_login, params[:token])&.then { it if it.portal? }
+      @link_contact ||= Contact.from_portal_link(params[:token])
     end
+
+    # Only a page of the portal's own, never an address somewhere else.
+    def portal_return_path(path) = path.to_s.match?(%r{\A/portal(?:[/?]|\z)}) && !path.include?("//") ? path : nil
 end

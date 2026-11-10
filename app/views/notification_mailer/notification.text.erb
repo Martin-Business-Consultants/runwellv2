@@ -1,6 +1,6 @@
-<% content_for :reason, "You're getting this because someone mentioned you." %>
-<%= @mention.mentioner.first_name %> mentioned you:
+<% content_for :reason, "You're getting this because #{@notification.reason}." %>
+<%= @notification.title %>:
 
-> <%= @mention.source.mentionable_content.truncate(250) %>
+> <%= @notification.excerpt.truncate(250) %>
 
 Open it: <%= notification_url(@notification) %>

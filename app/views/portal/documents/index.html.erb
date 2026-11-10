@@ -5,6 +5,12 @@
   <p class="portal-page-header__description">Every file we’ve shared with you, newest first.</p>
 <% end %>
 
+<% if @documents.any? || params[:q].present? %>
+  <div class="portal-filter">
+    <%= portal_search "Search documents by name" %>
+  </div>
+<% end %>
+
 <% if @documents.any? %>
   <section class="card card--flush portal-card">
     <ul class="list portal-documents">
@@ -16,6 +22,9 @@
       <% end %>
     </ul>
   </section>
+  <%= table_pagination @page %>
+<% elsif params[:q].present? %>
+  <%= render "layouts/shared/empty", text: "No file’s name matches “#{params[:q]}”." %>
 <% else %>
-  <%= render "layouts/shared/empty", text: "Nothing shared yet." %>
+  <%= render "layouts/shared/empty", text: "Nothing shared yet. Files we share with you show here." %>
 <% end %>

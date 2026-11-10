@@ -1,7 +1,7 @@
+# A notification by email: a mention, a client's reply on a task, a request that came in.
 class NotificationMailer < ApplicationMailer
   def notification(notification)
     @notification = notification
-    @mention = notification.source
-    mail to: notification.user.email_address, subject: "#{@mention.mentioner.first_name} mentioned you"
+    mail to: notification.user.email_address, subject: notification.title
   end
 end

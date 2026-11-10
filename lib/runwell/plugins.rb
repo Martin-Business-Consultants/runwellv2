@@ -19,7 +19,8 @@
 # its title: a status badge or a short fact), :task_aside (task:, a piece of work's sidebar),
 # :scope_item_aside (scope_item:), :task_notice (task:, under a task's title on its page and in its
 # side panel: a short note) and :note_row (note:), inside each row; in the
-# client portal, :portal_home (client:),
+# client portal, :portal_home (client:), :portal_dashboard (client:, contact:, above the work on its
+# first page: a dashboard for the client, which the core doesn't draw),
 # :portal_work_panel (work:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
@@ -47,7 +48,7 @@ module Runwell
       email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_work_panel: "Portal work panel",
       client_aside: "Client sidebar", work_aside: "Work sidebar", work_meta: "Work title line",
       task_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header",
-      task_notice: "Task notice" }.freeze
+      task_notice: "Task notice", portal_dashboard: "Portal dashboard" }.freeze
 
     # Something dated a plugin offers to calendars (Runwell::Plugins.dates): a meeting, a renewal,
     # a deadline of its own. label says what kind ("Meeting"), path where it opens, people who it's

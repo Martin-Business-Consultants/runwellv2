@@ -9,7 +9,13 @@ class Portal::McpController < Portal::BaseController
   INSTRUCTIONS = <<~TEXT
     You act for a client of a business (or of whoever runs this Runwell), through its portal: you see what they see there and can do what they can. Call `portal_me` first: who you act for and their company.
 
-    `portal_works` lists what we run for them (work, named by ref like WO-12, or by title); `portal_work` shows one: its sections, the tasks shared with them, and documents. `portal_tasks` lists all shared tasks; `portal_requests` what they've asked for; `portal_send_request` asks for something new.
+    `portal_works` lists what we run for them (work, named by ref like WO-12, or by title) and how far along each is; `portal_work` shows one: its sections, the tasks shared with them, and documents. `portal_tasks` lists all shared tasks and marks those holding a message they haven't read; `portal_task` shows one with its discussion, and `portal_reply_on_task` answers on it. `portal_documents` lists every file shared with them. `portal_requests` is what they've asked for; `portal_send_request` asks for something new.
+
+    A status is what the client reads: received (asked for, nobody has taken it on yet), planned, in_progress, on_hold or done.
+
+    `portal_prioritize_work`, `portal_prioritize_section` and `portal_prioritize_task` put their things in the order that matters most to them, which the team sees. `portal_update_account` changes their own details and whether the portal emails them.
+
+    Anything that writes in their name (a request, a reply) asks you to confirm: show the person what you'll send, then call it again with confirm: true.
 
     Errors carry a stable `code` (usage, not_found, ambiguous, auth, refused, invalid, read_only, paused, rate_limited, failed) and a `hint`; branch on the code.
   TEXT

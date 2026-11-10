@@ -1,5 +1,5 @@
 <% content_for :reason, "Someone asked to sign in with this address. If it wasn't you, ignore this email." %>
 Hi <%= @contact.name.split.first %>,
 
-Sign in: <%= @url %>
+Sign in to <%= Setting.current.brand_name %>: <%= @url %>
 This link works once, for one hour.

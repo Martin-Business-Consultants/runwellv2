@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_140000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -216,6 +216,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
     t.index ["subject_type", "subject_id"], name: "index_custom_values_on_subject"
   end
 
+  create_table "discussion_reads", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "task_id", null: false
+    t.datetime "read_at", null: false
+    t.index ["task_id"], name: "index_discussion_reads_on_task_id"
+    t.index ["user_id", "task_id"], name: "index_discussion_reads_on_user_id_and_task_id", unique: true
+    t.index ["user_id"], name: "index_discussion_reads_on_user_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.string "documentable_type", null: false
     t.integer "documentable_id", null: false
@@ -299,7 +308,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
 
   create_table "notifications", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.integer "creator_id", null: false
+    t.integer "creator_id"
     t.string "source_type", null: false
     t.integer "source_id", null: false
     t.datetime "read_at"
@@ -547,6 +556,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
     t.boolean "portal_access", default: false, null: false
     t.boolean "can_approve", default: false, null: false
     t.integer "legacy_contact_id"
+    t.boolean "portal_emails", default: true, null: false
     t.index ["agent_owner_id"], name: "index_users_on_agent_owner_id", unique: true
     t.index ["client_id"], name: "index_users_on_client_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
@@ -644,6 +654,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
   add_foreign_key "assignments", "users", column: "assigner_id", on_delete: :nullify
   add_foreign_key "contacts", "clients"
   add_foreign_key "custom_values", "custom_fields"
+  add_foreign_key "discussion_reads", "tasks", on_delete: :cascade
+  add_foreign_key "discussion_reads", "users", on_delete: :cascade
   add_foreign_key "documents", "users", column: "uploaded_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
   add_foreign_key "exports", "users"

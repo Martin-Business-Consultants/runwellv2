@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <h1 class="portal-page-header__title"><%= @page_title %></h1>
-  <p class="portal-page-header__description">What you’ve asked us for, newest first.</p>
+  <p class="portal-page-header__description">What you’ve asked us for, newest first. Open one to see how it’s going or to add to it.</p>
 <% end %>
 
 <% if @requests.any? %>
@@ -12,7 +12,9 @@
         <thead>
           <tr>
             <th>Subject</th>
-            <th class="portal-table__date">Sent</th>
+            <th class="portal-table__secondary"><%= term(:work) %></th>
+            <th class="portal-table__date portal-table__secondary">Sent</th>
+            <th class="portal-table__date">Needed by</th>
             <th class="portal-table__status">Status</th>
           </tr>
         </thead>
@@ -20,15 +22,25 @@
           <% @requests.each do |request_record| %>
             <%# herb:key request_record.id %>
             <tr>
-              <td class="portal-table__title"><%= request_record.title %></td>
-              <td class="portal-table__date muted nowrap"><%= l request_record.created_at.in_time_zone, format: :long %></td>
-              <td class="portal-table__status"><%= status_tag portal_request_status(request_record), highlight: request_record.status == "done" %></td>
+              <td class="portal-table__title">
+                <%= portal_task_link_to(request_record) { request_record.title } %>
+                <%= portal_unread_mark(request_record) %>
+              </td>
+              <td class="portal-table__secondary muted">
+                <% if request_record.work %>
+                  <%= link_to request_record.work.title, portal_work_path(request_record.work), class: "portal-table__link" %>
+                <% end %>
+              </td>
+              <td class="portal-table__date portal-table__secondary muted nowrap"><%= l request_record.created_at.in_time_zone.to_date, format: :short %></td>
+              <td class="portal-table__date muted nowrap"><%= portal_due(request_record) %></td>
+              <td class="portal-table__status"><%= portal_status_tag(request_record) %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
     </div>
   </section>
+  <%= table_pagination @page %>
 <% else %>
   <%= render "layouts/shared/empty", text: "Nothing yet.", action_text: "Ask for something", action_path: new_portal_request_path, action_frame: "modal" %>
 <% end %>

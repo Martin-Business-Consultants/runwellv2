@@ -1,17 +1,30 @@
 class Notification < ApplicationRecord
   include LiveRefreshes
   belongs_to :user
-  belongs_to :creator, class_name: "User"
+  # Nobody we know, for a request emailed by someone not on file.
+  belongs_to :creator, class_name: "User", optional: true
   belongs_to :source, polymorphic: true
 
   scope :unread, -> { where(read_at: nil) }
   scope :read, -> { where.not(read_at: nil) }
   scope :ordered, -> { order(read_at: :desc, updated_at: :desc) }
-  scope :preloaded, -> { preload(:creator, source: [ :mentioner, :source ]) }
+  scope :preloaded, -> { preload(:creator, :source) }
 
   after_create_commit :deliver_later
 
-  delegate :notifiable_target, to: :source
+  # What it says, whatever it's about: a mention, a client's reply, a request that came in.
+  delegate :notifiable_target, :notification_title, :notification_excerpt, to: :source
+  alias_method :title, :notification_title
+  alias_method :excerpt, :notification_excerpt
+
+  # Why its person got it, for the email's footer.
+  def reason
+    case source
+    when Mention then "someone mentioned you"
+    when Note then "you’re on this #{Setting.current.term(:task).downcase}"
+    else "you take requests on"
+    end
+  end
 
   class << self
     # In one statement, then one refresh for each person whose notifications they were.

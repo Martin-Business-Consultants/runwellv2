@@ -131,6 +131,8 @@ Rails.application.routes.draw do
   resources :clients do
     resources :contacts, only: %i[new create edit update destroy], shallow: true do
       resource :preview, only: %i[create destroy], module: :contacts
+      resource :portal_invitation, only: :create, module: :contacts
+      resource :portal_sessions, only: :destroy, module: :contacts
     end
     resources :tasks, only: :create
   end
@@ -199,13 +201,16 @@ Rails.application.routes.draw do
     resources :scope_items, only: [] do
       resource :priority, only: :create, module: :scope_items
     end
-    resources :tasks, only: :index do
+    resources :tasks, only: %i[index show] do
       resources :notes, only: :create, module: :tasks
       resource :priority, only: :create, module: :tasks
     end
     resources :documents, only: :index
     resources :requests, only: %i[index new create]
     resource :me, only: :show
+    resource :account, only: %i[show update] do
+      resource :sessions, only: :destroy, module: :accounts
+    end
     post "mcp", to: "mcp#create", as: :mcp
     resources :connected_apps, only: %i[index create destroy]
     resource :oauth_authorization, path: "oauth/authorization", only: %i[show create]

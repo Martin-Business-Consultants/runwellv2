@@ -162,13 +162,12 @@ class Work < ApplicationRecord
     end
   end
 
-  # Every file the client may see for this work: its own, its sections', its work's, and
-  # the client's.
+  # Every file the client may see for this work: its own, its sections' and its shared tasks'.
+  # What's on the client itself is on the portal's Documents (Client#client_documents).
   def client_documents
     Document.client_visible.where(documentable: self)
       .or(Document.client_visible.where(documentable_type: "ScopeItem", documentable_id: scope_items.select(:id)))
       .or(Document.client_visible.where(documentable_type: "Task", documentable_id: tasks.client_visible.select(:id)))
-      .or(Document.client_visible.where(documentable: client))
       .recent.includes(file_attachment: :blob)
   end
 
