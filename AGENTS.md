@@ -102,7 +102,15 @@ them something else on screen (`term(:work)`, `term(:task)`).
    `/requests` redirects to Intake). A task keeps who asked
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
    Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
-   emails create them (`task.requested`)
+   emails create them (`task.requested`). Who hears what comes in is Intake's Schedule
+   (`/intake/schedule`, `Intakes::ShiftsController`, `IntakeShift`, permission `manage_intake`, tools
+   `list_intake_schedule`, `create_intake_shift`, `update_intake_shift`, `delete_intake_shift`): a
+   line per person with its sources (clients, agents, team), days and either a window of the day
+   (told as it comes in, `Notifier::IntakeNotifier`) or digest times (`IntakeMailer#digest`, everything
+   waiting). With no lines, a client's request tells every owner and manager at once and nothing else
+   notifies; with some, what nobody's window covers waits (`tasks.intake_notified_at` nil) for the next
+   one to open (`IntakeShift.deliver`, `IntakeDeliveryJob`, every minute in production and as something
+   comes in). Times are the install's zone
 5. **What needs a human** — their own tasks, filtered on Tasks (`owner: "me"`, `due:` overdue,
    today or week, `status:` in review or blocked), and their notifications (mentions). The app
    opens on Tasks (`root`); the core has no home dashboard (the briefing, "Needs You", went in 5.0:
@@ -847,7 +855,7 @@ to the client's people on the task (`PortalMailer#reply`, to `Task#discussion_co
 asked and anyone who wrote on it, else everyone there with the portal), and a client's reply
 notifies whoever is on the task (`Notifier::ClientReplyNotifier`, `Task#team_watchers`), as a
 request from outside notifies owners and managers (`Notifier::RequestNotifier`,
-`User.request_watchers`). A task holding a message a contact hasn't read is marked wherever it's
+`User.request_watchers`), or whoever Intake's Schedule says. A task holding a message a contact hasn't read is marked wherever it's
 listed and counted on the nav (`DiscussionRead`, `Task.unread_discussion_ids`, read when its sheet
 opens), and something a contact asked for being marked done emails them a minute later, unless it
 was undone (`PortalMailer#done`), as does someone taking it on (`#taken_on`, the first person put on

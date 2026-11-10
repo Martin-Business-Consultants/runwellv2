@@ -1,0 +1,53 @@
+<%# locals: (shift:, people: nil) %>
+<%# A line of the Intake schedule: who, how (as it comes in, or a digest), which days and hours (or
+    digest times), and from which sources. Whoever may change it gets each as a picker that saves as
+    it changes; everyone else reads it. %>
+<% people ||= User.people.active.ordered.map { [ it.display_name, it.id ] } %>
+<% sources = [ [ term(:client, count: 2), "clients" ], [ "AI", "agents" ], [ "The team", "team" ] ] %>
+<li class="list-row intake-shift" id="<%= dom_id(shift, :row) %>" data-filter-target="item">
+  <% if can?(:manage_intake) %>
+    <%= form_with model: shift, url: intake_shift_path(shift), method: :patch, scope: :intake_shift, namespace: dom_id(shift), class: "intake-shift__form", data: { controller: "form" } do |form| %>
+      <div class="intake-shift__field">
+        <span class="field__label">Who</span>
+        <%= form.select :user_id, people, {}, aria: { label: "Who" }, data: { action: "change->form#submit" } %>
+      </div>
+      <div class="intake-shift__field">
+        <span class="field__label">How</span>
+        <%= form.select :mode, IntakeShift::MODES.invert.to_a, {}, aria: { label: "How" }, data: { action: "change->form#submit" } %>
+      </div>
+      <div class="intake-shift__field">
+        <span class="field__label">Days</span>
+        <%= form.select :days, IntakeShift::DAYS.invert.to_a, { selected: shift.days }, multiple: true, aria: { label: "Days" }, data: { action: "change->form#submit" } %>
+      </div>
+      <% if shift.digest? %>
+        <div class="intake-shift__field">
+          <span class="field__label">At</span>
+          <%= form.select :digest_minutes, IntakeShift.time_options, { selected: shift.digest_minutes }, multiple: true, aria: { label: "Digest times" }, data: { action: "change->form#submit" } %>
+        </div>
+      <% else %>
+        <div class="intake-shift__field">
+          <span class="field__label">From</span>
+          <%= form.select :from_minute, IntakeShift.time_options, {}, aria: { label: "From" }, data: { action: "change->form#submit" } %>
+        </div>
+        <div class="intake-shift__field">
+          <span class="field__label">Until</span>
+          <%= form.select :to_minute, IntakeShift.time_options, {}, aria: { label: "Until" }, data: { action: "change->form#submit" } %>
+        </div>
+      <% end %>
+      <div class="intake-shift__field">
+        <span class="field__label">From whom</span>
+        <%= form.select :sources, sources, { selected: shift.sources }, multiple: true, aria: { label: "Sources" }, data: { action: "change->form#submit" } %>
+      </div>
+    <% end %>
+    <div class="list-row__actions">
+      <%= render "layouts/shared/delete_dialog", name: "#{shift.user.display_name}’s line", path: intake_shift_path(shift),
+            message: "They stop hearing about what comes into Intake this way." %>
+    </div>
+  <% else %>
+    <span class="list-row__media"><%= person_tag shift.user %></span>
+    <div class="list-row__content">
+      <p class="list-row__title"><%= shift.user.display_name %></p>
+      <p class="list-row__desc"><%= IntakeShift::MODES[shift.mode] %> · <%= shift.when_label %> · <%= sources.filter_map { |label, key| label if shift.sources.include?(key) }.to_sentence %></p>
+    </div>
+  <% end %>
+</li>

@@ -1,0 +1,5 @@
+<% @page_title = "Schedule" %>
+<%= parent_page "Intake", intake_path %>
+<%# Who hears what comes into Intake, and when (IntakeShift): a line per person, each saved as it
+    changes (Intakes::ShiftsController answers in place). %>
+<%= render "intakes/shifts/schedule", shifts: @shifts %>

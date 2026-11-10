@@ -17,6 +17,7 @@ module User::Role
   PERMISSIONS = {
     manage_settings: { name: "Change settings and plugins", roles: %w[owner] },
     manage_people: { name: "Invite people and change their roles", roles: %w[owner] },
+    manage_intake: { name: "Set who hears what comes into Intake, and when", roles: %w[owner manager] },
     close_works: { name: "Close work", roles: %w[owner manager] },
     erase_works: { name: "Delete closed work permanently, with its tasks and history", roles: %w[owner] },
     delete_records: { name: "Delete records", roles: %w[owner manager] }

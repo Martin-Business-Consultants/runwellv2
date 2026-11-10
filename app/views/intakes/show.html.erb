@@ -9,6 +9,9 @@
   <%= link_to agent_activity_path(whose: "any"), class: "btn btn--ghost btn--sm" do %>
     <%= icon_tag "ai" %> <span>AI activity</span>
   <% end %>
+  <%= link_to intake_shifts_path, class: "btn btn--ghost btn--sm", title: "Who hears what comes in, and when" do %>
+    <%= icon_tag "calendar" %> <span>Schedule</span>
+  <% end %>
 <% end %>
 <% content_for :index_bulk do %>
   <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>

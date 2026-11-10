@@ -1,0 +1,8 @@
+<% content_for :reason, "You're getting this because you're on the Intake schedule (#{@shift.when_label})." %>
+<%= @tasks.size %> waiting in Intake. Nobody has accepted or declined these yet:
+
+<% @tasks.each do |task| %>
+- <%= task.title %> (<%= intake_digest_line(task) %>)
+<% end %>
+
+Open Intake: <%= intake_url %>

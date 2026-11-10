@@ -22,7 +22,7 @@ class Notification < ApplicationRecord
     case source
     when Mention then "someone mentioned you"
     when Note then "you’re on this #{Setting.current.term(:task).downcase}"
-    else "you take requests on"
+    else IntakeShift.exists? ? "you’re on the Intake schedule" : "you take requests on"
     end
   end
 

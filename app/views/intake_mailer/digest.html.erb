@@ -1,0 +1,10 @@
+<% content_for :preheader, @tasks.first(3).map(&:title).join(" · ").truncate(90) %>
+<% content_for :reason, "You’re getting this because you’re on the Intake schedule (#{@shift.when_label})." %>
+<%= mail_heading "#{@tasks.size} waiting in Intake" %>
+<p>Nobody has accepted or declined these yet:</p>
+<% @tasks.each do |task| %>
+  <%# herb:key task.id %>
+  <p><strong><%= task.title %></strong></p>
+  <%= mail_small intake_digest_line(task) %>
+<% end %>
+<%= mail_button "Open Intake", intake_url %>

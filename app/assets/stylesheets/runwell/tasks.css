@@ -452,3 +452,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .peek-panel .record-fields--in-place .setting-row .switch { justify-self: start; margin-left: var(--s-2); }
 .peek-panel__section { display: flex; flex-direction: column; gap: var(--s-2); }
 .peek-panel__heading { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+
+/* Intake > Schedule (intakes/shifts): a line per person, its pickers wrapping beside the avatar. */
+.intake-schedule { display: flex; flex-direction: column; gap: var(--s-4); max-width: 72rem; }
+.intake-schedule__body { display: flex; flex-direction: column; gap: var(--s-3); }
+.intake-schedule__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.intake-schedule__list:empty { display: none; }
+.intake-schedule__add { flex-direction: row; align-items: center; gap: var(--s-2); max-width: 32rem; }
+.intake-shift { align-items: flex-end; }
+.intake-shift__form { flex: 1; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: var(--s-3); min-width: 0; }
+.intake-shift__field { display: flex; flex-direction: column; gap: var(--s-1); min-width: 7rem; }

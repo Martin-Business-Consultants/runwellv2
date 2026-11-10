@@ -68,7 +68,12 @@ module Task::Intake
   end
 
   private
+    # With no Intake schedule the core's rule tells whoever it tells as it comes in, so there's
+    # nothing left to wait for a window (IntakeShift).
     def come_in
-      self.intake_at ||= Time.current if owner_id.nil? || work_id.nil?
+      return unless owner_id.nil? || work_id.nil?
+
+      self.intake_at ||= Time.current
+      self.intake_notified_at ||= intake_at unless IntakeShift.exists?
     end
 end

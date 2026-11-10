@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_200000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -272,6 +272,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
     t.index ["user_id"], name: "index_exports_on_user_id"
   end
 
+  create_table "intake_shifts", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "mode", default: "instant", null: false
+    t.json "days", default: [1, 2, 3, 4, 5], null: false
+    t.integer "from_minute", default: 480, null: false
+    t.integer "to_minute", default: 1020, null: false
+    t.json "digest_minutes", default: [540], null: false
+    t.json "sources", default: ["clients"], null: false
+    t.datetime "last_digest_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_intake_shifts_on_user_id"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "role", default: "member", null: false
@@ -520,6 +534,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
     t.datetime "declined_at"
     t.integer "declined_by_id"
     t.datetime "intake_at"
+    t.datetime "intake_notified_at"
     t.index ["client_id"], name: "index_tasks_on_client_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
@@ -676,6 +691,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
   add_foreign_key "documents", "users", column: "uploaded_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
   add_foreign_key "exports", "users"
+  add_foreign_key "intake_shifts", "users"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "mentions", "users", column: "mentionee_id"

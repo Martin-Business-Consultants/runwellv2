@@ -61,6 +61,9 @@ Rails.application.routes.draw do
   resource :search, only: :show
   resource :agent_activity, only: :show, path: "ai"
   resource :intake, only: :show
+  scope "intake", module: "intakes", as: "intake" do
+    resources :shifts, only: %i[index create update destroy], path: "schedule"
+  end
 
   resource :settings, only: :show
   # Settings > People became Users, in the left nav.

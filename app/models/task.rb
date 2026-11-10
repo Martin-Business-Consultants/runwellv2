@@ -98,8 +98,15 @@ class Task < ApplicationRecord
 
   def requester_name = contact&.name || sender_name.presence || sender_email
 
-  # A notification about it: a request that came in.
-  def notification_title = "#{requester_name || "Someone"} asked for something"
+  # A notification about it: something that came into Intake (a request, or a task an agent or
+  # someone on the team added with nobody on it).
+  def notification_title
+    if requester_name.present?
+      "#{requester_name || "Someone"} asked for something"
+    else
+      "#{agent_name || created_by&.display_name || "Someone"} added something to Intake"
+    end
+  end
   def notification_excerpt = title
 
 
@@ -171,8 +178,16 @@ class Task < ApplicationRecord
 
     def live_streams = [ self, :tasks, work, client, scope_item ]
 
-    # Only a request from outside notifies anyone (Notifiable would for every task).
+    # Without an Intake schedule only a request from outside notifies anyone (every owner and
+    # manager, Notifier::RequestNotifier; Notifiable would for every task). With one, what came in
+    # goes to whoever's on now, or waits for them (IntakeShift.deliver).
     def notify_recipients_later
-      super if requested && Current.source != "import"
+      return if Current.source == "import"
+
+      if intake_at && IntakeShift.exists?
+        IntakeDeliveryJob.perform_later
+      elsif requested
+        super
+      end
     end
 end

@@ -28,3 +28,6 @@ production:
   agent_housekeeping:
     class: AgentHousekeepingJob
     schedule: every day at 3am
+  intake_delivery:
+    class: IntakeDeliveryJob
+    schedule: every minute

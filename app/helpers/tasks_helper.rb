@@ -160,6 +160,13 @@ module TasksHelper
     [ who, ("via #{task.source}" if task.source.present?) ].compact.join(" ").presence || "Unknown"
   end
 
+  # One line under a task in the Intake digest (IntakeMailer): who it came from, what it's for and
+  # how long it's waited.
+  def intake_digest_line(task)
+    home = task.work&.title || task.client&.name
+    [ intake_source_label(task), ("for #{home}" if home), "came in #{time_ago_in_words(task.intake_at)} ago" ].compact.join(" · ")
+  end
+
   # Intake's Source cell: who it came from as an avatar (the person behind an agent with the AI mark
   # on it), then the channel in a word (AI, Portal, Email, Phone…); the full source in its tooltip.
   def intake_source_tag(task)
