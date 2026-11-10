@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/Martin-Business-Consultants/rune_ui.git
-  revision: d32da8835df706029eab24bdd5fe26e5f2ae0a3f
+  revision: c909a1afca97f8ac4dd0987a3cc574bc8254beb3
   branch: main
   specs:
     rune_ui (0.2.2)
