@@ -11,18 +11,7 @@
 <%= turbo_stream_from @item %>
 
 <section class="record-page record-page--tabbed">
-  <header class="record-page__header">
-    <div class="record-page__heading">
-      <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">
-        <%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %>
-        <span>A <%= term(:scope_item).downcase %> of <%= link_to @work.title, @work %></span>
-      </p>
-    </div>
-    <div class="button-row">
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+  <%= render "scope_items/header", item: @item %>
 
   <div class="record-page__main">
     <turbo-frame id="record_tab" target="_top">
@@ -81,7 +70,7 @@
 
     <section class="card record-card">
       <header class="card__head">
-        <h2 class="card__title">Rename or remove</h2>
+        <h2 class="card__title">Remove</h2>
         <p class="card__hint">Removing it keeps its <%= term(:task, count: 2).downcase %> on the <%= term(:work).downcase %>.</p>
       </header>
       <div class="card__content">

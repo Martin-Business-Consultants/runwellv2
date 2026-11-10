@@ -1,0 +1,15 @@
+<%# locals: (item:) %>
+<%# A section's page header: its name, changed in place, how its delivery stands and the work it's
+    part of. Redrawn when it saves (scope_items/update.turbo_stream.erb). %>
+<header class="record-page__header" id="<%= dom_id(item, :header) %>">
+  <div class="record-page__heading">
+    <%= render "layouts/shared/record_title", record: item, attribute: :description, label: "Name" %>
+    <p class="record-page__description">
+      <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+      <span>A <%= term(:scope_item).downcase %> of <%= link_to item.work.title, item.work %></span>
+    </p>
+  </div>
+  <div class="button-row">
+    <%= render "layouts/shared/sidebar_toggle" %>
+  </div>
+</header>

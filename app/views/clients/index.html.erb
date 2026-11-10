@@ -8,7 +8,7 @@
 <% if @view == "table" %>
   <% content_for :index_bulk do %>
   <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with work can’t be deleted, and are skipped and named.") : nil) do %>
-    <%= bulk_menu bulk_clients_path, method: :patch, name: "client[status]", label: "Status", choices: Client::STATUSES.map { [ it.humanize, it ] } %>
+    <%= bulk_menu bulk_clients_path, method: :patch, name: "client[status]", label: "Status", choices: Client::STATUSES.map { [ it.humanize, it ] }, params: { list_status: @status } %>
   <% end %>
   <% end %>
 <% end %>

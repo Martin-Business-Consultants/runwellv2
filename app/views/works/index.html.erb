@@ -12,7 +12,7 @@
   <% content_for :index_bulk do %>
   <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_works_path, noun: term(:work, count: 2).downcase, message: "Only those with no work yet are deleted; the rest are skipped (close them instead).") : nil) do %>
     <% if can?(:close_works) %>
-      <%= bulk_menu bulk_works_closure_path, method: :post, name: "outcome", label: "Close as", choices: [ [ "Completed", "completed" ], [ "Cancelled", "cancelled" ] ] %>
+      <%= bulk_menu bulk_works_closure_path, method: :post, name: "outcome", label: "Close as", choices: [ [ "Completed", "completed" ], [ "Cancelled", "cancelled" ] ], params: { list_state: @state, list_label: @label } %>
     <% end %>
   <% end %>
   <% end %>

@@ -11,7 +11,7 @@
 <% filters = request.query_parameters.slice("tasks") %>
 
 <%# Under the sidebar's sections tab (works/_sidebar), which names it. %>
-<section class="scope-section">
+<section class="scope-section" id="<%= dom_id(work, :scope) %>">
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= work_path(work, filters.merge(tab: "tasks")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
       <span class="scope-nav__name">All <%= term(:task, count: 2).downcase %></span>

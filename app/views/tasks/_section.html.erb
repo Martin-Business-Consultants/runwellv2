@@ -24,7 +24,7 @@
         <% unless work.closed? %>
           <details class="task-section__new">
             <summary class="icon-button task-section__add" title="Add a <%= term(:scope_item).downcase %>"><%= icon_tag "add" %><span class="visually-hidden">Add a <%= term(:scope_item).downcase %></span></summary>
-            <%= render "scope_items/new", work: work %>
+            <%= render "scope_items/new", work: work, state: state, item: focus_item %>
           </details>
         <% end %>
       <% end %>

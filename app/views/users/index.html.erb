@@ -10,8 +10,8 @@
 <% if @view == "table" && manage %>
   <% content_for :index_bulk do %>
     <%= bulk_bar do %>
-      <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] } %>
-      <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ] %>
+      <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] }, params: { list_status: @status } %>
+      <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ], params: { list_status: @status } %>
     <% end %>
   <% end %>
 <% end %>

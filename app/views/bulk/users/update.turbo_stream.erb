@@ -1,0 +1,14 @@
+<%# Several people changed from the table's bulk bar: each the table's filter no longer shows
+    (list_status: the page's ?status=, active or deactivated) goes, the rest are redrawn in place,
+    and the notice shows. %>
+<% list_status = params[:list_status].presence_in(UsersController::STATUSES + %w[all]) || "active" %>
+<% manage = can?(:manage_people) %>
+<% @bulk_changed.each do |person| %>
+  <%# herb:key person.id %>
+  <% if list_status == "all" || person.public_send("#{list_status}?") %>
+    <%= turbo_stream.replace dom_id(person, :row), method: :morph, partial: "users/row", locals: { person: person, manage: manage } %>
+  <% else %>
+    <%= turbo_stream.remove dom_id(person, :row) %>
+  <% end %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

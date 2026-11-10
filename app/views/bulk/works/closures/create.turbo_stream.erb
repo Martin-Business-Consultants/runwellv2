@@ -1,0 +1,14 @@
+<%# Several works closed from the table's bulk bar: each the table's filter no longer shows (list_state
+    and list_label, the page's own; Work.filtered judges) goes, the rest are redrawn in place, and
+    the notice shows. %>
+<% still = Work.filtered(state: Work.filter_from(params, :list_state), label: params[:list_label].presence_in(Work.labels) || "all", scope: Work.where(id: @bulk_changed.map(&:id))).pluck(:id) %>
+<% listed = CustomField.for("Work").listed.to_a %>
+<% @bulk_changed.each do |work| %>
+  <%# herb:key work.id %>
+  <% if still.include?(work.id) %>
+    <%= turbo_stream.replace dom_id(work, :row), method: :morph, partial: "works/row", locals: { work: work, listed: listed } %>
+  <% else %>
+    <%= turbo_stream.remove dom_id(work, :row) %>
+  <% end %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

@@ -1,0 +1,6 @@
+<%# Several works deleted from the table's bulk bar: their rows go, and the notice names any skipped. %>
+<% @bulk_changed.each do |work| %>
+  <%# herb:key work.id %>
+  <%= turbo_stream.remove dom_id(work, :row) %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

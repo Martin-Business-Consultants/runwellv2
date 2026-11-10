@@ -1,15 +1,8 @@
 <%# locals: (item:) %>
-<%# Renaming a scope item in place (its name and a check to save), and deleting it. %>
-<div class="scope-item-fields">
-  <%= form_with model: item, namespace: dom_id(item) do |form| %>
-    <%= form.text_field :description, required: true, autocomplete: "off", aria: { label: "Name" } %>
-    <button type="submit" class="icon-button" title="Save">
-      <%= icon_tag "check" %>
-      <span class="visually-hidden">Save</span>
-    </button>
-  <% end %>
-  <% if can?(:delete_records) %>
+<%# Removing a section (its name changes in the page's header). %>
+<% if can?(:delete_records) %>
+  <div class="scope-item-fields">
     <%= render "layouts/shared/delete_dialog", name: item.description, path: scope_item_path(item),
           message: "Removing it keeps its #{term(:task, count: 2).downcase} on the #{term(:work).downcase}, under no #{term(:scope_item).downcase}." %>
-  <% end %>
-</div>
+  </div>
+<% end %>

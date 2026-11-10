@@ -1,6 +1,9 @@
 <%# locals: () %>
 <%# Notices and alerts as toasts in the bottom right (rune_ui's flash, toast: true), in a frame so a
-    turbo stream can replace them. %>
+    turbo stream can replace them. data-turbo-temporary keeps them out of Turbo's page cache, so a
+    preview of a page never shows its toast again. %>
 <%= turbo_frame_tag :flash do %>
-  <%= flash_messages(toast: true) %>
+  <div data-turbo-temporary>
+    <%= flash_messages(toast: true) %>
+  </div>
 <% end %>

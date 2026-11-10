@@ -21,15 +21,27 @@ class ScopeItemsController < ApplicationController
     work = Work.find_by_ref!(params[:work_ref])
     item = work.scope_items.new(item_params)
     if item.save
+      @work, @item = work, item
+      return render(:create) if inline?("section")
+
       redirect_to work, notice: "#{Setting.current.term(:scope_item)} added: #{item.description}."
     else
+      return refuse_in_place(item.errors.full_messages.to_sentence) if inline?("section")
+
       redirect_to work, alert: item.errors.full_messages.to_sentence
     end
   end
 
   def update
     item = ScopeItem.find(params[:id])
-    if item.update(item_params)
+    saved = item.update(item_params)
+    if inline?("field")
+      @alert = item.errors.full_messages.to_sentence unless saved
+      @item = saved ? item : item.reload
+      return render(:update, status: (saved ? :ok : :unprocessable_entity))
+    end
+
+    if saved
       redirect_to item.work, notice: "#{Setting.current.term(:scope_item)} updated."
     else
       redirect_to item.work, alert: item.errors.full_messages.to_sentence

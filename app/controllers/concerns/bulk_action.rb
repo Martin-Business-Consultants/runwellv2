@@ -21,14 +21,14 @@ module BulkAction
       return redirect_back(fallback_location: fallback, alert: "Select at least one first.") if records.empty?
 
       @bulk_changed, message, flash_key = bulk_results(records, done:, &change)
-      return render(:update) if bulk_stream? && action_name == "update"
-      return render(:destroy) if bulk_stream? && action_name == "destroy"
+      return render(action_name) if bulk_stream?
 
       redirect_back fallback_location: fallback, flash_key => message
     end
 
-    # A controller with update/destroy .turbo_stream.erb views answers the table's own forms with a
-    # stream (rows that leave its list go, the rest are redrawn); anything else gets the redirect.
+    # A controller with a .turbo_stream.erb view for the action answers the table's own forms with a
+    # stream (rows that leave its list go, the rest are redrawn; the bar's forms carry the list's
+    # filter, list_*, for the model to judge by); anything else gets the redirect.
     def bulk_stream?
       request.format.turbo_stream? && lookup_context.exists?(action_name, controller_path, false, [], formats: [ :turbo_stream ])
     end

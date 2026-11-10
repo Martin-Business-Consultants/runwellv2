@@ -1,0 +1,6 @@
+<%# A section added from a piece of work's Tasks tab (inline=section): the tasks again with the new
+    section open for its first task (its filter and focus kept), the sidebar's list of sections, and
+    the notice. %>
+<%= turbo_stream.replace "tasks", method: :morph, partial: "tasks/section", locals: { work: @work, state: Task.state_filter(params[:inline_state]), item: Task.section_focus(params[:inline_item]), open_item: @item.id } %>
+<%= turbo_stream.replace dom_id(@work, :scope), method: :morph, partial: "works/scope", locals: { work: @work, current: Task.section_focus(params[:inline_item]) || "all" } %>
+<%= turbo_stream_flash(notice: "#{term(:scope_item)} added: #{@item.description}.") %>

@@ -1,0 +1,6 @@
+<%# Several clients deleted from the table's bulk bar: their rows go, and the notice names any skipped. %>
+<% @bulk_changed.each do |client| %>
+  <%# herb:key client.id %>
+  <%= turbo_stream.remove dom_id(client, :row) %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

@@ -1,0 +1,4 @@
+<%# A section renamed in place on its page (inline=field): its header redrawn, and the notice, or why
+    it was refused with the old name back. %>
+<%= turbo_stream.replace dom_id(@item, :header), method: :morph, partial: "scope_items/header", locals: { item: @item } %>
+<%= turbo_stream_flash(notice: (@alert ? nil : "Saved."), alert: @alert) %>

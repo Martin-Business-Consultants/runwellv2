@@ -1,7 +1,13 @@
-<%# locals: (work:) %>
-<%# A new scope item: its name and Add, on one line. %>
+<%# locals: (work:, state: nil, item: nil) %>
+<%# A new scope item: its name and Add, on one line. It answers in place (inline=section,
+    scope_items/create.turbo_stream.erb), keeping the Tasks tab's filter and focus (state, item). %>
 <div class="scope-item-fields">
   <%= form_with model: [ work, ScopeItem.new ], namespace: dom_id(work, :new_item) do |form| %>
+    <%= hidden_field_tag :inline, "section", id: nil %>
+    <%= hidden_field_tag :inline_state, state, id: nil %>
+    <% if item %>
+      <%= hidden_field_tag :inline_item, item, id: nil %>
+    <% end %>
     <%= form.text_field :description, required: true, autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
     <button type="submit" class="btn btn--primary btn--sm" title="Add">
       <span>Add</span>

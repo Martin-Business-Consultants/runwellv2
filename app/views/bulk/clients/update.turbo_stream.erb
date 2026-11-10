@@ -1,0 +1,13 @@
+<%# Several clients' status changed from the table's bulk bar: each the table's filter no longer shows
+    (list_status: the page's ?status=) goes, the rest are redrawn in place, and the notice shows. %>
+<% list_status = params[:list_status].presence_in(Client::STATUSES + %w[all]) || "active" %>
+<% listed = CustomField.for("Client").listed.to_a %>
+<% @bulk_changed.each do |client| %>
+  <%# herb:key client.id %>
+  <% if list_status == "all" || client.status == list_status %>
+    <%= turbo_stream.replace dom_id(client, :row), method: :morph, partial: "clients/row", locals: { client: client, listed: listed } %>
+  <% else %>
+    <%= turbo_stream.remove dom_id(client, :row) %>
+  <% end %>
+<% end %>
+<%= turbo_stream_flash(**@bulk_message) %>

@@ -37,10 +37,12 @@ module BulkHelper
   end
 
   # A pill opening a menu of values for one field, like a quick filter; choosing one applies it to
-  # every picked row.
-  def bulk_menu(path, method:, name:, label:, choices:)
+  # every picked row. params: fixed ones sent with it (the list's filter, so the answer knows which
+  # rows leave it).
+  def bulk_menu(path, method:, name:, label:, choices:, params: {})
     bulk_popup(label) do
       form_tag(path, method: method, class: "popup__form") do
+        safe_join(params.map { |key, value| hidden_field_tag(key, value, id: nil) }) +
         tag.ul(class: "popup__list", role: "listbox") do
           safe_join(choices.map do |text, value|
             tag.li(class: "popup__item") do
