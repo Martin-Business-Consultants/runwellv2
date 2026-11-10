@@ -17,11 +17,14 @@ class ChangesController < ApplicationController
 
     @client = Client.find(params[:client_id]) if params[:client_id].present?
     @work = Work.find_by_ref!(params[:work_ref]) if params[:work_ref].present?
-    events = (@client || @work) ? scope.limit(MAX * 4).select { within?(it) } : scope.limit(limit + 1).to_a
-
-    @more = events.size > limit
-    @events = events.first(limit)
-    @cursor = @events.last&.id || params[:after].presence&.to_i || Event.maximum(:id).to_i
+    if @client || @work
+      changes_within(scope, limit)
+    else
+      events = scope.limit(limit + 1).to_a
+      @more = events.size > limit
+      @events = events.first(limit)
+      @cursor = @events.last&.id || params[:after].presence&.to_i || Event.maximum(:id).to_i
+    end
   end
 
   private
@@ -31,6 +34,24 @@ class ChangesController < ApplicationController
       when /\A(\d+)\s*d\z/i then $1.to_i.days.ago
       when "" then 24.hours.ago
       else Time.zone.parse(params[:since]) || raise(ActionController::BadRequest, "since should be an ISO time, or like 24h or 7d")
+      end
+    end
+
+    # For one client or piece of work: a window of events, kept if they're about it (a plugin's
+    # subjects too, so the match is in Ruby). The cursor moves past everything looked at, matched
+    # or not, so events about others never hold it back; more says there's more to look through.
+    def changes_within(scope, limit)
+      window = MAX * 4
+      scanned = scope.limit(window).to_a
+      ActiveRecord::Associations::Preloader.new(records: scanned.map(&:subject).grep(Task), associations: :work).call
+      matched = scanned.select { within?(it) }
+
+      if matched.size > limit
+        @events, @more = matched.first(limit), true
+        @cursor = @events.last.id
+      else
+        @events, @more = matched, scanned.size == window
+        @cursor = scanned.last&.id || params[:after].presence&.to_i || Event.maximum(:id).to_i
       end
     end
 

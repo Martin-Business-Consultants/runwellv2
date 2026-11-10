@@ -1,5 +1,5 @@
 json.summary(if @events.empty?
-  "Nothing new#{" for #{(@work || @client).try(:ref) || @client&.name}" if @work || @client}."
+  "Nothing new#{" for #{(@work || @client).try(:ref) || @client&.name}" if @work || @client}#{", in what was looked through: call again with after: #{@cursor}" if @more}."
 else
   "#{pluralize @events.size, "change"}#{", and more: call again with after: #{@cursor}" if @more}."
 end)
