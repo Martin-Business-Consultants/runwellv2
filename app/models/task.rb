@@ -37,6 +37,8 @@ class Task < ApplicationRecord
 
   before_validation :take_client
   before_validation :match_sender
+  before_validation :drop_section_from_other_work, if: :will_save_change_to_work_id?
+  after_update :record_filing, if: :saved_change_to_work_id?
 
   scope :open, -> { where.not(status: "done") }
   scope :overdue, -> { open.where("due_on < ?", Date.current) }
@@ -85,6 +87,26 @@ class Task < ApplicationRecord
     scope
   end
 
+  # Intake: what came in and hasn't been dealt with, an open task that nobody has taken on or that
+  # isn't on a piece of work yet (a request from a client, an email, a task an agent added).
+  # Someone on it and a piece of work under it, and it's left intake.
+  scope :intake, -> { open.where(owner_id: nil).or(open.where(work_id: nil)) }
+  def intake? = status != "done" && (owner_id.nil? || work_id.nil?)
+
+  # Where it came from, as Intake filters it: a client (a contact, or an email's sender), an agent,
+  # or someone on the team.
+  INTAKE_SOURCES = %w[any clients agents team].freeze
+  scope :from_clients, -> { where("tasks.contact_id IS NOT NULL OR COALESCE(tasks.sender_email, '') <> ''") }
+  scope :from_team, -> { made_by_people.where(contact_id: nil).where("COALESCE(tasks.sender_email, '') = ''") }
+  def self.from_source(source)
+    case source
+    when "clients" then from_clients
+    when "agents" then made_by_agents
+    when "team" then from_team
+    else all
+    end
+  end
+
   # Added by an agent (someone's AI, through a token), and which one: "Ted's agent".
   def made_by_agent? = User.agent_names.key?(created_by_id)
   def agent_name = User.agent_names[created_by_id]
@@ -118,6 +140,16 @@ class Task < ApplicationRecord
 
   def take_client
     self.client_id = work.client_id if work
+  end
+
+  # Put on another piece of work (filed from Intake), a section of the old one no longer applies.
+  def drop_section_from_other_work
+    self.scope_item = nil if scope_item && scope_item.work_id != work_id
+  end
+
+  def record_filing
+    from, to = saved_change_to_work_id.map { Work.find_by(id: it)&.title }
+    record_event!("task.filed", payload: { from: from, to: to }.compact)
   end
 
   def match_sender

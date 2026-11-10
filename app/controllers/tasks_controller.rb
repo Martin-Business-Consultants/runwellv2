@@ -11,12 +11,12 @@ class TasksController < ApplicationController
     description: "Tasks across all work. status: open (default), all, or one status; owner: me (the person you act for), none (nobody's on it), any, or a person’s id or name (tasks they lead or are on); work: a ref or all; due: overdue, today or week (the seven days after today); made_by: any (default), people, or agents (added by someone's AI)."
   agent_tool :show_task, on: :show, title: "Show a task"
   agent_tool :create_task, on: :create, route: "/tasks", title: "Add a task to a piece of work or a client",
-    description: "Give work_ref for a task on a piece of work, or task.client_id for a task straight on a client. owner_id: who leads it; other_owner_ids: anyone else on it. Without owner_id or other_owner_ids it's yours (the person you act for); owner_id blank leaves nobody on it, which makes it a request until someone takes it on. A promise with a date is a task with a due date; repeat (weekly, biweekly, monthly, quarterly, yearly) makes the next one each time it's done. contact_id: the client contact who asked for it; source: how it came in (app, phone, email…). It stays internal unless client_visible: true shows it in the client's portal.",
+    description: "Give work_ref for a task on a piece of work, or task.client_id for a task straight on a client. owner_id: who leads it; other_owner_ids: anyone else on it. A task with nobody on it, or on no piece of work, is in Intake until someone takes it on and files it. A promise with a date is a task with a due date; repeat (weekly, biweekly, monthly, quarterly, yearly) makes the next one each time it's done. contact_id: the client contact who asked for it; source: how it came in (app, phone, email…). It stays internal unless client_visible: true shows it in the client's portal.",
     params: { work_ref: "string", task: { title: "string!", description: "text", client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", repeat: Cadence::KEYS, custom_fields: {} } },
     confirm: "Visible to the client (client_visible: true) shows it in their portal.", confirm_when: ->(args) { Agent::Tool.truthy?(args.dig("task", "client_visible")) }
   agent_tool :update_task, on: :update, title: "Change a task",
-    description: "Change its status (planned, in_progress, in_review when finished and waiting for a person to check, blocked, done), owners, due date or details. owner_id is the lead (replacing the lead, keeping the others; blank hands the lead to whoever else is on it); other_owner_ids is everyone else on it (replaces them; [] for nobody else). Both blank: nobody. client_visible shows it in the client’s portal. repeat (weekly, biweekly, monthly, quarterly, yearly; blank for never): marking it done makes the next one, due a period after this one.",
-    params: { task: { title: "string", description: "text", status: Task::STATUSES, client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", repeat: Cadence::KEYS, custom_fields: {} } },
+    description: "work_id puts it on a piece of work (a ref or title; its client follows, and a section of another work is dropped). Change its status (planned, in_progress, in_review when finished and waiting for a person to check, blocked, done), owners, due date or details. owner_id is the lead (replacing the lead, keeping the others; blank hands the lead to whoever else is on it); other_owner_ids is everyone else on it (replaces them; [] for nobody else). Both blank: nobody. client_visible shows it in the client’s portal. repeat (weekly, biweekly, monthly, quarterly, yearly; blank for never): marking it done makes the next one, due a period after this one.",
+    params: { task: { title: "string", description: "text", status: Task::STATUSES, work_id: "integer", client_id: "integer", contact_id: "integer", source: "string", owner_id: "integer", other_owner_ids: "integer[]", due_on: "date", scope_item_id: "integer", client_visible: "boolean", repeat: Cadence::KEYS, custom_fields: {} } },
     confirm: "Visible to the client (client_visible: true) shows it in their portal.", confirm_when: ->(args) { Agent::Tool.truthy?(args.dig("task", "client_visible")) }
   agent_tool :delete_task, on: :destroy, title: "Remove a task"
   agent_tool :brief_task, on: :brief, title: "Get a brief for doing a task",
@@ -60,9 +60,6 @@ class TasksController < ApplicationController
     attributes = task_params.merge(created_by: current_user)
     # What an agent adds stays internal unless it says otherwise (and confirms: it reaches the client).
     attributes = attributes.reverse_merge(client_visible: false) if Current.agent?
-    # An agent's task is its person's (they asked for it), not a request from outside, unless it
-    # names who's on it, or nobody (owner_id blank).
-    attributes = attributes.merge(owner_id: current_user.person.id) if Current.agent? && !task_params.key?(:owner_id) && !task_params.key?(:other_owner_ids)
     task = @home.tasks.new(attributes)
     if task.save
       return render(:create) if inline?("tasks")
@@ -144,5 +141,5 @@ class TasksController < ApplicationController
     def task_home = @task.work || @task.client || tasks_path(owner: "none")
 
     def set_task = @task = Task.find(params[:id])
-    def task_params = params.expect(task: [ :title, :description, :status, :client_id, :contact_id, :source, :owner_id, :due_on, :position, :client_visible, :scope_item_id, :repeat, custom_fields: {}, other_owner_ids: [] ])
+    def task_params = params.expect(task: [ :title, :description, :status, :work_id, :client_id, :contact_id, :source, :owner_id, :due_on, :position, :client_visible, :scope_item_id, :repeat, custom_fields: {}, other_owner_ids: [] ])
 end

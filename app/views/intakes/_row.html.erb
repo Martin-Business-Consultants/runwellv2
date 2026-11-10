@@ -1,0 +1,22 @@
+<%# locals: (task:) %>
+<%# One thing that came in, in Intake's data table (ui/_data_table): where it came from, the task
+    (it opens in the side panel, where it's put on a piece of work), what it's for (its work, else its
+    client with "file it", which opens the panel to put it on a piece of work), who's on it (a picker, to take it on) and when it came in. %>
+<tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
+  <%= bulk_select_cell task, task.title %>
+  <td data-column="source"><%= intake_source_tag(task) %></td>
+  <td data-column="title"><%= side_panel_link_to task, task.title %></td>
+  <td data-column="home">
+    <% if task.work %>
+      <%= peek_link_to task.work, task.work.title, class: "task-table__work", title: task.client&.name %>
+    <% else %>
+      <span class="intake__home">
+        <% if task.client %><span class="muted"><%= task.client.name %></span><% end %>
+        <%= side_panel_link_to task, task.client ? "· file it" : "No #{term(:client).downcase} yet: file it", class: "intake__file" %>
+      </span>
+    <% end %>
+  </td>
+  <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
+  <td class="muted nowrap" data-column="came_in" title="<%= task.created_at.iso8601 %>"><%= activity_time(task.created_at, short: true) %></td>
+  <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task, undoable: true %>
+</tr>

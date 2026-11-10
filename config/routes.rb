@@ -55,6 +55,7 @@ Rails.application.routes.draw do
   end
   resource :search, only: :show
   resource :agent_activity, only: :show, path: "ai"
+  resource :intake, only: :show
 
   resource :settings, only: :show
   # Settings > People became Users, in the left nav.
@@ -185,7 +186,7 @@ Rails.application.routes.draw do
     end
   end
   # Requests and commitments are tasks now: old addresses land on unassigned tasks.
-  get "requests(/*rest)", to: redirect("/tasks?owner=none")
+  get "requests(/*rest)", to: redirect("/intake")
   get "commitments(/*rest)", to: redirect("/tasks")
   get "quick_actions/new", to: "quick_actions#new", as: :new_quick_action
   get "quick_actions/records", to: "quick_actions/records#index", as: :quick_action_records

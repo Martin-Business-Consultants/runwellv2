@@ -390,6 +390,15 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .agent-actor { position: relative; display: inline-flex; }
 .agent-actor__mark { position: absolute; inset-block-end: -3px; inset-inline-end: -5px; width: .75rem; height: .75rem; padding: 1px; border-radius: 50%; background: var(--panel); color: var(--accent); }
 
+/* Intake (intakes/show): where each thing came from, an avatar and a word; None yet, for a task on
+   no piece of work, opens it to be filed. */
+.intake-source { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.intake-source__word { overflow: hidden; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.intake__home { display: inline-flex; gap: var(--s-1); min-width: 0; max-width: 100%; white-space: nowrap; }
+.intake__home .muted { overflow: hidden; text-overflow: ellipsis; }
+.intake__file { flex: none; color: var(--text-faint); }
+.intake__file:hover { color: var(--accent); }
+
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
 .owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--radius-pill, 99rem); background: color-mix(in srgb, var(--attention) 18%, transparent); color: var(--attention); font-size: var(--text-xs); font-weight: var(--weight-strong); }
 [data-away-on-due] .owner-picker__away { display: inline-block; }

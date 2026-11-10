@@ -73,17 +73,22 @@ them something else on screen (`term(:work)`, `term(:task)`).
    "billable": everything is a project, work order or service. Agreements (a document the client
    signs) are a plugin's (`runwell-agreements`), not the core's
 3. **What is happening** — `Task`, at `/tasks` (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
-   done; due; table or kanban, opening on your own tasks, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A task an
-   agent adds is its person's unless it names who's on it, or nobody (`owner_id` blank), so it isn't
-   taken for a request; Made by… › AI (`made_by=agents`, `Task.made_by_agents`) lists what agents
+   done; due; table or kanban, opening on your own tasks, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). Made by… › AI (`made_by=agents`, `Task.made_by_agents`) lists what agents
    added, and `agent_made_tag` marks it wherever it's listed (`Task#made_by_agent?`, read through
    `User.agent_names`, once per request). A task
    sits on a piece of work (its client follows) or straight on a client (`tasks.client_id`;
    `work_id` optional), and nil client only for an email from an unmatched sender. A promise
    is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).
    `Event` (append-only, every write of consequence), `Note`
-4. **What came in** — a request is a task nobody has taken on or started (`Task.requests`:
-   unassigned and planned, derived, whoever added it), at `/tasks?owner=none` (`/requests` redirects there). A task keeps who asked
+4. **What came in** — Intake (`/intake`, `IntakesController`, in the nav, `g i`, `list_intake`):
+   every open task nobody has taken on or that isn't on a piece of work yet (`Task.intake`,
+   `intake?`, derived): a client's request (portal, email, phone), a task an agent added, a task
+   straight on a client. It leaves once someone's on it and it's filed on a piece of work (the side
+   panel's Work picker, `work_id` on `update_task`; its client follows, a section of other work is
+   dropped, `task.filed`). Its Source column says where each came from (`intake_source_tag`;
+   filtered by `Task.from_source`: clients, agents, team). A request is still a task nobody has
+   taken on or started (`Task.requests`, what notifies and what the portal calls Waiting;
+   `/requests` redirects to Intake). A task keeps who asked
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
    Taking one on is assigning someone; one that isn't wanted is deleted. Portal contacts and
    emails create them (`task.requested`)
@@ -648,7 +653,7 @@ one place they are documented for people: add a new key there.
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (asks first; a task goes at once, with Undo): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
-| `g` + `c w t b u a n s` | Clients, work, tasks, board, users, AI activity, notifications, settings; `g 1`… plugin pages |
+| `g` + `c w t b u i n s` | Clients, work, tasks, board, users, intake, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |
@@ -975,7 +980,7 @@ do, through the same controllers: there is no separate API.
   `update`, `mcp` (`--read-only`), `agent setup` (a managed skill, marked, refreshed by `update`,
   never overwriting a hand-edited one). Output is JSON when piped; `--ids-only`, `--count`,
   `--field a.b` trim it. Exit statuses follow the error codes (`runwell help exit-codes`)
-- **AI activity** (`/ai`, `AgentActivitiesController`, in the nav, `g a`, the `agent_activity`
+- **AI activity** (`/ai`, `AgentActivitiesController`, linked from Intake, the `agent_activity`
   tool) is where people review what agents did: every event whose actor is an agent
   (`Event.by_agents`, `by_agent_of(person)`; sign-ins and settings stay in the audit log), your own
   agent's by default, a teammate's or everyone's, by area (`Event.in_area`, shared with the audit

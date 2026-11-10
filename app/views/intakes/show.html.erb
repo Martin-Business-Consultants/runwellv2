@@ -1,0 +1,29 @@
+<% @page_title = "Intake" %>
+<%= turbo_stream_from :tasks %>
+
+<% content_for :index_filters do %>
+  <%= render "layouts/shared/quick_filter", title: "Source…", param: :source, current: @source,
+        options: [ [ "Any source", "any" ], [ term(:client, count: 2), "clients" ], [ "AI", "agents" ], [ "The team", "team" ] ] %>
+  <%= render "layouts/shared/quick_filter", title: "Needs…", param: :needs, current: @needs,
+        options: [ [ "Anything", "any" ], [ "Someone on it", "owner" ], [ "A " + term(:work).downcase, "work" ] ] %>
+  <%= link_to agent_activity_path(whose: "any"), class: "btn btn--ghost btn--sm" do %>
+    <%= icon_tag "ai" %> <span>AI activity</span>
+  <% end %>
+<% end %>
+<% content_for :index_bulk do %>
+  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
+    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[owner_id]", label: "Owner", choices: task_owner_options %>
+    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[status]", label: "Status", choices: Task::STATUSES.map { [ it.humanize, it ] } %>
+  <% end %>
+<% end %>
+<%= render "layouts/shared/index_toolbar", view: @view %>
+
+<% columns = [ ui_column(:source, "Source", width: [ 10, "Source" ]),
+               ui_column(:title, term(:task), sort: :title, width: [ [ @column_widths[:title].to_i, 26 ].min, term(:task) ], hideable: false),
+               ui_column(:home, "For", sort: :work, width: [ [ [ @column_widths[:work].to_i, @column_widths[:client].to_i ].max + 4, 24 ].min, "For" ]),
+               ui_column(:owner, "Owner", width: :avatar),
+               ui_column(:came_in, "Came in", sort: :came_in, width: [ 9, "Came in" ]) ] %>
+<%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true, actions: true %>
+<% if @tasks.none? %>
+  <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has someone on it and a #{term(:work).downcase} under it." %>
+<% end %>

@@ -10,7 +10,7 @@
 <% if home %>
   <%= parent_page(@task.scope_item&.description || @task.work&.title || @task.client.name, home) %>
 <% else %>
-  <%= parent_page term(:task, count: 2), tasks_path(owner: "none") %>
+  <%= parent_page "Intake", intake_path %>
 <% end %>
 
 <%= turbo_stream_from @task %>

@@ -59,14 +59,26 @@
             <%= form.select :repeat, Cadence.options, { include_blank: "Never" }, aria: { label: "Repeats" }, data: { action: "change->form#submit" } %>
           <% end %>
         </dd>
-      <% elsif key == "home" && task.work %>
-        <dt><%= term(:scope_item) %></dt>
+      <% elsif key == "home" %>
+        <%# The piece of work it's on, picked here to file it (from Intake): its client follows. %>
+        <dt><%= term(:work) %></dt>
         <dd>
-          <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
+          <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_work), class: "task-panel__field", data: { controller: "form" } do |form| %>
             <%= hidden_field_tag :inline, "panel", id: nil %>
-            <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other " + term(:task, count: 2).downcase }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
+            <%= form.select :work_id, task_work_options(task), { include_blank: "None yet" }, aria: { label: term(:work) }, data: { action: "change->form#submit" } %>
           <% end %>
         </dd>
+        <% if task.work %>
+          <dt><%= term(:scope_item) %></dt>
+          <dd>
+            <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_section), class: "task-panel__field", data: { controller: "form" } do |form| %>
+              <%= hidden_field_tag :inline, "panel", id: nil %>
+              <%= form.select :scope_item_id, task.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "Other " + term(:task, count: 2).downcase }, aria: { label: term(:scope_item) }, data: { action: "change->form#submit" } %>
+            <% end %>
+          </dd>
+        <% else %>
+          <%= render "record_fields/task/home", record: task %>
+        <% end %>
       <% elsif layout.custom?(key) %>
         <%= render "record_fields/custom", record: task, field: layout.custom_field(key) %>
       <% else %>

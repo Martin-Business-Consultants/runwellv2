@@ -31,8 +31,12 @@ module EventsHelper
   end
 
   # When, short enough for a narrow column: the time today, else the day and time ("Nov 8, 3:12pm").
-  def activity_time(time)
-    format = time.to_date == Date.current ? "%-l:%M%P" : (time.year == Date.current.year ? "%b %-d, %-l:%M%P" : "%b %-d, %Y")
+  # short: the day alone ("Nov 8").
+  def activity_time(time, short: nil)
+    format = if time.to_date == Date.current then "%-l:%M%P"
+    elsif time.year == Date.current.year then short ? "%b %-d" : "%b %-d, %-l:%M%P"
+    else "%b %-d, %Y"
+    end
     time.strftime(format)
   end
 

@@ -151,6 +151,41 @@ module TasksHelper
     ].compact.join(" · ")
   end
 
+  # Where something in Intake came from, in words: "Ted Martin's agent", "Jane Doe via portal",
+  # "jo@example.com via email", "Priya via phone".
+  def intake_source_label(task)
+    return task.agent_name if task.made_by_agent?
+
+    who = task.requester_name || task.created_by&.display_name
+    [ who, ("via #{task.source}" if task.source.present?) ].compact.join(" ").presence || "Unknown"
+  end
+
+  # Intake's Source cell: who it came from as an avatar (the person behind an agent with the AI mark
+  # on it), then the channel in a word (AI, Portal, Email, Phone…); the full source in its tooltip.
+  def intake_source_tag(task)
+    person = task.made_by_agent? ? task.created_by&.agent_owner : (task.contact || task.created_by)
+    face = if task.made_by_agent?
+      tag.span(class: "agent-actor") { person_tag(person) + icon_tag("ai", class: "agent-actor__mark") }
+    elsif person
+      person_tag(person)
+    else
+      avatar(task.requester_name.to_s.presence || "?", size: :md)
+    end
+    word = task.made_by_agent? ? "AI" : task.source.to_s.humanize
+    tag.span(class: "intake-source", title: intake_source_label(task)) { face + tag.span(word, class: "intake-source__word") }
+  end
+
+  # The pieces of work a task can be put on (filed from Intake): its client's open work when it has
+  # a client, else everyone's grouped by client; the one it's on now whatever its state.
+  def task_work_options(task)
+    works = Work.open.or(Work.where(id: task.work_id))
+    works = works.where(client_id: task.client_id) if task.client_id
+    works = works.includes(:client).order(:title).to_a
+    return works.map { [ it.title, it.id ] } if task.client_id
+
+    works.group_by(&:client).sort_by { |client, _| client.name.downcase }.map { |client, list| [ client.name, list.map { [ it.title, it.id ] } ] }
+  end
+
   # The AI mark on a task an agent added (Task#made_by_agent?): its icon, naming the agent in its
   # tooltip, or beside it with label: true (the side panel). Nothing for a person's task.
   def agent_made_tag(task, label: nil)

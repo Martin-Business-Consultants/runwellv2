@@ -1,6 +1,13 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
-<%# Where it sits: its work's section, or (straight on a client) which client. %>
+<%# Where it sits: the piece of work it's on (filed from Intake: its client follows), its section
+    there, or (straight on a client) which client. A new task's home comes from where it's added. %>
 <% if form %>
+  <% if record.persisted? %>
+    <label class="field">
+      <span class="field__label"><%= term(:work) %></span>
+      <%= form.select :work_id, task_work_options(record), { include_blank: "None (straight on the #{term(:client).downcase})" }, form: form_id %>
+    </label>
+  <% end %>
   <% if record.work %>
     <label class="field">
       <span class="field__label"><%= term(:scope_item) %></span>

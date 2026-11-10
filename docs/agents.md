@@ -26,15 +26,16 @@ something in the portal) is previewed first and done only once you agree.
 
 ### Reviewing what it did
 
-- **Tasks it adds are yours.** A task an agent adds goes to the person it acts for, so it shows in
-  your own Tasks, not among requests from outside, unless the agent names who's on it (or nobody,
-  with `owner_id` blank).
+- **What it adds comes in through Intake** (in the nav, `g i`), beside clients' requests: a task
+  an agent adds with nobody on it, or on no piece of work, waits there (Source › AI) until someone
+  takes it on and files it. An agent that knows who and where can say so (`owner_id`, `work_ref`),
+  and the task skips Intake.
 - **Made by AI.** Tasks › Made by… › AI lists every task an agent added (`made_by=agents`, on the
   table and the board; `list_tasks` takes it too). Each one carries the AI mark after its title
   wherever it's listed, naming the agent, and the side panel says "Added by Ted's agent".
 - **Work it finishes waits for you.** An agent takes a task only as far as in review; a person
   marks it done (Show… › In review, or the board's In review column).
-- **AI activity** (in the nav, `g a`) lists everything agents did: tasks added, changes, notes,
+- **AI activity** (linked from Intake) lists everything agents did: tasks added, changes, notes,
   closes, newest first. It opens on your own agent's; pick a teammate's or everyone's, an area and
   a period. Each row opens what it touched (a task in the side panel). Agents read it too
   (`agent_activity`). Each record's History says the same ("Ted's agent via Claude …"), and every
