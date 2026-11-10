@@ -27,11 +27,12 @@ class Note < ApplicationRecord
   # Written by the client's own person (a contact), from the portal.
   def from_client? = author&.client?
 
-  # Its author (or the author's person, for a note an agent wrote), or anyone who may delete records.
+  # Its author (or whose agent wrote it), or anyone who may delete records.
   def deletable_by?(user)
     return false unless user
 
-    author_id == user.id || (author&.agent_owner_id.present? && author.agent_owner_id == user.id) || user.can?(:delete_records)
+    person_id = user.person.id
+    author_id == person_id || (author_id.present? && author&.agent_owner_id == person_id) || user.can?(:delete_records)
   end
 
   def search_title = "#{kind.humanize} note"

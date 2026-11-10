@@ -5,7 +5,7 @@ class Portal::WorksControllerTest < ActionDispatch::IntegrationTest
     @landing = works(:landing)
     contacts(:ann).update!(portal_access: true)
     contacts(:bob).update!(portal_access: true)
-    get portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
+    post portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
   end
 
   test "index lists only the contact's client" do

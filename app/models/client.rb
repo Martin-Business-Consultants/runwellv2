@@ -14,6 +14,8 @@ class Client < ApplicationRecord
   # only work straight on it goes with it. Before its contacts, whose notes on them would hold them.
   has_many :tasks, dependent: :destroy
   has_many :contacts, dependent: :destroy
+  # After the restriction above, so a client with work is refused before anything is touched.
+  before_destroy :clear_legacy_rows!
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUSES }
@@ -67,6 +69,31 @@ class Client < ApplicationRecord
   ActiveSupport.run_load_hooks(:runwell_client, self)
 
   private
+    # Rows from before contacts were users and requests were tasks (the contacts, requests and
+    # commitments tables, and what pointed at those contacts) still name this client: their foreign
+    # keys would refuse deleting it, so they go first. Nothing reads them.
+    def clear_legacy_rows!
+      db = self.class.connection
+      if db.table_exists?(:contacts)
+        contacts = db.select_values("SELECT id FROM contacts WHERE client_id = #{id.to_i}").map(&:to_i)
+        if contacts.any?
+          list = contacts.join(",")
+          %w[access_tokens oauth_grants].each do |table|
+            db.execute("UPDATE #{table} SET contact_id = NULL WHERE contact_id IN (#{list})") if db.column_exists?(table, :contact_id)
+          end
+          %w[portal_sessions approval_links approvals].each do |table|
+            db.execute("DELETE FROM #{table} WHERE contact_id IN (#{list})") if db.table_exists?(table)
+          end
+          %w[requests commitments].each do |table|
+            db.execute("UPDATE #{table} SET contact_id = NULL WHERE contact_id IN (#{list})") if db.table_exists?(table)
+          end
+        end
+      end
+      db.execute("DELETE FROM requests WHERE client_id = #{id.to_i}") if db.table_exists?(:requests)
+      db.execute("DELETE FROM commitments WHERE client_id = #{id.to_i}") if db.table_exists?(:commitments)
+      db.execute("DELETE FROM contacts WHERE client_id = #{id.to_i}") if db.table_exists?(:contacts)
+    end
+
     def live_streams = [ self, :clients ]
 
     def record_status_change

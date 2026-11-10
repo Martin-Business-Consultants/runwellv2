@@ -1,3 +1,4 @@
 [tools]
+# Node runs Herb's linter (bundle exec herb lint, through npx). Ruby matches .ruby-version: bump both together.
 node = "latest"
-ruby = "latest"
+ruby = "4.0.9"

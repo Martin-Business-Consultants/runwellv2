@@ -24,8 +24,9 @@ class Contact < User
   normalizes :email_address, with: ->(e) { e.to_s.strip.downcase.presence }
   validates :email_address, presence: { message: "is needed for portal access" }, if: :portal_access?
 
-  # Portal sign-in is a signed link, never a password: a contact gets one nobody knows.
-  generates_token_for :portal_login, expires_in: 1.hour
+  # Portal sign-in is a signed link, never a password: a contact gets one nobody knows. It works
+  # once (signing in moves link_signed_in_at), for an hour.
+  generates_token_for(:portal_login, expires_in: 1.hour) { link_signed_in_at }
   before_validation(on: :create) { self.password = SecureRandom.base58(32) if password_digest.blank? }
 
   scope :with_portal_access, -> { active.where(portal_access: true) }

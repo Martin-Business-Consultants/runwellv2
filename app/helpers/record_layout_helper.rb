@@ -18,7 +18,7 @@ module RecordLayoutHelper
       "name" => "Name", "status" => "Status", "time_zone" => "Time zone", "internal" => "Internal",
       "title" => "Title", "description" => "Description", "client" => term(:client), "label" => "#{term(:work)} type", "shape" => "Runs as", "cadence" => "How often", "repeat" => "Repeats",
       "due" => "Due", "lead" => "Lead", "others" => "Also on it", "home" => "#{term(:scope_item)} or #{term(:client).downcase}",
-      "requested_by" => "Requested by", "source" => "Came in by", "client_visible" => "Visible to the client",
+      "requested_by" => "Requested by", "source" => "Came in by", "client_visible" => "Visible to the #{term(:client).downcase}",
       "email_address" => "Email address", "role" => "Role", "email" => "Email", "phone" => "Phone",
       "portal_access" => "Portal access", "can_approve" => "Can approve",
       "overview" => "Overview", "sections" => term(:scope_item, count: 2), "tasks" => term(:task, count: 2),

@@ -22,8 +22,13 @@ class Document < ApplicationRecord
 
   delegate :filename, :byte_size, :content_type, to: :file
 
-  # Whoever uploaded it, or anyone who may delete records.
-  def deletable_by?(user) = uploaded_by == user || user.can?(:delete_records)
+  # Whoever uploaded it (or whose agent did), or anyone who may delete records.
+  def deletable_by?(user)
+    return false unless user
+
+    person_id = user.person.id
+    uploaded_by_id == person_id || (uploaded_by_id.present? && uploaded_by&.agent_owner_id == person_id) || user.can?(:delete_records)
+  end
 
   def search_title = filename.to_s
   def search_content = nil

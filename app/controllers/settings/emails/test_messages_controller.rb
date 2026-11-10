@@ -5,7 +5,7 @@ class Settings::Emails::TestMessagesController < Settings::BaseController
     description: "Sends from a job; show_email_settings says whether it went, or the mail server's error.", params: { to: "string" }
 
   def create
-    to = params[:to].presence || current_user.email_address
+    to = params[:to].presence || current_user.person.email_address
     TestEmailJob.send_later(to)
     redirect_to settings_email_path(tab: "smtp"), notice: "Sending a test email to #{to}. This page says how it went."
   end

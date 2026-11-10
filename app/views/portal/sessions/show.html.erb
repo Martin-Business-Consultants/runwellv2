@@ -1,0 +1,14 @@
+<% @page_title = "Sign in" %>
+
+<div class="auth">
+  <section class="card auth__card">
+    <header class="card__head auth__header">
+      <h1 class="card__title auth__title">Sign in as <%= @link_contact.name %></h1>
+      <p class="card__hint"><%= @link_contact.email %></p>
+    </header>
+
+    <div class="card__content auth__content">
+      <%= button_to "Sign in", portal_session_link_path(params[:token]), class: "btn btn--primary btn--block", form_class: "auth__form" %>
+    </div>
+  </section>
+</div>

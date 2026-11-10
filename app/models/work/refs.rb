@@ -19,8 +19,20 @@ module Work::Refs
     return if ref.present?
     prefix = Setting.current.label_prefix(label) or return
 
-    last = Work.where("ref LIKE ?", "#{prefix}-%")
-                     .pluck(:ref).map { |r| r.split("-").last.to_i }.max || 0
+    last = Work.where("ref LIKE ?", "#{prefix}-%").maximum(Arel.sql("CAST(substr(ref, #{prefix.length + 2}) AS INTEGER)")) || 0
     self.ref = "#{prefix}-#{last + 1}"
+  end
+
+  # Two pieces of work started at once can both take the next number: the unique index refuses
+  # the second, which takes the one after and tries once more.
+  def _create_record(*)
+    super
+  rescue ActiveRecord::RecordNotUnique => error
+    raise if @ref_retried || !error.message.include?("works.ref")
+
+    @ref_retried = true
+    self.ref = nil
+    assign_ref
+    retry
   end
 end

@@ -14,8 +14,11 @@ class Notification < ApplicationRecord
   delegate :notifiable_target, to: :source
 
   class << self
+    # In one statement, then one refresh for each person whose notifications they were.
     def read_all
-      all.each(&:read)
+      users = User.where(id: distinct.select(:user_id)).to_a
+      update_all(read_at: Time.current, unread_count: 0, updated_at: Time.current)
+      users.each { Turbo::StreamsChannel.broadcast_refresh_to(it, :notifications) }
     end
   end
 

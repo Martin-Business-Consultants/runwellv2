@@ -27,7 +27,7 @@
       <%= status_tag(client ? "Archived" : "Deactivated") %>
     <% elsif client %>
       <% if person.portal_access? %>
-        <%= badge "Portal", tone: :ok, title: "Signs in to the client portal by emailed link" %>
+        <%= badge "Portal", tone: :ok, title: "Signs in to the #{term(:client).downcase} portal by emailed link" %>
       <% else %>
         <%= status_tag "Active" %>
       <% end %>

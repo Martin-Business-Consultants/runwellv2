@@ -2,7 +2,7 @@
 <section class="card record-card" id="documents">
   <header class="card__head">
     <h2 class="card__title">Documents</h2>
-    <p class="card__hint">Files kept here. The switch shows one to the client in their portal.</p>
+    <p class="card__hint">Files kept here. The switch shows one to the <%= term(:client).downcase %> in their portal.</p>
   </header>
 
   <div class="card__content record-card__stack">
@@ -15,7 +15,7 @@
       <%= document_drop_target form %>
     <% end %>
 
-    <% documents = subject.documents.recent.includes(:uploaded_by, file_attachment: :blob) %>
+    <% documents = subject.documents.recent.preloaded %>
     <% if documents.any? %>
       <ul class="record-list">
         <% documents.each do |document| %>
@@ -25,11 +25,11 @@
 
             <span class="list-row__actions">
               <%= form_with model: document, namespace: dom_id(document), class: "document-row__visible", data: { controller: "form" } do |form| %>
-                <%= switch_tag(title: "Visible to the client", screen_reader_label: "Visible to the client") { form.check_box :client_visible, role: "switch", data: { action: "change->form#submit" } } %>
+                <%= switch_tag(title: "Visible to the #{term(:client).downcase}", screen_reader_label: "Visible to the #{term(:client).downcase}") { form.check_box :client_visible, role: "switch", data: { action: "change->form#submit" } } %>
               <% end %>
               <% if document.deletable_by?(Current.user) %>
                 <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), keys: "d",
-                      message: "The file is removed for everyone, including the client’s portal." %>
+                      message: "The file is removed for everyone, including the #{term(:client).downcase}’s portal." %>
               <% end %>
             </span>
           </li>

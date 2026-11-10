@@ -3,7 +3,7 @@ require "test_helper"
 class Portal::RequestsControllerTest < ActionDispatch::IntegrationTest
   setup do
     contacts(:bob).update!(portal_access: true)
-    get portal_session_link_path(contacts(:bob).generate_token_for(:portal_login))
+    post portal_session_link_path(contacts(:bob).generate_token_for(:portal_login))
   end
 
   test "new" do

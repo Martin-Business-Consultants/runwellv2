@@ -8,6 +8,8 @@
       <span class="visually-hidden">Save</span>
     </button>
   <% end %>
-  <%= render "layouts/shared/delete_dialog", name: item.description, path: scope_item_path(item),
-        message: "Removing it keeps its #{term(:task, count: 2).downcase} on the #{term(:work).downcase}, under no #{term(:scope_item).downcase}." %>
+  <% if can?(:delete_records) %>
+    <%= render "layouts/shared/delete_dialog", name: item.description, path: scope_item_path(item),
+          message: "Removing it keeps its #{term(:task, count: 2).downcase} on the #{term(:work).downcase}, under no #{term(:scope_item).downcase}." %>
+  <% end %>
 </div>

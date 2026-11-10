@@ -28,7 +28,7 @@ class Portal::SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a valid token signs the contact in" do
-    get portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
+    post portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
     assert_redirected_to portal_root_path
     assert cookies[:portal_session_id]
     assert_equal 1, contacts(:ann).portal_sessions.count
@@ -44,7 +44,7 @@ class Portal::SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy" do
-    get portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
+    post portal_session_link_path(contacts(:ann).generate_token_for(:portal_login))
     delete portal_session_path
     assert_redirected_to new_portal_session_path
     assert_equal 0, contacts(:ann).portal_sessions.count

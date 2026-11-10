@@ -21,7 +21,7 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
   and reactive template state
 - Staff auth: Rails' generated authentication (`Session`, `User`). Sign-up only makes
   the first owner; everyone else joins by invitation. Clients never have passwords:
-  portal sign-in is a signed, expiring link
+  portal sign-in is a signed, expiring link that works once, behind a button (`Portal::SessionsController`)
 - Time zones: stored in UTC, shown in the install's zone (`Setting.zone`: Settings > Address, else
   `TIME_ZONE`, else Eastern; `ApplicationController` and `ApplicationJob` run inside it). A client may have its own (`Client#time_zone`, blank = ours); its
   portal (`Portal::BaseController`), plugins' client pages and emails run inside `client.in_time_zone`.
@@ -998,7 +998,9 @@ Settings > Export (owners, `create_export` / `list_exports`) makes one .zip of e
 plugins', as JSON and CSV with ids intact, and every stored file, with a README. It skips
 sessions, tokens, grants, invitations and the search index (`Export::SKIPPED_TABLES`) and drops
 any password, secret, token or key column (`SECRET_COLUMNS`). A new table holding secrets goes in
-the skip list; a new secret column needs a name the pattern catches.
+the skip list; a new secret column needs a name the pattern catches. A backup (`kind: backup`, the
+database itself and every file, secrets included) is made only in the browser: a token asking for
+one is refused, and `create_export` offers only the data kind.
 
 ## Releases and updates
 

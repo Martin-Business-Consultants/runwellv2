@@ -14,9 +14,9 @@
             <div class="record-feed__head">
               <p class="record-feed__meta dot-list">
                 <% if note.from_client? %>
-                  <%= badge "From the client", tone: :accent %>
+                  <%= badge "From the #{term(:client).downcase}", tone: :accent %>
                 <% elsif note.client_visible? %>
-                  <%= badge "Shared with the client", tone: :accent %>
+                  <%= badge "Shared with the #{term(:client).downcase}", tone: :accent %>
                 <% else %>
                   <span class="badge badge--outline"><%= note.kind.humanize %></span>
                 <% end %>

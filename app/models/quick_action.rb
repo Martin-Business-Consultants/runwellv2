@@ -5,21 +5,25 @@ class QuickAction
   RECORD_TYPES = %w[Client Work ScopeItem Task].freeze
   STARTING = 12 # records a picker shows before anything is typed
 
-  attr_reader :key, :label, :title, :icon, :partial, :types
+  attr_reader :key, :icon, :partial, :types
 
   # context: turns the record on screen into one this action takes (time on a scope item
   # goes to its work), or nil.
   def initialize(key:, label:, icon:, partial:, title: nil, types: RECORD_TYPES, context: nil)
-    @key, @label, @icon, @partial, @types, @context = key.to_s, label, icon, partial, types, context
-    @title = title || "Add a #{label.downcase}"
+    @key, @icon, @partial, @types, @context = key.to_s, icon, partial, types, context
+    @label_text, @title_text = label, title
   end
+
+  # Either may be a lambda, for words from Settings > Names (the core's Task).
+  def label = @label_text.respond_to?(:call) ? @label_text.call : @label_text
+  def title = (@title_text.respond_to?(:call) ? @title_text.call : @title_text) || "Add a #{label.downcase}"
 
   CORE = [
     new(key: :note, label: "Note", icon: "comment", partial: "quick_actions/note"),
     new(key: :document, label: "Document", icon: "attachment", partial: "quick_actions/document"),
     # A task from anywhere (g t n): on a piece of work or straight on a client; a task or a section
     # on screen take its work, else its client.
-    new(key: :task, label: "Task", title: "Add a task", icon: "check-circle", partial: "quick_actions/task",
+    new(key: :task, label: -> { Setting.current.term(:task) }, icon: "check-circle", partial: "quick_actions/task",
       types: %w[Work Client], context: ->(record) { record.try(:work) || record.try(:client) })
   ].freeze
 

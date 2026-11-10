@@ -201,12 +201,20 @@ module Agent
         env[verb == "GET" ? "action_dispatch.request.query_parameters" : "action_dispatch.request.request_parameters"] = params
         env["action_dispatch.request.request_parameters"] ||= {}
 
+        # The action runs as the token's person, from a clean Current; whatever was running before
+        # (a plugin's request calling run_as) gets its own Current back afterwards.
+        outer = Current.attributes.dup
         Current.reset
         status, _headers, response = controller.action(route[:action]).call(env)
         body = +""
         response.each { body << it }
         response.close if response.respond_to?(:close)
         [ status, (JSON.parse(body) rescue { "status" => "error", "summary" => "#{tool.name} answered with a page, not JSON (#{status})." }) ]
+      ensure
+        if outer
+          Current.reset
+          outer.each { |name, value| Current.public_send("#{name}=", value) }
+        end
       end
 
       def params_from(value)

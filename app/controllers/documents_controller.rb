@@ -45,7 +45,7 @@ class DocumentsController < ApplicationController
 
   def destroy
     document = Document.find(params[:id])
-    return deny_access unless document.deletable_by?(current_user)
+    return redirect_back(fallback_location: root_path, alert: "Only whoever added this file can remove it.") unless document.deletable_by?(current_user)
 
     document.destroy!
     notice = "#{document.filename} removed."

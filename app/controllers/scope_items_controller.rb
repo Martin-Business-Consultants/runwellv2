@@ -1,5 +1,6 @@
 class ScopeItemsController < ApplicationController
   allow_staff
+  require_permission :delete_records, only: :destroy
   agent_tool :show_scope_item, on: :show, title: "Show a section", description: "A section of a piece of work (scope item) with its tasks and how delivery stands."
   agent_tool :add_scope_item, on: :create, title: "Add a section to a piece of work",
     description: "A part of what the work delivers, grouping its tasks. Tasks are then added under it (create_task with scope_item_id).",

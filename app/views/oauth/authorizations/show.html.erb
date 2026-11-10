@@ -6,7 +6,7 @@
       <h1 class="card__title auth__title">Connect <%= @client.name %>?</h1>
       <p class="card__hint">
         <strong class="auth__strong"><%= @client.name %></strong> will act as your agent, <strong class="auth__strong"><%= Current.user.agent&.display_name || Current.user.display_name %></strong>, in Runwell:
-        everything your role (<%= Current.user.role %>) allows, from reading clients and work to adding tasks and notes.
+        everything your role (<%= Current.user.role %>) allows, from reading <%= term(:client, count: 2).downcase %> and <%= term(:work, count: 2).downcase %> to adding <%= term(:task, count: 2).downcase %> and notes.
       </p>
     </header>
 

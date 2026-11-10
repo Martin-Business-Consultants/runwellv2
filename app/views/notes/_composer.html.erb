@@ -16,7 +16,7 @@
     <% if subject.is_a?(Task) && subject.client_visible? && subject.client %>
       <%# The same note, sent to the client instead: shared on the task's discussion in their portal. %>
       <button type="submit" class="btn btn--secondary btn--sm" formaction="<%= task_discussion_path(subject) %>"
-        title="The client reads it on this <%= term(:task).downcase %> in their portal, and can reply">Send to client</button>
+        title="The <%= term(:client).downcase %> reads it on this <%= term(:task).downcase %> in their portal, and can reply">Send to <%= term(:client).downcase %></button>
     <% end %>
     <button type="submit" class="btn btn--primary btn--sm note-composer__submit">Add note</button>
   </div>

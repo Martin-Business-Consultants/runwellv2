@@ -47,7 +47,7 @@
                     <span class="badge">Archived</span>
                   <% end %>
                 </p>
-                <p class="list-row__desc"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to clients" if field.client_visible %></p>
+                <p class="list-row__desc"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to " + term(:client, count: 2).downcase if field.client_visible %></p>
               </div>
               <div class="list-row__actions">
                 <% if field.archived? %>
@@ -78,7 +78,7 @@
                     </label>
                     <label class="checkbox">
                       <%= form.check_box :client_visible %>
-                      <span>Shown to the client in the portal</span>
+                      <span>Shown to the <%= term(:client).downcase %> in the portal</span>
                     </label>
                     <%= field_visibility_inputs "field[visible_to][]", field %>
                     <div><button type="submit" class="btn btn--primary btn--sm">Save</button></div>
@@ -117,7 +117,7 @@
           </label>
           <label class="checkbox">
             <%= form.check_box :client_visible %>
-            <span>Shown to the client in the portal</span>
+            <span>Shown to the <%= term(:client).downcase %> in the portal</span>
           </label>
           <%= field_visibility_inputs "field[visible_to][]", CustomField.new, namespace: "new_#{model.downcase}" %>
           <div><button type="submit" class="btn btn--primary btn--sm">Add field</button></div>

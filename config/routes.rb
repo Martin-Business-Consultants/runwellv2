@@ -184,6 +184,7 @@ Rails.application.routes.draw do
     root "works#index"
     resource :session, only: %i[new create destroy]
     get "session/:token", to: "sessions#show", as: :session_link
+    post "session/:token", to: "sessions#update"
     resources :works, param: :ref, path: "work", only: %i[index show] do
       resource :priority, only: :create, module: :works
     end

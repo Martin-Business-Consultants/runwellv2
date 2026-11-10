@@ -32,7 +32,7 @@ module CustomFieldsHelper
         *CustomField::RESTRICTABLE_ROLES.map do |role|
           tag.label(class: "checkbox") { check_box_tag(name, role, field.seen_by_role?(role), id: "#{prefix}_#{role}") + tag.span(role.capitalize.pluralize) }
         end,
-        tag.p("A field only some see is left out for everyone else wherever it shows, and never shown to clients.", class: "field__hint")
+        tag.p("A field only some see is left out for everyone else wherever it shows, and never shown to #{term(:client, count: 2).downcase}.", class: "field__hint")
       ])
     end
   end

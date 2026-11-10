@@ -45,7 +45,7 @@
           </div>
         <% elsif key == "client_visible" %>
           <div class="field quick-action__switch">
-            <%= switch_field form, :client_visible, label: "Visible to the client" %>
+            <%= switch_field form, :client_visible, label: "Visible to the #{term(:client).downcase}" %>
           </div>
         <% end %>
       <% end %>

@@ -5,19 +5,24 @@ class Settings::ExportsController < Settings::BaseController
   agent_tool :list_exports, on: :index, title: "List exports",
     description: "Exports of everything (a .zip of every table as JSON and CSV, and every file), with their state and a download address when ready."
   agent_tool :create_export, on: :create, title: "Export everything",
-    description: "Starts an export of all data and files as one .zip. kind: data (the default: every table as JSON and CSV, secrets left out) or backup (the database itself and every file, for Runwell Go's import; it holds every secret, passwords hashed). It's built in the background: list_exports shows when it's ready.",
-    params: { kind: Export::KINDS }, next_tools: %w[list_exports]
+    description: "Starts an export of all data and files as one .zip: every table as JSON and CSV, secrets left out. (A backup, which holds every secret, is made only by a person in the browser.) It's built in the background: list_exports shows when it's ready.",
+    params: { kind: %w[data] }, next_tools: %w[list_exports]
   agent_tool :download_export, on: :show, title: "Download an export", description: "Answers with the address of a ready export's .zip."
 
   def index
     @exports = Export.ordered.includes(:user, archive_attachment: :blob)
   end
 
+  # A backup holds every secret: data leaving the install that way is a person's call, in the
+  # browser, never a token's.
+  before_action :refuse_tokens, only: :create, if: -> { params[:kind] == "backup" }
+
   def create
-    export = Export.create!(user: Current.user, kind: params[:kind].presence_in(Export::KINDS) || "data")
+    person = Current.user.person
+    export = Export.create!(user: person, kind: params[:kind].presence_in(Export::KINDS) || "data")
     ExportJob.perform_later(export)
-    Current.user.record_event!("user.exported", payload: { export: export.id, kind: export.kind })
-    redirect_to settings_exports_path, notice: "#{export.backup? ? "Backup" : "Export"} started. It takes a minute or so; we’ll email #{Current.user.email_address} when it’s ready."
+    person.record_event!("user.exported", payload: { export: export.id, kind: export.kind })
+    redirect_to settings_exports_path, notice: "#{export.backup? ? "Backup" : "Export"} started. It takes a minute or so; we’ll email #{person.email_address} when it’s ready."
   end
 
   def show
