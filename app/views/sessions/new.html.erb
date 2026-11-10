@@ -1,10 +1,11 @@
 <% @page_title = "Sign in" %>
+<% content_for :showcase, "team" %>
 
 <div class="auth">
   <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
     <header class="card__head auth__header">
       <h1 class="card__title auth__title">Welcome back</h1>
-      <p class="card__hint">Sign in with your email address and password</p>
+      <p class="card__hint">Sign in to pick up where you left off.</p>
     </header>
 
     <div class="card__content auth__content">
@@ -17,7 +18,7 @@
         <div class="field">
           <div class="auth__label-row">
             <%= form.label :password, "Password", class: "field__label" %>
-            <%= link_to "Forgot your password?", new_password_path, class: "auth__aside-link" %>
+            <%= link_to "Forgot password?", new_password_path, class: "auth__aside-link" %>
           </div>
           <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
         </div>

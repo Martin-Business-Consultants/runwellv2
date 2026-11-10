@@ -115,6 +115,23 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 :is(.auth-layout__main, .portal-main) > #flash:not(:has(.flash)) { display: none; }
 .auth-layout__footer { width: 100%; max-width: 24rem; color: var(--text-faint); font-size: var(--text-meta); }
 
+/* A way in (.auth-layout--split, layouts/public's :showcase): the page on the card's own white,
+/* and on a wide screen two halves, the form centred in the left with its footer at the foot, the
+/* showcase filling the right (runwell/public.css, section 5). Narrower, the form alone. */
+.auth-layout--split { --auth-bg: var(--panel); background: var(--auth-bg); }
+.auth-layout--split > .showcase { display: none; }
+@media (min-width: 1024px) {
+  .auth-layout--split {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto;
+    justify-items: center; gap: 0; padding: 0;
+  }
+  .auth-layout--split > #global-container { grid-column: 1; grid-row: 1; align-self: center; margin: 0; padding: var(--s-6) var(--s-6) 0; }
+  .auth-layout--split > .auth-layout__footer { grid-column: 1; grid-row: 2; max-width: 28rem; padding: var(--s-5) var(--s-6) var(--s-6); }
+  .auth-layout--split > .showcase { display: block; grid-column: 2; grid-row: 1 / -1; }
+  /* The toggle moves into the showcase's corner. */
+  .auth-layout--split .auth-layout__theme { display: none; }
+}
+
 /* ======================================================================= 7 Portal (a top bar over one column) */
 
 /* The bar and the column share one width, wider than the staff pages': the portal has no nav

@@ -4,8 +4,12 @@
   <%= render "layouts/shared/head" %>
 
   <%# Signed-out and client-facing pages: the install's brand centered above one column, the
-      theme toggle in the corner (runwell.css, .auth-layout). %>
-  <body class="auth-layout">
+      theme toggle in the corner (runwell.css, .auth-layout). A way in (sign in, a link, a code, a
+      new password, an invitation, the portal's sign in) names its showcase (content_for
+      :showcase, "team" or "client"): the page splits, the form on the left and, on a wide screen,
+      a panel in the brand's colour on the right showing what's inside (layouts/shared/_showcase). %>
+  <% showcase = content_for(:showcase).presence %>
+  <body class="<%= class_names("auth-layout", "auth-layout--split": showcase) %>">
     <a href="#main" class="skip-link" data-turbo="false">Skip to main content</a>
     <div id="global-container">
       <header class="auth-layout__header" id="header">
@@ -36,5 +40,9 @@
     <footer id="footer" class="auth-layout__footer">
       <%= yield :footer %>
     </footer>
+
+    <% if showcase %>
+      <%= render "layouts/shared/showcase", kind: showcase %>
+    <% end %>
   </body>
 </html>

@@ -151,6 +151,12 @@ event); every event has a source.
   takes dollars and submits whole cents; `money(cents)` formats for display
 - Signed-out and client-facing pages use `layout "public"`; staff pages use
   the application layout
+- A way in (sign in, a link, a code, a new password, sign-up, an invitation, the portal's sign in)
+  also says `content_for :showcase, "team"` (or `"client"`): the public layout then splits, the form
+  on the left with no card and, on a wide screen, `layouts/shared/_showcase` on the right (a panel
+  mixed from the scheme's colour, `--color-link`, with frosted cards of made-up examples in the
+  install's terms, and the theme toggle in its cut-out corner). Other public pages (consents,
+  plugins' signing pages) keep the centred card
 - Multi-line text is rich text: Lexxy (`<lexxy-editor>`, Fizzy's editor)
   writing HTML into the plain text column. In forms use
   `rich_text_field form, :body`; to display use `rich_text record.body`, which

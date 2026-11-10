@@ -2,7 +2,8 @@
 /* (docs/rune-ui-migration.md). The two layouts' frames are in runwell.css (sections 6 and 7);
 /* this is what goes in them. Unlayered, so these win over rune's components.
 /*
-/* 1 The auth card   2 Portal pages   3 Portal cards, lists and tables   4 Portal forms */
+/* 1 The auth card   2 Portal pages   3 Portal cards, lists and tables   4 Portal forms
+/* 5 A way in, split: the form and the showcase */
 
 /* ======================================================================= 1 The auth card */
 
@@ -226,3 +227,136 @@ a.portal-section-filter { color: var(--text); text-decoration: none; }
 
 /* A reply the moment it's sent (portal/tasks/_pending_message), until the answer redraws the thread. */
 .portal-thread__message--pending { opacity: 0.5; }
+
+/* ======================================================================= 5 A way in, split */
+
+/* The form (layouts/public with a :showcase): no card around it, the install's mark large over a
+/* larger heading, roomy fields and a full-width button with a little lift. The same at any width;
+/* only the showcase waits for a wide screen. */
+.auth-layout--split .auth { gap: var(--s-6); }
+.auth-layout--split .auth__card { gap: var(--s-6); padding: 0; border: 0; background: none; box-shadow: none; }
+.auth-layout--split .auth-layout__header { gap: var(--s-3); }
+.auth-layout--split .auth-layout__brand { flex-direction: column; gap: var(--s-2); color: var(--text-muted); font-size: var(--text-meta); }
+.auth-layout--split .auth-layout__brand .sidebar__logo {
+  width: 3rem; height: 3rem; border-radius: calc(.875rem * var(--radius-scale, 1)); font-size: 1.25rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 8px 18px -8px rgb(0 0 0 / .4);
+}
+.auth-layout--split .auth-layout__brand .header__logo-image { max-height: 2.75rem; }
+.auth-layout--split .auth__header { gap: var(--s-2); }
+.auth-layout--split .auth__title { font-size: 1.625rem; font-weight: 650; letter-spacing: -.025em; }
+.auth-layout--split .auth__form { gap: var(--s-5); }
+.auth-layout--split .auth .field { gap: var(--s-2); }
+.auth-layout--split .auth .field__label { font-weight: var(--weight-strong); }
+.auth-layout--split .auth input:is([type="email"], [type="password"], [type="text"], [type="search"], [type="tel"], [type="number"]) {
+  height: 2.75rem; padding-inline: .875rem; font-size: 1rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.auth-layout--split .auth input:focus-visible { border-color: color-mix(in srgb, var(--accent) 65%, var(--line-strong)); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.auth-layout--split .auth .btn--block { height: 2.75rem; font-size: .9375rem; }
+.auth-layout--split .auth .btn--primary { box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 6px 14px -6px rgb(0 0 0 / .35); }
+.auth-layout--split .auth__aside-link { color: var(--color-link, var(--accent)); font-size: var(--text-meta); }
+.auth-layout--split .auth__aside-link:hover { color: var(--color-link, var(--accent)); }
+
+/* The showcase: the right half, a panel in the scheme's colour (--color-link, which each scheme in
+/* Settings > Appearance sets; mixed in oklch, so it
+/* follows any scheme and stays solid where a browser can't mix), grain over it, the theme toggle
+/* in a cut-out corner and frosted cards floating on it. Decorative: the cards are made-up examples. */
+.showcase { --showcase-color: var(--color-link, var(--accent)); position: sticky; top: 0; width: 100%; height: 100dvh; padding: var(--s-4); }
+.showcase__scene {
+  --showcase-radius: calc(1.75rem * var(--radius-scale, 1));
+  position: relative; height: 100%; overflow: hidden; isolation: isolate; border-radius: var(--showcase-radius);
+  background: var(--showcase-color);
+  background:
+    radial-gradient(60% 50% at 15% 10%, oklch(from var(--showcase-color) calc(l + .24) calc(c * .8) calc(h + 35)) 0, transparent 70%),
+    radial-gradient(55% 45% at 90% 25%, oklch(from var(--showcase-color) calc(l + .14) c calc(h - 45)) 0, transparent 70%),
+    radial-gradient(75% 60% at 20% 100%, oklch(from var(--showcase-color) calc(l - .2) c calc(h + 10)) 0, transparent 70%),
+    radial-gradient(50% 50% at 85% 90%, oklch(from var(--showcase-color) calc(l + .02) calc(c * 1.15) calc(h + 75)) 0, transparent 70%),
+    linear-gradient(160deg, oklch(from var(--showcase-color) calc(l + .1) c h), oklch(from var(--showcase-color) calc(l - .14) c h));
+}
+/* A soft light from the top, and fine grain so the colour reads as a surface. */
+.showcase__scene::before { content: ""; position: absolute; inset: 0; z-index: 0; background: radial-gradient(90% 55% at 50% -10%, rgb(255 255 255 / .35), transparent 70%); }
+.showcase__scene::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; opacity: .22; mix-blend-mode: overlay; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="dark"] .showcase__scene::before { background: linear-gradient(rgb(0 0 0 / .28), rgb(0 0 0 / .42)); }
+
+/* The cut-out corner: the page's colour over the panel's corner, curving into it on both sides,
+/* holding the theme toggle in a round button. */
+.showcase__notch {
+  --notch-r: var(--showcase-radius, calc(1.75rem * var(--radius-scale, 1)));
+  position: absolute; top: var(--s-4); left: var(--s-4); z-index: 2; padding: 0 .75rem .75rem 0;
+  border-bottom-right-radius: var(--notch-r); background: var(--auth-bg, var(--panel));
+}
+.showcase__notch::before, .showcase__notch::after {
+  content: ""; position: absolute; width: var(--notch-r); height: var(--notch-r);
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--notch-r) - .5px), var(--auth-bg, var(--panel)) var(--notch-r));
+}
+.showcase__notch::before { top: 0; left: 100%; }
+.showcase__notch::after { top: 100%; left: 0; }
+.showcase__theme {
+  display: grid; place-items: center; width: 4rem; height: 4rem; padding: 0; border: 0; border-radius: 50%;
+  background: var(--layer-1); color: var(--text-muted); cursor: pointer; transition: background .15s, color .15s;
+}
+.showcase__theme:hover { background: var(--layer-2); color: var(--text); }
+.showcase__theme:focus-visible { outline: 2px solid var(--showcase-color); outline-offset: 2px; }
+.showcase__theme .icon { width: 1.25rem; height: 1.25rem; }
+
+/* The frosted cards: the panel's colour through them, a hairline of light round the edge. */
+.showcase__card, .showcase__caption {
+  position: absolute; z-index: 1; display: flex; flex-direction: column; gap: .625rem; padding: 1rem 1.25rem;
+  border: 1px solid rgb(255 255 255 / .45); border-radius: calc(1rem * var(--radius-scale, 1));
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: 0 24px 48px -24px rgb(0 0 0 / .45), 0 2px 6px rgb(0 0 0 / .06);
+  color: var(--text); font-size: var(--text-meta); line-height: 1.35;
+}
+html[data-theme="dark"] :is(.showcase__card, .showcase__caption) { border-color: rgb(255 255 255 / .12); }
+.showcase__card--main { top: 40%; left: 12%; width: min(23rem, 64%); }
+.showcase__card--side { top: 15%; right: 7%; width: min(20rem, 58%); }
+.showcase__caption {
+  bottom: 1.5rem; left: 1.5rem; width: min(25rem, calc(100% - 3rem)); gap: .5rem;
+  border-color: rgb(255 255 255 / .28); background: rgb(10 12 16 / .22); color: #fff;
+}
+.showcase__row { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.showcase__title { flex: 1; min-width: 0; font-size: var(--text-ui); font-weight: var(--weight-strong); }
+.showcase__sub { color: var(--text-muted); }
+.showcase__pill {
+  display: inline-flex; align-items: center; gap: .3rem; flex: none; padding: .1rem .5rem; border-radius: var(--radius-pill, 99rem);
+  background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: var(--text-xs); font-weight: var(--weight-strong);
+}
+.showcase__pill--review { background: color-mix(in srgb, var(--attention) 18%, transparent); color: color-mix(in srgb, var(--attention) 75%, var(--text)); }
+.showcase__pill--progress { background: color-mix(in srgb, var(--showcase-color) 15%, transparent); color: var(--showcase-color); }
+.showcase__dot { width: .375rem; height: .375rem; border-radius: 50%; background: currentColor; }
+.showcase__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .25rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.showcase__stats > span { display: flex; flex-direction: column; gap: 2px; }
+.showcase__label { color: var(--text-muted); font-size: var(--text-xs); }
+.showcase__value { font-weight: var(--weight-strong); font-variant-numeric: tabular-nums; }
+.showcase__bar { height: .375rem; overflow: hidden; border-radius: var(--radius-pill, 99rem); background: var(--layer-2); }
+.showcase__bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--showcase-color); }
+.showcase__bar-fill--two-thirds { width: 66%; }
+.showcase__ring { flex: none; width: .875rem; height: .875rem; border: 2px solid var(--text-faint); border-radius: 50%; }
+.showcase__ring--half { border-color: var(--showcase-color); background: conic-gradient(var(--showcase-color) 0 50%, transparent 50%); }
+.showcase__task { flex: 1; min-width: 0; overflow: hidden; font-weight: var(--weight-strong); text-overflow: ellipsis; white-space: nowrap; }
+.showcase__card--side .showcase__row + .showcase__row { padding-top: .625rem; border-top: 1px solid var(--line); }
+.showcase__avatar {
+  display: grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+  background: oklch(from var(--showcase-color) calc(l - .05) c calc(h + 40)); color: #fff; font-size: .625rem; font-weight: 700;
+}
+.showcase__avatar--two { background: oklch(from var(--showcase-color) calc(l + .05) c calc(h - 60)); }
+.showcase__who { flex: 1; min-width: 0; font-weight: var(--weight-strong); }
+.showcase__new { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--showcase-color); }
+.showcase__message { margin: 0; color: var(--text); font-size: var(--text-ui); }
+.showcase__caption-title { font-size: var(--text-ui); font-weight: var(--weight-strong); }
+.showcase__caption-line { display: flex; align-items: center; gap: .5rem; color: rgb(255 255 255 / .88); }
+.showcase__caption-line .icon { flex: none; width: .9rem; height: .9rem; }
+
+/* They rise in once, then drift a little, each at its own pace. Still for reduced motion. */
+.showcase__card, .showcase__caption { animation: showcase-rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+.showcase__card--main { animation: showcase-rise .7s cubic-bezier(.2, .7, .2, 1) .05s both, showcase-drift 8s ease-in-out 1s infinite; }
+.showcase__card--side { animation: showcase-rise .7s cubic-bezier(.2, .7, .2, 1) .18s both, showcase-drift 9s ease-in-out 1.6s infinite reverse; }
+.showcase__caption { animation-delay: .3s; }
+@keyframes showcase-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes showcase-drift { 50% { translate: 0 -7px; } }
+@media (prefers-reduced-motion: reduce) { :is(.showcase__card, .showcase__caption) { animation: none; } }
+
