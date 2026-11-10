@@ -1,0 +1,13 @@
+<%# locals: () %>
+<%# A note the moment it's sent from the composer, before the server answers (the pending controller
+    copies this template, fills in its words and puts it at the top of the feed). Shaped like a
+    notes/_feed row, dimmed; the answer replaces the feed with the real one. %>
+<template id="pending_note">
+  <li class="record-feed__item record-feed__item--pending" aria-busy="true">
+    <span class="record-feed__avatar"><%= person_tag Current.user %></span>
+    <div class="record-feed__body">
+      <div class="record-feed__head"><p class="record-feed__meta">Adding…</p></div>
+      <div class="record-feed__text" data-pending-text></div>
+    </div>
+  </li>
+</template>

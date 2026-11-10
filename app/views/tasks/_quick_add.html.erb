@@ -1,13 +1,16 @@
 <%# locals: (work:, scope_item: nil, state: nil, item: nil) %>
 <%# The line under a section's tasks on a piece of work's page: type what needs doing and press
     Enter, and it's added to that section (or to other tasks) with nobody on it yet. The section
-    comes back in place (tasks/create.turbo_stream.erb) with this field emptied and still focused,
+    shows at once, dimmed (the pending controller, tasks/_pending), and the section comes back in
+    place (tasks/create.turbo_stream.erb) with this field emptied and still focused,
     so the next one can follow straight away (Esc empties it and lets go); who's on it and when
     it's due are set on its row.
     state and item: the section's filter and focus, kept through the answer. %>
 <div class="task-quick-add">
   <%= form_with model: Task.new, url: work_tasks_path(work), namespace: dom_id(scope_item || work, :quick_task),
-        class: "task-quick-add__form", data: { controller: "form", action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
+        class: "task-quick-add__form",
+        data: { controller: "form pending", pending_template_value: "pending_task", pending_scope_value: ".task-group", pending_list_value: ".record-list", pending_field_value: ".task-quick-add__input",
+                action: "turbo:submit-start->pending#show turbo:submit-end->pending#settle turbo:submit-end->form#resetOnSuccess" } do |form| %>
     <%= hidden_field_tag :inline, "tasks", id: nil %>
     <%= hidden_field_tag :inline_state, state, id: nil %>
     <% if item %>

@@ -6,6 +6,7 @@
   </header>
 
   <div class="card__content record-card__stack">
+    <%= render "notes/pending" %>
     <% if deferred %>
       <%# In the side panel the editor waits until it's wanted: opening a task to read it doesn't
           boot an editor. Clicking the line stamps the composer in its place (deferred-template). %>

@@ -42,7 +42,8 @@ module FieldsHelper
   #
   #   switch_field form, :require_two_factor, label: "Require it for everyone", hint: "…", submit_on_change: true
   def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
-    data = submit_on_change ? { action: "change->form#submit" } : {}
+    # Saving as it flips: the switch shows the change at once, and flips back if the save fails.
+    data = submit_on_change ? { action: "change->form#submit", revert_on_failure: true } : {}
     switch = switch_tag { form.check_box(method, role: "switch", data: data, **options) }
 
     if hint

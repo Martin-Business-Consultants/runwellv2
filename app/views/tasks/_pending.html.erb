@@ -1,0 +1,13 @@
+<%# locals: () %>
+<%# A task the moment it's typed into a section's quick add, before the server answers (the pending
+    controller copies this template, fills in its title and adds it to the section's list). Shaped
+    like tasks/_task, dimmed; the answer replaces the section with the real one. %>
+<template id="pending_task">
+  <li class="record-list__row task-item task-item--pending" aria-busy="true">
+    <span class="task-item__pending-dot" aria-hidden="true"></span>
+    <div class="record-list__main task-item__main">
+      <span class="task-item__heading"><span class="record-list__title" data-pending-text></span></span>
+      <span class="record-list__description">Adding…</span>
+    </div>
+  </li>
+</template>

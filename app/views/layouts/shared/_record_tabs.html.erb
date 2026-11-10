@@ -2,7 +2,7 @@
 <%# A record page's tabs (rune_ui's tabs): each a link that swaps ?tab= inside the record_tab
     frame. variant: "pill" draws them as a segmented row above a record page's cards; underlined
     otherwise (Settings). %>
-<nav class="<%= class_names("tabs", "tabs--pills record-tabs__list": variant == "pill") %>" aria-label="Sections">
+<nav class="<%= class_names("tabs", "tabs--pills record-tabs__list": variant == "pill") %>" aria-label="Sections" data-picks-current>
   <% tabs.each do |tab| %>
     <%# herb:key tab.key %>
     <%= link_to record_tab_path(tab.key), class: "tabs__tab", aria: { current: (tab.key == current) ? "page" : "false" },

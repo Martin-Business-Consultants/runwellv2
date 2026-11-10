@@ -265,6 +265,14 @@ Back, refresh and links work, and there's no client-side router:
   `turbo_stream_flash(notice:)` (`TurboFlash`) shows the toast; `AnswersInPlace` removes a row (`remove_row`) and checks a form's `inline` (`inline?`)
 - **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
   shows after 200ms
+- **Optimistic where the result is predictable**: the page changes on the click and is put back if
+  the save fails (`picker_controller.js` is the pattern). A task typed into a quick add and a note
+  from the composer show at once, dimmed, copied from a `<template>` the server renders
+  (`tasks/_pending`, `notes/_pending`, the `pending` controller), never markup written in
+  JavaScript; a row being deleted fades (`row-delete`), the rows a bulk action is changing dim
+  (`bulk`), a clicked tab is current before its frame arrives (the `picks-current` behavior, the
+  frame's old content dimmed on `aria-busy`), and a `submit_on_change` switch flips back if its save
+  fails (`revert-on-failure`)
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
   the `flash` frame), floating in the bottom right above the bell, never pushing the page; a notice
   goes by itself, an alert stays until closed. Runwell sets only `--toast-bottom` / `--toast-z`

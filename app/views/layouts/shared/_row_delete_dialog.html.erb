@@ -10,7 +10,7 @@
       <p class="dialog__hint" data-row-delete-target="hint">This can’t be undone.</p>
       <div class="dialog__actions">
         <button type="button" class="btn btn--ghost" data-action="row-delete#close">Cancel</button>
-        <%= button_to "#", method: :delete, params: { inline: "row" }, class: "btn btn--danger", form: { data: { row_delete_target: "form", turbo_frame: "_top" } }, data: { turbo_frame: "_top" } do %>
+        <%= button_to "#", method: :delete, params: { inline: "row" }, class: "btn btn--danger", form: { data: { row_delete_target: "form", turbo_frame: "_top", action: "turbo:submit-start->row-delete#leave turbo:submit-end->row-delete#settle" } }, data: { turbo_frame: "_top" } do %>
           <%= icon_tag "trash" %>
           <span>Delete</span>
         <% end %>

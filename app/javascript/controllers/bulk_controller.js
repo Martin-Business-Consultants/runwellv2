@@ -36,6 +36,8 @@ export default class extends Controller {
 
     form.querySelectorAll("input[data-bulk-id]").forEach(input => input.remove())
     this.#picked.forEach(item => this.#carry(form, "ids[]", item.value))
+    // The picked rows dim while it runs; the answer redraws or removes them.
+    this.#picked.forEach(item => item.closest("tr")?.classList.add("is-pending"))
 
     // The table's list (data-task-list: which, and its filter), so the answer drops the rows the
     // change takes out of it (a task marked done leaves an Open list) rather than reloading.
@@ -54,8 +56,12 @@ export default class extends Controller {
   }
 
   // After an action, the page comes back with the same rows: start with none picked.
+  // If it failed outright, the rows come back as they were, still picked.
   done(event) {
-    if (event.detail.success && this.barTargets.some(bar => bar.contains(event.target))) this.clear()
+    if (!this.barTargets.some(bar => bar.contains(event.target))) return
+
+    this.itemTargets.forEach(item => item.closest("tr")?.classList.remove("is-pending"))
+    if (event.detail.success) this.clear()
   }
 
   update() {

@@ -16,8 +16,10 @@ import open from "behaviors/open"
 import keepOpen from "behaviors/keep-open"
 import saveOnChange from "behaviors/save-on-change"
 import saveWhenDirty from "behaviors/save-when-dirty"
+import picksCurrent from "behaviors/picks-current"
+import revertOnFailure from "behaviors/revert-on-failure"
 
-const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty }
+const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty, "picks-current": picksCurrent, "revert-on-failure": revertOnFailure }
 
 const runtime = Runtime.start({ state: { debounce: 150, refetch: "off" } })
 for (const [ attribute, behavior ] of Object.entries(BEHAVIORS)) runtime.behaviors.define(attribute, behavior)

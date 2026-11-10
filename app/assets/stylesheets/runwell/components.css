@@ -419,3 +419,16 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .table:not(.table--even, :has(colgroup)):has(.table__grow) :is(th, td):first-child { width: 1%; white-space: nowrap; }
 .table:not(.table--even, :has(colgroup)) :is(th, td).table__grow { width: auto; white-space: normal; }
 .table .table__cap { display: inline-block; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+
+/* Optimistic: what's sent shows at once, dimmed, until the server answers (the pending controller's
+   rows, a row being deleted, the rows a bulk action is changing, a tab's frame loading). */
+.task-item--pending,
+.record-feed__item--pending,
+tr.is-pending,
+.is-pending { opacity: 0.5; pointer-events: none; transition: opacity 150ms ease; }
+tr.is-leaving { opacity: 0; transition: opacity 200ms ease; }
+.task-item__pending-dot { inline-size: 0.875rem; block-size: 0.875rem; border-radius: 50%; border: 1.5px dashed var(--line-strong); flex: none; }
+#record_tab[aria-busy="true"] .record-tabs__panel { opacity: 0.5; transition: opacity 150ms ease 100ms; }
+@media (prefers-reduced-motion: reduce) {
+  tr.is-leaving, .is-pending, #record_tab[aria-busy="true"] .record-tabs__panel { transition: none; }
+}
