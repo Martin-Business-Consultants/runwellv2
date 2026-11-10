@@ -48,9 +48,11 @@
     </section>
 
     <% if can?(:delete_records) %>
-      <%= render "layouts/shared/confirm", trigger: "Remove this " + term(:task).downcase, title: "Remove #{@task.title_was}?",
-            body: "It comes off the #{term(:work).downcase} and the #{term(:client).downcase}’s portal. Its history stays.",
-            button: "Remove", path: task_path(@task) %>
+      <%# Removed at once, with Undo in the toast for a few seconds (PendingRemoval): no dialog. %>
+      <%= button_to task_path(@task), method: :delete, class: button_classes(variant: :secondary, size: :sm) do %>
+        <%= icon_tag "trash" %>
+        <span>Remove this <%= term(:task).downcase %></span>
+      <% end %>
     <% end %>
   </aside>
 </section>

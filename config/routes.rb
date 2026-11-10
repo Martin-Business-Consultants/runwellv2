@@ -152,6 +152,8 @@ Rails.application.routes.draw do
   namespace :tasks do
     resources :columns, only: :show
   end
+  # Undo for a removal made in the browser (PendingRemoval): its batch, while the window lasts.
+  resources :pending_removals, only: :destroy, param: :batch, path: "removals"
   resources :tasks, only: %i[index show create edit update destroy] do
     get :brief, on: :member
     scope module: :tasks do

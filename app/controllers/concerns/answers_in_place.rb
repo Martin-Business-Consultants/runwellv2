@@ -22,6 +22,15 @@ module AnswersInPlace
       render turbo_stream: [ turbo_stream.remove(helpers.dom_id(record, :row)), *also, turbo_stream_flash(notice: notice) ]
     end
 
+    # A notice whose toast offers Undo for a removal's window (PendingRemoval, rune_ui's toast action).
+    def undo_notice(text, batch)
+      { text: text, timeout: PendingRemoval::WINDOW.in_milliseconds,
+        action: { label: "Undo", url: pending_removal_path(batch), method: :delete, data: { turbo_frame: "_top" } } }
+    end
+
+    # Removed in the browser (a Turbo form, not an agent or a plain post): with Undo.
+    def removing_with_undo? = request.format.turbo_stream? && !Current.agent?
+
     def refuse_in_place(alert)
       render turbo_stream: turbo_stream_flash(alert: alert), status: :unprocessable_entity
     end

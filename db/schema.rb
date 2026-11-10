@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -339,6 +339,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_100000) do
     t.index ["user_id"], name: "index_oauth_grants_on_user_id"
   end
 
+  create_table "pending_removals", force: :cascade do |t|
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.string "batch", null: false
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["batch"], name: "index_pending_removals_on_batch"
+    t.index ["created_at"], name: "index_pending_removals_on_created_at"
+    t.index ["record_type", "record_id"], name: "index_pending_removals_on_record_type_and_record_id", unique: true
+    t.index ["user_id"], name: "index_pending_removals_on_user_id"
+  end
+
   create_table "plugin_changes", force: :cascade do |t|
     t.integer "requested_by_id"
     t.string "key"
@@ -630,6 +643,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_100000) do
   add_foreign_key "oauth_grants", "contacts"
   add_foreign_key "oauth_grants", "oauth_clients"
   add_foreign_key "oauth_grants", "users"
+  add_foreign_key "pending_removals", "users", on_delete: :nullify
   add_foreign_key "plugin_changes", "users", column: "requested_by_id"
   add_foreign_key "portal_sessions", "contacts"
   add_foreign_key "scope_items", "agreement_versions"

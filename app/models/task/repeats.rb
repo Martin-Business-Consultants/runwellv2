@@ -25,7 +25,31 @@ module Task::Repeats
   # When the next one would be due, if it were done today.
   def next_due_on = repeats? ? Cadence.next_after(due_on || Date.current, repeat) : nil
 
+  # Undo on marking it done (the status toast): back to the status it had. If that made the next
+  # one, the next one goes too while nobody has touched it (the repeat moves back here); once it has
+  # been changed it stays, and the answer says so.
+  def undo_done!(to)
+    following = next_made_by_repeat
+    update!(status: to)
+    return unless following
+
+    if following.untouched_since_repeat?
+      following.destroy!
+      update_column(:repeat, following.repeat)
+      nil
+    else
+      "The next one stays: it’s been changed since."
+    end
+  end
+
+  def untouched_since_repeat? = status == "planned" && updated_at <= created_at + 2.seconds && notes.none?
+
   private
+    def next_made_by_repeat
+      id = events.where(kind: "task.repeated").order(:occurred_at).last&.payload&.dig("next_task_id")
+      Task.find_by(id: id) if id
+    end
+
     def repeats_now?
       repeats? && status_reason.nil? && (work.nil? || work.active?) && (client.nil? || client.status == "active")
     end

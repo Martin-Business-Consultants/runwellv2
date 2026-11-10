@@ -16,5 +16,5 @@
     <%# herb:key field.id %>
     <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, task.custom_value(field)) %></td>
   <% end %>
-  <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task %>
+  <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task, undoable: true %>
 </tr>

@@ -21,7 +21,8 @@
   <%= turbo_stream.action :close_side_panel, "side_panel" %>
 <% end %>
 <%= turbo_stream_flash(notice: @notice, alert: @alert) %>
-<%# A repeating task marked done made the next one: the page reloads in place to show it. %>
-<% if @task.repeated_task %>
+<%# A repeating task marked done made the next one, or Undo put a task back that its list had let
+    go: the page reloads in place to show it. %>
+<% if @task.repeated_task || @undone %>
   <%= turbo_stream.refresh(request_id: nil) %>
 <% end %>

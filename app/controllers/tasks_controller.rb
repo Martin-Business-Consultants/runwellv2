@@ -104,12 +104,18 @@ class TasksController < ApplicationController
   end
 
   # From its table row, just the row goes (and the side panel, if it showed this task); anywhere
-  # else, to its work, client or the requests it was among.
+  # else, to its work, client or the requests it was among. In the browser it goes once Undo's
+  # window has passed (remove_later!, PendingRemoval); agents and plain posts remove it at once.
   def destroy
-    @task.destroy
-    return remove_row(@task, notice: "Removed.", also: [ turbo_stream.remove(helpers.dom_id(@task, :panel)) ]) if row_removal?
+    if removing_with_undo?
+      notice = undo_notice("Removed “#{@task.title}”.", @task.remove_later!)
+    else
+      @task.destroy
+      notice = "Removed."
+    end
+    return remove_row(@task, notice: notice, also: [ turbo_stream.remove(helpers.dom_id(@task, :panel)), turbo_stream.remove(helpers.dom_id(@task, :item)) ]) if row_removal?
 
-    redirect_to task_home, notice: "Removed."
+    redirect_to task_home, notice: notice
   end
 
   private

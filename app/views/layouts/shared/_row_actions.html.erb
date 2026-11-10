@@ -1,8 +1,9 @@
-<%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, task: nil, peek: nil) %>
+<%# locals: (name:, edit_path: nil, delete_path: nil, delete_message: nil, task: nil, peek: nil, undoable: nil) %>
 <%# A table row's last cell: edit and delete, each only when the record allows it (and
     delete only for people who may delete records). Delete opens the table's one dialog
     (layouts/shared/_row_delete_dialog), which its button fills in. peek: a record that's changed in
-    place, whose Edit opens it in the side panel rather than going to its edit page. %>
+    place, whose Edit opens it in the side panel rather than going to its edit page. undoable: a
+    record removed at once with Undo in the toast (a task), with no dialog. %>
 <td class="data-table__actions">
   <div class="data-table__actions-row">
     <% if task %>
@@ -21,7 +22,11 @@
       <% end %>
     <% end %>
     <% if delete_path && can?(:delete_records) %>
-      <%= row_delete_button name: name, path: delete_path, message: delete_message %>
+      <% if undoable %>
+        <%= row_remove_button name: name, path: delete_path %>
+      <% else %>
+        <%= row_delete_button name: name, path: delete_path, message: delete_message %>
+      <% end %>
     <% end %>
   </div>
 </td>

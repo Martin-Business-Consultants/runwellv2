@@ -261,6 +261,13 @@ Back, refresh and links work, and there's no client-side router:
   `draft` controller, `draft_data(key)` and `draft_notice`; `record_fields/main_card` does it for new
   and edit forms), restored with "Draft restored" and Discard, cleared when the save works. So
   leaving a form never asks "are you sure"
+- **Undo for tasks**: removing a task in the browser (its row's trash or `d`, the bulk bar, its
+  page) acts at once with no dialog and offers Undo in the toast for eight seconds: `remove_later!`
+  (`RemovesLater`) records a `PendingRemoval` and `PendingRemovalJob` removes it when it comes due,
+  unless Undo (`PendingRemovalsController`) deleted the row first. Agents and plain posts remove at
+  once. Marking a task done offers Undo too (the status picker, `Task#undo_done!`). The toast's
+  button is rune_ui's (`flash_messages` given `{ text:, action:, timeout: }`, `undo_notice`).
+  Clients and work keep their dialogs: their deletes cascade
 - **Rows go in place**: the table's delete dialog sends `inline=row`; `remove_row` answers a stream
   removing `dom_id(record, :row)` (every row partial's `<tr>` id), and `refuse_in_place` says why
   where you are
@@ -610,7 +617,7 @@ one place they are documented for people: add a new key there.
 | `j` `k`, `gg` `G` | Move through the page's items (every `data-filter-target="item"`), first and last |
 | `x` | Pick the table row you're on, for the bulk bar |
 | `Enter` `o` | Open the item you're on |
-| `e` `d` | Edit, or delete / archive / close (always asks first): the item you're on, else the record on screen |
+| `e` `d` | Edit, or delete / archive / close (asks first; a task goes at once, with Undo): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
 | `g` + `c w t b u n s` | Clients, work, tasks, board, users, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |

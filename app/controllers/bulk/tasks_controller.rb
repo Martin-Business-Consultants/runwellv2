@@ -22,8 +22,17 @@ class Bulk::TasksController < ApplicationController
     end
   end
 
+  # From the table's bulk bar in the browser, they go once Undo's window has passed, one Undo for
+  # them all (PendingRemoval); agents and plain posts remove them at once.
   def destroy
-    apply_to_each(selected(Task.all), done: "Removed %{count} #{term_for(:task)}", fallback: tasks_path) do |task|
+    tasks = selected(Task.all)
+    if removing_with_undo? && tasks.any?
+      @bulk_changed = tasks
+      @bulk_message = { notice: undo_notice("Removed #{tasks.size} #{tasks.one? ? Setting.current.term(:task).downcase : term_for(:task)}.", Task.remove_later!(tasks)) }
+      return render(:destroy)
+    end
+
+    apply_to_each(tasks, done: "Removed %{count} #{term_for(:task)}", fallback: tasks_path) do |task|
       task.destroy ? true : "it couldn’t be removed"
     end
   end

@@ -22,6 +22,9 @@ production:
   export_cleanup:
     command: "Export.expire_old!; WebhookDelivery.expire_old!"
     schedule: every day at 3:30am
+  pending_removals:
+    command: "PendingRemoval.sweep"
+    schedule: every hour at minute 20
   agent_housekeeping:
     class: AgentHousekeepingJob
     schedule: every day at 3am

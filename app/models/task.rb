@@ -5,7 +5,7 @@
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
-  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable
+  include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable, RemovesLater
 
   # A request from outside (a client in the portal or through their agent, or an email): set by
   # whoever makes it, so its history says task.requested, credited to who asked, not task.created.

@@ -27,6 +27,16 @@ export default class extends Controller {
     this.row?.classList.add("is-leaving")
   }
 
+  // A row removed at once (row_remove_button, Undo in the toast): it fades as it goes, and comes back
+  // if the removal is refused.
+  leaveRow({ target }) {
+    target.closest("tr")?.classList.add("is-leaving")
+  }
+
+  settleRow({ target, detail }) {
+    if (!detail.success) target.closest("tr")?.classList.remove("is-leaving")
+  }
+
   // turbo:submit-end: refused or failed, the row comes back
   settle(event) {
     if (!event.detail.success) this.row?.classList.remove("is-leaving")

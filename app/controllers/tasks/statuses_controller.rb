@@ -7,13 +7,30 @@ class Tasks::StatusesController < ApplicationController
   allow_staff
   agent_exempt :update, reason: "the status picker in the browser; update_task changes status"
 
+  # Marking it done offers Undo in the toast for a few seconds: the same request with the status it
+  # had and undo, which puts it back (Task#undo_done!, taking the next one a repeat made with it).
   def update
-    if @task.update(status: params.dig(:task, :status))
+    before = @task.status
+    if params[:undo].present? && @task.status == "done"
+      @undone = true
+      @notice = [ "#{@task.title}: back to #{params.dig(:task, :status).to_s.humanize.downcase}.", @task.undo_done!(params.dig(:task, :status)) ].compact.join(" ")
+    elsif @task.update(status: params.dig(:task, :status))
       @notice = "#{@task.title}: #{@task.status.humanize.downcase}."
+      @notice = undo_status(@notice, before) if @task.status == "done" && before != "done"
     else
       @alert = @task.errors.full_messages.to_sentence
       @task.reload
     end
     @list = Task::List.from(params.fetch(:list, {}), task: @task)
+  rescue ActiveRecord::RecordInvalid => e
+    @alert = e.record.errors.full_messages.to_sentence
+    @task.reload
+    @list = Task::List.from(params.fetch(:list, {}), task: @task)
   end
+
+  private
+    def undo_status(text, before)
+      { text: text, timeout: PendingRemoval::WINDOW.in_milliseconds,
+        action: { label: "Undo", url: task_status_path(@task), method: :patch, params: { "task[status]" => before, undo: 1 }, data: { turbo_frame: "_top" } } }
+    end
 end
