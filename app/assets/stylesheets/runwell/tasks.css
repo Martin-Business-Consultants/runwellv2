@@ -398,6 +398,14 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .intake__home .muted { overflow: hidden; text-overflow: ellipsis; }
 .intake__file { flex: none; color: var(--text-faint); }
 .intake__decide { display: inline-flex; align-items: center; gap: var(--s-1); }
+/* Decline's pop-up (intakes/_decline): a line for why and the button, beside the ✕ and within
+   the row's height, so a table's scrolling frame never grows to fit it. */
+.intake-decline { position: relative; }
+.intake-decline > summary { list-style: none; cursor: pointer; }
+.intake-decline > summary::-webkit-details-marker { display: none; }
+.intake-decline__form { position: absolute; z-index: 20; inset-block-start: 50%; inset-inline-end: calc(100% + var(--s-1)); transform: translateY(-50%); flex-direction: row; align-items: center; gap: var(--s-2); width: 20rem; padding: var(--s-1); border: 1px solid var(--line); border-radius: calc(var(--radius-lg) * var(--radius-scale, 1)); background: var(--panel); box-shadow: var(--shadow-popover); }
+.intake-decline__form input { flex: 1; min-width: 0; }
+
 /* The side panel's Intake bar: Accept and Decline beside "Waiting in Intake". */
 .task-panel__intake { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-3); border-radius: calc(var(--radius-lg) * var(--radius-scale, 1)); background: var(--brand-tint, var(--accent-soft)); }
 .task-panel__intake-text { flex: 1; color: var(--text-muted); font-size: var(--text-meta); }

@@ -98,9 +98,7 @@
       <%= button_to task_acceptance_path(task), params: { inline: "panel" }, class: button_classes(variant: :primary, size: :sm) do %>
         <%= icon_tag "check" %><span>Accept</span>
       <% end %>
-      <%= button_to task_decline_path(task), params: { inline: "panel" }, class: button_classes(variant: :secondary, size: :sm) do %>
-        <%= icon_tag "close" %><span>Decline</span>
-      <% end %>
+      <%= render "intakes/decline", task: task, inline: "panel", label: "Decline" %>
     </div>
   <% elsif task.declined? %>
     <p class="task-panel__intake task-panel__intake-text">Declined<%= " by #{task.declined_by.display_name}" if task.declined_by %> on <%= l task.declined_at.to_date, format: :long %>.</p>

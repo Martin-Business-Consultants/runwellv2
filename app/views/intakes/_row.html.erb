@@ -24,9 +24,7 @@
       <%= button_to task_acceptance_path(task), params: { inline: "row" }, class: button_classes(variant: :secondary, size: :sm), title: "Accept: #{task.owner ? "#{task.owner.display_name} owns it" : "you take it on"}" do %>
         <%= icon_tag "check" %><span>Accept</span>
       <% end %>
-      <%= button_to task_decline_path(task), params: { inline: "row" }, class: "icon-button", title: "Decline: kept, and shown to the #{term(:client).downcase} as declined" do %>
-        <%= icon_tag "close" %><span class="visually-hidden">Decline <%= task.title %></span>
-      <% end %>
+      <%= render "intakes/decline", task: task, inline: "row" %>
     </span>
   </td>
 </tr>

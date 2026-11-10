@@ -4,10 +4,10 @@ class Bulk::Tasks::DeclinesController < ApplicationController
   include IntakeDecision
   allow_staff
   agent_tool :bulk_decline_tasks, on: :create, title: "Decline several tasks in intake",
-    description: "ids: tasks waiting in intake (list_intake) that won't be done. Each is kept, marked done as Declined, as decline_task would; nobody is emailed.",
-    params: { ids: "integer[]!" }
+    description: "ids: tasks waiting in intake (list_intake) that won't be done. Each is kept, marked done as Declined, as decline_task would; nobody is emailed. note: why, optional, kept as an internal note on each.",
+    params: { ids: "integer[]!", note: "string" }
 
   def create
-    decide_each("Declined %{count}") { |task| task.decline!(by: current_user) }
+    decide_each("Declined %{count}") { |task| task.decline!(by: current_user, note: params[:note]) }
   end
 end

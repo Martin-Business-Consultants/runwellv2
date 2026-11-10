@@ -51,14 +51,15 @@ module Task::Intake
   end
 
   # Not wanted: kept for the record, out of every open list, and Declined in the client's portal
-  # (nobody is emailed).
-  def decline!(by:)
+  # (nobody is emailed). note: why, kept as an internal note on it (the client never sees it).
+  def decline!(by:, note: nil)
     raise Task::Refused, "“#{title}” isn’t waiting in intake" unless declinable?
 
     transaction do
       self.status_reason = "Declined"
       update!(status: "done", declined_at: Time.current, declined_by: by)
-      record_event!("task.declined")
+      notes.create!(body: "Declined: #{note.strip}", author: by, kind: "internal", source: Current.source || "app") if note.present?
+      record_event!("task.declined", payload: { note: note.presence&.strip }.compact)
     end
   end
 end

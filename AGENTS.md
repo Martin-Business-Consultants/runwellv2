@@ -87,7 +87,8 @@ them something else on screen (`term(:work)`, `term(:task)`).
    bulk (`Tasks::AcceptancesController`, `Tasks::DeclinesController`, `Bulk::Tasks::*`; tools
    `accept_task`, `decline_task`, `bulk_accept_tasks`, `bulk_decline_tasks`; both refuse a task not
    waiting, `Task::Refused`): `accept!` (someone owns it, the owner picked or whoever accepts;
-   `accepted_at`, `task.accepted`; a client who asked hears it's taken on) and `decline!` (kept,
+   `accepted_at`, `task.accepted`; a client who asked hears it's taken on) and `decline!` (with an optional line
+   saying why, kept as an internal note on it, `note:`; kept,
    marked done with the reason Declined so nobody is emailed and it doesn't repeat; `declined_at`,
    `task.declined`; the portal shows it as Declined). Filing it on a piece of work with someone on it
    takes it out too (the side panel's Work picker, `work_id` on `update_task`; its client follows, a

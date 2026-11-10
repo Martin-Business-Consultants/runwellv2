@@ -1,0 +1,19 @@
+<%# locals: (task:, inline:, label: nil) %>
+<%# Decline, with an optional line saying why (kept as an internal note on the task): a <details>
+    whose pop-up holds the form, so a row keeps its height. label: the button's words (the side
+    panel); without it, the ✕ alone (an Intake row). %>
+<details class="intake-decline">
+  <summary class="<%= label ? button_classes(variant: :secondary, size: :sm) : "icon-button" %>" title="Decline: kept, and shown to the <%= term(:client).downcase %> as declined">
+    <%= icon_tag "close" %>
+    <% if label %>
+      <span><%= label %></span>
+    <% else %>
+      <span class="visually-hidden">Decline <%= task.title %></span>
+    <% end %>
+  </summary>
+  <%= form_with url: task_decline_path(task), method: :post, class: "intake-decline__form", namespace: dom_id(task, :decline) do |form| %>
+    <%= hidden_field_tag :inline, inline, id: nil %>
+    <%= form.text_field :note, placeholder: "Why? (optional, internal)", autocomplete: "off", autofocus: true, aria: { label: "Why it's declined" } %>
+    <%= form.button type: "submit", class: button_classes(variant: :primary, size: :sm) do %>Decline<% end %>
+  <% end %>
+</details>

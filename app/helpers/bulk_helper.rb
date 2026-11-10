@@ -76,6 +76,19 @@ module BulkHelper
     end
   end
 
+  # A pill opening a line of text to send with the action (a reason, optional unless required:),
+  # then its button: Decline with why, say.
+  def bulk_text(path, method:, name:, label:, placeholder:, submit:, required: nil)
+    bulk_popup(label) do
+      form_tag(path, method: method, class: "popup__form") do
+        tag.div(class: "popup__item popup__item--form") do
+          safe_join([ text_field_tag(name, nil, class: "input--sm", placeholder: placeholder, required: required, autocomplete: "off", aria: { label: placeholder }),
+            button_tag(submit, type: "submit", class: "btn btn--primary btn--sm", data: { action: "dialog#close" }) ])
+        end
+      end
+    end
+  end
+
   # Delete, behind a dialog (rune_ui's): it says what goes, and asks once.
   def bulk_delete(path, noun:, message: nil)
     title = "Delete the selected #{noun}?"
