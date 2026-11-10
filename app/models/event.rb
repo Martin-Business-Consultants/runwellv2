@@ -16,6 +16,21 @@ class Event < ApplicationRecord
   SECURITY_SUBJECTS = %w[User Setting].freeze
 
   scope :recent, -> { order(occurred_at: :desc) }
+  # What agents did (User::Agent: someone's AI, through a token), everyone's or one person's.
+  scope :by_agents, -> { where(actor_user_id: User.agents.select(:id)) }
+  scope :by_agent_of, ->(person) { where(actor_user_id: person.agent&.id || 0) }
+
+  # One area of the install's history, as the audit log and AI activity filter it.
+  def self.in_area(area)
+    case area
+    when "security" then where(subject_type: SECURITY_SUBJECTS)
+    when "works" then where("kind LIKE 'agreement.%' OR kind LIKE 'work.%' OR kind LIKE 'scope_item.%'")
+    when "tasks" then where("kind LIKE 'task.%' OR kind LIKE 'commitment.%' OR kind LIKE 'note.%' OR kind LIKE 'document.%'")
+    when "requests" then where("kind = 'task.requested' OR kind LIKE 'request.%' OR kind LIKE 'question.%'")
+    when "clients" then where("kind LIKE 'client.%' OR kind LIKE 'contact.%'")
+    else all
+    end
+  end
 
   before_update { raise ActiveRecord::ReadOnlyRecord, "events are append-only" }
   before_destroy { throw :abort unless destroyed_by_association }

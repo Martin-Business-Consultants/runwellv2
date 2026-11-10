@@ -1,0 +1,16 @@
+<%# locals: (event:) %>
+<%# One thing an agent did, in AI activity's data table (ui/_data_table): whose agent, what it did
+    and to what (a task opens in the side panel, a client or piece of work peeks), the details and
+    when; the app it came through is in the agent's tooltip. %>
+<tr id="<%= dom_id(event, :row) %>" data-filter-target="item">
+  <td data-column="who">
+    <span class="agent-actor" title="<%= [ event.actor_name, event.source_label ].join(" ") %>">
+      <%= person_tag event.actor_user&.person %>
+      <%= icon_tag "ai", class: "agent-actor__mark" %>
+    </span>
+  </td>
+  <td data-column="what"><%= event_title(event) %></td>
+  <td data-column="on"><%= event_subject_link(event) %></td>
+  <td class="muted" data-column="details"><%= event_details(event) %></td>
+  <td class="muted nowrap" data-column="when" title="<%= event.occurred_at.iso8601 %>"><%= activity_time(event.occurred_at) %></td>
+</tr>

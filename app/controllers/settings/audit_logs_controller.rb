@@ -45,14 +45,7 @@ class Settings::AuditLogsController < Settings::BaseController
     def filtered(scope)
       scope = scope.where(occurred_at: @days.to_i.days.ago..) unless @days == "all"
       scope = scope.where(actor_user: [ @person, @person.agent ].compact) if @person
-      case @area
-      when "security" then scope.where(subject_type: Event::SECURITY_SUBJECTS)
-      when "works" then scope.where("kind LIKE 'agreement.%' OR kind LIKE 'work.%'")
-      when "tasks" then scope.where("kind LIKE 'task.%' OR kind LIKE 'commitment.%' OR kind LIKE 'note.%' OR kind LIKE 'document.%'")
-      when "requests" then scope.where("kind = 'task.requested' OR kind LIKE 'request.%' OR kind LIKE 'question.%'")
-      when "clients" then scope.where("kind LIKE 'client.%'")
-      else scope
-      end
+      scope.in_area(@area)
     end
 
     def csv(events)

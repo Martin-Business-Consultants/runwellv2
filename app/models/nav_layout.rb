@@ -3,7 +3,7 @@
 # items in order, and a Hidden tray. It's kept in Setting#layouts under "nav" (beside the record
 # layouts), so it needs no table of its own.
 #
-# An item is a core section ("clients", "works", "tasks", "users") or a plugin's page ("plugin.<key>",
+# An item is a core section ("clients", "works", "tasks", "users", "agent_activity") or a plugin's page ("plugin.<key>",
 # from Runwell::Plugins.nav). Plugins sit among the core's sections, wherever they're put, with no
 # "Plugins" heading of their own. One switched on after the sidebar was arranged joins the end of
 # the first section until it's moved. One switched off drops out of sight and keeps its place (at
@@ -11,7 +11,7 @@
 # on puts it back. A section's label may be blank (no heading over it); a section with nothing to
 # show is left out of the sidebar.
 class NavLayout
-  CORE = %w[clients works tasks users].freeze
+  CORE = %w[clients works tasks users agent_activity].freeze
   LABEL_MAX = 40
   DEFAULT = { "sections" => [ { "label" => "Workspace", "items" => CORE } ], "hidden" => [] }.freeze
 

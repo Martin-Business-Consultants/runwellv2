@@ -34,8 +34,11 @@ something in the portal) is previewed first and done only once you agree.
   wherever it's listed, naming the agent, and the side panel says "Added by Ted's agent".
 - **Work it finishes waits for you.** An agent takes a task only as far as in review; a person
   marks it done (Show… › In review, or the board's In review column).
-- **The rest** is in each record's History ("Ted's agent via Claude …"), and every call a
-  connection made is under its Activity in Settings › Connected apps.
+- **AI activity** (in the nav, `g a`) lists everything agents did: tasks added, changes, notes,
+  closes, newest first. It opens on your own agent's; pick a teammate's or everyone's, an area and
+  a period. Each row opens what it touched (a task in the side panel). Agents read it too
+  (`agent_activity`). Each record's History says the same ("Ted's agent via Claude …"), and every
+  call a connection made is under its Activity in Settings › Connected apps.
 
 ## For clients
 

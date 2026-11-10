@@ -51,6 +51,7 @@ module PluginsHelper
     when "works" then [ term(:work, count: 2), works_path, "clipboard", "g w" ]
     when "tasks" then [ term(:task, count: 2), tasks_path, "board", "g t" ]
     when "users" then [ "Users", users_path, "person", "g u" ]
+    when "agent_activity" then [ "AI activity", agent_activity_path, "ai", "g a" ]
     end
   end
 

@@ -54,6 +54,7 @@ Rails.application.routes.draw do
     resource :revocation, only: :create
   end
   resource :search, only: :show
+  resource :agent_activity, only: :show, path: "ai"
 
   resource :settings, only: :show
   # Settings > People became Users, in the left nav.

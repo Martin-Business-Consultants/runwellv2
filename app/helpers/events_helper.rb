@@ -17,4 +17,46 @@ module EventsHelper
   def event_details(event)
     (event.payload || {}).filter_map { |key, value| "#{key}: #{value}" if value.present? && !value.is_a?(Enumerable) }.join(" · ")
   end
+
+  # What an event happened to, as a link where it has somewhere to open: a task in the side panel,
+  # a client, piece of work or contact as a peek; anything else (or gone) in words.
+  def event_subject_link(event)
+    subject = event.subject
+    name = audit_subject_name(event)
+    case subject
+    when Task then side_panel_link_to subject, name
+    when Client, Work, Contact then peek_link_to subject, name
+    else name
+    end
+  end
+
+  # When, short enough for a narrow column: the time today, else the day and time ("Nov 8, 3:12pm").
+  def activity_time(time)
+    format = time.to_date == Date.current ? "%-l:%M%P" : (time.year == Date.current.year ? "%b %-d, %-l:%M%P" : "%b %-d, %Y")
+    time.strftime(format)
+  end
+
+  # AI activity's area filter, in this install's names.
+  def agent_activity_area_label(area)
+    case area
+    when "tasks" then "#{term(:task, count: 2)} and notes"
+    when "works" then term(:work, count: 2)
+    when "clients" then term(:client, count: 2)
+    else "Everything"
+    end
+  end
+
+  def agent_activity_whose_label(person, whose)
+    if whose == "any" then "everyone's agents"
+    elsif person.nil? then "nobody's agent"
+    elsif person == Current.user&.person then "your agent"
+    else "#{person.display_name}'s agent"
+    end
+  end
+
+  def agent_activity_empty_text(person, whose)
+    if whose == "me" then "Your agent hasn’t done anything in this period. Connect an AI in Settings › Connected apps, and what it does shows here."
+    else "Nothing #{agent_activity_whose_label(person, whose)} did in this period."
+    end
+  end
 end

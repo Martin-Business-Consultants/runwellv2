@@ -648,7 +648,7 @@ one place they are documented for people: add a new key there.
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (asks first; a task goes at once, with Undo): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
-| `g` + `c w t b u n s` | Clients, work, tasks, board, users, notifications, settings; `g 1`… plugin pages |
+| `g` + `c w t b u a n s` | Clients, work, tasks, board, users, AI activity, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |
@@ -975,6 +975,11 @@ do, through the same controllers: there is no separate API.
   `update`, `mcp` (`--read-only`), `agent setup` (a managed skill, marked, refreshed by `update`,
   never overwriting a hand-edited one). Output is JSON when piped; `--ids-only`, `--count`,
   `--field a.b` trim it. Exit statuses follow the error codes (`runwell help exit-codes`)
+- **AI activity** (`/ai`, `AgentActivitiesController`, in the nav, `g a`, the `agent_activity`
+  tool) is where people review what agents did: every event whose actor is an agent
+  (`Event.by_agents`, `by_agent_of(person)`; sign-ins and settings stay in the audit log), your own
+  agent's by default, a teammate's or everyone's, by area (`Event.in_area`, shared with the audit
+  log) and period, each row linking to its task (side panel) or record (peek)
 - **Errors are machine-readable**: every agent error carries a `code` (usage, not_found, ambiguous,
   auth, forbidden, refused, invalid, read_only, paused, rate_limited, failed) and a `hint` (`Agent::Errors`); a redirect with
   an alert is `refused`, a 422 is `invalid`. A success whose tool declares `next_tools` also
