@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -519,9 +519,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_180000) do
     t.integer "accepted_by_id"
     t.datetime "declined_at"
     t.integer "declined_by_id"
+    t.datetime "intake_at"
     t.index ["client_id"], name: "index_tasks_on_client_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
+    t.index ["intake_at"], name: "index_tasks_on_intake_at"
     t.index ["owner_id"], name: "index_tasks_on_owner_id"
     t.index ["scope_item_id"], name: "index_tasks_on_scope_item_id"
     t.index ["status", "board_position"], name: "index_tasks_on_status_and_board_position"

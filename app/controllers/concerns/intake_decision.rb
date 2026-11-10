@@ -1,6 +1,7 @@
 # How an Intake decision (accept or decline, one task or several) answers: in the browser, by
 # Turbo Streams wherever it came from (a row, the side panel, the bulk bar): the decided rows leave
-# Intake, the task's side panel and any Tasks row are redrawn, and a toast says so. Agents and plain
+# Intake, the task's side panel (closed, when it was decided there) and any Tasks row are redrawn,
+# and a toast says so. Agents and plain
 # posts get the redirect with its notice.
 module IntakeDecision
   extend ActiveSupport::Concern
@@ -9,9 +10,11 @@ module IntakeDecision
     def answer_decision(notice, tasks = [ @task ])
       return redirect_back(fallback_location: intake_path, notice: notice) unless request.format.turbo_stream?
 
-      # Each decided task: its Intake row goes, its side panel and Intake bar redrawn, wherever the
-      # decision came from; never a reload.
-      render turbo_stream: tasks.flat_map { decided_streams(it) } + [ turbo_stream_flash(notice: notice) ]
+      # Each decided task: its Intake row goes and anywhere else it shows is redrawn, wherever the
+      # decision came from; never a reload. Decided in the side panel, the panel closes too.
+      streams = tasks.flat_map { decided_streams(it) } + [ turbo_stream_flash(notice: notice) ]
+      streams << turbo_stream.action(:close_side_panel, "side_panel") if params[:inline] == "panel"
+      render turbo_stream: streams
     end
 
     # Several at once (a BulkAction controller): each task decided as alone, one no longer waiting

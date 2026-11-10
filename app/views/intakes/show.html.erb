@@ -29,6 +29,6 @@
 <div class="intake">
   <%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true %>
   <div class="intake__empty">
-    <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has someone on it and is accepted or on a #{term(:work).downcase}." %>
+    <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has been accepted or declined." %>
   </div>
 </div>

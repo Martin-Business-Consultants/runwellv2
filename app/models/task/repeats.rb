@@ -57,7 +57,7 @@ module Task::Repeats
     def repeat_next!
       following = @repeated_task = Task.create!(title: title, description: description, work: work, client: client, scope_item: scope_item,
         owner: owner, other_owner_ids: other_owners.map(&:id), client_visible: client_visible, due_on: next_due_on,
-        repeat: repeat, source: "app", created_by: Current.user || created_by)
+        repeat: repeat, source: "app", created_by: Current.user || created_by, skips_intake: true)
       update_column(:repeat, nil)
       record_event!("task.repeated", payload: { next_task_id: following.id, due_on: following.due_on&.iso8601, repeat: following.repeat })
     end

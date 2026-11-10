@@ -1,12 +1,13 @@
-# Intake (IntakesController): what came in and hasn't been dealt with. An open task is in it while
-# nobody owns it, or, until someone accepts it, while it's on no piece of work: a client's request
-# (the portal, an email, a call), a task an agent added, a task straight on a client.
+# Intake (IntakesController): what came in and hasn't been decided. A task comes in (intake_at) when
+# it's made without an owner or a piece of work: a client's request (the portal, an email, a call),
+# a task an agent added, a task straight on a client. Not a repeat's next one, nor an import.
 #
-# Two decisions take it out, each a verb that refuses a task that isn't waiting (Task::Refused):
-# accept! (someone owns it: the one given, else whoever accepts; it may be filed on a piece of work
-# later) and decline! (kept, marked done with the reason "Declined", so the client isn't emailed it's
-# done and it doesn't repeat; their portal shows it as Declined). Filing it on a piece of work with
-# someone on it takes it out too.
+# It stays until a decision takes it out, each a verb that refuses a task that isn't waiting
+# (Task::Refused): accept! (someone owns it: the one given, else whoever's on it, else whoever
+# accepts; it may be filed on a piece of work later) and decline! (kept, marked done with the reason
+# "Declined", so the client isn't emailed it's done and it doesn't repeat; their portal shows it as
+# Declined). Assigning or filing it meanwhile doesn't: accepting is the decision. Marked done
+# another way, it's no longer waiting either.
 module Task::Intake
   extend ActiveSupport::Concern
 
@@ -18,8 +19,11 @@ module Task::Intake
     belongs_to :accepted_by, class_name: "User", optional: true
     belongs_to :declined_by, class_name: "User", optional: true
 
-    scope :intake, -> { open.where("tasks.owner_id IS NULL OR (tasks.work_id IS NULL AND tasks.accepted_at IS NULL)") }
+    scope :intake, -> { open.where.not(intake_at: nil).where(accepted_at: nil, declined_at: nil) }
     scope :from_clients, -> { where("tasks.contact_id IS NOT NULL OR COALESCE(tasks.sender_email, '') <> ''") }
+    attr_accessor :skips_intake
+    before_create :come_in, unless: -> { skips_intake || Current.source == "import" }
+
     scope :from_team, -> { made_by_people.where(contact_id: nil).where("COALESCE(tasks.sender_email, '') = ''") }
   end
 
@@ -34,7 +38,7 @@ module Task::Intake
     end
   end
 
-  def intake? = status != "done" && (owner_id.nil? || (work_id.nil? && accepted_at.nil?))
+  def intake? = status != "done" && intake_at.present? && accepted_at.nil? && declined_at.nil?
   def acceptable? = intake?
   def declinable? = intake?
   def declined? = declined_at.present?
@@ -62,4 +66,9 @@ module Task::Intake
       record_event!("task.declined", payload: { note: note.presence&.strip }.compact)
     end
   end
+
+  private
+    def come_in
+      self.intake_at ||= Time.current if owner_id.nil? || work_id.nil?
+    end
 end

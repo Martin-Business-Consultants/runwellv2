@@ -81,19 +81,23 @@ them something else on screen (`term(:work)`, `term(:task)`).
    is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).
    `Event` (append-only, every write of consequence), `Note`
 4. **What came in** — Intake (`/intake`, `IntakesController`, in the nav, `g i`, `list_intake`):
-   every open task nobody owns, or that isn't on a piece of work and nobody has accepted
-   (`Task::Intake`, `intake?`, derived): a client's request (portal, email, phone), a task an agent
-   added, a task straight on a client. Two decisions, on a row, in the side panel's Intake bar or in
-   bulk (`Tasks::AcceptancesController`, `Tasks::DeclinesController`, `Bulk::Tasks::*`; tools
-   `accept_task`, `decline_task`, `bulk_accept_tasks`, `bulk_decline_tasks`; both refuse a task not
-   waiting, `Task::Refused`): `accept!` (someone owns it, the owner picked or whoever accepts;
-   `accepted_at`, `task.accepted`; a client who asked hears it's taken on) and `decline!` (with an optional line
-   saying why, kept as an internal note on it, `note:`; kept,
-   marked done with the reason Declined so nobody is emailed and it doesn't repeat; `declined_at`,
-   `task.declined`; the portal shows it as Declined). Filing it on a piece of work with someone on it
-   takes it out too (the side panel's Work picker, `work_id` on `update_task`; its client follows, a
-   section of other work is dropped, `task.filed`). Its Source column says where each came from (`intake_source_tag`;
-   filtered by `Task.from_source`: clients, agents, team). A request is still a task nobody has
+   every task that came in and hasn't been decided (`Task::Intake`, `intake?`). A task comes in
+   (`intake_at`) when it's made without an owner or a piece of work: a client's request (portal,
+   email, phone), a task an agent added, a task straight on a client; not a repeat's next one
+   (`skips_intake`) nor an import. It stays until a decision, on a row, in the side panel's Intake
+   bar (`intakes/_bar`) or in bulk (`Tasks::AcceptancesController`, `Tasks::DeclinesController`,
+   `Bulk::Tasks::*`; tools `accept_task`, `decline_task`, `bulk_accept_tasks`, `bulk_decline_tasks`;
+   both refuse a task not waiting, `Task::Refused`): `accept!` (someone owns it: the owner picked,
+   else whoever's on it, else whoever accepts; `accepted_at`, `task.accepted`; a client who asked
+   hears it's taken on) and `decline!` (with an optional line saying why, kept as an internal note
+   on it, `note:`; kept, marked done with the reason Declined so nobody is emailed and it doesn't
+   repeat; `declined_at`, `task.declined`; the portal shows it as Declined). Assigning or filing it
+   meanwhile doesn't take it out (the side panel's Work picker, `work_id` on `update_task`; its
+   client follows, a section of other work is dropped, `task.filed`); decided in the side panel,
+   the panel closes. Every answer about a task carries `intake_streams` (its Intake row redrawn or
+   removed, the panel's Intake bar redrawn), so Intake never needs a reload. Its Source column says
+   where each came from (`intake_source_tag`; filtered by `Task.from_source`: clients, agents,
+   team). A request is still a task nobody has
    taken on or started (`Task.requests`, what notifies and what the portal calls Waiting;
    `/requests` redirects to Intake). A task keeps who asked
    (`contact`, or `sender_name` / `sender_email`) and how (`source`: app, portal, email, phone…).
