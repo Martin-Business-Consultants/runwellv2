@@ -5,7 +5,7 @@
 # Contact is that slice of users (its default scope), so Contact, contact_id and the contact tools
 # read as before. Archiving a contact deactivates the user.
 class Contact < User
-  include Searchable
+  include Searchable, PortalScope
 
   default_scope { where(role: User::CLIENT) }
 

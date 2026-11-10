@@ -7,7 +7,7 @@ class Portal::ScopeItems::PrioritiesController < Portal::BaseController
     params: { before: "integer" }
 
   def create
-    item = ScopeItem.where(work: client.works).find(params[:scope_item_id])
+    item = ScopeItem.where(work: current_contact.portal_works).find(params[:scope_item_id])
     before = item.work.scope_items.find_by(id: params[:before]) if params[:before].present?
     # The work's tasks, grouped by section in this order, follow it.
     prioritize(item, before, refresh: true)

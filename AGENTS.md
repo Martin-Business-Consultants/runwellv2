@@ -788,10 +788,17 @@ and `contact` for a client's person off the same `user_id` (`HeldByPerson`). The
 plugins). Two switches per contact:
 `portal_access` (sign in by emailed link, see the client's shared tasks and documents, send
 requests; Invite to the portal on their page emails what it is with a link good for a week,
-`Contact#invite_to_portal!`, `contact.invited`, and Sign out everywhere ends their sessions) and `can_approve` (may say yes for their company, for a plugin such as Agreements). `Contact#portal?` is checked on every
+`Contact#invite_to_portal!`, `contact.invited`, and Sign out everywhere ends their sessions) and `can_approve` (may say yes for their company, for a plugin such as Agreements or Approvals, which
+puts a shared task to the client for a yes in its side sheet, the `:portal_task` slot). `Contact#portal?` is checked on every
 portal request, so switching access off or archiving a contact signs them out at once. What
 a client sees is decided per record (`client_visible` on tasks and documents); there are no
-client roles. Staff see it for themselves with View as on a contact's page
+client roles. A contact may also be limited to some of the client's work (`portal_limited`,
+`ContactWork`, set in the Portal card on their page or with `set_contact_portal_scope`): they then
+see only those pieces of work, the tasks and files on them, and anything they asked for
+themselves. Every portal page, tool and email reads what its contact sees through
+`Contact::PortalScope` (`portal_works`, `portal_tasks`, `portal_documents`, `sees?`), never
+`client.works` or `client.tasks` directly, and `Notice` tells nobody about what they can't see. A
+new portal read goes through it. Staff see it for themselves with View as on a contact's page
 (`Contacts::PreviewsController`, `contact.previewed`): the portal as that contact, read-only (a
 signed `portal_preview` cookie beside the staff session; `Current.preview_contact`,
 `Portal::BaseController#refuse_writes_while_previewing`), with a bar to stop. A portal controller

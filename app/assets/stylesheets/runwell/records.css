@@ -63,6 +63,9 @@ html[data-sidebar="collapsed"] .record-page__header .sidebar-toggle .icon { tran
 
 /* ======================================================================= 3 Tabs */
 
+/* A contact's Portal card: what they see there, then signing them out. */
+.contact-portal, .contact-portal__scope { display: flex; flex-direction: column; gap: var(--s-3); }
+
 /* The working column's tabs (layouts/shared/_record_tabs) above the tab's cards. */
 .record-tabs { display: flex; flex-direction: column; gap: var(--s-4); }
 .record-tabs__panel { display: flex; flex-direction: column; gap: var(--s-5); }

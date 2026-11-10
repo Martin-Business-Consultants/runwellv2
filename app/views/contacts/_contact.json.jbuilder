@@ -1,3 +1,5 @@
 json.merge! agent_ref(contact)
 json.extract! contact, :name, :title, :email, :phone, :portal_access, :can_approve
 json.can_sign_in contact.portal?
+json.sees contact.portal_scope_label
+json.portal_limited contact.portal_limited?

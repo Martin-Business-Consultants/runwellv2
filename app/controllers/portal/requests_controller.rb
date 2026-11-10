@@ -13,7 +13,7 @@ class Portal::RequestsController < Portal::BaseController
     confirm: "It goes to the team in the person’s name. Show them the subject and details first.", next_tools: %i[portal_requests]
 
   def index
-    asked = client.tasks.client_visible.where("tasks.contact_id IS NOT NULL OR COALESCE(tasks.sender_email, '') != '' OR COALESCE(tasks.sender_name, '') != ''")
+    asked = current_contact.portal_tasks.where("tasks.contact_id IS NOT NULL OR COALESCE(tasks.sender_email, '') != '' OR COALESCE(tasks.sender_name, '') != ''")
     @requests = portal_page(asked.includes(:work).order(created_at: :desc, id: :desc))
   end
 
@@ -42,6 +42,6 @@ class Portal::RequestsController < Portal::BaseController
     def about_work(name = params[:work])
       return if name.blank?
 
-      client.works.open.find_by(ref: name.to_s.upcase) || client.works.open.find_by(title: name.to_s)
+      current_contact.portal_works.open.find_by(ref: name.to_s.upcase) || current_contact.portal_works.open.find_by(title: name.to_s)
     end
 end

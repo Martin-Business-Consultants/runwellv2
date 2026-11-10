@@ -4,6 +4,7 @@ json.me do
   json.email current_contact.email
   json.company client.name
   json.can_approve current_contact.can_approve?
+  json.sees current_contact.portal_scope_label
   json.time_zone Time.zone.name
 end
 json.business Setting.current.brand_name

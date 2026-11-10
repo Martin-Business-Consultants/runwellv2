@@ -13,7 +13,7 @@ class Portal::WorksController < Portal::BaseController
   def index
     # Active work to start (the filter swaps ?state=), with how many each choice holds.
     @state = params[:state].presence_in(STATES) || "active"
-    works = client.works
+    works = current_contact.portal_works
     @counts = { "active" => works.open.count, "closed" => works.closed.count, "all" => works.count }
     works = { "active" => works.open, "closed" => works.closed }.fetch(@state, works)
     @works = works.by_client_priority.ordered.includes(:client).to_a
@@ -21,7 +21,7 @@ class Portal::WorksController < Portal::BaseController
   end
 
   def show
-    @work = client.works.includes(scope_items: :tasks).find_by_ref!(params[:ref])
+    @work = current_contact.portal_works.includes(scope_items: :tasks).find_by_ref!(params[:ref])
     @task_state = Task.state_filter(params[:tasks])
     # One section's tasks (clicked in the sidebar), or all of them.
     @section = @work.scope_items.find { it.id.to_s == params[:section].to_s } if params[:section].present?

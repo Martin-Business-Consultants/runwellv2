@@ -63,6 +63,9 @@
 
   <%= render "custom_fields/values", record: task, client: true %>
 
+  <%# What a plugin adds to a shared task for the client (:portal_task): something to decide or do on it. %>
+  <%= plugin_slots(:portal_task, task: task, contact: current_contact) %>
+
   <% documents = task.documents.client_visible.recent.includes(file_attachment: :blob).to_a %>
   <% if documents.any? %>
     <%= render "portal/works/documents", documents: documents %>

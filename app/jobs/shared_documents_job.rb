@@ -12,8 +12,10 @@ class SharedDocumentsJob < ApplicationJob
     shared = client.client_documents.where(updated_at: STRETCH.ago..).reorder(updated_at: :desc, id: :desc).to_a.reject { it.uploaded_by&.client? }
     return unless shared.first == document
 
-    Notice.contacts("document", client: client, record: document, usual: Notice.reachable_contacts(client)).each do
-      PortalMailer.with(documents: shared, contact: it).documents.deliver_later
+    Notice.contacts("document", client: client, record: document, usual: Notice.reachable_contacts(client)).each do |contact|
+      # Only the files this person sees in the portal (Contact::PortalScope).
+      theirs = shared.select { contact.sees?(it) }
+      PortalMailer.with(documents: theirs, contact: contact).documents.deliver_later if theirs.any?
     end
   end
 end

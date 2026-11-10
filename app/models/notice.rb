@@ -23,7 +23,10 @@ module Notice
     def contacts(kind, client:, record:, usual:)
       return [] unless client
 
+      # Nobody is told about something they can't see in the portal (Contact::PortalScope). Files
+      # go out several at once, so SharedDocumentsJob checks each one per person instead.
       everyone = reachable_contacts(client)
+      everyone = everyone.select { it.sees?(record) } unless record.nil? || record.is_a?(Document)
       Runwell::Plugins.notice_recipients(:client, kind: kind.to_s, client: client, record: record, usual: Array(usual) & everyone, everyone: everyone)
     end
 

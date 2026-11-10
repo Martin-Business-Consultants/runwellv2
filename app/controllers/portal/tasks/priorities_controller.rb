@@ -9,7 +9,7 @@ class Portal::Tasks::PrioritiesController < Portal::BaseController
     params: { before: "integer" }
 
   def create
-    tasks = client.tasks.client_visible
+    tasks = current_contact.portal_tasks
     task = tasks.find(params[:task_id])
     before = tasks.find_by(id: params[:before]) if params[:before].present?
     prioritize(task, before)

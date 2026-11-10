@@ -7,7 +7,7 @@ class Portal::Works::PrioritiesController < Portal::BaseController
     params: { before: "string" }
 
   def create
-    works = client.works
+    works = current_contact.portal_works
     work = works.find_by_ref!(params[:work_ref])
     before = works.find_by(ref: params[:before].to_s.upcase) || works.find_by(title: params[:before]) if params[:before].present?
     prioritize(work, before)

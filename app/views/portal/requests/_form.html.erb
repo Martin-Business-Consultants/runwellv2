@@ -4,7 +4,7 @@
     the form submits inside it: refused, it comes back there; sent, the modal closes over the page
     (Portal::RequestsController). On its own page Cancel goes back to the requests. What's typed
     is kept in the browser until it's sent (the draft controller). %>
-<% works = request_record.client.works.open.by_client_priority.ordered.map { [ it.title, it.ref ] } %>
+<% works = current_contact.portal_works.open.by_client_priority.ordered.map { [ it.title, it.ref ] } %>
 <%= render "layouts/shared/errors", record: request_record %>
 <%= form_with model: request_record, scope: :request, url: portal_requests_path, multipart: true, class: "portal-form",
       data: { controller: "form draft", draft_key_value: "portal:request:#{request_record.client_id}", action: "keydown.esc->form#cancel" } do |form| %>

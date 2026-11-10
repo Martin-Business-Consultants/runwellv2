@@ -21,11 +21,12 @@ class Portal::BaseController < ApplicationController
 
   def current_contact = Current.contact
 
-  # A task shared with this client, opened in the side sheet (?task=): only theirs, only shared.
+  # A task shared with this client, opened in the side sheet (?task=): only theirs, only shared,
+  # only what this contact sees (Contact::PortalScope, as every page here reads).
   def portal_side_panel_task
     return unless current_contact && params[:task].present?
 
-    @portal_side_panel_task ||= client.tasks.client_visible.includes(:work, :scope_item, :contact, :owner, assignments: :user).find_by(id: params[:task])&.tap { mark_discussion_read(it) }
+    @portal_side_panel_task ||= current_contact.portal_tasks.includes(:work, :scope_item, :contact, :owner, assignments: :user).find_by(id: params[:task])&.tap { mark_discussion_read(it) }
   end
 
   # Opening a task reads its discussion (not for staff viewing as them, nor their agent).

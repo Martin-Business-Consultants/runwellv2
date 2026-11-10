@@ -71,6 +71,7 @@ Slots, and the locals each partial gets:
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
 | `:portal_dashboard` | The top of the portal's first page, above the client's work: a dashboard for the client (what's new, what's coming up). The core draws none; each partial is a card or several, laid side by side. `Task.unread_discussion_ids(contact)` gives the shared tasks holding a message the contact hasn't read, `task.client_status` what a client reads for a status, `portal_task_link_to(task)` a link opening it in the portal's side sheet | `client:`, `contact:` | 5.29 |
+| `:portal_task` | A shared task's side sheet in the portal, under its description and above its files and discussion: something for the client to decide or do on it. Redrawn whenever the sheet is (a reply, a live refresh) | `task:`, `contact:` | 5.31 |
 | `:task_notice` | Under a task's title, on its page and in its side panel: a short note (render nothing when there's nothing to say) | `task:` | 5.6 |
 
 **Removed in 3.0:** `:request_aside` and `:commitment_row`, with the `Commitment` and `Request`
@@ -355,7 +356,7 @@ portal; the subject is the client, for their works, or the work, for its section
 its ref stays), `task.created`, `task.status`, `task.repeated` (5.9: a repeating task marked done made
 the next one; payload `next_task_id`, `due_on`, `repeat`), `task.requested` (3.0: a client asked for it, from the portal or by
 email, or someone logged it; the subject is the task), `note.added`, `note.deleted`, `document.added`,
-`contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject), `contact.invited` (5.29: they were emailed an invitation to the portal) and `contact.signed_out` (5.29: staff signed them out of the portal everywhere; payload `sessions`), `client.sunset` (5.2.2: the client was set dormant or former and its open work closed as
+`contact.previewed` (5.1.3: someone on staff viewed the portal as the contact, the subject), `contact.invited` (5.29: they were emailed an invitation to the portal) and `contact.signed_out` (5.29: staff signed them out of the portal everywhere; payload `sessions`), `contact.portal_scope` (5.31: what they see in the portal changed; payload `limited`, and `works`, their refs, when limited), `client.sunset` (5.2.2: the client was set dormant or former and its open work closed as
 cancelled and open tasks marked done; payload `status`, `reason`, `works` (their refs) and `tasks` (how
 many); each piece of work also records `work.closed` with that `reason`, and each task `task.status`
 with a `reason` in its payload).
@@ -436,6 +437,13 @@ Since 5.30, in portal pages and slots: `portal_task_link_to(task) { … }` (a li
 task in the portal's side sheet), `portal_status_tag(task)`, `portal_due(task, prefix:)` (its date,
 marked when late; `task.late?`), `portal_unread_mark(task)`, and the `documents/link` partial
 (`document:`, `meta:`).
+
+Since 5.31 a contact may be limited to some of their client's work (`contact.portal_limited?`,
+set on their page). A portal page or tool reads what its contact sees, never the client's records
+directly: `current_contact.portal_works`, `portal_tasks` (shared tasks, as a relation) and
+`portal_documents`, and `contact.sees?(record)` for one record (a piece of work, a section, a
+task, a document, a note). `Notice` already leaves out anyone who can't see what a notice is about;
+a plugin emailing a client's people itself checks `sees?` too.
 
 ### Who hears about what
 

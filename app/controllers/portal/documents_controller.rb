@@ -12,7 +12,7 @@ class Portal::DocumentsController < Portal::BaseController
       return redirect_to(url)
     end
 
-    documents = client.client_documents
+    documents = current_contact.portal_documents
     if params[:q].present?
       named = ActiveStorage::Attachment.where(record_type: "Document", name: "file").joins(:blob)
         .where("lower(active_storage_blobs.filename) LIKE ?", "%#{Document.sanitize_sql_like(params[:q].to_s.downcase.strip)}%")

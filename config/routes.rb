@@ -133,6 +133,7 @@ Rails.application.routes.draw do
       resource :preview, only: %i[create destroy], module: :contacts
       resource :portal_invitation, only: :create, module: :contacts
       resource :portal_sessions, only: :destroy, module: :contacts
+      resource :portal_scope, only: :update, module: :contacts
     end
     resources :tasks, only: :create
   end

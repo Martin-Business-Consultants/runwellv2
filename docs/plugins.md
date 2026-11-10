@@ -255,6 +255,17 @@ and kind of notice, always, as usual or never (`ClientDashboard::Rule`), which i
 with through `Runwell::Plugins.notices`: everyone set to always, plus the usual ones not set to
 never.
 
+`runwell-approvals` (Approvals, 5.31) is the reference for something a client decides in the
+portal and for a state machine of a plugin's own. `Approvals::Request` is one ask for a client's
+approval of a shared task (pending, then approved or changes requested by a contact who
+`can_approve?` and sees the task, or withdrawn by the team); its verbs (`ask!`, `decide!`,
+`withdraw!`) refuse what the state doesn't allow (`Approvals::Request::Refused`) and record
+`task.approval_requested`, `task.approved`, `task.changes_requested` and `task.approval_withdrawn`
+on the task. The client answers in the task's side sheet (the `:portal_task` slot), and the answer
+is also a note on the task's discussion in their name, so the core tells whoever is on the task
+with no notifier of the plugin's own. Its email to approvers goes only to people `Notice` says can
+be reached.
+
 `runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
 (`Meetings::Priority`: a task, done when the task is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its

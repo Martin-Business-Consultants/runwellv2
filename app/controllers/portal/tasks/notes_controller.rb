@@ -12,7 +12,7 @@ class Portal::Tasks::NotesController < Portal::BaseController
     confirm: "It goes to the team in the person’s name, on the task. Show them what you’ll send first."
 
   def create
-    task = client.tasks.client_visible.find(params[:task_id])
+    task = current_contact.portal_tasks.find(params[:task_id])
     sent = params.expect(note: [ :body, files: [] ])
     files = Array(sent[:files]).select { it.respond_to?(:original_filename) }
     # Files alone are a message too: it says what was sent.

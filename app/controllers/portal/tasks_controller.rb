@@ -8,7 +8,7 @@ class Portal::TasksController < Portal::BaseController
 
   def index
     @state = Task.state_filter(params[:status])
-    shared = Task.client_visible.where(client: client)
+    shared = current_contact.portal_tasks
     @counts = { "open" => shared.open.count, "done" => shared.where(status: "done").count, "all" => shared.count }
     shared = shared.where("lower(tasks.title) LIKE ?", "%#{Task.sanitize_sql_like(params[:q].to_s.downcase.strip)}%") if params[:q].present?
     @tasks = portal_page(Task.state_scope(shared, @state).includes(:work, :scope_item).by_client_priority.order(:due_on, :position, :id))
@@ -16,7 +16,7 @@ class Portal::TasksController < Portal::BaseController
 
   # For their agent, the task whole; a person opens it in the side sheet, over the list.
   def show
-    @task = client.tasks.client_visible.includes(:work, :scope_item, :contact, :owner, assignments: :user).find(params[:id])
+    @task = current_contact.portal_tasks.includes(:work, :scope_item, :contact, :owner, assignments: :user).find(params[:id])
     respond_to do |format|
       format.json
       format.html { redirect_to portal_tasks_path(task: @task.id, status: "all") }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_160000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -170,6 +170,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_140000) do
     t.boolean "internal", default: false, null: false
     t.boolean "ai_excluded", default: false, null: false
     t.index ["name"], name: "index_clients_on_name", unique: true
+  end
+
+  create_table "contact_works", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "work_id", null: false
+    t.index ["user_id", "work_id"], name: "index_contact_works_on_user_id_and_work_id", unique: true
+    t.index ["user_id"], name: "index_contact_works_on_user_id"
+    t.index ["work_id"], name: "index_contact_works_on_work_id"
   end
 
   create_table "contacts", force: :cascade do |t|
@@ -557,6 +565,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_140000) do
     t.boolean "can_approve", default: false, null: false
     t.integer "legacy_contact_id"
     t.boolean "portal_emails", default: true, null: false
+    t.boolean "portal_limited", default: false, null: false
     t.index ["agent_owner_id"], name: "index_users_on_agent_owner_id", unique: true
     t.index ["client_id"], name: "index_users_on_client_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
@@ -652,6 +661,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_140000) do
   add_foreign_key "assignments", "tasks", on_delete: :cascade
   add_foreign_key "assignments", "users"
   add_foreign_key "assignments", "users", column: "assigner_id", on_delete: :nullify
+  add_foreign_key "contact_works", "users", on_delete: :cascade
+  add_foreign_key "contact_works", "works", on_delete: :cascade
   add_foreign_key "contacts", "clients"
   add_foreign_key "custom_values", "custom_fields"
   add_foreign_key "discussion_reads", "tasks", on_delete: :cascade

@@ -15,10 +15,10 @@ module Task::Discussion
   end
 
   class_methods do
-    # The ids of a client's shared tasks holding something this contact hasn't read: a note shared
+    # The ids of the shared tasks this contact sees that hold something they haven't read: a note shared
     # on it by anyone else, since they last opened it.
     def unread_discussion_ids(contact)
-      Note.client_visible.where(subject_type: "Task", subject_id: client_visible.where(client_id: contact.client_id).select(:id))
+      Note.client_visible.where(subject_type: "Task", subject_id: contact.portal_tasks.select(:id))
         .where("notes.author_id IS NULL OR notes.author_id != ?", contact.id)
         .joins("LEFT JOIN discussion_reads ON discussion_reads.task_id = notes.subject_id AND discussion_reads.user_id = #{contact.id.to_i}")
         .where("discussion_reads.read_at IS NULL OR notes.occurred_at > discussion_reads.read_at")
