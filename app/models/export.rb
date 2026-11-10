@@ -24,7 +24,7 @@ class Export < ApplicationRecord
     searchable_documents active_storage_variant_records action_mailbox_inbound_emails plugin_changes upgrades exports
     pending_removals push_subscriptions
   ].freeze
-  SECRET_COLUMNS = /password|secret|token|_digest\z|\Aotp_|credential|api_key|private_key|recovery/i
+  SECRET_COLUMNS = /password|secret|token|_digest\z|\Aotp_|credential|api_key|private_key|remote_key|recovery/i
 
   belongs_to :user
   has_one_attached :archive

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -665,6 +665,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_200000) do
     t.index ["ref"], name: "index_works_on_ref", unique: true
   end
 
+  create_table "workspace_links", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "url", null: false
+    t.string "name"
+    t.string "icon_url"
+    t.string "color"
+    t.integer "position", default: 0, null: false
+    t.text "remote_key"
+    t.string "key_digest"
+    t.string "nonce_digest"
+    t.datetime "nonce_expires_at"
+    t.datetime "linked_at"
+    t.integer "unread_count"
+    t.integer "intake_count"
+    t.datetime "badges_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key_digest"], name: "index_workspace_links_on_key_digest", unique: true
+    t.index ["nonce_digest"], name: "index_workspace_links_on_nonce_digest", unique: true
+    t.index ["user_id", "url"], name: "index_workspace_links_on_user_id_and_url", unique: true
+    t.index ["user_id"], name: "index_workspace_links_on_user_id"
+  end
+
   add_foreign_key "access_tokens", "contacts"
   add_foreign_key "access_tokens", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -722,6 +745,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_200000) do
   add_foreign_key "webhook_endpoints", "users", column: "created_by_id"
   add_foreign_key "works", "clients"
   add_foreign_key "works", "users", column: "created_by_id"
+  add_foreign_key "workspace_links", "users"
 
   # Virtual tables defined in this database.
   # Note that virtual tables may not work with other database engines. Be careful if changing database.

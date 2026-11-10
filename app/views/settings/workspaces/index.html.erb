@@ -1,0 +1,64 @@
+<% @page_title = "Workspaces" %>
+<%= render "settings/header", current: :workspaces %>
+
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Workspaces</h2>
+      <p class="settings-section__description">
+        Other Runwell installs you work in, on a rail left of the nav: each one’s icon, your unread notifications there, a dot when something’s waiting in its Intake, and <kbd>w</kbd> then a number to switch.
+        Adding one takes you there to confirm, and this workspace joins its rail too. You still sign in to each on its own; the link only lets each show the other’s counts.
+      </p>
+    </header>
+
+    <% if @links.any? %>
+      <ul class="settings-workspaces">
+        <% @links.each do |link| %>
+          <%# herb:key link.id %>
+          <li class="list-row" id="<%= dom_id(link) %>">
+            <span class="list-row__media workspace-rail__item workspace-rail__item--still">
+              <% if link.icon_url.present? %>
+                <%= image_tag link.icon_url, alt: "", class: "workspace-rail__icon" %>
+              <% else %>
+                <span class="workspace-rail__initials"><%= link.initials %></span>
+              <% end %>
+            </span>
+            <div class="list-row__content">
+              <p class="list-row__title"><%= link.label %></p>
+              <p class="list-row__desc">
+                <%= link.url %> ·
+                <% if link.linked? %>
+                  linked <%= time_ago_in_words(link.linked_at) %> ago
+                <% else %>
+                  waiting for you to confirm there
+                <% end %>
+              </p>
+            </div>
+            <div class="list-row__actions">
+              <% unless link.linked? %>
+                <%= button_to "Try again", settings_workspaces_path, params: { workspace: { url: link.url } }, class: "btn btn--secondary btn--sm", data: { turbo: false } %>
+              <% end %>
+              <%= render "layouts/shared/delete_dialog", name: link.label, path: settings_workspace_path(link),
+                    message: "It leaves your rail here, and this workspace leaves its rail there." %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <%= render "layouts/shared/empty", text: "No other workspaces yet. Add the address of another Runwell you work in." %>
+    <% end %>
+  </section>
+
+  <section class="settings-section">
+    <%= form_with url: settings_workspaces_path, scope: :workspace, class: "settings-workspaces__add", data: { turbo: false } do |form| %>
+      <div class="field">
+        <%= form.label :url, "Add a workspace", class: "field__label" %>
+        <div class="field-row">
+          <%= form.text_field :url, placeholder: "crm.example.com", required: true, autocomplete: "off", inputmode: "url" %>
+          <%= form.submit "Add", class: "btn btn--primary" %>
+        </div>
+        <p class="field__hint">You’ll go there to sign in if you need to, then confirm. Both need Runwell 5.40 or later.</p>
+      </div>
+    <% end %>
+  </section>
+</div>

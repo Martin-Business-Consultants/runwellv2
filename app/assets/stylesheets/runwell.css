@@ -194,3 +194,31 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
   /* Only the icon shows; the label stays for screen readers. */
   .portal-topbar__new-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
+
+/* ======================================================================= Workspace rail */
+/* Other Runwell installs (layouts/shared/_workspace_rail), a column left of the nav once someone
+/* has linked one. It stays when the nav collapses, and slides in with it on a phone. */
+:root { --rail-width: 3.5rem; }
+.app:has(> .workspace-rail) { grid-template-columns: var(--rail-width) var(--sidebar-width) minmax(0, 1fr); }
+:root[data-sidenav="collapsed"] .app:has(> .workspace-rail) { grid-template-columns: var(--rail-width) 0 minmax(0, 1fr); }
+.app > .workspace-rail { grid-column: 1; grid-row: 1; }
+.app:has(> .workspace-rail) > .sidebar { grid-column: 2; }
+.workspace-rail { display: block; position: sticky; top: 0; height: 100vh; overflow: hidden auto; border-right: 1px solid var(--line); }
+.workspace-rail__list { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); padding: var(--s-3) 0; }
+.workspace-rail__item { position: relative; display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius); outline-offset: 2px; opacity: .72; transition: opacity .12s; }
+.workspace-rail__item:hover, .workspace-rail__item[aria-current], .workspace-rail__item--still { opacity: 1; }
+.workspace-rail__item[aria-current]::before { content: ""; position: absolute; left: calc(-1 * var(--s-2) - 1px); top: 20%; bottom: 20%; width: 3px; border-radius: var(--radius-pill, 99rem); background: var(--accent); }
+.workspace-rail__icon { width: 100%; height: 100%; border-radius: var(--radius); object-fit: cover; }
+.workspace-rail__initials { display: grid; place-items: center; width: 100%; height: 100%; border-radius: var(--radius); background: var(--brand-tint-strong); color: var(--text); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.workspace-rail__count { position: absolute; top: -.35rem; right: -.45rem; min-width: 1.1rem; height: 1.1rem; padding: 0 .25rem; border: 2px solid var(--page); border-radius: var(--radius-pill, 99rem); background: var(--danger); color: white; font-size: .625rem; font-weight: var(--weight-strong); line-height: .8rem; text-align: center; }
+.workspace-rail__dot { position: absolute; top: -.2rem; right: -.2rem; width: .65rem; height: .65rem; border: 2px solid var(--page); border-radius: 50%; background: var(--accent); }
+.workspace-rail__add { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border: 1px dashed var(--line-strong); border-radius: var(--radius); color: var(--text-muted); }
+.workspace-rail__add:hover { background: var(--hover); color: var(--text); }
+.settings-workspaces { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.settings-workspaces .workspace-rail__item { flex: none; }
+@media (max-width: 860px) {
+  .app:has(> .workspace-rail), :root[data-sidenav="collapsed"] .app:has(> .workspace-rail) { grid-template-columns: 1fr; }
+  .workspace-rail { position: fixed; inset: 0 auto 0 0; z-index: 31; width: var(--rail-width); background: var(--page); transform: translateX(-100%); transition: transform .17s var(--ease); }
+  .sidebar-open .workspace-rail { transform: none; }
+  .app:has(> .workspace-rail) .sidebar { left: var(--rail-width); }
+}

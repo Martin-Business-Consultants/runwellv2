@@ -1,0 +1,38 @@
+<%# locals: (links:, src: nil) %>
+<%# The workspace rail, at the far left of the nav (WorkspaceLink): this install, then each other
+    Runwell install the person linked, by icon (initials without one), each with their unread
+    notifications there (a count) or, with none, a dot when something's waiting in its Intake; then
+    + to add one. w 1, w 2… go to each. The layout draws it from what was last heard; the frame then
+    asks every install for its counts (Workspaces::RailsController) and again every two minutes, and
+    a visit keeps it (data-turbo-permanent). Links leave the frame: each install is a page of its own. %>
+<% here = WorkspaceLink.identity(request.base_url) %>
+<turbo-frame id="workspace_rail" class="workspace-rail" target="_top" data-turbo-permanent <% if src %>src="<%= src %>" data-reloads-every="120"<% end %>>
+  <nav class="workspace-rail__list" aria-label="Workspaces">
+    <a href="<%= root_path %>" class="workspace-rail__item" aria-current="page" title="<%= here[:name] %> (here)" data-keys="w 1">
+      <%= image_tag here[:icon_url], alt: "", class: "workspace-rail__icon" %>
+      <span class="visually-hidden"><%= here[:name] %>, this workspace</span>
+    </a>
+    <% links.each_with_index do |link, index| %>
+      <%# herb:key link.id %>
+      <% counts = [ (pluralize(link.unread_count, "unread") if link.unread_count.to_i.positive?), ("#{link.intake_count} waiting in Intake" if link.intake_count.to_i.positive?) ].compact %>
+      <% title = ([ link.label ] + counts).join(" · ") %>
+      <a href="<%= link.url %>" class="workspace-rail__item" title="<%= title %>" <% if index < 8 %>data-keys="w <%= index + 2 %>"<% end %> data-turbo="false">
+        <% if link.icon_url.present? %>
+          <%= image_tag link.icon_url, alt: "", class: "workspace-rail__icon", loading: "lazy" %>
+        <% else %>
+          <span class="workspace-rail__initials"><%= link.initials %></span>
+        <% end %>
+        <% if link.unread_count.to_i.positive? %>
+          <span class="workspace-rail__count"><%= link.unread_count > 99 ? "99+" : link.unread_count %></span>
+        <% elsif link.intake_count.to_i.positive? %>
+          <span class="workspace-rail__dot"></span>
+        <% end %>
+        <span class="visually-hidden"><%= title %></span>
+      </a>
+    <% end %>
+    <%= link_to settings_workspaces_path, class: "workspace-rail__add", title: "Add a workspace" do %>
+      <%= icon_tag "add" %>
+      <span class="visually-hidden">Add a workspace</span>
+    <% end %>
+  </nav>
+</turbo-frame>
