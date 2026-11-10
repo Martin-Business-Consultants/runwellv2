@@ -69,8 +69,8 @@ class Client < ApplicationRecord
   ActiveSupport.run_load_hooks(:runwell_client, self)
 
   private
-    # Rows from before contacts were users and requests were tasks (the contacts, requests and
-    # commitments tables, and what pointed at those contacts) still name this client: their foreign
+    # Rows from before contacts were users (the contacts table, and what pointed at those
+    # contacts) still name this client: their foreign
     # keys would refuse deleting it, so they go first. Nothing reads them.
     def clear_legacy_rows!
       db = self.class.connection
@@ -84,13 +84,8 @@ class Client < ApplicationRecord
           %w[portal_sessions approval_links approvals].each do |table|
             db.execute("DELETE FROM #{table} WHERE contact_id IN (#{list})") if db.table_exists?(table)
           end
-          %w[requests commitments].each do |table|
-            db.execute("UPDATE #{table} SET contact_id = NULL WHERE contact_id IN (#{list})") if db.table_exists?(table)
-          end
         end
       end
-      db.execute("DELETE FROM requests WHERE client_id = #{id.to_i}") if db.table_exists?(:requests)
-      db.execute("DELETE FROM commitments WHERE client_id = #{id.to_i}") if db.table_exists?(:commitments)
       db.execute("DELETE FROM contacts WHERE client_id = #{id.to_i}") if db.table_exists?(:contacts)
     end
 

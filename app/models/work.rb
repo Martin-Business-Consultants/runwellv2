@@ -188,8 +188,8 @@ class Work < ApplicationRecord
   private
     def live_streams = [ self, :works, client ]
 
-    # Rows in the tables left unread since 3.0 (commitments, and agreement versions with their
-    # approvals and links, from before Agreements was a plugin) that still point at this work by
+    # Rows in the tables left unread since 3.0 (agreement versions with their approvals and links,
+    # from before Agreements was a plugin) that still point at this work by
     # engagement_id: their foreign keys would refuse erasing it, so they go first. Nothing reads them.
     def clear_legacy_rows!
       db = self.class.connection
@@ -204,7 +204,6 @@ class Work < ApplicationRecord
           db.execute("DELETE FROM agreement_versions WHERE id IN (#{list})")
         end
       end
-      db.execute("DELETE FROM commitments WHERE engagement_id = #{id.to_i}") if db.table_exists?(:commitments)
     end
 
     def record_retype

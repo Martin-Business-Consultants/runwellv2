@@ -20,7 +20,7 @@ class Export < ApplicationRecord
   KEEP_FOR = 7.days
   SKIPPED_TABLES = %w[
     schema_migrations ar_internal_metadata sessions access_tokens oauth_clients oauth_grants portal_sessions
-    approval_links invitations identities sign_in_providers agent_calls agent_idempotency_keys
+    approval_links invitations agent_calls agent_idempotency_keys
     searchable_documents active_storage_variant_records action_mailbox_inbound_emails plugin_changes upgrades exports
   ].freeze
   SECRET_COLUMNS = /password|secret|token|_digest\z|\Aotp_|credential|api_key|private_key|recovery/i

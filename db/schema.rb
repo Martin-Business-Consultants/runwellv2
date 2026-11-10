@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_090000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -172,26 +172,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.index ["name"], name: "index_clients_on_name", unique: true
   end
 
-  create_table "commitments", force: :cascade do |t|
-    t.integer "client_id", null: false
-    t.integer "engagement_id"
-    t.string "description", null: false
-    t.string "owner_kind", default: "us", null: false
-    t.integer "user_id"
-    t.integer "contact_id"
-    t.date "due_on", null: false
-    t.string "resolution"
-    t.datetime "resolved_at"
-    t.text "resolution_note"
-    t.string "source", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_commitments_on_client_id"
-    t.index ["contact_id"], name: "index_commitments_on_contact_id"
-    t.index ["engagement_id"], name: "index_commitments_on_engagement_id"
-    t.index ["user_id"], name: "index_commitments_on_user_id"
-  end
-
   create_table "contacts", force: :cascade do |t|
     t.integer "client_id", null: false
     t.string "name", null: false
@@ -273,18 +253,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.datetime "updated_at", null: false
     t.string "kind", default: "data", null: false
     t.index ["user_id"], name: "index_exports_on_user_id"
-  end
-
-  create_table "identities", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "provider", null: false
-    t.string "uid", null: false
-    t.string "email"
-    t.datetime "last_used_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
-    t.index ["user_id"], name: "index_identities_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -396,47 +364,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.index ["contact_id"], name: "index_portal_sessions_on_contact_id"
   end
 
-  create_table "questions", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.text "text", null: false
-    t.json "choices", default: [], null: false
-    t.string "subject_type"
-    t.bigint "subject_id"
-    t.text "context"
-    t.string "asked_by", null: false
-    t.string "source", null: false
-    t.text "answer"
-    t.datetime "answered_at"
-    t.datetime "dismissed_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "answered_at", "dismissed_at"], name: "index_questions_on_user_id_and_answered_at_and_dismissed_at"
-    t.index ["user_id"], name: "index_questions_on_user_id"
-  end
-
-  create_table "requests", force: :cascade do |t|
-    t.integer "client_id"
-    t.integer "contact_id"
-    t.string "sender_name"
-    t.string "sender_email"
-    t.string "subject", null: false
-    t.text "body"
-    t.string "source", null: false
-    t.string "status", default: "open", null: false
-    t.string "promoted_type"
-    t.bigint "promoted_id"
-    t.string "dismissed_reason"
-    t.datetime "received_at", null: false
-    t.integer "triaged_by_id"
-    t.datetime "triaged_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_requests_on_client_id"
-    t.index ["contact_id"], name: "index_requests_on_contact_id"
-    t.index ["status"], name: "index_requests_on_status"
-    t.index ["triaged_by_id"], name: "index_requests_on_triaged_by_id"
-  end
-
   create_table "scope_items", force: :cascade do |t|
     t.integer "agreement_version_id"
     t.string "description", null: false
@@ -522,19 +449,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.string "hoster_token"
   end
 
-  create_table "sign_in_providers", force: :cascade do |t|
-    t.string "key", null: false
-    t.string "client_id"
-    t.string "client_secret"
-    t.string "tenant_id"
-    t.boolean "enabled", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "issuer"
-    t.string "label"
-    t.index ["key"], name: "index_sign_in_providers_on_key", unique: true
-  end
-
   create_table "tasks", force: :cascade do |t|
     t.integer "work_id"
     t.integer "scope_item_id"
@@ -568,17 +482,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
   end
 
   create_table "upgrades", force: :cascade do |t|
-    t.datetime "created_at", null: false
+    t.integer "requested_by_id", null: false
+    t.string "from_version", null: false
+    t.string "to_version", null: false
+    t.string "via", null: false
+    t.string "status", default: "running", null: false
     t.string "external_id"
     t.string "external_url"
-    t.datetime "finished_at"
-    t.string "from_version", null: false
     t.text "message"
-    t.integer "requested_by_id", null: false
-    t.string "status", default: "running", null: false
-    t.string "to_version", null: false
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "via", null: false
     t.index ["requested_by_id"], name: "index_upgrades_on_requested_by_id"
     t.index ["status"], name: "index_upgrades_on_status"
   end
@@ -589,7 +503,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name", default: "", null: false
-    t.json "nav_plugins"
     t.string "role", default: "member", null: false
     t.datetime "deactivated_at"
     t.integer "agent_owner_id"
@@ -600,6 +513,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.json "otp_recovery_codes"
     t.boolean "passwordless", default: false, null: false
     t.datetime "link_signed_in_at"
+    t.json "nav_plugins"
     t.integer "client_id"
     t.string "title"
     t.string "phone"
@@ -701,16 +615,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
   add_foreign_key "assignments", "tasks", on_delete: :cascade
   add_foreign_key "assignments", "users"
   add_foreign_key "assignments", "users", column: "assigner_id", on_delete: :nullify
-  add_foreign_key "commitments", "clients"
-  add_foreign_key "commitments", "contacts"
-  add_foreign_key "commitments", "users"
-  add_foreign_key "commitments", "works", column: "engagement_id"
   add_foreign_key "contacts", "clients"
   add_foreign_key "custom_values", "custom_fields"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
   add_foreign_key "events", "users", column: "actor_user_id"
   add_foreign_key "exports", "users"
-  add_foreign_key "identities", "users"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "mentions", "users", column: "mentionee_id"
@@ -723,10 +632,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
   add_foreign_key "oauth_grants", "users"
   add_foreign_key "plugin_changes", "users", column: "requested_by_id"
   add_foreign_key "portal_sessions", "contacts"
-  add_foreign_key "questions", "users"
-  add_foreign_key "requests", "clients"
-  add_foreign_key "requests", "contacts"
-  add_foreign_key "requests", "users", column: "triaged_by_id"
   add_foreign_key "scope_items", "agreement_versions"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "scope_items"

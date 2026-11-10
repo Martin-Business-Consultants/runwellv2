@@ -96,9 +96,12 @@ A piece of work ends closed, as completed (delivered) or cancelled (`close_outco
 the reason in its history, and the client records `client.sunset`; setting it active again reopens
 nothing.
 
-Commitments and the `Request` model were folded into tasks in 3.0, and `Question` removed. Their
-tables (`commitments`, `requests`, `questions`) are left, unread, for a later release to drop; the 3.0 migrations moved their rows and
-history onto tasks (or, for a client's promise, its work or client).
+Commitments and the `Request` model were folded into tasks in 3.0, and `Question` removed; the 3.0
+migrations moved their rows and history onto tasks (or, for a client's promise, its work or client).
+Their tables, with the old sign-in tables (`identities`, `sign_in_providers`), were dropped in 5.17.
+The `contacts` and `portal_sessions` tables from before contacts were users stay, unread
+(`access_tokens`, `oauth_grants` and the agreement tables still name them by foreign key);
+`Client#clear_legacy_rows!` clears a client's before it's deleted.
 
 Agreements left the core in 3.0 for the Agreements plugin. Their tables (`agreement_versions`,
 `approvals`, `approval_links`, and `scope_items.agreement_version_id`, `price_cents`,
