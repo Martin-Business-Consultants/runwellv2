@@ -389,13 +389,15 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 
 /* The scheme's colour (Settings > Appearance, --accent) carries through what's chosen, current or
 /* under the keys: a tint made from it (in any scheme, light or dark), and the colour itself on the
-/* icon of what's highlighted, on checkboxes and on selected text. Focus rings already take it. */
+/* icon of what's highlighted, on checkboxes and on selected text. Focus rings already take it.
+/* Mixed in OKLab, as every tint here is: in OKLCH white, greys and transparent carry a hue of 0
+/* (red), and the mix swung round the wheel toward it (indigo came out pink, navy brown). */
 :root {
-  --brand-tint: color-mix(in oklch, var(--accent) 12%, var(--panel));
-  --brand-tint-strong: color-mix(in oklch, var(--accent) 20%, var(--panel));
+  --brand-tint: color-mix(in oklab, var(--accent) 12%, var(--panel));
+  --brand-tint-strong: color-mix(in oklab, var(--accent) 20%, var(--panel));
 }
 input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
-::selection { background: color-mix(in oklch, var(--accent) 28%, transparent); }
+::selection { background: color-mix(in oklab, var(--accent) 28%, transparent); }
 .popup .popup__btn:is(:hover, :focus-visible), .popup__item[aria-selected] { background: var(--brand-tint); }
 .popup .popup__btn:is(:hover, :focus-visible) .icon:not(.checked) { color: var(--accent); }
 .popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--accent); }

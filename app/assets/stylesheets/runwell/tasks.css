@@ -185,9 +185,9 @@ html[data-theme="dark"] .card-columns .cards { --lane: var(--page); }
 .cards__list:has(.card) .cards__blank { display: none; }
 .card-columns .cards__blank { padding: var(--s-5) var(--s-4); font-size: var(--text-meta); }
 .card-columns .cards__blank--drag {
-  border-color: color-mix(in oklch, var(--lane-color, var(--text-faint)) 30%, transparent);
-  background: color-mix(in oklch, var(--lane-color, var(--text-faint)) 5%, transparent);
-  color: color-mix(in oklch, var(--lane-color, var(--text-faint)) 75%, var(--text));
+  border-color: color-mix(in oklab, var(--lane-color, var(--text-faint)) 30%, transparent);
+  background: color-mix(in oklab, var(--lane-color, var(--text-faint)) 5%, transparent);
+  color: color-mix(in oklab, var(--lane-color, var(--text-faint)) 75%, var(--text));
 }
 .cards--in-progress { --lane-color: var(--task-in-progress); }
 .cards--in-review { --lane-color: var(--task-in-review); }
@@ -198,7 +198,7 @@ html[data-theme="dark"] .card-columns .cards { --lane: var(--page); }
 /* Dragging: the lane it would land in, a faint accent wash inside a dashed ring (on the lane's
 /* inner container, so its rounded corners show). */
 .card-columns .drag-and-drop__hover-container .cards__transition-container {
-  background: color-mix(in oklch, var(--accent) 6%, transparent);
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
   outline: 2px dashed var(--text-faint); outline-offset: -1px; transition: background-color 200ms;
 }
 
@@ -248,7 +248,7 @@ html[data-theme="dark"] .card-columns .cards { --lane: var(--page); }
 /* task list's checkbox, and the title underlines under the pointer. */
 .task-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
 .task-item .record-list__main:hover .record-list__title {
-  text-decoration: underline; text-decoration-color: color-mix(in oklch, currentColor 40%, transparent); text-underline-offset: 4px;
+  text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 40%, transparent); text-underline-offset: 4px;
 }
 
 /* A piece of work's work (tasks/_section), grouped by scope item: the groups sit close, a rule

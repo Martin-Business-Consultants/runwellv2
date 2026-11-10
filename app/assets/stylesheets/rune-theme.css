@@ -11,7 +11,7 @@
 :root {
   --page: oklch(var(--lch-ink-lightest));
   --panel: oklch(var(--lch-canvas));
-  --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 70%, oklch(var(--lch-canvas)));
+  --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 70%, oklch(var(--lch-canvas)));
   --layer-2: oklch(var(--lch-ink-lightest));
   --layer-3: oklch(var(--lch-ink-lighter));
   --text: oklch(var(--lch-ink-darkest));
@@ -19,9 +19,9 @@
   --text-faint: oklch(var(--lch-ink-medium));
   --line: oklch(var(--lch-ink-lighter));
   --line-strong: oklch(var(--lch-ink-light));
-  --hover: color-mix(in oklch, oklch(var(--lch-ink-lighter)) 55%, transparent);
+  --hover: color-mix(in oklab, oklch(var(--lch-ink-lighter)) 55%, transparent);
   --accent: oklch(var(--lch-accent));
-  --accent-hover: color-mix(in oklch, oklch(var(--lch-accent)) 85%, oklch(var(--lch-ink-darkest)));
+  --accent-hover: color-mix(in oklab, oklch(var(--lch-accent)) 85%, oklch(var(--lch-ink-darkest)));
   --accent-ink: oklch(var(--lch-ink-inverted));
   --accent-soft: oklch(var(--lch-accent-lightest));
   --attention: oklch(var(--lch-yellow-dark));
@@ -32,7 +32,7 @@
 html[data-theme="dark"] {
   --page: oklch(var(--lch-canvas) / 100%);
   --panel: oklch(var(--lch-ink-lightest));
-  --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+  --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
   --layer-2: oklch(var(--lch-ink-lighter));
   --layer-3: oklch(var(--lch-ink-light));
   --line: oklch(var(--lch-white) / 9%);
@@ -47,7 +47,7 @@ html[data-theme="dark"] {
   html:not([data-theme]) {
     --page: oklch(var(--lch-canvas) / 100%);
     --panel: oklch(var(--lch-ink-lightest));
-    --layer-1: color-mix(in oklch, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+    --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
     --layer-2: oklch(var(--lch-ink-lighter));
     --layer-3: oklch(var(--lch-ink-light));
     --line: oklch(var(--lch-white) / 9%);
