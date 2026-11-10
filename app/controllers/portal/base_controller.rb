@@ -87,7 +87,12 @@ class Portal::BaseController < ApplicationController
   def refuse_writes_while_previewing
     return unless Current.previewing? && !request.get? && !request.head?
 
-    redirect_back fallback_location: portal_root_path, alert: "You’re viewing as #{current_contact.name}: nothing is sent or changed."
+    message = "You’re viewing as #{current_contact.name}: nothing is sent or changed. To send it for real, sign in as them with a portal link."
+    # From a modal, an inline form or a drag (a stream request), the refusal answers in place: a
+    # redirect would land inside the frame, and the form would close as if it had been sent.
+    return render(turbo_stream: turbo_stream_flash(alert: message), status: :forbidden) if request.format.turbo_stream?
+
+    redirect_back fallback_location: portal_root_path, alert: message
   end
 
   def require_contact_token
