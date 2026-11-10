@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { post } from "@rails/request.js"
 import { nextFrame } from "helpers/timing_helpers"
+import { prefetchLink } from "helpers/page_prefetch"
 
 // Every key the app answers to, vim style, in one place (on <body>). Letters act outside
 // inputs and open dialogs; ⌘/Ctrl+Enter saves from anywhere in a form.
@@ -27,6 +28,16 @@ import { nextFrame } from "helpers/timing_helpers"
 
 const ITEM = "[data-filter-target~='item'], [data-keyboard-item]"
 const TYPING = "input, textarea, select, [contenteditable], lexxy-editor"
+const SELECTED_KEY = "keyboardSelected"
+
+// A Back or Forward visit brings a page back: once it's loaded, its row is picked again (#reselect).
+let restoring = false
+document.addEventListener("turbo:visit", event => { restoring = event.detail.action === "restore" })
+document.addEventListener("turbo:load", () => {
+  if (restoring) requestAnimationFrame(() => document.dispatchEvent(new CustomEvent("keyboard:restore")))
+  restoring = false
+})
+
 const OPENER = ":is(a[href], button):not(.row-action):not([data-keys])"
 const CHORD_TIMEOUT = 1500
 const EXTEND_TIMEOUT = 600 // how long g w waits for a third key before it goes
@@ -41,11 +52,14 @@ export default class extends Controller {
     document.addEventListener("keydown", this.keydown)
     document.addEventListener("focusin", this.focusin)
     this.#showHints(this.#storedHints)
+    this.reselect = () => this.#reselect()
+    document.addEventListener("keyboard:restore", this.reselect)
   }
 
   disconnect() {
     document.removeEventListener("keydown", this.keydown)
     document.removeEventListener("focusin", this.focusin)
+    document.removeEventListener("keyboard:restore", this.reselect)
     this.hintObserver?.disconnect()
   }
 
@@ -157,9 +171,21 @@ export default class extends Controller {
 
   #startChord(event) {
     event.preventDefault()
+    this.#prefetchChords()
     this.pending = "g"
     clearTimeout(this.chordTimer)
     this.chordTimer = setTimeout(() => { this.pending = null }, CHORD_TIMEOUT)
+  }
+
+  // g was pressed: the pages its second key reaches (the nav's g c, g w…) are fetched ahead, once
+  // per page, so the visit that follows is served at once (helpers/page_prefetch).
+  #prefetchChords() {
+    if (this.chordsPrefetched === location.href) return
+    this.chordsPrefetched = location.href
+
+    document.querySelectorAll("a[data-keys]").forEach(link => {
+      if (link.dataset.keys.split(",").some(name => /^g \S+$/.test(name.trim()))) prefetchLink(link)
+    })
   }
 
   // A longer chord starts with this one (g t, with g t n declared somewhere).
@@ -254,6 +280,29 @@ export default class extends Controller {
     item.focus({ preventScroll: true })
     item.scrollIntoView({ block: "nearest" })
     item.dispatchEvent(new CustomEvent("keyboard:select", { bubbles: true }))
+    this.#prefetchOpener(item)
+    this.#remember(item)
+  }
+
+  // Back to a list puts you on the row you were on: the item's id, kept per address for the tab
+  // (sessionStorage), picked again when a restoration visit (Back, Forward) brings the page back.
+  #remember(item) {
+    if (!item.id) return
+    try { sessionStorage.setItem(`${SELECTED_KEY}:${location.pathname}${location.search}`, item.id) } catch {}
+  }
+
+  #reselect() {
+    let id
+    try { id = sessionStorage.getItem(`${SELECTED_KEY}:${location.pathname}${location.search}`) } catch {}
+    const item = id && document.getElementById(id)
+    if (item && this.#items().includes(item)) this.#select(item)
+  }
+
+  // The page Enter would open from the item you're on, fetched ahead (a task's link opens the side
+  // panel instead, which fetches its own).
+  #prefetchOpener(item) {
+    const opener = item.matches(OPENER) ? item : item.querySelector(OPENER)
+    if (opener?.matches("a[href]") && !opener.matches("[data-action*='side-panel#open']")) prefetchLink(opener)
   }
 
   #clear(event) {

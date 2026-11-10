@@ -606,6 +606,14 @@ one place they are documented for people: add a new key there.
 | `.` | Hint mode on or off |
 | Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
 
+Moving with the keys fetches ahead: the row `j` / `k` lands on has its page (the plain link Enter
+follows) fetched, and `g` fetches the pages its chords reach, once per page
+(`helpers/page_prefetch`, handed to the visit through `turbo:before-fetch-request`, as Turbo and the
+side panel do); a task's link leaves it to the side panel. Back or Forward to a list picks the row
+you were on again (kept per address in `sessionStorage`). The sidenav keeps its scroll position from
+page to page (the `keeps-scroll` behavior), and the modal shows a placeholder for a New form that
+takes more than 150ms (`loading-placeholder`, `layouts/shared/_modal_placeholder`).
+
 Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-focus` focuses
 it instead, `data-keys-anywhere` works while the element is out of sight (in a closed menu), `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
 ⌘ on a Mac, Ctrl elsewhere). A key declared inside an item fires for the selected item only

@@ -3,8 +3,9 @@
     as Settings > Sidebar arranges them (NavLayout: the core's and plugins' pages together, under
     headings the install names), and at the foot the page filter (/), plugins' actions,
     the shortcut sheet (?) and the signed-in person, whose menu holds their account, settings,
-    the theme, help and signing out. The current section is marked (aria-current). %>
-<nav class="sidebar" id="sidenav" aria-label="Main">
+    the theme, help and signing out. The current section is marked (aria-current). It keeps its
+    scroll position from page to page (keeps-scroll). %>
+<nav class="sidebar" id="sidenav" aria-label="Main" data-keeps-scroll>
   <div class="sidebar__top">
     <%= link_to root_path, class: "sidebar__brand" do %>
       <span class="sidebar__brand-text">

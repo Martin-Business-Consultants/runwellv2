@@ -1,0 +1,16 @@
+<%# locals: () %>
+<%# What the modal frame shows while a slow New form is on its way (the loading-placeholder
+    behavior, after 150ms): the modal itself, with quiet lines where the form goes. The form's
+    answer replaces it. %>
+<template id="modal_placeholder">
+  <div data-placeholder data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
+    <dialog class="dialog dialog--lg record-modal" aria-label="Loading" aria-busy="true" data-dialog-target="dialog">
+      <div class="dialog__box record-modal__placeholder">
+        <span class="skeleton record-modal__skeleton record-modal__skeleton--title"></span>
+        <span class="skeleton record-modal__skeleton"></span>
+        <span class="skeleton record-modal__skeleton"></span>
+        <span class="skeleton record-modal__skeleton record-modal__skeleton--short"></span>
+      </div>
+    </dialog>
+  </div>
+</template>
