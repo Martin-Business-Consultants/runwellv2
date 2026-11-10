@@ -294,6 +294,13 @@ Back, refresh and links work, and there's no client-side router:
   (`bulk`), a clicked tab is current before its frame arrives (the `picks-current` behavior, the
   frame's old content dimmed on `aria-busy`), and a `submit_on_change` switch flips back if its save
   fails (`revert-on-failure`)
+- **Losing the connection**: the `connection` controller on `<body>` shows a quiet line while the
+  browser is offline or live updates are down (`layouts/shared/_connection_status`), refreshes the
+  page in place once when they come back after a real gap (broadcasts sent meanwhile are lost), and
+  keeps a form that got no answer as it is, marked unsaved (`form[data-unsaved]`), sending it again
+  once back online; a save the server refused still reverts. A frame or stream answered with the
+  sign-in page (marked `X-Runwell-Sign-In`) sends the page itself to sign in, and sign-in returns to
+  it (`Authentication#request_authentication` remembers only page requests)
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
   the `flash` frame), floating in the bottom right above the bell, never pushing the page; a notice
   goes by itself, an alert stays until closed. Runwell sets only `--toast-bottom` / `--toast-z`

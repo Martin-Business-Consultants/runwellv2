@@ -80,10 +80,15 @@ module Authentication
       Session.joins(:user).merge(User.active).find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
     end
 
+    # Back to the page after signing in: only a page itself is remembered, never a frame, stream
+    # or form the page sent (a session that ran out mid-work: the connection controller then
+    # visits the page, which is what comes back here).
     def request_authentication
-      session[:return_to_after_authenticating] = request.url
+      session[:return_to_after_authenticating] = request.url if page_request?
       redirect_to new_session_path
     end
+
+    def page_request? = request.get? && request.format.html? && !turbo_frame_request?
 
     # The first step checked out (a password, an emailed link, Google…): sign in, or go on to the
     # code from the authenticator app when the person has two-factor sign-in on.

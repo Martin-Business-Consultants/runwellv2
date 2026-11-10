@@ -10,7 +10,10 @@ class SessionsController < ApplicationController
   layout "public"
 
   # A new install has no one to sign in yet: its first visitor sets it up as the owner.
+  # Marked as the sign-in page, so a frame or stream that lands here (a session that ran out) sends
+  # the whole page to sign in (the connection controller).
   def new
+    response.set_header("X-Runwell-Sign-In", "1")
     redirect_to new_signup_path unless User.exists?
   end
 

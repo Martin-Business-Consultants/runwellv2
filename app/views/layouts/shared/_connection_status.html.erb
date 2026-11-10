@@ -1,0 +1,9 @@
+<%# locals: () %>
+<%# A quiet line at the foot of the page while the connection is gone (the connection controller on
+    <body>): offline, or the live updates reconnecting. What's typed stays, and unsaved changes go
+    once it's back. %>
+<p class="connection-status" role="status" hidden data-connection-target="status"
+  data-offline="Offline. Changes save when you’re back." data-reconnecting="Reconnecting…">
+  <span class="connection-status__dot" aria-hidden="true"></span>
+  <span data-connection-text></span>
+</p>

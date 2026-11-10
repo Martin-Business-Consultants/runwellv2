@@ -6,7 +6,9 @@ class Portal::SessionsController < Portal::BaseController
 
   layout "public"
 
+  # Marked as the sign-in page, as staff's is (SessionsController#new, the connection controller).
   def new
+    response.set_header("X-Runwell-Sign-In", "1")
   end
 
   # Always answer the same way so the form does not reveal which emails exist.

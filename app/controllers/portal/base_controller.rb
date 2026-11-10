@@ -43,7 +43,7 @@ class Portal::BaseController < ApplicationController
     Current.portal_session&.destroy
     Current.portal_session = nil
     cookies.delete(:portal_session_id)
-    session[:portal_return_to] = request.fullpath if request.get?
+    session[:portal_return_to] = request.fullpath if request.get? && request.format.html? && !turbo_frame_request?
     redirect_to new_portal_session_path
   end
 
