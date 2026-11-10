@@ -10,6 +10,14 @@
     <a href="#main" class="skip-link" data-turbo="false">Skip to main content</a>
     <% if authenticated? %>
       <%= crumbs(*breadcrumb_items) %>
+      <%# The quick actions' + and the bell, at the right of the bar across from the breadcrumb (never
+          over the page's own buttons at its foot), each opening its menu downwards. %>
+      <% unless @hide_footer_frames %>
+        <% content_for :context do %>
+          <%= render "quick_actions/tray" %>
+          <%= render "notifications/tray" %>
+        <% end %>
+      <% end %>
       <% page = capture do %>
         <% if content_for?(:settings_nav) %>
           <div class="settings-layout">
@@ -39,9 +47,7 @@
       <% if authenticated? && !@hide_footer_frames %>
         <div id="footer_frames" data-turbo-permanent>
           <%= render "bar/bar" %>
-          <%= render "notifications/tray" %>
         </div>
-        <%= render "quick_actions/tray" %>
         <%= render "layouts/shared/side_panel", task: side_panel_task, peek: side_panel_peek %>
         <%= turbo_stream_from Current.user, :notifications %>
         <%= render "layouts/shared/connection_status" %>

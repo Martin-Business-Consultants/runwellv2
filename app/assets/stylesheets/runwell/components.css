@@ -353,10 +353,9 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 
 /* ======================================================================= Toasts */
 
-/* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash). On staff
-/* pages they stack just above the bell and the quick actions' +, over the side panel and trays;
-/* sign-in pages and the portal have nothing in that corner, so they take it. */
-#flash .flashes--toast { --toast-bottom: calc(var(--s-3) + 2.5rem + var(--s-3)); --toast-z: calc(var(--z-tray) + 2); }
+/* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash), in the
+/* bottom right corner, over the side panel and trays (the bell and the + are in the bar at the top). */
+#flash .flashes--toast { --toast-bottom: var(--s-3); --toast-z: calc(var(--z-tray) + 2); }
 :is(.auth-layout__main, .portal-main) #flash .flashes--toast { --toast-bottom: var(--s-3); }
 
 /* ======================================================================= Comboboxes */

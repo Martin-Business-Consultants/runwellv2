@@ -302,7 +302,7 @@ Back, refresh and links work, and there's no client-side router:
   sign-in page (marked `X-Runwell-Sign-In`) sends the page itself to sign in, and sign-in returns to
   it (`Authentication#request_authentication` remembers only page requests)
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
-  the `flash` frame), floating in the bottom right above the bell, never pushing the page; a notice
+  the `flash` frame), floating in the bottom right, never pushing the page; a notice
   goes by itself, an alert stays until closed. Runwell sets only `--toast-bottom` / `--toast-z`
   (`runwell/components.css`)
 
@@ -609,7 +609,8 @@ ReActionView rules:
   (`SearchesHelper::SEARCH_PRIORITY`)
 - The search bar is Fizzy's (`bar/_bar`, `bar_controller`), rendered in the
   application layout footer for signed-in staff. It shows only once opened (`s`, ⌘K): the
-  bottom of staff pages stays clear but for the quick actions' + and the notification bell (`runwell/home.css`)
+  bottom of staff pages stays clear (the quick actions' + and the notification bell sit at the right of the
+  panel bar, across from the breadcrumb, `runwell/home.css`)
 
 ## Keyboard shortcuts
 
@@ -666,7 +667,7 @@ stored in the HTML column. A model with rich text includes `Mentions` and names 
 columns (`mentionable_fields :body`); after save it scans them and creates a `Mention`
 per person, which is `Notifiable`: `Notifier.for` picks `Notifier::MentionNotifier`,
 which skips self-mentions and creates a `Notification`. Notifications show in the
-tray (`notifications/_tray`), which a bell in the bottom right corner fans open (`g n`), and on `/notifications`, and are emailed
+tray (`notifications/_tray`), which the bell at the right of the panel bar opens (`g n`), and on `/notifications`, and are emailed
 (`NotificationMailer`). Opening one reads it and redirects to its record
 (`notifications#show`). Client-facing editors never get the prompt.
 
@@ -733,7 +734,7 @@ described in `docs/plugins.md`.
 
 ## Quick actions
 
-The tray at the bottom right (`A`, `quick_actions/_tray`) is Fizzy's tray. At the top of the
+The tray at the right of the panel bar (`A`, `quick_actions/_tray`) is Fizzy's tray, opening downwards. At the top of the
 fan is a record picker (Fizzy's filter + combobox) set to the record on screen
 (`current_record`) and able to pick any other; below it, one entry per action: Note,
 Document and Task in the core (`g t n` opens the task form straight away, on a piece of work or a client), plus any a plugin registers
@@ -745,7 +746,7 @@ and time are added only here; notes also have a composer at the top of every Not
 The picker writes `record` ("Client:12") into the form through the `form` attribute; the
 receiving controller reads it with `QuickAction.locate(params[:record], types)`. Forms post
 with `data-turbo-frame="_top"` so the page redirects back as usual. Its button is a round + just left of the notification
-bell, bottom right; `A` clicks it.
+bell, at the right of the panel bar; `A` clicks it.
 
 ## Requests by email
 

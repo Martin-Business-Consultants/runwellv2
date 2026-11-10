@@ -1,9 +1,9 @@
 <%# locals: () %>
-<%# The quick action tray, bottom right (A): a popover menu: a record picker (the
+<%# The quick action tray, at the right of the panel bar beside the bell (A): a popover menu: a record picker (the
     record on screen, or any other) over an entry per action. The entries submit one GET form
     carrying the picked record; each action's form opens in a modal (quick_actions#new).
-    Plugins add actions with Runwell::Plugins.quick_action. Its toggle is a round + beside the
-    bell (A clicks it), and the menu stacks in reverse, so the picker sits above the actions. %>
+    Plugins add actions with Runwell::Plugins.quick_action. Its toggle is a + beside the bell (A
+    clicks it), and the menu stacks in reverse, so the picker sits above the actions. %>
 <% record = current_record %>
 <section class="tray tray--actions" data-controller="dialog" data-dialog-sizing-value="false" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
   <form id="quick_actions_form" action="<%= new_quick_action_path %>" method="get" data-turbo-frame="quick_action" hidden></form>

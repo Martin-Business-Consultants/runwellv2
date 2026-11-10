@@ -82,22 +82,21 @@
 
 /* ======================================================================= 3 Trays */
 
-/* The bell and the quick actions, bottom right, each opening a popover above it. */
-.tray { position: fixed; inset: auto calc(var(--s-3) + env(safe-area-inset-right)) calc(var(--s-3) + env(safe-area-inset-bottom)) auto; z-index: var(--z-tray); display: flex; flex-direction: column; align-items: flex-end; }
-
-/* The quick actions' + sits just left of the bell (A clicks it too). */
-.tray--actions { right: calc(var(--s-3) + 2.5rem + var(--s-2) + env(safe-area-inset-right)); }
+/* The bell and the quick actions, at the right of the panel bar across from the breadcrumb, each
+   opening a popover below it. */
+.panel-bar__context:has(.tray) { gap: var(--s-1); }
+.tray { position: relative; z-index: var(--z-tray); display: flex; flex-direction: column; align-items: flex-end; }
 
 .tray__dialog[open] {
-  position: absolute; inset: auto 0 3rem auto; display: flex; flex-direction: column-reverse; width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem);
+  position: absolute; inset: calc(100% + 6px) 0 auto auto; display: flex; flex-direction: column-reverse; width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem);
   margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
-  transform-origin: bottom right; animation: rune-pop var(--motion) var(--ease);
+  transform-origin: top right; animation: rune-pop var(--motion) var(--ease);
 }
 .tray__item { position: relative; }
 
 /* The bell: a round button, with a red dot while something is unread. */
 .tray__toggle { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
-.tray__toggle-btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--panel); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / .08); transition: background .12s; }
+.tray__toggle-btn { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--text); transition: background .12s; }
 .tray__toggle:hover .tray__toggle-btn, .tray__dialog[open] ~ .tray__toggle .tray__toggle-btn { background: var(--layer-2); }
 .tray__toggle-text { display: none; }
 html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notification) ~ .tray__toggle::after {
@@ -122,8 +121,8 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 .tray--actions .tray__dialog[open] { width: min(18rem, 100vw - 1.5rem); gap: var(--s-1); padding: var(--s-1); overflow: visible; }
 .tray__item--picker { margin-inline: calc(var(--s-1) * -1); padding: 0 var(--s-2) var(--s-2); border-bottom: 1px solid var(--line); }
 .tray__item--picker .quick-action__trigger { flex: 1; max-width: none; justify-content: space-between; }
-/* The tray sits at the foot of the screen, so the picker's list opens upwards. */
-.tray__item--picker .popup { inset: auto 0 calc(100% + 4px) auto; max-height: 60dvh; }
+/* The tray hangs from the bar at the top, so the picker's list opens downwards. */
+.tray__item--picker .popup { inset: calc(100% + 4px) 0 auto auto; max-height: 60dvh; }
 .tray__item:has(.menu__item:focus-visible) { z-index: 1; }
 
 /* ======================================================================= 4 Notifications */

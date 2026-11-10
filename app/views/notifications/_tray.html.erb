@@ -1,8 +1,9 @@
 <%# locals: () %>
-<%# The bell in the bottom right corner (g n) and its popover: a header with the way to every
+<%# The bell at the right of the panel bar (g n) and its popover: a header with the way to every
     notification and Clear all, over the newest few as list rows (notifications/trays/show). The
-    dialog stacks in reverse, so the header sits on top while the rows come first for the keys. %>
-<section class="tray tray--notifications" data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:frame-render->badge#update" data-dialog-sizing-value="false">
+    dialog stacks in reverse, so the header sits on top while the rows come first for the keys.
+    Permanent, so its loaded list rides along from page to page. %>
+<section class="tray tray--notifications" id="notifications_tray" data-turbo-permanent data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:frame-render->badge#update" data-dialog-sizing-value="false">
   <dialog class="tray__dialog"
       aria-label="Notifications"
       data-controller="navigable-list"
