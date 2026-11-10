@@ -10,6 +10,5 @@ module Setting::TimeZone
 
   class_methods do
     def zone = ActiveSupport::TimeZone[current.time_zone.presence || Time.zone_default.name] || Time.zone_default
-    def time_zone_set? = current.time_zone.present? || ENV["TIME_ZONE"].present?
   end
 end

@@ -13,7 +13,6 @@ module User::Agent
     # The team: people on staff, not their agents and not clients' contacts (pickers, mentions,
     # sign-in, Users).
     scope :people, -> { where(agent_owner_id: nil).where.not(role: User::CLIENT) }
-    scope :agents, -> { where.not(agent_owner_id: nil) }
 
     validate :agent_owner_is_a_person, if: :agent?
     after_create_commit :create_agent_later, unless: -> { agent? || client? }

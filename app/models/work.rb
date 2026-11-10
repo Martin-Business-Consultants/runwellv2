@@ -97,7 +97,7 @@ class Work < ApplicationRecord
     summary = { ref: ref, title: title, tasks: tasks.count }
     transaction do
       clear_legacy_rows!
-      Current.set(erasing: true) { destroy! }
+      destroy!
       client.record_event!("work.erased", actor: actor, source: source, payload: summary)
     end
   end

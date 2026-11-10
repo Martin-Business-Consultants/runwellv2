@@ -52,8 +52,7 @@ if Client.none?
   mia = harbor.contacts.create!(portal_access: true, name: "Mia Chen", title: "Office manager", email: "mia@harbordental.example", phone: "555-0143")
 
   site = harbor.works.create!(label: "project", title: "Website rebuild", created_by: ted,
-    description: "<p>A new site for all three offices: service pages, a provider directory, online booking and location pages that support local search.</p>",
-    estimate_notes: "<p>Booking widget is their existing Dentrix integration. Budget allows 2 rounds of design revisions.</p>")
+    description: "<p>A new site for all three offices: service pages, a provider directory, online booking and location pages that support local search.</p><p>Booking widget is their existing Dentrix integration. Budget allows 2 rounds of design revisions.</p>")
   sections.(site, [ "Discovery and sitemap", "Design: home and 4 templates", "Build and content migration", "Launch and redirects" ])
   task.(site, "Discovery and sitemap", owner: sarah, due: today - 20, status: "done")
   task.(site, "Design: home and 4 templates", owner: marcus, due: today - 2, status: "in_progress",
@@ -88,8 +87,7 @@ if Client.none?
   tasha = summit.contacts.create!(portal_access: true, name: "Tasha Reid", title: "Marketing coordinator", email: "tasha@summitroofing.example")
 
   ads = summit.works.create!(label: "service", shape: "recurring", title: "Google Ads management", created_by: ted,
-    description: "<p>Search campaigns for roof repair and replacement across the metro area, with call tracking and a monthly report.</p>",
-    estimate_notes: "<p>Management fee only. Ad spend is billed to their card directly.</p>")
+    description: "<p>Search campaigns for roof repair and replacement across the metro area, with call tracking and a monthly report.</p><p>Management fee only. Ad spend is billed to their card directly.</p>")
   sections.(ads, [ "Campaign management", "Call tracking and reporting" ])
   task.(ads, "Campaign management", owner: jordan, due: today + 4, status: "in_progress")
   task.(ads, "Call tracking and reporting", owner: jordan, due: today + 9)
@@ -127,8 +125,7 @@ if Client.none?
   coastal = Client.create!(name: "Coastal Kitchen & Bath", custom_fields: { "website" => "https://coastalkb.example" })
   dana = coastal.contacts.create!(portal_access: true, name: "Dana Whitfield", title: "Co-owner", email: "dana@coastalkb.example", phone: "555-0190", can_approve: true)
   proposal = coastal.works.create!(label: "project", title: "New website and portfolio", created_by: ted,
-    description: "<p>A portfolio-led site with project galleries, a consultation request form and showroom location pages.</p>",
-    estimate_notes: "<p>They have about 60 project photos; galleries need a simple CMS.</p>")
+    description: "<p>A portfolio-led site with project galleries, a consultation request form and showroom location pages.</p><p>They have about 60 project photos; galleries need a simple CMS.</p>")
   sections.(proposal, [ "Design", "Build with project galleries", "Launch" ])
   # Work straight on the client, not on its work.
   coastal.tasks.create!(title: "Send the proposal", owner: ted, due_on: today + 2, created_by: ted)

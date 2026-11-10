@@ -153,8 +153,8 @@ module Import
 
       work = client.works.create!(
         label: "project", shape: "fixed", title: row["name"],
-        description: rich("Project", row["id"], "description") || row["description"].presence,
-        estimate_notes: rich("Project", row["id"], "context") || row["context"].presence,
+        description: with_context(rich("Project", row["id"], "description") || row["description"].presence,
+          rich("Project", row["id"], "context") || row["context"].presence),
         created_by: @users[row["user_id"]], created_at: time(row["created_at"]))
       @works["project:#{row["id"]}"] = work
       @counts[:projects] += 1
@@ -171,8 +171,7 @@ module Import
 
       work = client.works.create!(
         label: "service", shape: "recurring", title: row["name"],
-        description: rich("Service", row["id"], "description") || row["description"].presence,
-        estimate_notes: row["context"].presence,
+        description: with_context(rich("Service", row["id"], "description") || row["description"].presence, row["context"].presence),
         created_by: @users[row["user_id"]], created_at: time(row["created_at"]))
       @works["service:#{row["id"]}"] = work
       @counts[:services] += 1
@@ -196,8 +195,7 @@ module Import
 
       work = client.works.create!(
         label: "work_order", shape: "fixed", title: row["title"],
-        description: rich("WorkOrder", row["id"], "description") || row["description"].presence,
-        estimate_notes: row["notes"].presence,
+        description: with_context(rich("WorkOrder", row["id"], "description") || row["description"].presence, row["notes"].presence),
         created_by: @users[row["created_by_id"]], created_at: time(row["created_at"]))
       @works["work_order:#{row["id"]}"] = work
       @counts[:work_orders] += 1
@@ -376,6 +374,17 @@ module Import
     # --- Reading v1 ----------------------------------------------------------------------
 
     def rows(table) = @db.execute("SELECT * FROM #{table} ORDER BY id")
+
+    # v1 kept a project's context (or a work order's notes) apart from its description; here it
+    # follows the description, under its own heading.
+    def with_context(description, context)
+      return description if context.blank?
+
+      [ description.presence && as_html(description), "<h3>Context</h3>", as_html(context) ].compact.join
+    end
+
+    # Plain text as paragraphs, as rich_text shows it; HTML as it is.
+    def as_html(text) = text.include?("<") ? text : ActionController::Base.helpers.simple_format(text)
 
     def rich(record_type, record_id, name)
       @rich ||= @db.execute("SELECT record_type, record_id, name, body FROM action_text_rich_texts")

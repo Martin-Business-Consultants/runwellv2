@@ -170,5 +170,6 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 }
 @media (max-width: 479px) {
   .portal-topbar__new { width: var(--control-h-sm); padding: 0; }
-  .portal-topbar__new > :not(.icon) { display: none; }
+  /* Only the icon shows; the label stays for screen readers. */
+  .portal-topbar__new-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }

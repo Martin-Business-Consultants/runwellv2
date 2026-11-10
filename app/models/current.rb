@@ -2,8 +2,6 @@ class Current < ActiveSupport::CurrentAttributes
   attribute :session, :access_token, :portal_session, :source, :settings
   # Someone on staff viewing the portal as this contact (Contacts::PreviewsController): read-only.
   attribute :preview_contact
-  # Set only inside Work#erase!, so plugins' records that refuse deletion know it's an erase.
-  attribute :erasing
   # Every WorkType, read once per request (WorkType.cached).
   attribute :work_types
 

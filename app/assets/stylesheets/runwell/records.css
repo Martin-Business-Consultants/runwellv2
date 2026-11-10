@@ -201,6 +201,11 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* A record's form (clients/_form and the like): a card of fields with Cancel and the main action
 /* at its foot. Short fields pair up in a .field-row, which stacks when narrow. */
 .record-form__body { gap: var(--s-4); }
+/* An on/off choice drawn as a row (the AI plugin's settings still use it). */
+.record-form__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); transition: background .12s, border-color .12s; }
+.record-form__toggle:hover { background: var(--hover); }
+.record-form__toggle:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
+.record-form__toggle-text { min-width: 0; color: var(--text-muted); }
 /* A short field (a status) beside a long one (a time zone). */
 
 /* A group of fields under its own heading (a fieldset's legend). A legend sits outside the

@@ -4,6 +4,4 @@ class CustomValue < ApplicationRecord
   belongs_to :subject, polymorphic: true
 
   validates :value, presence: true
-
-  def typed = custom_field.cast(value)
 end

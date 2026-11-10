@@ -1,6 +1,11 @@
 # Moving Runwell's UI to rune_ui
 
-Status: started 2026-11-06. This is the working plan; tick phases off as they land.
+Status: done. It shipped in 4.0 (2026-11-07) and is kept as the record of why the UI is built the way
+it is. For how to build UI now, AGENTS.md (Frontend, Styling) and the rune_ui README are the guide; file
+names and scripts below are as they were during the move (`runwell/work.css` is now `runwell/tasks.css`).
+
+Plugins that still use the classes the move retired (`record-form__field`, `__label`, `__hint`, `__row`,
+`__cancel`, `settings--split`) draw unstyled until they move to rune's `field` and `card` classes.
 
 ## Decisions
 

@@ -38,7 +38,7 @@
             <%= plugin_slots(:portal_actions, contact: current_contact) %>
             <%= link_to new_portal_request_path, class: button_classes(variant: :primary, size: :sm, extra: "portal-topbar__new"), data: { turbo_frame: "modal" } do %>
               <%= icon_tag "add" %>
-              <span>New request</span>
+              <span class="portal-topbar__new-label">New request</span>
             <% end %>
 
             <% you = capture do %>

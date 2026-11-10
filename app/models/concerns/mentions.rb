@@ -5,7 +5,6 @@ module Mentions
 
   included do
     has_many :mentions, as: :source, dependent: :destroy
-    has_many :mentionees, through: :mentions
     after_save_commit :create_mentions_later, if: :mentionable_content_changed?
   end
 

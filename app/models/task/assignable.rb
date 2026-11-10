@@ -6,7 +6,6 @@ module Task::Assignable
 
   included do
     has_many :assignments, -> { order(:created_at, :id) }, dependent: :delete_all, inverse_of: :task
-    has_many :assignees, through: :assignments, source: :user
 
     scope :assigned_to, ->(users) { where(id: Assignment.where(user: users).select(:task_id)) }
 

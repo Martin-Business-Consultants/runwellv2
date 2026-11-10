@@ -20,10 +20,6 @@ module Setting::Terminology
     WorkType.named(label)&.prefix
   end
 
-  def label_enabled?(label)
-    WorkType.named(label)&.archived? == false
-  end
-
   def enabled_labels
     WorkType.active_keys
   end

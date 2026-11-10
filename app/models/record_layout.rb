@@ -56,7 +56,6 @@ class RecordLayout
   def renamed = @text
 
   def keys = main + aside + hidden
-  def zones = single_column? ? %w[main hidden] : ZONES
   def required?(key) = DEFAULTS[kind][:required].include?(key)
   def shown?(key) = !hidden.include?(key)
   def custom_field(key) = custom_fields.find { "custom.#{it.key}" == key }
