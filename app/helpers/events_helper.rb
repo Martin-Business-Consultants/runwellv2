@@ -47,10 +47,10 @@ module EventsHelper
   end
 
   def agent_activity_whose_label(person, whose)
-    if whose == "any" then "everyone's agents"
+    if whose == "any" then "every agent"
     elsif person.nil? then "nobody's agent"
     elsif person == Current.user&.person then "your agent"
-    else "#{person.display_name}'s agent"
+    else person.agent&.display_name || "#{person.display_name}'s agent"
     end
   end
 

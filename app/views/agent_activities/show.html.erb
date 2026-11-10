@@ -1,9 +1,10 @@
 <% @page_title = "AI activity" %>
-<% people = User.people.active.ordered.to_a %>
+<%# Each teammate's agent by its own name ("Amir's agent"), yours first as Your agent. %>
+<% agents = User.people.active.ordered.where.not(id: Current.user.person.id).includes(:agent).filter_map(&:agent) %>
 
 <% content_for :index_filters do %>
-  <%= render "layouts/shared/quick_filter", title: "Whose agent…", param: :whose, current: @whose,
-        options: [ [ "Your agent", "me" ], [ "Everyone’s", "any" ] ] + people.map { [ it.display_name, it.id.to_s ] } %>
+  <%= render "layouts/shared/quick_filter", title: "Agent…", param: :whose, current: @whose,
+        options: [ [ "Your agent", "me" ], [ "Every agent", "any" ] ] + agents.map { [ it.display_name, it.agent_owner_id.to_s ] } %>
   <%= render "layouts/shared/quick_filter", title: "What…", param: :area, current: @area,
         options: AgentActivitiesController::AREAS.map { [ agent_activity_area_label(it), it ] } %>
   <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days,
