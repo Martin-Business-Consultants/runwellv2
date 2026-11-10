@@ -15,7 +15,7 @@ module ApplicationHelper
     "negative" => %w[overdue blocked missed stopped changes\ requested behind],
     "waiting" => %w[sent open awaiting\ decision awaiting draft planned waiting],
     "progress" => %w[in\ progress],
-    "neutral" => %w[closed superseded dormant former dropped dismissed not\ started]
+    "neutral" => %w[closed superseded dormant former dropped dismissed declined not\ started]
   }.flat_map { |tone, labels| labels.map { [ it, tone ] } }.to_h.freeze
 
   def status_tone(label, highlight: false)

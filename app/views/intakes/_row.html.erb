@@ -1,7 +1,8 @@
 <%# locals: (task:) %>
 <%# One thing that came in, in Intake's data table (ui/_data_table): where it came from, the task
     (it opens in the side panel, where it's put on a piece of work), what it's for (its work, else its
-    client with "file it", which opens the panel to put it on a piece of work), who's on it (a picker, to take it on) and when it came in. %>
+    client with "file it", which opens the panel to put it on a piece of work), who's on it (a picker), when it came in, and
+    Accept or Decline (Tasks::AcceptancesController, DeclinesController). %>
 <tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
   <%= bulk_select_cell task, task.title %>
   <td data-column="source"><%= intake_source_tag(task) %></td>
@@ -18,5 +19,14 @@
   </td>
   <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
   <td class="muted nowrap" data-column="came_in" title="<%= task.created_at.iso8601 %>"><%= activity_time(task.created_at, short: true) %></td>
-  <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task, undoable: true %>
+  <td data-column="decide">
+    <span class="intake__decide">
+      <%= button_to task_acceptance_path(task), params: { inline: "row" }, class: button_classes(variant: :secondary, size: :sm), title: "Accept: #{task.owner ? "#{task.owner.display_name} owns it" : "you take it on"}" do %>
+        <%= icon_tag "check" %><span>Accept</span>
+      <% end %>
+      <%= button_to task_decline_path(task), params: { inline: "row" }, class: "icon-button", title: "Decline: kept, and shown to the #{term(:client).downcase} as declined" do %>
+        <%= icon_tag "close" %><span class="visually-hidden">Decline <%= task.title %></span>
+      <% end %>
+    </span>
+  </td>
 </tr>

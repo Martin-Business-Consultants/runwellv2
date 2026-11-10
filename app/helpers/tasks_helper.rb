@@ -205,7 +205,8 @@ module TasksHelper
 
   # How far a client's request has got, in the portal's words.
   def portal_request_status(task)
-    if task.request? then "Waiting"
+    if task.declined? then "Declined"
+    elsif task.request? then "Waiting"
     elsif task.status == "done" then "Done"
     else "Taken on"
     end

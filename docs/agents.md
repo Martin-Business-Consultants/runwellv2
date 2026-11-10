@@ -28,8 +28,9 @@ something in the portal) is previewed first and done only once you agree.
 
 - **What it adds comes in through Intake** (in the nav, `g i`), beside clients' requests: a task
   an agent adds with nobody on it, or on no piece of work, waits there (Source › AI) until someone
-  takes it on and files it. An agent that knows who and where can say so (`owner_id`, `work_ref`),
-  and the task skips Intake.
+  someone accepts it (`accept_task`, or several with `bulk_accept_tasks`) or declines it
+  (`decline_task`, `bulk_decline_tasks`: kept, Declined in the client's portal, nobody emailed). An
+  agent that knows who and where can say so (`owner_id`, `work_ref`), and the task skips Intake.
 - **Made by AI.** Tasks › Made by… › AI lists every task an agent added (`made_by=agents`, on the
   table and the board; `list_tasks` takes it too). Each one carries the AI mark after its title
   wherever it's listed, naming the agent, and the side panel says "Added by Ted's agent".

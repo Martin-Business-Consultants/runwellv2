@@ -37,6 +37,11 @@ Rails.application.routes.draw do
   # Many records at once, from a table's selection (BulkAction).
   namespace :bulk do
     resource :tasks, only: %i[update destroy]
+    # Intake's decisions on several tasks at once.
+    namespace :tasks do
+      resource :acceptance, only: :create
+      resource :decline, only: :create
+    end
     resource :clients, only: %i[update destroy]
     resource :users, only: :update
     resource :works, path: "work", only: :destroy do
@@ -171,6 +176,8 @@ Rails.application.routes.draw do
       resources :assignments, only: :create
       resource :status, only: :update
       resource :discussion, only: :create
+      resource :acceptance, only: :create
+      resource :decline, only: :create
     end
   end
 

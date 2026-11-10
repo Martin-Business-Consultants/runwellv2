@@ -12,8 +12,8 @@
 <% end %>
 <% content_for :index_bulk do %>
   <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
-    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[owner_id]", label: "Owner", choices: task_owner_options %>
-    <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[status]", label: "Status", choices: Task::STATUSES.map { [ it.humanize, it ] } %>
+    <%= bulk_menu bulk_tasks_acceptance_path, method: :post, name: "owner_id", label: "Accept for…", choices: [ [ "You", "me" ] ] + task_owner_options.reject { |_, id| id == Current.user.person.id } %>
+    <%= bulk_button bulk_tasks_decline_path, method: :post, label: "Decline" %>
   <% end %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view %>
@@ -22,8 +22,9 @@
                ui_column(:title, term(:task), sort: :title, width: [ [ @column_widths[:title].to_i, 26 ].min, term(:task) ], hideable: false),
                ui_column(:home, "For", sort: :work, width: [ [ [ @column_widths[:work].to_i, @column_widths[:client].to_i ].max + 4, 24 ].min, "For" ]),
                ui_column(:owner, "Owner", width: :avatar),
-               ui_column(:came_in, "Came in", sort: :came_in, width: [ 9, "Came in" ]) ] %>
-<%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true, actions: true %>
+               ui_column(:came_in, "Came in", sort: :came_in, width: [ 9, "Came in" ]),
+               ui_column(:decide, "Decide", width: [ 16, "Decide" ], hideable: false) ] %>
+<%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true %>
 <% if @tasks.none? %>
   <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has someone on it and a #{term(:work).downcase} under it." %>
 <% end %>

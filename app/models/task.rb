@@ -4,10 +4,13 @@
 # email or the portal arrives that way, with who asked (`contact`, or an unmatched sender) and how
 # (`source`). A promise with a date is a task with a due date; whoever it's assigned to owns it.
 class Task < ApplicationRecord
+  # A verb refused for the state the task is in (accept! or decline! once it's out of intake).
+  class Refused < StandardError; end
+
   include Eventful, Noted, Searchable, Mentions, Documentable, CustomFields, Assignable, Repeats
   include LiveRefreshes, RecordsCreation, ClientPrioritized, TextFilterable, RemovesLater, Discussion
   # A request from outside tells the people who take requests on (Notifier::RequestNotifier).
-  include Notifiable
+  include Notifiable, Intake
 
   # A request from outside (a client in the portal or through their agent, or an email): set by
   # whoever makes it, so its history says task.requested, credited to who asked, not task.created.
@@ -85,26 +88,6 @@ class Task < ApplicationRecord
     scope = scope.where(work: Work.find_by_ref!(work)) unless work == "all"
     scope = scope.public_send("made_by_#{made_by}") unless made_by == "any"
     scope
-  end
-
-  # Intake: what came in and hasn't been dealt with, an open task that nobody has taken on or that
-  # isn't on a piece of work yet (a request from a client, an email, a task an agent added).
-  # Someone on it and a piece of work under it, and it's left intake.
-  scope :intake, -> { open.where(owner_id: nil).or(open.where(work_id: nil)) }
-  def intake? = status != "done" && (owner_id.nil? || work_id.nil?)
-
-  # Where it came from, as Intake filters it: a client (a contact, or an email's sender), an agent,
-  # or someone on the team.
-  INTAKE_SOURCES = %w[any clients agents team].freeze
-  scope :from_clients, -> { where("tasks.contact_id IS NOT NULL OR COALESCE(tasks.sender_email, '') <> ''") }
-  scope :from_team, -> { made_by_people.where(contact_id: nil).where("COALESCE(tasks.sender_email, '') = ''") }
-  def self.from_source(source)
-    case source
-    when "clients" then from_clients
-    when "agents" then made_by_agents
-    when "team" then from_team
-    else all
-    end
   end
 
   # Added by an agent (someone's AI, through a token), and which one: "Ted's agent".

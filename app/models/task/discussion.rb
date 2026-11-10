@@ -5,7 +5,7 @@ module Task::Discussion
   extend ActiveSupport::Concern
 
   # What a client reads for a status: the team's five, less what's only the team's business.
-  CLIENT_STATUSES = %w[received planned in_progress on_hold done].freeze
+  CLIENT_STATUSES = %w[received planned in_progress on_hold done declined].freeze
 
   included do
     has_many :discussion_reads, dependent: :delete_all
@@ -32,6 +32,7 @@ module Task::Discussion
   # received: asked for and nobody has taken it on yet. in review reads as in progress (that check
   # is ours), blocked as on hold.
   def client_status
+    return "declined" if declined?
     return "received" if request? && asked_for?
 
     { "in_review" => "in_progress", "blocked" => "on_hold" }.fetch(status, status)

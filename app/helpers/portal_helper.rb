@@ -2,7 +2,7 @@
 # holding a message they haven't read, and the portal's search box.
 module PortalHelper
   # The status a client reads (Task#client_status): the team's "in review" and "blocked" stay ours.
-  def portal_status_tag(task) = status_tag(task.client_status_label, highlight: task.status == "done")
+  def portal_status_tag(task) = status_tag(task.client_status_label, highlight: task.status == "done" && !task.declined?)
 
   # A due date, marked when an open task is past it. format: an I18n date format.
   def portal_due(task, format: :short, prefix: nil)

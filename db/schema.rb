@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_180000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -515,6 +515,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_160000) do
     t.string "sender_email"
     t.string "repeat"
     t.integer "client_priority"
+    t.datetime "accepted_at"
+    t.integer "accepted_by_id"
+    t.datetime "declined_at"
+    t.integer "declined_by_id"
     t.index ["client_id"], name: "index_tasks_on_client_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
@@ -687,7 +691,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_160000) do
   add_foreign_key "scope_items", "agreement_versions"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "scope_items"
+  add_foreign_key "tasks", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "tasks", "users", column: "created_by_id"
+  add_foreign_key "tasks", "users", column: "declined_by_id", on_delete: :nullify
   add_foreign_key "tasks", "users", column: "owner_id"
   add_foreign_key "tasks", "works"
   add_foreign_key "upgrades", "users", column: "requested_by_id"

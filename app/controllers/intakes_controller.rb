@@ -8,7 +8,7 @@ class IntakesController < ApplicationController
 
   agent_tool :list_intake, on: :show, title: "List intake",
     description: "What came in and hasn't been dealt with: open tasks nobody has taken on, or not on a piece of work yet (requests from clients, emails, tasks agents added), newest first. source: any, clients, agents or team; needs: any, owner (nobody's on it) or work (on no piece of work). Deal with one by update_task: owner_id to take it on, work_id to file it.",
-    params: { source: Task::INTAKE_SOURCES, needs: NEEDS }, next_tools: %i[update_task]
+    params: { source: Task::Intake::SOURCES, needs: NEEDS }, next_tools: %i[update_task]
 
   sortable_columns title: "tasks.title",
     client: [ "clients.name", ->(scope) { scope.left_joins(:client) } ],
@@ -17,7 +17,7 @@ class IntakesController < ApplicationController
 
   def show
     @view = "table"
-    @source = params[:source].presence_in(Task::INTAKE_SOURCES) || "any"
+    @source = params[:source].presence_in(Task::Intake::SOURCES) || "any"
     @needs = params[:needs].presence_in(NEEDS) || "any"
 
     scope = Task.intake.from_source(@source)

@@ -81,11 +81,17 @@ them something else on screen (`term(:work)`, `term(:task)`).
    is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).
    `Event` (append-only, every write of consequence), `Note`
 4. **What came in** — Intake (`/intake`, `IntakesController`, in the nav, `g i`, `list_intake`):
-   every open task nobody has taken on or that isn't on a piece of work yet (`Task.intake`,
-   `intake?`, derived): a client's request (portal, email, phone), a task an agent added, a task
-   straight on a client. It leaves once someone's on it and it's filed on a piece of work (the side
-   panel's Work picker, `work_id` on `update_task`; its client follows, a section of other work is
-   dropped, `task.filed`). Its Source column says where each came from (`intake_source_tag`;
+   every open task nobody owns, or that isn't on a piece of work and nobody has accepted
+   (`Task::Intake`, `intake?`, derived): a client's request (portal, email, phone), a task an agent
+   added, a task straight on a client. Two decisions, on a row, in the side panel's Intake bar or in
+   bulk (`Tasks::AcceptancesController`, `Tasks::DeclinesController`, `Bulk::Tasks::*`; tools
+   `accept_task`, `decline_task`, `bulk_accept_tasks`, `bulk_decline_tasks`; both refuse a task not
+   waiting, `Task::Refused`): `accept!` (someone owns it, the owner picked or whoever accepts;
+   `accepted_at`, `task.accepted`; a client who asked hears it's taken on) and `decline!` (kept,
+   marked done with the reason Declined so nobody is emailed and it doesn't repeat; `declined_at`,
+   `task.declined`; the portal shows it as Declined). Filing it on a piece of work with someone on it
+   takes it out too (the side panel's Work picker, `work_id` on `update_task`; its client follows, a
+   section of other work is dropped, `task.filed`). Its Source column says where each came from (`intake_source_tag`;
    filtered by `Task.from_source`: clients, agents, team). A request is still a task nobody has
    taken on or started (`Task.requests`, what notifies and what the portal calls Waiting;
    `/requests` redirects to Intake). A task keeps who asked
@@ -847,7 +853,7 @@ would and everyone who could, and a plugin may choose among them per client
 (`Runwell::Plugins.notices`; the Client dashboard plugin's tab on each client), never reaching
 anyone outside `everyone`. A new notice to a client or the team goes through it. The portal's pages refresh live (`turbo_stream_from client`; the cable takes a
 portal session). A client never reads the team's statuses: `Task#client_status`
-(`Task::CLIENT_STATUSES`: received, planned, in progress, on hold, done; `portal_status_tag`), and a
+(`Task::CLIENT_STATUSES`: received, planned, in progress, on hold, done, declined; `portal_status_tag`), and a
 date an open task has passed is marked late. A client puts their things in their own order of priority by dragging them in the portal (the core's
 drag-and-drop, by a grip): their pieces of work (Your work), each work's sections, and the tasks
 shared with them, on Tasks or within a section on a work's page (`ClientPrioritized`,

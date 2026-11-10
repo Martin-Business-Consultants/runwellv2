@@ -397,6 +397,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .intake__home { display: inline-flex; gap: var(--s-1); min-width: 0; max-width: 100%; white-space: nowrap; }
 .intake__home .muted { overflow: hidden; text-overflow: ellipsis; }
 .intake__file { flex: none; color: var(--text-faint); }
+.intake__decide { display: inline-flex; align-items: center; gap: var(--s-1); }
+/* The side panel's Intake bar: Accept and Decline beside "Waiting in Intake". */
+.task-panel__intake { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-3); border-radius: calc(var(--radius-lg) * var(--radius-scale, 1)); background: var(--brand-tint, var(--accent-soft)); }
+.task-panel__intake-text { flex: 1; color: var(--text-muted); font-size: var(--text-meta); }
 .intake__file:hover { color: var(--accent); }
 
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
