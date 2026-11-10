@@ -249,7 +249,9 @@ Back, refresh and links work, and there's no client-side router:
   wherever it's linked: `peek_link_to record` keeps its page as the href. Table rows' names, a row's
   Edit (`row_actions … peek:`), a task's work, a client's contacts and the task panel's context all
   peek. It shows the title and fields in place (the same zones and `update.turbo_stream.erb` as the
-  record's page), open tasks and notes, and Open to its page; plugins' slots stay on the page
+  record's page; in the panel a field reads as its value, label beside it, and turns into its input
+  when pointed at or focused, and `peek_header`'s `meta:` puts a glance on the header's row: a
+  client's status), open tasks and notes, and Open to its page; plugins' slots stay on the page
 - **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) and an in-page add
   (Add a contact) load the new page into the layout's `modal` frame; `new.html.erb` renders
   `layouts/shared/_modal` around its form (`modal: true`) when `turbo_frame_request_id == "modal"`.

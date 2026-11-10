@@ -387,5 +387,32 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
    panel's frame, its title changed in place, then its fields, open tasks and notes. */
 .peek-panel .record-title-form .page-title { font-size: var(--text-title); }
 .peek-panel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+/* What a peek is and, on the same row, something worth a glance (a client's status). */
+.task-panel__header--meta .task-panel__context { flex: 0 1 auto; }
+.task-panel__meta { display: flex; flex: 1; align-items: center; min-width: 0; }
+/* A peek's fields read as values, the label beside each, and become inputs when pointed at or
+   focused (the title's own way, .task-panel__title); a hint shows while its field is being
+   changed. Rich text keeps its editor, under its label. */
+.peek-panel .record-fields--in-place { gap: 2px; }
+.peek-panel .record-fields--in-place .field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
+.peek-panel .record-fields--in-place .field__label { color: var(--text-muted); font-weight: var(--weight); }
+.peek-panel .record-fields--in-place .field__hint { grid-column: 2; display: none; padding-inline: var(--s-2); }
+.peek-panel .record-fields--in-place .field:focus-within .field__hint { display: block; }
+.peek-panel .record-fields--in-place .field:has(lexxy-editor) { grid-template-columns: minmax(0, 1fr); row-gap: var(--s-1); padding-block: var(--s-1); }
+.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), .combobox__trigger) { border-color: transparent; background: none; box-shadow: none; padding-inline: var(--s-2); }
+.peek-panel .record-fields--in-place .field .combobox__trigger .icon { opacity: 0; }
+.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), .combobox__trigger):hover { border-color: var(--line); }
+.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"])):focus,
+.peek-panel .record-fields--in-place .field .combobox__trigger:focus-visible,
+.peek-panel .record-fields--in-place .field .combobox:has(.popup[open]) .combobox__trigger { border-color: var(--line-strong); background: var(--panel); }
+.peek-panel .record-fields--in-place .field .combobox__trigger:hover .icon,
+.peek-panel .record-fields--in-place .field .combobox__trigger:focus-visible .icon,
+.peek-panel .record-fields--in-place .field .combobox:has(.popup[open]) .combobox__trigger .icon { opacity: 1; }
+.peek-panel .record-fields--in-place .field input::placeholder { color: var(--text-faint); }
+/* A switch: its label where the others' are, the switch where their values are, its hint dropped. */
+.peek-panel .record-fields--in-place .setting-row { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
+.peek-panel .record-fields--in-place .setting-row__label { color: var(--text-muted); font-weight: var(--weight); }
+.peek-panel .record-fields--in-place .setting-row__hint { display: none; }
+.peek-panel .record-fields--in-place .setting-row .switch { justify-self: start; margin-left: var(--s-2); }
 .peek-panel__section { display: flex; flex-direction: column; gap: var(--s-2); }
 .peek-panel__heading { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }

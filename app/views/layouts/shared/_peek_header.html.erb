@@ -1,7 +1,8 @@
-<%# locals: (record:, open_path:, context: nil) %>
+<%# locals: (record:, open_path:, context: nil, meta: nil) %>
 <%# The top of a peek in the side panel (clients/_peek, works/_peek, contacts/_peek): where the
-    record sits (context, a peek link of its own when it's a record), then Open its page and Close. %>
-<header class="task-panel__header">
+    record sits (context, a peek link of its own when it's a record), beside it what it's worth
+    knowing at a glance (meta: a client's status, changed in place), then Open its page and Close. %>
+<header class="<%= class_names("task-panel__header", "task-panel__header--meta": meta.present?) %>">
   <p class="task-panel__context">
     <% if context.is_a?(ActiveRecord::Base) %>
       <%= peek_link_to context, peek_title(context) %>
@@ -9,6 +10,9 @@
       <span><%= context %></span>
     <% end %>
   </p>
+  <% if meta.present? %>
+    <div class="task-panel__meta"><%= meta %></div>
+  <% end %>
   <div class="task-panel__actions">
     <%= link_to open_path, class: "icon-button", title: "Open its page", data: { turbo_frame: "_top" } do %>
       <%= icon_tag "maximize" %>
