@@ -834,7 +834,9 @@ do, through the same controllers: there is no separate API.
   `{ status: "error", errors }` (from the record the action was saving). So write notices a
   model can act on, and give `redirect_back` a sensible fallback
 - **Anything that reaches a client** (sends, emails, portal visibility) declares `confirm:`;
-  the tool then answers `needs_confirmation` with a preview until called with `confirm: true`
+  the tool then answers `needs_confirmation` with a preview until called with `confirm: true`.
+  A tool that reaches the client only with some arguments adds `confirm_when:` (the task tools,
+  when `client_visible` is true); a task an agent adds stays internal unless it says otherwise
 - A tool runs the real action with the caller's token (`Agent::Dispatch`), so roles,
   permissions, validations and events are the UI's. `Agent::Catalogue.for(user)` offers only
   what their role and switched-on plugins allow; `me` explains what's withheld

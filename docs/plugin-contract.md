@@ -368,6 +368,7 @@ New kinds may be added in any minor release; existing kinds keep their name and 
 | Call | Since | Status |
 | --- | --- | --- |
 | `agent_tool name, on:, title:, description:, params:, confirm:, next_tools:` in a controller | 2.0 | Stable |
+| `confirm_when:` on `agent_tool`, a lambda of the call's arguments (string keys) for a tool that reaches the client only sometimes: it previews only when the lambda is true (`->(args) { Agent::Tool.truthy?(args.dig("task", "client_visible")) }`) | 5.16 | Stable |
 | `agent_exempt action, reason:` | 2.0 | Stable |
 | A param's spec as a lambda returning one (`label: -> { WorkType.active_keys }`), read each time the tools are listed, for choices the install sets | 5.9 | Stable |
 | `Runwell::Plugins.agent_brief key, ->(task, base_url) { markdown or nil }` | 2.0 | Stable |

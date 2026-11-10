@@ -7,14 +7,21 @@ module Agent
     CUSTOM_FIELDS = { type: "object", additionalProperties: true,
       description: "Custom fields by key, from list_custom_fields: text; money in whole cents; dates YYYY-MM-DD; true/false; a choice’s exact value. A blank removes a value." }.freeze
 
-    attr_reader :controller, :action, :name, :title, :description, :params, :confirm, :route, :follow, :next_tools
+    attr_reader :controller, :action, :name, :title, :description, :params, :confirm, :confirm_when, :route, :follow, :next_tools
 
     def initialize(controller, action, declaration)
       @controller, @action = controller, action.to_s
       @name, @title, @description, @params = declaration.values_at(:name, :title, :description, :params)
-      @confirm, @follow, @next_tools = declaration.values_at(:confirm, :follow, :next_tools)
+      @confirm, @confirm_when, @follow, @next_tools = declaration.values_at(:confirm, :confirm_when, :follow, :next_tools)
       @route = find_route(declaration[:route])
     end
+
+    # Whether this call reaches the client, so it previews until confirmed: always for a tool with
+    # confirm:, or only for the arguments its confirm_when: picks out.
+    def needs_confirmation?(arguments) = confirm.present? && (confirm_when.nil? || confirm_when.call(arguments.to_h))
+
+    # An argument meant as true, however it came: true, "true" or "1".
+    def self.truthy?(value) = value.to_s.in?(%w[true 1])
 
     def verb = route.verb.split("|").first
     def read? = verb == "GET"
@@ -55,7 +62,7 @@ module Agent
     end
 
     def full_description
-      [ description.presence || title, (confirm && "Reaches the client: #{confirm} Call once to get a preview, then again with confirm: true."),
+      [ description.presence || title, (confirm && "Reaches the client#{" (only then)" if confirm_when}: #{confirm} Call once to get a preview, then again with confirm: true."),
         (next_tools.any? && "Often next: #{next_tools.join(", ")}.") ].compact_blank.join("\n\n")
     end
 

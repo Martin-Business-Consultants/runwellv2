@@ -5,7 +5,8 @@ class Bulk::TasksController < ApplicationController
   require_permission :delete_records, only: :destroy
   agent_tool :bulk_update_tasks, on: :update, title: "Change several tasks at once",
     description: "ids: the tasks. Give any of status, owner_id (the lead: a person's id or name, keeping anyone else on it; blank takes everyone off), due_on (blank clears) or client_visible, and each task changes as update_task would.",
-    params: { ids: "integer[]!", task: { status: Task::STATUSES, owner_id: "string", due_on: "date", client_visible: "boolean" } }
+    params: { ids: "integer[]!", task: { status: Task::STATUSES, owner_id: "string", due_on: "date", client_visible: "boolean" } },
+    confirm: "Visible to the client (client_visible: true) shows it in their portal.", confirm_when: ->(args) { Agent::Tool.truthy?(args.dig("task", "client_visible")) }
   agent_tool :bulk_delete_tasks, on: :destroy, title: "Remove several tasks at once", params: { ids: "integer[]!" }
 
   def update

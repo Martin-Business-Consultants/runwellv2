@@ -53,7 +53,7 @@ module Agent
 
       def run
         @arguments = with_names_resolved(arguments)
-        return preview if tool.confirm && arguments["confirm"] != true
+        return preview if tool.needs_confirmation?(arguments) && arguments["confirm"] != true
 
         key = arguments["idempotency_key"].to_s.presence unless tool.read?
         if key && access_token && (prior = access_token.agent_idempotency_keys.find_by(key: key))

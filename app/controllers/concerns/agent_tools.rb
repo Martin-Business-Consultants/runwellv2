@@ -37,10 +37,11 @@ module AgentTools
     # objects ([ { title: "string!" } ]); a trailing "!" makes it required. Path
     # parameters (id, ref, client_id…) come from the route; route: picks one by its path when
     # an action has several ("/works/:work_ref/work"). confirm: what reaches a client;
-    # the tool then previews until called again with confirm: true.
-    def agent_tool(name, on:, title:, description: nil, params: {}, confirm: nil, route: nil, follow: true, next_tools: [])
+    # the tool then previews until called again with confirm: true. confirm_when: a lambda of the
+    # call's arguments, for a tool that reaches the client only sometimes (client_visible: true).
+    def agent_tool(name, on:, title:, description: nil, params: {}, confirm: nil, confirm_when: nil, route: nil, follow: true, next_tools: [])
       self.agent_declarations = agent_declarations.merge(on.to_s => {
-        name: name.to_s, title: title, description: description, params: params, confirm: confirm,
+        name: name.to_s, title: title, description: description, params: params, confirm: confirm, confirm_when: confirm_when,
         route: route&.to_s, follow: follow, next_tools: next_tools.map(&:to_s)
       })
     end
