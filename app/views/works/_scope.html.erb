@@ -2,11 +2,15 @@
 <%# The work's sections down the sidebar: all its work, each section, and work in none, each
     with how much is done. Picking one shows just its work in the Work tab
     (?item=), where its tasks are added. current: the one shown ("all", an id, "other"), nil off
-    the Work tab. Counted in one query, not one per item. %>
+    the Work tab. Counted in one query, not one per item. The sections move to a new place by their
+    grip (dragged, or ↑ and ↓ once it's focused), the core's drag-and-drop posting to the same
+    ScopeItems::MovesController as the Tasks tab's accordions, so this works while one section is
+    picked too; the page refreshes in place with the new order. Not on closed work. %>
 <% statuses = work.tasks.pluck(:scope_item_id, :status).group_by(&:first).transform_values { |rows| rows.map(&:last) } %>
 <% items = work.scope_items.to_a %>
 <% rows = items.map { |item| [ item.id, item.description, statuses.fetch(item.id, []) ] } %>
-<% rows << [ "other", "Other " + term(:task, count: 2).downcase, statuses[nil] ] if statuses[nil] %>
+<% other = [ "other", "Other " + term(:task, count: 2).downcase, statuses[nil] ] if statuses[nil] %>
+<% sortable = !work.closed? && items.size > 1 %>
 <% everything = statuses.values.flatten %>
 <% filters = request.query_parameters.slice("tasks") %>
 
@@ -18,22 +22,41 @@
       <span class="scope-nav__count"><%= everything.count("done") %>/<%= everything.size %></span>
       <progress class="scope-nav__progress" value="<%= everything.count("done") %>" max="<%= [ everything.size, 1 ].max %>"></progress>
     </a>
-    <% rows.each do |id, name, item_statuses| %>
-      <%# herb:key id %>
-      <% state = id == "other" ? nil : ScopeItem.delivery_state_of(item_statuses) %>
-      <a href="<%= work_path(work, filters.merge(tab: "tasks", item: id)) %>" class="scope-nav__item"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
-        <span class="scope-nav__name" title="<%= name %>">
-          <% if state %>
-            <%= status_dot({ "in_progress" => :accent, "blocked" => :danger, "done" => :ok }.fetch(state, :neutral), label: state.humanize) %>
+    <div class="scope-nav__sections" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="scope-nav__row--dragging" data-drag-and-drop-hover-container-class="scope-nav__sections--hover"
+      data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
+      <div data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= scope_item_move_path("__id__") %>">
+        <div class="scope-nav__list" data-drag-drop-item-container>
+          <% rows.each do |id, name, item_statuses| %>
+            <%# herb:key id %>
+            <% state = ScopeItem.delivery_state_of(item_statuses) %>
+            <div class="scope-nav__row" data-drag-and-drop-target="item" data-id="<%= id %>">
+              <% if sortable %>
+                <span class="scope-nav__grip" draggable="true" tabindex="0" role="button" title="Drag to move <%= name %>, or press ↑ or ↓"
+                  aria-label="Move <%= name %>: press up or down" data-action="keydown.up->drag-and-drop#moveUp keydown.down->drag-and-drop#moveDown"><%= icon_tag "grip" %></span>
+              <% end %>
+              <a href="<%= work_path(work, filters.merge(tab: "tasks", item: id)) %>" class="scope-nav__item" draggable="false"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
+                <span class="scope-nav__name" title="<%= name %>">
+                  <%= status_dot({ "in_progress" => :accent, "blocked" => :danger, "done" => :ok }.fetch(state, :neutral), label: state.humanize) %>
+                  <span class="scope-nav__label"><%= name %></span>
+                </span>
+                <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>
+                <progress class="scope-nav__progress" value="<%= item_statuses.count("done") %>" max="<%= [ item_statuses.size, 1 ].max %>"></progress>
+              </a>
+            </div>
           <% end %>
-          <span class="scope-nav__label"><%= name %></span>
-        </span>
+        </div>
+      </div>
+    </div>
+    <% if other %>
+      <% id, name, item_statuses = other %>
+      <a href="<%= work_path(work, filters.merge(tab: "tasks", item: id)) %>" class="scope-nav__item"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
+        <span class="scope-nav__name" title="<%= name %>"><span class="scope-nav__label"><%= name %></span></span>
         <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>
         <progress class="scope-nav__progress" value="<%= item_statuses.count("done") %>" max="<%= [ item_statuses.size, 1 ].max %>"></progress>
       </a>
     <% end %>
   </nav>
-  <% if rows.empty? %>
+  <% if rows.empty? && other.nil? %>
     <p class="record-card__empty">
       No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:task, count: 2).downcase %>, or add <%= term(:task, count: 2).downcase %> straight in the <%= term(:task, count: 2) %> tab.
     </p>

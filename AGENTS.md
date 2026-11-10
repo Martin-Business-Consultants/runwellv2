@@ -435,8 +435,9 @@ an info button beside the title (a dialog, no Overview card); its Tasks tab show
 section or, with the List / Board switch (`?task_view=board`, `tasks/_view_switch`), as the Tasks
 board for everyone's tasks on it (`@board_filters`, which `task_board_filters` hands the columns and
 drops); History is a tab, and the sidebar is its sections
-(`works/_scope`, where they're added): all tasks, each section with done of total, and
-other tasks, each a `?item=` link that shows just that work in the Tasks tab, where its tasks are
+(`works/_scope`, where they're added): all tasks, each section with done of total (moved to a
+new place by its grip there too, dragged or ↑ ↓, through the same `ScopeItems::MovesController`),
+and other tasks, each a `?item=` link that shows just that work in the Tasks tab, where its tasks are
 added. In the Tasks tab each section (and other tasks) is an accordion (`<details>`: the first
 open, and any empty one, and the one a task was just added to; the `keep-open` behavior keeps
 whatever someone opened through a morph), dragged by its grip to a new place (the core's

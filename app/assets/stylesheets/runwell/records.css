@@ -230,6 +230,21 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .scope-nav { display: flex; flex-direction: column; gap: 2px; margin-inline: calc(-1 * var(--s-2)); }
 .scope-nav__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px var(--s-3); padding: var(--s-2); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
 .scope-nav__item:hover { background: var(--hover); color: var(--text); }
+/* The sections in the work's order, each moved by a grip in the list's left gutter that shows on
+/* hover or focus (always on touch); the one being dragged is tinted. */
+.scope-nav__sections, .scope-nav__list { display: flex; flex-direction: column; gap: 2px; }
+.scope-nav__row { position: relative; }
+.scope-nav__grip {
+  position: absolute; top: .45rem; left: calc(-1 * var(--s-4)); z-index: 1; display: grid; place-items: center; width: var(--s-4); height: 1.25rem;
+  color: var(--text-faint); cursor: grab; opacity: 0; transition: opacity 80ms ease-out;
+}
+.scope-nav__grip .icon { width: .8rem; height: .8rem; }
+.scope-nav__row:hover .scope-nav__grip, .scope-nav__grip:focus-visible { opacity: 1; }
+.scope-nav__grip:hover { color: var(--text); }
+.scope-nav__grip:active { cursor: grabbing; }
+.scope-nav__grip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: var(--radius-sm); color: var(--text); }
+@media (hover: none) { .scope-nav__grip { opacity: 1; } }
+.scope-nav__row--dragging .scope-nav__item { background: var(--brand-tint); opacity: .8; }
 .scope-nav__item[aria-current="page"] { background: var(--layer-2); font-weight: var(--weight-strong); }
 .scope-nav__name { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
 .scope-nav__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
