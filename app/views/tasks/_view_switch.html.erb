@@ -5,7 +5,7 @@
 <nav class="tabs tabs--icons" aria-label="Show as" data-picks-current>
   <% [ [ "list", "List", "column-left" ], [ "board", "Board", "board" ] ].each do |key, label, icon| %>
     <%# herb:key key %>
-    <%= link_to url_for(request.query_parameters.except("task").merge("tab" => "tasks", "task_view" => key)), class: "tabs__tab", title: label,
+    <%= link_to url_for(request.query_parameters.except("task", "peek").merge("tab" => "tasks", "task_view" => key)), class: "tabs__tab", title: label,
           aria: { current: (key == current) ? "page" : "false", label: label }, data: { turbo_frame: "record_tab", turbo_action: "replace" } do %>
       <%= icon_tag icon %>
     <% end %>

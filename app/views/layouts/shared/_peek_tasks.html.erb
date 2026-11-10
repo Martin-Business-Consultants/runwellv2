@@ -1,0 +1,17 @@
+<%# locals: (record:, path:) %>
+<%# A peek's open tasks (a client's or a piece of work's), soonest due first: the first dozen, each
+    opening in the panel in the peek's place, and how many more its page has. %>
+<% tasks = record.tasks.open.includes(:owner, :client, :work, assignments: :user).order(:due_on, :position).limit(13).to_a %>
+<section class="peek-panel__section">
+  <h2 class="peek-panel__heading">Open <%= term(:task, count: 2).downcase %></h2>
+  <% if tasks.any? %>
+    <ul class="record-list">
+      <%= render partial: "tasks/task", collection: tasks.first(12), as: :task %>
+    </ul>
+    <% if tasks.size > 12 %>
+      <%= link_to "More on its page", path, class: "small", data: { turbo_frame: "_top" } %>
+    <% end %>
+  <% else %>
+    <p class="record-card__empty">Nothing open.</p>
+  <% end %>
+</section>

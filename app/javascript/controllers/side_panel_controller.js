@@ -1,15 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
 // The side panel (layouts/shared/_side_panel): a task opened over the page you're on instead of on
-// a page of its own. Its state is the page's own address plus ?task=42, so a refresh shows the same
-// page with the same task open, and the server renders it on a full load.
+// a page of its own, or a client, piece of work or contact peeked at there. Its state is the page's
+// own address plus ?task=42 (or ?peek=Work:12; one at a time), so a refresh shows the same page with
+// the same panel open, and the server renders it on a full load.
 //
 // Opening, following and closing only load the panel's frame (frame.src): no page visit, so no page
 // render, view transition or morph runs under it. The address is written through Turbo's history
 // (push to open, replace to follow or close), so the entries are ones Turbo understands, and Back
 // or Forward between this page with and without ?task is handled here, before Turbo would revisit
-// the page. Links that open a task carry data-action="side-panel#open" and the task's id; with a
-// modifier key (or a middle click) they open the task's own page as usual.
+// the page. Links that open one carry data-action="side-panel#open" and the task's id
+// (data-side-panel-task-param) or the record's "Type:id" (data-side-panel-peek-param); with a
+// modifier key (or a middle click) they open its own page as usual.
 //
 // Hovering a task's link fetches its panel ahead (prefetch, after a short pause, kept 10 seconds),
 // and the frame's own request then takes that response instead of asking again (Turbo's hand-off,
@@ -29,7 +31,9 @@ import { Controller } from "@hotwired/stimulus"
 const PREFETCH_DELAY = 60
 const PREFETCH_TTL = 10_000
 const PREFETCH_KEPT = 4
-const KEEPS_OPEN = "[data-side-panel-task-param], dialog, [popover], #modal, #flash, #quick_action"
+const LINK = "[data-side-panel-task-param], [data-side-panel-peek-param]"
+const PARAMS = [ "task", "peek" ]
+const KEEPS_OPEN = `${LINK}, dialog, [popover], #modal, #flash, #quick_action`
 
 export default class extends Controller {
   static targets = [ "frame", "placeholder" ]
@@ -84,24 +88,24 @@ export default class extends Controller {
   clicked(event) {
     const pressedOff = this.pressedOff
     this.pressedOff = false
-    if (!pressedOff || !this.#isOpen || !this.#off(event) || !this.#currentId) return
+    if (!pressedOff || !this.#isOpen || !this.#off(event) || !this.#current) return
     if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
 
     this.close()
   }
 
-  // A pointer resting on a task's link: fetch its panel, unless it's the one showing or already fetched.
+  // A pointer resting on a panel's link: fetch its panel, unless it's the one showing or already fetched.
   hovered({ target }) {
-    const link = target.closest?.("[data-side-panel-task-param]")
+    const link = target.closest?.(LINK)
     if (!link || link === this.hoveredLink) return
 
     this.hoveredLink = link
     clearTimeout(this.hoverTimer)
-    this.hoverTimer = setTimeout(() => this.#prefetch(link.dataset.sidePanelTaskParam), PREFETCH_DELAY)
+    this.hoverTimer = setTimeout(() => this.#prefetch(this.#paramOf(link)), PREFETCH_DELAY)
   }
 
   unhovered({ target, relatedTarget }) {
-    const link = target.closest?.("[data-side-panel-task-param]")
+    const link = target.closest?.(LINK)
     if (!link || link !== this.hoveredLink || link.contains(relatedTarget)) return
 
     this.hoveredLink = null
@@ -160,11 +164,11 @@ export default class extends Controller {
 
   open(event) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0) return
-    const id = event.params.task
-    if (!id) return
+    const param = PARAMS.map(name => [ name, event.params[name] ]).find(([ , value ]) => value)
+    if (!param) return
 
     event.preventDefault()
-    const url = this.#urlFor(id)
+    const url = this.#urlFor(param)
     if (!this.#isOpen) this.#showPlaceholder(event.params.title)
     this.#load(url)
     this.#record("push", url)
@@ -175,10 +179,10 @@ export default class extends Controller {
   // j / k with the panel open: it follows the row you move to, without adding to history.
   follow({ target }) {
     if (!this.#isOpen) return
-    const id = target.querySelector?.("[data-side-panel-task-param]")?.dataset.sidePanelTaskParam
-    if (!id || id === this.#currentId) return
+    const param = this.#paramOf(target.querySelector?.(LINK))
+    if (!param || this.#isCurrent(param)) return
 
-    const url = this.#urlFor(id)
+    const url = this.#urlFor(param)
     this.#load(url)
     this.#record("replace", url)
     this.#prefetchAround(target)
@@ -222,20 +226,37 @@ export default class extends Controller {
     return !this.frameTarget.contains(target) && !target.closest(KEEPS_OPEN)
   }
 
-  get #currentId() {
-    return new URL(location.href).searchParams.get("task")
+  // What the panel shows, from the address: [ "task", "42" ], [ "peek", "Work:12" ] or nothing.
+  get #current() {
+    const params = new URL(location.href).searchParams
+    return PARAMS.map(name => [ name, params.get(name) ]).find(([ , value ]) => value)
   }
 
-  #urlFor(id) {
+  #isCurrent([ name, value ]) {
+    const current = this.#current
+    return !!current && current[0] === name && current[1] === String(value)
+  }
+
+  // What a link opens: [ "task", id ] or [ "peek", "Type:id" ].
+  #paramOf(link) {
+    if (!link) return null
+    if (link.dataset.sidePanelTaskParam) return [ "task", link.dataset.sidePanelTaskParam ]
+    if (link.dataset.sidePanelPeekParam) return [ "peek", link.dataset.sidePanelPeekParam ]
+    return null
+  }
+
+  // This page with that panel (one at a time), or none.
+  #urlFor(param) {
     const url = new URL(location.href)
-    id ? url.searchParams.set("task", id) : url.searchParams.delete("task")
+    PARAMS.forEach(name => url.searchParams.delete(name))
+    if (param) url.searchParams.set(param[0], param[1])
     return url
   }
 
-  // The page the panel last saw, apart from ?task: the same path and every other param.
+  // The page the panel last saw, apart from ?task and ?peek: the same path and every other param.
   #samePageAs(url) {
     if (!this.pageUrl) return false
-    const strip = u => { const copy = new URL(u); copy.searchParams.delete("task"); return copy.pathname + "?" + copy.searchParams.toString() }
+    const strip = u => { const copy = new URL(u); PARAMS.forEach(name => copy.searchParams.delete(name)); return copy.pathname + "?" + copy.searchParams.toString() }
     return strip(url) === strip(this.pageUrl)
   }
 
@@ -250,7 +271,7 @@ export default class extends Controller {
     this.frameTarget.replaceChildren(placeholder)
   }
 
-  // The tasks just before and after this item in the page's list (the items j / k move through),
+  // The rows just before and after this item in the page's list (the items j / k move through),
   // fetched once the panel's own request is on its way.
   #prefetchAround(item) {
     if (!item) return
@@ -260,13 +281,13 @@ export default class extends Controller {
     if (at < 0) return
 
     for (const neighbour of [ items[at + 1], items[at - 1] ]) {
-      this.#prefetch(neighbour?.querySelector("[data-side-panel-task-param]")?.dataset.sidePanelTaskParam)
+      this.#prefetch(this.#paramOf(neighbour?.querySelector(LINK)))
     }
   }
 
-  #prefetch(id) {
-    if (!id || id === this.#currentId) return
-    const url = this.#urlFor(id).toString()
+  #prefetch(param) {
+    if (!param || this.#isCurrent(param)) return
+    const url = this.#urlFor(param).toString()
     const kept = this.prefetched.get(url)
     if (kept && Date.now() - kept.at < PREFETCH_TTL) return
 

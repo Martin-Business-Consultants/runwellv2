@@ -244,6 +244,12 @@ Back, refresh and links work, and there's no client-side router:
   (`keyboard:select`), with the tasks above and below fetched ahead (as a hovered task's link is). It loads by setting its frame's `src` and records the address through
   Turbo's history (no page visit runs under it). Its fields save on change with `inline=panel`,
   answered by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows
+- **Peek**: a client, a piece of work or a contact opens in the same panel (`?peek=Work:12`, one
+  panel at a time; `<type>/_peek`, `ApplicationController#side_panel_peek`, `PEEKABLE`) from
+  wherever it's linked: `peek_link_to record` keeps its page as the href. Table rows' names, a row's
+  Edit (`row_actions … peek:`), a task's work, a client's contacts and the task panel's context all
+  peek. It shows the title and fields in place (the same zones and `update.turbo_stream.erb` as the
+  record's page), open tasks and notes, and Open to its page; plugins' slots stay on the page
 - **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) loads the new page
   into the layout's `modal` frame; `new.html.erb` renders `layouts/shared/_modal` around its form
   (`modal: true`) when `turbo_frame_request_id == "modal"`, and the form submits to `_top`

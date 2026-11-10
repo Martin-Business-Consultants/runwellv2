@@ -42,7 +42,7 @@
           <%= render "notifications/tray" %>
         </div>
         <%= render "quick_actions/tray" %>
-        <%= render "layouts/shared/side_panel", task: side_panel_task %>
+        <%= render "layouts/shared/side_panel", task: side_panel_task, peek: side_panel_peek %>
         <%= turbo_stream_from Current.user, :notifications %>
         <%= render "layouts/shared/modal_placeholder" %>
         <turbo-frame id="modal" data-loading-placeholder="modal_placeholder"></turbo-frame>

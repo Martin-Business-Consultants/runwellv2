@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
   before_action :remember_host
   before_action :render_side_panel, if: -> { turbo_frame_request_id == "side_panel" && request.get? }
   around_action :in_install_time_zone
-  helper_method :side_panel_task, :current_record
+  helper_method :side_panel_task, :side_panel_peek, :current_record
 
   private
 
@@ -41,10 +41,24 @@ class ApplicationController < ActionController::Base
     @side_panel_task ||= Task.includes(:work, :client, :scope_item, :owner, assignments: :user).find_by(id: params[:task])
   end
 
+  # What can be peeked at in the side panel (?peek=Work:12 on any staff page): a client, a piece of
+  # work or a contact, over the page you're on. Every one is a record any staff member may open
+  # (their pages are allow_staff), so the panel needs no rule of its own.
+  PEEKABLE = %w[Client Work Contact].freeze
+
+  # The record peeked at in the side panel, or nil (a task, ?task=, takes the panel first).
+  def side_panel_peek
+    return unless Current.user && !Current.agent? && params[:peek].present? && params[:task].blank?
+
+    @side_panel_peek ||= QuickAction.locate(params[:peek], PEEKABLE)
+  rescue ActionController::BadRequest, ActiveRecord::RecordNotFound
+    nil
+  end
+
   # Opening or closing the side panel loads just its frame: the page under it stays as it is, so
   # its own action needn't run.
   def render_side_panel
-    render partial: "layouts/shared/side_panel", locals: { task: side_panel_task }, layout: false
+    render partial: "layouts/shared/side_panel", locals: { task: side_panel_task, peek: side_panel_peek }, layout: false
   end
 
   # Until someone sets the address (Settings > Address or APP_HOST), mail links to the one

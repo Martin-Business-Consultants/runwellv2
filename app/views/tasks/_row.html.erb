@@ -6,7 +6,7 @@
   <td data-column="title"><%= side_panel_link_to task, task.title %></td>
   <td data-column="work">
     <% if task.work %>
-      <%= link_to task.work.title, task.work, class: "task-table__work", title: task.work.label_name %>
+      <%= peek_link_to task.work, task.work.title, class: "task-table__work", title: task.work.label_name %>
     <% end %>
   </td>
   <td class="muted" data-column="client"><%= task.client&.name %></td>

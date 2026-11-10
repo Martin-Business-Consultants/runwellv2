@@ -19,5 +19,5 @@ module RecordTabsHelper
 
   # Another tab closes the side panel: its link leaves ?task= out (and the side panel controller
   # lets the open panel fade away).
-  def record_tab_path(key) = url_for(request.query_parameters.except("task").merge(tab: key))
+  def record_tab_path(key) = url_for(request.query_parameters.except("task", "peek").merge(tab: key))
 end

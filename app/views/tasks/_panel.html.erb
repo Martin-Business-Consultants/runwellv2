@@ -9,9 +9,9 @@
   <header class="task-panel__header">
     <p class="task-panel__context">
       <% if task.work %>
-        <%= link_to task.work.title, task.work, data: { turbo_frame: "_top" } %>
+        <%= peek_link_to task.work, task.work.title %>
       <% elsif task.client %>
-        <%= link_to task.client.name, task.client, data: { turbo_frame: "_top" } %>
+        <%= peek_link_to task.client, task.client.name %>
       <% else %>
         <span>No <%= term(:client).downcase %> yet</span>
       <% end %>

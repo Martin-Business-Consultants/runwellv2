@@ -1,0 +1,18 @@
+<%# locals: (record:) %>
+<%# A piece of work in the side panel (?peek=Work:12), over the page you're on: its title and
+    fields, changed in place as on its page (works/update.turbo_stream.erb redraws both), its open
+    tasks and its notes. Its sections, board, history and plugins' panels stay on its page (Open). %>
+<% layout = record_layout(:work) %>
+<section class="task-panel peek-panel" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.title %>">
+  <%= turbo_stream_from record %>
+  <%= render "layouts/shared/peek_header", record: record, open_path: work_path(record), context: record.client %>
+  <%= render "layouts/shared/record_title", record: record, attribute: :title, label: "Title" %>
+  <p class="peek-panel__meta record-meta">
+    <%= status_tag record.state_label, highlight: record.active? %>
+    <span><%= record.label_name %> · <%= record.runs %></span>
+  </p>
+  <%= render "record_fields/zone", layout: layout, zone: "main", record: record, in_place: true, except: header_fields(:work) %>
+  <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, in_place: true, except: header_fields(:work) %>
+  <%= render "layouts/shared/peek_tasks", record: record, path: work_path(record, tab: "tasks") %>
+  <%= render "notes/section", subject: record, permanent: false, deferred: true %>
+</section>

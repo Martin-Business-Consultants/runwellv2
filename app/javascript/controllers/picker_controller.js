@@ -62,7 +62,7 @@ export default class extends Controller {
     // says so, and the answer brings that list back as it now stands. From the side panel, which
     // sits in no list, it's the list on the page underneath (one per page), and it says it came
     // from the panel: a task that leaves the list closes the panel too.
-    const panel = this.element.closest(".task-panel")
+    const panel = this.element.closest(".task-panel:not(.peek-panel)")
     const list = this.element.closest("[data-task-list]") || (panel && document.querySelector("[data-task-list]"))
     if (panel) this.#hidden(form, "panel", "1")
     if (list) {
@@ -161,7 +161,7 @@ export default class extends Controller {
   #leaving(status) {
     if (!this.taskValue || !status || status === this.currentValue) return
 
-    const panel = this.element.closest(".task-panel")
+    const panel = this.element.closest(".task-panel:not(.peek-panel)")
     const list = this.element.closest("[data-task-list]") || (panel && document.querySelector("[data-task-list]"))
     const keeps = list?.dataset.taskListKeeps?.split(" ")
     if (!keeps || keeps.includes(status)) return

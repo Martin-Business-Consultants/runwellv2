@@ -79,6 +79,12 @@ fills `:task_aside` instead (`task.request?` says whether nobody has taken it on
 plugin: a piece of work's own tab is `:work_panel`, its sidebar `:work_aside` and its
 title line `:work_meta`.
 
+**Peeks render no slots (since 5.22).** A client, a piece of work or a contact opened in the side
+panel (`?peek=Work:12`) shows its title, fields, open tasks and notes, and an Open button to its
+page. The `*_aside`, `*_panel` and `:work_meta` slots stay on the record's own page: they were made
+for its sidebar and tabs, and a narrow panel over another page is no place for them. A note's
+`:note_row` still shows in a peek's notes, as it does everywhere notes do.
+
 A slot partial declares strict locals on its first line, like every core partial. The row slot
 (`:note_row`) renders once per row: tasks out anything shared once a request (a
 `CurrentAttributes` of the plugin's own), never a query per row. A shortcut only lists a key on the

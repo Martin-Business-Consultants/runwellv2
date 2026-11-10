@@ -38,7 +38,7 @@
             <% contacts.each do |contact| %>
               <%# herb:key contact.id %>
               <li data-filter-target="item">
-                <%= link_to edit_contact_path(contact), class: "list-row" do %>
+                <%= peek_link_to contact, class: "list-row" do %>
                   <%= avatar contact.name, size: :md %>
                   <span class="list-row__content">
                     <span class="list-row__title"><%= contact.name %></span>

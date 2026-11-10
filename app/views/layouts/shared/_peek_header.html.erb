@@ -1,0 +1,22 @@
+<%# locals: (record:, open_path:, context: nil) %>
+<%# The top of a peek in the side panel (clients/_peek, works/_peek, contacts/_peek): where the
+    record sits (context, a peek link of its own when it's a record), then Open its page and Close. %>
+<header class="task-panel__header">
+  <p class="task-panel__context">
+    <% if context.is_a?(ActiveRecord::Base) %>
+      <%= peek_link_to context, peek_title(context) %>
+    <% elsif context %>
+      <span><%= context %></span>
+    <% end %>
+  </p>
+  <div class="task-panel__actions">
+    <%= link_to open_path, class: "icon-button", title: "Open its page", data: { turbo_frame: "_top" } do %>
+      <%= icon_tag "maximize" %>
+      <span class="visually-hidden">Open <%= peek_title(record) %> on its own page</span>
+    <% end %>
+    <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close">
+      <%= icon_tag "close" %>
+      <span class="visually-hidden">Close</span>
+    </button>
+  </div>
+</header>

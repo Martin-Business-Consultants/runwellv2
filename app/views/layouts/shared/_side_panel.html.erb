@@ -1,7 +1,8 @@
-<%# locals: (task: nil) %>
-<%# The side panel's frame (side-panel controller): empty, or the task named by ?task= on the page
-    you're on (tasks/_panel). The layout renders it, and so does ApplicationController for a frame
-    request, which skips the page's own work. %>
+<%# locals: (task: nil, peek: nil) %>
+<%# The side panel's frame (side-panel controller): empty, the task named by ?task= on the page
+    you're on (tasks/_panel), or the client, work or contact named by ?peek=Type:id (its
+    <type>/_peek). The layout renders it, and so does ApplicationController for a frame request,
+    which skips the page's own work. %>
 <%# What the panel shows the moment a task is clicked, before its frame arrives: the panel with the
     task's title (from the link) and quiet lines where its fields go. %>
 <template data-side-panel-target="placeholder">
@@ -24,5 +25,7 @@
 <turbo-frame id="side_panel" data-side-panel-target="frame">
   <% if task %>
     <%= render "tasks/panel", task: task %>
+  <% elsif peek %>
+    <%= render "#{peek.class.name.underscore.pluralize}/peek", record: peek %>
   <% end %>
 </turbo-frame>

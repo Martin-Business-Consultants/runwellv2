@@ -1,0 +1,15 @@
+<%# locals: (record:) %>
+<%# A client in the side panel (?peek=Client:3), over the page you're on: its name and fields,
+    changed in place as on its page (clients/update.turbo_stream.erb redraws both), its open tasks
+    and its notes. Its tabs and plugins' panels stay on its page (Open). %>
+<% layout = record_layout(:client) %>
+<section class="task-panel peek-panel" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.name %>">
+  <%= turbo_stream_from record %>
+  <%= render "layouts/shared/peek_header", record: record, open_path: client_path(record), context: term(:client) %>
+  <%= render "layouts/shared/record_title", record: record, attribute: :name, label: "Name" %>
+  <p class="peek-panel__meta"><%= render "clients/status_picker", client: record %></p>
+  <%= render "record_fields/zone", layout: layout, zone: "main", record: record, in_place: true, except: header_fields(:client) %>
+  <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, in_place: true, except: header_fields(:client) %>
+  <%= render "layouts/shared/peek_tasks", record: record, path: client_path(record, tab: "tasks") %>
+  <%= render "notes/section", subject: record, permanent: false, deferred: true %>
+</section>

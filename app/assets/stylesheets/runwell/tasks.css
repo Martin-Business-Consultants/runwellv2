@@ -382,3 +382,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
 .owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--radius-pill, 99rem); background: color-mix(in srgb, var(--attention) 18%, transparent); color: var(--attention); font-size: var(--text-xs); font-weight: var(--weight-strong); }
 [data-away-on-due] .owner-picker__away { display: inline-block; }
+
+/* A client, a piece of work or a contact peeked at in the side panel (<type>/_peek): the task
+   panel's frame, its title changed in place, then its fields, open tasks and notes. */
+.peek-panel .record-title-form .page-title { font-size: var(--text-title); }
+.peek-panel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+.peek-panel__section { display: flex; flex-direction: column; gap: var(--s-2); }
+.peek-panel__heading { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
