@@ -21,7 +21,11 @@ env:
   IMAGE: ghcr.io/martin-business-consultants/runwell
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: ci
     strategy:
       matrix:
         include:

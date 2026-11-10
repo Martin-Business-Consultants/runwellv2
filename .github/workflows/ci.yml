@@ -1,0 +1,30 @@
+# Lint and tests (bin/ci, config/ci.rb) on every push to main and every pull request. Release and
+# Image call it too and wait for it, so a tag on a commit that fails never reaches an install.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      # Herb's linter runs through npx.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: bin/ci
