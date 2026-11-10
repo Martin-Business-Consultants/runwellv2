@@ -60,7 +60,7 @@ Slots, and the locals each partial gets:
 | `:work_panel` | A tab on each work | `work:` | 2.0 |
 | `:task_panel` | A tab on each task | `task:` | 2.0 |
 | `:nav_actions` | A button in the nav's foot | none | 2.0 |
-| `:portal_home` | The client portal's home | `client:` | 2.0 |
+| `:portal_home` | The client portal's home: a card in its sidebar, under any dashboard (below the work until 5.32) | `client:` | 2.0 |
 | `:portal_work_panel` | A piece of work in the portal | `work:` | 2.0 |
 | `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
@@ -70,7 +70,7 @@ Slots, and the locals each partial gets:
 | `:scope_item_aside` | A section's (scope item's) sidebar, above Details | `scope_item:` | 2.18 |
 | `:note_row` | Inside each note in a Notes section | `note:` | 2.18 |
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
-| `:portal_dashboard` | The top of the portal's first page, above the client's work: a dashboard for the client (what's new, what's coming up). The core draws none; each partial is a card or several, laid side by side. `Task.unread_discussion_ids(contact)` gives the shared tasks holding a message the contact hasn't read, `task.client_status` what a client reads for a status, `portal_task_link_to(task)` a link opening it in the portal's side sheet | `client:`, `contact:` | 5.29 |
+| `:portal_dashboard` | The sidebar of the portal's first page, beside the client's work (under it on a narrow screen): a dashboard for the client (what's new, what's coming up). The core draws none; each partial is a card or several, stacked down the sidebar (5.29 to 5.31 drew them above the work; the sidebar since 5.32). `Task.unread_discussion_ids(contact)` gives the shared tasks holding a message the contact hasn't read, `task.client_status` what a client reads for a status, `portal_task_link_to(task)` a link opening it in the portal's side sheet | `client:`, `contact:` | 5.29 |
 | `:portal_task` | A shared task's side sheet in the portal, under its description and above its files and discussion: something for the client to decide or do on it. Redrawn whenever the sheet is (a reply, a live refresh) | `task:`, `contact:` | 5.31 |
 | `:task_notice` | Under a task's title, on its page and in its side panel: a short note (render nothing when there's nothing to say) | `task:` | 5.6 |
 

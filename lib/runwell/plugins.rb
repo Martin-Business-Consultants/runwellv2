@@ -19,7 +19,7 @@
 # its title: a status badge or a short fact), :task_aside (task:, a piece of work's sidebar),
 # :scope_item_aside (scope_item:), :task_notice (task:, under a task's title on its page and in its
 # side panel: a short note) and :note_row (note:), inside each row; in the
-# client portal, :portal_home (client:), :portal_dashboard (client:, contact:, above the work on its
+# client portal, :portal_home (client:), :portal_dashboard (client:, contact:, beside the work on its
 # first page: a dashboard for the client, which the core doesn't draw), :portal_task (task:,
 # contact:, in a shared task's side sheet, above its files and discussion),
 # :portal_work_panel (work:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit

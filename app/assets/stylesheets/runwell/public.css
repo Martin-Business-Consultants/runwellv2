@@ -141,9 +141,11 @@
 .portal-search__field { width: 16rem; max-width: 100%; }
 @media (max-width: 479px) { .portal-search, .portal-search__field { width: 100%; } }
 
-/* A plugin's dashboard, above the work on the portal's first page (the :portal_dashboard slot):
-/* its cards side by side while there's room. */
+/* A plugin's dashboard, beside the work on the portal's first page (the :portal_dashboard slot):
+/* its cards in a column down the sidebar, side by side under the work on a middling screen. */
 .portal-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); align-items: start; gap: var(--s-5); }
+/* The first page with nothing beside the work: one column. */
+@media (min-width: 1024px) { .portal-grid--alone { grid-template-columns: minmax(0, 1fr); } }
 
 /* A task holding a message its reader hasn't opened: a dot in the brand's colour after its title. */
 .portal-unread { display: inline-block; flex: none; width: .5rem; height: .5rem; margin-left: var(--s-1); border-radius: 50%; background: var(--accent); vertical-align: middle; }

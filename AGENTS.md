@@ -847,8 +847,9 @@ sees it in History; a task's side panel says where the client puts it, and staff
 (`portal_nav … replaces: :documents`: its link takes the item's place and the page redirects to it). Task lists open on open tasks
 (`?tasks=` on a piece of work, `?status=` on Tasks); Tasks and Documents search by name (`?q=`,
 `portal_search`) and, with Requests, page (`portal_page`, 25 a page). The first page is the client's
-work, each with how many of its shared tasks are done and the next date due; the core draws no
-dashboard there: one is a plugin's (the `:portal_dashboard` slot). Requests lists everything asked
+work in the main column, each with how many of its shared tasks are done and the next date due, and
+in the sidebar whatever plugins add (`:portal_dashboard`, then `:portal_home`); the core draws no
+dashboard of its own. Requests lists everything asked
 for on the client's behalf, each opening in the side sheet. New request opens in a modal (the portal
 layout's `modal` frame) taking the piece of work it's about, a needed-by date (the task's due date)
 and files, submits inside it and, sent, closes over the page; files sent with a request or a reply
