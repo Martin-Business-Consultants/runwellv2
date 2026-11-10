@@ -3,7 +3,7 @@
     (it opens in the side panel, where it's put on a piece of work), what it's for (its work, else its
     client with "file it", which opens the panel to put it on a piece of work), who's on it (a picker), when it came in, and
     Accept or Decline (Tasks::AcceptancesController, DeclinesController). %>
-<tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
+<tr id="<%= dom_id(task, :intake) %>" class="intake-row" data-filter-target="item">
   <%= bulk_select_cell task, task.title %>
   <td data-column="source"><%= intake_source_tag(task) %></td>
   <td data-column="title"><%= side_panel_link_to task, task.title %></td>

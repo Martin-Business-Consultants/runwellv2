@@ -24,7 +24,11 @@
                ui_column(:owner, "Owner", width: :avatar),
                ui_column(:came_in, "Came in", sort: :came_in, width: [ 9, "Came in" ]),
                ui_column(:decide, "Decide", width: [ 16, "Decide" ], hideable: false) ] %>
-<%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true %>
-<% if @tasks.none? %>
-  <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has someone on it and a #{term(:work).downcase} under it." %>
-<% end %>
+<%# The empty state is always there and shows by CSS once no row is left (.intake:has), so a row
+    leaving by stream needs no reload to say so. %>
+<div class="intake">
+  <%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true %>
+  <div class="intake__empty">
+    <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has someone on it and is accepted or on a #{term(:work).downcase}." %>
+  </div>
+</div>

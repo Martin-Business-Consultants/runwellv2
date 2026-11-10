@@ -1,6 +1,7 @@
-# How an Intake decision (accept or decline, one task or several) answers: in the browser, the
-# decided rows leave the Intake table and a toast says so, and from the side panel (inline=panel)
-# the page refreshes in place; agents and plain posts get the redirect with its notice.
+# How an Intake decision (accept or decline, one task or several) answers: in the browser, by
+# Turbo Streams wherever it came from (a row, the side panel, the bulk bar): the decided rows leave
+# Intake, the task's side panel and any Tasks row are redrawn, and a toast says so. Agents and plain
+# posts get the redirect with its notice.
 module IntakeDecision
   extend ActiveSupport::Concern
 
@@ -8,12 +9,9 @@ module IntakeDecision
     def answer_decision(notice, tasks = [ @task ])
       return redirect_back(fallback_location: intake_path, notice: notice) unless request.format.turbo_stream?
 
-      if params[:inline] == "panel"
-        flash[:notice] = notice
-        render turbo_stream: turbo_stream.refresh(request_id: nil)
-      else
-        render turbo_stream: tasks.map { turbo_stream.remove(helpers.dom_id(it, :row)) } + [ turbo_stream_flash(notice: notice) ]
-      end
+      # Each decided task: its Intake row goes, its side panel and Intake bar redrawn, wherever the
+      # decision came from; never a reload.
+      render turbo_stream: tasks.flat_map { decided_streams(it) } + [ turbo_stream_flash(notice: notice) ]
     end
 
     # Several at once (a BulkAction controller): each task decided as alone, one no longer waiting
@@ -30,7 +28,14 @@ module IntakeDecision
       end
       return redirect_back(fallback_location: intake_path, flash_key => message) unless request.format.turbo_stream?
 
-      render turbo_stream: changed.map { turbo_stream.remove(helpers.dom_id(it, :row)) } + [ turbo_stream_flash(flash_key => message) ]
+      render turbo_stream: changed.flat_map { decided_streams(it) } + [ turbo_stream_flash(flash_key => message) ]
+    end
+
+    def decided_streams(task)
+      task = Task.includes(:owner, :client, :work, :contact, { assignments: :user }, created_by: :agent_owner).find(task.id)
+      [ helpers.intake_streams(task),
+        turbo_stream.replace(helpers.dom_id(task, :panel), method: :morph, partial: "tasks/panel", locals: { task: task }),
+        turbo_stream.replace(helpers.dom_id(task, :row), method: :morph, partial: "tasks/row", locals: { task: task, listed: CustomField.for("Task").listed.to_a }) ]
     end
 
     def refuse_decision(alert)

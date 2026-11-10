@@ -398,6 +398,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .intake__home .muted { overflow: hidden; text-overflow: ellipsis; }
 .intake__file { flex: none; color: var(--text-faint); }
 .intake__decide { display: inline-flex; align-items: center; gap: var(--s-1); }
+/* With no row left (the last decided, by stream), the table goes and the empty state shows. */
+.intake:has(.intake-row) .intake__empty, .intake:not(:has(.intake-row)) .data-table-wrap { display: none; }
+.task-panel__intake-slot:empty { display: none; }
+
 /* Decline's pop-up (intakes/_decline): a line for why and the button, beside the ✕ and within
    the row's height, so a table's scrolling frame never grows to fit it. */
 .intake-decline { position: relative; }

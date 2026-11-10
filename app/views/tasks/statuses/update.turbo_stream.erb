@@ -20,6 +20,7 @@
 <% if params[:panel] && @list && !@list.shows?(@task) %>
   <%= turbo_stream.action :close_side_panel, "side_panel" %>
 <% end %>
+<%= intake_streams(@task) %>
 <%= turbo_stream_flash(notice: @notice, alert: @alert) %>
 <%# A repeating task marked done made the next one, or Undo put a task back that its list had let
     go: the page reloads in place to show it. %>

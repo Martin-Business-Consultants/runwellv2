@@ -14,4 +14,7 @@
     <% end %>
   <% end %>
 <% end %>
+<% @bulk_changed.each do |task| %>
+  <%= intake_streams(task) %>
+<% end %>
 <%= turbo_stream_flash(**@bulk_message) %>

@@ -13,8 +13,10 @@ class Tasks::AssignmentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(helpers.dom_id(task, params[:labelled].present? ? :owners_labelled : :owners),
-          partial: "tasks/owners", locals: { task: task, labelled: params[:labelled].present? })
+        # The avatars beside the picker, and Intake's row and the side panel's Intake bar (someone on
+        # it may take it out of Intake, or put it back).
+        render turbo_stream: [ turbo_stream.replace(helpers.dom_id(task, params[:labelled].present? ? :owners_labelled : :owners),
+          partial: "tasks/owners", locals: { task: task, labelled: params[:labelled].present? }), helpers.intake_streams(task) ]
       end
       format.html { redirect_back fallback_location: task_path(task), notice: "#{person.display_name} #{task.assigned_to?(person) ? "is on" : "is off"} it." }
     end

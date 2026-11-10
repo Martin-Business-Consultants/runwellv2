@@ -1,0 +1,17 @@
+<%# locals: (task:) %>
+<%# The side panel's Intake bar: waiting, with Accept and Decline (someone owns it / kept, Declined
+    for the client), or who declined it. Always drawn, empty otherwise, so every answer about the
+    task can redraw it (intake_streams), the owner picker's included. %>
+<div id="<%= dom_id(task, :intake_bar) %>" class="task-panel__intake-slot">
+  <% if task.intake? %>
+    <div class="task-panel__intake">
+      <span class="task-panel__intake-text">Waiting in Intake</span>
+      <%= button_to task_acceptance_path(task), params: { inline: "panel" }, class: button_classes(variant: :primary, size: :sm) do %>
+        <%= icon_tag "check" %><span>Accept</span>
+      <% end %>
+      <%= render "intakes/decline", task: task, inline: "panel", label: "Decline" %>
+    </div>
+  <% elsif task.declined? %>
+    <p class="task-panel__intake task-panel__intake-text">Declined<%= " by #{task.declined_by.display_name}" if task.declined_by %> on <%= l task.declined_at.to_date, format: :long %>.</p>
+  <% end %>
+</div>
