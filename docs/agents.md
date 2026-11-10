@@ -24,6 +24,19 @@ What the assistant does is recorded as your agent ("Ted's agent via Muse"), with
 exactly. Anything that reaches a client (an email, showing
 something in the portal) is previewed first and done only once you agree.
 
+### Reviewing what it did
+
+- **Tasks it adds are yours.** A task an agent adds goes to the person it acts for, so it shows in
+  your own Tasks, not among requests from outside, unless the agent names who's on it (or nobody,
+  with `owner_id` blank).
+- **Made by AI.** Tasks › Made by… › AI lists every task an agent added (`made_by=agents`, on the
+  table and the board; `list_tasks` takes it too). Each one carries the AI mark after its title
+  wherever it's listed, naming the agent, and the side panel says "Added by Ted's agent".
+- **Work it finishes waits for you.** An agent takes a task only as far as in review; a person
+  marks it done (Show… › In review, or the board's In review column).
+- **The rest** is in each record's History ("Ted's agent via Claude …"), and every call a
+  connection made is under its Activity in Settings › Connected apps.
+
 ## For clients
 
 A contact with portal access connects their own assistant to `https://your-install/portal/mcp`,

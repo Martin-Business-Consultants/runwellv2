@@ -379,6 +379,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .task-item:hover .task-item__open, .task-item:focus-within .task-item__open, .task-item[data-keyboard-current] .task-item__open { opacity: 1; }
 @media (hover: none) { .task-item__open { opacity: 1; } }
 
+/* A task an agent added (agent_made_tag): the AI icon after its title, the agent named in its
+   tooltip, or beside it in the side panel's context line. */
+.agent-made { display: inline-flex; flex: none; align-items: center; gap: var(--s-1); color: var(--accent); vertical-align: -0.15em; }
+.agent-made .icon { width: .9rem; height: .9rem; }
+.agent-made--label { margin-inline-start: var(--s-2); color: var(--text-muted); vertical-align: baseline; }
+.agent-made--label .icon { color: var(--accent); }
+
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
 .owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--radius-pill, 99rem); background: color-mix(in srgb, var(--attention) 18%, transparent); color: var(--attention); font-size: var(--text-xs); font-weight: var(--weight-strong); }
 [data-away-on-due] .owner-picker__away { display: inline-block; }

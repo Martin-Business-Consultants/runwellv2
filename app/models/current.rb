@@ -4,6 +4,8 @@ class Current < ActiveSupport::CurrentAttributes
   attribute :preview_contact
   # Every WorkType, read once per request (WorkType.cached).
   attribute :work_types
+  # Every agent user's name by id, read once per request (User.agent_names).
+  attribute :agent_names
 
   # The client's contact on the portal: signed in by link, or acting through their token.
   def contact = preview_contact || portal_session&.contact || access_token&.contact

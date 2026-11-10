@@ -3,7 +3,7 @@
 <tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
   <%= bulk_select_cell task, task.title %>
   <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
-  <td data-column="title"><%= side_panel_link_to task, task.title %></td>
+  <td data-column="title"><%= side_panel_link_to task, task.title %> <%= agent_made_tag(task) %></td>
   <td data-column="work">
     <% if task.work %>
       <%= peek_link_to task.work, task.work.title, class: "task-table__work", title: task.work.label_name %>

@@ -71,12 +71,23 @@ class Task < ApplicationRecord
   # The board's columns, in Fizzy's anatomy: the planned stream, the doing columns, done.
   BOARD_COLUMNS = %w[in_progress in_review blocked].freeze
 
-  def self.filtered(owner: "any", work: "all")
+  # Who added it, as Tasks filters it: anyone, people, or agents (User::Agent: AI acting for a person).
+  MADE_BY = %w[any people agents].freeze
+
+  scope :made_by_agents, -> { where(created_by_id: User.agents.select(:id)) }
+  scope :made_by_people, -> { where(created_by_id: nil).or(where.not(created_by_id: User.agents.select(:id))) }
+
+  def self.filtered(owner: "any", work: "all", made_by: "any")
     scope = includes(:owner, :client, { assignments: :user }, :work)
     scope = owner.nil? ? scope.where(owner_id: nil) : scope.assigned_to(owner) unless owner == "any"
     scope = scope.where(work: Work.find_by_ref!(work)) unless work == "all"
+    scope = scope.public_send("made_by_#{made_by}") unless made_by == "any"
     scope
   end
+
+  # Added by an agent (someone's AI, through a token), and which one: "Ted's agent".
+  def made_by_agent? = User.agent_names.key?(created_by_id)
+  def agent_name = User.agent_names[created_by_id]
 
   def request? = owner_id.nil? && status == "planned"
 

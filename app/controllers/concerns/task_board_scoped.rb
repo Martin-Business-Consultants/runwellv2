@@ -18,7 +18,8 @@ module TaskBoardScoped
   # Your own tasks unless the filter says otherwise, as on the page (TasksController#index), and
   # the page filter's words (?q=).
   def board_tasks
-    Task.filtered(owner: owner_filter_for(params[:owner].presence || "me"), work: params[:work].presence || "all").filter_text(params[:q])
+    Task.filtered(owner: owner_filter_for(params[:owner].presence || "me"), work: params[:work].presence || "all",
+      made_by: params[:made_by].presence_in(Task::MADE_BY) || "any").filter_text(params[:q])
   end
 
   # The owner filter as Task.filtered takes it: "any", or an owner (User.owner_id_for; "me" is the

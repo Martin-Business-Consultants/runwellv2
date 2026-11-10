@@ -73,7 +73,11 @@ them something else on screen (`term(:work)`, `term(:task)`).
    "billable": everything is a project, work order or service. Agreements (a document the client
    signs) are a plugin's (`runwell-agreements`), not the core's
 3. **What is happening** — `Task`, at `/tasks` (a lead owner and anyone else on it, status: planned, in progress, in review, blocked,
-   done; due; table or kanban, opening on your own tasks, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A task
+   done; due; table or kanban, opening on your own tasks, `owner: "me"`, with Anyone in the filter; agents finish into in review for a person to mark done). A task an
+   agent adds is its person's unless it names who's on it, or nobody (`owner_id` blank), so it isn't
+   taken for a request; Made by… › AI (`made_by=agents`, `Task.made_by_agents`) lists what agents
+   added, and `agent_made_tag` marks it wherever it's listed (`Task#made_by_agent?`, read through
+   `User.agent_names`, once per request). A task
    sits on a piece of work (its client follows) or straight on a client (`tasks.client_id`;
    `work_id` optional), and nil client only for an email from an unmatched sender. A promise
    is a task with a due date: whoever it's assigned to owns it (there are no client-owned promises).

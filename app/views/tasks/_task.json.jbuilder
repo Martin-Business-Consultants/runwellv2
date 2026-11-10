@@ -8,5 +8,6 @@ json.client agent_ref(task.client)
 json.request task.request?
 json.requested_by(task.contact ? agent_ref(task.contact) : task.requester_name)
 json.source task.source
+json.made_by_agent task.made_by_agent?
 json.scope_item agent_ref(task.scope_item)
 json.custom_fields task.custom_field_hash

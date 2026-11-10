@@ -8,6 +8,7 @@
   <div class="record-list__main task-item__main">
     <span class="task-item__heading">
       <%= side_panel_link_to task, task.title, class: "record-list__title task-item__link" %>
+      <%= agent_made_tag(task) %>
       <%= link_to task_path(task), class: "task-item__open", title: "Open on its own page", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "arrow-up-right" %>
         <span class="visually-hidden">Open <%= task.title %> on its own page</span>

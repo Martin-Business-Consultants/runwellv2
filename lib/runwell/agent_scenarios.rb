@@ -41,7 +41,7 @@ module Runwell
         say("Anything new since yesterday?", "changes", since: "24h") { it["cursor"].is_a?(Integer) }
         cursor = @last["cursor"]
         say("…and since then?", "changes", after: cursor) { it["changes"] == [] }
-        asked = { title: "Scenario: add a holiday banner", source: "chat" }
+        asked = { title: "Scenario: add a holiday banner", source: "chat", owner_id: "" }
         say("Add that ask as work nobody's on yet (sent twice, as after a timeout)", "create_task", client_id: client.id, task: asked, idempotency_key: "scenario-1") { it["status"] == "ok" }
         say("(the retry)", "create_task", client_id: client.id, task: asked, idempotency_key: "scenario-1") { it["replayed"] == true }
         say("Find “a”", "resolve", q: "a") { it["candidates"].size > 1 }

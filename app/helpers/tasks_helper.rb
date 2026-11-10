@@ -151,6 +151,17 @@ module TasksHelper
     ].compact.join(" · ")
   end
 
+  # The AI mark on a task an agent added (Task#made_by_agent?): its icon, naming the agent in its
+  # tooltip, or beside it with label: true (the side panel). Nothing for a person's task.
+  def agent_made_tag(task, label: nil)
+    return unless task.made_by_agent?
+
+    text = "Added by #{task.agent_name}"
+    tag.span(class: token_list("agent-made", "agent-made--label": label), title: (text unless label)) do
+      safe_join([ icon_tag("ai"), tag.span(text, class: label ? nil : "visually-hidden") ])
+    end
+  end
+
   # Where a task sits, for a card or a row: its work's title, else nothing.
   def task_ref(task) = task.work&.title
 

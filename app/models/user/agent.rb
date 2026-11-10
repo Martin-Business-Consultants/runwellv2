@@ -13,10 +13,17 @@ module User::Agent
     # The team: people on staff, not their agents and not clients' contacts (pickers, mentions,
     # sign-in, Users).
     scope :people, -> { where(agent_owner_id: nil).where.not(role: User::CLIENT) }
+    scope :agents, -> { where.not(agent_owner_id: nil) }
 
     validate :agent_owner_is_a_person, if: :agent?
     after_create_commit :create_agent_later, unless: -> { agent? || client? }
     after_update :sync_agent, if: -> { !agent? && agent && (saved_change_to_role? || saved_change_to_name?) }
+  end
+
+  class_methods do
+    # Every agent's name by id, read once per request, so a list can mark what agents made
+    # (Task#made_by_agent?) without loading who made each.
+    def agent_names = Current.agent_names ||= agents.pluck(:id, :name).to_h
   end
 
   def agent? = agent_owner_id.present?

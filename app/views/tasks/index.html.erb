@@ -12,6 +12,8 @@
         options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
   <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
         options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + task_owner_options.map { |name, id| [ name, id.to_s ] } %>
+  <%= render "layouts/shared/quick_filter", title: "Made by…", param: :made_by, current: @made_by,
+        options: [ [ "Anyone", "any" ], [ "People", "people" ], [ "AI", "agents" ] ] %>
   <%= render "layouts/shared/quick_filter", title: term(:work) + "…", param: :work, current: @work_filter,
         options: [ [ "All " + term(:work, count: 2).downcase, "all" ] ] + task_work_filter_options(@work_filter) %>
 <% end %>

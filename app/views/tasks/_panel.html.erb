@@ -15,6 +15,7 @@
       <% else %>
         <span>No <%= term(:client).downcase %> yet</span>
       <% end %>
+      <%= agent_made_tag(task, label: true) %>
     </p>
     <div class="task-panel__actions">
       <%= render "tasks/ai_brief", task: task %>

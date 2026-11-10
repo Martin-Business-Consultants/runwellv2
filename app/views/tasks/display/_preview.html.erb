@@ -22,7 +22,7 @@
       <% end %>
       <span class="app-card__context"><%= task_client_name(task) %></span>
     </p>
-    <h3 class="app-card__title"><%= task.title %></h3>
+    <h3 class="app-card__title"><%= task.title %> <%= agent_made_tag(task) %></h3>
   </header>
 
   <footer class="app-card__footer">
