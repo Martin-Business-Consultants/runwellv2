@@ -356,6 +356,8 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 /* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash), in the
 /* bottom right corner, over the side panel and trays (the bell and the + are in the bar at the top). */
 #flash .flashes--toast { --toast-bottom: var(--s-3); --toast-z: calc(var(--z-tray) + 2); }
+/* The toasts' wrapper (layouts/shared/_flash) takes no room in the page's column. */
+.flash-frame__messages { display: contents; }
 :is(.auth-layout__main, .portal-main) #flash .flashes--toast { --toast-bottom: var(--s-3); }
 
 /* ======================================================================= Comboboxes */
