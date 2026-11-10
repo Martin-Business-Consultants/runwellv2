@@ -4,7 +4,7 @@
 class Portal::AccountsController < Portal::BaseController
   agent_exempt :show, reason: "the account page; portal_me reads who you act for"
   agent_tool :portal_update_account, on: :update, title: "Change your details",
-    description: "Your name, job title and phone, and whether the portal emails you (portal_emails): a message from the team, something you asked for being done.",
+    description: "Your name, job title and phone, and whether the portal emails you (portal_emails): a message from the team, something you asked for picked up or done, a file shared with you.",
     params: { account: { name: "string", title: "string", phone: "string", portal_emails: "boolean" } }
 
   def show

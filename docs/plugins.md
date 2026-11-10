@@ -246,6 +246,15 @@ when their task or a launch lands); the page and its tools (`list_calendar`, `sh
 `add_time_off`) read the same object. Its .ics link is a public controller finding a digest-stored
 token, made only in the browser (`browser_only`).
 
+`runwell-client-dashboard` (Client dashboard, 5.30) is the reference for the portal's first page
+and for who hears about what. `ClientDashboard::Board` is what a contact sees on arriving (the
+`:portal_dashboard` slot): the cards the install shows, in its order (`ClientDashboard::Setting`),
+each only when it holds something; the client's agent reads the same object (`portal_dashboard`, a
+tool on a controller inheriting `Portal::BaseController`). Its tab on each client sets, per person
+and kind of notice, always, as usual or never (`ClientDashboard::Rule`), which it answers the core
+with through `Runwell::Plugins.notices`: everyone set to always, plus the usual ones not set to
+never.
+
 `runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
 (`Meetings::Priority`: a task, done when the task is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its

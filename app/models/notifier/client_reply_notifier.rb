@@ -4,6 +4,6 @@ class Notifier::ClientReplyNotifier < Notifier
   alias note source
 
   private
-    def recipients = note.discussion? && note.from_client? ? note.subject.team_watchers : []
+    def recipients = note.discussion? && note.from_client? ? note.subject.team_watchers(note) : []
     def creator = note.author
 end

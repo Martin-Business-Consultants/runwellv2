@@ -28,7 +28,7 @@
             <%= form.telephone_field :phone, autocomplete: "tel" %>
           </div>
         </div>
-        <%= switch_field form, :portal_emails, label: "Email me about my work", hint: "When we write to you on something, and when something you asked for is done. Sign-in links always come." %>
+        <%= switch_field form, :portal_emails, label: "Email me about my work", hint: "When we write to you on something, pick up or finish what you asked for, or share a file. Sign-in links always come." %>
         <div class="button-row portal-form__actions">
           <%= tag.button "Save", type: "submit", class: "btn btn--primary", disabled: Current.previewing? %>
         </div>

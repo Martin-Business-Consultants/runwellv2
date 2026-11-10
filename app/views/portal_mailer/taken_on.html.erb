@@ -1,0 +1,7 @@
+<% content_for :preheader, "Someone has picked up what you asked for." %>
+<% content_for :reason, "You’re getting this because you asked for it. You can turn these off in the portal, under your account." %>
+<%= mail_heading "We’re on it" %>
+<p>Hi <%= @contact.name.split.first %>, <%= @task.owner.first_name %> has picked this up:</p>
+<%= mail_quote @task.title %>
+<p>You can follow it, or add to it, in the portal.</p>
+<%= mail_button "Open it", @url %>

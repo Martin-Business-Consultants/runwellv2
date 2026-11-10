@@ -61,7 +61,7 @@ class Note < ApplicationRecord
       if from_client?
         super
       else
-        subject.discussion_contacts.each { PortalMailer.with(note: self, contact: it).reply.deliver_later }
+        subject.reply_contacts(self).each { PortalMailer.with(note: self, contact: it).reply.deliver_later }
       end
     end
 end

@@ -814,8 +814,13 @@ request from outside notifies owners and managers (`Notifier::RequestNotifier`,
 `User.request_watchers`). A task holding a message a contact hasn't read is marked wherever it's
 listed and counted on the nav (`DiscussionRead`, `Task.unread_discussion_ids`, read when its sheet
 opens), and something a contact asked for being marked done emails them a minute later, unless it
-was undone (`PortalMailer#done`). A contact turns those two emails off in Your account
-(`portal_emails`). The portal's pages refresh live (`turbo_stream_from client`; the cable takes a
+was undone (`PortalMailer#done`), as does someone taking it on (`#taken_on`, the first person put on
+it); files the team shares are emailed too, those shared together as one (`SharedDocumentsJob`,
+`PortalMailer#documents`; not the client's own uploads). A contact turns these emails off in Your
+account (`portal_emails`). Who hears is decided in one place, `Notice`: the core says who usually
+would and everyone who could, and a plugin may choose among them per client
+(`Runwell::Plugins.notices`; the Client dashboard plugin's tab on each client), never reaching
+anyone outside `everyone`. A new notice to a client or the team goes through it. The portal's pages refresh live (`turbo_stream_from client`; the cable takes a
 portal session). A client never reads the team's statuses: `Task#client_status`
 (`Task::CLIENT_STATUSES`: received, planned, in progress, on hold, done; `portal_status_tag`), and a
 date an open task has passed is marked late. A client puts their things in their own order of priority by dragging them in the portal (the core's

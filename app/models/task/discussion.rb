@@ -11,6 +11,7 @@ module Task::Discussion
     has_many :discussion_reads, dependent: :delete_all
 
     after_update_commit :tell_asker_its_done, if: -> { saved_change_to_status? && status == "done" }
+    after_update_commit :tell_asker_its_taken_on, if: -> { saved_change_to_owner_id? && owner_id_before_last_save.nil? && owner_id.present? }
   end
 
   class_methods do
@@ -48,30 +49,45 @@ module Task::Discussion
     retry
   end
 
-  # Who at the client a message on it is for: whoever asked for it and anyone who wrote on it, or,
-  # when that's nobody, everyone there who uses the portal. Only those who can sign in and want mail.
+  # Who at the client a message on it is usually for: whoever asked for it and anyone who wrote on
+  # it, or, when that's nobody, everyone there who uses the portal. Only those who can sign in and
+  # want mail (Notice.reachable_contacts).
   def discussion_contacts
-    return Contact.none unless client_id
+    return [] unless client
 
     ids = [ contact_id, *notes.client_visible.where(author_id: Contact.where(client_id: client_id).select(:id)).distinct.pluck(:author_id) ].compact
-    reachable = Contact.with_portal_access.where(client_id: client_id).where.not(email_address: [ nil, "" ]).where(portal_emails: true)
-    taking_part = reachable.where(id: ids)
-    taking_part.exists? ? taking_part : reachable
+    reachable = Notice.reachable_contacts(client)
+    reachable.select { it.id.in?(ids) }.presence || reachable
   end
 
-  # Who on the team hears about what a client sends on it: whoever is on the task, else the people
-  # who take requests on (User.request_watchers).
-  def team_watchers
+  # Who at the client is emailed a message on it (Notice: a plugin may choose among them).
+  def reply_contacts(note) = Notice.contacts("reply", client: client, record: note, usual: discussion_contacts)
+
+  # Who on the team hears about what a client sends on it: usually whoever is on the task, else the
+  # people who take requests on (User.request_watchers).
+  def team_watchers(note = nil)
     people = owners.select { it.active? && !it.agent? }
-    people.presence || User.request_watchers.to_a
+    Notice.people("reply", client: client, record: note || self, usual: people.presence || User.request_watchers.to_a)
   end
 
   private
     # A minute on, so an Undo in the meantime sends nothing (PortalMailer#done checks again). Not
     # when something other than a person finished it (a client's sunset), nor from an import.
     def tell_asker_its_done
-      return if status_reason.present? || Current.source == "import" || !client_visible? || !contact&.portal? || !contact.portal_emails?
+      return if status_reason.present? || Current.source == "import" || !client_visible? || !asked_for?
 
-      PortalMailer.with(task: self, contact: contact).done.deliver_later(wait: 1.minute)
+      Notice.contacts("done", client: client, record: self, usual: [ contact ].compact).each do
+        PortalMailer.with(task: self, contact: it).done.deliver_later(wait: 1.minute)
+      end
+    end
+
+    # Someone took on what they asked for: the first person put on it. A minute on too, checked
+    # again when it's sent (PortalMailer#taken_on).
+    def tell_asker_its_taken_on
+      return if Current.source == "import" || !client_visible? || !asked_for? || status == "done"
+
+      Notice.contacts("taken_on", client: client, record: self, usual: [ contact ].compact).each do
+        PortalMailer.with(task: self, contact: it).taken_on.deliver_later(wait: 1.minute)
+      end
     end
 end

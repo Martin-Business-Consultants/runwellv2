@@ -22,6 +22,13 @@ class Document < ApplicationRecord
 
   delegate :filename, :byte_size, :content_type, to: :file
 
+  # A file the team shares with a client is emailed to their people, a few minutes on so several
+  # shared together go as one (SharedDocumentsJob). Not the client's own uploads, nor an import.
+  after_commit :tell_client_later, on: %i[create update], if: -> { saved_change_to_client_visible? && client_visible? }
+
+  # The client it belongs to, through whatever it's on.
+  def client = Client.find_by(id: search_client_id)
+
   # Whoever uploaded it (or whose agent did), or anyone who may delete records.
   def deletable_by?(user)
     return false unless user
@@ -42,4 +49,8 @@ class Document < ApplicationRecord
     end
 
     def live_streams = [ documentable, documentable.try(:work), documentable.try(:client) ]
+
+    def tell_client_later
+      SharedDocumentsJob.set(wait: SharedDocumentsJob::QUIET).perform_later(self) unless Current.source == "import" || uploaded_by&.client?
+    end
 end

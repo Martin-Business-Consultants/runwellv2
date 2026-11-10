@@ -74,6 +74,7 @@ module Runwell
     mattr_reader :shortcuts, default: Hash.new { |hash, key| hash[key] = [] }
     mattr_reader :date_sources, default: {}
     mattr_reader :away_sources, default: {}
+    mattr_reader :notice_rules, default: {}
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -194,6 +195,30 @@ module Runwell
         permissions[key][permission.to_sym] = { name: name, roles: roles }
       end
 
+      # Who hears about what passes between a client and the team (Notice): a plugin choosing, per
+      # client, among the people who could. client: for the client's people (kinds
+      # Notice::CLIENT_KINDS), team: for the team's (Notice::TEAM_KINDS); each a lambda
+      #   ->(kind:, client:, record:, usual:, everyone:) { recipients }
+      # given who would usually hear and everyone who could, returning who does. client is nil for
+      # a request emailed by someone not on file.
+      def notices(key, client: nil, team: nil)
+        notice_rules[key] = { client: client, team: team }
+      end
+
+      # Each switched-on plugin's say in turn, starting from the usual recipients; never anyone
+      # outside `everyone`. A rule that fails is reported and skipped.
+      def notice_recipients(side, kind:, client:, record:, usual:, everyone:)
+        enabled_notice_rules.reduce(usual) do |recipients, (key, rules)|
+          rule = rules[side]
+          next recipients unless rule
+
+          Array(rule.call(kind: kind, client: client, record: record, usual: recipients, everyone: everyone)) & everyone
+        rescue StandardError => error
+          Rails.error.report(error, context: { plugin: key, extension: :notices })
+          recipients
+        end
+      end
+
       # An entry in the quick action tray. The partial renders the form (form_id:),
       # which posts a "record" param ("Client:12") of one of the types. context: maps the
       # record on screen to one of the types, e.g. a scope item to its work.
@@ -216,6 +241,7 @@ module Runwell
       def enabled_agent_briefs = agent_briefs.select { |key, _| enabled?(key) }
       def enabled_date_sources = date_sources.select { |key, _| enabled?(key) }
       def enabled_away_sources = away_sources.select { |key, _| enabled?(key) }
+      def enabled_notice_rules = notice_rules.select { |key, _| enabled?(key) }
       def enabled_agent_workflows = agent_workflows.select { |key, _| enabled?(key) }
       def enabled_ai_prompts = ai_prompts.select { |key, _| enabled?(key) }.values.flatten.map { [ nil, it ] }
       def enabled_shortcuts = shortcuts.select { |key, _| enabled?(key) }.values.flatten

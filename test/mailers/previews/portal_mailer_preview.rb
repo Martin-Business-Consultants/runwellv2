@@ -10,6 +10,9 @@ class PortalMailerPreview < ActionMailer::Preview
 
   def done = PortalMailer.with(task: Task.client_visible.where(status: "done").take, contact: contact).done
 
+  def taken_on = PortalMailer.with(task: Task.client_visible.where.not(owner_id: nil).where.not(status: "done").take, contact: contact).taken_on
+  def documents = PortalMailer.with(documents: Document.client_visible.limit(3).to_a, contact: contact).documents
+
   private
     def contact = Contact.with_portal_access.where.not(email: [ nil, "" ]).take
 end

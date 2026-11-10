@@ -1,0 +1,9 @@
+<% content_for :preheader, @documents.map { it.filename.to_s }.to_sentence.truncate(90) %>
+<% content_for :reason, "You’re getting this because we shared #{@documents.one? ? "this" : "these"} with #{@contact.client.name}. You can turn these off in the portal, under your account." %>
+<%= mail_heading @documents.one? ? "A file for you" : "#{@documents.size} files for you" %>
+<p>Hi <%= @contact.name.split.first %>, we’ve shared <%= @documents.one? ? "this" : "these" %> with you:</p>
+<%= mail_quote safe_join(@documents.first(10).map { it.filename.to_s }, tag.br) %>
+<% if @documents.size > 10 %>
+  <%= mail_small "And #{@documents.size - 10} more." %>
+<% end %>
+<%= mail_button "See your documents", @url %>

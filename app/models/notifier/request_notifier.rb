@@ -4,6 +4,6 @@ class Notifier::RequestNotifier < Notifier
   alias task source
 
   private
-    def recipients = User.request_watchers.to_a
+    def recipients = Notice.people("request", client: task.client, record: task, usual: User.request_watchers.to_a)
     def creator = task.contact
 end

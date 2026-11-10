@@ -432,6 +432,29 @@ people to it; agents' `portal_documents` tool still answers with the core's list
 off and the core's page is back. A plugin that also runs on cores before 5.13 checks for the keyword
 first (`Runwell::Plugins.method(:portal_nav).parameters`).
 
+Since 5.30, in portal pages and slots: `portal_task_link_to(task) { … }` (a link opening a shared
+task in the portal's side sheet), `portal_status_tag(task)`, `portal_due(task, prefix:)` (its date,
+marked when late; `task.late?`), `portal_unread_mark(task)`, and the `documents/link` partial
+(`document:`, `meta:`).
+
+### Who hears about what
+
+| Call | Since | Status |
+| --- | --- | --- |
+| `Runwell::Plugins.notices key, client: ->(kind:, client:, record:, usual:, everyone:) { … }, team: ->(…) { … }` | 5.30 | Stable |
+| `Notice::CLIENT_KINDS`, `Notice::TEAM_KINDS` (kind => what it is, in words), `Notice.reachable_contacts(client)` | 5.30 | Stable |
+
+Everything that passes between a client and the team goes through `Notice`, which asks plugins who
+should hear. To a client's people, by email: `reply` (the team wrote on a task; `record` the note),
+`taken_on` and `done` (something they asked for; the task), `document` (files shared; the latest
+document). To the team, as notifications: `request` (a request from outside; the task) and `reply`
+(a client wrote on a task; the note). Each lambda gets who would usually hear (`usual`) and
+everyone who could (`everyone`: the client's people who can sign in to the portal and haven't
+switched its mail off; the team's active people), and returns who does. The core keeps only those
+in `everyone`, so a contact's own switch always wins. `client` is nil for a request emailed by
+someone not on file. Either side may be left out; several plugins answer in turn, each given the
+last one's answer as `usual`. `runwell-client-dashboard` is the reference.
+
 ## Public pages
 
 | Call | Since | Status |

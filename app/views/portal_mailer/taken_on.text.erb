@@ -1,0 +1,6 @@
+<% content_for :reason, "You're getting this because you asked for it. You can turn these off in the portal, under your account." %>
+Hi <%= @contact.name.split.first %>,
+
+<%= @task.owner.first_name %> has picked this up: <%= @task.title %>
+
+Follow it, or add to it, in the portal: <%= @url %>

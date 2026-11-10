@@ -1,0 +1,12 @@
+<% content_for :reason, "You're getting this because we shared #{@documents.one? ? "this" : "these"} with #{@contact.client.name}. You can turn these off in the portal, under your account." %>
+Hi <%= @contact.name.split.first %>,
+
+We've shared <%= @documents.one? ? "this" : "these" %> with you:
+<% @documents.first(10).each do |document| %>
+- <%= document.filename %>
+<% end %>
+<% if @documents.size > 10 %>
+And <%= @documents.size - 10 %> more.
+<% end %>
+
+See your documents: <%= @url %>
