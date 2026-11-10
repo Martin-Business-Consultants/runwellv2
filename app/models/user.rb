@@ -9,6 +9,7 @@ class User < ApplicationRecord
   # signing in with it moves link_signed_in_at.
   generates_token_for(:link_sign_in, expires_in: 15.minutes) { link_signed_in_at }
   has_many :sessions, dependent: :destroy
+  has_many :push_subscriptions, dependent: :delete_all
   # Someone at a client (the client role, Contact) belongs to it.
   belongs_to :client, optional: true
   has_many :tasks, foreign_key: :owner_id, dependent: :nullify, inverse_of: :owner

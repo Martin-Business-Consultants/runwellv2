@@ -61,6 +61,7 @@ Rails.application.routes.draw do
   get "settings/people/:id", to: redirect("/users/%{id}")
 
   namespace :settings do
+    resource :push_subscription, only: %i[create destroy]
     resources :layouts, only: %i[show update destroy], param: :kind
     resource :address, only: %i[show update]
     resource :appearance, only: %i[show update]
@@ -152,6 +153,11 @@ Rails.application.routes.draw do
   namespace :tasks do
     resources :columns, only: :show
   end
+  # Installing the app (staff pages link these): its manifest, from the install's settings, and the
+  # service worker (the offline page and pushed notifications).
+  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+
   # Undo for a removal made in the browser (PendingRemoval): its batch, while the window lasts.
   resources :pending_removals, only: :destroy, param: :batch, path: "removals"
   resources :tasks, only: %i[index show create edit update destroy] do

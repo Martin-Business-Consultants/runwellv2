@@ -294,6 +294,14 @@ Back, refresh and links work, and there's no client-side router:
   (`bulk`), a clicked tab is current before its frame arrives (the `picks-current` behavior, the
   frame's old content dimmed on `aria-busy`), and a `submit_on_change` switch flips back if its save
   fails (`revert-on-failure`)
+- **Installable**: staff pages link the manifest (`pwa/manifest.json.erb`, the install's name, icon
+  and colour) and register the service worker (`pwa/service-worker.js.erb`, versioned by
+  `Runwell::VERSION`), which caches nothing signed-in: only `public/offline.html` for a page that
+  can't load. Mentions are pushed to each browser or installed app a person switched on (Settings >
+  Your account, the `push` controller, `Settings::PushSubscriptionsController`, `browser_only`) by
+  `PushNotificationJob` beside `NotificationMailer`, signed with the install's VAPID keys
+  (`Setting::Push`, the private one encrypted); one the push service says is gone is deleted. The
+  app's badge follows the unread count. The portal is left out
 - **Losing the connection**: the `connection` controller on `<body>` shows a quiet line while the
   browser is offline or live updates are down (`layouts/shared/_connection_status`), refreshes the
   page in place once when they come back after a real gap (broadcasts sent meanwhile are lost), and

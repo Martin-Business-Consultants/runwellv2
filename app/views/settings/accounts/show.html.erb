@@ -14,6 +14,28 @@
     <% end %>
   </section>
 
+  <%# Notifications on this device: pushed by the install (PushSubscription), switched on per browser
+      or installed app by the push controller, which alone knows whether this one is. %>
+  <section class="settings-section" id="notifications-device">
+    <header class="settings-section__head">
+      <h2>Notifications on this device</h2>
+      <p class="settings-section__description">When someone mentions you, this browser (or Runwell installed as an app) shows it, as well as the email. Switch it on on each device you want them on.</p>
+    </header>
+    <div class="settings-group__card" data-controller="push" data-push-key-value="<%= Setting.current.push_keys[:public_key] %>" data-push-url-value="<%= settings_push_subscription_path %>">
+      <div class="setting-row setting-row--field">
+        <div class="setting-row__text">
+          <label class="setting-row__label" for="push_switch">Show my notifications here</label>
+          <span class="setting-row__hint">Your browser asks first. Clicking one opens what it’s about.</span>
+        </div>
+        <%= switch_tag { check_box_tag "push", "1", false, id: "push_switch", role: "switch", data: { push_target: "switch", action: "change->push#toggle" } } %>
+      </div>
+      <p class="setting-row__hint push-note" hidden data-push-target="note"
+        data-unsupported="This browser can’t show notifications from a website. On an iPhone or iPad, add Runwell to your Home Screen first."
+        data-denied="Notifications are blocked for Runwell in this browser’s settings."
+        data-failed="That didn’t work. Try again in a moment."></p>
+    </div>
+  </section>
+
   <section class="settings-section" id="two-factor">
     <header class="settings-section__head">
       <h2>Two-factor sign-in</h2>

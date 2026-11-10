@@ -5,6 +5,12 @@ import "reactionview"
 import "behaviors"
 import { highlightCode } from "lexxy"
 
+// Staff pages link the manifest: they register the service worker (the offline page, pushed
+// notifications; app/views/pwa/service-worker.js.erb), once, at load.
+if ("serviceWorker" in navigator && document.querySelector("link[rel=manifest]")) {
+  navigator.serviceWorker.register("/service-worker.js", { scope: "/" }).catch(() => {})
+}
+
 // Turbo's progress bar after 200ms rather than 500, so a slower page says it's coming.
 if (window.Turbo?.config) window.Turbo.config.drive.progressBarDelay = 200
 

@@ -25,6 +25,7 @@ gem "rails"
 gem "rails-active_search"
 gem "reactionview", "0.6.0" # pinned with herb, above
 gem "rotp"
+gem "web-push" # notifications pushed to a person's browser or installed app (PushSubscription); plugins may use it too
 gem "rqrcode"
 gem "ruby_llm"
 gem "rubyzip", require: "zip"

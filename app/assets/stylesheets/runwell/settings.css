@@ -289,3 +289,7 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 .nav-editor__hidden { display: flex; flex-direction: column; gap: var(--s-2); }
 .nav-editor__hidden-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); margin: 0; font-size: var(--text-ui); font-weight: var(--weight-strong); }
 .nav-editor__actions { padding-top: var(--s-2); border-top: 1px solid var(--line); }
+
+/* Notifications on this device (Settings > Your account, the push controller): why it can't. */
+.push-note { padding: 0 var(--s-4) var(--s-3); }
+.push-note[hidden] { display: none; }

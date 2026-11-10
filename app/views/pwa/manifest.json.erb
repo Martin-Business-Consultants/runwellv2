@@ -1,22 +1,14 @@
-{
-  "name": "Runwellv2",
-  "icons": [
-    {
-      "src": "/icon.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    },
-    {
-      "src": "/icon.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
-    }
-  ],
-  "start_url": "/",
-  "display": "standalone",
-  "scope": "/",
-  "description": "Runwellv2.",
-  "theme_color": "red",
-  "background_color": "red"
-}
+<% setting = Setting.current %>
+<% name = setting.mail_from_name.presence || "Runwell" %>
+<% icon = setting.favicon.attached? ? { src: rails_blob_path(setting.favicon, disposition: :inline), type: setting.favicon.content_type } : { src: "/icon.png", type: "image/png" } %>
+<%= raw({
+  name: name,
+  short_name: name.truncate(12, omission: ""),
+  description: "#{name}: #{setting.term(:client, count: 2).downcase}, #{setting.term(:work, count: 2).downcase} and #{setting.term(:task, count: 2).downcase}.",
+  icons: [ icon.merge(sizes: "512x512"), icon.merge(sizes: "512x512", purpose: "maskable") ],
+  start_url: "/",
+  scope: "/",
+  display: "standalone",
+  theme_color: setting.brand_color,
+  background_color: "#ffffff"
+}.to_json) %>

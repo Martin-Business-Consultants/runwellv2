@@ -35,8 +35,10 @@ class Notification < ApplicationRecord
   end
 
   private
+    # By email, and pushed to each browser or installed app they switched on (PushSubscription).
     def deliver_later
       NotificationMailer.notification(self).deliver_later
+      PushNotificationJob.perform_later(self) if user.push_subscriptions.exists?
     end
 
     def live_streams = [ [ user, :notifications ] ]

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_130000) do
   create_table "access_tokens", force: :cascade do |t|
     t.integer "user_id"
     t.string "name", null: false
@@ -377,6 +377,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
     t.index ["contact_id"], name: "index_portal_sessions_on_contact_id"
   end
 
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "endpoint", null: false
+    t.string "p256dh_key", null: false
+    t.string "auth_key", null: false
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "scope_items", force: :cascade do |t|
     t.integer "agreement_version_id"
     t.string "description", null: false
@@ -460,6 +472,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
     t.string "bot_check_secret_key"
     t.json "layouts", default: {}, null: false
     t.string "hoster_token"
+    t.string "push_public_key"
+    t.string "push_private_key"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -646,6 +660,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
   add_foreign_key "pending_removals", "users", on_delete: :nullify
   add_foreign_key "plugin_changes", "users", column: "requested_by_id"
   add_foreign_key "portal_sessions", "contacts"
+  add_foreign_key "push_subscriptions", "users", on_delete: :cascade
   add_foreign_key "scope_items", "agreement_versions"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "scope_items"
