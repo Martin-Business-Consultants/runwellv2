@@ -1,11 +1,18 @@
+# Answers for forms on the page you're on (AGENTS.md, Frontend). A form marks itself with
+# `inline` (the field it saves, the section it adds to, the row it removes) and asks for a turbo
+# stream; the action answers with streams that redraw what changed, and redirects for everyone
+# else (agents, plain posts, the quick action tray).
+#
 # A record deleted from its table row: the table's one delete dialog sends inline=row, and the
 # answer removes that row (every row partial's <tr> is dom_id(record, :row)) and says so, with no
-# reload; a refusal says why where you are. Anywhere else, the action redirects as usual.
-module RemovesRows
+# reload; a refusal says why where you are.
+module AnswersInPlace
   extend ActiveSupport::Concern
 
   private
-    def row_removal? = params[:inline] == "row" && request.format.turbo_stream?
+    def inline?(form) = params[:inline] == form && request.format.turbo_stream?
+
+    def row_removal? = inline?("row")
 
     def remove_row(record, notice:, also: [])
       render turbo_stream: [ turbo_stream.remove(helpers.dom_id(record, :row)), *also, turbo_stream_flash(notice: notice) ]

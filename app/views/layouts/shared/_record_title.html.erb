@@ -1,0 +1,10 @@
+<%# locals: (record:, attribute:, label:, scope: nil, url: nil) %>
+<%# A record page's heading, changed in place (as a task's title is in its panel): the title is an
+    input that saves on Enter or when you leave it, answered by the record's
+    update.turbo_stream.erb (inline=field). e focuses it from anywhere on the page. %>
+<%= form_with model: record, url: url || polymorphic_path(record), scope: scope, method: :patch, id: dom_id(record, :title_form), class: "record-title-form", data: { controller: "form" } do |form| %>
+  <%= hidden_field_tag :inline, "field", id: nil %>
+  <h1 class="page-title">
+    <%= form.text_field attribute, class: "record-title", required: true, autocomplete: "off", aria: { label: label }, data: { keys: "e", keys_focus: true, action: "change->form#submit keydown.esc->form#blurActiveInput" } %>
+  </h1>
+<% end %>

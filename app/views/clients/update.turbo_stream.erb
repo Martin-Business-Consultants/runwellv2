@@ -1,0 +1,9 @@
+<%# A client's field saved in place (inline=field): the client redrawn wherever it shows (its page's
+    header and fields, its row on the clients table) and the notice, or why it was refused with
+    the old value back. Targets the page lacks are skipped. %>
+<% layout = record_layout(:client) %>
+<%= turbo_stream.replace dom_id(@client, :header), method: :morph, partial: "clients/header", locals: { client: @client } %>
+<%= turbo_stream.replace dom_id(@client, :main_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "main", record: @client, in_place: true, except: header_fields(:client) } %>
+<%= turbo_stream.replace dom_id(@client, :aside_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "aside", record: @client, in_place: true, except: header_fields(:client) } %>
+<%= turbo_stream.replace dom_id(@client, :row), method: :morph, partial: "clients/row", locals: { client: @client, listed: CustomField.for("Client").listed.to_a } %>
+<%= turbo_stream_flash(notice: (@alert ? nil : [ "Saved.", @client.sunset_summary ].compact.join(" ")), alert: @alert) %>

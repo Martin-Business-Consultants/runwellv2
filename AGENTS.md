@@ -262,7 +262,7 @@ Back, refresh and links work, and there's no client-side router:
   itself (`data-task-list`, `-state`, `-item` on the section or the Tasks table), the picker sends
   that with the change, and `Task::List` says whether the task still belongs there, so a task
   marked done leaves Open at once. Nothing reads `request.referer` to decide an answer.
-  `turbo_stream_flash(notice:)` (`TurboFlash`) shows the toast; `RemovesRows` removes a row
+  `turbo_stream_flash(notice:)` (`TurboFlash`) shows the toast; `AnswersInPlace` removes a row (`remove_row`) and checks a form's `inline` (`inline?`)
 - **Waiting shows**: a submitting form's button dims (`form[aria-busy]`), and the progress bar
   shows after 200ms
 - **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
@@ -363,10 +363,10 @@ it). The Tasks board's columns take `q` too (`TaskBoardScoped`). A new paginated
 `filters_text_on`.
 
 A record's page, and its new and edit pages, are a `record-page` (`runwell/records.css`): a
-header row across the top (`record-page__header`: `record-page__heading` with
-`<h1 class="page-title"><%= @page_title %></h1>` and a muted `record-page__description`, then
-the record's actions in a `button-row` as secondary buttons, Edit and Copy for AI, beside the
-sidebar toggle `]`), then the working column (`record-page__main`, 2/3: the description, tasks,
+header row across the top (`record-page__header`, a partial of its own such as `clients/_header`:
+`record-page__heading` with the title and a muted `record-page__description`, then the record's
+actions in a `button-row` as secondary buttons, Copy for AI and the like, beside the sidebar toggle
+`]`), then the working column (`record-page__main`, 2/3: the description, tasks,
 the form) beside the sidebar (`record-page__aside`, 1/3: Details as a `dl.details`, the smaller
 sections such as contacts and plugin panels, notes or history, delete or archive). Both columns
 are stacks of rune `card`s. New pages use the sidebar for what comes next (`record-steps`) and
@@ -951,6 +951,17 @@ each row's first field; a hidden field drops out of its row). Custom fields star
 `record_fields/<kind>/_<key>` (custom fields `record_fields/_custom`), drawing an input when given
 a form builder and its value (a `dt`/`dd`, or nothing when the header already shows it) without;
 `record_fields/zone` lays out a column, `record_fields/main_card` and `aside_card` the cards.
+
+A record's own page (clients, work, contacts, people) changes in place: nobody goes to an edit page
+to change a field. Its zones render with `in_place: true`, which gives each field a hidden form of
+its own (`inline=field`), so a save sends only that field; the `save-on-change` behavior submits it
+when it changes (not while arranging), and the record's `update.turbo_stream.erb` redraws each place
+it shows (the page's header and zones, its table row) with the toast, or puts the old value back
+and says why. The title is `layouts/shared/_record_title` in the header (`e` focuses it), and what
+the header draws instead of the columns is `header_fields(kind)` (a client's status picker, a work's
+description in its info dialog: rich text saves with Save or ⌘/Ctrl+Enter, never per keystroke,
+and Esc puts it back, the `save-when-dirty` behavior). The edit pages stay for row actions,
+Cmd-click and plain posts.
 
 The limits, kept on purpose so this stays a way to arrange a page and doesn't become a form
 builder:

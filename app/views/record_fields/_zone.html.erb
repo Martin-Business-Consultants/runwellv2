@@ -1,11 +1,33 @@
-<%# locals: (layout:, zone:, record:, form: nil, form_id: nil, stacked: nil, except: nil, paired: nil) %>
+<%# locals: (layout:, zone:, record:, form: nil, form_id: nil, stacked: nil, except: nil, paired: nil, in_place: nil, scope: nil, url: nil) %>
 <%# One column of a record page's fields, in the install's order (RecordLayout): inputs when given
     a form builder (new and edit; each joins the form by form_id), else values as a details list
     (show; stacked puts each label over its value, for the working column). Each field is a
-    .layout-field the arranging controller can move. except: a field drawn elsewhere (beside the
-    card's heading); paired: two fields to a row (a modal's sidebar fields). %>
-<% keys = (zone == "main" ? layout.main : layout.aside) - [ except ] %>
-<% if form %>
+    .layout-field the arranging controller can move. except: fields drawn elsewhere (beside the
+    card's heading, or the page's header); paired: two fields to a row (a modal's sidebar fields).
+    in_place: a record's own page, where each field is an input that saves as it changes: each
+    gets a form of its own (empty but for inline=field, and joined by id), so a save sends only
+    that field and two people changing different fields don't undo each other. The save-on-change
+    behavior submits it; the answer (<model>/update.turbo_stream.erb) redraws the zone. %>
+<% keys = (zone == "main" ? layout.main : layout.aside) - Array(except) %>
+<% if in_place %>
+  <% builder = record_fields_builder(record, scope: scope) %>
+  <div class="record-fields record-fields--in-place" id="<%= dom_id(record, "#{zone}_fields") %>" data-record-layout-target="zone" data-zone="<%= zone %>" data-save-on-change>
+    <% keys.each do |key| %>
+      <%# herb:key key %>
+      <% field_form = dom_id(record, "#{key.parameterize(separator: "_")}_field") %>
+      <div class="layout-field" data-layout-key="<%= key %>" data-layout-label="<%= layout_field_label(layout, key) %>"<% if layout.required?(key) %> data-layout-required="true"<% end %>>
+        <%= form_with model: record, url: url || polymorphic_path(record), scope: scope, method: :patch, id: field_form, class: "record-field-form" do %>
+          <%= hidden_field_tag :inline, "field", id: nil %>
+        <% end %>
+        <% if layout.custom?(key) %>
+          <%= render "record_fields/custom", record: record, field: layout.custom_field(key), form: builder, form_id: field_form %>
+        <% else %>
+          <%= render record_field_partial(layout, key), record: record, form: builder, form_id: field_form %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% elsif form %>
   <div class="<%= class_names("record-fields record-form__body", "record-fields--paired": paired) %>" data-record-layout-target="zone" data-zone="<%= zone %>" data-form-for="<%= form_id %>">
     <% keys.each do |key| %>
       <%# herb:key key %>

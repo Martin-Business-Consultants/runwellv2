@@ -1,7 +1,6 @@
 <% @page_title = @work.title %>
 <% tabs = work_record_tabs(@work) %>
 <% tab = current_record_tab(tabs, "tasks") %>
-<% next_step = work_next_step(@work) %>
 
 <%= parent_page term(:work, count: 2), works_path %>
 <%= turbo_stream_from @work %>
@@ -10,62 +9,15 @@
 <section class="record-page record-page--tabbed" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:work) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:work).downcase}’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
-      <div class="record-page__title-row">
-        <h1 class="page-title"><%= @page_title %></h1>
-        <% if @work.description.present? %>
-          <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
-            <button type="button" class="icon-button" title="About this <%= term(:work).downcase %>" aria-haspopup="dialog" data-action="rune-dialog#open">
-              <%= icon_tag "info" %>
-              <span class="visually-hidden">About <%= @work.title %></span>
-            </button>
-            <dialog class="dialog dialog--lg" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="work_about_title">
-              <div class="dialog__box">
-                <header class="dialog__header">
-                  <h2 class="dialog__title" id="work_about_title"><%= @page_title %></h2>
-                  <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
-                </header>
-                <div class="dialog__body record-card__prose"><%= rich_text @work.description %></div>
-              </div>
-            </dialog>
-          </div>
-        <% end %>
-      </div>
-      <p class="record-meta record-page__description">
-        <%= status_tag @work.state_label, highlight: @work.active? %>
-        <%= link_to @work.client.name, @work.client %>
-        <span><%= @work.label_name %> · <%= @work.runs %></span>
-        <% if @work.internal? %>
-          <span>Internal</span>
-        <% end %>
-        <%= plugin_slots(:work_meta, work: @work) %>
-        <% if @work.closed? %>
-          <span><%= @work.state_label %> <%= l @work.closed_at.to_date, format: :long %><%= ": #{@work.close_reason}" if @work.close_reason.present? %></span>
-        <% end %>
-      </p>
-      <% if next_step %>
-        <p class="record-page__next"><%= next_step %></p>
-      <% end %>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= link_to edit_work_path(@work), class: "btn btn--secondary", data: { keys: "e" } do %>
-        <%= icon_tag "pencil" %>
-        <span>Edit</span>
-        <kbd class="hide-on-touch">E</kbd>
-      <% end %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+  <%= render "works/header", work: @work %>
 
   <div class="record-page__main">
-    <%# Fields the install put in the working column (template mode); the sidebar's sit in its
-        general pane (works/sidebar). Title, client, kind and description draw nothing here: they
+    <%# Fields the install put in the working column (template mode), changed in place; the
+        sidebar's sit in its general pane (works/sidebar). Title, client, shape and description
         are the header and its info button. %>
     <section class="card record-card record-fields-card">
       <div class="card__content">
-        <%= render "record_fields/zone", layout: layout, zone: "main", record: @work, stacked: true %>
+        <%= render "record_fields/zone", layout: layout, zone: "main", record: @work, in_place: true, except: header_fields(:work) %>
       </div>
     </section>
 

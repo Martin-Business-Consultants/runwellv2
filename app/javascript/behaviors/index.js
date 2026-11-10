@@ -14,8 +14,10 @@
 import { Runtime } from "reactionview"
 import open from "behaviors/open"
 import keepOpen from "behaviors/keep-open"
+import saveOnChange from "behaviors/save-on-change"
+import saveWhenDirty from "behaviors/save-when-dirty"
 
-const BEHAVIORS = { open, "keep-open": keepOpen }
+const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty }
 
 const runtime = Runtime.start({ state: { debounce: 150, refetch: "off" } })
 for (const [ attribute, behavior ] of Object.entries(BEHAVIORS)) runtime.behaviors.define(attribute, behavior)

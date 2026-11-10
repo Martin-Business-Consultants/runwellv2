@@ -1,0 +1,5 @@
+<%# A person's field saved in place on their page (inline=field): their heading and fields redrawn,
+    and the notice, or why it was refused with the old value back. %>
+<%= turbo_stream.replace dom_id(@person, :heading), method: :morph, partial: "users/heading", locals: { person: @person, manage: can?(:manage_people) } %>
+<%= turbo_stream.replace dom_id(@person, :main_fields), method: :morph, partial: "record_fields/zone", locals: { layout: record_layout(:user), zone: "main", record: @person, in_place: true, scope: :user, url: user_path(@person) } %>
+<%= turbo_stream_flash(notice: (@alert ? nil : @notice), alert: @alert) %>

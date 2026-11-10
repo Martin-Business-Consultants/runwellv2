@@ -69,7 +69,10 @@ class WorksController < ApplicationController
   end
 
   def update
-    if @work.update(work_params.except(:client_id, :shape))
+    saved = @work.update(work_params.except(:client_id, :shape))
+    return answer_field(saved) if inline?("field")
+
+    if saved
       redirect_to @work, notice: "#{@work.title} updated."
     else
       render :edit, status: :unprocessable_entity
@@ -106,6 +109,14 @@ class WorksController < ApplicationController
 
   private
     def current_record = (@work if @work&.persisted?)
+
+    # A field on the work's own page saved (record_fields/_zone in_place, its title, its
+    # description): the work redrawn wherever it shows. A refused save puts the old value back.
+    def answer_field(saved)
+      @alert = @work.errors.full_messages.to_sentence unless saved
+      @work.reload unless saved
+      render :update, status: (saved ? :ok : :unprocessable_entity)
+    end
 
 
   # The page reads each section's work (its delivery state): loaded together rather than one query

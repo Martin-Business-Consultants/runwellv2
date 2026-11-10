@@ -1,0 +1,7 @@
+<%# A contact's field saved in place (inline=field): their page's header and fields redrawn, and the
+    notice, or why it was refused with the old value back. %>
+<% layout = record_layout(:contact) %>
+<%= turbo_stream.replace dom_id(@contact, :header), method: :morph, partial: "contacts/header", locals: { contact: @contact } %>
+<%= turbo_stream.replace dom_id(@contact, :main_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "main", record: @contact, in_place: true, except: header_fields(:contact) } %>
+<%= turbo_stream.replace dom_id(@contact, :aside_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "aside", record: @contact, in_place: true, except: header_fields(:contact) } %>
+<%= turbo_stream_flash(notice: (@alert ? nil : "Saved."), alert: @alert) %>

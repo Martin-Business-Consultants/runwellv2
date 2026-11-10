@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   include AgentTools, AgentResponses
   include TableSorting
   include BotChecked
-  include TurboFlash, RemovesRows
+  include TurboFlash, AnswersInPlace
   include NPlusOneDetection
   allow_browser versions: :modern
   # ReActionView registers its slots format, and Rails then answers a bare "*/*" (a plain fetch(),

@@ -1,0 +1,17 @@
+<%# locals: (contact:) %>
+<%# A contact's page header: their name, changed in place, where they work, and View as. Redrawn when
+    it saves (contacts/update.turbo_stream.erb). %>
+<header class="record-page__header" id="<%= dom_id(contact, :header) %>">
+  <div class="record-page__heading">
+    <%= render "layouts/shared/record_title", record: contact, attribute: :name, label: "Name" %>
+    <p class="record-page__description">A contact at <%= link_to contact.client.name, contact.client %></p>
+  </div>
+  <div class="button-row">
+    <%= render "record_fields/arrange_button" %>
+    <%= button_to contact_preview_path(contact), class: button_classes(variant: :secondary), form: { data: { turbo: false } },
+          title: "Open the #{term(:client).downcase} portal as #{contact.name}, read-only" do %>
+      <%= icon_tag "eye" %><span>View as <%= contact.name %></span>
+    <% end %>
+    <%= render "layouts/shared/sidebar_toggle" %>
+  </div>
+</header>

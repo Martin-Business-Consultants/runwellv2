@@ -1,0 +1,20 @@
+<%# locals: (person:, manage:) %>
+<%# A person's name, role and state at the top of their page. Redrawn when a field saves in place
+    (users/update.turbo_stream.erb). %>
+<div class="person-page__heading" id="<%= dom_id(person, :heading) %>">
+  <%= avatar_preview_tag person, hidden_for_screen_reader: true %>
+  <div class="person-page__name">
+    <h1><%= person.display_name %><%= " (you)" if person == Current.user %></h1>
+    <div class="settings-chips">
+      <%= badge person.role.capitalize, tone: :outline %>
+      <% if person.deactivated? %>
+        <%= badge "Deactivated", tone: :neutral %>
+      <% else %>
+        <%= badge "Active", tone: :ok %>
+      <% end %>
+      <% if manage && person.two_factor? %>
+        <%= badge "Two-factor", tone: :ok %>
+      <% end %>
+    </div>
+  </div>
+</div>

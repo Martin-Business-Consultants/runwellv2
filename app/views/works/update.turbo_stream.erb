@@ -1,0 +1,10 @@
+<%# A work's field saved in place (inline=field): the work redrawn wherever it shows (its page's
+    header with the description, its fields in the working column and the sidebar's General pane,
+    its row on the work table) and the notice, or why it was refused with the old value back.
+    Targets the page lacks are skipped. %>
+<% layout = record_layout(:work) %>
+<%= turbo_stream.replace dom_id(@work, :header), method: :morph, partial: "works/header", locals: { work: @work } %>
+<%= turbo_stream.replace dom_id(@work, :main_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "main", record: @work, in_place: true, except: header_fields(:work) } %>
+<%= turbo_stream.replace dom_id(@work, :aside_fields), method: :morph, partial: "record_fields/zone", locals: { layout: layout, zone: "aside", record: @work, in_place: true, except: header_fields(:work) } %>
+<%= turbo_stream.replace dom_id(@work, :row), method: :morph, partial: "works/row", locals: { work: @work, listed: CustomField.for("Work").listed.to_a } %>
+<%= turbo_stream_flash(notice: (@alert ? nil : "Saved."), alert: @alert) %>

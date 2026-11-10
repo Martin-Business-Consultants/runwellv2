@@ -48,7 +48,15 @@ class UsersController < ApplicationController
 
   def update
     person = User.people.find(params[:id])
-    if person.update(params.expect(user: %i[name email_address role]))
+    saved = person.update(params.expect(user: %i[name email_address role]))
+    if inline?("field")
+      @alert = person.errors.full_messages.to_sentence unless saved
+      @person = saved ? person : person.reload
+      @notice = "Saved #{person.display_name}: #{person.role == "owner" ? "an owner" : "a " + person.role}."
+      return render(:update, status: (saved ? :ok : :unprocessable_entity))
+    end
+
+    if saved
       redirect_back_or_to user_path(person), notice: "Saved #{person.display_name}: #{person.role == "owner" ? "an owner" : "a " + person.role}."
     else
       redirect_back_or_to user_path(person), alert: person.errors.full_messages.to_sentence

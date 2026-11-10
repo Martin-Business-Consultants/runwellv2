@@ -1,0 +1,16 @@
+<%# locals: (client:) %>
+<%# A client's page header: its name, changed in place, and its status and since when. Redrawn
+    when it saves (clients/update.turbo_stream.erb). %>
+<header class="record-page__header" id="<%= dom_id(client, :header) %>">
+  <div class="record-page__heading">
+    <%= render "layouts/shared/record_title", record: client, attribute: :name, label: "Name" %>
+    <p class="record-page__description">
+      <%= render "clients/status_picker", client: client %>
+      <span><%= client.internal? ? "Internal: our own " + term(:work, count: 2).downcase : term(:client) %> since <%= l client.created_at.to_date, format: :long %></span>
+    </p>
+  </div>
+  <div class="button-row">
+    <%= render "record_fields/arrange_button" %>
+    <%= render "layouts/shared/sidebar_toggle" %>
+  </div>
+</header>

@@ -53,6 +53,7 @@ class ClientsController < ApplicationController
   def update
     saved = @client.update(client_params)
     return answer_in_place(saved) if params[:from_list] && request.format.turbo_stream?
+    return answer_field(saved) if inline?("field")
 
     if saved
       if params[:from_list]
@@ -88,13 +89,23 @@ class ClientsController < ApplicationController
       @client.reload unless saved
       streams = [ turbo_stream.replace(helpers.dom_id(@client, :status), partial: "clients/status_picker", locals: { client: @client }) ]
       if saved
-        streams << turbo_stream_flash(notice: "#{@client.name} is #{@client.status.humanize.downcase}. #{@client.sunset_summary}") if @client.sunset_summary
+        if @client.sunset_summary
+          streams << turbo_stream_flash(notice: "#{@client.name} is #{@client.status.humanize.downcase}. #{@client.sunset_summary}")
+          streams << turbo_stream.refresh(request_id: nil) # its work closed and its tasks were marked done
+        end
       else
         streams << turbo_stream_flash(alert: @client.errors.full_messages.to_sentence)
       end
       render turbo_stream: streams
     end
 
+    # A field on the client's own page saved (record_fields/_zone in_place, or the name in its
+    # header): the client redrawn wherever it shows. A refused save puts the old value back.
+    def answer_field(saved)
+      @alert = @client.errors.full_messages.to_sentence unless saved
+      @client.reload unless saved
+      render :update, status: (saved ? :ok : :unprocessable_entity)
+    end
 
   def set_client = @client = Client.find(params[:id])
   # Whether a client is kept out of AI is a person's call, never an agent's.

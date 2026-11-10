@@ -1,33 +1,30 @@
-<% @page_title = "Edit #{@contact.name_was}" %>
+<% @page_title = @contact.name_was %>
 
 <%= parent_page @contact.client.name, @contact.client %>
 
+<%# A contact's page: their fields change in place, each saving as it changes
+    (record_fields/_zone in_place, answered by contacts/update.turbo_stream.erb). %>
 <% layout = record_layout(:contact) %>
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:contact) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a contact’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
-      <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">A contact at <%= link_to @contact.client.name, @contact.client %></p>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= button_to contact_preview_path(@contact), class: button_classes(variant: :secondary), form: { data: { turbo: false } },
-            title: "Open the #{term(:client).downcase} portal as #{@contact.name_was}, read-only" do %>
-        <%= icon_tag "eye" %><span>View as <%= @contact.name_was %></span>
-      <% end %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+  <%= render "contacts/header", contact: @contact %>
 
   <div class="record-page__main">
-    <%= render "record_fields/main_card", layout: layout, record: @contact, form_id: "contact_form", title: "Contact",
-          hint: "Someone at #{@contact.client.name} you deal with.", submit: "Save changes", url: contact_path(@contact), cancel: client_path(@contact.client) %>
+    <%= render "layouts/shared/errors", record: @contact %>
+    <section class="card record-card record-fields-card">
+      <header class="card__head">
+        <%= layout_text_tag layout, "main.title", "Contact", class: "card__title" %>
+        <%= layout_text_tag layout, "main.hint", "Someone at #{@contact.client.name} you deal with.", tag: :p, class: "card__hint" %>
+      </header>
+      <div class="card__content">
+        <%= render "record_fields/zone", layout: layout, zone: "main", record: @contact, in_place: true, except: header_fields(:contact) %>
+      </div>
+    </section>
   </div>
 
   <aside class="record-page__aside">
-    <%= render "record_fields/aside_card", layout: layout, record: @contact, form_id: "contact_form", title: "Access" %>
+    <%= render "record_fields/aside_card", layout: layout, record: @contact, title: "Access", in_place: true, except: header_fields(:contact) %>
     <%= render "contacts/sidebar", client: @contact.client, contact: @contact %>
 
     <% if can?(:delete_records) %>

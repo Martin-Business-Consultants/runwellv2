@@ -5,28 +5,12 @@
 
 <div class="<%= class_names("person-page", "person-page--split": manage) %>">
   <div class="card person-page__main">
-    <div class="person-page__heading">
-      <%= avatar_preview_tag @person, hidden_for_screen_reader: true %>
-      <div class="person-page__name">
-        <h1><%= @person.display_name %><%= " (you)" if me %></h1>
-        <div class="settings-chips">
-          <%= badge @person.role.capitalize, tone: :outline %>
-          <% if @person.deactivated? %>
-            <%= badge "Deactivated", tone: :neutral %>
-          <% else %>
-            <%= badge "Active", tone: :ok %>
-          <% end %>
-          <% if manage && @person.two_factor? %>
-            <%= badge "Two-factor", tone: :ok %>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <%= render "users/heading", person: @person, manage: manage %>
 
     <% if manage %>
     <% layout = record_layout(:user) %>
     <%# Their name, address and role in the order the install arranged them (template mode,
-        RecordLayout; one column, so order only), saved by the form below (user_form). %>
+        RecordLayout; one column, so order only), each saving as it changes (in place). %>
     <section class="settings-section" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:user) %>"
       data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
       <%= render "record_fields/arrange", layout: layout, noun: "people’s" %>
@@ -35,10 +19,7 @@
         <p class="settings-section__description">Their name, the address they sign in with, and what they may do.</p>
         <div class="settings-section__actions"><%= render "record_fields/arrange_button" %></div>
       </header>
-      <%= render "record_fields/zone", layout: layout, zone: "main", record: @person, form: record_fields_builder(@person, scope: :user), form_id: "user_form" %>
-      <%= form_with model: @person, url: user_path(@person), method: :patch, scope: :user, id: "user_form", class: "settings-form" do %>
-        <div><button type="submit" class="btn btn--primary">Save</button></div>
-      <% end %>
+      <%= render "record_fields/zone", layout: layout, zone: "main", record: @person, in_place: true, scope: :user, url: user_path(@person) %>
     </section>
 
     <section class="settings-section">

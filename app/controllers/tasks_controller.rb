@@ -119,7 +119,6 @@ class TasksController < ApplicationController
 
     # A form in place on a page (the side panel's fields, a Tasks section's Add) marks itself, and
     # is answered as a stream; the same action answers anything else with a redirect.
-    def inline?(form) = params[:inline] == form && request.format.turbo_stream?
 
     def home_from_params
       if params[:work_ref] then Work.find_by_ref!(params[:work_ref])

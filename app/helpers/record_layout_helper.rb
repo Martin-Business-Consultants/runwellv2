@@ -10,6 +10,14 @@ module RecordLayoutHelper
     ComboboxFormBuilder.new(scope || record.model_name.param_key, record, self, {})
   end
 
+  # Fields a record's page draws in its header rather than its columns when they're changed in
+  # place (record_fields/_zone in_place): the name or title, and what's fixed once it exists or
+  # changes through a guarded control of its own (a client's status picker, a work's description
+  # in its info dialog).
+  HEADER_FIELDS = { "client" => %w[name status], "work" => %w[title description client shape], "contact" => %w[name] }.freeze
+
+  def header_fields(kind) = HEADER_FIELDS.fetch(kind.to_s, [])
+
   # What a field is called, for its chip while arranging.
   def layout_field_label(layout, key)
     return layout.custom_field(key)&.label || key if layout.custom?(key)

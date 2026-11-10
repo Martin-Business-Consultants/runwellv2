@@ -30,7 +30,14 @@ class ContactsController < ApplicationController
   end
 
   def update
-    if @contact.update(contact_params)
+    saved = @contact.update(contact_params)
+    if inline?("field")
+      @alert = @contact.errors.full_messages.to_sentence unless saved
+      @contact.reload unless saved
+      return render(:update, status: (saved ? :ok : :unprocessable_entity))
+    end
+
+    if saved
       redirect_to @contact.client, notice: "Contact updated."
     else
       render :edit, status: :unprocessable_entity
