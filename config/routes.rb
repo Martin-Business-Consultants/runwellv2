@@ -61,14 +61,6 @@ Rails.application.routes.draw do
   resource :search, only: :show
   resource :agent_activity, only: :show, path: "ai"
   resource :intake, only: :show
-  # Other installs on the workspace rail (WorkspaceLink): the confirm page, the server-to-server
-  # handshake and badge, and the rail's own frame.
-  scope "workspace", module: "workspaces", as: "workspace" do
-    resource :link, only: %i[new create]
-    resource :handshake, only: %i[create destroy]
-    resource :badge, only: :show
-    resource :rail, only: :show
-  end
   scope "intake", module: "intakes", as: "intake" do
     resources :shifts, only: %i[index create update destroy], path: "schedule"
   end
@@ -123,7 +115,6 @@ Rails.application.routes.draw do
     resources :connected_apps, only: %i[index create destroy] do
       resource :pause, only: %i[create destroy], module: :connected_apps
     end
-    resources :workspaces, only: %i[index create destroy]
     resource :updates, only: %i[show create] do
       resource :check, only: :create, module: :updates
       resource :failures, only: :destroy, module: :updates

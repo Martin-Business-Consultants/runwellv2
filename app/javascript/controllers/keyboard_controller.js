@@ -8,8 +8,7 @@ import { prefetchLink } from "helpers/page_prefetch"
 //
 // - j / k, g g / G walk the page's items (anything marked data-filter-target="item"),
 //   Enter or o opens the one you're on, Esc drops it
-// - a chord starting with g goes somewhere: any element declaring data-keys="g c"; one starting
-//   with w switches workspace (the workspace rail's w 1, w 2…), when the rail is there. A chord may
+// - a chord starting with g goes somewhere: any element declaring data-keys="g c". A chord may
 //   take a third key (data-keys="g t n"): after g t it waits a moment for one, vim style, and
 //   with none (or another) does g w
 // - every other key clicks the visible element declaring it (data-keys="e"), or focuses it
@@ -104,7 +103,6 @@ export default class extends Controller {
       return this.#trigger(chord, event)
     }
     if (key === "g") return this.#startChord(event)
-    if (key === "w" && document.querySelector("[data-keys^='w ']")) return this.#startChord(event, "w")
 
     if (this.#board && this.#boardKey(key, event)) return
 
@@ -171,10 +169,10 @@ export default class extends Controller {
 
   // Chords
 
-  #startChord(event, key = "g") {
+  #startChord(event) {
     event.preventDefault()
-    if (key === "g") this.#prefetchChords()
-    this.pending = key
+    this.#prefetchChords()
+    this.pending = "g"
     clearTimeout(this.chordTimer)
     this.chordTimer = setTimeout(() => { this.pending = null }, CHORD_TIMEOUT)
   }

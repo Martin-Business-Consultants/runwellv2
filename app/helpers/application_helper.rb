@@ -1,6 +1,11 @@
 module ApplicationHelper
+  # The tab's title: the page, then the install's name (its sender name, Settings > Email), so tabs
+  # of several installs tell apart; for the team, led by their unread notifications, "(3) Tasks |
+  # Lumin". The badge controller keeps the count current as notifications arrive and are read.
   def page_title_tag
-    tag.title [ @page_title, "Runwell" ].compact.join(" | ")
+    title = [ @page_title, Setting.current.mail_from_name.presence || "Runwell" ].compact.join(" | ")
+    unread = Current.user.person.notifications.unread.count if Current.user&.staff?
+    tag.title(unread.to_i.positive? ? "(#{unread}) #{title}" : title)
   end
 
   # Runwell's icons are rune_ui's (config/initializers/rune_ui.rb registers them): an inline SVG,

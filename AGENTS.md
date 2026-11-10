@@ -129,7 +129,8 @@ migrations moved their rows and history onto tasks (or, for a client's promise, 
 Their tables, with the old sign-in tables (`identities`, `sign_in_providers`), were dropped in 5.17.
 The `contacts` and `portal_sessions` tables from before contacts were users stay, unread
 (`access_tokens`, `oauth_grants` and the agreement tables still name them by foreign key);
-`Client#clear_legacy_rows!` clears a client's before it's deleted.
+`Client#clear_legacy_rows!` clears a client's before it's deleted. `workspace_links` (5.40's workspace rail, taken out in 5.41) is
+left, unread, for a later release to drop.
 
 Agreements left the core in 3.0 for the Agreements plugin. Their tables (`agreement_versions`,
 `approvals`, `approval_links`, and `scope_items.agreement_version_id`, `price_cents`,
@@ -337,7 +338,8 @@ Back, refresh and links work, and there's no client-side router:
   Your account, the `push` controller, `Settings::PushSubscriptionsController`, `browser_only`) by
   `PushNotificationJob` beside `NotificationMailer`, signed with the install's VAPID keys
   (`Setting::Push`, the private one encrypted); one the push service says is gone is deleted. The
-  app's badge follows the unread count. The portal is left out
+  app's badge and the tab's title ("(3) Tasks | Lumin", the install's sender name after the page,
+  `page_title_tag`, kept current by the `badge` controller from the tray's total) follow the unread count. The portal is left out
 - **Losing the connection**: the `connection` controller on `<body>` shows a quiet line while the
   browser is offline or live updates are down (`layouts/shared/_connection_status`), refreshes the
   page in place once when they come back after a real gap (broadcasts sent meanwhile are lost), and
@@ -405,17 +407,7 @@ named sections in order, or unnamed for no heading, holding the core's pages and
 in any order, and a Hidden tray; arranged like template mode, by dragging or the keys, with the
 `nav-layout` controller, or the `arrange_sidebar` tool; `nav_sections` draws it, `sidenav_link_to`
 marks the current one). Plugins have no section of their own: one switched on later joins the end
-of the first section. Left of the nav, once someone links another install, is the workspace rail
-(`layouts/shared/_workspace_rail`, `WorkspaceLink`, Settings > Workspaces): this install and each other
-Runwell they work in, by icon, with their unread notifications there or a dot for something waiting in
-its Intake, `w 1`… to switch (the one chord not starting with `g`). Linking goes both ways in one
-confirm: the install where it's added keeps a nonce and sends the person to the other's confirm page
-(`Workspaces::LinksController`), whose server posts the nonce and a key to the first's handshake
-(`Workspaces::HandshakesController`) and gets a key back, so keys never pass through the browser. A key
-reads only `/workspace/badge` (the name, icon, colour and that person's two counts); each install
-keeps its own sign-in. The rail's frame (`Workspaces::RailsController`) asks every linked install at
-once, at most once a minute each, and reloads every two minutes (the `reloads-every` behavior);
-unlinking either side drops both halves. Each person can still hide plugins for themselves (Settings > Your account >
+of the first section. Each person can still hide plugins for themselves (Settings > Your account >
 Your menu, `User::NavPlugins`), and `g 1`… number the plugins shown, in order. At its foot the signed-in person, whose menu holds
 their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
 too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from `parent_page`
@@ -683,7 +675,6 @@ one place they are documented for people: add a new key there.
 | `e` `d` | Edit, or delete / archive / close (asks first; a task goes at once, with Undo): the item you're on, else the record on screen |
 | `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
 | `g` + `c w t b u i n s` | Clients, work, tasks, board, users, intake, notifications, settings; `g 1`… plugin pages |
-| `w` + `1`… | Another workspace on the rail (`w 1` is this one) |
 | `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |
 | `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |

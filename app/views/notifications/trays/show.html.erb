@@ -1,3 +1,5 @@
 <turbo-frame id="notifications">
+  <%# All unread, not just the newest shown, for the tab's title and the app's badge (badge controller). %>
+  <data hidden value="<%= @unread_total %>" data-badge-target="total"></data>
   <%= render partial: "notifications/notification", collection: @notifications, as: :notification %>
 </turbo-frame>

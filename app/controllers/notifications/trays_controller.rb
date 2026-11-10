@@ -6,6 +6,7 @@ class Notifications::TraysController < ApplicationController
 
   def show
     @notifications = Current.user.person.notifications.unread.preloaded.ordered.limit(MAX_ENTRIES_LIMIT)
+    @unread_total = Current.user.person.notifications.unread.count
     fresh_when etag: Current.user.person.notifications
   end
 end

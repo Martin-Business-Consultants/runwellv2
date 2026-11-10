@@ -14,7 +14,6 @@ class User < ApplicationRecord
   belongs_to :client, optional: true
   has_many :tasks, foreign_key: :owner_id, dependent: :nullify, inverse_of: :owner
   has_many :notifications, dependent: :destroy
-  has_many :workspace_links, dependent: :destroy
   has_many :access_tokens, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
