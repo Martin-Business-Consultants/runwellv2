@@ -41,6 +41,17 @@ module FieldsHelper
   # not a partial, so it works inside form_with.
   #
   #   switch_field form, :require_two_factor, label: "Require it for everyone", hint: "…", submit_on_change: true
+  # A form that keeps unsent typing in the browser (the draft controller): the data for its <form>,
+  # by a key naming the form and its record, and the quiet line saying a draft came back, with
+  # Discard. A helper, so it can sit inside form_with.
+  def draft_data(key) = { controller: "draft", draft_key_value: key }
+
+  def draft_notice
+    tag.p(class: "draft-notice", hidden: true, data: { draft_target: "notice" }) do
+      safe_join([ tag.span("Draft restored."), tag.button("Discard", type: "button", class: "draft-notice__discard", data: { action: "draft#discard" }) ], " ")
+    end
+  end
+
   def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
     # Saving as it flips: the switch shows the change at once, and flips back if the save fails.
     data = submit_on_change ? { action: "change->form#submit", revert_on_failure: true } : {}

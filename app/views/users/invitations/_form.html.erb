@@ -1,6 +1,7 @@
 <%# locals: (invitation:, modal: nil) %>
 <%# Who to invite and as what: on the Invite page, or in a modal over Users (modal: true). %>
-<%= form_with model: invitation, url: user_invitations_path, class: "settings-form", data: (modal ? { turbo_frame: "_top" } : {}) do |form| %>
+<%= form_with model: invitation, url: user_invitations_path, class: "settings-form", data: draft_data("new:invitation") do |form| %>
+  <%= draft_notice %>
   <div class="field">
     <%= form.label :email_address, "Email address", class: "field__label" %>
     <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "off", placeholder: "name@example.com" %>

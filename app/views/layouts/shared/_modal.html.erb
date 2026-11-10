@@ -1,8 +1,9 @@
 <%# locals: (title:) %>
 <%# A form opened over the page you're on (the New button on an index, into the layout's modal
-    frame), so making a record doesn't lose your place. The form inside submits to the whole page:
-    saved, you land on the new record; refused, the full form shows its errors. Esc or Cancel
-    closes it. %>
+    frame), so making a record doesn't lose your place. The form inside submits in the frame:
+    refused, the modal comes back with what was typed and why; saved, the new record's row joins
+    the list you're on (a stream that also closes this), or for a record whose next step is on its
+    own page (new work), you go there. Esc or Cancel closes it. %>
 <turbo-frame id="modal">
   <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
     <dialog class="dialog dialog--lg record-modal" aria-label="<%= title %>" data-dialog-target="dialog">

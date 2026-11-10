@@ -6,6 +6,7 @@
         <h2><%= @page_title %></h2>
         <p class="settings-section__description">They get an email with a link to choose a name and password.</p>
       </header>
+      <%= render "layouts/shared/errors", record: @invitation %>
       <%= render "users/invitations/form", invitation: @invitation, modal: true %>
     </section>
   <% end %>

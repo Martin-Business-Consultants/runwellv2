@@ -250,9 +250,17 @@ Back, refresh and links work, and there's no client-side router:
   Edit (`row_actions … peek:`), a task's work, a client's contacts and the task panel's context all
   peek. It shows the title and fields in place (the same zones and `update.turbo_stream.erb` as the
   record's page), open tasks and notes, and Open to its page; plugins' slots stay on the page
-- **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) loads the new page
-  into the layout's `modal` frame; `new.html.erb` renders `layouts/shared/_modal` around its form
-  (`modal: true`) when `turbo_frame_request_id == "modal"`, and the form submits to `_top`
+- **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) and an in-page add
+  (Add a contact) load the new page into the layout's `modal` frame; `new.html.erb` renders
+  `layouts/shared/_modal` around its form (`modal: true`) when `turbo_frame_request_id == "modal"`.
+  The form submits inside the frame, so a refused save comes back in the modal with what was typed.
+  Saved, the action answers `from_modal?` with its `create.turbo_stream.erb` (the modal emptied, the
+  new row added and marked `is-fresh`, a toast linking to it); a record whose next step is on its
+  own page (new work) redirects, and the frame's `breaks-out` behavior visits that answer
+- **Drafts**: every Lexxy editor and multi-field form keeps unsent typing in `localStorage` (the
+  `draft` controller, `draft_data(key)` and `draft_notice`; `record_fields/main_card` does it for new
+  and edit forms), restored with "Draft restored" and Discard, cleared when the save works. So
+  leaving a form never asks "are you sure"
 - **Rows go in place**: the table's delete dialog sends `inline=row`; `remove_row` answers a stream
   removing `dom_id(record, :row)` (every row partial's `<tr>` id), and `refuse_in_place` says why
   where you are

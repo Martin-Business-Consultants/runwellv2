@@ -3,8 +3,12 @@
     modal, which has no sidebar, the aside's too), then the <form> itself as the card's footer.
     Every field sits outside the form and joins it by form_id, so the sidebar's can too.
     head_key: one field drawn beside the heading instead (a modal's who-it's-for: the work's
-    client), and left out of the columns below; the modal's sidebar fields go two to a row. %>
+    client), and left out of the columns below; the modal's sidebar fields go two to a row. In the
+    modal the form submits inside its frame: refused, it comes back there with what was typed;
+    saved, the answer either stays on the page (a stream with the new row) or goes to the new
+    record's page (the frame's breaks-out behavior). %>
 <% builder = record_fields_builder(record, scope: scope) %>
+<% draft_key = record.persisted? ? "edit:#{record.model_name.param_key}:#{record.id}" : [ "new", record.model_name.param_key, url ].compact.join(":") %>
 <%= render "layouts/shared/errors", record: record %>
 <section class="card record-form">
   <header class="<%= class_names("card__head", "record-form__head--field": head_key) %>">
@@ -23,7 +27,8 @@
     <% end %>
   </div>
   <%= form_with model: record, url: url, scope: scope, id: form_id, class: "card__footer card__footer--bordered record-form__footer",
-        data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do %>
+        data: { controller: "form draft", draft_key_value: draft_key, action: "keydown.esc->form#cancel" } do %>
+    <%= draft_notice %>
     <% (hidden || {}).each do |name, value| %>
       <%# herb:key name %>
       <%= hidden_field_tag name, value, id: nil %>

@@ -1,0 +1,5 @@
+<%# A contact added from the modal on their client's page: the modal closes, the client's Contacts
+    card comes back with them in it, and the toast links to them. %>
+<%= turbo_stream.update "modal" %>
+<%= turbo_stream.replace dom_id(@client, :contacts), method: :morph, partial: "clients/contacts", locals: { client: @client } %>
+<%= turbo_stream_flash(notice: safe_join([ "Added ", link_to(@contact.name, edit_contact_path(@contact)), "." ])) %>

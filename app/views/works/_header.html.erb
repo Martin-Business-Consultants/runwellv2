@@ -19,9 +19,10 @@
               <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
             </header>
             <div class="dialog__body">
-              <%= form_with model: work, method: :patch, id: dom_id(work, :description_form), class: "rich-text-in-place", data: { save_when_dirty: true } do |form| %>
+              <%= form_with model: work, method: :patch, id: dom_id(work, :description_form), class: "rich-text-in-place", data: draft_data("description:work:#{work.id}").merge(save_when_dirty: true) do |form| %>
                 <%= hidden_field_tag :inline, "field", id: nil %>
                 <%= rich_text_field form, :description, staff: true, placeholder: "What it is, what’s agreed, what done looks like" %>
+                <%= draft_notice %>
                 <div class="rich-text-in-place__actions">
                   <span class="faint small"><kbd>Esc</kbd> puts it back</span>
                   <button type="submit" class="btn btn--primary btn--sm"><span>Save</span> <kbd class="hide-on-touch">⌘↵</kbd></button>

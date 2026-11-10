@@ -14,6 +14,10 @@ module AnswersInPlace
 
     def row_removal? = inline?("row")
 
+    # A form in the modal (an index's New, Add a contact): saved, the answer is a stream that closes
+    # the modal and adds the new record where you are, rather than a page of its own.
+    def from_modal? = turbo_frame_request_id == "modal" && request.format.turbo_stream?
+
     def remove_row(record, notice:, also: [])
       render turbo_stream: [ turbo_stream.remove(helpers.dom_id(record, :row)), *also, turbo_stream_flash(notice: notice) ]
     end

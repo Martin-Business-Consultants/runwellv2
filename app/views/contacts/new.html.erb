@@ -1,8 +1,14 @@
 <% @page_title = "Add a contact" %>
-
+<% layout = record_layout(:contact) %>
+<% if turbo_frame_request_id == "modal" %>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
+    <%= render "record_fields/main_card", layout: layout, record: @contact, form_id: "contact_form", title: "Add a contact at #{@client.name}",
+          hint: "Someone you deal with there. Portal access and approval are off until you switch them on.", submit: "Add contact",
+          url: client_contacts_path(@client), cancel: client_path(@client), modal: true %>
+  <% end %>
+<% else %>
 <%= parent_page @client.name, @client %>
 
-<% layout = record_layout(:contact) %>
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:contact) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a contact’s" %>
@@ -27,3 +33,4 @@
     <%= render "contacts/sidebar", client: @client, contact: @contact %>
   </aside>
 </section>
+<% end %>

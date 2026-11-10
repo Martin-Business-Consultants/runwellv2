@@ -20,6 +20,8 @@ class ContactsController < ApplicationController
   def create
     @contact = @client.contacts.new(contact_params)
     if @contact.save
+      return render(:create) if from_modal?
+
       redirect_to @client, notice: "Contact added."
     else
       render :new, status: :unprocessable_entity

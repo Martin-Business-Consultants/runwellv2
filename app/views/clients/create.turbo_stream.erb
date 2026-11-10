@@ -1,0 +1,10 @@
+<%# A client added from the modal over the clients table: the modal closes, the new row joins the top
+    of the table, marked new, and the toast links to it. With no table yet (the first client), the
+    page comes back whole. %>
+<%= turbo_stream.update "modal" %>
+<% if Client.count == 1 %>
+  <%= turbo_stream.refresh request_id: nil %>
+<% else %>
+  <%= turbo_stream.prepend pagination_frame_id_for("clients_rows", 1), partial: "clients/row", locals: { client: @client, listed: CustomField.for("Client").listed.to_a, fresh: true } %>
+<% end %>
+<%= turbo_stream_flash(notice: safe_join([ "Added ", link_to(@client.name, @client), "." ])) %>

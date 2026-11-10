@@ -432,3 +432,14 @@ tr.is-leaving { opacity: 0; transition: opacity 200ms ease; }
 @media (prefers-reduced-motion: reduce) {
   tr.is-leaving, .is-pending, #record_tab[aria-busy="true"] .record-tabs__panel { transition: none; }
 }
+
+/* A row just added from the modal (create.turbo_stream.erb): tinted a moment, then like the rest. */
+tr.is-fresh { animation: row-fresh 2.4s ease-out; }
+@keyframes row-fresh { from { background: var(--brand-tint-strong); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { tr.is-fresh { animation: none; background: var(--brand-tint); } }
+
+/* A form's draft came back from the browser (the draft controller): said quietly, with Discard. */
+.draft-notice { display: flex; align-items: center; gap: var(--s-2); margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+.draft-notice[hidden] { display: none; }
+.draft-notice__discard { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer; }
+.draft-notice__discard:hover { text-decoration: underline; }

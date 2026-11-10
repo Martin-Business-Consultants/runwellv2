@@ -1,5 +1,4 @@
 <% @page_title = @client.name %>
-<% contacts = @client.contacts.active.ordered.to_a %>
 <% tabs = client_record_tabs(@client) %>
 
 <%= parent_page term(:client, count: 2), clients_path %>
@@ -27,46 +26,7 @@
     <%= plugin_slots(:client_aside, client: @client) %>
     <%= render "record_fields/aside_card", layout: layout, record: @client, in_place: true, except: header_fields(:client) %>
 
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Contacts</h2>
-        <p class="card__hint"><%= pluralize contacts.size, "person", plural: "people" %> at <%= @client.name %></p>
-      </header>
-      <div class="card__content">
-        <% if contacts.any? %>
-          <ul class="record-list">
-            <% contacts.each do |contact| %>
-              <%# herb:key contact.id %>
-              <li data-filter-target="item">
-                <%= peek_link_to contact, class: "list-row" do %>
-                  <%= avatar contact.name, size: :md %>
-                  <span class="list-row__content">
-                    <span class="list-row__title"><%= contact.name %></span>
-                    <span class="list-row__desc"><%= [ contact.title, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
-                  </span>
-                  <span class="contact-marks">
-                    <% if contact.portal? %>
-                      <span class="contact-marks__mark" title="Can sign in to the portal"><%= icon_tag "globe" %><span class="visually-hidden">Portal</span></span>
-                    <% end %>
-                    <% if contact.can_approve? %>
-                      <span class="contact-marks__mark contact-marks__mark--approve" title="Can approve"><%= icon_tag "check-circle" %><span class="visually-hidden">Can approve</span></span>
-                    <% end %>
-                  </span>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="record-card__empty">No contacts yet.</p>
-        <% end %>
-      </div>
-      <footer class="card__footer">
-        <%= link_to new_client_contact_path(@client), class: "btn btn--secondary btn--sm" do %>
-          <%= icon_tag "person-add" %>
-          <span>Add a contact</span>
-        <% end %>
-      </footer>
-    </section>
+    <%= render "clients/contacts", client: @client %>
 
     <%= render "events/timeline", subject: @client %>
   </aside>

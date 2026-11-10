@@ -41,6 +41,8 @@ class ClientsController < ApplicationController
   def create
     @client = Client.new(client_params)
     if @client.save
+      return render(:create) if from_modal?
+
       redirect_to @client, notice: "Client added."
     else
       render :new, status: :unprocessable_entity

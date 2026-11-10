@@ -15,7 +15,14 @@ class Users::InvitationsController < ApplicationController
     invitation = Invitation.new(params.expect(invitation: %i[email_address role]).merge(invited_by: current_user))
     if invitation.save
       invitation.deliver
-      redirect_to new_user_invitation_path, notice: "Invitation sent to #{invitation.email_address}."
+      notice = "Invitation sent to #{invitation.email_address}."
+      # From the modal over Users: it closes, and the list of pending invitations shows the new one.
+      return render(turbo_stream: [ turbo_stream.update("modal"), turbo_stream_flash(notice: notice), turbo_stream.refresh(request_id: nil) ]) if from_modal?
+
+      redirect_to new_user_invitation_path, notice: notice
+    elsif from_modal?
+      @invitation = invitation
+      render :new, status: :unprocessable_entity
     else
       redirect_to new_user_invitation_path, alert: invitation.errors.full_messages.to_sentence
     end
