@@ -1,9 +1,12 @@
 <%# locals: (request_record:, modal: nil) %>
 <%# A request's subject and details. In the modal (New request over the page) Cancel closes it and
-    the form submits to the whole page; on its own page Cancel goes back to the requests. %>
+    the form submits inside it: refused, it comes back there; sent, the modal closes over the page
+    (Portal::RequestsController). On its own page Cancel goes back to the requests. What's typed
+    is kept in the browser until it's sent (the draft controller). %>
 <%= render "layouts/shared/errors", record: request_record %>
 <%= form_with model: request_record, scope: :request, url: portal_requests_path, class: "portal-form",
-      data: { controller: "form", action: "keydown.esc->form#cancel" }.merge(modal ? { turbo_frame: "_top" } : {}) do |form| %>
+      data: { controller: "form draft", draft_key_value: "portal:request:#{request_record.client_id}", action: "keydown.esc->form#cancel" } do |form| %>
+  <%= draft_notice %>
   <div class="field">
     <%= form.label :subject, "Subject", class: "field__label" %>
     <%= form.text_field :subject, value: request_record.title, required: true, autofocus: true, autocomplete: "off" %>

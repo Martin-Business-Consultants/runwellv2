@@ -59,34 +59,5 @@
   <% end %>
   </div>
 
-  <% messages = task.notes.discussion.includes(:author) %>
-  <section class="portal-task__discussion" aria-label="Discussion">
-    <h3 class="portal-task__discussion-title">Discussion</h3>
-    <% if messages.any? %>
-      <ol class="portal-thread">
-        <% messages.each do |note| %>
-          <%# herb:key note.id %>
-          <li class="<%= class_names("portal-thread__message", "portal-thread__message--mine": note.author_id == current_contact.id) %>">
-            <p class="portal-thread__meta">
-              <strong><%= note.author&.display_name || "The team" %></strong>
-              <time datetime="<%= note.occurred_at.iso8601 %>"><%= l(note.occurred_at.in_time_zone, format: :short) %></time>
-            </p>
-            <div class="portal-thread__text"><%= rich_text note.body %></div>
-          </li>
-        <% end %>
-      </ol>
-    <% else %>
-      <p class="muted portal-thread__empty">Nothing here yet. Ask a question or add something, and the team sees it on this <%= term(:task).downcase %>.</p>
-    <% end %>
-    <%= form_with url: portal_task_notes_path(task), scope: :note, class: "portal-thread__reply", namespace: dom_id(task, :portal_reply),
-          data: { controller: "form", action: "turbo:submit-end->form#resetOnSuccess" } do |form| %>
-      <%= rich_text_field_tag form.field_name(:body), nil, id: form.field_id(:body), placeholder: "Write a message…" %>
-      <div class="portal-thread__actions">
-        <% if Current.previewing? %>
-          <span class="portal-thread__preview muted small">You’re viewing as <%= current_contact.name %>, so nothing is sent.</span>
-        <% end %>
-        <%= tag.button "Send", type: "submit", class: "btn btn--primary btn--sm", disabled: Current.previewing? %>
-      </div>
-    <% end %>
-  </section>
+  <%= render "portal/tasks/discussion", task: task %>
 </section>

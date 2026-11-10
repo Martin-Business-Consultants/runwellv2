@@ -1,0 +1,9 @@
+<%# locals: () %>
+<%# A reply the moment it's sent, before the server answers (the pending controller puts its words in
+    and adds it to the thread), shaped like the client's own messages, dimmed. %>
+<template id="pending_portal_message">
+  <li class="portal-thread__message portal-thread__message--mine portal-thread__message--pending" aria-busy="true">
+    <p class="portal-thread__meta"><strong>You</strong> <span>Sending…</span></p>
+    <div class="portal-thread__text" data-pending-text></div>
+  </li>
+</template>

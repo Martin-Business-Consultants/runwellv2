@@ -806,7 +806,10 @@ sees it in History; a task's side panel says where the client puts it, and staff
 (`Portal::DocumentsController`, `Client#client_documents`); a plugin can stand in for it
 (`portal_nav … replaces: :documents`: its link takes the item's place and the page redirects to it). Task lists open on open tasks
 (`?tasks=` on a piece of work, `?status=` on Tasks). New request opens in a modal (the portal
-layout's `modal` frame).
+layout's `modal` frame), submits inside it and, sent, closes over the page; a reply on a task's
+discussion answers in place (`inline=discussion`, `portal/tasks/_discussion`), showing at once while
+it's sent, and both keep unsent words as drafts. The portal has the staff pages' connection line and
+sign-in handling (its own sign-in page is marked too), but no peek and no undo.
 
 The plugins Runwell publishes (Agreements, AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does

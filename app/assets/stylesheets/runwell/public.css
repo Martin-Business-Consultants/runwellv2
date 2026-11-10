@@ -181,3 +181,6 @@ a.portal-section-filter { color: var(--text); text-decoration: none; }
 .portal-thread__reply { display: flex; flex: none; flex-direction: column; gap: var(--s-2); }
 .portal-thread__reply lexxy-editor { min-height: 4rem; max-height: 10rem; overflow-y: auto; background: var(--panel); }
 .portal-thread__actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--s-3); }
+
+/* A reply the moment it's sent (portal/tasks/_pending_message), until the answer redraws the thread. */
+.portal-thread__message--pending { opacity: 0.5; }

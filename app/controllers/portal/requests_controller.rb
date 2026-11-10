@@ -22,6 +22,9 @@ class Portal::RequestsController < Portal::BaseController
                                        sender_name: current_contact.name, sender_email: current_contact.email,
                                        source: Current.client_agent? ? "agent" : "portal", requested: true)
     if @request_record.save
+      # From the modal over any portal page: it closes and the page shows the request in place.
+      return render(turbo_stream: [ turbo_stream.update("modal"), turbo_stream_flash(notice: "Sent. We'll get back to you."), turbo_stream.refresh(request_id: nil) ]) if from_modal?
+
       redirect_to portal_requests_path, notice: "Sent. We'll get back to you."
     else
       render :new, status: :unprocessable_entity
