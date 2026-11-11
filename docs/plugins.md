@@ -266,6 +266,19 @@ is also a note on the task's discussion in their name, so the core tells whoever
 with no notifier of the plugin's own. Its email to approvers goes only to people `Notice` says can
 be reached.
 
+`runwell-leads` (Leads, 3.0 for 5.31) is the reference for a public endpoint a website posts to and
+for a plugin that keeps records apart from the core's until they earn a place there. A website's
+form posts to `/leads/capture/<key>` (`Leads::CapturesController`: `allow_unauthenticated_access`,
+`skip_forgery_protection`, `rate_limit`, found by a `Leads::CaptureKey` token, 404 while the plugin
+is off), and `Leads::Capture` makes it a lead or joins an existing one (by submission id, then
+email). A lead (`Leads::Lead`: open in a `Leads::Stage`, with an owner and a next step, then won
+or lost) stays in the plugin's tables; only winning it (`Leads::Win`) writes to the core, making a
+client, its contact and a first piece of work through the core's models. Its board uses the core's
+`drag-and-drop`, and its history is recorded by the model, so every surface leaves the same trail.
+3.0 replaced Leads 2 (written for 2.x) under the same key: its first migration renames 2's tables
+aside in place and the last brings their rows across, the way to replace a plugin's tables
+without losing an install's data.
+
 `runwell-meetings` (Meetings) is a team's daily rhythm. Each person picks the day's priorities
 (`Meetings::Priority`: a task, done when the task is, or a line of their own, ticked off by hand)
 and carries over the previous weekday's unfinished ones. A meeting (`Meetings::Meeting`, with its
