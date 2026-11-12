@@ -20,6 +20,14 @@ and the ways in:
 - **The command line** (and any assistant that runs commands):
   `curl -fsSL https://your-install/install/cli | sh`, then `runwell login`.
 
+Signed in to more than one Runwell (two businesses, say)? `runwell login` again with the other's
+address: the CLI keeps a sign-in per Runwell and sends each only to its own. `runwell installs`
+lists them, `runwell use <host>` picks the default, and `--on <host>` on any command (or
+`RUNWELL_URL`) uses another this once; a task's brief puts `--on` on its commands, so an agent
+can't act on the wrong Runwell's task of the same number. With a Claude Code per business
+(`CLAUDE_CONFIG_DIR`), `runwell agent setup --on <host>` in each ties it to its own Runwell.
+`runwell logout [host]` signs out of one, `--all` of every one.
+
 What the assistant does is recorded as your agent ("Ted's agent via Muse"), with your role
 exactly. Anything that reaches a client (an email, showing
 something in the portal) is previewed first and done only once you agree.

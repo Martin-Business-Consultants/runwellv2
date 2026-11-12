@@ -19,6 +19,9 @@ class Task::Brief
   private
     def work = task.work
     def record = "Task:#{task.id}"
+    # This Runwell, as the CLI's --on takes it: a person signed in to several has each command
+    # say which one, since an id here is someone else's task there.
+    def on = "--on #{base_url.sub(%r{\Ahttps?://}, "")}"
     def plain(html) = html.present? ? ActionText::Content.new(html.to_s).to_plain_text.strip : nil
 
     def sections
@@ -90,21 +93,21 @@ class Task::Brief
         Sign in once with the `runwell` command (or connect an MCP client to #{base_url}/mcp):
 
         ```sh
-        curl -fsSL #{base_url}/install/cli | sh    # if you don't have it yet
-        runwell login #{base_url}
+        curl -fsSL #{base_url}/install/cli | sh    # if you don't have it yet (`runwell update` if it doesn't know --on)
+        runwell login #{base_url}                  # keeps any other Runwell you're signed in to
         ```
 
-        Then, as you work:
+        Then, as you work (keep the `#{on}`: it sends each command to this Runwell, whichever others you're signed in to):
 
         ```sh
-        runwell show_task --id #{task.id}                                  # the item, fresh
-        runwell update_task --id #{task.id} --task.status in_progress      # when you start
-        runwell add_note --record #{record} --note.body "What you did, found or decided"
-        runwell update_task --id #{task.id} --task.status blocked          # stuck: add a note saying why
-        runwell update_task --id #{task.id} --task.status in_review        # finished: a person checks it and marks it done
+        runwell show_task --id #{task.id} #{on}                                  # the item, fresh
+        runwell update_task --id #{task.id} --task.status in_progress #{on}      # when you start
+        runwell add_note --record #{record} --note.body "What you did, found or decided" #{on}
+        runwell update_task --id #{task.id} --task.status blocked #{on}          # stuck: add a note saying why
+        runwell update_task --id #{task.id} --task.status in_review #{on}        # finished: a person checks it and marks it done
         ```
 
-        `runwell tools` lists everything you can do; `runwell help <tool>` explains one.
+        `runwell tools #{on}` lists everything you can do; `runwell help <tool>` explains one.
       MD
     end
 

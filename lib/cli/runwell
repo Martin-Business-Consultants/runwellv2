@@ -7,7 +7,11 @@
 #
 #   runwell login [URL]          sign in through the browser (--token rw_… for a personal token,
 #                                --read-only for access that can't change anything, --client to
-#                                sign in as a client's contact, to their portal)
+#                                sign in as a client's contact, to their portal). Signing in to
+#                                another Runwell keeps the ones you have
+#   runwell installs             the Runwells you're signed in to, and which is the default
+#   runwell use <host>           make one the default
+#       --on <host>              on any command: use that Runwell this once (or set RUNWELL_URL)
 #   runwell tools                what you can do, for your role
 #   runwell help <tool>          a tool's description and inputs (runwell help exit-codes)
 #   runwell <tool> [--key value] run one; dotted keys nest (--client.name Acme); @path reads a file
@@ -19,7 +23,7 @@
 #   runwell update               get the latest CLI from this Runwell (and refresh the skill)
 #   runwell mcp [--read-only]    a stdio MCP server for desktop apps, forwarding to Runwell
 #   runwell agent setup          teach Claude Code (a skill and a startup check); print MCP setup
-#   runwell logout
+#   runwell logout [host]        sign out of one (the one in use), or --all
 require "json"
 require "net/http"
 require "uri"
@@ -30,9 +34,15 @@ require "socket"
 require "fileutils"
 
 DEFAULT_URL = "__RUNWELL_URL__"
-CONFIG = File.join(ENV.fetch("XDG_CONFIG_HOME", File.join(Dir.home, ".config")), "runwell", "config.json")
-SKILL_PATH = File.join(Dir.home, ".claude", "skills", "runwell", "SKILL.md")
-CLAUDE_SETTINGS = File.join(Dir.home, ".claude", "settings.json")
+CONFIG_DIR = File.join(ENV.fetch("XDG_CONFIG_HOME", File.join(Dir.home, ".config")), "runwell")
+# Every sign-in, by its Runwell's address: { "default" => url, "installs" => { url => { "token" => … } } }.
+LOGINS = File.join(CONFIG_DIR, "logins.json")
+# The one sign-in the CLI kept before it could hold several: read once, then replaced by LOGINS.
+LEGACY_CONFIG = File.join(CONFIG_DIR, "config.json")
+# Claude Code's own directory: a person may run several (CLAUDE_CONFIG_DIR), each with its own skill and settings.
+CLAUDE_DIR = ENV["CLAUDE_CONFIG_DIR"].to_s.empty? ? File.join(Dir.home, ".claude") : ENV["CLAUDE_CONFIG_DIR"]
+SKILL_PATH = File.join(CLAUDE_DIR, "skills", "runwell", "SKILL.md")
+CLAUDE_SETTINGS = File.join(CLAUDE_DIR, "settings.json")
 SKILL_MARKER = "<!-- managed by the runwell CLI: `runwell agent setup` rewrites this file; remove this line to keep your own edits -->"
 
 # Stable exit statuses, one per error code the server sends (see `runwell help exit-codes`).
@@ -56,14 +66,6 @@ EXIT_HELP = <<~TEXT
    12  rate_limited        too many calls this minute: wait retry_after seconds
 TEXT
 
-def config = File.exist?(CONFIG) ? JSON.parse(File.read(CONFIG)) : {}
-
-def save_config(data)
-  FileUtils.mkdir_p(File.dirname(CONFIG))
-  File.write(CONFIG, JSON.pretty_generate(data))
-  File.chmod(0o600, CONFIG)
-end
-
 def die(message, code: "failed", hint: nil)
   if $json_errors
     puts JSON.generate({ "status" => "error", "code" => code, "summary" => message, "hint" => hint }.compact)
@@ -74,11 +76,87 @@ def die(message, code: "failed", hint: nil)
   exit EXIT_CODES.fetch(code, 1)
 end
 
-def base_url = (ENV["RUNWELL_URL"] || config["url"] || DEFAULT_URL).sub(%r{/+\z}, "")
+# --- the Runwells you're signed in to -------------------------------------------------------
+#
+# A sign-in belongs to one Runwell and is only ever sent there: choosing another address (--on,
+# RUNWELL_URL) chooses that address's own sign-in, or none.
+
+# The address this copy of the CLI was downloaded from (nil when run from the repository).
+def baked_url = DEFAULT_URL.start_with?("__") ? nil : DEFAULT_URL
+
+def normalize(url) = url.to_s.strip.sub(%r{/+\z}, "").sub(%r{\Ahttps?://[^/]+}i) { it.downcase }
+def host_of(url) = url.to_s.sub(%r{\Ahttps?://}, "")
+
+def read_store
+  path = [ LOGINS, LEGACY_CONFIG ].find { File.exist?(it) } or return { "default" => nil, "installs" => {} }
+  data = JSON.parse(File.read(path))
+  return { "default" => data["default"], "installs" => data["installs"] || {} } if path == LOGINS
+  return { "default" => nil, "installs" => {} } unless data["url"]
+
+  url = normalize(data["url"])
+  { "default" => url, "installs" => { url => data.except("url") } }
+rescue JSON::ParserError
+  die "#{path} isn't valid JSON", hint: "Fix or remove it, then `runwell login` again."
+end
+
+def store = @store ||= read_store
+
+# Read, change and write the sign-ins as one step, so two runwells at once (agents working side
+# by side) can't lose each other's. Not re-entrant.
+def change_store
+  FileUtils.mkdir_p(CONFIG_DIR)
+  File.open(File.join(CONFIG_DIR, "lock"), File::RDWR | File::CREAT, 0o600) do |lock|
+    lock.flock(File::LOCK_EX)
+    data = read_store
+    result = yield data
+    data["default"] = data["installs"].keys.first if data["installs"].size == 1
+    data["default"] = nil unless data["installs"].key?(data["default"])
+    scratch = "#{LOGINS}.#{Process.pid}.tmp"
+    File.write(scratch, JSON.pretty_generate(data), perm: 0o600)
+    File.rename(scratch, LOGINS)
+    File.delete(LEGACY_CONFIG) if File.exist?(LEGACY_CONFIG)
+    @store = data
+    result
+  end
+end
+
+# A Runwell by its address or its host ("crm.example.com"): the one signed in to by that name,
+# else that host over https.
+def resolve(name)
+  name = name.to_s.strip
+  return normalize(name) if name.match?(%r{\Ahttps?://}i)
+
+  store["installs"].keys.find { host_of(it) == name.downcase } || "https://#{name.downcase}"
+end
+
+# The Runwell this command is for: --on, else RUNWELL_URL, else the default.
+def base_url
+  @base_url ||= if $on then resolve($on)
+  elsif !ENV["RUNWELL_URL"].to_s.empty? then resolve(ENV["RUNWELL_URL"])
+  elsif store["installs"].key?(store["default"]) then store["default"]
+  elsif store["installs"].size == 1 then store["installs"].keys.first
+  elsif store["installs"].any?
+    die "signed in to #{signed_in_hosts.join(", ")}, with no default", code: "usage", hint: "Add --on <host>, or pick one with `runwell use <host>`."
+  else
+    baked_url || die("no Runwell to talk to yet", code: "auth", hint: "The person runs `runwell login https://their-runwell` in a terminal.")
+  end
+end
+
+def signed_in_hosts = store["installs"].keys.map { host_of(it) }
+def several? = store["installs"].size > 1
+
+# This Runwell's sign-in ({} when there is none).
+def install = store["installs"][base_url] || {}
+
+def not_signed_in
+  others = signed_in_hosts - [ host_of(base_url) ]
+  die "not signed in to #{host_of(base_url)}#{", or the token was revoked" if install["token"]}", code: "auth",
+    hint: "The person runs `runwell login #{base_url}` in a terminal.#{" (Signed in to #{others.join(", ")}: --on <host> uses one.)" if others.any?}"
+end
 
 # Staff talk to /mcp; a client's contact to their portal's /portal/mcp.
-def mcp_url = "#{base_url}#{config["mcp_path"] || "/mcp"}"
-def client? = config["mcp_path"] == "/portal/mcp"
+def mcp_url = "#{base_url}#{install["mcp_path"] || "/mcp"}"
+def client? = install["mcp_path"] == "/portal/mcp"
 def me_tool = client? ? "portal_me" : "me"
 
 def http(method, url, body: nil, form: nil, token: nil, accept: "application/json", retry_once: false)
@@ -112,14 +190,14 @@ def login(args)
   die "--token needs a value", code: "usage" if index && token.nil?
   read_only = !args.delete("--read-only").nil?
   client = !args.delete("--client").nil?
-  url = (args.find { !it.start_with?("--") } || base_url).sub(%r{/+\z}, "")
-  die "give Runwell's address: runwell login https://runwell.example.com", code: "usage" unless url.match?(%r{\Ahttps?://})
+  url = (name = args.find { !it.start_with?("--") }) ? resolve(name) : base_url
+  @base_url = url
 
   # A personal token says whose it is: a client's work on the portal, not on /mcp.
   if token
     path = client || http(:post, "#{url}/mcp", token: token, body: { jsonrpc: "2.0", id: 1, method: "tools/list" }).code == "401" ? "/portal/mcp" : "/mcp"
-    save_config("url" => url, "token" => token, "mcp_path" => path)
-    return puts("Signed in to #{url}#{" (client portal)" if path == "/portal/mcp"} with a personal token.")
+    save_login(url, "token" => token, "mcp_path" => path)
+    return puts("Signed in to #{url}#{" (client portal)" if path == "/portal/mcp"} with a personal token.#{default_note(url)}")
   end
   unless $stdin.tty? && $stdout.tty?
     die "signing in needs a browser and a person", code: "auth", hint: "Ask the person to run `runwell login #{url}` in a terminal, or use --token."
@@ -150,32 +228,92 @@ def login(args)
     code: query["code"], redirect_uri: redirect, code_verifier: verifier }).body)
   die "sign-in failed: #{tokens["error"]}", code: "auth" unless tokens["access_token"]
 
-  save_config("url" => url, "token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"],
+  save_login(url, "token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"],
     "client_id" => app["client_id"], "token_endpoint" => meta["token_endpoint"], "mcp_path" => client ? "/portal/mcp" : "/mcp")
   me = call_tool(me_tool, {})
-  puts "Signed in to #{url} as #{me.dig("me", "name")} (#{me.dig("me", client ? "company" : "role")})#{", read only" if me["read_only"]}."
+  puts "Signed in to #{url} as #{me.dig("me", "name")} (#{me.dig("me", client ? "company" : "role")})#{", read only" if me["read_only"]}.#{default_note(url)}"
 end
 
+# Signing in adds this Runwell (or replaces its sign-in) and leaves the others, and the default, alone.
+def save_login(url, entry)
+  change_store do |data|
+    data["installs"][url] = entry
+    data["default"] ||= url
+  end
+end
+
+def default_note(url)
+  return if store["default"] == url
+
+  "\nYour default is still #{host_of(store["default"])}: add `--on #{host_of(url)}` to a command for this one, or switch with `runwell use #{host_of(url)}`."
+end
+
+# A fresh token for this Runwell, once its hourly one has run out. Refresh tokens are used once,
+# so this waits its turn: if another runwell refreshed while this one waited, its token is used.
 def refresh!
-  c = config
-  return false unless c["refresh_token"]
+  url, used = base_url, install["token"]
+  return false unless install["refresh_token"]
 
-  tokens = JSON.parse(http(:post, c["token_endpoint"], form: { grant_type: "refresh_token", client_id: c["client_id"], refresh_token: c["refresh_token"] }).body)
-  return false unless tokens["access_token"]
+  change_store do |data|
+    c = data["installs"][url] or next false
+    next true if c["token"] != used
+    next false unless c["refresh_token"] && c["token_endpoint"]
 
-  save_config(c.merge("token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"]))
-  true
+    tokens = JSON.parse(http(:post, c["token_endpoint"], form: { grant_type: "refresh_token", client_id: c["client_id"], refresh_token: c["refresh_token"] }).body) rescue {}
+    next false unless tokens["access_token"]
+
+    c.merge!("token" => tokens["access_token"], "refresh_token" => tokens["refresh_token"])
+    true
+  end
+end
+
+def logout(args)
+  return puts("Signed out.") if store["installs"].empty?
+
+  if args.include?("--all")
+    hosts = signed_in_hosts
+    change_store { it["installs"].clear }
+    return puts("Signed out of #{hosts.join(", ")}.")
+  end
+  url = (name = args.find { !it.start_with?("--") }) ? resolve(name) : base_url
+  return puts("Not signed in to #{host_of(url)}.") unless store["installs"].key?(url)
+
+  change_store { it["installs"].delete(url) }
+  puts "Signed out of #{host_of(url)}.#{" Still signed in to #{signed_in_hosts.join(", ")}#{" (the default is #{host_of(store["default"])})" if several?}." if store["installs"].any?}"
+end
+
+def use(name)
+  die "which Runwell? runwell use <host>", code: "usage", hint: "`runwell installs` lists them." if name.to_s.empty? || name.start_with?("--")
+  url = resolve(name)
+  die "not signed in to #{host_of(url)}", code: "auth", hint: "Signed in to: #{signed_in_hosts.join(", ").then { it.empty? ? "none" : it }}. The person runs `runwell login #{url}` in a terminal." unless store["installs"].key?(url)
+
+  change_store { it["default"] = url }
+  puts "#{host_of(url)} is now the default."
+end
+
+def list_installs(args)
+  rows = store["installs"].map do |url, entry|
+    { "host" => host_of(url), "url" => url, "default" => url == store["default"], "portal" => entry["mcp_path"] == "/portal/mcp" }
+  end
+  if args.include?("--json") || (!$stdout.tty? && !args.include?("--human"))
+    return puts(JSON.pretty_generate("status" => "ok", "default" => store["default"], "installs" => rows))
+  end
+  return puts("Not signed in to any Runwell: runwell login https://their-runwell") if rows.empty?
+
+  width = rows.map { it["host"].length }.max
+  rows.each { puts "#{it["default"] ? "*" : " "} #{it["host"].ljust(width)}  #{it["url"]}#{"  (client portal)" if it["portal"]}#{"  (default)" if it["default"]}" }
+  puts "\n`--on <host>` uses one for a single command; `runwell use <host>` changes the default." if rows.size > 1
 end
 
 # --- talking to the MCP endpoint ------------------------------------------------------------
 
 def rpc(method, params = nil, retried: false, retry_network: false)
-  token = config["token"] or die("not signed in", code: "auth", hint: "The person runs `runwell login` in a terminal.")
+  token = install["token"] or not_signed_in
   message = { jsonrpc: "2.0", id: 1, method: method, params: params }.compact
   # A read, or a change with its idempotency key, is safe to send once more if the connection drops.
   response = http(:post, mcp_url, token: token, body: message, retry_once: retry_network || method != "tools/call")
   return rpc(method, params, retried: true) if response.code == "401" && !retried && refresh!
-  die "not signed in, or the token was revoked", code: "auth", hint: "The person runs `runwell login` in a terminal." if response.code == "401"
+  not_signed_in if response.code == "401"
 
   body = JSON.parse(response.body)
   die body.dig("error", "message"), code: "failed" if body["error"]
@@ -270,7 +408,15 @@ def dig_path(value, path)
   end
 end
 
+# With several Runwells signed in, what to run next says which one it's for.
+def pin_next(result)
+  return result unless several? && result["next"].is_a?(Array)
+
+  result.merge("next" => result["next"].map { it.merge("command" => "#{it["command"]} --on #{host_of(base_url)}") })
+end
+
 def print_result(result, options)
+  result = pin_next(result)
   if options[:ids_only]
     records_in(result.except("next", "next_tools")).map { it["id"] }.uniq.each { puts it }
   elsif options[:count]
@@ -355,8 +501,8 @@ def mcp_bridge(args)
   $stdout.sync = true
   read_tools = nil
   forward = lambda do |message|
-    response = http(:post, mcp_url, token: config["token"], body: message)
-    response = http(:post, mcp_url, token: config["token"], body: message) if response.code == "401" && refresh!
+    response = http(:post, mcp_url, token: install["token"], body: message)
+    response = http(:post, mcp_url, token: install["token"], body: message) if response.code == "401" && refresh!
     response
   end
   $stdin.each_line do |line|
@@ -388,7 +534,10 @@ end
 
 # --- checking and updating ------------------------------------------------------------------
 
-def served_script = http(:get, "#{base_url}/install/runwell", accept: "text/x-ruby")
+# The CLI comes from the Runwell it was installed from, whichever one a command is for: with
+# several signed in (on different versions, maybe) it doesn't flip between their copies.
+def origin_url = baked_url || base_url
+def served_script = http(:get, "#{origin_url}/install/runwell", accept: "text/x-ruby")
 
 def doctor(args)
   brief = args.include?("--brief")
@@ -396,28 +545,29 @@ def doctor(args)
   checks = []
   check = ->(name, ok, detail) { checks << { "check" => name, "ok" => ok, "detail" => detail } }
 
-  check.("config", File.exist?(CONFIG), File.exist?(CONFIG) ? CONFIG : "no config yet: run `runwell login`")
+  saved = [ LOGINS, LEGACY_CONFIG ].find { File.exist?(it) }
+  check.("config", !saved.nil?, saved ? "#{saved}#{" (#{signed_in_hosts.join(", ")}; the default is #{host_of(store["default"])})" if several?}" : "no sign-in yet: run `runwell login`")
   up = (http(:get, "#{base_url}/up", accept: "text/html").code == "200" rescue false)
   check.("reachable", up, up ? base_url : "can't reach #{base_url}")
 
   me = nil
-  if up && config["token"]
+  if up && install["token"]
     ask = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: me_tool, arguments: {} } }
-    response = http(:post, mcp_url, token: config["token"], body: ask)
-    response = http(:post, mcp_url, token: config["token"], body: ask) if response.code == "401" && refresh!
+    response = http(:post, mcp_url, token: install["token"], body: ask)
+    response = http(:post, mcp_url, token: install["token"], body: ask) if response.code == "401" && refresh!
     me = (JSON.parse(response.body).dig("result", "structuredContent") rescue nil) if response.code == "200"
   end
   signed_in = me && me["status"] != "error"
   check.("signed in", !!signed_in, signed_in ? "#{me.dig("me", "name")}#{", acting for #{me.dig("me", "acting_for", "name")}" if me.dig("me", "acting_for")} (#{me.dig("me", client? ? "company" : "role")})#{", read only" if me["read_only"]}" : "not signed in: the person runs `runwell login` in a terminal")
 
-  if up
+  if origin_url == base_url ? up : (http(:get, "#{origin_url}/up", accept: "text/html").code == "200" rescue false)
     latest = served_script.body.to_s
     current = File.read(File.realpath($PROGRAM_NAME)) rescue ""
     same = Digest::SHA256.hexdigest(latest) == Digest::SHA256.hexdigest(current)
-    check.("cli up to date", same, same ? "matches #{base_url}" : "a newer runwell is available: run `runwell update`")
+    check.("cli up to date", same, same ? "matches #{origin_url}" : "a newer runwell is available: run `runwell update`")
   end
 
-  if File.directory?(File.join(Dir.home, ".claude"))
+  if File.directory?(CLAUDE_DIR)
     skill = File.exist?(SKILL_PATH) ? File.read(SKILL_PATH) : nil
     state = if skill.nil? then [ false, "no Claude Code skill: run `runwell agent setup`" ]
     elsif !skill.include?(SKILL_MARKER) then [ true, "#{SKILL_PATH} (your own version, left alone)" ]
@@ -429,8 +579,10 @@ def doctor(args)
 
   failing = checks.reject { it["ok"] }
   if brief
-    puts(signed_in ? "Runwell: signed in to #{base_url} as #{me.dig("me", "name")}#{" (read only)" if me["read_only"]}. #{failing.empty? ? "Ready." : failing.map { it["detail"] }.join("; ")}" :
-                     "Runwell: not signed in to #{base_url}. Don't run `runwell login` yourself: ask the person to run it in a terminal.")
+    others = signed_in_hosts - [ host_of(base_url) ]
+    also = others.any? ? " Also signed in to #{others.join(", ")}: a command goes to #{host_of(base_url)} unless it says `--on <host>`, so keep the `--on` a brief's commands carry." : ""
+    puts(signed_in ? "Runwell: signed in to #{base_url} as #{me.dig("me", "name")}#{" (read only)" if me["read_only"]}. #{failing.empty? ? "Ready." : failing.map { it["detail"] }.join("; ")}#{also}" :
+                     "Runwell: not signed in to #{base_url}. Don't run `runwell login` yourself: ask the person to run it in a terminal.#{also}")
   elsif json
     puts JSON.pretty_generate("status" => failing.empty? ? "ok" : "error", "checks" => checks)
   else
@@ -449,7 +601,7 @@ def update
   else
     File.write(path, response.body)
     File.chmod(0o755, path)
-    puts "Updated #{path} from #{base_url}."
+    puts "Updated #{path} from #{origin_url}."
   end
   exec(path, "agent", "setup", "--quiet") if File.exist?(SKILL_PATH) && File.read(SKILL_PATH).include?(SKILL_MARKER)
 end
@@ -479,6 +631,7 @@ def skill_text = <<~MARKDOWN
   - Errors carry a `code` and a `hint`; exit statuses match (`runwell help exit-codes`). Branch on the code: `invalid` means fix the named fields; `refused` means Runwell said no as things stand; `auth` means ask the person to sign in.
   - Anything that reaches a client answers `needs_confirmation` (exit 9). Show the person; only after they agree, run it again with `--yes`.
   - Never run `runwell login` yourself: it needs a person at a browser. If you're not signed in, ask them. `runwell doctor` checks everything.
+  - A person can be signed in to several Runwells (`runwell installs`). A command goes to the default unless it says `--on <host>`, and ids mean something else on another Runwell: when a brief or a link names one, put its `--on <host>` on every command for that work.
 
   ## Working a task
 
@@ -508,18 +661,29 @@ def skill_text = <<~MARKDOWN
   - "Check my in-progress tasks against the repos and mark what's actually done, with a note."
 MARKDOWN
 
+# The startup check, and, asked for one Runwell by name (--on), that Runwell for every command
+# this Claude Code runs (RUNWELL_URL in its settings' env): a person with a Claude Code per
+# business ties each to its own Runwell.
 def install_session_hook
   settings = File.exist?(CLAUDE_SETTINGS) ? (JSON.parse(File.read(CLAUDE_SETTINGS)) rescue nil) : {}
-  return "left #{CLAUDE_SETTINGS} alone: it isn't valid JSON" if settings.nil?
+  return "left #{CLAUDE_SETTINGS} alone: it isn't valid JSON" unless settings.is_a?(Hash)
 
+  done = []
   command = "#{File.realpath($PROGRAM_NAME)} doctor --brief"
   hooks = (settings["hooks"] ||= {})["SessionStart"] ||= []
-  return "the startup check was already there" if hooks.any? { |h| Array(h["hooks"]).any? { it["command"].to_s.include?("doctor --brief") } }
+  if hooks.none? { |h| Array(h["hooks"]).any? { it["command"].to_s.include?("doctor --brief") } }
+    hooks << { "hooks" => [ { "type" => "command", "command" => command } ] }
+    done << "added a startup check to #{CLAUDE_SETTINGS}: each session starts knowing whether Runwell is signed in"
+  end
+  if $on && settings.dig("env", "RUNWELL_URL") != base_url
+    (settings["env"] ||= {})["RUNWELL_URL"] = base_url
+    done << "tied this Claude Code (#{CLAUDE_DIR}) to #{host_of(base_url)}: its commands go there"
+  end
+  return "the startup check was already there" if done.empty?
 
-  hooks << { "hooks" => [ { "type" => "command", "command" => command } ] }
   FileUtils.mkdir_p(File.dirname(CLAUDE_SETTINGS))
   File.write(CLAUDE_SETTINGS, JSON.pretty_generate(settings))
-  "added a startup check to #{CLAUDE_SETTINGS}: each session starts knowing whether Runwell is signed in"
+  done.join(", and ")
 end
 
 def agent_setup(args)
@@ -536,20 +700,28 @@ def agent_setup(args)
   return if quiet
 
   puts "And #{hook}."
+  puts "Signed in to #{signed_in_hosts.join(", ")}: `runwell agent setup --on <host>` ties this Claude Code to one." if several? && !$on
   puts "\nTo use Runwell over MCP instead:"
   puts "  Claude Code:     claude mcp add --transport http runwell #{base_url}/mcp"
   puts "  Claude/ChatGPT:  add a custom connector with #{base_url}/mcp"
-  puts "  Desktop apps:    { \"mcpServers\": { \"runwell\": { \"command\": \"#{File.expand_path($PROGRAM_NAME)}\", \"args\": [\"mcp\"] } } }"
+  puts "  Desktop apps:    { \"mcpServers\": { \"runwell\": { \"command\": \"#{File.expand_path($PROGRAM_NAME)}\", \"args\": [\"mcp\", \"--on\", \"#{host_of(base_url)}\"] } } }"
   puts "  Read only:       add \"--read-only\" to those args, or sign in with `runwell login --read-only`"
 end
 
 # --- main ---------------------------------------------------------------------------------
 
-command, *rest = ARGV
+argv = ARGV.dup
+if (index = argv.index("--on"))
+  $on = argv.slice!(index, 2).last
+  die "--on needs a Runwell: --on crm.example.com", code: "usage" if $on.nil? || $on.start_with?("--")
+end
+command, *rest = argv
 case command
 when nil, "-h", "--help" then puts File.read(__FILE__).lines.drop(1).take_while { it.start_with?("#") }.map { it.sub(/^# ?/, "") }.join
 when "login" then login(rest)
-when "logout" then File.delete(CONFIG) if File.exist?(CONFIG); puts "Signed out."
+when "logout" then logout(rest)
+when "installs" then list_installs(rest)
+when "use" then use(rest.first)
 when "tools" then list_tools
 when "help" then rest.first ? help_tool(rest.first) : list_tools
 when "doctor" then doctor(rest)

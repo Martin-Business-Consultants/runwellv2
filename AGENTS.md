@@ -999,7 +999,14 @@ do, through the same controllers: there is no separate API.
   commands to it for app features; declare a tool instead. Its own commands are only about the
   CLI: `login` (`--read-only`, `--client` for a contact's portal), `doctor` (`--brief` is the Claude Code SessionStart check),
   `update`, `mcp` (`--read-only`), `agent setup` (a managed skill, marked, refreshed by `update`,
-  never overwriting a hand-edited one). Output is JSON when piped; `--ids-only`, `--count`,
+  never overwriting a hand-edited one), and `installs`, `use`, `logout [host]`. It keeps a sign-in
+  per Runwell (`~/.config/runwell/logins.json`, by address; the old one-sign-in `config.json` is
+  read once and replaced), written under a lock so two runs can't lose a refreshed token. A
+  command goes to `--on <host>`, else `RUNWELL_URL`, else the default, and a token is only ever
+  sent to the Runwell it was issued by (never the default's to another address). `Task::Brief`
+  puts `--on` on its commands. `update` and the doctor's version check use the Runwell the CLI
+  was installed from, whichever is in use; `agent setup` writes to `CLAUDE_CONFIG_DIR` when set,
+  and with `--on` ties that Claude Code to the Runwell (`env.RUNWELL_URL` in its settings). Output is JSON when piped; `--ids-only`, `--count`,
   `--field a.b` trim it. Exit statuses follow the error codes (`runwell help exit-codes`)
 - **AI activity** (`/ai`, `AgentActivitiesController`, linked from Intake, the `agent_activity`
   tool) is where people review what agents did: every event whose actor is an agent
