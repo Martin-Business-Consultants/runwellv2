@@ -4,13 +4,17 @@
 # meant the brand's colour and its var(--ring) the focus shadow, so as Propshaft serves a
 # stylesheet a plugin registered (Runwell::Plugins.stylesheet), those read as --primary and
 # --ui-focus-ring. Every other old name is defined from runeui's tokens in runwell/compat.css.
+# A stylesheet already written against runeui's tokens says so with the comment
+# /* tokens: runeui */ and is served as it is (its --accent is shadcn's fill).
 # Goes in 7.0, with the layer: plugins write runeui's names.
 class PropshaftPluginStylesheets < Propshaft::Compiler
   RENAMES = { "accent" => "primary", "ring" => "ui-focus-ring" }.freeze
   PATTERN = /var\(\s*--(accent|ring)\s*(?=[,)])/
+  RUNEUI = %r{/\*\s*tokens:\s*runeui\s*\*/}
 
   def compile(asset, input)
     return input unless plugin?(asset)
+    return input if input.match?(RUNEUI)
 
     input.gsub(PATTERN) { "var(--#{RENAMES.fetch($1)}" }
   end

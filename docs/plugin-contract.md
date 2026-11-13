@@ -185,7 +185,7 @@ then:
   the sheet (`lib/rails_ext/propshaft_plugin_stylesheets.rb`, for stylesheets registered with
   `Runwell::Plugins.stylesheet`). Moving to runeui's names, a plugin writes `--primary` for the
   brand's colour and `--ui-focus-ring` for focus, and from then on `--accent` and `--ring` mean
-  shadcn's.
+  shadcn's: it puts `/* tokens: runeui */` in the stylesheet, and the core serves it unchanged.
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
 each page calls `section_nav "Its name" do … end` once (a partial of the plugin's, given the
