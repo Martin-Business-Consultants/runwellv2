@@ -7,4 +7,4 @@
 <% else %>
   <%= turbo_stream.prepend pagination_frame_id_for("clients_rows", 1), partial: "clients/row", locals: { client: @client, listed: CustomField.for("Client").listed.to_a, fresh: true } %>
 <% end %>
-<%= turbo_stream_flash(notice: safe_join([ "Added ", link_to(@client.name, @client), "." ])) %>
+<%= turbo_stream_flash(notice: { title: "Added #{@client.name}.", action: { label: "Open", href: client_path(@client) } }) %>

@@ -2,7 +2,7 @@
 /* over rune's). Each area of the app adds a section here as it moves to rune_ui
 /* (docs/rune-ui-migration.md).
 /*
-/* 1 Page   2 Sidebar   3 Page filter   4 Theme toggle   5 Settings layout   6 Sign-in pages
+/* 1 Page   2 The shell   3 Page filter   4 Theme toggle   5 Settings layout   6 Sign-in pages
 /* 7 Portal */
 
 /* ======================================================================= 1 Page */
@@ -19,7 +19,7 @@ turbo-frame { display: contents; }
 /* is its own group, so it holds still while the page beside it changes. None for anyone who asks
 /* for less motion. */
 @view-transition { navigation: auto; }
-.sidebar { view-transition-name: sidebar; }
+[data-slot="sidebar"] { view-transition-name: sidebar; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .1s; }
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
@@ -31,30 +31,80 @@ turbo-frame { display: contents; }
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; }
 
-/* The nav's width is the token Runwell has always had for it. */
-:root { --sidebar-width: 16rem; }
+/* ======================================================================= 2 The shell */
 
-/* ======================================================================= 2 Sidebar */
+/* Staff pages are runeui's shell, inset (ui :app_shell in the application layout): the nav down
+/* the left (layouts/shared/_sidenav and its _brand and _foot), collapsing to icons with [ and a
+/* sheet on a phone, beside the page in a rounded panel under a bar (layouts/shared/_panel_bar).
+/* runeui draws all of that; what's here is Runwell's own markup inside it.
+/*
+/* The bridge gives runeui's parts shadcn's meanings for --accent (a quiet fill) and --ring (a
+/* colour). Everything Runwell puts in the shell reads them as the brand colour and the focus
+/* shadow, so its boxes get those back (as compat.css does for the compat helpers' parts). */
+[data-slot="app-content"], [data-slot="app-header-content"], [data-slot="sidebar-header"], [data-slot="sidebar-footer"] {
+  --accent: var(--rune-accent);
+  --ring: var(--rune-ring);
+}
 
-.sidebar__top { height: auto; min-height: 2.5rem; padding-left: 0; }
+/* The page's box (#main, runeui's app-content): Runwell's column, its own measure and gaps. */
+[data-slot="app-content"].main { padding: var(--s-4) var(--s-6) calc(var(--s-6) * 2); }
+@media (max-width: 860px) { [data-slot="app-content"].main { padding: var(--s-4) var(--s-4) var(--s-6); } }
+
+/* The bar: the trail takes the room, the + and the bell sit at its end. */
+.panel-bar__crumbs { flex: 1; min-width: 0; }
+.panel-bar__crumbs [data-slot="breadcrumb-list"] { flex-wrap: nowrap; }
+.panel-bar__crumbs [data-slot="breadcrumb-item"] { min-width: 0; white-space: nowrap; }
+.panel-bar__crumbs :is([data-slot="breadcrumb-link"], [data-slot="breadcrumb-page"]) { overflow: hidden; text-overflow: ellipsis; }
+.panel-bar__crumbs [data-slot="breadcrumb-page"] { font-weight: var(--weight-strong); }
+.panel-bar__crumbs [data-slot="breadcrumb-separator"] { flex: none; }
+.panel-bar__context { display: flex; flex: none; align-items: center; gap: var(--s-2); margin-left: auto; }
+
+/* The nav's items: the brand's tint and colour on the current one (as every chosen thing has),
+/* the page's hover on the rest. Runwell's icons are 16px drawings of its own. */
+[data-slot="sidebar-menu-button"] .icon { flex: none; color: var(--text-muted); }
+[data-slot="sidebar-menu-button"]:hover { background: var(--hover); }
+[data-slot="sidebar-menu-button"][data-active] { background: var(--brand-tint); }
+[data-slot="sidebar-menu-button"][data-active] .icon { color: var(--rune-accent); }
+
+/* Its top: the install's name or logo over what it's for; the logo's mark alone while it's icons. */
+.nav-brand { display: flex; align-items: center; gap: var(--s-2); min-width: 0; min-height: 2.5rem; padding: 4px var(--s-2); border-radius: var(--radius-sm); color: var(--text); font-size: var(--text-read); font-weight: var(--weight-strong); text-decoration: none; }
+.nav-brand:hover { background: var(--hover); color: var(--text); }
+.nav-brand__mark { display: none; flex: none; place-items: center; width: 2rem; height: 2rem; overflow: hidden; border-radius: var(--radius); background: var(--text); color: var(--panel); font-weight: 700; }
+.nav-brand__mark img { width: 100%; height: 100%; object-fit: contain; }
+.nav-brand__mark:has(img) { background: none; }
+.nav-brand__text { display: flex; flex-direction: column; min-width: 0; line-height: var(--leading-tight); }
+.nav-brand__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-brand__name img { display: block; width: auto; max-height: 1.25rem; }
+.nav-brand__sub { overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); text-overflow: ellipsis; white-space: nowrap; }
+
+/* Its foot: the filter and plugins' actions in a row, then the person and their menu. */
+.nav-tools { display: flex; align-items: center; gap: var(--s-1); min-width: 0; padding: 0 var(--s-1); }
+.nav-account .menu { display: block; min-width: 0; }
+.nav-account__button { display: flex; align-items: center; gap: .625rem; width: 100%; min-height: 2.75rem; padding: 4px var(--s-2); border-radius: var(--radius-sm); color: var(--text-muted); }
+.nav-account__button:hover, .nav-account__button[aria-expanded="true"] { background: var(--hover); color: var(--text); }
+.nav-account__avatar { flex: 0 0 auto; width: 2rem; height: 2rem; overflow: hidden; border-radius: var(--radius); }
+.nav-account__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.nav-account__text { display: flex; flex: 1; flex-direction: column; min-width: 0; line-height: var(--leading-tight); text-align: left; }
+.nav-account__name { overflow: hidden; color: var(--text); font-weight: var(--weight-strong); text-overflow: ellipsis; white-space: nowrap; }
+.nav-account__email { overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
+
+/* While the nav is icons (not on a phone, where it's a whole sheet): the mark for the brand, the
+/* avatar for the person, and the filter opening beside the nav, over the page, when / calls it. */
+@media (min-width: 768px) {
+  [data-slot="app-shell"][data-sidebar="collapsed"] :is(.nav-brand__text, .nav-account__text) { display: none; }
+  [data-slot="app-shell"][data-sidebar="collapsed"] .nav-brand__mark { display: grid; }
+  [data-slot="app-shell"][data-sidebar="collapsed"] :is(.nav-brand, .nav-account__button) { justify-content: center; padding: 0; }
+  [data-slot="app-shell"][data-sidebar="collapsed"] .nav-tools { flex-direction: column; padding: 0; }
+  [data-slot="app-shell"][data-sidebar="collapsed"] .nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) {
+    position: fixed; inset: auto auto 3.75rem .5rem; z-index: var(--z-nav); width: 14rem; box-shadow: var(--shadow-popover);
+  }
+}
+
+/* The portal's and the sign-in pages' brand (their layouts, until they move: phase 8). */
 .sidebar__brand { flex: 1; gap: var(--s-2); padding: 4px var(--s-2); border-radius: var(--radius-sm); }
 .sidebar__brand:hover { background: var(--hover); }
 .sidebar__logo { width: 2rem; height: 2rem; border-radius: var(--radius); font-size: var(--text-read); overflow: hidden; }
 .sidebar__logo img { width: 100%; height: 100%; object-fit: contain; }
-.sidebar__brand-text { display: flex; flex-direction: column; min-width: 0; line-height: var(--leading-tight); }
-.sidebar__brand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar__brand-name img { max-height: 1.25rem; width: auto; }
-.sidebar__brand-sub { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.sidebar__tools { margin-top: auto; display: flex; align-items: center; gap: var(--s-1); padding: var(--s-3) var(--s-1) 0; }
-.sidebar__tools + .sidebar__footer { margin-top: 0; padding-top: var(--s-1); }
-.sidebar__account { height: auto; min-height: 2.75rem; padding: 4px var(--s-2); }
-.sidebar__avatar { flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: var(--radius); overflow: hidden; }
-.sidebar__avatar img { width: 100%; height: 100%; object-fit: cover; }
-.sidebar__account-text { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: var(--leading-tight); text-align: left; }
-.sidebar__account-text .sidebar__label { color: var(--text); font-weight: var(--weight-strong); }
-.sidebar__account-email { color: var(--text-faint); font-size: var(--text-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar__footer .menu__items { min-width: 15rem; }
 
 /* ======================================================================= 3 Page filter ("/") */
 
@@ -71,7 +121,7 @@ turbo-frame { display: contents; }
 /* reach them, since keys act on what's on the page, clipped or not. */
 .nav-filter__key { display: none; }
 .nav-filter:not(:focus-within):has(.nav-filter__input:placeholder-shown),
-.sidebar__shortcuts-button { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+.nav-shortcuts-button { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
 .nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) .nav-filter__input { width: 100%; }
 [data-filter-target~="item"][hidden] { display: none !important; }
 
@@ -111,8 +161,6 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 /* (.auth--wide) has more to say, so a little more room. */
 .auth-layout__main { width: 100%; max-width: 24rem; margin: 0; padding: 0; gap: var(--s-5); }
 .auth-layout__main:has(.auth--wide) { max-width: 28rem; }
-/* The flash frame takes no row (and no gap) until a notice lands in it. */
-:is(.auth-layout__main, .portal-main) > #flash:not(:has(.flash)) { display: none; }
 .auth-layout__footer { width: 100%; max-width: 24rem; color: var(--text-faint); font-size: var(--text-meta); }
 
 /* A way in (.auth-layout--split, layouts/public's :showcase): the page on the card's own white,

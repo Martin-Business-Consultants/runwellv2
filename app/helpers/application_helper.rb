@@ -50,9 +50,10 @@ module ApplicationHelper
     nil
   end
 
-  # The inset header's breadcrumb (layouts/shared/_inset_header): the page's parent, when it
-  # named one (parent_page), then the page itself.
+  # The panel bar's breadcrumb (layouts/shared/_panel_bar, ui :breadcrumb): the trail a page set
+  # itself (crumbs, RuneCompatHelper), else the page's parent, when it named one (parent_page),
+  # then the page itself.
   def breadcrumb_items
-    [ @breadcrumb_parent, ([ @page_title, nil ] if @page_title.present?) ].compact
+    @crumbs.presence || [ @breadcrumb_parent, ([ @page_title, nil ] if @page_title.present?) ].compact.presence || [ content_for(:title) ].compact_blank
   end
 end

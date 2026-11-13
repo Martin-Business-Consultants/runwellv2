@@ -8,9 +8,7 @@
       root.dataset.theme = theme
     }
 
-    // Collapsed nav and details sidebar (panes controller), set before the first paint.
-    for (const pane of [ "sidenav", "sidebar" ]) {
-      try { if (localStorage.getItem(pane) === "collapsed") root.dataset[pane] = "collapsed" } catch {}
-    }
+    // A record page's collapsed details sidebar (panes controller), set before the first paint.
+    try { if (localStorage.getItem("sidebar") === "collapsed") root.dataset.sidebar = "collapsed" } catch {}
   }
 <% end %>

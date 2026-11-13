@@ -201,11 +201,10 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .person__none { color: var(--text-faint); font-size: var(--text-meta); }
 .avatar--more { background: var(--layer-3); color: var(--text-muted); }
 
-/* Delete with a confirmation in place (layouts/shared/_confirm). */
-.confirm { display: flex; justify-content: center; }
-.confirm__card { width: min(100%, 26rem); }
-.confirm__trigger { color: var(--danger); }
-.confirm__trigger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 9%, transparent); }
+/* A destructive action on a record's own page (confirm_button, layouts/shared/_confirm): a quiet
+/* red button; the question is asked in the page's confirm dialog. */
+.confirm-button, .confirm-button:hover { color: var(--danger); }
+.confirm-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
 
 /* A secret (secret_field): the field with an eye to show it. */
 .secret-field { position: relative; display: flex; align-items: center; width: 100%; }
@@ -255,7 +254,7 @@ html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd))::after 
   box-shadow: 0 0 0 2px var(--panel); font-family: var(--font-sans); font-size: .65rem; font-weight: 600; line-height: 1;
   text-align: center; text-transform: none; white-space: pre; word-spacing: .2em; pointer-events: none;
 }
-html[data-hints] :is(.sidebar__link, .sidebar__brand)[data-key-hint]::after { inset: 50% var(--s-2) auto auto; translate: 0 -50%; }
+html[data-hints] [data-slot="sidebar-menu-button"][data-key-hint]::after { inset: 50% var(--s-2) auto auto; translate: 0 -50%; }
 html[data-hints] :is([data-filter-target~="item"], [data-keyboard-item]):not(:hover, :focus-within, [data-keyboard-current], [aria-selected="true"]) [data-key-hint]::after { display: none; }
 .hint-legend { display: none; }
 html[data-hints] .hint-legend {
@@ -368,12 +367,10 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 
 /* ======================================================================= Toasts */
 
-/* Notices and alerts are rune's toasts (flash_messages toast: true, layouts/shared/_flash), in the
-/* bottom right corner, over the side panel and trays (the bell and the + are in the bar at the top). */
-#flash .flashes--toast { --toast-bottom: var(--s-3); --toast-z: calc(var(--z-tray) + 2); }
-/* The toasts' wrapper (layouts/shared/_flash) takes no room in the page's column. */
-.flash-frame__messages { display: contents; }
-:is(.auth-layout__main, .portal-main) #flash .flashes--toast { --toast-bottom: var(--s-3); }
+/* Notices and alerts are runeui's toasts (ui :toaster in layouts/shared/_feedback; the flash and
+/* turbo_stream_flash), in the bottom right corner, over the side panel, the trays and the search
+/* bar (the bell and the + are in the bar at the top). */
+#runeui-toaster { z-index: calc(var(--z-tray) + 12); }
 
 /* ======================================================================= Comboboxes */
 
@@ -418,8 +415,6 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .popup .popup__btn:is(:hover, :focus-visible) .icon:not(.checked) { color: var(--accent); }
 .popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--accent); }
 .data-table tbody tr:focus-visible td, .data-table tbody tr[data-keyboard-current] td { background: var(--brand-tint); }
-.sidebar__link[aria-current="page"] { background: var(--brand-tint); color: var(--text); }
-.sidebar__link[aria-current="page"] .icon { color: var(--accent); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] .icon { color: var(--accent); }
 .record-list__row[data-keyboard-current], .list-row[data-keyboard-current] { background: var(--brand-tint); }
@@ -465,7 +460,7 @@ tr.is-fresh { animation: row-fresh 2.4s ease-out; }
 
 /* The connection gone (layouts/shared/_connection_status, the connection controller): a quiet pill
    at the foot of the page, and anything waiting to be sent marked unsaved. */
-.connection-status { position: fixed; inset-inline: 0; bottom: calc(var(--s-3) + env(safe-area-inset-bottom)); z-index: var(--toast-z, 60); display: flex; align-items: center; gap: var(--s-2); width: fit-content; margin: 0 auto; padding: var(--s-1) var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--panel); box-shadow: var(--shadow-popover, 0 8px 24px rgb(0 0 0 / .12)); color: var(--text-muted); font-size: var(--text-meta); }
+.connection-status { position: fixed; inset-inline: 0; bottom: calc(var(--s-3) + env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: var(--s-2); width: fit-content; margin: 0 auto; padding: var(--s-1) var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--panel); box-shadow: var(--shadow-popover, 0 8px 24px rgb(0 0 0 / .12)); color: var(--text-muted); font-size: var(--text-meta); }
 .connection-status[hidden] { display: none; }
 .connection-status__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--attention); }
 form[data-unsaved] input,

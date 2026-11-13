@@ -170,6 +170,11 @@ export default class extends Controller {
       const hint = hintFor(keys)
       if (element.dataset.keyHint !== hint) element.dataset.keyHint = hint
     })
+    // A runeui control that handles its own key says which in aria-keyshortcuts (the nav's
+    // toggle, [): hint mode shows that too.
+    document.querySelectorAll(":is(button, a)[aria-keyshortcuts]:not([data-keys])").forEach(element => {
+      if (element.dataset.keyHint !== element.ariaKeyShortcuts) element.dataset.keyHint = element.ariaKeyShortcuts
+    })
   }
 
   // Chords

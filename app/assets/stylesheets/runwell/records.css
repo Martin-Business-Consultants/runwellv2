@@ -266,12 +266,6 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .work-finish__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .work-finish__danger, .work-finish__danger:hover { color: var(--danger); }
 .work-finish__danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
-.erase-work__form { padding: var(--s-4); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 5%, var(--panel)); }
-
-/* The inline confirmation (layouts/shared/_confirm) at the foot of a record's sidebar starts
-/* where the cards do, at their width. */
-.record-page__aside > .confirm { justify-content: flex-start; }
-.record-page__aside .confirm__card { width: 100%; }
 
 /* ======================================================================= 11 Indexes */
 

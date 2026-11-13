@@ -1,0 +1,8 @@
+<%# locals: () %>
+<%# Where every layout's messages and questions show, once, at the end of <body>: runeui's toaster
+    (notices and alerts from the flash, and turbo_stream_flash's from a stream: a notice goes by
+    itself, an alert stays until closed), and the one dialog data-turbo-confirm asks in
+    (ui :confirm: every delete and "are you sure"). Both stay through Turbo's visits. %>
+<%= ui :toaster %>
+<%= ui :confirm %>
+<%= flash_messages %>

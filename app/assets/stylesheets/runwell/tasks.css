@@ -216,7 +216,7 @@ html[data-theme="dark"] .card-columns .cards { --lane: var(--page); }
 @media (max-width: 639px) {
   .card-columns { --column-width-expanded: calc(100vw - 4rem); scroll-snap-type: inline mandatory; }
   .card-columns .cards.is-expanded { overflow: hidden; }
-  body.contained-scrolling .app > .panel { height: 100dvh; min-height: 0; }
+  body.contained-scrolling [data-slot="app-inset"] { height: 100dvh; min-height: 0; }
   body.contained-scrolling #main { flex: 1 1 auto; min-height: 0; padding-bottom: var(--s-4); }
   body.contained-scrolling .card-columns { flex: 1 1 auto; min-height: 0; }
 }

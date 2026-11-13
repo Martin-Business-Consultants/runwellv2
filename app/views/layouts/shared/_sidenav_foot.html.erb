@@ -1,0 +1,33 @@
+<%# locals: () %>
+<%# The foot of the staff nav (ui :app_shell's sidebar_footer): the page filter (/), plugins'
+    actions and the shortcut sheet (?) in a row, then the signed-in person, whose menu holds their
+    account, settings, the theme, help and signing out. %>
+<div class="nav-tools">
+  <%= render "layouts/shared/nav_filter" %>
+  <%= plugin_slots(:nav_actions) %>
+  <%= render "layouts/shared/shortcuts" %>
+</div>
+
+<div class="nav-account">
+  <% account = capture do %>
+    <%= avatar_preview_tag Current.user, hidden_for_screen_reader: true, class: "nav-account__avatar" %>
+    <span class="nav-account__text">
+      <span class="nav-account__name"><%= Current.user.display_name %></span>
+      <span class="nav-account__email"><%= Current.user.email_address %></span>
+    </span>
+  <% end %>
+  <%= menu account, up: true, trigger_class: "nav-account__button" do %>
+    <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), settings_account_path %>
+    <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Settings and help"), tag.kbd("G S") ]), settings_path,
+          data: { keys: "g s", keys_anywhere: true }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
+    <%# Items that run a Stimulus action rather than go somewhere: runeui's menu items, as data. %>
+    <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
+    <% shortcuts = capture do %><%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd>?</kbd><% end %>
+    <%= ui :menu, part: "items", items: [
+          { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
+          { label: shortcuts, value: "shortcuts", data: { controller: "rune-proxy", action: "select->rune-proxy#click", rune_proxy_selector_param: "[data-keys='?']" } }
+        ] %>
+    <%= menu_divider %>
+    <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), session_path, method: :delete %>
+  <% end %>
+</div>

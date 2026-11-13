@@ -9,7 +9,9 @@
 # component for (list rows, settings rows, status dots, link tabs) and what its own phase moves
 # (the avatar: phases 3 to 5, with the lists and pickers that copy it).
 #
-# The shell's helpers (app_shell, crumbs, flash_messages…) are RuneCompatShellHelper.
+# The shell itself is runeui's now (ui :app_shell in the staff layout, phase 2); what's left of
+# the gem's shell helpers here are the two names pages and plugins still call: crumbs and
+# flash_messages.
 #
 # This module goes when the plugins have moved to runeui's own API (the plan's phase 10); the
 # core stops calling it area by area before then.
@@ -77,6 +79,22 @@ module RuneCompatHelper
   end
 
   # ---- Page ----
+
+  # The panel bar's trail, for a page that sets its own: crumbs("Bots", [bot.name, bot]),
+  # strings or [label, path], the last the page you're on. layouts/shared/_panel_bar draws it
+  # with ui :breadcrumb (otherwise the trail is parent_page and the page's title).
+  def crumbs(*parts)
+    @crumbs = parts.compact.map { |part| part.is_a?(Array) ? [ part[0], (url_for(part[1]) if part[1]) ] : part }
+    nil
+  end
+
+  # The flash, for runeui's toaster (ui_flash_toasts): a notice goes by itself, an alert stays
+  # until closed. Each layout renders it once (layouts/shared/_feedback). A message may be a hash
+  # for a toast with an action (AnswersInPlace#undo_notice). toast: is accepted and ignored:
+  # every message is a toast.
+  def flash_messages(toast: true)
+    ui_flash_toasts
+  end
 
   # The page's title (in the panel bar, after its trail) and, in the page, what it's for and its
   # actions (the block). subtitle: text, or an array shown as a dotted list.

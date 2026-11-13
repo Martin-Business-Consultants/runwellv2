@@ -303,9 +303,10 @@ Back, refresh and links work, and there's no client-side router:
   (`RemovesLater`) records a `PendingRemoval` and `PendingRemovalJob` removes it when it comes due,
   unless Undo (`PendingRemovalsController`) deleted the row first. Agents and plain posts remove at
   once. Marking a task done offers Undo too (the status picker, `Task#undo_done!`). The toast's
-  button is rune_ui's (`flash_messages` given `{ text:, action:, timeout: }`, `undo_notice`).
+  button is runeui's toast action (`undo_notice`: `{ title:, duration:, action: { label:, url:, method: } }`,
+  which `turbo_stream_flash` and the flash both take).
   Clients and work keep their dialogs: their deletes cascade
-- **Rows go in place**: the table's delete dialog sends `inline=row`; `remove_row` answers a stream
+- **Rows go in place**: a row's trash button sends `inline=row` (once the confirm dialog says yes); `remove_row` answers a stream
   removing `dom_id(record, :row)` (every row partial's `<tr>` id), and `refuse_in_place` says why
   where you are
 - **Live**: models that people watch include `LiveRefreshes` and name what a change touches
@@ -347,10 +348,11 @@ Back, refresh and links work, and there's no client-side router:
   once back online; a save the server refused still reverts. A frame or stream answered with the
   sign-in page (marked `X-Runwell-Sign-In`) sends the page itself to sign in, and sign-in returns to
   it (`Authentication#request_authentication` remembers only page requests)
-- **Messages are toasts**: notices and alerts are rune's toasts (`flash_messages(toast: true)` in
-  the `flash` frame), floating in the bottom right, never pushing the page; a notice
-  goes by itself, an alert stays until closed. Runwell sets only `--toast-bottom` / `--toast-z`
-  (`runwell/components.css`)
+- **Messages are toasts**: notices and alerts are runeui's toasts, in its toaster (`ui :toaster`,
+  once per layout in `layouts/shared/_feedback`, with `ui :confirm` and the flash as
+  `flash_messages`), floating in the bottom right, never pushing the page; a notice goes by itself,
+  an alert stays until closed. From a stream it's `turbo_stream_flash` (`turbo_stream.ui_toast`);
+  a message may be a hash with an `action:` (a button that sends a request, or `href:` a page)
 
 Page changes use the browser's own view transitions, no JavaScript: Turbo renders its visits
 through them (`<meta name="view-transition" content="same-origin">` in `layouts/shared/_head`) and
@@ -377,13 +379,16 @@ around a checkbox with no form method; an empty list is
 A list of the same partial is `render partial:, collection:, as:` (herb lint's
 `actionview-prefer-collection-render`), not a loop.
 
-Every trash icon opens a delete dialog (rune_ui's `<dialog>`),
-`render "layouts/shared/delete_dialog", name:, path:, message:` — never a native
-`turbo_confirm`. In a table row it's `row_delete_button` instead (from `row_actions`): the table
-has one dialog (`layouts/shared/_row_delete_dialog`, `row-delete` controller) that the button fills
-in, so a long table doesn't carry a dialog and a form per row. A destructive action on a record's own page (delete, archive) confirms inline with
-`render "layouts/shared/confirm", trigger:, title:, body:, button:, path:`,
-which is ReActionView state with no JavaScript.
+Every question is asked in one dialog, runeui's (`ui :confirm`, in `layouts/shared/_feedback`):
+the button that does the thing carries `data-turbo-confirm` (`confirm_data(title, description:,
+button:)`, `ConfirmHelper`), and Turbo waits for the answer; Esc or Cancel puts focus back. Never
+the browser's own `confirm()`, and never a dialog per record. A trash icon is
+`render "layouts/shared/delete_dialog", name:, path:, message:` (`delete_button`). In a table row
+it's `row_delete_button` instead (from `row_actions`), which sends `inline=row` so the row fades
+and goes in place (`row-delete` controller). A destructive action on a record's own page (delete,
+archive) is `render "layouts/shared/confirm", trigger:, title:, body:, button:, path:`
+(`confirm_button`; `d` presses it), and the bulk bar's Delete is `bulk_delete`. Erasing a closed
+piece of work asks for its title to be typed: `ui :alert_dialog, confirm_text:` (`works/_erase`).
 
 Boards are Fizzy's board wholesale, not a new take on it: the same
 `card-columns` markup and data attributes, `column_tag` / `column_frame_tag`
@@ -400,8 +405,8 @@ styles; and cards keep a manual order (`Task#board_position`, positioned per sta
 marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
 `before` (the card it now sits before) for `Task#move!`.
 
-Staff pages are rune_ui's shell (`app_shell` in the application layout): a left nav
-(`layouts/shared/_sidenav`, `runwell.css`) beside the page in an inset panel. The nav has the install at the top, then its
+Staff pages are runeui's shell (`ui :app_shell`, inset, in the application layout): a left nav
+(`layouts/shared/_sidenav`, with `_sidenav_brand` and `_sidenav_foot`; `ui :sidebar_group` and `ui :sidebar_item`; `runwell.css`) beside the page in an inset panel. The nav has the install at the top, then its
 sections as the install arranges them (`NavLayout`, Settings > Sidebar, kept in `Setting#layouts["nav"]`:
 named sections in order, or unnamed for no heading, holding the core's pages and plugins' together
 in any order, and a Hidden tray; arranged like template mode, by dragging or the keys, with the
@@ -410,8 +415,10 @@ marks the current one). Plugins have no section of their own: one switched on la
 of the first section. Each person can still hide plugins for themselves (Settings > Your account >
 Your menu, `User::NavPlugins`), and `g 1`… number the plugins shown, in order. At its foot the signed-in person, whose menu holds
 their account, settings, light or dark, the shortcut sheet and sign out ("/" and `?` are keys
-too). The panel opens with its bar: the nav's toggle (`[`) and a breadcrumb from `parent_page`
-and `@page_title` (`breadcrumb_items`, through rune_ui's `crumbs`). Below 860px the nav slides in
+too). The panel opens with its bar (`layouts/shared/_panel_bar`): the nav's toggle and a breadcrumb
+from `parent_page` and `@page_title` (`breadcrumb_items`, `ui :breadcrumb`). `[` collapses the nav
+to icons (runeui's `runeui--sidebar` controller, remembered in a cookie so the server draws it that
+way from the first paint; nothing of Runwell's handles the key), and below 768px the nav slides in
 over the page. Every index shows its records as a table (there's no
 cards view since 5.0), and has no heading: the nav marks the current section. The controller sets
 `@view = index_view` ("table"; Tasks adds `extra: %w[board]`, read from `?view=`). The page starts with
@@ -687,7 +694,7 @@ follows) fetched, and `g` fetches the pages its chords reach, once per page
 (`helpers/page_prefetch`, handed to the visit through `turbo:before-fetch-request`, as Turbo and the
 side panel do); a task's link leaves it to the side panel. Back or Forward to a list picks the row
 you were on again (kept per address in `sessionStorage`). The sidenav keeps its scroll position from
-page to page (the `keeps-scroll` behavior), and the modal shows a placeholder for a New form that
+page to page (runeui's sidebar controller), and the modal shows a placeholder for a New form that
 takes more than 150ms (`loading-placeholder`, `layouts/shared/_modal_placeholder`).
 
 Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-focus` focuses

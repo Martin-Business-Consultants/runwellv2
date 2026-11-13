@@ -32,7 +32,6 @@
       </header>
 
       <main id="main" class="main main--narrow auth-layout__main">
-        <%= render "layouts/shared/flash" %>
         <%= yield %>
       </main>
     </div>
@@ -44,5 +43,6 @@
     <% if showcase %>
       <%= render "layouts/shared/showcase", kind: showcase %>
     <% end %>
+    <%= render "layouts/shared/feedback" %>
   </body>
 </html>

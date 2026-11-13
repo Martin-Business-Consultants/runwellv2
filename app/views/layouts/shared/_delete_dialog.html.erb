@@ -1,25 +1,4 @@
 <%# locals: (name:, path:, message: nil, trigger_class: nil, keys: nil) %>
-<%# Delete: a trash button opening a dialog (rune_ui's) that names what goes and asks once. %>
-<% title = "Delete " + name + "?" %>
-<div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
-  <button type="button" class="<%= class_names("icon-button icon-button--danger", trigger_class) %>" title="<%= title %>" aria-label="<%= title %>" aria-haspopup="dialog" data-keys="<%= keys %>" data-action="rune-dialog#open">
-    <%= icon_tag "trash" %>
-  </button>
-  <dialog class="dialog" aria-label="<%= title %>" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop">
-    <div class="dialog__box">
-      <header class="dialog__header">
-        <h2 class="dialog__title"><%= title %></h2>
-      </header>
-      <div class="dialog__body">
-        <p class="dialog__hint"><%= message || "This can’t be undone." %></p>
-        <div class="dialog__actions">
-          <button type="button" class="btn btn--ghost" data-action="rune-dialog#close">Cancel</button>
-          <%= button_to path, method: :delete, class: "btn btn--danger", data: { turbo_frame: "_top" } do %>
-            <%= icon_tag "trash" %>
-            <span>Delete</span>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </dialog>
-</div>
+<%# Delete: a trash button that names what goes and asks once, in the page's one confirm dialog
+    (delete_button, ConfirmHelper). %>
+<%= delete_button name: name, path: path, message: message, trigger_class: trigger_class, keys: keys %>

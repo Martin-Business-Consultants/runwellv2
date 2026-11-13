@@ -2,4 +2,4 @@
     card comes back with them in it, and the toast links to them. %>
 <%= turbo_stream.update "modal" %>
 <%= turbo_stream.replace dom_id(@client, :contacts), method: :morph, partial: "clients/contacts", locals: { client: @client } %>
-<%= turbo_stream_flash(notice: safe_join([ "Added ", link_to(@contact.name, edit_contact_path(@contact)), "." ])) %>
+<%= turbo_stream_flash(notice: { title: "Added #{@contact.name}.", action: { label: "Open", href: edit_contact_path(@contact) } }) %>

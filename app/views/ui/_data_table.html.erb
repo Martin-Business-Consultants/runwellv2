@@ -53,9 +53,6 @@
     </table>
   </div>
 
-  <% if actions %>
-    <%= render "layouts/shared/row_delete_dialog" %>
-  <% end %>
   <% if empty && rows.none? %>
     <%= render "layouts/shared/empty", text: empty %>
   <% end %>

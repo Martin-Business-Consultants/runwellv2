@@ -33,7 +33,7 @@ const PREFETCH_TTL = 10_000
 const PREFETCH_KEPT = 4
 const LINK = "[data-side-panel-task-param], [data-side-panel-peek-param]"
 const PARAMS = [ "task", "peek" ]
-const KEEPS_OPEN = `${LINK}, dialog, [popover], #modal, #flash, #quick_action`
+const KEEPS_OPEN = `${LINK}, dialog, [popover], #modal, #quick_action, #runeui-toaster, #runeui-confirm, ui-alert-dialog-content, ui-dialog-content, ui-menu-content`
 
 export default class extends Controller {
   static targets = [ "frame", "placeholder" ]

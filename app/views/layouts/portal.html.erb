@@ -80,7 +80,6 @@
       </header>
 
       <main id="main" class="main portal-main">
-        <%= render "layouts/shared/flash" %>
         <div class="portal-page-header">
           <%= yield :header %>
         </div>
@@ -107,5 +106,6 @@
     <% if current_contact %>
       <%= render "portal/tasks/side_panel", task: portal_side_panel_task %>
     <% end %>
+    <%= render "layouts/shared/feedback" %>
   </body>
 </html>

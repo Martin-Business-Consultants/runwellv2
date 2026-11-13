@@ -89,31 +89,13 @@ module BulkHelper
     end
   end
 
-  # Delete, behind a dialog (rune_ui's): it says what goes, and asks once.
+  # Delete, once the page's confirm dialog says yes (ConfirmHelper): it says what goes, and asks once.
   def bulk_delete(path, noun:, message: nil)
-    title = "Delete the selected #{noun}?"
-    tag.div(class: "dialog-wrap", data: { controller: "rune-dialog", action: "keydown.esc->rune-dialog#close:stop" }) do
-      safe_join([
-        button_tag(type: "button", class: "btn btn--danger btn--sm bulk-bar__delete", aria: { haspopup: "dialog" }, data: { action: "rune-dialog#open" }) { safe_join([ icon_tag("trash"), tag.span("Delete") ]) },
-        tag.dialog(class: "dialog", aria: { label: title }, data: { rune_dialog_target: "dialog", action: "click->rune-dialog#backdrop" }) do
-          tag.div(class: "dialog__box") do
-            safe_join([
-              tag.header(tag.h2(title, class: "dialog__title"), class: "dialog__header"),
-              tag.div(class: "dialog__body") do
-                safe_join([
-                  tag.p(message || "This can’t be undone. Any that can’t be deleted are skipped and named.", class: "dialog__hint"),
-                  tag.div(class: "dialog__actions") do
-                    safe_join([
-                      button_tag("Cancel", type: "button", class: "btn btn--ghost", data: { action: "rune-dialog#close" }),
-                      form_tag(path, method: :delete, class: "button_to") { button_tag(type: "submit", class: "btn btn--danger") { safe_join([ icon_tag("trash"), tag.span("Delete") ]) } }
-                    ])
-                  end
-                ])
-              end
-            ])
-          end
-        end
-      ])
+    form_tag(path, method: :delete, class: "button_to") do
+      button_tag(type: "submit", class: "btn btn--danger btn--sm bulk-bar__delete",
+        data: confirm_data("Delete the selected #{noun}?", description: message || "This can’t be undone. Any that can’t be deleted are skipped and named.")) do
+        safe_join([ icon_tag("trash"), tag.span("Delete") ])
+      end
     end
   end
 

@@ -1,58 +1,16 @@
 <%# locals: () %>
-<%# The staff nav, down the left (rune_ui's sidebar): the install at the top, then its sections
-    as Settings > Sidebar arranges them (NavLayout: the core's and plugins' pages together, under
-    headings the install names), and at the foot the page filter (/), plugins' actions,
-    the shortcut sheet (?) and the signed-in person, whose menu holds their account, settings,
-    the theme, help and signing out. The current section is marked (aria-current). It keeps its
-    scroll position from page to page (keeps-scroll). %>
-<nav class="sidebar" id="sidenav" aria-label="Main" data-keeps-scroll>
-  <div class="sidebar__top">
-    <%= link_to root_path, class: "sidebar__brand" do %>
-      <span class="sidebar__brand-text">
-        <span class="sidebar__brand-name"><%= render "layouts/shared/logo" %></span>
-        <span class="sidebar__brand-sub"><%= term(:client, count: 2) %> and work</span>
-      </span>
-    <% end %>
-  </div>
-
-  <% nav_sections.each_with_index do |(label, links), index| %>
-    <%# herb:key index %>
-    <% if label.present? %>
-      <%= sidebar_section label %>
-    <% end %>
+<%# The staff nav's sections (the middle of ui :app_shell's sidebar, which scrolls and keeps its
+    place from page to page): as Settings > Sidebar arranges them (NavLayout: the core's and
+    plugins' pages together, under headings the install names), each a ui :sidebar_group of
+    ui :sidebar_item (sidenav_link_to), the current one marked. The brand above them is
+    layouts/shared/_sidenav_brand; the filter, the shortcut sheet and the person's menu below,
+    layouts/shared/_sidenav_foot. %>
+<% nav_sections.each_with_index do |(label, links), index| %>
+  <%# herb:key index %>
+  <%= ui :sidebar_group, label: label.presence do %>
     <% links.each do |link_label, url, icon, keys| %>
       <%# herb:key url %>
       <%= sidenav_link_to link_label, url, icon: icon, keys: keys %>
     <% end %>
   <% end %>
-
-  <div class="sidebar__tools">
-    <%= render "layouts/shared/nav_filter" %>
-    <%= plugin_slots(:nav_actions) %>
-    <%= render "layouts/shared/shortcuts" %>
-  </div>
-
-  <div class="sidebar__footer">
-    <% account = capture do %>
-      <%= avatar_preview_tag Current.user, hidden_for_screen_reader: true, class: "sidebar__avatar" %>
-      <span class="sidebar__account-text">
-        <span class="sidebar__label"><%= Current.user.display_name %></span>
-        <span class="sidebar__account-email"><%= Current.user.email_address %></span>
-      </span>
-    <% end %>
-    <%= menu account, up: true, trigger_class: "sidebar__account" do %>
-      <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), settings_account_path %>
-      <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Settings and help"), tag.kbd("G S") ]), settings_path,
-            data: { keys: "g s", keys_anywhere: true }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
-      <%# Items that run a Stimulus action rather than go somewhere: runeui's menu items, as data. %>
-      <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
-      <% shortcuts = capture do %><%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd>?</kbd><% end %>
-      <%= ui :menu, part: "items", items: [
-            { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
-            { label: shortcuts, value: "shortcuts", data: { controller: "rune-proxy", action: "select->rune-proxy#click", rune_proxy_selector_param: "[data-keys='?']" } }
-          ] %>
-      <%= menu_divider %>
-      <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), session_path, method: :delete %>
-    <% end %>
-  </div>
-</nav>
+<% end %>

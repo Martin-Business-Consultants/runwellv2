@@ -1,0 +1,12 @@
+<%# locals: (trail:, trays: true) %>
+<%# The bar over every staff page, after the nav's toggle (ui :app_shell draws that): where the
+    page sits (trail: breadcrumb_items, the page's parent when it named one with parent_page, then
+    the page; or what a page set with crumbs), and at the right the quick actions' + and the bell, each
+    opening its menu downwards (never over the page's own buttons at its foot). %>
+<%= ui :breadcrumb, items: trail, class: "panel-bar__crumbs" %>
+<% if trays %>
+  <div class="panel-bar__context">
+    <%= render "quick_actions/tray" %>
+    <%= render "notifications/tray" %>
+  </div>
+<% end %>

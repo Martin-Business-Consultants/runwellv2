@@ -63,6 +63,29 @@ core (plugins go through the compatibility layer).
    kept. Toasts → `ui :toaster` (`turbo_stream_flash` → `turbo_stream.ui_toast`); every
    `delete_dialog`, `row_delete_dialog` and `layouts/shared/confirm` → `ui :alert_dialog` /
    `data-turbo-confirm`.
+   **Done:** staff pages are `ui :app_shell` (inset), the nav `ui :sidebar_group` /
+   `ui :sidebar_item` (`sidenav_link_to`) between a brand and a foot (`layouts/shared/_sidenav`,
+   `_sidenav_brand`, `_sidenav_foot`), the bar `ui :breadcrumb` beside the + and the bell
+   (`_panel_bar`); `[`, the cookie, the phone sheet and the nav's kept scroll are runeui's sidebar
+   controller (`rune-sidebar`, `RuneCompatShellHelper`, the `keeps-scroll` behavior and the panes
+   controller's nav half are gone). Every message is a toast in `ui :toaster` and every question
+   is asked in `ui :confirm` (both in `layouts/shared/_feedback`, in the staff, public and portal
+   layouts; `runeui_tags` no longer passes `confirm: false, toasts: false`): `turbo_stream_flash`
+   is `turbo_stream.ui_toast`, the flash is `ui_flash_toasts`, Undo is a toast action; deletes and
+   confirms are forms whose button carries `data-turbo-confirm` (`ConfirmHelper`: `delete_button`,
+   `confirm_button`, `row_delete_button`, `bulk_delete`), and erasing work is `ui :alert_dialog`
+   with `confirm_text:`. `rune-flash`, the flash and row-delete-dialog partials and their CSS are
+   gone; `layouts/shared/_delete_dialog` and `_confirm` stay as the names plugins render, drawn
+   the new way, as do `crumbs` and `flash_messages` (RuneCompatHelper). Added to runeui for it:
+   the sidebar's header and footer (`sidebar_header:`, `sidebar_footer:`) with only the groups
+   scrolling, `content_attrs:`, an item's `icon:` as markup, toast actions that send a request or
+   visit a page and `duration: 0`, hash messages in the flash, typed confirmation
+   (`confirm_text:`). Left: the `rune-dialog` controller for the shortcut sheet (phase 7) and a
+   piece of work's About dialog (phase 5); `works/_close` (two in-place forms with a note, on
+   ReActionView state: phase 5); `.main`, `.crumbs` and `.sidebar__brand` / `.sidebar__logo` in
+   compat.css for the public and portal layouts (phase 8). Inside the shell Runwell's markup
+   needs `--accent` and `--ring` back (runwell.css, 2), and `data-sidebar` on `<html>` is still
+   the record page's details sidebar, not the nav's (which is on the shell).
 3. **Lists**: `ui/_data_table` → `ui :table` with `selectable:`, `ui :sort_header`,
    `ui :select_cell`, `ui :bulk_bar`, `ui :pagination` (geared_pagination's pages kept);
    `quick_filter` → `ui :filter` / `ui :filter_bar`; the Columns menu → `ui :menu`.

@@ -21,8 +21,7 @@
 /* scroll on their own, so the nav's foot is always in reach whatever the page's length (sticky
 /* couldn't: the nav starts below the header, so a short page never scrolled it fully into view). */
 @media (min-width: 861px) {
-  body:has(.settings-layout) .app .panel { height: calc(100dvh - 2 * var(--s-2)); min-height: 0; }
-  :root[data-sidenav="collapsed"] body:has(.settings-layout) .app .panel { height: 100dvh; }
+  body:has(.settings-layout) [data-slot="app-inset"] { height: calc(100dvh - 1rem); min-height: 0; }
   body:has(.settings-layout) #main { flex: 1 1 auto; min-height: 0; padding-bottom: 0; }
   .settings-layout { flex: 1 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
   .settings-layout .settings-nav,

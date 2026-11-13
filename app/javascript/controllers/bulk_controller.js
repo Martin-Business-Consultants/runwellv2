@@ -36,8 +36,6 @@ export default class extends Controller {
 
     form.querySelectorAll("input[data-bulk-id]").forEach(input => input.remove())
     this.#picked.forEach(item => this.#carry(form, "ids[]", item.value))
-    // The picked rows dim while it runs; the answer redraws or removes them.
-    this.#picked.forEach(item => item.closest("tr")?.classList.add("is-pending"))
 
     // The table's list (data-task-list: which, and its filter), so the answer drops the rows the
     // change takes out of it (a task marked done leaves an Open list) rather than reloading.
@@ -46,6 +44,14 @@ export default class extends Controller {
       this.#carry(form, "list[kind]", list.dataset.taskList)
       if (list.dataset.taskListState) this.#carry(form, "list[state]", list.dataset.taskListState)
     }
+  }
+
+  // It's on its way (turbo:submit-start: after the confirm dialog's yes, where a button asks
+  // first): the picked rows dim while it runs; the answer redraws or removes them.
+  pending(event) {
+    if (!this.hasBarTarget || !this.barTargets.some(bar => bar.contains(event.target))) return
+
+    this.#picked.forEach(item => item.closest("tr")?.classList.add("is-pending"))
   }
 
   #carry(form, name, value) {

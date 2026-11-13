@@ -1,0 +1,10 @@
+<%# locals: () %>
+<%# The top of the staff nav (ui :app_shell's sidebar_header): the install's name or logo over
+    what it's for, a link home. While the nav is icons it's the logo's mark alone. %>
+<%= link_to root_path, class: "nav-brand", title: Setting.current.brand_name do %>
+  <span class="nav-brand__mark"><%= render "layouts/shared/logo_mark" %></span>
+  <span class="nav-brand__text">
+    <span class="nav-brand__name"><%= render "layouts/shared/logo" %></span>
+    <span class="nav-brand__sub"><%= term(:client, count: 2) %> and work</span>
+  </span>
+<% end %>

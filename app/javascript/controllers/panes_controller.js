@@ -1,16 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Collapses the left nav ([) and a record page's details sidebar (]) for more room. The choice
-// is this browser's, kept in localStorage, and set on <html> before the first paint
-// (layouts/_theme_preference), so it holds across pages without a flicker.
+// Collapses a record page's details sidebar (]) for more room. The choice is this browser's,
+// kept in localStorage, and set on <html> before the first paint (layouts/_theme_preference), so
+// it holds across pages without a flicker. (The left nav's [ is runeui's sidebar controller, on
+// the shell, remembered in a cookie the server reads.)
 export default class extends Controller {
   connect() {
-    this.#sync("sidenav")
     this.#sync("sidebar")
-  }
-
-  toggleNav() {
-    this.#toggle("sidenav")
   }
 
   toggleSidebar() {

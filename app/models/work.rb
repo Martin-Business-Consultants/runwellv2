@@ -86,7 +86,8 @@ class Work < ApplicationRecord
   def closed? = closed_at.present?
 
   # Deleted only while nothing hangs on it; once work is under way, close it (or erase it).
-  def deletable? = has_attribute?(:has_tasks) ? !has_tasks : tasks.none?
+  # has_tasks comes from the index's query (Work.listed), where SQLite answers EXISTS with 0 or 1.
+  def deletable? = has_attribute?(:has_tasks) ? !ActiveModel::Type::Boolean.new.cast(has_tasks) : tasks.none?
   def recurring? = shape == "recurring"
 
   # Gone for good: a closed work with its sections, tasks, notes, documents and history, for

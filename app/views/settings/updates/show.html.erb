@@ -9,29 +9,9 @@
         <p class="settings-section__description">Which Runwell this is, and whether a newer release is out.</p>
         <% if @failed_count.positive? %>
           <div class="settings-section__actions">
-            <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
-              <button type="button" class="btn btn--danger btn--sm" aria-haspopup="dialog" data-action="rune-dialog#open">
-                <%= icon_tag "trash" %>
-                <span>Clear failed updates</span>
-              </button>
-              <dialog class="dialog" aria-label="Clear failed updates" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop">
-                <div class="dialog__box">
-                  <header class="dialog__header">
-                    <h2 class="dialog__title">Clear <%= pluralize(@failed_count, "failed update") %>?</h2>
-                  </header>
-                  <div class="dialog__body">
-                    <p class="dialog__hint">They leave Past updates, with what went wrong. Updates that worked stay.</p>
-                    <div class="dialog__actions">
-                      <button type="button" class="btn btn--ghost" data-action="rune-dialog#close">Cancel</button>
-                      <%= button_to settings_updates_failures_path, method: :delete, class: "btn btn--danger", data: { turbo_frame: "_top" } do %>
-                        <%= icon_tag "trash" %>
-                        <span>Clear</span>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              </dialog>
-            </div>
+            <%= confirm_button trigger: "Clear failed updates", title: "Clear #{pluralize(@failed_count, "failed update")}?",
+                  body: "They leave Past updates, with what went wrong. Updates that worked stay.", button: "Clear",
+                  path: settings_updates_failures_path, keys: nil, css: "btn btn--danger btn--sm" %>
           </div>
         <% end %>
       </header>

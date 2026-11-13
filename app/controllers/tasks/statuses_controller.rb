@@ -30,7 +30,7 @@ class Tasks::StatusesController < ApplicationController
 
   private
     def undo_status(text, before)
-      { text: text, timeout: PendingRemoval::WINDOW.in_milliseconds,
-        action: { label: "Undo", url: task_status_path(@task), method: :patch, params: { "task[status]" => before, undo: 1 }, data: { turbo_frame: "_top" } } }
+      { title: text, duration: PendingRemoval::WINDOW.in_milliseconds,
+        action: { label: "Undo", url: task_status_path(@task), method: :patch, params: { "task[status]" => before, undo: 1 } } }
     end
 end
