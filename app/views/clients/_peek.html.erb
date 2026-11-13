@@ -4,7 +4,7 @@
     changed in place as on its page (clients/update.turbo_stream.erb redraws both), its open tasks
     and its notes. Its tabs and plugins' panels stay on its page (Open). %>
 <% layout = record_layout(:client) %>
-<section class="task-panel peek-panel" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.name %>">
+<section class="task-panel peek-panel" data-morph="replace" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.name %>">
   <%= turbo_stream_from record %>
   <%= render "layouts/shared/peek_header", record: record, open_path: client_path(record), context: term(:client), meta: render("clients/status_picker", client: record) %>
   <%= render "layouts/shared/record_title", record: record, attribute: :name, label: "Name" %>

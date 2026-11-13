@@ -4,10 +4,7 @@
     switches allow is under each switch in the form). %>
 <% if contact.portal_access? %>
   <% sessions = contact.portal_sessions.count %>
-  <section class="card record-card">
-    <header class="card__head">
-      <h2 class="card__title">Portal</h2>
-      <p class="card__hint">
+  <% hint = capture do %>
         <% if !contact.portal? %>
           Can’t sign in yet: they need an email address.
         <% elsif contact.link_signed_in_at %>
@@ -15,9 +12,8 @@
         <% else %>
           Hasn’t signed in yet. Invite them, above.
         <% end %>
-      </p>
-    </header>
-    <div class="card__content contact-portal">
+  <% end %>
+  <%= record_card "Portal", hint: hint, css: "contact-portal" do %>
       <%# What they see there (Contact::PortalScope): everything shared, or only chosen work. %>
       <% works = client.works.ordered.map { [ it.title, it.ref ] } %>
       <%= form_with url: contact_portal_scope_path(contact), scope: :scope, method: :patch, class: "contact-portal__scope", namespace: dom_id(contact, :portal_scope) do |form| %>
@@ -27,28 +23,18 @@
           <%= form.select :works, works, { selected: contact.limited_works.map(&:ref) }, multiple: true %>
           <p class="field__hint">Ticked, they see only these, the <%= term(:task, count: 2).downcase %> and files on them, and what they asked for themselves. Unticked, everything shared with <%= client.name %>.</p>
         </div>
-        <div class="button-row"><button type="submit" class="btn btn--secondary btn--sm">Save what they see</button></div>
+        <div class="button-row"><%= ui :button, type: :submit, variant: :outline, size: :sm, content: "Save what they see" %></div>
       <% end %>
       <% if sessions.positive? %>
-        <%= button_to "Sign out everywhere", contact_portal_sessions_path(contact), method: :delete, class: "btn btn--secondary btn--sm" %>
+        <%= form_with url: contact_portal_sessions_path(contact), method: :delete, class: "contact-portal__sign-out" do %>
+          <%= ui :button, type: :submit, variant: :outline, size: :sm, content: "Sign out everywhere" %>
+        <% end %>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 <% end %>
 <% others = client.contacts.active.ordered.where.not(id: contact.id).to_a %>
-<section class="card record-card">
-  <header class="card__head">
-    <h2 class="card__title">At <%= client.name %></h2>
-    <p class="card__hint">
-      <% if others.empty? %>
-        No one else yet.
-      <% else %>
-        <%= pluralize others.size, "other contact" %>
-      <% end %>
-    </p>
-  </header>
+<%= record_card "At #{client.name}", hint: (others.empty? ? "No one else yet." : pluralize(others.size, "other contact")) do %>
   <% if others.any? %>
-    <div class="card__content">
       <ul class="record-list">
         <% others.each do |other| %>
           <%# herb:key other.id %>
@@ -75,6 +61,5 @@
           </li>
         <% end %>
       </ul>
-    </div>
   <% end %>
-</section>
+<% end %>

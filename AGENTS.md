@@ -264,7 +264,7 @@ client evaluates (a bare state, `!`, `==` / `!=` a literal; `herb-state-valid-re
 makes every toggle re-run the whole controller action and page, so a form opened in place is
 always rendered and only hidden: `<div hidden="<%= !open %>">` around it,
 `hidden="<%= open %>"` on its trigger, and `aria-pressed="<%= tab == "task" %>"` for a pressed
-choice, never a class picked by `if` (`layouts/shared/_confirm`, `works/_close`). Its first field has `autofocus` (Turbo skips hidden ones on load), and the
+choice, never a class picked by `if`. Its first field has `autofocus` (Turbo skips hidden ones on load), and the
 wrapper carries `data-controller="state-focus" data-state-focus-state-value="open"`, which focuses
 it when the state changes (the guide's `useState` pattern). Esc closes it, even from a field: its
 Cancel is `data-keys="esc"`; a `<details>` form closes on its own and the `open` behavior
@@ -273,16 +273,26 @@ focuses its `autofocus` field.
 Stay on the page you're working from; bring the rest to it. Every state still has a real URL, so
 Back, refresh and links work, and there's no client-side router:
 
-- **The side panel**: a task opens over the page (`tasks/_panel` in `layouts/shared/_side_panel`,
-  the `side-panel` controller on `<body>`), its state the page's own URL plus `?task=42`. A link
-  that opens a task is `side_panel_link_to task`, which keeps `task_path` as its href (Cmd-click
-  still opens the task's page). The layout renders the panel on a full load; a request for the
-  `side_panel` frame renders just it (`ApplicationController#render_side_panel`, skipping the page's
-  action). Esc, ✕ or a click outside it closes it (Back if it was opened here; a click on another task
-  follows it instead, and dialogs, popovers and toasts keep it open), and it follows `j` / `k`
-  (`keyboard:select`), with the tasks above and below fetched ahead (as a hovered task's link is). It loads by setting its frame's `src` and records the address through
-  Turbo's history (no page visit runs under it). Its fields save on change with `inline=panel`,
-  answered by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows
+- **The side panel**: a task opens over the page in runeui's side panel (`ui :side_panel, params:
+  %w[task peek]` in `layouts/shared/_side_panel`: a drawer down the right whose body is the
+  `side_panel` frame, `layouts/shared/_side_panel_content` inside it), its state the page's own URL
+  plus `?task=42`. runeui's `runeui--side-panel` controller opens and closes it, keeps the address
+  (pushed to open, replaced to follow, Back to close when it was opened here) and shows a skeleton
+  while it loads; Runwell's `side-panel` controller on `<body>` adds the links, `j` / `k`, fetching
+  ahead and closing on a click outside. A link that opens a task is `side_panel_link_to task`,
+  which keeps `task_path` as its href (Cmd-click still opens the task's page). The layout draws the
+  panel open on a full load (the block of `ui :side_panel`); a request for the `side_panel` frame
+  renders just it (`ApplicationController#render_side_panel`, `layouts/shared/_side_panel_frame`,
+  skipping the page's action). Esc, ✕ (`data-action="side-panel#close"`, `data-keys="esc"`) or a
+  click outside it closes it (a click on another task follows it instead, and dialogs, popovers,
+  menus and toasts keep it open); Esc inside it closes an open popup first, then the panel. It
+  follows `j` / `k` (`keyboard:select`; it leaves focus on the page as it opens, `initial_focus:
+  "none"`), with the tasks above and below fetched ahead (as a hovered task's link is). It loads by
+  setting its frame's `src` (no page visit runs under it); a refresh morph reloads the frame. Its
+  contents opt out of runeui's morph guard (`data-morph="replace"` on `tasks/_panel` and the peeks),
+  since they sit inside a `ui-*` element. Its fields save on change with `inline=panel`, answered
+  by `tasks/update.turbo_stream.erb`, which redraws the task wherever it shows. The portal's sheet
+  is the same component (`params: %w[task]`, `portal/tasks/_side_panel` for its frame)
 - **Peek**: a client, a piece of work or a contact opens in the same panel (`?peek=Work:12`, one
   panel at a time; `<type>/_peek`, `ApplicationController#side_panel_peek`, `PEEKABLE`) from
   wherever it's linked: `peek_link_to record` keeps its page as the href. Table rows' names, a row's
@@ -471,37 +481,45 @@ it). The Tasks board's columns take `q` too (`TaskBoardScoped`). A new paginated
 `filters_text_on`.
 
 A record's page, and its new and edit pages, are a `record-page` (`runwell/records.css`): a
-header row across the top (`record-page__header`, a partial of its own such as `clients/_header`:
-`record-page__heading` with the title and a muted `record-page__description`, then the record's
-actions in a `button-row` as secondary buttons, Copy for AI and the like, beside the sidebar toggle
-`]`), then the working column (`record-page__main`, 2/3: the description, tasks,
-the form) beside the sidebar (`record-page__aside`, 1/3: Details as a `dl.details`, the smaller
-sections such as contacts and plugin panels, notes or history, delete or archive). Both columns
-are stacks of rune `card`s. New pages use the sidebar for what comes next (`record-steps`) and
-related records. Never a lone centered card for a form. A record with several sections (clients,
-work, tasks, scope items) puts them in tabs in the working column: `record_tab(key, label,
-count:)` plus `plugin_record_tabs(:client_panel)` (one tab per plugin panel),
-`current_record_tab(tabs, default)`, and `render "layouts/shared/record_tabs", variant: "pill"`
-inside `<turbo-frame id="record_tab" target="_top">`. A tab is a `?tab=` link that only reloads
-the frame; the first heading in a tab is hidden since the tab names it. The sidebar keeps
+header row across the top (`record_header id:, actions: do … end`, `RecordPagesHelper`: runeui's
+`ui :page_header`, in a partial of its own such as `clients/_header`: the title, changed in place,
+and a muted `record-header__line` under it, then the record's actions as outline `ui :button`s,
+Copy for AI and the like, then the arrange button and the sidebar toggle `]`), then the working
+column (`record-page__main`, 2/3: the description, tasks, the form) beside the sidebar
+(`record-page__aside`, 1/3: Details as a `dl.details`, the smaller sections such as contacts and
+plugin panels, notes or history, delete or archive). Both columns are stacks of runeui cards:
+`record_card title, hint:, action:, footer:, id:, css: do … end` (`ui :card`, its title a heading,
+its content stacked); an empty list in one is `ui :empty, size: :sm`. New pages use the sidebar for
+what comes next (`record-steps`) and related records. Never a lone centered card for a form. A
+record with several sections (clients, work, tasks, scope items) puts them in tabs in the working
+column: `record_tab(key, label, count:)` plus `plugin_record_tabs(:client_panel)` (one tab per
+plugin panel), `current_record_tab(tabs, default)`, and `render "layouts/shared/record_tabs"`
+(runeui's `ui :tabs` as links, `record_tab_links`) inside `<turbo-frame id="record_tab"
+target="_top">`. A tab is a `?tab=` link that only reloads the frame (the `picks-current` behavior
+marks it current on the click); the first heading in a tab is hidden since the tab names it.
+Plugins' hand-written `.card`, `.record-page__header` and `.tabs` markup still draws (compat). The sidebar keeps
 Details, the few things always needed (contacts), History, and destructive actions. A piece of
 work is the exception: its facts are one line under the title (`record-meta`, with
 plugins' `:work_meta`) and its next step a muted line under that; its description opens from
-an info button beside the title (a dialog, no Overview card); its Tasks tab shows the tasks by
+an info button beside the title (`ui :dialog`, no Overview card); finishing it is Mark complete or
+Cancel it in its sidebar, each asking in `ui :alert_dialog` with an optional note (`works/_close`;
+`d` opens Mark complete); its Tasks tab shows the tasks by
 section or, with the List / Board switch (`?task_view=board`, `tasks/_view_switch`), as the Tasks
 board for everyone's tasks on it (`@board_filters`, which `task_board_filters` hands the columns and
-drops); History is a tab, and the sidebar is its sections
-(`works/_scope`, where they're added): all tasks, each section with done of total (moved to a
+drops); History is a tab, and the sidebar is its sections (`works/_sidebar`: `ui :tabs`,
+Sections and General; `works/_scope`, where they're added, `data-morph="replace"` so a refresh
+redraws a reordered list inside the tabs): all tasks, each section with done of total (moved to a
 new place by its grip there too, dragged or ↑ ↓, through the same `ScopeItems::MovesController`),
 and other tasks, each a `?item=` link that shows just that work in the Tasks tab, where its tasks are
-added. In the Tasks tab each section (and other tasks) is an accordion (`<details>`: the first
-open, and any empty one, and the one a task was just added to; the `keep-open` behavior keeps
-whatever someone opened through a morph), dragged by its grip to a new place (the core's
+added. In the Tasks tab each section (and other tasks) is an accordion (native `<details>`, not
+`ui :accordion`, whose open state a morph would hand back to the server's list: the first open,
+and any empty one, and the one a task was just added to; the `keep-open` behavior keeps whatever
+someone opened through a morph), dragged by its grip to a new place (the core's
 drag-and-drop, `ScopeItems::MovesController`), and ends in a quick add (`tasks/quick_add`): a
 title and Enter adds it there, the section comes back in place with its filter and focus kept and
 the field still focused for the next, and Esc empties it; not on Done, nor on closed work. A new
-section is the + beside the tab's hint (there's no Add task under the list). A section's add action is one small secondary button with the add icon after its list
-(`record-add`), a `<details>` when it opens a form; the one primary button on a page is its next
+section is the + beside the tab's hint (there's no Add task under the list). A section's add action is one small outline button with the add icon after its list
+(`record-add`), a `<details>` whose `<summary>` is a `ui-button`, when it opens a form; the one primary button on a page is its next
 step. Up a level is `parent_page label, path`, called in the template: a `<link rel="up">` that
 Esc follows and the panel bar's breadcrumb shows, never a Back button.
 
@@ -1135,7 +1153,8 @@ where it goes, the details, lead beside who else, due beside the client switch, 
 each row's first field; a hidden field drops out of its row). Custom fields start in the sidebar on clients and work, the working column elsewhere. Each field is a partial,
 `record_fields/<kind>/_<key>` (custom fields `record_fields/_custom`), drawing an input when given
 a form builder and its value (a `dt`/`dd`, or nothing when the header already shows it) without;
-`record_fields/zone` lays out a column, `record_fields/main_card` and `aside_card` the cards.
+`record_fields/zone` lays out a column, `record_fields/main_card` and `aside_card` the cards
+(`record_card`; the zones carry the `record-layout` targets, so the cards' markup is free).
 
 A record's own page (clients, work, contacts, people) changes in place: nobody goes to an edit page
 to change a field. Its zones render with `in_place: true`, which gives each field a hidden form of

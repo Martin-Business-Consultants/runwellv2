@@ -3,8 +3,9 @@
     where it sits, its title, then its fields in the install's order (status, who's on it, due
     date and section saved as you change them), and its notes. Saving refreshes the page under it in place
     (TasksController#update), and others' changes arrive live (turbo_stream_from). Open goes to
-    its own page; Esc or ✕ closes it. %>
-<section class="task-panel" id="<%= dom_id(task, :panel) %>" aria-label="<%= task.title %>">
+    its own page; Esc or ✕ closes it. It sits in runeui's side panel (a ui-* element), so it opts
+    out of runeui's morph guard (data-morph="replace"): a refresh redraws it as the server has it. %>
+<section class="task-panel" id="<%= dom_id(task, :panel) %>" aria-label="<%= task.title %>" data-morph="replace">
   <%= turbo_stream_from task %>
   <header class="task-panel__header">
     <p class="task-panel__context">
@@ -19,14 +20,8 @@
     </p>
     <div class="task-panel__actions">
       <%= render "tasks/ai_brief", task: task %>
-      <%= link_to task_path(task), class: "icon-button", title: "Open its page", data: { turbo_frame: "_top" } do %>
-        <%= icon_tag "maximize" %>
-        <span class="visually-hidden">Open <%= task.title %> on its own page</span>
-      <% end %>
-      <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close">
-        <%= icon_tag "close" %>
-        <span class="visually-hidden">Close</span>
-      </button>
+      <%= ui :button, href: task_path(task), variant: :ghost, size: :icon_sm, title: "Open its page", aria: { label: "Open #{task.title} on its own page" }, data: { turbo_frame: "_top" }, content: icon_tag("maximize") %>
+      <%= ui :button, variant: :ghost, size: :icon_sm, title: "Close (Esc)", aria: { label: "Close" }, data: { keys: "esc", action: "side-panel#close" }, content: icon_tag("close") %>
     </div>
   </header>
 
@@ -94,10 +89,7 @@
   <%= render "intakes/bar", task: task %>
 
   <div class="task-panel__description">
-    <%= link_to edit_task_path(task), class: "btn btn--secondary btn--sm", data: { turbo_frame: "_top" } do %>
-      <%= icon_tag "pencil" %>
-      <span>Edit details</span>
-    <% end %>
+    <%= ui :button, href: edit_task_path(task), variant: :outline, size: :sm, data: { turbo_frame: "_top" }, content: safe_join([ icon_tag("pencil"), tag.span("Edit details") ], " ") %>
   </div>
 
   <%= render "notes/section", subject: task, permanent: false, deferred: true %>

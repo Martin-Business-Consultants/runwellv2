@@ -2,12 +2,8 @@
 <%# A client's contacts, in its page's sidebar: each opens in the side panel (peek), and Add a contact
     opens its form in the modal; adding one redraws this card (contacts/create.turbo_stream.erb). %>
 <% contacts = client.contacts.active.ordered.to_a %>
-<section class="card record-card" id="<%= dom_id(client, :contacts) %>">
-  <header class="card__head">
-    <h2 class="card__title">Contacts</h2>
-    <p class="card__hint"><%= pluralize contacts.size, "person", plural: "people" %> at <%= client.name %></p>
-  </header>
-  <div class="card__content">
+<%= record_card "Contacts", id: dom_id(client, :contacts), hint: "#{pluralize contacts.size, "person", plural: "people"} at #{client.name}",
+      footer: ui(:button, variant: :outline, size: :sm, href: new_client_contact_path(client), content: safe_join([ icon_tag("person-add"), "Add a contact" ], " "), data: { turbo_frame: "modal" }) do %>
     <% if contacts.any? %>
       <ul class="record-list">
         <% contacts.each do |contact| %>
@@ -32,13 +28,6 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="record-card__empty">No contacts yet.</p>
+      <%= ui :empty, size: :sm, description: "No contacts yet." %>
     <% end %>
-  </div>
-  <footer class="card__footer">
-    <%= link_to new_client_contact_path(client), class: "btn btn--secondary btn--sm", data: { turbo_frame: "modal" } do %>
-      <%= icon_tag "person-add" %>
-      <span>Add a contact</span>
-    <% end %>
-  </footer>
-</section>
+<% end %>

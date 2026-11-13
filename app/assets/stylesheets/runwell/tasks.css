@@ -50,6 +50,8 @@
 
 /* The pickers' menus, on the page once (task_picker_menus, client_status_menu): runeui's menu,
 /* combobox and popover, each row a dot or a face, its name, and a check on what's current. */
+/* Their roots take no room where they sit (the side panel draws its own beside its status). */
+ui-combobox.picker-menu { display: contents; }
 .picker-menu__label { flex: 1; min-width: 0; }
 .picker-menu__check { display: none; margin-inline-start: auto; color: var(--muted-foreground); }
 [data-picker-current] { font-weight: var(--weight-strong); }
@@ -307,34 +309,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* ======================================================================= The side panel */
 
-/* A task over the page (tasks/_panel, side-panel controller): a panel floating down the right
-/* edge, over whatever is under it, the + and bell in the corner too (the board keeps its full
-/* width); full screen on a phone. Toasts and the open search float above it. */
-.task-panel {
-  --task-panel-width: min(32rem, 100vw - 1rem);
+/* A task (tasks/_panel) or a peek (<type>/_peek) in runeui's side panel (ui :side_panel, in
+/* layouts/shared/_side_panel), which slides it in down the right edge and scrolls it; full width
+/* on a phone. What's here is the content's own layout. */
+.task-panel { display: flex; flex-direction: column; gap: var(--s-4); }
+#runeui-side-panel [data-side-panel-content] { width: min(34rem, 100vw); }
+@media (max-width: 639px) { #runeui-side-panel [data-side-panel-content] { width: 100vw; } }
 
-  position: fixed; inset: var(--s-2) var(--s-2) var(--s-2) auto; z-index: calc(var(--z-tray) + 1);
-  display: flex; flex-direction: column; gap: var(--s-4); width: var(--task-panel-width);
-  padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain;
-  border: 1px solid var(--line); border-radius: var(--radius-panel, var(--radius-lg)); background: var(--panel);
-  box-shadow: var(--shadow-popover); animation: rune-slide var(--motion) var(--ease);
-}
-/* rune's motion: in, the slide every sheet and toast takes; following another task, the panel
-/* stays put and its contents fade over; out, quicker, back the way it came (the side-panel
-/* controller waits for it). Reduced motion makes them instant (rune's tokens). */
-@keyframes task-panel-out { to { opacity: 0; translate: 1rem 0; } }
-.task-panel:is(.task-panel--following, .task-panel--still) { animation: none; }
-.task-panel--following > * { animation: rune-fade var(--motion-fast) var(--ease); }
-.task-panel--leaving { animation: task-panel-out var(--motion-out) var(--ease-in) forwards; pointer-events: none; }
-@media (max-width: 639px) { .task-panel { inset: 0; width: 100vw; border: 0; border-radius: 0; } }
-
-/* The panel while its task loads (layouts/shared/_side_panel's placeholder): the title, and quiet
-/* lines where the fields go, gently pulsing. Reduced motion keeps them still. */
-.task-panel__skeleton { height: .8rem; border-radius: var(--radius-sm, 4px); background: var(--layer-2, var(--hover)); animation: task-panel-pulse 1.2s var(--ease) infinite alternate; }
-.task-panel__context .task-panel__skeleton { display: inline-block; width: 8rem; vertical-align: middle; }
-.task-panel__skeleton--short { width: 55%; }
-@keyframes task-panel-pulse { to { opacity: .45; } }
-@media (prefers-reduced-motion: reduce) { .task-panel__skeleton { animation: none; } }
 .task-panel__header { display: flex; align-items: center; gap: var(--s-2); }
 .task-panel__context { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
 .task-panel__context a { color: inherit; }

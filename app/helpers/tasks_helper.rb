@@ -20,7 +20,7 @@ module TasksHelper
   # leaves it off).
   def side_panel_link_to(task, content = nil, data: {}, open: true, **options, &block)
     action = [ data[:action], "side-panel#open" ].compact.join(" ")
-    data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, side_panel_title_param: task.title, turbo_prefetch: false)
+    data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, turbo_prefetch: false)
     return link_to(task_path(task), data: data, **options, &block) if block
 
     with_page_link(link_to(content, task_path(task), data: data, **options), task_path(task), task.title, open)

@@ -20,28 +20,16 @@
         <div class="record-tabs__panel">
           <% case tab %>
           <% when "tasks" %>
-            <section class="card record-card" id="tasks">
-              <header class="card__head">
-                <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-                <p class="card__hint"><%= done %> of <%= total %> done</p>
-              </header>
-
-              <div class="card__content">
+            <%= record_card term(:task, count: 2), hint: "#{done} of #{total} done", id: "tasks",
+                  footer: (render("tasks/add", work: @work, scope_item: @item, inline: false) unless @work.closed?) do %>
                 <% if @tasks.any? %>
                   <ul class="record-list">
                     <%= render partial: "tasks/task", collection: @tasks, as: :task %>
                   </ul>
                 <% else %>
-                  <p class="record-card__empty">No work under this yet.</p>
+                  <%= ui :empty, size: :sm, description: "No #{term(:task, count: 2).downcase} under this yet." %>
                 <% end %>
-              </div>
-
-              <% unless @work.closed? %>
-                <footer class="card__footer">
-                  <%= render "tasks/add", work: @work, scope_item: @item, inline: false %>
-                </footer>
-              <% end %>
-            </section>
+            <% end %>
           <% when "notes" %>
             <%= render "notes/section", subject: @item %>
           <% when "documents" %>
@@ -54,28 +42,17 @@
 
   <aside class="record-page__aside">
     <%= plugin_slots(:scope_item_aside, scope_item: @item) %>
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content">
+    <%= record_card "Details" do %>
         <dl class="details">
           <dt>Delivery</dt><dd><%= status_tag @item.delivery_state.humanize, highlight: @item.delivery_state == "done" %></dd>
           <dt>Progress</dt><dd><strong><%= done %> of <%= total %></strong> done</dd>
           <dt><%= term(:work) %></dt><dd><%= link_to @work.title, @work %></dd>
           <dt><%= term(:client) %></dt><dd><%= link_to @work.client.name, @work.client %></dd>
         </dl>
-      </div>
-    </section>
+    <% end %>
 
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Remove</h2>
-        <p class="card__hint">Removing it keeps its <%= term(:task, count: 2).downcase %> on the <%= term(:work).downcase %>.</p>
-      </header>
-      <div class="card__content">
-        <%= render "scope_items/item", item: @item %>
-      </div>
-    </section>
+    <%= record_card "Remove", hint: "Removing it keeps its #{term(:task, count: 2).downcase} on the #{term(:work).downcase}." do %>
+      <%= render "scope_items/item", item: @item %>
+    <% end %>
   </aside>
 </section>

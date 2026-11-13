@@ -1,16 +1,10 @@
 <%# locals: (subject:, expanded: nil) %>
-<%# A record's history as an activity feed in a card (rune_ui's folding card): who did what,
-    newest first. Folded in a sidebar; open where it is the whole tab (expanded). %>
+<%# A record's history as an activity feed in a card (ui :card holding ui :collapsible): who did
+    what, newest first. Folded in a sidebar; open where it is the whole tab (expanded). %>
 <% events = subject.events.recent.limit(30).includes(:actor_user) %>
 <% if events.any? %>
-  <details class="card card--fold record-card record-timeline"<% if expanded %> open<% end %>>
-    <summary class="card__fold-summary record-timeline__summary">
-      <span class="card__head">
-        <h2 class="card__title">History</h2>
-        <span class="card__hint">The last <%= pluralize events.size, "change" %>, newest first</span>
-      </span>
-      <%= icon_tag "chevron", class: "fold__chevron" %>
-    </summary>
+  <%= record_card css: "record-timeline" do %>
+  <%= ui :collapsible, open: expanded, trigger: timeline_trigger(events.size), id: dom_id(subject, :history) do %>
     <ol class="record-feed">
       <% events.each do |event| %>
         <%# herb:key event.id %>
@@ -36,5 +30,6 @@
         </li>
       <% end %>
     </ol>
-  </details>
+  <% end %>
+  <% end %>
 <% end %>

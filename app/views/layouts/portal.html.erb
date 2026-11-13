@@ -102,9 +102,15 @@
     <%= render "layouts/shared/connection_status" %>
     <%= render "layouts/shared/modal_placeholder" %>
     <turbo-frame id="modal" data-loading-placeholder="modal_placeholder" data-breaks-out></turbo-frame>
-    <%# A shared task opens here, read-only (?task=, the side-panel controller, as on staff pages). %>
+    <%# A shared task opens here, read-only (?task=: runeui's side panel and the side-panel
+        controller, as on staff pages). %>
     <% if current_contact %>
-      <%= render "portal/tasks/side_panel", task: portal_side_panel_task %>
+      <% task = portal_side_panel_task %>
+      <%= ui :side_panel, params: %w[task], src: (request.fullpath if task), closable: false, label: (task ? task.title : "Details") do %>
+        <% if task %>
+          <%= render "portal/tasks/panel", task: task %>
+        <% end %>
+      <% end %>
     <% end %>
     <%= render "layouts/shared/feedback" %>
   </body>

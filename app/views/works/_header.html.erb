@@ -1,59 +1,41 @@
 <%# locals: (work:) %>
-<%# A piece of work's page header: its title, changed in place; its description, read and changed
-    in the dialog its info button opens (saved with Save or ⌘/Ctrl+Enter, Esc puts it back); its
-    facts on one line, and its next step. Redrawn when it saves (works/update.turbo_stream.erb). %>
+<%# A piece of work's page header (record_header: ui :page_header): its title, changed in place;
+    its description, read and changed in the dialog its info button opens (ui :dialog; saved with
+    Save or ⌘/Ctrl+Enter, Esc puts it back, the save-when-dirty behavior); its facts on one line,
+    and its next step. Redrawn when it saves (works/update.turbo_stream.erb). %>
 <% next_step = work_next_step(work) %>
-<header class="record-page__header" id="<%= dom_id(work, :header) %>">
-  <div class="record-page__heading">
-    <div class="record-page__title-row">
-      <%= render "layouts/shared/record_title", record: work, attribute: :title, label: "Title" %>
-      <div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
-        <button type="button" class="icon-button" title="About this <%= term(:work).downcase %>" aria-haspopup="dialog" data-action="rune-dialog#open">
-          <%= icon_tag "info" %>
-          <span class="visually-hidden">About <%= work.title %></span>
-        </button>
-        <dialog class="dialog dialog--lg" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="work_about_title">
-          <div class="dialog__box">
-            <header class="dialog__header">
-              <h2 class="dialog__title" id="work_about_title"><%= work.title %></h2>
-              <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
-            </header>
-            <div class="dialog__body">
-              <%= form_with model: work, method: :patch, id: dom_id(work, :description_form), class: "rich-text-in-place", data: draft_data("description:work:#{work.id}").merge(save_when_dirty: true) do |form| %>
-                <%= hidden_field_tag :inline, "field", id: nil %>
-                <%= rich_text_field form, :description, staff: true, placeholder: "What it is, what’s agreed, what done looks like" %>
-                <%= draft_notice %>
-                <div class="rich-text-in-place__actions">
-                  <span class="faint small"><kbd>Esc</kbd> puts it back</span>
-                  <button type="submit" class="btn btn--primary btn--sm"><span>Save</span> <kbd class="hide-on-touch">⌘↵</kbd></button>
-                </div>
-              <% end %>
-              <% unless work.internal? %>
-                <p class="field__hint">Shown to the <%= term(:client).downcase %> in the portal.</p>
-              <% end %>
-            </div>
-          </div>
-        </dialog>
-      </div>
-    </div>
-    <p class="record-meta record-page__description">
-      <%= status_tag work.state_label, highlight: work.active? %>
-      <%= link_to work.client.name, work.client %>
-      <span><%= work.label_name %> · <%= work.runs %></span>
-      <% if work.internal? %>
-        <span>Internal</span>
+<%= record_header id: dom_id(work, :header) do %>
+  <div class="record-header__title-row">
+    <%= render "layouts/shared/record_title", record: work, attribute: :title, label: "Title" %>
+    <%= ui :dialog, id: dom_id(work, :about), size: :lg, title: work.title, class: "work-about",
+          trigger: ui(:button, variant: :ghost, size: :icon, content: icon_tag("info"), title: "About this #{term(:work).downcase}", aria: { label: "About #{work.title}" }) do %>
+      <%= form_with model: work, method: :patch, id: dom_id(work, :description_form), class: "rich-text-in-place", data: draft_data("description:work:#{work.id}").merge(save_when_dirty: true) do |form| %>
+        <%= hidden_field_tag :inline, "field", id: nil %>
+        <%= rich_text_field form, :description, staff: true, placeholder: "What it is, what’s agreed, what done looks like" %>
+        <%= draft_notice %>
+        <div class="rich-text-in-place__actions">
+          <span class="faint small"><kbd>Esc</kbd> puts it back</span>
+          <%= ui :button, type: :submit, size: :sm, content: safe_join([ tag.span("Save"), tag.kbd("⌘↵", class: "hide-on-touch") ], " ") %>
+        </div>
       <% end %>
-      <%= plugin_slots(:work_meta, work: work) %>
-      <% if work.closed? %>
-        <span><%= work.state_label %> <%= l work.closed_at.to_date, format: :long %><%= ": #{work.close_reason}" if work.close_reason.present? %></span>
+      <% unless work.internal? %>
+        <p class="field__hint">Shown to the <%= term(:client).downcase %> in the portal.</p>
       <% end %>
-    </p>
-    <% if next_step %>
-      <p class="record-page__next"><%= next_step %></p>
     <% end %>
   </div>
-  <div class="button-row">
-    <%= render "record_fields/arrange_button" %>
-    <%= render "layouts/shared/sidebar_toggle" %>
-  </div>
-</header>
+  <p class="record-meta record-header__line">
+    <%= status_tag work.state_label, highlight: work.active? %>
+    <%= link_to work.client.name, work.client %>
+    <span><%= work.label_name %> · <%= work.runs %></span>
+    <% if work.internal? %>
+      <span>Internal</span>
+    <% end %>
+    <%= plugin_slots(:work_meta, work: work) %>
+    <% if work.closed? %>
+      <span><%= work.state_label %> <%= l work.closed_at.to_date, format: :long %><%= ": #{work.close_reason}" if work.close_reason.present? %></span>
+    <% end %>
+  </p>
+  <% if next_step %>
+    <p class="record-header__next"><%= next_step %></p>
+  <% end %>
+<% end %>

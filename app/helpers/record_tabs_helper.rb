@@ -17,6 +17,15 @@ module RecordTabsHelper
     params[:tab].presence_in(tabs.map(&:key)) || default
   end
 
+  # The tabs as runeui's link tabs (layouts/shared/record_tabs): each loads only the record_tab
+  # frame and advances history; a count sits beside its name.
+  def record_tab_links(tabs)
+    tabs.map do |tab|
+      label = tab.count.to_i.positive? ? safe_join([ tab.label, tag.span(tab.count, class: "count count--quiet") ], " ") : tab.label
+      { value: tab.key, label: label, href: record_tab_path(tab.key), data: { turbo_frame: "record_tab", turbo_action: "advance" } }
+    end
+  end
+
   # Another tab closes the side panel: its link leaves ?task= out (and the side panel controller
   # lets the open panel fade away).
   def record_tab_path(key) = url_for(request.query_parameters.except("task", "peek").merge(tab: key))

@@ -1,18 +1,10 @@
 <%# locals: (work:, current: nil) %>
-<%# herb:slots client %>
-<%# herb:state (pane: "scope") %>
-<%# A piece of work's sidebar card: its sections (works/_scope) by default, or General, its
-    facts and custom fields. Both are always on the page and state shows one, so switching never
-    waits on the server. current: the scope item whose work is shown (works/_scope). %>
-<section class="card record-card work-sidebar">
-  <header class="card__head">
-    <nav class="tabs tabs--pills work-sidebar__tabs" aria-label="Sidebar">
-      <button type="button" class="tabs__tab" aria-pressed="<%= pane == "scope" %>" data-herb-set="pane=scope"><%= term(:scope_item, count: 2) %></button>
-      <button type="button" class="tabs__tab" aria-pressed="<%= pane == "general" %>" data-herb-set="pane=general">General</button>
-    </nav>
-  </header>
-
-  <div class="card__content record-card__stack" hidden="<%= pane != "general" %>">
+<%# A piece of work's sidebar card: its sections (works/_scope) by default, or General, its facts
+    and custom fields, in runeui's tabs (ui :tabs: both panels on the page, the tabs switch them in
+    the browser and keep the choice through a morph). current: the scope item whose tasks are
+    shown (works/_scope). %>
+<% general = capture do %>
+  <div class="record-card__stack" data-morph="replace">
     <dl class="details">
       <dt>Status</dt><dd><%= status_tag work.state_label, highlight: work.active? %></dd>
       <dt><%= term(:client) %></dt><dd><%= link_to work.client.name, work.client %></dd>
@@ -24,8 +16,10 @@
     </dl>
     <%= render "record_fields/zone", layout: record_layout(:work), zone: "aside", record: work, in_place: true, except: header_fields(:work) %>
   </div>
-
-  <div class="card__content record-card__stack" hidden="<%= pane != "scope" %>">
-    <%= render "works/scope", work: work, current: current %>
-  </div>
-</section>
+<% end %>
+<%= record_card css: "work-sidebar" do %>
+  <%= ui :tabs, label: "Sidebar", value: "scope", id: dom_id(work, :sidebar_tabs), class: "work-sidebar__tabs", tabs: [
+        { value: "scope", label: term(:scope_item, count: 2), content: render("works/scope", work: work, current: current) },
+        { value: "general", label: "General", content: general }
+      ] %>
+<% end %>

@@ -12,6 +12,6 @@
       <%= link_to "More on its page", path, class: "small", data: { turbo_frame: "_top" } %>
     <% end %>
   <% else %>
-    <p class="record-card__empty">Nothing open.</p>
+    <%= ui :empty, size: :sm, description: "Nothing open." %>
   <% end %>
 </section>

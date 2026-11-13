@@ -206,11 +206,13 @@ a.portal-section-filter { color: var(--text); text-decoration: none; }
 
 /* A shared task in the portal's side sheet (portal/tasks/panel): the task above, its discussion
 /* below, each half scrolling on its own, the reply pinned at the foot. */
-.task-panel.portal-task { overflow: hidden; gap: 0; padding-bottom: 0; }
+/* It fills runeui's side panel (ui :side_panel), whose frame then doesn't scroll itself. */
+[data-slot="side-panel-frame"]:not([busy], :empty):has(> .portal-task) { display: flex; flex-direction: column; overflow: hidden; padding: 1.25rem 0 0; }
+.task-panel.portal-task { flex: 1; min-height: 0; overflow: hidden; gap: 0; padding: 0 1.25rem; }
 .portal-task__about { display: flex; flex: 1 1 0; flex-direction: column; gap: var(--s-4); min-height: 0; overflow-y: auto; padding: var(--s-2) 0 var(--s-4); }
 /* The discussion keeps room for its composer (the editor and Send) however short the screen: the
    thread above it scrolls, and the task's details above that give way first. */
-.portal-task__discussion { display: flex; flex: 1 1 0; flex-direction: column; gap: var(--s-3); min-height: min(16rem, 60%); margin-inline: calc(var(--s-4) * -1); padding: var(--s-3) var(--s-4) var(--s-4); border-top: 1px solid var(--line); background: var(--layer-1); }
+.portal-task__discussion { display: flex; flex: 1 1 0; flex-direction: column; gap: var(--s-3); min-height: min(16rem, 60%); margin-inline: -1.25rem; padding: var(--s-3) 1.25rem var(--s-4); border-top: 1px solid var(--line); background: var(--layer-1); }
 .portal-task__discussion-title { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
 .portal-thread { display: flex; flex: 1; flex-direction: column; gap: var(--s-3); min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .portal-thread__message { max-width: 85%; padding: var(--s-2) var(--s-3); border-radius: var(--radius-lg); background: var(--panel); }

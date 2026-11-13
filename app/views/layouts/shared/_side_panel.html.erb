@@ -1,31 +1,11 @@
 <%# locals: (task: nil, peek: nil) %>
-<%# The side panel's frame (side-panel controller): empty, the task named by ?task= on the page
-    you're on (tasks/_panel), or the client, work or contact named by ?peek=Type:id (its
-    <type>/_peek). The layout renders it, and so does ApplicationController for a frame request,
-    which skips the page's own work. %>
-<%# What the panel shows the moment a task is clicked, before its frame arrives: the panel with the
-    task's title (from the link) and quiet lines where its fields go. %>
-<template data-side-panel-target="placeholder">
-  <section class="task-panel task-panel--loading" id="task_panel_loading" aria-busy="true" aria-label="Loading">
-    <header class="task-panel__header">
-      <p class="task-panel__context"><span class="task-panel__skeleton task-panel__skeleton--short"></span></p>
-      <div class="task-panel__actions">
-        <button type="button" class="icon-button" title="Close (Esc)" data-action="side-panel#close">
-          <%= icon_tag "close" %>
-          <span class="visually-hidden">Close</span>
-        </button>
-      </div>
-    </header>
-    <p class="task-panel__title task-panel__title--static" data-side-panel-title></p>
-    <div class="task-panel__skeleton"></div>
-    <div class="task-panel__skeleton"></div>
-    <div class="task-panel__skeleton task-panel__skeleton--short"></div>
-  </section>
-</template>
-<turbo-frame id="side_panel" data-side-panel-target="frame">
-  <% if task %>
-    <%= render "tasks/panel", task: task %>
-  <% elsif peek %>
-    <%= render "#{peek.class.name.underscore.pluralize}/peek", record: peek %>
-  <% end %>
-</turbo-frame>
+<%# The side panel: runeui's (ui :side_panel), its state this page's own address with ?task=42 (the
+    task, tasks/_panel) or ?peek=Client:3 (a client, piece of work or contact, <type>/_peek). The
+    layout draws it open from the first paint when the address has one; opening, following (j / k)
+    and closing load just its frame, which ApplicationController#render_side_panel answers with
+    layouts/shared/side_panel_frame, skipping the page's own action. The side-panel controller on
+    <body> adds the links, j / k, prefetching and closing on a click outside. Its contents draw
+    their own ✕ (closable: false). %>
+<%= ui :side_panel, params: %w[task peek], src: (request.fullpath if task || peek), closable: false, initial_focus: "none", label: (task ? task.title : (peek ? peek_title(peek) : "Details")) do %>
+  <%= render "layouts/shared/side_panel_content", task: task, peek: peek %>
+<% end %>

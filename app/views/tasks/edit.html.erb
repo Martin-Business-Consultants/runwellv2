@@ -6,16 +6,10 @@
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:task) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:task).downcase}’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
+  <%= record_header id: "record_header" do %>
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">What it is, and beside it who’s on it, when it’s due and where it came from.</p>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+      <p class="record-header__line">What it is, and beside it who’s on it, when it’s due and where it came from.</p>
+  <% end %>
 
   <%# Fields as the install arranged them (template mode, RecordLayout): the working column's in
       the form's card, the sidebar's in Properties, all saved by the one form (task_form). %>
@@ -27,11 +21,7 @@
   <aside class="record-page__aside">
     <%= render "record_fields/aside_card", layout: layout, record: @task, form_id: "task_form" %>
 
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content">
+    <%= record_card "Details" do %>
         <dl class="details">
           <% if @task.work %>
             <dt><%= term(:work) %></dt><dd><%= link_to @task.work.title, @task.work %></dd>
@@ -44,8 +34,7 @@
             <dt>Done</dt><dd><%= l @task.completed_at.to_date, format: :long %></dd>
           <% end %>
         </dl>
-      </div>
-    </section>
+    <% end %>
 
     <% if can?(:delete_records) %>
       <%# Removed at once, with Undo in the toast for a few seconds (PendingRemoval): no dialog. %>

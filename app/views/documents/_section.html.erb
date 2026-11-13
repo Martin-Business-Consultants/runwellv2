@@ -1,11 +1,5 @@
 <%# locals: (subject:) %>
-<section class="card record-card" id="documents">
-  <header class="card__head">
-    <h2 class="card__title">Documents</h2>
-    <p class="card__hint">Files kept here. The switch shows one to the <%= term(:client).downcase %> in their portal.</p>
-  </header>
-
-  <div class="card__content record-card__stack">
+<%= record_card "Documents", id: "documents", hint: "Files kept here. The switch shows one to the #{term(:client).downcase} in their portal." do %>
     <%# Drop files on the box (or click it to choose): the file input covers it, so a drop fills the
         input, each file uploads with its progress on the box, and the form sends them to the same
         documents#create as the quick action tray. %>
@@ -36,7 +30,6 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="record-card__empty">No documents yet.</p>
+      <%= ui :empty, size: :sm, description: "No documents yet." %>
     <% end %>
-  </div>
-</section>
+<% end %>

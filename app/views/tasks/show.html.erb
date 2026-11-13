@@ -18,10 +18,13 @@
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:task) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:task).downcase}’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
+  <% header_actions = capture do %>
+    <%= render "tasks/ai_brief", task: @task, labelled: true %>
+    <%= ui :button, href: edit_task_path(@task), variant: :outline, data: { keys: "e" }, content: safe_join([ icon_tag("pencil"), tag.span("Edit"), tag.kbd("E", class: "hide-on-touch") ], " ") %>
+  <% end %>
+  <%= record_header id: "record_header", actions: header_actions do %>
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">
+      <p class="record-header__line">
         <% if @task.work %>
           <%= link_to @task.work.title, @task.work %>
           <span aria-hidden="true">›</span>
@@ -37,27 +40,14 @@
         <% end %>
       </p>
       <%= plugin_slots(:task_notice, task: @task) %>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= render "tasks/ai_brief", task: @task, labelled: true %>
-      <%= link_to edit_task_path(@task), class: "btn btn--secondary", data: { keys: "e" } do %>
-        <%= icon_tag "pencil" %>
-        <span>Edit</span>
-        <kbd class="hide-on-touch">E</kbd>
-      <% end %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+  <% end %>
 
   <div class="record-page__main">
     <%# Its fields as the install arranged them (template mode): the working column's here,
         stacked; the sidebar's in Details. %>
-    <section class="card record-card record-fields-card">
-      <div class="card__content">
-        <%= render "record_fields/zone", layout: layout, zone: "main", record: @task, stacked: true %>
-      </div>
-    </section>
+    <%= record_card css: "record-fields-card" do %>
+      <%= render "record_fields/zone", layout: layout, zone: "main", record: @task, stacked: true %>
+    <% end %>
 
     <turbo-frame id="record_tab" target="_top">
       <div class="record-tabs">

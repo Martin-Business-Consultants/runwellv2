@@ -40,7 +40,7 @@
     <% end %>
   </div>
   <details class="settings-fold settings-field__change">
-    <summary class="btn btn--secondary btn--sm">Change</summary>
+    <summary class="ui-button" data-variant="outline" data-size="sm">Change</summary>
     <%= form_with model: work_type, url: settings_work_type_path(work_type), method: :patch, scope: :work_type, namespace: dom_id(work_type), class: "settings-subform" do |form| %>
       <div class="field-row">
         <div class="field">

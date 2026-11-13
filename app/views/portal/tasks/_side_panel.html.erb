@@ -1,7 +1,8 @@
 <%# locals: (task: nil) %>
-<%# The portal's side sheet frame: empty, or the shared task named by ?task= (portal/tasks/panel).
-    The portal layout renders it, and Portal::BaseController does for a frame request. %>
-<turbo-frame id="side_panel" data-side-panel-target="frame">
+<%# The portal's side sheet frame, alone: the shared task named by ?task= (portal/tasks/panel), the
+    answer to a request for it (Portal::BaseController#render_portal_side_panel). The portal layout
+    draws the sheet itself (ui :side_panel), as staff pages do. %>
+<turbo-frame id="side_panel">
   <% if task %>
     <%= render "portal/tasks/panel", task: task %>
   <% end %>

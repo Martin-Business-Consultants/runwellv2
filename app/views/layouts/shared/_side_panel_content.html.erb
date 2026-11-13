@@ -1,0 +1,7 @@
+<%# locals: (task: nil, peek: nil) %>
+<%# What the side panel holds: the task named by ?task=, or the record named by ?peek=Type:id. %>
+<% if task %>
+  <%= render "tasks/panel", task: task %>
+<% elsif peek %>
+  <%= render "#{peek.class.name.underscore.pluralize}/peek", record: peek %>
+<% end %>

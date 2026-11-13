@@ -15,11 +15,9 @@
     <%# Fields the install put in the working column (template mode), changed in place; the
         sidebar's sit in its general pane (works/sidebar). Title, client, shape and description
         are the header and its info button. %>
-    <section class="card record-card record-fields-card">
-      <div class="card__content">
-        <%= render "record_fields/zone", layout: layout, zone: "main", record: @work, in_place: true, except: header_fields(:work) %>
-      </div>
-    </section>
+    <%= record_card css: "record-fields-card" do %>
+      <%= render "record_fields/zone", layout: layout, zone: "main", record: @work, in_place: true, except: header_fields(:work) %>
+    <% end %>
 
     <%= render "works/record_tab", work: @work, tabs: tabs, task_state: @task_state, task_item: @task_item, task_view: @task_view, board: @board %>
   </div>
@@ -29,21 +27,12 @@
     <%= plugin_slots(:work_aside, work: @work) %>
 
     <% if can?(:close_works) || (@work.closed? && can?(:erase_works)) %>
-      <section class="card record-card">
-        <header class="card__head">
-          <% if @work.closed? %>
-            <h2 class="card__title"><%= @work.state_label %></h2>
-            <p class="card__hint">Off the open list. Its <%= term(:task, count: 2).downcase %> and history stay.</p>
-          <% else %>
-            <h2 class="card__title">Finish</h2>
-            <p class="card__hint">Mark it complete once it’s delivered, or cancel it.</p>
-          <% end %>
-        </header>
-        <div class="card__content record-card__stack">
+      <%= record_card (@work.closed? ? @work.state_label : "Finish"),
+            hint: (@work.closed? ? "Off the open list. Its #{term(:task, count: 2).downcase} and history stay." : "Mark it complete once it’s delivered, or cancel it.") do %>
           <% if can?(:close_works) %>
             <% if @work.reopenable? %>
-              <%= button_to reopen_work_path(@work), class: "btn btn--secondary btn--sm" do %>
-                <%= icon_tag "refresh" %> <span>Reopen</span>
+              <%= form_with url: reopen_work_path(@work), class: "work-reopen" do %>
+                <%= ui :button, type: :submit, variant: :outline, size: :sm, content: safe_join([ icon_tag("refresh"), "Reopen" ], " ") %>
               <% end %>
             <% end %>
             <% if @work.closable? %>
@@ -54,8 +43,7 @@
           <% if @work.closed? && can?(:erase_works) %>
             <%= render "works/erase", work: @work %>
           <% end %>
-        </div>
-      </section>
+      <% end %>
     <% end %>
   </aside>
 </section>

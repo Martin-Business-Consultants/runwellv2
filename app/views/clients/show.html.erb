@@ -13,11 +13,9 @@
   <div class="record-page__main">
     <%# Its fields as the install arranged them (template mode): the working column's here; the
         sidebar's in Details. %>
-    <section class="card record-card record-fields-card">
-      <div class="card__content">
-        <%= render "record_fields/zone", layout: layout, zone: "main", record: @client, in_place: true, except: header_fields(:client) %>
-      </div>
-    </section>
+    <%= record_card css: "record-fields-card" do %>
+      <%= render "record_fields/zone", layout: layout, zone: "main", record: @client, in_place: true, except: header_fields(:client) %>
+    <% end %>
 
     <%= render "clients/record_tab", client: @client, tabs: tabs, work_state: @work_state, task_state: @task_state %>
   </div>

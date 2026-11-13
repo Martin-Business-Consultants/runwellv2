@@ -14,13 +14,7 @@
     <div class="task-panel__meta"><%= meta %></div>
   <% end %>
   <div class="task-panel__actions">
-    <%= link_to open_path, class: "icon-button", title: "Open its page", data: { turbo_frame: "_top" } do %>
-      <%= icon_tag "maximize" %>
-      <span class="visually-hidden">Open <%= peek_title(record) %> on its own page</span>
-    <% end %>
-    <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close">
-      <%= icon_tag "close" %>
-      <span class="visually-hidden">Close</span>
-    </button>
+    <%= ui :button, href: open_path, variant: :ghost, size: :icon_sm, title: "Open its page", aria: { label: "Open #{peek_title(record)} on its own page" }, data: { turbo_frame: "_top" }, content: icon_tag("maximize") %>
+    <%= ui :button, variant: :ghost, size: :icon_sm, title: "Close (Esc)", aria: { label: "Close" }, data: { keys: "esc", action: "side-panel#close" }, content: icon_tag("close") %>
   </div>
 </header>

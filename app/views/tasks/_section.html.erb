@@ -13,11 +13,8 @@
 <% quick = !work.closed? && state != "done" %>
 <% picked = item.is_a?(Integer) ? work.scope_items.find_by(id: item) : nil %>
 <% focus = picked || item == "other" %>
-<section class="card record-card" id="tasks" data-task-list="work" data-task-list-state="<%= state %>" data-task-list-keeps="<%= task_list_keeps(state) %>"<% if item %> data-task-list-item="<%= item %>"<% end %>>
-  <%= render "tasks/pending" %>
-  <header class="card__head">
-    <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-    <div class="card__hint task-section__hint">
+<% hint = capture do %>
+  <span class="task-section__hint">
       <% if focus %>
         <span>Just one <%= term(:scope_item).downcase %>’s. Pick another in the sidebar.</span>
       <% else %>
@@ -29,13 +26,15 @@
           </details>
         <% end %>
       <% end %>
-    </div>
-    <div class="card__action task-section__actions">
-      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
-            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
-      <%= render "tasks/view_switch", current: "list" %>
-    </div>
-  </header>
+  </span>
+<% end %>
+<% actions = capture do %>
+  <div class="task-section__actions">
+    <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
+          options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ] %>
+    <%= render "tasks/view_switch", current: "list", work: work %>
+  </div>
+<% end %>
 
   <% tasks = work.tasks.includes(:owner, :scope_item, :client, { assignments: :user }, :work).order(:due_on, :position) %>
   <% tasks = tasks.where(scope_item: picked) if focus %>
@@ -44,7 +43,8 @@
   <% groups = shown.group_by(&:scope_item) %>
   <% items = (work.scope_items.to_a + all_groups.keys.compact).uniq.select { |item| groups.key?(item) || (quick && !all_groups.key?(item) && (!focus || item == picked)) } %>
 
-  <div class="card__content record-card__stack">
+<%= record_card term(:task, count: 2), hint: hint, action: actions, id: "tasks", data: { task_list: "work", task_list_state: state, task_list_keeps: task_list_keeps(state), task_list_item: item } do %>
+    <%= render "tasks/pending" %>
     <% if focus %>
       <% done = tasks.count { |task| task.status == "done" } %>
       <div class="list-row list-row--outline task-focus">
@@ -54,10 +54,7 @@
         </div>
         <% if picked %>
           <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>
-          <%= link_to picked, class: "btn btn--secondary btn--sm", title: "Open the #{term(:scope_item).downcase}: its notes, documents and history" do %>
-            <span>Open</span>
-            <%= icon_tag "arrow-right" %>
-          <% end %>
+          <%= ui :button, href: scope_item_path(picked), variant: :outline, size: :sm, title: "Open the #{term(:scope_item).downcase}: its notes, documents and history", content: safe_join([ tag.span("Open"), icon_tag("arrow-right") ], " ") %>
         <% end %>
       </div>
     <% end %>
@@ -89,7 +86,9 @@
                   <%= icon_tag "caret-down", class: "task-group__caret" %>
                   <%= link_to item.description, work_path(work, request.query_parameters.merge("tab" => "tasks", "item" => item.id)), class: "task-group__name" %>
                   <span class="task-group__count"><%= everything.count { |task| task.status == "done" } %> of <%= everything.size %></span>
-                  <%= status_tag item.delivery_state.humanize, highlight: item.delivery_state == "done" %>
+                  <%# Its state from the tasks already loaded (all_groups), not a query per section. %>
+                  <% delivery = ScopeItem.delivery_state_of(everything.map(&:status)) %>
+                  <%= status_tag delivery.humanize, highlight: delivery == "done" %>
                 </summary>
                 <ul class="record-list">
                   <%= render partial: "tasks/task", collection: group, as: :task %>
@@ -135,15 +134,11 @@
 
     <% if tasks.none? %>
       <% if focus %>
-        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> here yet. Type the first above.</p>
+        <%= ui :empty, size: :sm, description: "No #{term(:task, count: 2).downcase} here yet. Type the first above." %>
       <% else %>
-        <p class="record-card__empty">No <%= term(:task, count: 2).downcase %> yet. Type the first into a <%= term(:scope_item).downcase %> above, or add a <%= term(:scope_item).downcase %> with +.</p>
+        <%= ui :empty, size: :sm, description: "No #{term(:task, count: 2).downcase} yet. Type the first into a #{term(:scope_item).downcase} above, or add a #{term(:scope_item).downcase} with +." %>
       <% end %>
     <% elsif shown.none? %>
-      <p class="record-card__empty">
-        <%= state == "open" ? "Nothing open: all #{tasks.size} done." : "Nothing done yet." %>
-        <%= link_to "Show all", work_path(work, request.query_parameters.merge("tasks" => "all")) %>
-      </p>
+      <%= ui :empty, size: :sm, description: (state == "open" ? "Nothing open: all #{tasks.size} done." : "Nothing done yet."), action: link_to("Show all", work_path(work, request.query_parameters.merge("tasks" => "all"))) %>
     <% end %>
-  </div>
-</section>
+<% end %>

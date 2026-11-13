@@ -11,16 +11,9 @@
       <% case tab %>
       <% when "tasks" %>
         <% if task_view == "board" %>
-          <section class="card record-card" id="tasks">
-            <header class="card__head">
-              <h2 class="card__title"><%= term(:task, count: 2) %></h2>
-              <p class="card__hint">Everyone’s, by status. Drag a card to move it.</p>
-              <div class="card__action"><%= render "tasks/view_switch", current: "board" %></div>
-            </header>
-            <div class="card__content">
-              <%= render "tasks/board/columns", board: board %>
-            </div>
-          </section>
+          <%= record_card term(:task, count: 2), id: "tasks", hint: "Everyone’s, by status. Drag a card to move it.", action: render("tasks/view_switch", current: "board", work: work) do %>
+            <%= render "tasks/board/columns", board: board %>
+          <% end %>
         <% else %>
           <%= render "tasks/section", work: work, state: task_state, item: task_item %>
         <% end %>

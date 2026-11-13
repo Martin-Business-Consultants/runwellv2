@@ -4,7 +4,7 @@
 <% manage = can?(:manage_people) %>
 
 <div class="<%= class_names("person-page", "person-page--split": manage) %>">
-  <div class="card person-page__main">
+  <%= ui :card, class: "person-page__main" do %>
     <%= render "users/heading", person: @person, manage: manage %>
 
     <% if manage %>
@@ -75,10 +75,10 @@
       </dl>
     </section>
     <% end %>
-  </div>
+  <% end %>
 
   <% if manage %>
-  <aside class="card person-page__side">
+  <%= ui :card, class: "person-page__side" do %>
     <section class="settings-section">
       <header class="settings-section__head">
         <h2>Signed in</h2>
@@ -176,6 +176,6 @@
       <% end %>
       <p><%= link_to "Everything in the audit log", settings_audit_log_path(person: @person.id) %></p>
     </section>
-  </aside>
+  <% end %>
   <% end %>
 </div>

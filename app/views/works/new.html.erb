@@ -13,22 +13,16 @@
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:work) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:work).downcase}’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
+  <%= record_header id: "record_header" do %>
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">
+      <p class="record-header__line">
         <% if client&.internal? %>
           <%= client.name %> is internal: its <%= term(:work, count: 2).downcase %> are your own.
         <% else %>
           It’s active from the start: add its <%= term(:scope_item, count: 2).downcase %> and <%= term(:task, count: 2).downcase %> next.
         <% end %>
       </p>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+  <% end %>
 
   <div class="record-page__main">
     <%= render "record_fields/main_card", layout: layout, record: @work, form_id: "work_form", title: term(:work), hint: "Who it’s for, what kind it is, and what it covers.",
@@ -38,11 +32,7 @@
   <aside class="record-page__aside">
     <%= render "record_fields/aside_card", layout: layout, record: @work, form_id: "work_form" %>
 
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">How it goes</h2>
-      </header>
-      <div class="card__content">
+    <%= record_card "How it goes" do %>
         <% steps = [ "Add #{term(:scope_item, count: 2).downcase} if it has parts, to group its #{term(:task, count: 2).downcase}.",
              "Add #{term(:task, count: 2).downcase} with owners and due dates, whenever something needs doing.", "Track it on the #{term(:task, count: 2)} table or board like any other.",
              "Close the #{term(:work).downcase} when it’s done." ] %>
@@ -52,17 +42,11 @@
             <li><%= step %></li>
           <% end %>
         </ol>
-      </div>
-    </section>
+    <% end %>
 
     <% if client %>
-      <section class="card record-card">
-        <header class="card__head">
-          <h2 class="card__title"><%= client.name %>’s <%= term(:work, count: 2).downcase %></h2>
-          <p class="card__hint"><%= existing.empty? ? "This is their first." : pluralize(existing.size, "so far", plural: "so far") %></p>
-        </header>
+      <%= record_card "#{client.name}’s #{term(:work, count: 2).downcase}", hint: (existing.empty? ? "This is their first." : pluralize(existing.size, "so far", plural: "so far")) do %>
         <% if existing.any? %>
-          <div class="card__content">
             <ul class="record-list">
               <% existing.each do |work| %>
                 <%# herb:key work.id %>
@@ -74,9 +58,8 @@
                 </li>
               <% end %>
             </ul>
-          </div>
         <% end %>
-      </section>
+      <% end %>
     <% end %>
   </aside>
 </section>

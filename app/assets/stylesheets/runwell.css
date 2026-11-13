@@ -11,8 +11,8 @@
 .skip-link:focus { transform: none; padding: var(--s-2) var(--s-3); border-radius: var(--radius-control); background: var(--panel); box-shadow: var(--shadow-popover); }
 
 /* Frames hold rows, cards and sections inside grids and flex layouts, so they lay out as their
-/* contents, as Fizzy's base had it. */
-turbo-frame { display: contents; }
+/* contents, as Fizzy's base had it. runeui's own frames (the side panel's) lay out as runeui says. */
+turbo-frame:not([data-slot]) { display: contents; }
 
 /* Page changes cross-fade with the browser's own view transitions: Turbo's visits (the
 /* view-transition meta in layouts/shared/_head) and full page loads (@view-transition). The nav
@@ -41,7 +41,8 @@ turbo-frame { display: contents; }
 /* The bridge gives runeui's parts shadcn's meanings for --accent (a quiet fill) and --ring (a
 /* colour). Everything Runwell puts in the shell reads them as the brand colour and the focus
 /* shadow, so its boxes get those back (as compat.css does for the compat helpers' parts). */
-[data-slot="app-content"], [data-slot="app-header-content"], [data-slot="sidebar-header"], [data-slot="sidebar-footer"] {
+[data-slot="app-content"], [data-slot="app-header-content"], [data-slot="sidebar-header"], [data-slot="sidebar-footer"], [data-slot="side-panel-frame"],
+.record-header > [data-slot], [data-slot="tabs-panel"], [data-slot="collapsible-content"], .work-about [data-slot="dialog-body"], .work-finish__dialog [data-slot="dialog-body"] {
   --accent: var(--rune-accent);
   --ring: var(--rune-ring);
 }

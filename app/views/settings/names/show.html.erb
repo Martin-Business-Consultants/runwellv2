@@ -56,7 +56,7 @@
     </ul>
 
     <details class="settings-fold">
-      <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add a type</summary>
+      <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Add a type</summary>
       <%= form_with model: WorkType.new, url: settings_work_types_path, scope: :work_type, namespace: "new_work_type", class: "settings-subform" do |form| %>
         <div class="field-row">
           <div class="field">

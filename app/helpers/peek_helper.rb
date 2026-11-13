@@ -10,7 +10,7 @@ module PeekHelper
   def peek_link_to(record, content = nil, data: {}, open: true, **options, &block)
     action = [ data[:action], "side-panel#open" ].compact.join(" ")
     data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_peek_param: QuickAction.value_for(record),
-      side_panel_title_param: peek_title(record), turbo_prefetch: false)
+      turbo_prefetch: false)
     path = record.is_a?(Contact) ? edit_contact_path(record) : polymorphic_path(record)
     return link_to(path, data: data, **options, &block) if block
 

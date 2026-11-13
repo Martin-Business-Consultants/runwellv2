@@ -59,7 +59,7 @@
               </div>
               <% unless field.archived? %>
                 <details class="settings-fold settings-field__change">
-                  <summary class="btn btn--secondary btn--sm">Change</summary>
+                  <summary class="ui-button" data-variant="outline" data-size="sm">Change</summary>
                   <%= form_with model: field, url: settings_field_path(field), method: :patch, scope: :field, namespace: dom_id(field), class: "settings-subform" do |form| %>
                     <div class="field">
                       <%= form.label :label, "Label", class: "field__label" %>
@@ -93,7 +93,7 @@
       <% end %>
 
       <details class="settings-fold">
-        <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add a field</summary>
+        <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Add a field</summary>
         <%= form_with url: settings_fields_path, scope: :field, namespace: "new_#{model.downcase}", class: "settings-subform" do |form| %>
           <%= form.hidden_field :model_type, value: model %>
           <div class="field-row">

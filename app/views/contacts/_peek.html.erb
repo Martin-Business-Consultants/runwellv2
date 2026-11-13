@@ -2,7 +2,7 @@
 <%# A contact in the side panel (?peek=Contact:11), over the page you're on: their name and fields,
     changed in place as on their page (contacts/update.turbo_stream.erb redraws both). %>
 <% layout = record_layout(:contact) %>
-<section class="task-panel peek-panel" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.name %>">
+<section class="task-panel peek-panel" data-morph="replace" id="<%= dom_id(record, :panel) %>" aria-label="<%= record.name %>">
   <%= render "layouts/shared/peek_header", record: record, open_path: edit_contact_path(record), context: record.client %>
   <%= render "layouts/shared/record_title", record: record, attribute: :name, label: "Name" %>
   <%= render "record_fields/zone", layout: layout, zone: "main", record: record, in_place: true, except: header_fields(:contact) %>

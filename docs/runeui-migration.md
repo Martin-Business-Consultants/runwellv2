@@ -155,6 +155,41 @@ core (plugins go through the compatibility layer).
 5. **Record pages and the sheet**: record page cards and tabs → `ui :card`, `ui :tabs`; the task
    panel and peek → `ui :side_panel` (`?task=`, `?peek=` kept as the address); the in-place
    field forms kept (save-on-change), on runeui controls.
+   **Done:** the sheet is `ui :side_panel, params: %w[task peek]` (`layouts/shared/_side_panel`,
+   its content `_side_panel_content`, the frame alone `_side_panel_frame` for
+   `render_side_panel`), drawn open from the first paint on a full load; runeui's controller opens,
+   closes, shows the skeleton and keeps the address, and Runwell's `side-panel` controller (rewritten,
+   about half the size) keeps only the links, `j` / `k`, fetching ahead and the click outside. The
+   portal's sheet is the same (`params: %w[task]`). The panel's and peeks' contents carry
+   `data-morph="replace"` (they sit inside a `ui-*` element, where runeui's morph guard would keep
+   nodes a script moved). Record pages: headers are `record_header` (`ui :page_header`,
+   `RecordPagesHelper`), cards `record_card` (`ui :card`), empty sections `ui :empty, size: :sm`,
+   History `ui :card` + `ui :collapsible`, record tabs `ui :tabs` as links
+   (`layouts/shared/record_tabs`, `record_tab_links`, settings' tabs too), the List / Board switch
+   `ui :toggle_group` as links, the work's sidebar `ui :tabs` (Sections / General: its ReActionView
+   state gone), the About dialog `ui :dialog` (save-when-dirty, ⌘/Ctrl+Enter and Esc unchanged),
+   `works/_close` two `ui :alert_dialog`s with a note (`ui :input` joined to the dialog's form; its
+   ReActionView state gone), the sidebar toggle, arrange button, panel and peek buttons, the arrange
+   bar and the record pages' buttons `ui :button` / `ui-button`. The Tasks tab's sections stay native
+   `<details>` (styled as before): `ui :accordion`'s open items would follow the server's list on a
+   morph, undoing the `keep-open` rule (only closing is refused; the server may open one). Added to
+   runeui: `params:` on `ui :side_panel` (the panel as the page's own state: the frame loads this
+   page with the param, the address is the frame's), a block drawn in the frame from the first paint,
+   `closable: false`, `initial_focus:`, a reload of what shows keeping it on screen
+   (`data-refreshing`); `ui :tabs` as links (`href:` tabs, the block as the panel, current by
+   `aria-current`). Gone: the old panel's placeholder, motion and skeleton CSS, the `rune-dialog` and
+   ReActionView state on record pages, `record-card__empty` / `card__*` markup in the core's record
+   pages. Kept for plugins: `.card` / `card__*`, `.record-page__header` / `__heading` /
+   `__description`, `.record-card__empty`, `.tabs` / `.tabs--pills` (compat.css, records.css),
+   `layouts/shared/record_tabs`, `sidebar_toggle`, `peek_header`, `peek_tasks`, `card`,
+   `side_panel_link_to`, `peek_link_to`, `record_tab`, `plugin_record_tabs`, `current_record_tab`.
+   Left: the user page and the invitation page keep settings-section markup inside `ui :card`
+   wrappers (the invitation page keeps `.card`; phase 8); `segmented_filter` (rune tabs, phase 8);
+   the scope list's rows and progress are Runwell's own markup; the shortcut sheet's `rune-dialog`
+   (phase 7). Esc from a field inside the panel now closes it (UI SDK's drawer), where it used to
+   only leave the field. Also fixed on the way: a section's delivery state in the Tasks tab comes
+   from the tasks already loaded (an N+1 on a quick add's answer), and the List / Board switch
+   drawn in a stream answer links to the work's page (`tasks/_view_switch, work:`).
 6. **The board**: `tasks/board/*`, `columns/*`, the Fizzy drag-and-drop → `ui :board`
    (`Task#move!`, `before`, one endpoint).
 7. **Search, quick actions, keys**: the bar and tray → `ui :command, dialog: true`; the keyboard

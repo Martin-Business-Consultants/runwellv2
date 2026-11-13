@@ -15,7 +15,8 @@
 <% filters = request.query_parameters.slice("tasks") %>
 
 <%# Under the sidebar's sections tab (works/_sidebar), which names it. %>
-<section class="scope-section" id="<%= dom_id(work, :scope) %>">
+<%# data-morph="replace": a refresh morph redraws it as the server has it, though it sits in runeui's tabs (a row the drag moved isn't a part the tabs made). %>
+<section class="scope-section" id="<%= dom_id(work, :scope) %>" data-morph="replace">
   <nav class="scope-nav" aria-label="<%= term(:scope_item, count: 2) %>">
     <a href="<%= work_path(work, filters.merge(tab: "tasks")) %>" class="scope-nav__item"<% if current == "all" %> aria-current="page"<% end %>>
       <span class="scope-nav__name">All <%= term(:task, count: 2).downcase %></span>
@@ -57,15 +58,13 @@
     <% end %>
   </nav>
   <% if rows.empty? && other.nil? %>
-    <p class="record-card__empty">
-      No <%= term(:scope_item, count: 2).downcase %> yet. Add one to group the <%= term(:task, count: 2).downcase %>, or add <%= term(:task, count: 2).downcase %> straight in the <%= term(:task, count: 2) %> tab.
-    </p>
+    <%= ui :empty, size: :sm, description: "No #{term(:scope_item, count: 2).downcase} yet. Add one to group the #{term(:task, count: 2).downcase}, or add #{term(:task, count: 2).downcase} straight in the #{term(:task, count: 2)} tab." %>
   <% end %>
 </section>
 
 <% unless work.closed? %>
   <details class="record-add">
-    <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
+    <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> <span>Add a <%= term(:scope_item).downcase %></span></summary>
     <%= render "scope_items/new", work: work %>
   </details>
 <% end %>

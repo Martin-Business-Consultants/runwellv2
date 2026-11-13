@@ -1,41 +1,18 @@
 <%# locals: (work:) %>
-<%# herb:slots client %>
-<%# herb:state (closing: "") %>
-<%# Finishing a piece of work: Mark complete (delivered) or Cancel (stopped before then), each with an
-    optional note. Either closes it: off the open list, its work and history kept. Both forms
-    are always on the page and state only shows one, so opening them never waits on the server. %>
-<div class="work-finish" data-controller="state-focus" data-state-focus-state-value="closing">
-  <div class="work-finish__choices" hidden="<%= closing != "" %>">
-    <button type="button" class="btn btn--secondary btn--sm" data-keys="d" data-herb-set="closing=completed"><%= icon_tag "check" %> <span>Mark complete</span></button>
-    <button type="button" class="btn btn--ghost btn--sm work-finish__danger" title="Cancel <%= work.title %>" data-herb-set="closing=cancelled">
-      <%= icon_tag "close-circle" %>
-      <span>Cancel it</span>
-    </button>
-  </div>
-
-  <div hidden="<%= closing != "completed" %>">
-    <%= form_with url: close_work_path(work), namespace: dom_id(work, :complete), class: "work-finish__form" do |form| %>
-      <strong>Mark <%= work.title %> complete?</strong>
-      <span class="work-finish__text">Delivered and done. It leaves the open list; its work and history stay, and it can be reopened.</span>
-      <input type="hidden" name="outcome" value="completed">
-      <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
-      <div class="work-finish__actions">
-        <button type="submit" class="btn btn--primary btn--sm">Mark complete</button>
-        <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
-      </div>
+<%# Finishing a piece of work: Mark complete (delivered) or Cancel (stopped before then), each
+    asked in runeui's alert dialog with an optional note (its field joins the dialog's form by
+    id). Either closes it: off the open list, its work and history kept, and it can be reopened.
+    d opens Mark complete. %>
+<div class="work-finish">
+  <% [ [ "completed", "Mark complete", "check", :outline, "Mark #{work.title} complete?", "Delivered and done.", :default ],
+       [ "cancelled", "Cancel it", "close-circle", :ghost, "Cancel #{work.title}?", "Stopped before it was delivered.", :destructive ] ].each do |outcome, label, icon, look, question, what, variant| %>
+    <%# herb:key outcome %>
+    <% dialog_id = dom_id(work, outcome == "completed" ? :complete : :cancel) %>
+    <%= ui :alert_dialog, id: dialog_id, title: question, class: "work-finish__dialog",
+          description: "#{what} It leaves the open list; its #{term(:task, count: 2).downcase} and history stay, and it can be reopened.",
+          trigger: ui(:button, variant: look, size: :sm, class: ("work-finish__danger" if outcome == "cancelled"), content: safe_join([ icon_tag(icon), label ], " "), title: (outcome == "cancelled" ? "Cancel #{work.title}" : nil), data: { keys: (outcome == "completed" ? "d" : nil) }),
+          cancel: "Not now", action: label, variant: variant, href: close_work_path(work), params: { outcome: outcome } do %>
+      <%= ui :input, name: "reason", form: "#{dialog_id}-form", id: "#{dialog_id}_reason", autofocus: true, autocomplete: "off", placeholder: "A note (optional)", aria: { label: "A note (optional)" } %>
     <% end %>
-  </div>
-
-  <div hidden="<%= closing != "cancelled" %>">
-    <%= form_with url: close_work_path(work), namespace: dom_id(work, :cancel), class: "work-finish__form" do |form| %>
-      <strong>Cancel <%= work.title %>?</strong>
-      <span class="work-finish__text">Stopped before it was delivered. It leaves the open list; its work and history stay, and it can be reopened.</span>
-      <input type="hidden" name="outcome" value="cancelled">
-      <%= form.text_field :reason, autofocus: true, autocomplete: "off", placeholder: "A note (optional)" %>
-      <div class="work-finish__actions">
-        <button type="submit" class="btn btn--danger btn--sm">Cancel it</button>
-        <button type="button" class="btn btn--ghost btn--sm" data-keys="esc" data-herb-reset="closing">Not now</button>
-      </div>
-    <% end %>
-  </div>
+  <% end %>
 </div>

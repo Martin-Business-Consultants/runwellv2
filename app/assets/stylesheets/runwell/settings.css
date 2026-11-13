@@ -228,13 +228,15 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 /* people, a narrower card of what's around them (2 : 1), stacked when narrow. */
 .person-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
 @media (min-width: 960px) { .person-page--split { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
-.person-page__main { gap: var(--s-6); padding: var(--s-6); }
-.person-page__side { position: relative; gap: 1.75rem; padding: var(--s-5); }
+/* Both columns are runeui cards (ui :card); their sections stack in the card's content. */
+.person-page__main > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-6); min-width: 0; }
+.person-page__side { position: relative; }
+.person-page__side > [data-slot="card-content"] { display: flex; flex-direction: column; gap: 1.75rem; min-width: 0; }
 .person-page__side .settings-section { gap: var(--s-4); }
 .person-page__side .settings-section__head { padding-bottom: 0; border-bottom: 0; }
 .person-page__side .settings-section__head > h2 { font-size: var(--text-read); }
 .person-page__side .settings-list--scroll { max-height: 18rem; }
-@media (max-width: 640px) { .person-page__main, .person-page__side { padding: var(--s-4); } }
+@media (max-width: 640px) { :is(.person-page__main, .person-page__side) > [data-slot="card-content"] { padding-inline: var(--s-4); } }
 
 /* The invitation page's sidebar hides for a wider working column (], panes_controller): a thin
 /* strip that keeps the button bringing it back. Only where that button is. */

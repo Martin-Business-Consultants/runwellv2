@@ -4,10 +4,10 @@
 export default {
   connect(element) {
     element.picksCurrent ||= event => {
-      const tab = event.target.closest("a.tabs__tab")
+      const tab = event.target.closest("a.tabs__tab, a[data-slot=tabs-tab], a[data-slot=toggle]")
       if (!tab || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
 
-      element.querySelectorAll("a.tabs__tab").forEach(other => other.setAttribute("aria-current", other === tab ? "page" : "false"))
+      element.querySelectorAll("a.tabs__tab, a[data-slot=tabs-tab], a[data-slot=toggle]").forEach(other => other.setAttribute("aria-current", other === tab ? "page" : "false"))
     }
     element.addEventListener("click", element.picksCurrent)
   },

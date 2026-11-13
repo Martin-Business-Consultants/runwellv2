@@ -1,0 +1,5 @@
+<%# locals: (task: nil, peek: nil) %>
+<%# The side panel's frame, alone: the answer to a request for it (ApplicationController#render_side_panel). %>
+<turbo-frame id="side_panel">
+  <%= render "layouts/shared/side_panel_content", task: task, peek: peek %>
+</turbo-frame>

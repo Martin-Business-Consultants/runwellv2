@@ -1,23 +1,20 @@
 <%# locals: (contact:) %>
-<%# A contact's page header: their name, changed in place, where they work, and View as. Redrawn when
-    it saves (contacts/update.turbo_stream.erb). %>
-<header class="record-page__header" id="<%= dom_id(contact, :header) %>">
-  <div class="record-page__heading">
-    <%= render "layouts/shared/record_title", record: contact, attribute: :name, label: "Name" %>
-    <p class="record-page__description">A contact at <%= link_to contact.client.name, contact.client %></p>
-  </div>
-  <div class="button-row">
-    <%= render "record_fields/arrange_button" %>
-    <% if contact.portal? %>
-      <%= button_to contact_portal_invitation_path(contact), class: button_classes(variant: :secondary),
-            title: "Email #{contact.name} what the portal is and a link that signs them in" do %>
-        <%= icon_tag "paper-plane" %><span><%= contact.link_signed_in_at ? "Invite again" : "Invite to the portal" %></span>
-      <% end %>
+<%# A contact's page header (record_header: ui :page_header): their name, changed in place, where
+    they work, inviting them to the portal and View as. Redrawn when it saves
+    (contacts/update.turbo_stream.erb). %>
+<% actions = capture do %>
+  <% if contact.portal? %>
+    <%= form_with url: contact_portal_invitation_path(contact), class: "record-header__form" do %>
+      <%= ui :button, type: :submit, variant: :outline, title: "Email #{contact.name} what the portal is and a link that signs them in",
+            content: safe_join([ icon_tag("paper-plane"), (contact.link_signed_in_at ? "Invite again" : "Invite to the portal") ], " ") %>
     <% end %>
-    <%= button_to contact_preview_path(contact), class: button_classes(variant: :secondary), form: { data: { turbo: false } },
-          title: "Open the #{term(:client).downcase} portal as #{contact.name}, read-only" do %>
-      <%= icon_tag "eye" %><span>View as <%= contact.name %></span>
-    <% end %>
-    <%= render "layouts/shared/sidebar_toggle" %>
-  </div>
-</header>
+  <% end %>
+  <%= form_with url: contact_preview_path(contact), class: "record-header__form", data: { turbo: false } do %>
+    <%= ui :button, type: :submit, variant: :outline, title: "Open the #{term(:client).downcase} portal as #{contact.name}, read-only",
+          content: safe_join([ icon_tag("eye"), "View as #{contact.name}" ], " ") %>
+  <% end %>
+<% end %>
+<%= record_header id: dom_id(contact, :header), actions: actions do %>
+  <%= render "layouts/shared/record_title", record: contact, attribute: :name, label: "Name" %>
+  <p class="record-header__line">A contact at <%= link_to contact.client.name, contact.client %></p>
+<% end %>

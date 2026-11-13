@@ -10,23 +10,8 @@
 <% builder = record_fields_builder(record, scope: scope) %>
 <% draft_key = record.persisted? ? "edit:#{record.model_name.param_key}:#{record.id}" : [ "new", record.model_name.param_key, url ].compact.join(":") %>
 <%= render "layouts/shared/errors", record: record %>
-<section class="card record-form">
-  <header class="<%= class_names("card__head", "record-form__head--field": head_key) %>">
-    <%= layout_text_tag layout, "main.title", title, class: "card__title" %>
-    <%= layout_text_tag layout, "main.hint", hint, tag: :p, class: "card__hint" %>
-    <% if head_key %>
-      <div class="card__action record-form__head-field">
-        <%= render record_field_partial(layout, head_key), record: record, form: builder, form_id: form_id %>
-      </div>
-    <% end %>
-  </header>
-  <div class="card__content">
-    <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id, except: head_key %>
-    <% if modal %>
-      <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: builder, form_id: form_id, except: head_key, paired: true %>
-    <% end %>
-  </div>
-  <%= form_with model: record, url: url, scope: scope, id: form_id, class: "card__footer card__footer--bordered record-form__footer",
+<% form_footer = capture do %>
+  <%= form_with model: record, url: url, scope: scope, id: form_id, class: "record-form__footer",
         data: { controller: "form draft", draft_key_value: draft_key, action: "keydown.esc->form#cancel" } do %>
     <%= draft_notice %>
     <% (hidden || {}).each do |name, value| %>
@@ -34,10 +19,20 @@
       <%= hidden_field_tag name, value, id: nil %>
     <% end %>
     <% if modal %>
-      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+      <button type="button" class="ui-button" data-variant="outline" data-size="default" data-form-target="cancel" data-action="dialog#close">Cancel</button>
     <% else %>
-      <%= link_to "Cancel", cancel, class: "btn btn--secondary", data: { form_target: "cancel" } %>
+      <%= link_to "Cancel", cancel, class: "ui-button", data: { variant: "outline", size: "default", form_target: "cancel" } %>
     <% end %>
-    <button type="submit" class="btn btn--primary" data-form-target="submit"><span><%= submit %></span></button>
+    <button type="submit" class="ui-button" data-variant="default" data-size="default" data-form-target="submit"><span><%= submit %></span></button>
   <% end %>
-</section>
+<% end %>
+<%= record_card css: class_names("record-form", "record-form--head-field": head_key),
+      title: layout_text_tag(layout, "main.title", title, class: "record-card__title"),
+      hint: layout_text_tag(layout, "main.hint", hint, tag: :p, class: "record-card__hint"),
+      action: (render(record_field_partial(layout, head_key), record: record, form: builder, form_id: form_id) if head_key),
+      footer: form_footer do %>
+  <%= render "record_fields/zone", layout: layout, zone: "main", record: record, form: builder, form_id: form_id, except: head_key %>
+  <% if modal %>
+    <%= render "record_fields/zone", layout: layout, zone: "aside", record: record, form: builder, form_id: form_id, except: head_key, paired: true %>
+  <% end %>
+<% end %>

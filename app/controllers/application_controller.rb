@@ -58,7 +58,7 @@ class ApplicationController < ActionController::Base
   # Opening or closing the side panel loads just its frame: the page under it stays as it is, so
   # its own action needn't run.
   def render_side_panel
-    render partial: "layouts/shared/side_panel", locals: { task: side_panel_task, peek: side_panel_peek }, layout: false
+    render partial: "layouts/shared/side_panel_frame", locals: { task: side_panel_task, peek: side_panel_peek }, layout: false
   end
 
   # Until someone sets the address (Settings > Address or APP_HOST), mail links to the one

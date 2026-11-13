@@ -1,13 +1,10 @@
-<%# locals: (current:) %>
-<%# A piece of work's work as a list by section or as the Work board: icon tabs in its card's head,
-    each a link swapping ?task_view= that reloads only the record tab's frame (the frame targets
-    _top, so the link names it), never the whole page. %>
-<nav class="tabs tabs--icons" aria-label="Show as" data-picks-current>
-  <% [ [ "list", "List", "column-left" ], [ "board", "Board", "board" ] ].each do |key, label, icon| %>
-    <%# herb:key key %>
-    <%= link_to url_for(request.query_parameters.except("task", "peek").merge("tab" => "tasks", "task_view" => key)), class: "tabs__tab", title: label,
-          aria: { current: (key == current) ? "page" : "false", label: label }, data: { turbo_frame: "record_tab", turbo_action: "replace" } do %>
-      <%= icon_tag icon %>
-    <% end %>
-  <% end %>
-</nav>
+<%# locals: (current:, work: nil) %>
+<%# A piece of work's tasks as a list by section or as the board: runeui's toggle group as links,
+    in its card's head, each swapping ?task_view= and reloading only the record tab's frame (the
+    frame targets _top, so the link names it), never the whole page. work: the piece of work, so
+    an answer drawn for another address (a quick add's stream) still links to its page. %>
+<% view_url = ->(key) { params = request.query_parameters.except("task", "peek").merge("tab" => "tasks", "task_view" => key); work ? work_path(work, params) : url_for(params) } %>
+<%= ui :toggle_group, value: current, variant: :outline, size: :sm, label: "Show as", class: "view-toggle", data: { picks_current: true }, options: [
+      [ "List", "list", { icon: icon_tag("column-left"), title: "List", href: view_url.call("list"), data: { turbo_frame: "record_tab", turbo_action: "replace" } } ],
+      [ "Board", "board", { icon: icon_tag("board"), title: "Board", href: view_url.call("board"), data: { turbo_frame: "record_tab", turbo_action: "replace" } } ]
+    ] %>

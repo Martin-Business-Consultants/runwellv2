@@ -1,5 +1,6 @@
 <%# locals: () %>
 <%# Template mode's button in a record page's header (owners): opens the arranging bar. %>
 <% if can?(:manage_settings) %>
-  <%= icon_button "layout", label: "Arrange this page’s fields for everyone", data: { action: "record-layout#toggle" } %>
+  <%= ui :button, variant: :ghost, size: :icon, class: "arrange-button", content: icon_tag("layout"), title: "Arrange this page’s fields for everyone",
+        aria: { label: "Arrange this page’s fields for everyone" }, data: { action: "record-layout#toggle" } %>
 <% end %>

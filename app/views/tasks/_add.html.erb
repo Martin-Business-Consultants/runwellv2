@@ -4,7 +4,7 @@
     (TasksController#create); inline: false where the page shows its work another way. %>
 <% home = work || client %>
 <details class="record-add">
-  <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Add <%= term(:task).downcase %></summary>
+  <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Add <%= term(:task).downcase %></summary>
   <%= form_with model: Task.new, url: (work ? work_tasks_path(work) : client_tasks_path(client)), namespace: dom_id(scope_item || home, :new_task),
         class: "record-add__form", data: { controller: "form" } do |form| %>
     <% unless inline == false %>

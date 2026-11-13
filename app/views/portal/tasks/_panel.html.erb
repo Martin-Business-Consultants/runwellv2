@@ -6,7 +6,7 @@
     the editor (Portal::Tasks::NotesController). Staff viewing as the client see the editor as the
     client does, with Send off: a preview writes nothing. Esc or ✕ closes it. Opening it reads its
     discussion (Portal::BaseController), so the dot on its row wherever it's listed comes off. %>
-<section class="task-panel portal-task" id="<%= dom_id(task, :portal_panel) %>" aria-label="<%= task.title %>">
+<section class="task-panel portal-task" data-morph="replace" id="<%= dom_id(task, :portal_panel) %>" aria-label="<%= task.title %>">
   <turbo-stream action="remove" targets="[data-unread-task='<%= task.id %>']"><template></template></turbo-stream>
   <header class="task-panel__header">
     <p class="task-panel__context">

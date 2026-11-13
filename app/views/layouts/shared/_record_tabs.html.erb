@@ -1,16 +1,7 @@
 <%# locals: (tabs:, current:, variant: nil) %>
-<%# A record page's tabs (rune_ui's tabs): each a link that swaps ?tab= inside the record_tab
-    frame. variant: "pill" draws them as a segmented row above a record page's cards; underlined
-    otherwise (Settings). %>
-<nav class="<%= class_names("tabs", "tabs--pills record-tabs__list": variant == "pill") %>" aria-label="Sections" data-picks-current>
-  <% tabs.each do |tab| %>
-    <%# herb:key tab.key %>
-    <%= link_to record_tab_path(tab.key), class: "tabs__tab", aria: { current: (tab.key == current) ? "page" : "false" },
-          data: { turbo_frame: "record_tab", turbo_action: "advance" } do %>
-      <span><%= tab.label %></span>
-      <% if tab.count.to_i.positive? %>
-        <span class="count count--quiet"><%= tab.count %></span>
-      <% end %>
-    <% end %>
-  <% end %>
-</nav>
+<%# A record page's tabs (and a settings page's): runeui's tabs as links (ui :tabs with href:),
+    each swapping ?tab= inside the record_tab frame, so a tab is bookmarkable, Back works and only
+    the frame reloads; the one clicked is current at once (the picks-current behavior). The panel
+    under them is the caller's (record-tabs__panel). variant: "pill" is the default muted row;
+    anything else draws them underlined. %>
+<%= ui :tabs, label: "Sections", value: current, variant: (variant == "pill" || variant.nil? ? nil : :line), tabs: record_tab_links(tabs), class: "record-tabs__list", data: { picks_current: true } %>

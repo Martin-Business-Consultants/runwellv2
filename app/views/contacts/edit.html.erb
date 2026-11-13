@@ -12,15 +12,10 @@
 
   <div class="record-page__main">
     <%= render "layouts/shared/errors", record: @contact %>
-    <section class="card record-card record-fields-card">
-      <header class="card__head">
-        <%= layout_text_tag layout, "main.title", "Contact", class: "card__title" %>
-        <%= layout_text_tag layout, "main.hint", "Someone at #{@contact.client.name} you deal with.", tag: :p, class: "card__hint" %>
-      </header>
-      <div class="card__content">
-        <%= render "record_fields/zone", layout: layout, zone: "main", record: @contact, in_place: true, except: header_fields(:contact) %>
-      </div>
-    </section>
+    <%= record_card css: "record-fields-card", title: layout_text_tag(layout, "main.title", "Contact", class: "record-card__title"),
+          hint: layout_text_tag(layout, "main.hint", "Someone at #{@contact.client.name} you deal with.", tag: :p, class: "record-card__hint") do %>
+      <%= render "record_fields/zone", layout: layout, zone: "main", record: @contact, in_place: true, except: header_fields(:contact) %>
+    <% end %>
   </div>
 
   <aside class="record-page__aside">

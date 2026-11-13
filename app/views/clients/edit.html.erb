@@ -6,16 +6,10 @@
 <section class="record-page" data-controller="record-layout" data-record-layout-url-value="<%= settings_layout_path(:client) %>"
   data-action="dragstart->record-layout#dragstart dragover->record-layout#dragover drop->record-layout#drop dragend->record-layout#dragend keydown->record-layout#keydown">
   <%= render "record_fields/arrange", layout: layout, noun: "a #{term(:client).downcase}’s" %>
-  <header class="record-page__header">
-    <div class="record-page__heading">
+  <%= record_header id: "record_header" do %>
       <h1 class="page-title"><%= @page_title %></h1>
-      <p class="record-page__description">Changes show everywhere they appear, the portal included.</p>
-    </div>
-    <div class="button-row">
-      <%= render "record_fields/arrange_button" %>
-      <%= render "layouts/shared/sidebar_toggle" %>
-    </div>
-  </header>
+      <p class="record-header__line">Changes show everywhere they appear, the portal included.</p>
+  <% end %>
 
   <div class="record-page__main">
     <%= render "record_fields/main_card", layout: layout, record: @client, form_id: "client_form", title: term(:client), hint: "Their name, where they stand, and the time zone their portal uses.",
@@ -25,18 +19,13 @@
   <aside class="record-page__aside">
     <%= render "record_fields/aside_card", layout: layout, record: @client, form_id: "client_form" %>
 
-    <section class="card record-card">
-      <header class="card__head">
-        <h2 class="card__title">Details</h2>
-      </header>
-      <div class="card__content">
+    <%= record_card "Details" do %>
         <dl class="details">
           <dt>Contacts</dt><dd><%= @client.contacts.active.count %></dd>
           <dt><%= term(:work, count: 2) %></dt><dd><%= @client.works.count %></dd>
           <dt>Since</dt><dd><%= l @client.created_at.to_date, format: :long %></dd>
         </dl>
-      </div>
-    </section>
+    <% end %>
 
     <% if can?(:delete_records) %>
       <%= render "layouts/shared/confirm", trigger: "Delete this " + term(:client).downcase, title: "Delete #{@client.name_was}?",
