@@ -17,12 +17,12 @@ for custom CSS when those choices aren't enough to make Runwell look like your o
 - **Custom CSS loads last and unlayered**, after the app's stylesheets and Appearance's choices,
   so a plain `:root { … }` wins without `!important`.
 - **Colors are OKLCH triples.** Color tokens hold `L% C H` (lightness, chroma, hue) without
-  `oklch()`, so the app can add transparency: `--lch-accent: 55% 0.16 277;`. Set the `--lch-*`
+  `oklch()`, so the app can add transparency: `--lch-accent: 51% 0.26 277;`. Set the `--lch-*`
   tokens; the `--color-*` tokens are built from them.
 - **Dark mode is a second block.** Set colors for light under `:root`, and again for dark under
   `html[data-theme="dark"]` and `@media (prefers-color-scheme: dark) { html:not([data-theme]) { … } }`
   (dark is either chosen, or the system's when nobody chose).
-- **Leave Colors on Indigo** in Settings › Appearance when your theme sets the accent: the other
+- **Leave Colors on Neutral** in Settings › Appearance when your theme sets the accent: the other
   schemes set it with a more specific selector.
 - **Not allowed:** `@import`, `url()` other than `data:` URIs, `expression()`, `javascript:`,
   `behavior`, `-moz-binding` and `</`. Fonts must be ones people have installed, or embedded as
@@ -37,23 +37,28 @@ for custom CSS when those choices aren't enough to make Runwell look like your o
 | Token | What it colors | Default (light) |
 | --- | --- | --- |
 | `--lch-canvas` | The page and panels | `100% 0 0` |
-| `--lch-ink-darkest` | Body text, headings | `14.1% 0.005 285.8` |
-| `--lch-ink-darker` | Secondary text | `37% 0.013 285.8` |
-| `--lch-ink-dark` | Muted text | `55.2% 0.016 285.9` |
-| `--lch-ink-medium` | Placeholder text, icons | `64% 0.015 286` |
-| `--lch-ink-light` | Input borders | `87.1% 0.006 286.3` |
-| `--lch-ink-lighter` | Hairlines, dividers | `92% 0.004 286.3` |
-| `--lch-ink-lightest` | Faint fills, hover rows | `96.7% 0.001 286.4` |
-| `--lch-ink-inverted` | Text on the accent | `100% 0 0` |
-| `--lch-accent` | Links, buttons, focus, the current item | `55% 0.16 277` |
-| `--lch-accent-light` | Strong selection | `84% 0.06 277` |
-| `--lch-accent-lighter` | Selection | `93% 0.025 277` |
-| `--lch-accent-lightest` | Faint selection | `97% 0.012 277` |
-| `--lch-red-dark` | Errors, destructive actions (`--color-negative`) | `59% 0.19 38` |
+| `--lch-ink-darkest` | Body text, headings | `14.5% 0 0` |
+| `--lch-ink-darker` | Secondary text | `37.1% 0 0` |
+| `--lch-ink-dark` | Muted text | `55.6% 0 0` |
+| `--lch-ink-medium` | Placeholder text, icons | `64% 0 0` |
+| `--lch-ink-light` | Input borders | `92.2% 0 0` |
+| `--lch-ink-lighter` | Hairlines, dividers | `92.2% 0 0` |
+| `--lch-ink-lightest` | Faint fills, hover rows | `97% 0 0` |
+| `--lch-ink-inverted` | Text on the accent | `98.5% 0 0` |
+| `--lch-accent` | Buttons, links, switches, the current item | `20.5% 0 0` |
+| `--lch-accent-light` | Strong selection | `87% 0 0` |
+| `--lch-accent-lighter` | Selection | `94% 0 0` |
+| `--lch-accent-lightest` | Faint selection | `97% 0 0` |
+| `--lch-ring` | The focus ring, drawn 3px wide at half strength | `70.8% 0 0` |
+| `--lch-red-dark` | Errors, destructive actions (`--color-negative`) | `57.7% 0.245 27.325` |
 | `--lch-green-dark` | Success (`--color-positive`) | `55% 0.162 147` |
 
 Families for status colors (`red`, `yellow`, `lime`, `green`, `aqua`, `blue`, `purple`) each run
 `-darkest` to `-lightest`; change them only to retune the palette.
+
+The defaults are shadcn/ui's neutral theme: greys with no hue, and an accent (its `--primary`)
+that is near-black in light and near-white in dark. Settings › Appearance › Color gives the accent
+a colour and leaves the greys alone.
 
 ### Component tokens
 
@@ -64,16 +69,17 @@ both blocks).
 
 | Token | What it colors | Built from |
 | --- | --- | --- |
-| `--page` | Behind the panel (the nav's ground) | `--lch-ink-lightest` (the canvas in dark) |
-| `--panel` | The page's panel, cards, menus and dialogs | `--lch-canvas` (`--lch-ink-lightest` in dark) |
+| `--page` | Behind the panel (the nav's ground) | halfway from `--lch-canvas` to `--lch-ink-lightest` (`--lch-ink-lightest` in dark) |
+| `--panel` | The page's panel, cards, menus and dialogs | `--lch-canvas` |
 | `--layer-1`, `--layer-2`, `--layer-3` | Faint fills: settings cards, tab tracks, hovered menu items, switch tracks | the ink steps |
 | `--text`, `--text-muted`, `--text-faint` | Body text, secondary text, hints and icons | `--lch-ink-darkest`, `-dark`, `-medium` |
 | `--line`, `--line-strong` | Hairlines, field and button borders | `--lch-ink-lighter`, `-light` |
-| `--hover` | Hovered rows and ghost buttons | `--lch-ink-lighter`, faded |
-| `--accent`, `--accent-hover`, `--accent-ink`, `--accent-soft` | Links, switches, checked boxes, focus, picked rows | `--lch-accent`, `--lch-ink-inverted`, `--lch-accent-lightest` |
+| `--hover` | Hovered rows and ghost buttons | `--lch-ink-darkest` at 4% (white at 8% in dark) |
+| `--accent`, `--accent-hover`, `--accent-ink`, `--accent-soft` | Primary buttons, links, switches, checked boxes, picked rows | `--lch-accent`, `--lch-ink-inverted`, `--lch-accent-lightest` |
+| `--ring` | The focus ring (a box-shadow) | `--lch-ring` |
 | `--ok`, `--danger`, `--attention` | Success, errors and destructive actions, warnings and counts | `--color-positive`, `--color-negative`, `--lch-yellow-dark` |
 
-Primary buttons are drawn in `--text` on `--panel` (ink on paper), not in the accent.
+Primary buttons are drawn in the accent, with `--accent-ink` for their text.
 
 ### Type
 
@@ -82,18 +88,18 @@ Primary buttons are drawn in `--text` on `--panel` (ink on paper), not in the ac
 | `--font-sans` | Everything | Inter, then the system font |
 | `--font-mono` | Code, refs, keys | `ui-monospace, …` |
 | `--text-scale` | Every size at once (Text size sets it): the root is `calc(1rem * --text-scale)` and every size is rem | `1` |
-| `--text-xs`, `--text-meta`, `--text-ui`, `--text-read`, `--text-title` | The size steps: badges, hints, the UI (the body), reading text, a page title | `0.6875rem`, `0.75rem`, `0.8125rem`, `0.875rem`, `1.25rem` |
-| `--weight`, `--weight-strong` | Body and emphasis weights | `440`, `530` |
+| `--text-xs`, `--text-meta`, `--text-ui`, `--text-read`, `--text-title` | The size steps: badges, hints, the UI (the body), reading text, a page title | `0.75rem`, `0.75rem`, `0.875rem`, `0.875rem`, `1.25rem` |
+| `--weight`, `--weight-strong` | Body and emphasis weights | `400`, `500` |
 
 ### Shape, space and depth
 
 | Token | What it sets | Default |
 | --- | --- | --- |
-| `--radius-scale` | Every container's corners, as a multiple | `1` |
-| `--radius-control` | Buttons, inputs, tags, toggles | `var(--radius-lg)` (0.625rem) |
+| `--radius-scale` | Every container's corners, as a multiple (of 0.625rem and the steps round it: 0.375rem rows, 0.875rem cards) | `1` |
+| `--radius-control` | Buttons, inputs, tags, toggles | `0.5rem`, times `--radius-scale` |
 | `--radius-pill` | Pill shapes | `99rem` |
 | `--s-1` … `--s-6` | The space steps | `0.25rem` … `2rem` |
-| `--control-h`, `--control-h-sm` | Button and field heights | `2rem`, `1.75rem` |
+| `--control-h`, `--control-h-sm` | Button and field heights | `2.25rem`, `2rem` |
 | `--shadow-popover` | Menus and dialogs | a deeper shadow |
 | `--main-width` | The widest a page grows | `1400px` |
 
@@ -102,7 +108,7 @@ Primary buttons are drawn in `--text` on `--panel` (ink on paper), not in the ac
 These were read by the old components and no longer are, so setting them does nothing:
 `--font-serif`, `--text-x-small` … `--text-xx-large` (use `--text-scale` or the steps above),
 `--inline-space`, `--block-space`, `--shadow`, and shadcn's component tokens (`--primary`,
-`--card`, `--popover`, `--muted`, `--border`, `--input`, `--ring`…). Set the `--lch-*` palette
+`--card`, `--popover`, `--muted`, `--border`, `--input`…). Set the `--lch-*` palette
 instead, or the component tokens above.
 
 ## An example

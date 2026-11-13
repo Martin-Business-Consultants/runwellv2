@@ -5,10 +5,12 @@ module Setting::Appearance
 
   THEMES = { "system" => "System", "light" => "Light", "dark" => "Dark" }.freeze
   RADII = { "sharp" => "Sharp", "fizzy" => "Soft", "round" => "Round" }.freeze
-  SCHEMES = { "fizzy" => "Indigo", "forest" => "Forest", "plum" => "Plum", "ocean" => "Ocean", "graphite" => "Graphite" }.freeze
-  # Each scheme's accent as hex (its oklch in appearance.css, converted), for email, which knows
-  # neither oklch nor CSS variables.
-  SCHEME_COLORS = { "fizzy" => "#5d63cd", "forest" => "#058931", "plum" => "#a049d4", "ocean" => "#00859a", "graphite" => "#404249" }.freeze
+  # "fizzy" is the default (the column's, and what every install that never chose has): shadcn/ui's
+  # neutral, a near-black primary. The rest colour the primary.
+  SCHEMES = { "fizzy" => "Neutral", "indigo" => "Indigo", "forest" => "Forest", "plum" => "Plum", "ocean" => "Ocean", "graphite" => "Graphite" }.freeze
+  # Each scheme's accent as hex (its light oklch in appearance.css, converted), for email, which
+  # knows neither oklch nor CSS variables.
+  SCHEME_COLORS = { "fizzy" => "#171717", "indigo" => "#4f39f6", "forest" => "#008236", "plum" => "#9810fa", "ocean" => "#007595", "graphite" => "#314158" }.freeze
   # Text size: the page's base size, which every rem in the stylesheets scales from (Default is
   # 16px). Each person may pick their own (User#text_size, Settings > Your account).
   TEXT_SIZES = { "small" => "Small", "default" => "Default", "large" => "Large", "larger" => "Larger" }.freeze

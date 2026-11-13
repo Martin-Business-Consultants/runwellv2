@@ -54,14 +54,14 @@
                     0 4px 6px -4px oklch(var(--lch-black) / 10%);
 
   /* Components */
-  --btn-size: 2.2857em; /* shadcn's size-8 at text-sm */
+  --btn-size: 2.5714em; /* shadcn's size-9 at text-sm */
   --footer-height: 2.65rem;
   --tray-size: clamp(12rem, 25dvw, 24rem);
 
   /* Focus rings for keyboard navigation */
-  --focus-ring-color: var(--color-link);
-  --focus-ring-offset: 1px;
-  --focus-ring-size: 2px;
+  --focus-ring-color: oklch(var(--lch-ring) / 50%);
+  --focus-ring-offset: 0px;
+  --focus-ring-size: 3px;
   --focus-ring: var(--focus-ring-size) solid var(--focus-ring-color);
 
   /* Dialogs */
@@ -98,23 +98,29 @@
 
   /* OKLCH colors: Light mode */
   --lch-canvas: var(--lch-white);
-  --lch-ink-inverted: var(--lch-white);
+  --lch-ink-inverted: 98.5% 0 0;
 
-  /* shadcn/ui's zinc: near-neutral greys with a faint cool cast. Text, secondary, tertiary,
-  /* then hairlines and fills. */
-  --lch-ink-darkest: 14.1% 0.005 285.8;
-  --lch-ink-darker: 37% 0.013 285.8;
-  --lch-ink-dark: 55.2% 0.016 285.9;
-  --lch-ink-medium: 64% 0.015 286;
-  --lch-ink-light: 87.1% 0.006 286.3;
-  --lch-ink-lighter: 92% 0.004 286.3;
-  --lch-ink-lightest: 96.7% 0.001 286.4;
+  /* shadcn/ui's neutral, its default theme: pure greys. Text (--foreground), secondary, muted
+  /* text (--muted-foreground), faint text, then input borders and hairlines (--input and
+  /* --border, the same grey in light) and fills (--muted, --secondary, --accent). */
+  --lch-ink-darkest: 14.5% 0 0;
+  --lch-ink-darker: 37.1% 0 0;
+  --lch-ink-dark: 55.6% 0 0;
+  --lch-ink-medium: 64% 0 0;
+  --lch-ink-light: 92.2% 0 0;
+  --lch-ink-lighter: 92.2% 0 0;
+  --lch-ink-lightest: 97% 0 0;
 
-  /* The accent: an indigo, unless Settings > Appearance picks a scheme. */
-  --lch-accent: 55% 0.16 277;
-  --lch-accent-light: 84% 0.06 277;
-  --lch-accent-lighter: 93% 0.025 277;
-  --lch-accent-lightest: 97% 0.012 277;
+  /* The accent is shadcn's --primary: near-black (near-white in dark) with --lch-ink-inverted its
+  /* --primary-foreground, unless Settings > Appearance picks a colour (appearance.css). Its tints
+  /* are shadcn's --accent fill and two steps past it. */
+  --lch-accent: 20.5% 0 0;
+  --lch-accent-light: 87% 0 0;
+  --lch-accent-lighter: 94% 0 0;
+  --lch-accent-lightest: 97% 0 0;
+
+  /* shadcn's --ring: the colour of the focus ring, drawn 3px wide at half strength. */
+  --lch-ring: 70.8% 0 0;
 
   --lch-uncolor-darkest: 26% 0.018 40;
   --lch-uncolor-darker: 40.04% 0.0376 50.06;
@@ -126,7 +132,7 @@
 
   --lch-red-darkest: 26% 0.105 34;
   --lch-red-darker: 40% 0.154 36;
-  --lch-red-dark: 59% 0.19 38;
+  --lch-red-dark: 57.7% 0.245 27.325; /* shadcn's --destructive */
   --lch-red-medium: 66% 0.204 40;
   --lch-red-light: 84.08% 0.0837 41.96;
   --lch-red-lighter: 92% 0.03 44;
@@ -216,10 +222,13 @@
   --color-negative: oklch(var(--lch-red-dark));
   --color-positive: oklch(var(--lch-green-dark));
   --color-link: oklch(var(--lch-accent));
+  /* The sign-in pages' showcase panel: the accent, except in dark with no scheme picked, where
+  /* the accent is near-white and the panel takes a dark grey (its caption is white). */
+  --color-showcase: oklch(var(--lch-accent));
   --color-selected-light: oklch(var(--lch-accent-lightest));
   --color-selected: oklch(var(--lch-accent-lighter));
   --color-selected-dark: oklch(var(--lch-accent-light));
-  --color-hover: oklch(var(--lch-ink-darkest) / 5%);
+  --color-hover: oklch(var(--lch-ink-darkest) / 4%);
   --color-highlight: oklch(var(--lch-yellow-lighter));
   --color-marker: oklch(var(--lch-red-medium));
   --color-terminal-bg: oklch(98% 0.002 252);
@@ -290,22 +299,26 @@ html[data-theme="dark"] {
 
 /* Dark mode - explicit theme choice overrides system preference */
 html[data-theme="dark"] {
-  --lch-canvas: 17% 0.005 285.9;
-  --lch-ink-inverted: var(--lch-black);
+  /* shadcn's neutral, dark: --background, then --foreground, --muted-foreground, and the fills
+  /* --muted / --accent (lighter) and --card / --sidebar (lightest). */
+  --lch-canvas: 14.5% 0 0;
+  --lch-ink-inverted: 20.5% 0 0;
 
   --lch-ink-darkest: 98.5% 0 0;
-  --lch-ink-darker: 87.1% 0.006 286.3;
-  --lch-ink-dark: 70.5% 0.015 286.1;
-  --lch-ink-medium: 55.2% 0.016 285.9;
-  --lch-ink-light: 37% 0.013 285.8;
-  --lch-ink-lighter: 27.4% 0.006 286;
-  --lch-ink-lightest: 21% 0.006 285.9;
+  --lch-ink-darker: 87% 0 0;
+  --lch-ink-dark: 70.8% 0 0;
+  --lch-ink-medium: 55.6% 0 0;
+  --lch-ink-light: 37.1% 0 0;
+  --lch-ink-lighter: 26.9% 0 0;
+  --lch-ink-lightest: 20.5% 0 0;
 
-  --lch-accent: 70% 0.13 277;
-  --lch-accent-light: 42% 0.1 277;
-  --lch-accent-lighter: 30% 0.06 277;
-  --lch-accent-lightest: 24% 0.035 277;
-  --color-hover: oklch(var(--lch-white) / 5%);
+  --lch-accent: 92.2% 0 0;
+  --lch-accent-light: 37.1% 0 0;
+  --lch-accent-lighter: 32% 0 0;
+  --lch-accent-lightest: 26.9% 0 0;
+  --lch-ring: 55.6% 0 0;
+  --color-hover: oklch(var(--lch-white) / 8%);
+  --color-showcase: oklch(var(--lch-ink-light));
 
   --lch-uncolor-darkest: 96.09% 0.0076 100;
   --lch-uncolor-darker: 86% 0.021 90;
@@ -392,31 +405,37 @@ html[data-theme="dark"] {
   --color-golden: oklch(var(--lch-accent));
   --color-highlight: oklch(var(--lch-blue-lighter));
 
-  --shadow: 0 0 0 1px oklch(var(--lch-white) / 7%),
-    0 4px 16px oklch(var(--lch-black) / 0.5);
-  --shadow-popover: 0 0 0 1px oklch(var(--lch-white) / 9%),
-    0 8px 32px oklch(var(--lch-black) / 0.6);
+  --shadow: 0 0 0 1px oklch(var(--lch-white) / 10%),
+            0 1px 3px 0 oklch(var(--lch-black) / 10%),
+            0 1px 2px -1px oklch(var(--lch-black) / 10%);
+  --shadow-popover: 0 0 0 1px oklch(var(--lch-white) / 10%),
+                    0 10px 15px -3px oklch(var(--lch-black) / 10%),
+                    0 4px 6px -4px oklch(var(--lch-black) / 10%);
 }
 
 /* Fallback to system preference when no explicit theme is set */
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) {
-    --lch-canvas: 17% 0.005 285.9;
-    --lch-ink-inverted: var(--lch-black);
+    /* shadcn's neutral, dark: --background, then --foreground, --muted-foreground, and the fills
+    /* --muted / --accent (lighter) and --card / --sidebar (lightest). */
+    --lch-canvas: 14.5% 0 0;
+    --lch-ink-inverted: 20.5% 0 0;
 
     --lch-ink-darkest: 98.5% 0 0;
-    --lch-ink-darker: 87.1% 0.006 286.3;
-    --lch-ink-dark: 70.5% 0.015 286.1;
-    --lch-ink-medium: 55.2% 0.016 285.9;
-    --lch-ink-light: 37% 0.013 285.8;
-    --lch-ink-lighter: 27.4% 0.006 286;
-    --lch-ink-lightest: 21% 0.006 285.9;
+    --lch-ink-darker: 87% 0 0;
+    --lch-ink-dark: 70.8% 0 0;
+    --lch-ink-medium: 55.6% 0 0;
+    --lch-ink-light: 37.1% 0 0;
+    --lch-ink-lighter: 26.9% 0 0;
+    --lch-ink-lightest: 20.5% 0 0;
 
-    --lch-accent: 70% 0.13 277;
-    --lch-accent-light: 42% 0.1 277;
-    --lch-accent-lighter: 30% 0.06 277;
-    --lch-accent-lightest: 24% 0.035 277;
-    --color-hover: oklch(var(--lch-white) / 5%);
+    --lch-accent: 92.2% 0 0;
+    --lch-accent-light: 37.1% 0 0;
+    --lch-accent-lighter: 32% 0 0;
+    --lch-accent-lightest: 26.9% 0 0;
+    --lch-ring: 55.6% 0 0;
+    --color-hover: oklch(var(--lch-white) / 8%);
+    --color-showcase: oklch(var(--lch-ink-light));
 
     --lch-uncolor-darkest: 96.09% 0.0076 100;
     --lch-uncolor-darker: 86% 0.021 90;
@@ -503,9 +522,11 @@ html[data-theme="dark"] {
     --color-golden: oklch(var(--lch-accent));
     --color-highlight: oklch(var(--lch-blue-lighter));
 
-    --shadow: 0 0 0 1px oklch(var(--lch-white) / 7%),
-              0 4px 16px oklch(var(--lch-black) / 0.5);
-    --shadow-popover: 0 0 0 1px oklch(var(--lch-white) / 9%),
-              0 8px 32px oklch(var(--lch-black) / 0.6);
+    --shadow: 0 0 0 1px oklch(var(--lch-white) / 10%),
+              0 1px 3px 0 oklch(var(--lch-black) / 10%),
+              0 1px 2px -1px oklch(var(--lch-black) / 10%);
+    --shadow-popover: 0 0 0 1px oklch(var(--lch-white) / 10%),
+                      0 10px 15px -3px oklch(var(--lch-black) / 10%),
+                      0 4px 6px -4px oklch(var(--lch-black) / 10%);
   }
 }

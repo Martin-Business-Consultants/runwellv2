@@ -108,6 +108,10 @@
 /* for the one that grows; narrower, it scrolls sideways inside its .table-wrap. */
 .data-table--min-w40 { min-width: 40ch; } .data-table--min-w50 { min-width: 50ch; } .data-table--min-w60 { min-width: 60ch; } .data-table--min-w70 { min-width: 70ch; } .data-table--min-w80 { min-width: 80ch; } .data-table--min-w90 { min-width: 90ch; } .data-table--min-w100 { min-width: 100ch; } .data-table--min-w110 { min-width: 110ch; } .data-table--min-w120 { min-width: 120ch; } .data-table--min-w130 { min-width: 130ch; } .data-table--min-w140 { min-width: 140ch; } .data-table--min-w150 { min-width: 150ch; } .data-table--min-w160 { min-width: 160ch; } .data-table--min-w170 { min-width: 170ch; } .data-table--min-w180 { min-width: 180ch; } .data-table--min-w190 { min-width: 190ch; } .data-table--min-w200 { min-width: 200ch; } .data-table--min-w210 { min-width: 210ch; } .data-table--min-w220 { min-width: 220ch; } .data-table--min-w230 { min-width: 230ch; } .data-table--min-w240 { min-width: 240ch; }
 .data-table--fixed td { overflow-wrap: anywhere; }
+/* The widths are in characters, tuned when the body was 13px: the table and its <col>s keep that
+/* measure and the cells take the body's size, so the same columns fit the same page at 14px. */
+.data-table--fixed { font-size: .8125rem; }
+.data-table--fixed td { font-size: var(--text-ui); }
 /* rune_ui's column convention (ui_data_table_colgroup): the identifying column takes the leftover
 /* width; every other column is as wide as its content, in characters (plus the cell's padding). */
 .data-table__col--grow { width: auto; }
@@ -399,13 +403,14 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 /* ======================================================================= The brand's colour */
 
 /* The scheme's colour (Settings > Appearance, --accent) carries through what's chosen, current or
-/* under the keys: a tint made from it (in any scheme, light or dark), and the colour itself on the
-/* icon of what's highlighted, on checkboxes and on selected text. Focus rings already take it.
-/* Mixed in OKLab, as every tint here is: in OKLCH white, greys and transparent carry a hue of 0
-/* (red), and the mix swung round the wheel toward it (indigo came out pink, navy brown). */
+/* under the keys: its tints (the palette's --lch-accent-lightest and -lighter: shadcn's quiet
+/* --accent fill by default, the scheme's hue when one is picked, light or dark), and the colour
+/* itself on the icon of what's highlighted, on checkboxes and on selected text. Focus rings take
+/* --lch-ring. Mixes here are in OKLab: in OKLCH white, greys and transparent carry a hue of 0
+/* (red), and a mix swings round the wheel toward it. */
 :root {
-  --brand-tint: color-mix(in oklab, var(--accent) 12%, var(--panel));
-  --brand-tint-strong: color-mix(in oklab, var(--accent) 20%, var(--panel));
+  --brand-tint: var(--accent-soft);
+  --brand-tint-strong: oklch(var(--lch-accent-lighter));
 }
 input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 ::selection { background: color-mix(in oklab, var(--accent) 28%, transparent); }

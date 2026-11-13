@@ -5,13 +5,17 @@
 /* --main-width, --shadow-popover, --radius-scale, --radius-control, --radius-pill, --text-scale)
 /* need nothing here: Runwell's values already apply.
 /*
-/* Depth follows rune's: the page (behind the nav) a step off the panel: lighter than it in
-/* light, darker in dark. */
+/* The values are shadcn/ui's defaults (runeui's tokens.css), under rune's names:
+/* --page is --sidebar, --panel is --background (and --card, --popover), --layer-2 is --muted /
+/* --secondary / shadcn's --accent, --text and --text-muted are --foreground and
+/* --muted-foreground, --line and --line-strong are --border and --input, and rune's --accent is
+/* --primary with --accent-ink its --primary-foreground. So the nav's ground is a step off the
+/* panel, as shadcn's inset sidebar is: darker than it in light, lighter in dark. */
 
 :root {
-  --page: oklch(var(--lch-ink-lightest));
+  --page: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 50%, oklch(var(--lch-canvas)));
   --panel: oklch(var(--lch-canvas));
-  --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 70%, oklch(var(--lch-canvas)));
+  --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 50%, oklch(var(--lch-canvas)));
   --layer-2: oklch(var(--lch-ink-lightest));
   --layer-3: oklch(var(--lch-ink-lighter));
   --text: oklch(var(--lch-ink-darkest));
@@ -19,42 +23,67 @@
   --text-faint: oklch(var(--lch-ink-medium));
   --line: oklch(var(--lch-ink-lighter));
   --line-strong: oklch(var(--lch-ink-light));
-  --hover: color-mix(in oklab, oklch(var(--lch-ink-lighter)) 55%, transparent);
+  --hover: oklch(var(--lch-ink-darkest) / 4%);
   --accent: oklch(var(--lch-accent));
-  --accent-hover: color-mix(in oklab, oklch(var(--lch-accent)) 85%, oklch(var(--lch-ink-darkest)));
+  --accent-hover: color-mix(in oklab, oklch(var(--lch-accent)) 90%, oklch(var(--lch-canvas)));
   --accent-ink: oklch(var(--lch-ink-inverted));
   --accent-soft: oklch(var(--lch-accent-lightest));
   --attention: oklch(var(--lch-yellow-dark));
   --danger: var(--color-negative);
   --ok: var(--color-positive);
+
+  /* Focus, as shadcn draws it: a 3px ring at half of --ring. --ring-color is that colour on its
+  /* own, for runeui's bridge (a focused field's border). */
+  --ring-color: oklch(var(--lch-ring));
+  --ring: 0 0 0 3px oklch(var(--lch-ring) / 50%);
+
+  /* shadcn's sizes: controls are h-9 (h-8 small), the body text-sm (14px) with text-xs (12px)
+  /* under it (reading text is the body's size, as shadcn's is), weights normal and medium. */
+  --control-h: 2.25rem;
+  --control-h-sm: 2rem;
+  --text-xs: 0.75rem;
+  --text-meta: 0.75rem;
+  --text-ui: 0.875rem;
+  --text-read: 0.875rem;
+  --text-title: 1.25rem;
+  --weight: 400;
+  --weight-strong: 500;
+}
+
+/* shadcn's primary button is --primary on --primary-foreground. rune_ui draws its primary button
+/* in --text on --panel, so those two are the accent's inside one: near-black by default, the
+/* scheme's colour when one is picked. */
+.btn--primary {
+  --text: var(--accent);
+  --panel: var(--accent-ink);
 }
 
 html[data-theme="dark"] {
-  --page: oklch(var(--lch-canvas) / 100%);
-  --panel: oklch(var(--lch-ink-lightest));
-  --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+  --page: oklch(var(--lch-ink-lightest));
+  --panel: oklch(var(--lch-canvas));
+  --layer-1: oklch(var(--lch-ink-lightest));
   --layer-2: oklch(var(--lch-ink-lighter));
   --layer-3: oklch(var(--lch-ink-light));
-  --line: oklch(var(--lch-white) / 9%);
+  --line: oklch(var(--lch-white) / 10%);
   --line-strong: oklch(var(--lch-white) / 15%);
-  --hover: oklch(var(--lch-white) / 5%);
+  --hover: oklch(var(--lch-white) / 8%);
   --attention: oklch(var(--lch-yellow-medium));
-  --danger: oklch(var(--lch-red-medium));
+  --danger: oklch(70.4% 0.191 22.216);
   --ok: oklch(var(--lch-green-medium));
 }
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) {
-    --page: oklch(var(--lch-canvas) / 100%);
-    --panel: oklch(var(--lch-ink-lightest));
-    --layer-1: color-mix(in oklab, oklch(var(--lch-ink-lightest)) 60%, oklch(var(--lch-ink-lighter)));
+    --page: oklch(var(--lch-ink-lightest));
+    --panel: oklch(var(--lch-canvas));
+    --layer-1: oklch(var(--lch-ink-lightest));
     --layer-2: oklch(var(--lch-ink-lighter));
     --layer-3: oklch(var(--lch-ink-light));
-    --line: oklch(var(--lch-white) / 9%);
+    --line: oklch(var(--lch-white) / 10%);
     --line-strong: oklch(var(--lch-white) / 15%);
-    --hover: oklch(var(--lch-white) / 5%);
+    --hover: oklch(var(--lch-white) / 8%);
     --attention: oklch(var(--lch-yellow-medium));
-    --danger: oklch(var(--lch-red-medium));
+    --danger: oklch(70.4% 0.191 22.216);
     --ok: oklch(var(--lch-green-medium));
   }
 }

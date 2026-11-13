@@ -1,23 +1,53 @@
 /* Settings > Appearance, applied as attributes on <html> (data-scheme, data-radius,
-/* data-font) so a change previews instantly. Schemes re-point Fizzy's accent tokens at one
-/* of its color families; those families swap their steps in dark mode, so every scheme
-/* works in both themes.
+/* data-font) so a change previews instantly.
+/*
+/* Colours are shadcn/ui's idea of a theme: the greys stay neutral and a scheme colours the
+/* primary, which here is the accent (--lch-accent: buttons, links, switches, the focus ring,
+/* the current item) with --lch-ink-inverted the text on it. The default, "fizzy" (Neutral), sets
+/* nothing: it is _global.css's near-black. Each colour is a Tailwind step picked to read as text
+/* on the canvas and under its own foreground (4.5:1 or better), light and dark.
 /*
 /* Fizzy's tokens are unlayered (_global.css), so scheme and font overrides are too; the
 /* corner overrides target component variables, which live in the components layer. */
 
+:root[data-scheme="indigo"] { --scheme: 51.1% 0.262 276.966; --scheme-ink: 96.2% 0.018 272.314; --scheme-dark: 67.3% 0.182 276.935; --scheme-dark-ink: 25.7% 0.09 281.288; --scheme-hue: 277; }
+:root[data-scheme="forest"] { --scheme: 52.7% 0.154 150.069; --scheme-ink: 98.2% 0.018 155.826; --scheme-dark: 72.3% 0.219 149.579; --scheme-dark-ink: 26.6% 0.065 152.934; --scheme-hue: 150; }
+:root[data-scheme="plum"] { --scheme: 55.8% 0.288 302.321; --scheme-ink: 97.7% 0.014 308.299; --scheme-dark: 71.4% 0.203 305.504; --scheme-dark-ink: 29.1% 0.149 302.717; --scheme-hue: 304; }
+:root[data-scheme="ocean"] { --scheme: 52% 0.105 223.128; --scheme-ink: 98.4% 0.019 200.873; --scheme-dark: 71.5% 0.143 215.221; --scheme-dark-ink: 30.2% 0.056 229.695; --scheme-hue: 220; }
+:root[data-scheme="graphite"] { --scheme: 37.2% 0.044 257.287; --scheme-ink: 98.4% 0.003 247.858; --scheme-dark: 86.9% 0.022 252.894; --scheme-dark-ink: 20.8% 0.042 265.755; --scheme-hue: 257; --scheme-chroma: 0.3; }
 
-:root[data-scheme="forest"] { --scheme: var(--lch-green-dark); --scheme-light: var(--lch-green-light); --scheme-lighter: var(--lch-green-lighter); --scheme-lightest: var(--lch-green-lightest); }
-:root[data-scheme="plum"] { --scheme: var(--lch-purple-dark); --scheme-light: var(--lch-purple-light); --scheme-lighter: var(--lch-purple-lighter); --scheme-lightest: var(--lch-purple-lightest); }
-:root[data-scheme="ocean"] { --scheme: var(--lch-aqua-dark); --scheme-light: var(--lch-aqua-light); --scheme-lighter: var(--lch-aqua-lighter); --scheme-lightest: var(--lch-aqua-lightest); }
-:root[data-scheme="graphite"] { --scheme: var(--lch-ink-darker); --scheme-light: var(--lch-ink-light); --scheme-lighter: var(--lch-ink-lighter); --scheme-lightest: var(--lch-ink-lightest); }
-
-:root:is([data-scheme="forest"], [data-scheme="plum"], [data-scheme="ocean"], [data-scheme="graphite"]) {
-  --color-link: oklch(var(--scheme));
-  --color-selected: oklch(var(--scheme-lighter));
-  --color-selected-dark: oklch(var(--scheme-light));
-  --color-card-default: oklch(var(--scheme));
+:root[data-scheme]:not([data-scheme="fizzy"]) {
+  --lch-accent: var(--scheme);
+  --lch-ink-inverted: var(--scheme-ink);
+  --lch-ring: var(--scheme);
+  --color-showcase: oklch(var(--lch-accent));
+  --scheme-light: 87% calc(0.065 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  --scheme-lighter: 93% calc(0.032 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  --scheme-lightest: 97% calc(0.014 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  --lch-accent-light: var(--scheme-light);
+  --lch-accent-lighter: var(--scheme-lighter);
+  --lch-accent-lightest: var(--scheme-lightest);
   --scheme-tint: oklch(var(--scheme-lightest));
+}
+
+html[data-theme="dark"][data-scheme]:not([data-scheme="fizzy"]) {
+  --lch-accent: var(--scheme-dark);
+  --lch-ink-inverted: var(--scheme-dark-ink);
+  --lch-ring: var(--scheme-dark);
+  --scheme-light: 40% calc(0.09 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  --scheme-lighter: 32% calc(0.055 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  --scheme-lightest: 27% calc(0.035 * var(--scheme-chroma, 1)) var(--scheme-hue);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme])[data-scheme]:not([data-scheme="fizzy"]) {
+    --lch-accent: var(--scheme-dark);
+    --lch-ink-inverted: var(--scheme-dark-ink);
+    --lch-ring: var(--scheme-dark);
+    --scheme-light: 40% calc(0.09 * var(--scheme-chroma, 1)) var(--scheme-hue);
+    --scheme-lighter: 32% calc(0.055 * var(--scheme-chroma, 1)) var(--scheme-hue);
+    --scheme-lightest: 27% calc(0.035 * var(--scheme-chroma, 1)) var(--scheme-hue);
+  }
 }
 
 /* Fonts: local font stacks only, nothing downloaded. */
@@ -29,10 +59,24 @@
 /* Corners. Every radius in the app's stylesheets is written against these variables:
 /* containers (panels, cards, dialogs, the editor) multiply by --radius-scale, pill shapes
 /* use --radius-pill, and true circles (50%) stay circles. Every control (buttons, inputs,
-/* selects, toggles, tags) reads var(--radius-control, var(--radius-lg)) so they always match
-/* each other: shadcn's rounded-lg by default, and whatever Sharp or Round sets. */
-:root { --radius-scale: 1; --radius-pill: 99rem; --radius-control: var(--radius-lg); }
-:root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; --radius-control: 0.2em; }
+/* selects, toggles, tags) reads var(--radius-control) so they always match each other.
+/*
+/* Soft is shadcn's default, --radius: 0.625rem, and the steps it derives, under rune's names:
+/* rounded-sm (6px: menu items, rows), rounded-md (8px: controls), rounded-lg (10px, --radius:
+/* tabs, alerts, menus) and rounded-xl (14px: cards, dialogs, the page's panel). Sharp and Round
+/* scale them all. */
+:root {
+  --radius-scale: 1;
+  --radius-pill: 99rem;
+  --radius-xs: calc(0.25rem * var(--radius-scale));
+  --radius-sm: calc(0.375rem * var(--radius-scale));
+  --radius-md: calc(0.5rem * var(--radius-scale));
+  --radius: calc(0.625rem * var(--radius-scale));
+  --radius-lg: calc(0.875rem * var(--radius-scale));
+  --radius-panel: calc(0.875rem * var(--radius-scale));
+  --radius-control: calc(0.5rem * var(--radius-scale));
+}
+:root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; }
 :root[data-radius="round"] { --radius-scale: 1.6; --radius-control: 99rem; }
 
 /* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
@@ -62,31 +106,33 @@
     place-items: center;
   }
 
-  .appearance-swatch--fizzy { background: oklch(55% 0.16 277); }
-  .appearance-swatch--forest { background: oklch(var(--lch-green-dark)); }
-  .appearance-swatch--plum { background: oklch(var(--lch-purple-dark)); }
-  .appearance-swatch--ocean { background: oklch(var(--lch-aqua-dark)); }
-  .appearance-swatch--graphite { background: oklch(var(--lch-ink-darker)); }
+  /* Each scheme's primary, as it is in the theme on screen. */
+  .appearance-swatch--fizzy { background: light-dark(oklch(20.5% 0 0), oklch(92.2% 0 0)); }
+  .appearance-swatch--indigo { background: light-dark(oklch(51.1% 0.262 276.966), oklch(67.3% 0.182 276.935)); }
+  .appearance-swatch--forest { background: light-dark(oklch(52.7% 0.154 150.069), oklch(72.3% 0.219 149.579)); }
+  .appearance-swatch--plum { background: light-dark(oklch(55.8% 0.288 302.321), oklch(71.4% 0.203 305.504)); }
+  .appearance-swatch--ocean { background: light-dark(oklch(52% 0.105 223.128), oklch(71.5% 0.143 215.221)); }
+  .appearance-swatch--graphite { background: light-dark(oklch(37.2% 0.044 257.287), oklch(86.9% 0.022 252.894)); }
 
   [class*="appearance-swatch--"] {
     block-size: 2rem;
     border-radius: 50%;
-    box-shadow: 0 0 0 3px var(--background), 0 0 0 4px var(--border);
+    box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line);
     color: transparent;
     inline-size: 2rem;
   }
 
   [class*="appearance-corner--"] {
-    background-color: var(--muted);
-    border: 2px solid var(--foreground);
+    background-color: var(--layer-2);
+    border: 2px solid var(--text);
     border-block-end: 0;
     border-inline-end: 0;
     color: transparent;
     translate: 0.375rem 0.375rem;
   }
 
-  .appearance-corner--sharp { border-start-start-radius: 0.15rem; }
-  .appearance-corner--fizzy { border-start-start-radius: 0.5rem; }
+  .appearance-corner--sharp { border-start-start-radius: 0.125rem; }
+  .appearance-corner--fizzy { border-start-start-radius: 0.625rem; }
   .appearance-corner--round { border-start-start-radius: 1rem; }
 
   .appearance-font--system { font-family: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -103,9 +149,9 @@
   /* The theme's preview: a little page of cards, light or dark whatever the page is now, and
   /* System half of each. */
   .theme-mock {
-    --mock-page: oklch(93% 0.005 260);
+    --mock-page: oklch(97% 0 0);
     --mock-card: oklch(100% 0 0);
-    --mock-line: oklch(90% 0.005 260);
+    --mock-line: oklch(90% 0 0);
 
     background: var(--mock-page);
     block-size: 100%;
@@ -118,19 +164,19 @@
   }
 
   .theme-mock--dark {
-    --mock-page: oklch(21% 0.02 265);
-    --mock-card: oklch(30% 0.02 265);
-    --mock-line: oklch(42% 0.02 265);
+    --mock-page: oklch(14.5% 0 0);
+    --mock-card: oklch(26.9% 0 0);
+    --mock-line: oklch(42% 0 0);
   }
 
   .theme-mock--system {
-    --mock-line: oklch(60% 0.01 265 / 45%);
+    --mock-line: oklch(60% 0 0 / 45%);
 
-    background: linear-gradient(90deg, var(--mock-page) 50%, oklch(21% 0.02 265) 50%);
+    background: linear-gradient(90deg, var(--mock-page) 50%, oklch(14.5% 0 0) 50%);
 
     /* Cards sit evenly inside the page, so their middle is the page's. */
     .theme-mock__card {
-      background: linear-gradient(90deg, var(--mock-card) 50%, oklch(30% 0.02 265) 50%);
+      background: linear-gradient(90deg, var(--mock-card) 50%, oklch(26.9% 0 0) 50%);
     }
   }
 
