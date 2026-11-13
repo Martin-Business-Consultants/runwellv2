@@ -53,6 +53,22 @@ class CustomField < ApplicationRecord
 
   def self.for(model, viewer: Current.user) = active.where(model_type: model.to_s).seen_by(viewer).ordered
 
+  # How wide each of these fields' values run in a table, in characters ({ id => characters }):
+  # the longest value as a list shows it, across every record, so a column fits what it holds and
+  # keeps its width from page to page. One query. A link is shown without its scheme; a date,
+  # a yes or no and an amount have a set shape.
+  FIXED_WIDTHS = { "date" => 12, "boolean" => 4 }.freeze
+
+  def self.column_widths(fields)
+    measured = fields.reject { FIXED_WIDTHS.key?(it.kind) }
+    longest = measured.any? ? CustomValue.where(custom_field_id: measured.map(&:id)).group(:custom_field_id).maximum(Arel.sql("LENGTH(value)")) : {}
+    fields.to_h do |field|
+      length = FIXED_WIDTHS[field.kind] || (longest[field.id].to_i - (field.kind == "link" ? "https://".length : 0)).clamp(0, 60)
+      # In ch, the width of a 0: ordinary text runs narrower, so a character each with one to spare.
+      [ field.id, length + 1 ]
+    end
+  end
+
   # Every date field's value that falls in a range of dates, as the viewer may see them: a list of
   # [record, field, date], each record a Client, Work or Task (a work's launch, a client's renewal).
   # What a calendar reads (the plugin contract, 5.5); one query for the values, one per kind of record.

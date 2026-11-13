@@ -14,7 +14,7 @@
   <td class="data-table__center" data-column="status"><%= render "tasks/status_dot", task: task %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>
-    <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, task.custom_value(field)) %></td>
+    <%= custom_field_cell(field, task.custom_value(field)) %>
   <% end %>
   <%= render "layouts/shared/row_actions", name: task.title, edit_path: edit_task_path(task), delete_path: task_path(task), task: task, undoable: true %>
 </tr>

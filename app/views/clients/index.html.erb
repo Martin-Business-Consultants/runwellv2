@@ -19,7 +19,7 @@
                  ui_column(:status, "Status", sort: :status, width: :status),
                  ui_column(:contacts, "Contacts", width: :avatars),
                  ui_column(:works, "Open " + term(:work, count: 2).downcase, width: :number, align: :end),
-                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+                 *custom_field_columns(listed) ] %>
   <%= render "ui/data_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client, row_locals: { listed: listed },
         page: @page, selectable: true, actions: true %>
 <% elsif Client.exists? %>

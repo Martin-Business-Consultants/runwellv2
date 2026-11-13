@@ -56,6 +56,20 @@ module CustomFieldsHelper
   end
 
   # Plain text for a table cell or a card's context line.
+  # The data table's columns for the custom fields a list shows (ui_column), each as wide as its
+  # longest value (CustomField.column_widths, capped like any fitted column), never the same
+  # width whatever it holds: a short field doesn't hold space, a long one isn't broken over lines.
+  def custom_field_columns(fields)
+    widths = CustomField.column_widths(fields)
+    fields.map { ui_column("field_#{it.id}", it.label, width: [ widths[it.id], it.label ], align: (:end if it.kind.in?(%w[number money]))) }
+  end
+
+  # A custom field's cell in a data table row: one line, cut short with the whole value on hover.
+  def custom_field_cell(field, value)
+    text = custom_field_text(field, value)
+    tag.td(text, class: class_names("muted data-table__fit", "data-table__number" => field.kind.in?(%w[number money])), title: text, data: { column: "field_#{field.id}" })
+  end
+
   def custom_field_text(field, value)
     return if value.nil?
 

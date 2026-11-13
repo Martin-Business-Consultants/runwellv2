@@ -13,7 +13,7 @@
     <% else %>
       <span class="intake__home">
         <% if task.client %><span class="muted"><%= task.client.name %></span><% end %>
-        <%= side_panel_link_to task, task.client ? "· file it" : "No #{term(:client).downcase} yet: file it", class: "intake__file" %>
+        <%= side_panel_link_to task, task.client ? "· file it" : "No #{term(:client).downcase} yet: file it", class: "intake__file", open: false %>
       </span>
     <% end %>
   </td>

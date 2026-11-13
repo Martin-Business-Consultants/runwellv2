@@ -74,6 +74,15 @@
   .new-link :is(.new-link__text, .new-link__key) { display: none; }
 }
 
+/* A link that opens a sheet, with the arrow to the record's own page after it (page_link_to):
+   faint until the row or the link is pointed at or focused. */
+.sheet-link { display: inline-flex; align-items: center; gap: var(--s-1); min-width: 0; max-width: 100%; }
+.sheet-link > a:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.page-link { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: var(--radius-xs); color: var(--text-faint); opacity: .55; transition: opacity var(--motion-fast), color var(--motion-fast), background-color var(--motion-fast); }
+.page-link svg { width: .875rem; height: .875rem; }
+:is(tr, li, .sheet-link, .side-panel__context):hover .page-link, .page-link:focus-visible { opacity: 1; }
+.page-link:hover { background: var(--hover); color: var(--accent); }
+
 /* ======================================================================= 3 Data table */
 
 /* ui/_data_table on rune's .table: sortable headers, a checkbox column, edit and delete at each
@@ -86,6 +95,8 @@
 .data-table td a:not([class]):hover { color: var(--accent); }
 .data-table .data-table__number { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .data-table .data-table__center { text-align: center; }
+/* A fitted column's text (a custom field): one line, cut short rather than broken over two. */
+.data-table .data-table__fit { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .data-table [data-column][hidden] { display: none; }
 @media (max-width: 640px) { .data-table td { white-space: nowrap; } }
 

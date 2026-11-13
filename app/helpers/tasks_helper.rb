@@ -16,10 +16,14 @@ module TasksHelper
   # A link that opens a task in the side panel (side-panel controller); its href stays the task's own
   # page, for a new tab or a modifier click. Built here, in Ruby: a data hash worked out in a
   # template (data: some_method) is written by Herb as a literal data="{…}" attribute.
-  def side_panel_link_to(task, content = nil, data: {}, **options, &block)
+  # A text link is followed by the arrow to the task's page (PeekHelper#page_link_to; open: false
+  # leaves it off).
+  def side_panel_link_to(task, content = nil, data: {}, open: true, **options, &block)
     action = [ data[:action], "side-panel#open" ].compact.join(" ")
     data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, side_panel_title_param: task.title, turbo_prefetch: false)
-    block ? link_to(task_path(task), data: data, **options, &block) : link_to(content, task_path(task), data: data, **options)
+    return link_to(task_path(task), data: data, **options, &block) if block
+
+    with_page_link(link_to(content, task_path(task), data: data, **options), task_path(task), task.title, open)
   end
 
   # The team for the inline owner picker, loaded once per page however many rows use it.

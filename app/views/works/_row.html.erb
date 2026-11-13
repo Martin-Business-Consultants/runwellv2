@@ -8,7 +8,7 @@
   <td data-column="state"><%= status_tag work.state_label, highlight: work.active? %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>
-    <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, work.custom_value(field)) %></td>
+    <%= custom_field_cell(field, work.custom_value(field)) %>
   <% end %>
   <%= render "layouts/shared/row_actions", name: work.title, edit_path: edit_work_path(work), peek: work, delete_path: (work_path(work) if work.deletable?),
         delete_message: "Nothing has been done on it yet, so its notes and documents go with it." %>

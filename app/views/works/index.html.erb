@@ -24,7 +24,7 @@
                  ui_column(:type, "Type", sort: :type, width: :pill),
                  ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
                  ui_column(:state, "State", width: :status),
-                 *listed.map { ui_column("field_#{it.id}", it.label) } ] %>
+                 *custom_field_columns(listed) ] %>
   <%= render "ui/data_table", id: "works", columns: columns, rows: @works, row: "works/row", as: :work,
         row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
 <% end %>

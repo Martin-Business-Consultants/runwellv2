@@ -8,7 +8,7 @@
   <td class="data-table__number" data-column="works"><%= client.works.count { !it.closed? } %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>
-    <td class="muted" data-column="field_<%= field.id %>"><%= custom_field_text(field, client.custom_value(field)) %></td>
+    <%= custom_field_cell(field, client.custom_value(field)) %>
   <% end %>
   <%= render "layouts/shared/row_actions", name: client.name, edit_path: edit_client_path(client), peek: client, delete_path: client_path(client),
         delete_message: "This removes its contacts, " + term(:task, count: 2).downcase + " and notes. A " + term(:client).downcase + " with " + term(:work, count: 2).downcase + " can’t be deleted." %>
