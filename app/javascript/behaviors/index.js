@@ -25,4 +25,9 @@ import breaksOut from "behaviors/breaks-out"
 const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty, "picks-current": picksCurrent, "revert-on-failure": revertOnFailure, "keeps-scroll": keepsScroll, "loading-placeholder": loadingPlaceholder, "breaks-out": breaksOut }
 
 const runtime = Runtime.start({ state: { debounce: 150, refetch: "off" } })
-for (const [ attribute, behavior ] of Object.entries(BEHAVIORS)) runtime.behaviors.define(attribute, behavior)
+// ReActionView matches a behavior by the attribute's whole name, and the markup writes these as
+// data attributes (data-save-on-change, data: { revert_on_failure: true }); open is the element's
+// own open attribute (<details>, <dialog>). Defined without the data-, none of them ever connected.
+for (const [ attribute, behavior ] of Object.entries(BEHAVIORS)) {
+  runtime.behaviors.define(attribute === "open" ? attribute : `data-${attribute}`, behavior)
+}
