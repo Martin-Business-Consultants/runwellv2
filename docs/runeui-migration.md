@@ -50,6 +50,14 @@ core (plugins go through the compatibility layer).
    `table`, `dl.details`, `empty`, `stack`, `grid-2`, `button-row`, `separator`, `kbd`, `muted`,
    `faint`, `small`, `visually-hidden`) styled from runeui's tokens, and Runwell's icons as
    runeui icons (`Runeui::Icons.register`). Then the rune_ui gem comes out of the Gemfile.
+   **Done:** the gem is out. `RuneCompatHelper` draws buttons, badges, cards, fields, empty
+   states, menus, dialogs, sheets, callouts and progress with runeui (`RuneCompatShellHelper`
+   keeps the shell, crumbs and flash for phase 2); `runwell/compat.css` carries rune_ui's sheets
+   in the layer `runeui.rune`, between runeui's base and components, and dresses those parts;
+   the `rune-*` controllers still named in views are in `app/javascript/controllers`. Left on
+   rune's markup: `avatar`, `tabs`, `list_row`, the settings rows, `status_dot`; `button_classes`
+   stays rune's `btn` (a class can't carry `data-variant`); the icons stay Runwell's own 16×16
+   set (`Runwell::Icons`), not registered into runeui's 24×24 one.
 2. **The shell**: `app_shell`, the sidenav, the panel bar and breadcrumb → `ui :app_shell`,
    `ui :sidebar_group`, `ui :sidebar_item`, `ui :breadcrumb`; `NavLayout` and the per-person menu
    kept. Toasts → `ui :toaster` (`turbo_stream_flash` → `turbo_stream.ui_toast`); every

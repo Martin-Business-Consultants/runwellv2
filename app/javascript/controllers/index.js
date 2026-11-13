@@ -1,7 +1,9 @@
-// Runwell's controllers (controllers/**/*_controller) and rune_ui's (rune-*, the UI kit).
+// Runwell's controllers (controllers/**/*_controller). The rune_* ones (rune-dialog, rune-popover,
+// rune-sidebar…) are the rune_ui gem's, carried here when the gem came out; each goes as its
+// markup moves to a runeui component (docs/runeui-migration.md).
 import { application } from "controllers/application"
 import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
-import { registerRuneUi } from "rune_ui"
+import { installBusyButtons } from "helpers/busy_buttons"
 
-registerRuneUi(application)
+installBusyButtons()
 eagerLoadControllersFrom("controllers", application)

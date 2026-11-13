@@ -57,21 +57,21 @@
               <span class="visually-hidden">Your menu</span>
             <% end %>
             <%= menu you, trigger_class: "portal-user__button" do %>
-              <div class="menu__label portal-user__label">
-                <strong class="portal-user__name"><%= current_contact.name %></strong>
-                <span class="portal-user__email"><%= current_contact.email %></span>
-              </div>
+              <% who = capture do %>
+                <span class="portal-user__label">
+                  <strong class="portal-user__name"><%= current_contact.name %></strong>
+                  <span class="portal-user__email"><%= current_contact.email %></span>
+                </span>
+              <% end %>
+              <%= menu_label who %>
               <%= menu_divider %>
               <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), portal_account_path,
                     aria: { current: ("page" if request.path == portal_account_path) } %>
               <%= menu_link safe_join([ icon_tag("email"), tag.span("Your requests") ]), portal_requests_path %>
               <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Connected apps") ]), portal_connected_apps_path,
                     aria: { current: ("page" if request.path == portal_connected_apps_path) } %>
-              <button type="button" class="menu__item theme-toggle" data-controller="theme" data-action="theme#toggle">
-                <%= icon_tag "moon", class: "theme-toggle__moon" %>
-                <%= icon_tag "sun", class: "theme-toggle__sun" %>
-                <span>Light or dark</span>
-              </button>
+              <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
+              <%= ui :menu, part: "items", items: [ { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } } ] %>
               <%= menu_divider %>
               <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), portal_session_path, method: :delete %>
             <% end %>

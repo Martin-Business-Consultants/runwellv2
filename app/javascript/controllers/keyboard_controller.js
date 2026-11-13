@@ -45,6 +45,11 @@ const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "meta" : "ctrl"
 const BOARD_ARROWS = { j: "ArrowDown", k: "ArrowUp", h: "ArrowLeft", l: "ArrowRight" }
 const HINTS_KEY = "keyHints"
 
+// What takes the keys for itself while it's open: a <dialog>, and runeui's dialogs, sheets and
+// menus (UI SDK's elements, which close on Esc and move through their own items).
+const OVERLAY = "dialog[open], [aria-modal='true'][data-open], ui-menu-content, ui-popover-content"
+const MODAL = "dialog:modal, [aria-modal='true'][data-open]"
+
 export default class extends Controller {
   connect() {
     this.keydown = this.keydown.bind(this)
@@ -90,7 +95,7 @@ export default class extends Controller {
 
     if (key === `${MOD}+enter`) return this.#save(event)
     if (key === "esc" && this.#cancel(event)) return
-    if (event.target.closest?.(TYPING) || event.target.closest?.("dialog[open]") || document.querySelector("dialog:modal")) return
+    if (event.target.closest?.(TYPING) || event.target.closest?.(OVERLAY) || document.querySelector(MODAL)) return
 
     if (this.pending) {
       const previous = this.pending
@@ -223,7 +228,7 @@ export default class extends Controller {
   // Esc in a form opened in place, even from a field (where keys are otherwise the field's):
   // ReActionView state's Cancel, marked data-keys="esc", or else the <details> it opened in.
   #cancel(event) {
-    if (event.target.closest?.("dialog[open]")) return false
+    if (event.target.closest?.(OVERLAY)) return false
 
     const cancel = Array.from(event.target.closest?.("form")?.querySelectorAll("[data-keys]") || []).find(element => declares(element, "esc"))
     const details = event.target.closest?.("details[open]")

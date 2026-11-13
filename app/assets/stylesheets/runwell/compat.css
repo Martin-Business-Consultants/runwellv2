@@ -1,0 +1,741 @@
+/* The compatibility layer's stylesheet (docs/runeui-migration.md, phase 1): what the rune_ui gem's
+ * sheets styled, carried into Runwell when the gem came out of the Gemfile, so the class names the
+ * core's views, Runwell's own CSS and the plugins still write keep their look: the tokens
+ * (--page, --panel, --text, --line, --accent, --s-1..6, --radius-*, --control-h…), the bare
+ * elements (the page, headings, links, inputs, selects, textareas, tables, forms as flex
+ * columns), the classes (btn, icon-button, pill, card, list-row, field, badge, count, tabs,
+ * alert, table, dl.details, empty, stack, grid-2, button-row, separator, kbd, muted, faint,
+ * small, visually-hidden, the settings rows, switches, menus, popovers, dialogs, sheets, toasts)
+ * and the shell (sidebar, panel, panel bar, crumbs).
+ *
+ * It is rune_ui's CSS as it was (revision c909a1a), in one cascade layer (`runeui.rune`, below), so
+ * Runwell's own unlayered sheets still win over it, and linked first (rune_ui_stylesheet_tags,
+ * before runeui's sheets) so the layer order below, the first the page meets, is the one that
+ * holds. rune-theme.css points the colour tokens at Runwell's palette.
+ *
+ * It goes with the layer: each area's classes as its phase moves the markup to runeui's
+ * components, the tokens in the flip (phase 9), the rest when the plugins have moved (phase 10).
+ * At the end of the file, unlayered: what dresses a runeui component a compat helper now draws
+ * (RuneCompatHelper) so it sits right among the classes above. */
+
+/* rune's layers sit between runeui's base and its components, which only a layer inside
+   `runeui` can do (layers nest: a sibling of `runeui` is over or under all of it). So the old
+   `rune` layer is `runeui.rune` here. Over runeui's base, which resets every button and field
+   inside a runeui part (font, colour, border colour): what a compat helper's block holds is rune
+   markup (btn, icon-button, bare inputs), and it keeps its look inside a runeui card or dialog.
+   Under runeui's components, so a runeui control (a native input or button with a ui- class)
+   still beats the bare-element rules here. Runwell's own sheets are unlayered, over both. */
+@layer ui-sdk, runeui.tokens, runeui.base, runeui.rune, runeui.components, runeui.utilities, runeui-bridge;
+
+/* ---- rune_ui/tokens.css ---- */
+/* rune_ui: plain CSS, light and dark.
+ *
+ * Every rule is in a layer of `rune`, declared here in order, so an app's own (unlayered) CSS
+ * always wins, whatever its specificity. To restyle, set tokens on :root (an app can point the
+ * colours at its own palette, as Runwell does with its OKLCH theme tokens).
+ *
+ * Sizes are rem, so the root's size (calc(1rem * --text-scale)) scales the whole UI. Corners go
+ * through --radius-scale; controls share --radius-control; pills are --radius-pill (round at any
+ * scale, square when the scale is 0, like every other corner). Multi-line fields
+ * (textarea, the Lexxy editor) are boxes: --radius-lg, never the control radius.
+ *
+ * Rules the sheets keep:
+ * - Containers space their children with gap, never sibling margins (`> * + *`): ERB
+ *   tooling can wrap output in <span style="display: contents">, which gap sees through.
+ * - Two control heights: --control-h (page and form actions, inputs) and --control-h-sm
+ *   (inside cards, rows and bars; icon buttons).
+ * - No coloured edge stripes: states show as tints, weight, dots and badges. */
+
+@layer runeui.rune.tokens, runeui.rune.base, runeui.rune.components, runeui.rune.utilities;
+
+@layer runeui.rune.tokens {
+  :root {
+    /* Each colour is light-dark(light, dark): the device's setting picks one, and data-theme
+       on <html> (theme_data) overrides it through color-scheme. */
+    color-scheme: light dark;
+
+    --page: light-dark(#ededed, #0a0a0a);
+    --panel: light-dark(#ffffff, #161616);
+    --layer-1: light-dark(#f7f7f7, #1b1b1b);
+    --layer-2: light-dark(#f0f0f0, #232323);
+    --layer-3: light-dark(#e6e6e6, #2d2d2d);
+    --text: light-dark(#161616, #ededed);
+    --text-muted: light-dark(#646464, #a0a0a0);
+    --text-faint: light-dark(#8f8f8f, #6e6e6e);
+    --line: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .08));
+    --line-strong: light-dark(rgb(0 0 0 / .15), rgb(255 255 255 / .15));
+    --hover: light-dark(rgb(0 0 0 / .045), rgb(255 255 255 / .05));
+    --accent: light-dark(#3b6cf6, #5b84ff);
+    --accent-hover: light-dark(#2f5de0, #7a9bff);
+    --accent-ink: light-dark(#ffffff, #0a0f1f);
+    --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--panel));
+    --attention: light-dark(#c98d0a, #f2c14e);
+    --danger: light-dark(#d23f3f, #f06a6a);
+    --ok: light-dark(#1f8a57, #4cc38a);
+    --shadow-popover: light-dark(0 10px 30px rgb(0 0 0 / .14), 0 12px 32px rgb(0 0 0 / .6)), 0 0 0 1px var(--line);
+    --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+
+    --s-1: .25rem;
+    --s-2: .5rem;
+    --s-3: .75rem;
+    --s-4: 1rem;
+    --s-5: 1.5rem;
+    --s-6: 2rem;
+
+    --radius-scale: 1;
+    --radius-xs: calc(4px * var(--radius-scale));
+    --radius-sm: calc(6px * var(--radius-scale));
+    --radius: calc(8px * var(--radius-scale));
+    --radius-lg: calc(10px * var(--radius-scale));
+    --radius-panel: calc(12px * var(--radius-scale));
+    --radius-control: var(--radius-sm);
+    --radius-pill: calc(999px * var(--radius-scale)); /* round at any scale, square at 0 */
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    /* Motion: everything that appears comes in the same way. Small things (menus) quickly, larger
+       ones (dialogs, panels, the tray, search) a little slower, toasts the slowest; anything
+       leaving goes quicker than it came. Reduced motion makes them all instant. */
+    --motion-fast: 120ms;
+    --motion: 200ms;
+    --motion-slow: 320ms;
+    --motion-out: 140ms;
+    --ease-in: cubic-bezier(.4, 0, 1, 1);
+
+    --control-h: 2rem;
+    --control-h-sm: 1.75rem;
+    --row-h: 2.5rem;
+    --icon-size: 1rem;
+    --sidebar-width: 16.5rem;
+    --main-width: 1080px;
+    --breakpoint-narrow: 860px; /* for reference: media queries can't read it */
+
+    --font-sans: "Inter", "InterVariable", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --text-scale: 1;
+    --text-xs: .6875rem;   /* 11px: badges, counts */
+    --text-meta: .75rem;  /* 12px: hints, meta */
+    --text-ui: .8125rem;   /* 13px: the UI */
+    --text-read: .875rem;  /* 14px: reading (chat, prose) */
+    --text-title: 1.25rem; /* 20px: h1 */
+    --leading: 1.25rem;
+    --leading-tight: 1rem;
+    --weight: 440;
+    --weight-strong: 530;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root { --motion-fast: 1ms; --motion: 1ms; --motion-slow: 1ms; --motion-out: 1ms; }
+  }
+
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+}
+
+/* ---- rune_ui/base.css ---- */
+@layer runeui.rune.base {
+  * { box-sizing: border-box; }
+  /* 16px, the browser's own, times --text-scale: every size in rune_ui is rem from here. */
+  html { font-size: calc(1rem * var(--text-scale, 1)); }
+  body {
+    margin: 0; background: var(--page); color: var(--text);
+    font-family: var(--font-sans); font-size: var(--text-ui); line-height: var(--leading); font-weight: var(--weight); letter-spacing: -.005em;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, p, ul, ol, dl, dd, pre, figure, blockquote, fieldset { margin: 0; }
+  h1 { font-size: var(--text-title); line-height: 1.75rem; font-weight: 600; letter-spacing: -.015em; }
+  h2 { font-size: var(--text-read); line-height: var(--leading); font-weight: var(--weight-strong); }
+  h3 { font-size: var(--text-ui); font-weight: var(--weight-strong); }
+  strong, b { font-weight: var(--weight-strong); }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:hover { color: var(--accent-hover); }
+  ul, ol { padding-left: 1.4em; }
+  code, pre, kbd, samp { font-family: var(--font-mono); font-size: var(--text-meta); line-height: 1.125rem; }
+  :not(pre) > code { background: var(--layer-2); padding: 1px 5px; border-radius: var(--radius-xs); }
+  pre { background: var(--layer-1); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--s-3) var(--s-4); overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
+  img, svg, video { max-width: 100%; }
+  summary { cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  :focus-visible { outline: none; box-shadow: var(--ring); }
+  [hidden] { display: none !important; }
+  turbo-cable-stream-source, turbo-stream-source { display: none; }
+  ::selection { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { opacity: .3; } }
+  /* The motion everything shares (--motion tokens): pop for what opens in place (menus, dialogs),
+     slide for what comes in from the edge (sheets, toasts), fade for backdrops. */
+  @keyframes rune-pop { from { opacity: 0; scale: .97; translate: 0 -2px; } }
+  @keyframes rune-slide { from { opacity: 0; translate: 1.5rem 0; } }
+  @keyframes rune-fade { from { opacity: 0; } }
+}
+
+/* ---- rune_ui/shell.css ---- */
+/* The shell: the sidebar on the page, the content in an inset panel with a bar on top. */
+
+@layer runeui.rune.components {
+  .app { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns .17s var(--ease); }
+  :root[data-sidenav="collapsed"] .app { grid-template-columns: 0 minmax(0, 1fr); }
+  .app > .sidebar { grid-column: 1; grid-row: 1; }
+  .app > .panel { grid-column: -2 / -1; grid-row: 1; }
+
+  .panel { margin: var(--s-2) var(--s-2) var(--s-2) 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-panel); min-height: calc(100vh - 2 * var(--s-2)); display: flex; flex-direction: column; min-width: 0; }
+  :root[data-sidenav="collapsed"] .app .panel { margin-left: var(--s-2); }
+
+  .panel-bar { position: sticky; top: 0; z-index: 12; display: flex; flex-shrink: 0; align-items: center; gap: var(--s-2); height: 3rem; padding: 0 var(--s-3) 0 var(--s-4); background: var(--panel); border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+  .panel-bar .panel-bar__toggle { display: none; }
+  :root[data-sidenav="collapsed"] .app .panel-bar .panel-bar__toggle { display: inline-grid; }
+  .panel-bar__context { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .crumbs { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-weight: var(--weight-strong); }
+  .crumbs a { color: var(--text-muted); text-decoration: none; font-weight: var(--weight); white-space: nowrap; }
+  .crumbs a:hover { color: var(--text); }
+  .crumbs__sep { color: var(--text-faint); }
+  .crumbs__current { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .main { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--s-2) var(--s-6) calc(var(--s-6) * 2); max-width: var(--main-width); width: 100%; margin: 0 auto; }
+  .main--narrow { max-width: 25rem; margin: 12vh auto 0; padding: var(--s-4); }
+
+  .sidebar { padding: var(--s-2) var(--s-2) var(--s-3) var(--s-3); display: flex; flex-direction: column; gap: 1px; position: sticky; top: 0; height: 100vh; overflow: hidden auto; min-width: 0; }
+  /* A menu taller than the window scrolls; its items never shrink to fit (a link on its own would
+     drop to its text's height beside one wrapped with a submenu). */
+  .sidebar > * { flex-shrink: 0; }
+  :root[data-sidenav="collapsed"] .app .sidebar { visibility: hidden; padding: 0; }
+  .sidebar__top { display: flex; align-items: center; justify-content: space-between; height: 2.5rem; padding-left: var(--s-2); margin-bottom: var(--s-2); }
+  .sidebar__brand { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-size: var(--text-read); font-weight: var(--weight-strong); color: var(--text); text-decoration: none; }
+  .sidebar__brand:hover { color: var(--text); }
+  .sidebar__brand img { width: 1.25rem; height: 1.25rem; border-radius: var(--radius-xs); object-fit: contain; }
+  .sidebar__logo { width: 1.25rem; height: 1.25rem; border-radius: calc(5px * var(--radius-scale)); background: var(--text); color: var(--panel); display: grid; place-items: center; font-size: var(--text-xs); font-weight: 700; }
+  .sidebar__section { font-size: var(--text-meta); font-weight: var(--weight-strong); color: var(--text-faint); padding: var(--s-4) var(--s-2) var(--s-1); }
+  .sidebar__link { display: flex; align-items: center; gap: .625rem; width: 100%; height: var(--control-h); padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-muted); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+  .sidebar__link:hover { background: var(--hover); color: var(--text); }
+  .sidebar__link[aria-current="page"] { background: var(--layer-2); color: var(--text); }
+  .sidebar__link .icon { color: var(--text-faint); }
+  .sidebar__link:hover .icon, .sidebar__link[aria-current="page"] .icon { color: var(--text-muted); }
+  /* An item with a submenu (sidebar_link sub:): the submenu shows under the current item. */
+  .sidebar__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar__footer { margin-top: auto; padding-top: var(--s-3); display: flex; align-items: center; gap: var(--s-1); }
+  .sidebar__footer .menu { flex: 1; min-width: 0; }
+  .sidebar__account { display: flex; align-items: center; gap: .625rem; width: 100%; height: var(--control-h); padding: 0 var(--s-2); border-radius: var(--radius-sm); color: var(--text-muted); }
+  .sidebar__account .icon { color: var(--text-faint); }
+  .sidebar__account:hover, .menu[open] > .sidebar__account { background: var(--hover); color: var(--text); }
+  .sidebar-scrim { display: none; }
+
+  @media (max-width: 860px) {
+    .app, :root[data-sidenav="collapsed"] .app { grid-template-columns: 1fr; }
+    .app > .panel { grid-column: 1; }
+    .sidebar, :root[data-sidenav="collapsed"] .app .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: 17rem; padding: var(--s-2) var(--s-2) var(--s-3) var(--s-3); visibility: visible; background: var(--page); transform: translateX(-100%); transition: transform .17s var(--ease); }
+    .sidebar-open .sidebar { transform: none; }
+    .sidebar-open .sidebar-scrim { display: block; position: fixed; inset: 0; z-index: 20; background: rgb(0 0 0 / .4); }
+    .panel, :root[data-sidenav="collapsed"] .app .panel { margin: 0; border: 0; border-radius: 0; min-height: 100vh; }
+    .panel-bar { border-radius: 0; border-bottom: 1px solid var(--line); }
+    .panel-bar .panel-bar__toggle { display: inline-grid; }
+    .main { padding: var(--s-4) var(--s-4) var(--s-6); }
+  }
+}
+
+/* ---- rune_ui/layout.css ---- */
+/* Stacks, grids and small text utilities. Utilities sit in their own layer, above components. */
+
+@layer runeui.rune.components {
+  .stack, form { display: flex; flex-direction: column; gap: var(--s-4); }
+  form.button_to { display: inline-flex; flex-direction: row; gap: 0; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); align-items: start; }
+  @media (max-width: 860px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+  .catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--s-4); }
+  .catalog .card { gap: var(--s-3); }
+  .catalog .card p { flex: 1; }
+
+  .dot-list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-2); color: var(--text-muted); }
+  .dot-list > * + *::before { content: "·"; margin-right: var(--s-2); color: var(--text-faint); }
+
+  dl.details { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-3) var(--s-5); align-items: center; }
+  dl.details dt { color: var(--text-muted); }
+  dl.details dd { min-width: 0; overflow-wrap: anywhere; }
+}
+
+@layer runeui.rune.utilities {
+  .muted { color: var(--text-muted); }
+  .faint { color: var(--text-faint); }
+  .small { font-size: var(--text-meta); line-height: var(--leading-tight); }
+  .nowrap { white-space: nowrap; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* ---- rune_ui/marks.css ---- */
+/* Marks: icons, avatars, status dots, badges, counts, chips, keys. */
+
+@layer runeui.rune.components {
+  .icon { width: var(--icon-size); height: var(--icon-size); flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .icon--down { width: .75rem; height: .75rem; transform: rotate(90deg); }
+
+  /* letter_avatar: a coloured initial. avatar: a picture, else the initial. */
+  .letter, .avatar { flex: 0 0 auto; width: 1.125rem; height: 1.125rem; border-radius: var(--radius-xs); display: grid; place-items: center; overflow: hidden; font-size: var(--text-xs); font-weight: 600; line-height: 1; color: #fff; background: var(--letter, #7b7b7b); }
+  .letter--lg, .avatar--lg { width: 1.75rem; height: 1.75rem; border-radius: calc(7px * var(--radius-scale)); font-size: var(--text-read); }
+  .avatar { border-radius: 50%; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar--md { width: 1.5rem; height: 1.5rem; font-size: var(--text-xs); }
+  .avatar-stack { display: inline-flex; align-items: center; }
+  .avatar-stack .avatar { box-shadow: 0 0 0 2px var(--panel); }
+  .avatar-stack .avatar + .avatar { margin-left: -.25rem; }
+  .letter--0 { --letter: #b23b78; } .letter--1 { --letter: #a83232; } .letter--2 { --letter: #1f7a8c; } .letter--3 { --letter: #3554c4; }
+  .letter--4 { --letter: #b85a1e; } .letter--5 { --letter: #6a46b8; } .letter--6 { --letter: #2d8a4e; } .letter--7 { --letter: #8a6d1f; }
+  .avatar--empty { background: transparent; border: 1px dashed var(--line-strong); color: var(--text-faint); }
+
+  .status { flex: 0 0 auto; display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; }
+  .status--attention { background: var(--attention); }
+  .status--unread, .status--accent { background: var(--accent); }
+  .status--failed, .status--danger { background: var(--danger); }
+  .status--ok { background: var(--ok); }
+  .status--neutral { background: var(--text-faint); }
+  .status--busy { width: .75rem; height: .75rem; border: 1.6px solid var(--line-strong); border-top-color: var(--text-muted); animation: spin .8s linear infinite; }
+
+  /* Tones: badge(status) picks one through RuneUi.badge_tones. */
+  .badge { display: inline-flex; align-items: center; gap: 5px; height: 1.25rem; padding: 0 7px; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: var(--weight-strong); line-height: 1; white-space: nowrap; background: var(--layer-2); color: var(--text-muted); text-decoration: none; }
+  .badge--ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .badge--danger { background: color-mix(in srgb, var(--danger) 13%, transparent); color: var(--danger); }
+  .badge--attention { background: color-mix(in srgb, var(--attention) 16%, transparent); color: var(--attention); }
+  .badge--accent, .badge--busy { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); }
+  .badge--busy::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
+  .badge--outline { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+  .count { min-width: 1.125rem; padding: 0 6px; border-radius: var(--radius-pill); background: var(--attention); color: #1a1300; font-size: var(--text-xs); font-weight: 600; line-height: 1.125rem; text-align: center; }
+  .count--quiet { background: var(--layer-3); color: var(--text-muted); }
+
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: var(--control-h-sm); padding: 0 var(--s-2); border-radius: var(--radius-sm); color: var(--text-muted); white-space: nowrap; }
+
+  /* A rule; with text (separator--label), the text sits in the middle of it. */
+  .separator { height: 1px; margin: 0; border: 0; background: var(--line); }
+  .separator--label { display: flex; align-items: center; gap: var(--s-3); height: auto; background: none; color: var(--text-faint); font-size: var(--text-meta); }
+  .separator--label::before, .separator--label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  kbd, .key { display: inline-flex; align-items: center; min-width: 1.25rem; height: 1.25rem; padding: 0 5px; border: 1px solid var(--line); border-radius: var(--radius-xs); background: var(--layer-1); color: var(--text-muted); font-family: var(--font-sans); font-size: var(--text-xs); line-height: 1; justify-content: center; }
+}
+
+/* ---- rune_ui/buttons.css ---- */
+/* Buttons (from button_link, action_button, submit_button, icon_button) and menus. */
+
+@layer runeui.rune.components {
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto; width: fit-content;
+    height: var(--control-h); padding: 0 var(--s-3); border: 1px solid transparent; border-radius: var(--radius-control);
+    font: inherit; font-weight: var(--weight-strong); line-height: 1; white-space: nowrap; text-decoration: none; cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s, opacity .12s;
+  }
+  .btn .icon { width: .875rem; height: .875rem; }
+  .btn--sm { height: var(--control-h-sm); padding: 0 .625rem; font-size: var(--text-meta); }
+  .btn--primary { background: var(--text); color: var(--panel); }
+  .btn--primary:hover { color: var(--panel); opacity: .86; }
+  .btn--accent { background: var(--accent); color: var(--accent-ink); }
+  .btn--accent:hover { background: var(--accent-hover); color: var(--accent-ink); }
+  .btn--secondary { background: var(--panel); border-color: var(--line-strong); color: var(--text); }
+  .btn--secondary:hover { background: var(--layer-1); color: var(--text); }
+  .btn--ghost { background: transparent; color: var(--text-muted); }
+  .btn--ghost:hover { background: var(--hover); color: var(--text); }
+  .btn--danger { background: transparent; border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger); }
+  .btn--danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); color: var(--danger); }
+  .btn:disabled, .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; pointer-events: none; }
+  .btn[aria-busy="true"] { cursor: progress; }
+  .btn[aria-busy="true"]::before { content: ""; width: .75rem; height: .75rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+  .btn[aria-pressed="true"] { background: var(--layer-2); color: var(--text); }
+
+  .btn--block { width: 100%; }
+  /* A filter or picker's trigger: a quiet outline button with a chevron after its choice. */
+  .pill { display: inline-flex; align-items: center; gap: 6px; max-width: 16rem; height: var(--control-h-sm); padding: 0 var(--s-2) 0 .625rem; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text); font: inherit; font-size: var(--text-meta); font-weight: var(--weight-strong); white-space: nowrap; cursor: pointer; }
+  .pill:hover, .pill[aria-expanded="true"] { background: var(--layer-1); }
+  .pill > :not(.icon) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .pill .icon { width: .75rem; height: .75rem; color: var(--text-faint); }
+
+  .icon-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: var(--control-h-sm); height: var(--control-h-sm); padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); text-decoration: none; cursor: pointer; }
+  .icon-button:hover, .icon-button[aria-pressed="true"] { background: var(--hover); color: var(--text); }
+  .icon-button.is-done { color: var(--ok); }
+  .icon-button--danger { color: var(--danger); }
+  .icon-button--danger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+
+
+  .link-button { padding: 0; border: 0; background: none; font: inherit; color: var(--text-faint); cursor: pointer; }
+  .link-button:hover { color: var(--text); }
+
+  .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+
+  .menu { position: relative; display: inline-flex; }
+  .menu__items { position: absolute; top: calc(100% + 4px); right: 0; z-index: 15; display: flex; flex-direction: column; min-width: 12.5rem; max-height: min(24rem, 70vh); overflow-y: auto; padding: 4px; background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow-popover); }
+  .menu__items form { width: 100%; }
+  .menu__item { display: flex; align-items: center; gap: var(--s-2); width: 100%; min-height: var(--control-h); padding: 0 var(--s-3); border: 0; border-radius: calc(5px * var(--radius-scale)); background: none; color: var(--text); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+  .menu__item:hover, .menu__item:focus-visible { background: var(--layer-2); color: var(--text); box-shadow: none; }
+  .menu__item .icon { color: var(--text-faint); }
+  .menu__item[aria-checked="true"] { font-weight: var(--weight-strong); }
+  .menu__item[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--text-muted); }
+  .menu__item kbd { margin-left: auto; }
+  .menu__label { padding: var(--s-2) var(--s-3) var(--s-1); color: var(--text-faint); font-size: var(--text-meta); }
+  .menu__divider { height: 1px; margin: 4px 0; background: var(--line); }
+  .menu--up .menu__items { top: auto; bottom: calc(100% + 4px); left: 0; right: auto; }
+}
+
+/* ---- rune_ui/forms.css ---- */
+/* Fields, inputs, switches, choices, segmented controls, search and filter bars. */
+
+@layer runeui.rune.base {
+  input:is([type="text"], [type="email"], [type="password"], [type="url"], [type="search"], [type="number"], [type="tel"], [type="date"], [type="datetime-local"], [type="time"], [type="month"], :not([type])), select, textarea {
+    width: 100%; height: var(--control-h); padding: 0 .625rem;
+    border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text);
+    font: inherit; transition: border-color .12s, box-shadow .12s;
+  }
+  /* Several lines are a box, so a box's corners: round corners make a control a pill, not a textarea. */
+  textarea { height: auto; min-height: 5rem; padding: var(--s-2) .625rem; border-radius: var(--radius-lg); resize: vertical; }
+  select { padding-right: 1.75rem; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+  input::placeholder, textarea::placeholder { color: var(--text-faint); }
+  input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: color-mix(in srgb, var(--danger) 60%, var(--line-strong)); }
+  input[type="checkbox"], input[type="radio"] { width: .9375rem; height: .9375rem; margin: 0; accent-color: var(--accent); }
+  fieldset { padding: 0; border: 0; min-width: 0; }
+  legend { padding: 0; font-weight: var(--weight-strong); }
+  label { cursor: default; }
+}
+
+@layer runeui.rune.components {
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field > label, .field__label { font-weight: var(--weight-strong); }
+  .field__hint { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+  .field--inline { display: flex; flex-direction: row; align-items: center; gap: var(--s-2); }
+
+  /* Fields side by side, one column on a narrow screen. */
+  .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-4); }
+
+  select.select--sm { height: var(--control-h-sm); width: auto; font-size: var(--text-meta); }
+  input.input--sm { height: var(--control-h-sm); font-size: var(--text-meta); }
+
+  .checkbox { display: inline-flex; align-items: center; gap: var(--s-2); cursor: pointer; }
+
+  .switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 2.125rem; height: 1.25rem; }
+  .switch input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .switch__track { position: relative; width: 100%; height: 100%; border-radius: var(--radius-pill); background: var(--layer-3); transition: background .17s var(--ease); }
+  .switch__track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 1rem; height: 1rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .25); transition: transform .17s var(--ease); }
+  .switch input:checked + .switch__track { background: var(--accent); }
+  .switch input:checked + .switch__track::after { transform: translateX(.875rem); }
+  .switch input:focus-visible + .switch__track { box-shadow: var(--ring); }
+  .switch input:disabled + .switch__track { opacity: .45; }
+
+  .choice { display: flex; flex-direction: column; gap: var(--s-2); padding: 0; border: 0; }
+
+  .segmented { display: inline-flex; padding: 2px; border-radius: var(--radius); background: var(--layer-3); }
+
+  /* rune-rows: the list of repeating rows. */
+
+  .search { position: relative; display: flex; align-items: center; flex: 1 1 16rem; min-width: 12rem; }
+  .search .icon { position: absolute; left: .625rem; color: var(--text-faint); pointer-events: none; }
+  .search input { padding-left: 2rem; }
+
+
+  .copy-field { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+  .copy-field code { flex: 1; min-width: 0; padding: 5px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy { display: inline-flex; }
+}
+
+/* ---- rune_ui/cards.css ---- */
+/* Page header, cards, folds, empty states. */
+
+@layer runeui.rune.components {
+  .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3) var(--s-4); min-height: var(--control-h); }
+
+  .card { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-4) var(--s-5); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .card__head { display: flex; flex-direction: column; gap: 2px; }
+  .card__title { font-size: var(--text-read); }
+  .card__hint { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+  .card__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }
+  .card--flush { gap: 0; padding: 0; overflow: hidden; }
+  .card--flush > .card__head { padding: var(--s-3) var(--s-5); border-bottom: 1px solid var(--line); }
+  .card--flush > .list { padding: var(--s-1); }
+  .card--danger { background: color-mix(in srgb, var(--danger) 5%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
+
+  /* A card's parts beyond its head: .card__content (the body, when it needs one), .card__action
+     (beside the title and hint, top right), and a rule under the head or over the footer. */
+  .card__content { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+  .card__head:has(.card__action) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s-3); }
+  .card__head:has(.card__action) :is(.card__title, .card__hint, .card__header) { grid-column: 1; }
+  .card__action { grid-column: 2; grid-row: 1 / span 2; align-self: start; display: flex; align-items: center; gap: var(--s-2); }
+  .card__head--bordered { padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
+  .card__footer--bordered { padding-top: var(--s-3); border-top: 1px solid var(--line); }
+  .card--sm { gap: var(--s-3); padding: var(--s-3) var(--s-4); }
+  .card--flush > .card__content, .card--flush > .card__footer { padding: var(--s-3) var(--s-5); }
+
+  /* A <details> that folds: .fold > summary.fold__summary (with a .fold__chevron icon). */
+  .fold { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading); }
+  .fold__chevron { width: .75rem; height: .75rem; color: var(--text-faint); transition: transform .12s var(--ease); }
+  [open] > .fold__summary .fold__chevron, [open] > .card__fold-summary .fold__chevron { transform: rotate(90deg); }
+  .card--fold { display: block; }
+  .card__fold-summary { display: flex; align-items: center; justify-content: space-between; font-weight: var(--weight-strong); }
+  .card--fold[open] > .card__fold-summary { margin-bottom: var(--s-4); }
+
+  .empty { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); padding: var(--s-6) var(--s-5); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted); text-align: center; }
+  .empty--compact { align-items: flex-start; padding: var(--s-3) var(--s-4); border: 0; text-align: left; color: var(--text-faint); }
+}
+
+/* ---- rune_ui/lists.css ---- */
+/* Lists: rows of avatar · title · muted detail · meta, grouped by day if wanted. */
+
+@layer runeui.rune.components {
+  .list { display: flex; flex-direction: column; gap: 1px; }
+  .list-row { display: flex; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: 6px var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+  a.list-row:hover, a.list-row:focus-visible { background: var(--hover); color: var(--text); }
+  .list-row--tall { align-items: flex-start; }
+  .list-row > .icon { color: var(--text-faint); }
+  .list-row__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
+  .list-row__sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); }
+  .list-row--tall .list-row__sub { white-space: normal; }
+  .list-row__meta { flex: 0 0 auto; display: flex; align-items: center; gap: var(--s-2); color: var(--text-faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* A row with more to it: a picture (__media), a title over a description (__content with
+     __title and __desc), and buttons at the end (__actions). */
+  .list-row__media { flex: 0 0 auto; display: inline-flex; align-items: center; color: var(--text-faint); }
+  .list-row__content { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .list-row__content > .list-row__title { flex: none; }
+  .list-row__desc { min-width: 0; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); overflow-wrap: anywhere; }
+  .list-row__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+  .list-row--outline { border: 1px solid var(--line); border-radius: var(--radius); }
+
+
+  [data-nav-item]:focus-visible { box-shadow: var(--ring); }
+}
+
+/* ---- rune_ui/settings.css ---- */
+/* Settings: a heading above a card of label / control rows. */
+
+@layer runeui.rune.components {
+  .settings-group { display: flex; flex-direction: column; gap: var(--s-2); }
+  .settings-group__title { padding: 0 var(--s-1); color: var(--text-muted); font-size: var(--text-ui); }
+  .settings-group__hint { padding: 0 var(--s-1); color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+  .settings-group__card { display: flex; flex-direction: column; background: var(--layer-1); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
+  .setting-row + .setting-row { border-top: 1px solid var(--line); }
+  .setting-row__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .setting-row__label { color: var(--text); }
+  .setting-row__hint { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+  .setting-row__control { display: flex; align-items: center; gap: var(--s-3); }
+  .setting-row__control input:not([type="checkbox"], [type="radio"]) { width: 20rem; max-width: 100%; }
+  @media (max-width: 860px) {
+    .setting-row { flex-direction: column; align-items: stretch; }
+    .setting-row__control input:not([type="checkbox"], [type="radio"]) { width: 100%; }
+  }
+}
+
+/* ---- rune_ui/flash.css ---- */
+@layer runeui.rune.components {
+  .flashes { display: flex; flex-direction: column; gap: var(--s-2); }
+  .flash { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: var(--row-h); padding: 6px 6px 6px var(--s-4); border: 1px solid; border-radius: var(--radius); }
+  .flash--notice { background: color-mix(in srgb, var(--ok) 8%, var(--panel)); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+  .flash--alert { background: color-mix(in srgb, var(--danger) 8%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+  .flash--info { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 28%, transparent); }
+  .flash--attention { background: color-mix(in srgb, var(--attention) 9%, var(--panel)); border-color: color-mix(in srgb, var(--attention) 32%, transparent); }
+  .flash__text { flex: 1; min-width: 0; }
+  .flash__action-form { display: flex; flex: none; }
+  .flash.is-leaving { opacity: 0; transform: translateY(-4px); transition: opacity .25s, transform .25s; }
+
+  /* Toasts (flash_messages toast: true): a stack in the bottom right, above the page, each a solid
+  /* card with its tint over the panel. --toast-bottom lifts the stack (above buttons in that
+  /* corner); --toast-z sets what it floats over. */
+  .flashes--toast {
+    position: fixed; right: calc(var(--s-3) + env(safe-area-inset-right)); bottom: calc(var(--toast-bottom, var(--s-3)) + env(safe-area-inset-bottom));
+    z-index: var(--toast-z, 60); width: min(24rem, 100vw - 2 * var(--s-3)); pointer-events: none;
+  }
+  /* A toast slides in from the side and eases to a stop, then fades away softly. */
+  .flashes--toast .flash { pointer-events: auto; background-color: var(--panel); box-shadow: var(--shadow-popover, 0 8px 24px rgb(0 0 0 / .12)); animation: rune-toast-in var(--motion-slow) var(--ease); }
+  .flashes--toast .flash--notice { background-image: linear-gradient(color-mix(in srgb, var(--ok) 8%, transparent), color-mix(in srgb, var(--ok) 8%, transparent)); }
+  .flashes--toast .flash--alert { background-image: linear-gradient(color-mix(in srgb, var(--danger) 8%, transparent), color-mix(in srgb, var(--danger) 8%, transparent)); }
+  .flashes--toast .flash--info { background-image: linear-gradient(color-mix(in srgb, var(--accent) 7%, transparent), color-mix(in srgb, var(--accent) 7%, transparent)); }
+  .flashes--toast .flash--attention { background-image: linear-gradient(color-mix(in srgb, var(--attention) 9%, transparent), color-mix(in srgb, var(--attention) 9%, transparent)); }
+  .flashes--toast .flash.is-leaving { opacity: 0; transform: scale(.97); transition: opacity var(--motion-slow) var(--ease-in), transform var(--motion-slow) var(--ease-in); }
+  @keyframes rune-toast-in { from { opacity: 0; transform: translateX(calc(100% + var(--s-3) + env(safe-area-inset-right))); } }
+  @media (prefers-reduced-motion: reduce) {
+    .flashes--toast .flash { animation: rune-toast-fade .2s ease-out; }
+    .flashes--toast .flash.is-leaving { transform: none; transition: opacity .3s ease; }
+  }
+  @keyframes rune-toast-fade { from { opacity: 0; } }
+}
+
+/* ---- rune_ui/palette.css ---- */
+/* The ⌘K palette. */
+
+@layer runeui.rune.components {
+}
+
+/* ---- rune_ui/prose.css ---- */
+/* .prose: rendered Markdown or rich text, spaced with gap. */
+
+@layer runeui.rune.components {
+  .prose > :is(ul, ol) { display: flex; flex-direction: column; gap: var(--s-1); }
+  .prose :is(h1, h2, h3, h4) { margin-top: var(--s-2); font-size: .9375rem; line-height: 1.375rem; font-weight: 600; }
+  .prose :is(th, td) { padding: var(--s-2) var(--s-3); border: 1px solid var(--line); text-align: left; }
+}
+
+/* ---- rune_ui/composer.css ---- */
+/* The composer: a message box (Lexxy, no toolbar) with its context and send button. Put it in
+   .composer-dock to keep it at the bottom of the panel as the page scrolls. */
+
+@layer runeui.rune.components {
+  .composer { gap: var(--s-2); }
+}
+
+/* ---- rune_ui/overlays.css ---- */
+/* Popover menus, dialogs, sheets and tooltips. */
+
+@layer runeui.rune.components {
+  .popover-menu { display: inline-flex; }
+  .popover.menu__items { position: fixed; inset: auto; right: auto; margin: 0; border: 0; color: var(--text); }
+  .popover:not(:popover-open) { display: none; }
+  :is(.popover:popover-open, .menu[open] .menu__items) { animation: rune-pop var(--motion-fast) var(--ease); }
+
+  .dialog-wrap { display: contents; }
+  .dialog { width: min(32rem, calc(100vw - 2rem)); max-height: calc(100vh - 4rem); margin: 10vh auto auto; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); overflow: auto; }
+  .dialog::backdrop { background: rgb(0 0 0 / .45); }
+  .dialog[open] { animation: rune-pop var(--motion) var(--ease); }
+  .dialog[open]::backdrop { animation: rune-fade var(--motion) var(--ease); }
+  .dialog--lg { width: min(48rem, calc(100vw - 2rem)); }
+  .dialog__box { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-4) var(--s-5) var(--s-5); }
+  .dialog__header { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+  .dialog__title { font-size: var(--text-read); }
+  .dialog__hint { color: var(--text-muted); }
+
+  .dialog__body { display: flex; flex-direction: column; gap: var(--s-4); }
+  .dialog__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }
+
+  .sheet { width: min(28rem, 100vw); height: 100vh; max-height: none; margin: 0 0 0 auto; border-radius: var(--radius-panel) 0 0 var(--radius-panel); }
+  .sheet[open] { animation: rune-slide var(--motion) var(--ease); }
+
+  /* A tooltip on anything with data-tooltip="…" (CSS only; the title attribute stays for touch). */
+  [data-tooltip] { position: relative; }
+  [data-tooltip]:is(:hover, :focus-visible)::after {
+    content: attr(data-tooltip); position: absolute; bottom: calc(100% + 6px); left: 50%; z-index: 40; transform: translateX(-50%);
+    padding: 3px 7px; border-radius: var(--radius-xs); background: var(--text); color: var(--panel);
+    font-size: var(--text-meta); font-weight: var(--weight); line-height: var(--leading-tight); white-space: nowrap; pointer-events: none;
+  }
+}
+
+/* ---- rune_ui/data.css ---- */
+/* Tables, tabs, alerts, skeletons and progress. */
+
+@layer runeui.rune.components {
+  .table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+  .table :is(th, td) { padding: var(--s-2) var(--s-3); text-align: left; vertical-align: middle; border-bottom: 1px solid var(--line); }
+  .table th { height: 2.25rem; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); white-space: nowrap; }
+  .table td { height: var(--row-h); }
+  .table tbody tr:last-child td { border-bottom: 0; }
+  .table tbody tr:hover td { background: var(--hover); }
+  .table a:not([class]) { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
+  .table a:not([class]):hover { color: var(--accent); }
+  .table .number { text-align: right; }
+
+  /* Column widths, one convention for every table: the column that identifies the row (the first,
+     or the one marked table__grow) takes the leftover width and wraps or truncates; every other
+     column fits its content, one gap apart, so narrow facts (type, status, dates) sit together.
+     table__cap keeps long text in a fitted column from taking over (it truncates). table--even
+     opts out, for a table whose columns are all alike; a table that sizes its own columns with a
+     <colgroup> is left to it. */
+  .table:not(.table--even, :has(colgroup)) :is(th, td):not(:first-child) { width: 1%; white-space: nowrap; }
+  .table:not(.table--even, :has(colgroup)):has(.table__grow) :is(th, td):first-child { width: 1%; white-space: nowrap; }
+  .table:not(.table--even, :has(colgroup)) :is(th, td).table__grow { width: auto; white-space: normal; }
+  .table .table__cap { display: inline-block; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+
+  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); border-bottom: 1px solid var(--line); }
+  .tabs__tab { display: inline-flex; align-items: center; gap: 6px; height: 2.25rem; padding: 0 var(--s-2); margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--text-muted); font: inherit; text-decoration: none; cursor: pointer; }
+  .tabs__tab:hover { color: var(--text); }
+  .tabs__tab:is([aria-current="page"], [aria-pressed="true"], [aria-selected="true"]) { border-bottom-color: var(--text); color: var(--text); font-weight: var(--weight-strong); }
+
+  .tabs--icons { gap: 2px; padding: 2px; border: 0; border-radius: var(--radius); background: var(--layer-2); }
+  .tabs--icons .tabs__tab { height: var(--control-h-sm); padding: 0 var(--s-2); margin: 0; border: 0; border-radius: var(--radius-sm); }
+  .tabs--icons .tabs__tab:is([aria-current="page"], [aria-pressed="true"], [aria-selected="true"]) { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  .tabs--pills { gap: 2px; padding: 2px; border: 0; border-radius: var(--radius); background: var(--layer-2); width: fit-content; }
+  .tabs--pills .tabs__tab { height: var(--control-h-sm); padding: 0 var(--s-3); margin: 0; border: 0; border-radius: var(--radius-sm); }
+  .tabs--pills .tabs__tab:is([aria-current="page"], [aria-pressed="true"], [aria-selected="true"]) { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  .table a.row-link { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
+  .table a.row-link:hover { color: var(--accent); }
+
+  .alert { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); border: 1px solid; border-radius: var(--radius); }
+  .alert__title { font-weight: var(--weight-strong); }
+  .alert--attention { background: color-mix(in srgb, var(--attention) 8%, var(--panel)); border-color: color-mix(in srgb, var(--attention) 32%, transparent); }
+  .alert--danger { background: color-mix(in srgb, var(--danger) 7%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+
+  .alert:has(.alert__icon) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--s-3); }
+  .alert:has(.alert__icon) :is(.alert__title, .alert__body, p, ul) { grid-column: 2; }
+  .alert__icon { grid-row: 1 / span 2; margin-top: 2px; }
+  .alert--danger .alert__icon { color: var(--danger); }
+  .alert--attention .alert__icon { color: var(--attention); }
+  .alert__body { color: var(--text-muted); }
+  ul.alert__body { padding-left: 1.2em; }
+
+  .skeleton { display: block; height: 1em; border-radius: var(--radius-xs); background: linear-gradient(90deg, var(--layer-2), var(--layer-1), var(--layer-2)); background-size: 200% 100%; animation: skeleton 1.4s ease-in-out infinite; }
+  @keyframes skeleton { to { background-position: -200% 0; } }
+
+}
+
+
+/* ---- The compatibility helpers' runeui parts (RuneCompatHelper) ---- */
+
+/* A trigger written with the caller's own class (menu's and dialog's trigger_class:) is a
+   <button> now, where rune's menu had a <summary>: bare, so that class draws all of it. In
+   rune's base layer, under every component rule. */
+@layer runeui.rune.base {
+  :is(ui-menu-trigger, ui-dialog-trigger, ui-drawer-trigger, ui-alert-dialog-trigger) > button { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: inherit; cursor: pointer; }
+}
+
+/* Unlayered from here, so these win over runeui's layers: what makes a runeui part drawn by a
+   compat helper sit right among rune's classes still written by hand around it. */
+
+/* Inside a runeui part the bridge gives --accent and --ring shadcn's meanings (a quiet fill, a
+   colour). What callers put in a compat helper's block is rune markup (btn, links, bare inputs),
+   which reads them as the brand colour and the focus shadow: those slots get rune's back. */
+.card > [data-slot="card-content"], .card [data-slot="card-action"], .callout > [data-slot="alert-description"],
+.empty > [data-slot="empty-action"], .page-header > [data-slot="page-actions"], .dialog-wrap [data-slot="dialog-body"],
+.dialog-wrap [data-slot="drawer-body"], .field[data-slot="field"] {
+  --accent: var(--rune-accent);
+  --ring: var(--rune-ring);
+}
+
+/* menu(…, trigger_class:): the trigger fills the menu's box as rune's <summary> did, and shows
+   it's open. */
+:is(.menu, .popover-menu) > ui-menu-trigger { display: contents; }
+.menu > ui-menu-trigger > .sidebar__account[aria-expanded="true"] { background: var(--hover); color: var(--text); }
+
+/* card(): runeui's card at rune's measure, so it lines up with the cards still written as
+   .card around it (its padding moves from the card to its parts, which is how runeui's card
+   lets content run to the edges: card--flush). */
+.card[data-slot="card"] { gap: var(--s-4); padding: var(--s-4) 0; border-radius: var(--radius-lg); box-shadow: none; }
+.card > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) { padding-inline: var(--s-5); }
+.card > [data-slot="card-header"] { gap: 2px; }
+.card > [data-slot="card-header"] [data-slot="card-description"] { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+.card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+.card--flush[data-slot="card"] { gap: 0; padding: 0; overflow: hidden; }
+.card--flush > [data-slot="card-header"] { padding-block: var(--s-3); border-bottom: 1px solid var(--line); }
+.card--flush > [data-slot="card-content"] { gap: 0; padding-inline: 0; }
+.card--flush > [data-slot="card-content"] > .list { padding: var(--s-1); }
+
+/* The small button's text and the icon button's ink, as rune's beside them. */
+.ui-button.btn { gap: 6px; padding: 0 var(--s-3); }
+.ui-button.btn--sm { padding: 0 .625rem; font-size: var(--text-meta); }
+.ui-button.icon-button { color: var(--text-muted); }
+.ui-button.icon-button:hover { color: var(--text); }
+.ui-button.icon-button--danger, .ui-button.icon-button--danger:hover { color: var(--danger); }
+.ui-button.btn .icon, .ui-button.icon-button .icon { flex: 0 0 auto; }
+
+/* badge(): a pill, as the badges and counts written by hand beside it; busy pulses. */
+.badge[data-slot="badge"] { border-radius: var(--radius-pill); }
+.badge--outline[data-slot="badge"] { box-shadow: none; }
+
+/* field(): its hint as .field__hint beside it. */
+.field > [data-slot="field-description"] { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+.card > [data-slot="card-header"] [data-slot="card-title"] { display: flex; align-items: center; min-height: var(--control-h-sm); line-height: var(--leading); }
+
+/* menu(): the widths the nav's and the portal's menus had, a key at the end of its row, and
+   Runwell's icons in the ink runeui gives its own. */
+.sidebar__footer [data-slot="menu-content"] { min-width: 15rem; }
+.portal-topbar [data-slot="menu-content"] { min-width: 14rem; }
+:is(.menu, .popover-menu) .ui-item kbd { margin-inline-start: auto; }
+:is(.menu, .popover-menu) .ui-item .icon { color: var(--text-muted); }
+:is(.menu, .popover-menu) .ui-item .theme-toggle { display: inline-flex; }
+.portal-user__label .portal-user__email { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); }
+
+/* progress_bar(): as wide as the caller's .progress says (runeui's keeps a minimum for a bar
+   on its own line), and the muted track rune's bar had. */
+.progress[data-slot="progress"] { flex: 0 0 auto; min-width: 0; }

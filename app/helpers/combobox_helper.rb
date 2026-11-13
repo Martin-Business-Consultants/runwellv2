@@ -31,7 +31,7 @@ module ComboboxHelper
       wrapper = tag.div(class: class_names("combobox", "combobox--sm": select["class"].to_s.include?("select--sm"), "combobox--multiple": multiple),
         data: {
           controller: "dialog #{controller} popup-filter navigable-list",
-          action: [ "keydown.esc->dialog#close:stop", "click@document->dialog#closeOnClickOutside", "dialog:show->navigable-list#reset",
+          action: [ "keydown.esc->dialog#closeOnEscape", "click@document->dialog#closeOnClickOutside", "dialog:show->navigable-list#reset",
                     "dialog:close->popup-filter#clearInput", "keydown->navigable-list#navigate", "popup-filter:changed->navigable-list#reset", select["data-action"] ].compact.join(" "),
           dialog_orient_value: "false",
           combobox_blank_submits_value: ("true" unless multiple),

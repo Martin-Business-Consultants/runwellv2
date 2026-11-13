@@ -8,10 +8,10 @@ module ApplicationHelper
     tag.title(unread.to_i.positive? ? "(#{unread}) #{title}" : title)
   end
 
-  # Runwell's icons are rune_ui's (config/initializers/rune_ui.rb registers them): an inline SVG,
-  # hidden from screen readers. A name nobody registered (a plugin's) draws a dot, not an error.
+  # One of Runwell's icons (Runwell::Icons, 16×16 line drawings): an inline SVG, hidden from
+  # screen readers. A name nobody drew (a plugin's) draws a dot, not an error.
   def icon_tag(name, **options)
-    name = RuneUi.icons.key?(name.to_s.to_sym) ? name : "dot"
+    name = Runwell::Icons.key?(name) ? name : "dot"
     icon(name, css: class_names("icon--#{name}", options.delete(:class)).presence)
   end
 
