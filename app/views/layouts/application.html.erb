@@ -38,7 +38,7 @@
 
       <% if authenticated? && !@hide_footer_frames %>
         <div id="footer_frames" data-turbo-permanent>
-          <%= render "bar/bar" %>
+          <%= render "layouts/shared/search" %>
         </div>
         <%= render "layouts/shared/side_panel", task: side_panel_task, peek: side_panel_peek %>
         <%= turbo_stream_from Current.user, :notifications %>

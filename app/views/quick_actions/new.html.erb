@@ -15,7 +15,7 @@
         </header>
         <div class="field quick-action__where">
           <span class="field__label">Where it goes</span>
-          <%= render "quick_actions/picker", records: @action.records(@record), record: @record, form_id: "quick_action_form", types: @action.types %>
+          <%= render "quick_actions/record_picker", record: @record, form_id: "quick_action_form", types: @action.types %>
         </div>
         <%= render @action.partial, form_id: "quick_action_form" %>
       </div>

@@ -386,7 +386,7 @@ a loop, and pay off only when the block is slow (measure; the History timeline i
 Shared pieces, so the same markup is never written twice (all helpers, so they work inside
 `form_with`): a menu is `ui :menu` (one on the page that many buttons open, `data-runeui-open`,
 as the task pickers do), or `popup_menu label:, title: do … end` (`PopupHelper`, Fizzy's popup,
-left for the quick-actions tray and plugins); an on/off switch is
+left for plugins); an on/off switch is
 `switch_field form, :attr, label:, hint:, submit_on_change:` (`ui :switch`, sending "0" when off;
 with a hint, the settings row; without, the switch beside its label), or `ui :switch, name:` with
 no form builder (`switch_tag { check_box_tag … }`, the old native one, stays for plugins); a
@@ -602,10 +602,10 @@ development. Build new markup with it:
   Bare inputs, selects and textareas need no class; every `<form>` is a flex column with a gap
   (`form.button_to` is inline), so an inline form gets its own layout class
 - Menus and pickers are runeui's (`ui :menu`, `ui :combobox`, `ui :popover`, `ui :select`). Fizzy's
-  popup (`<dialog class="popup">`, `popup_menu`, the `dialog` and `combobox` controllers) is left
-  only in the quick-actions tray (its record picker) and for plugins
-- Native elements over JavaScript: `<dialog>` (opened by `rune-dialog`, or the `dialog`
-  controller for popups), runeui's `ui :popover` and `ui :menu`, `<details>`, real
+  popup (`<dialog class="popup">`, `popup_menu`, the `dialog` controller) is left for plugins, and
+  the `dialog` controller for the notifications tray and the modals
+- Native elements over JavaScript: `<dialog>` (the `dialog` controller's modals), runeui's
+  `ui :dialog`, `ui :popover` and `ui :menu`, `<details>`, real
   checkboxes and radios. CSS uses descendant or class selectors, not child ones: in development
   ReActionView wraps every ERB output in a `display: contents` span
 - Index tables are `layouts/shared/_list_table` (runeui's `ui :table`, `runwell/components.css`
@@ -705,21 +705,24 @@ ReActionView rules:
   relevance, with `record.hit.highlight(:title)` and `(:content)` HTML-safe. It's fuzzy: exact
   matches first, then words starting with what was typed or a typo or two from it, taken from the
   index's vocabulary (`Search::Vocabulary`, fts5vocab). Agent name resolution passes `fuzzy: false`
-- Results show as you type (`bar#searchAsYouType`, from two characters; the /search page through
-  `form#debouncedSubmit`), grouped in a fixed order: clients, work, tasks, then people (the team, by
-  name or email, `Search#people`, a direct lookup since users aren't indexed), then the rest
-  (`SearchesHelper::SEARCH_PRIORITY`)
-- The search bar is Fizzy's (`bar/_bar`, `bar_controller`), rendered in the
-  application layout footer for signed-in staff. It shows only once opened (`s`, ⌘K): the
-  bottom of staff pages stays clear (the quick actions' + and the notification bell sit at the right of the
-  panel bar, across from the breadcrumb, `runwell/home.css`)
+- Results are grouped in a fixed order: clients, work, tasks, then people (the team, by name or
+  email, `Search#people`, a direct lookup since users aren't indexed), then the rest
+  (`SearchesHelper::SEARCH_PRIORITY`, `search_result_groups`)
+- Search is runeui's command palette (`layouts/shared/_search`: `ui :command, dialog: true,
+  src: search_path, min: 2`), in the application layout's footer for signed-in staff, opened by
+  `s` (its out-of-sight button) or ⌘K (the palette's own). From two characters it asks /search as
+  you type; `searches#show` answers a request carrying `Runeui-Command` with the palette's items
+  (`searches/_palette`, `search_palette_items`: each result a link, a task's opening the side
+  panel, anything else its page, then "See all results" to /search). Arrows and Enter pick, Esc
+  clears the box and then closes it. The /search page is every result for a query, its field
+  following what's typed (`form#debouncedSubmit` into the `search_results` frame, the address keeping `q`)
 
 ## Keyboard shortcuts
 
 Vim style, and everything reachable without a mouse. One Stimulus controller on `<body>`
 (`keyboard_controller`) handles every key; nothing else listens for letters. Keys act outside
 inputs and open dialogs; `⌘/Ctrl+Enter` saves from anywhere in a form. The `?` sheet
-(`layouts/shared/_shortcuts`, listed in `_shortcut_list`, also on Settings > Help) is the
+(`layouts/shared/_shortcuts`, listed in `_shortcut_list`) is the
 one place they are documented for people: add a new key there.
 
 | Key | Action |
@@ -728,10 +731,10 @@ one place they are documented for people: add a new key there.
 | `x` | Pick the table row you're on, for the bulk bar |
 | `Enter` `o` | Open the item you're on |
 | `e` `d` | Edit, or delete / archive / close (asks first; a task goes at once, with Undo): the item you're on, else the record on screen |
-| `Esc` | Drop the selection, then up a level (`parent_page`), cancel a form, close a dialog |
+| `Esc` | Close a popup or dialog (runeui's handle it themselves), then drop the selection, then up a level (`parent_page`); in a form opened in place, cancel it |
 | `g` + `c w t b u i n s` | Clients, work, tasks, board, users, intake, notifications, settings; `g 1`… plugin pages |
 | `n` `v` `/` | New record, next view (Tasks: table / board), focus the page filter |
-| `s` or `⌘K`, `a`, `?` | Search, quick actions, the shortcut sheet |
+| `s` or `⌘K`, `a`, `?` | Search (the palette), quick actions (the + popover), the shortcut sheet |
 | `i` | Ask AI (the AI plugin) |
 | `g t n` | Add a task (the quick action) to a piece of work or client picked in it, the one on screen to start; `g t` waits a moment for the `n`, vim style |
 | `.` | Hint mode on or off |
@@ -749,13 +752,25 @@ Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-f
 it instead, `data-keys-anywhere` works while the element is out of sight (in a closed menu), `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
 ⌘ on a Mac, Ctrl elsewhere). A key declared inside an item fires for the selected item only
 (`row_actions` marks edit `e` and delete `d`); one outside any item is the page's. Show the
-key on the button with `<kbd class="hide-on-touch">`.
+key on the button with `<kbd class="hide-on-touch">` (or `ui :kbd`).
+
+Keys typed into runeui's controls stay theirs: the keyboard controller ignores a key another
+handler marked handled (`defaultPrevented`), one typed in a field or editor, and any key while a
+dialog, sheet, palette or popup is open or holds focus (`OVERLAY`: runeui's dialogs, menus,
+popovers, selects, comboboxes, date pickers and `ui-command`), so Esc closes the popup and only the
+next Esc drops the selection or goes up a level.
+
+The `?` sheet is runeui's `ui :dialog` (`#shortcuts`, keys as `ui :kbd`), opened by its button in
+the nav's foot (`data-keys="?"`, which the account menu's Keyboard shortcuts presses too), with hint
+mode's switch at its foot (`#hints-switch`, `change->keyboard#setHints`, kept in step by the
+controller).
 
 Hint mode (`.`, or the switch in the `?` sheet) teaches the keys in place: the keyboard controller
 copies each `data-keys` into `data-key-hint` (the first alternative, `mod` as ⌘ or Ctrl) and
 `runwell/components.css` draws it as a keycap over the control, never moving anything; keys inside an item show
 only on the row you're on, and controls that already show a `<kbd>` get none.
-`layouts/shared/_hint_legend` lists the keys with no control (j/k, Enter, /, s, a, Esc, ?). It's
+`layouts/shared/_hint_legend` lists the keys with no control (j/k, Enter, /, s, a, Esc, ?, as
+`ui :kbd`). It's
 remembered per browser (localStorage `keyHints`), off by default, and hidden on touch devices.
 A new `data-keys` gets its hint for free. A new index page's "Add a …" button
 renders `render "layouts/shared/new_button", text: "Add a client", path: new_client_path`.
@@ -839,9 +854,11 @@ described in `docs/plugins.md`.
 
 ## Quick actions
 
-The tray at the right of the panel bar (`A`, `quick_actions/_tray`) is Fizzy's tray, opening downwards. At the top of the
-fan is a record picker (Fizzy's filter + combobox) set to the record on screen
-(`current_record`) and able to pick any other; below it, one entry per action: Note,
+The + at the right of the panel bar (`A`, `quick_actions/_tray`) opens a runeui `ui :popover`
+below it (`#quick-actions`). At its top is the record picker (`quick_actions/_record_picker`: a
+`ui :combobox, trigger: true` searching the server, `src:` `quick_action_records_path`, which
+answers JSON by kind, `quick_action_record_items`) set to the record on screen
+(`current_record`) and able to find any other; below it, one entry per action: Note,
 Document and Task in the core (`g t n` opens the task form straight away, on a piece of work or a client), plus any a plugin registers
 (`Runwell::Plugins.quick_action key, label:, icon:, partial:, types:, title:, context:`). The
 entries submit one GET form with the picked record, and the action's form opens in a modal

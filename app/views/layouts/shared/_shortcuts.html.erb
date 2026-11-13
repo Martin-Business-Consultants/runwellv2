@@ -1,30 +1,17 @@
 <%# locals: () %>
-<%# The ? sheet: a button in the nav opening a dialog (rune_ui's), listing every key. %>
-<div class="dialog-wrap" data-controller="rune-dialog" data-action="keydown.esc->rune-dialog#close:stop">
-  <button type="button" class="icon-button nav-shortcuts-button" title="Help and keyboard shortcuts" aria-haspopup="dialog" data-keys="?" data-action="rune-dialog#open">
-    <kbd>?</kbd>
+<%# The ? sheet: every key (layouts/shared/_shortcut_list) in runeui's ui :dialog, opened by ? (its
+    button sits out of sight in the nav's foot, where the keyboard controller can press it; the
+    account menu's Keyboard shortcuts presses it too), with hint mode's switch at its foot. %>
+<% trigger = capture do %>
+  <button type="button" class="nav-shortcuts-button" title="Help and keyboard shortcuts" data-keys="?">
     <span class="visually-hidden">Keyboard shortcuts</span>
   </button>
-  <dialog class="dialog dialog--lg shortcuts" data-rune-dialog-target="dialog" data-action="click->rune-dialog#backdrop" aria-labelledby="shortcuts_title">
-    <div class="dialog__box">
-      <header class="dialog__header">
-        <div class="stack shortcuts__intro">
-          <h2 class="dialog__title" id="shortcuts_title">Keyboard shortcuts</h2>
-          <p class="muted">Letters work anywhere outside a text field. A pair like <kbd>g</kbd> <kbd>c</kbd> is pressed one key after the other.</p>
-        </div>
-        <%= icon_button :close, label: "Close", data: { action: "rune-dialog#close" } %>
-      </header>
-      <div class="dialog__body">
-        <%= render "layouts/shared/shortcut_list" %>
-      </div>
-      <footer class="dialog__actions shortcuts__footer">
-        <button type="button" class="<%= button_classes(variant: :secondary) %> hints-switch" data-action="keyboard#toggleHints">
-          <span class="hints-switch__show">Show key hints</span>
-          <span class="hints-switch__hide">Hide key hints</span>
-          <kbd class="hide-on-touch">.</kbd>
-        </button>
-        <button type="button" class="<%= button_classes(variant: :primary) %>" data-action="rune-dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
-      </footer>
-    </div>
-  </dialog>
-</div>
+<% end %>
+<% footer = capture do %>
+  <%= ui :switch, id: "hints-switch", label: "Show each key on the control it presses", data: { action: "change->keyboard#setHints" } %>
+  <%= ui :button, content: "Close", variant: :outline, data: { runeui_close: "shortcuts" } %>
+<% end %>
+<%= ui :dialog, id: "shortcuts", trigger: trigger, size: :xl, class: "shortcuts", title: "Keyboard shortcuts",
+      description: "Letters work anywhere outside a text field. A pair like g c is pressed one key after the other.", footer: footer do %>
+  <%= render "layouts/shared/shortcut_list" %>
+<% end %>

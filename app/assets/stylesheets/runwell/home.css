@@ -1,57 +1,18 @@
-/* Notifications, Search, Quick actions and the bar, on rune_ui's tokens
+/* Notifications, Search and Quick actions, on rune_ui's tokens
 /* (docs/rune-ui-migration.md). Unlayered, so these win over rune's components.
 /*
-/* 2 The bar and search   3 Trays   4 Notifications   5 Quick actions */
+/* 2 Search   3 Trays   4 Notifications   5 Quick actions */
 
-/* ======================================================================= 2 The bar and search */
+/* ======================================================================= 2 Search */
 
-/* Closed, the bar takes no room and no clicks: its button (S, ⌘K) is on the page, since keys
-/* only click what's there, but out of sight. */
-.bar { position: fixed; inset: auto 0 0 0; z-index: var(--z-bar); display: flex; flex-direction: column; pointer-events: none; }
-.bar__placeholder { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.bar__backdrop, .bar__footer { display: none; }
-
-/* Open (the placeholder hides once S is pressed): a command box a fifth of the way down, over a
-/* dimmed page, popping in as every dialog does (rune's --motion): a large field across its top,
-/* the results under it. */
-.bar:has(.bar__placeholder[hidden]) {
-  inset: 18% 0 auto 0; z-index: calc(var(--z-tray) + 10); width: calc(100% - 2rem); max-height: calc(78dvh - 1rem); margin-inline: auto; padding: 0;
-  overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); color: var(--text);
-  box-shadow: 0 24px 64px -12px rgb(0 0 0 / .28), var(--shadow-popover);
-  pointer-events: auto; animation: rune-pop var(--motion) var(--ease);
-}
-@media (min-width: 640px) { .bar:has(.bar__placeholder[hidden]) { width: 40rem; } }
-.bar:has(.bar__placeholder[hidden]) .bar__backdrop { position: fixed; inset: 0; z-index: -1; display: block; background: rgb(0 0 0 / .28); animation: rune-fade var(--motion) var(--ease); }
-.bar__input { flex: 0 0 auto; padding: 0; }
-/* In the bar the field is the box's top edge: large, no frame or fill of its own, a rule under it,
-/* its icon in the brand's colour while you type. */
-.bar .search-box { height: 3.25rem; padding: 0 var(--s-2) 0 var(--s-4); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; }
-.bar .search-box .search-box__input { font-size: var(--text-read); }
-.bar .search-box:focus-within .search-box__icon { color: var(--accent); }
-
-/* The results under the box, whether or not their dialog is open: before a search the hint,
-/* after one the results. Empty, they take no room. */
-.bar .bar__modal {
-  position: static; z-index: auto; display: block; width: auto; max-width: none; height: auto; max-height: min(28rem, 55dvh); margin: 0; padding: var(--s-1);
-  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; border: 0; background: none; color: inherit;
-}
-.bar .bar__modal:not(:has(.search-results)) { display: none; }
-.bar:has(.bar__placeholder[hidden]) .bar__footer {
-  display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: var(--s-4);
-  margin: 0; padding: var(--s-2) var(--s-4);
-  border-top: 1px solid var(--line); background: var(--layer-1); color: var(--text-muted); font-size: var(--text-meta);
-}
-@media (any-hover: none) { .bar:has(.bar__placeholder[hidden]) .bar__footer { display: none; } }
-.bar__footer-key { display: inline-flex; align-items: center; gap: 6px; }
-
-/* The search box (bar and /search): an icon, the field without its own frame, and ✕. */
-.search-box { flex-direction: row; align-items: center; gap: 0; height: var(--control-h); padding: 0 2px 0 var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--layer-1); color: var(--text-muted); }
-.search-box__icon { color: var(--text-faint); }
-.search-box .search-box__input { flex: 1; min-width: 0; height: 100%; padding: 0 .625rem 0 6px; border: 0; background: transparent; box-shadow: none; color: var(--text); }
-.search-box .search-box__input:focus { box-shadow: none; }
-.search-box__input::-webkit-search-cancel-button { display: none; }
-.search-box .search-box__reset { width: 1.5rem; height: 1.5rem; }
-.search-box__reset .icon { width: .75rem; height: .75rem; }
+/* The palette (layouts/shared/_search, runeui's ui :command): a little wider than runeui's, its
+/* list taller. Runwell's icons and avatars sit in the icon slot; the match is bold. */
+.search-palette [data-command-dialog][data-slot="dialog-content"] { width: min(calc(100% - 2rem), 40rem); }
+.search-palette [data-slot="command-list"] { max-height: min(28rem, 55dvh); }
+.search-palette [data-slot="command-item-icon"] .icon { color: var(--muted-foreground); }
+.search-palette [data-slot="command-item"][data-highlighted] [data-slot="command-item-icon"] .icon { color: var(--accent-foreground); }
+.search-palette mark { background: none; color: inherit; font-weight: 600; }
+.search-palette mark span { display: none; }
 
 /* The results: groups by kind, a rule between them, rows of icon · title over the match · client. */
 .search-results { display: block; }
@@ -74,11 +35,9 @@
 .search-results mark { position: static; background: none; color: var(--text); font-weight: 600; white-space: inherit; }
 .search-results mark span { display: none; }
 
-/* /search: the same box and results, framed on the page. */
+/* /search: a field over every result, framed on the page. */
 .search-page { display: flex; flex-direction: column; width: min(100%, 42rem); margin: var(--s-4) auto 0; padding: var(--s-1); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); }
-.search-page .search-box { margin: var(--s-1) var(--s-1) 0; }
-.search-page .search-box:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-.search-page .search-box:has(.search-box__input:placeholder-shown) .search-box__reset { display: none; }
+.search-page__form { margin: var(--s-1) var(--s-1) 0; }
 
 /* ======================================================================= 3 Trays */
 
@@ -117,13 +76,18 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 .tray__empty { display: none; padding: var(--s-6) var(--s-4); color: var(--text-muted); text-align: center; }
 .tray__dialog:not(:has(.tray__item--notification)) .tray__empty { display: block; }
 
-/* The quick actions popover: its label, the record picker, then the actions (a menu). */
-.tray--actions .tray__dialog[open] { width: min(18rem, 100vw - 1.5rem); gap: var(--s-1); padding: var(--s-1); overflow: visible; }
-.tray__item--picker { margin-inline: calc(var(--s-1) * -1); padding: 0 var(--s-2) var(--s-2); border-bottom: 1px solid var(--line); }
-.tray__item--picker .quick-action__trigger { flex: 1; max-width: none; justify-content: space-between; }
-/* The tray hangs from the bar at the top, so the picker's list opens downwards. */
-.tray__item--picker .popup { inset: calc(100% + 4px) 0 auto auto; max-height: 60dvh; }
-.tray__item:has(.menu__item:focus-visible) { z-index: 1; }
+/* The quick actions (quick_actions/_tray, runeui's ui :popover under the +): a label, where it goes
+/* (the record picker), then a row per action. Runwell's markup inside a runeui part, so the
+/* brand's --accent and --ring are put back for the icons and focus. */
+.quick-actions [data-slot="popover-content"] { width: min(18rem, 100vw - 1.5rem); gap: 0; padding: var(--s-1); }
+.quick-actions__title { padding: var(--s-1) var(--s-2) 0; color: var(--muted-foreground); font-size: var(--text-meta); }
+.quick-actions__where { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-2) var(--s-2); border-bottom: 1px solid var(--border); margin-bottom: var(--s-1); }
+.quick-actions__on { color: var(--muted-foreground); font-size: var(--text-meta); }
+.quick-actions__where [data-slot="combobox"] { flex: 1; min-width: 0; }
+.quick-actions__where [data-slot="combobox-trigger"] { width: 100%; }
+.quick-actions__list { display: flex; flex-direction: column; }
+.quick-actions__item { width: 100%; border: 0; background: none; font: inherit; text-align: start; }
+.quick-actions__item .icon { color: var(--muted-foreground); }
 
 /* ======================================================================= 4 Notifications */
 
@@ -159,29 +123,19 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 
 /* The modal (quick_actions#new): a title and hint with ✕ across, where it goes, the form. */
 .quick-action:focus-visible { box-shadow: var(--shadow-popover); }
-/* The picker's list hangs out of the dialog rather than scrolling inside it, where there's room. */
-@media (min-height: 40rem) { .quick-action { overflow: visible; } }
 .quick-action__header { align-items: flex-start; }
 .quick-action__heading { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .quick-action__heading kbd { margin-inline: 1px; }
 .quick-action__optional { color: var(--text-muted); font-weight: var(--weight); }
 
-/* The picker (the modal and the tray): a pill showing the pick, its list a popup under it. */
-.quick-action__picker { position: relative; display: flex; align-items: center; gap: var(--s-2); }
-.quick-action__picker .popup { max-width: min(30rem, 100dvw - 4rem); }
-.quick-action__picker--full .quick-action__trigger { flex: 1; max-width: none; height: var(--control-h); justify-content: space-between; font-size: inherit; }
-.quick-action__records { max-height: 18rem; overflow-y: auto; }
-.quick-action__kind { flex: 0 0 auto; color: var(--text-faint); font-size: var(--text-xs); white-space: nowrap; }
-.quick-action__none { padding: var(--s-2) var(--s-3); color: var(--text-muted); }
+/* The picker in the modal: as wide as the field. */
+.quick-action__where [data-slot="combobox"], .quick-action__where [data-slot="combobox-trigger"] { width: 100%; }
 
 /* Documents: the drop target fills the form; the file input covers it, unseen, to take the click
 /* and the drop. */
 .quick-action__upload { position: relative; width: 100%; height: auto; min-height: 6rem; padding: var(--s-4); border: 1px dashed var(--line-strong); white-space: normal; font-weight: var(--weight); font-size: var(--text-meta); cursor: pointer; }
 .quick-action__upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .quick-action__upload:has(input[type="file"]:focus-visible) { box-shadow: var(--ring); }
-
-/* Open, search floats above everything else that floats: the side panel, the trays, toasts. */
-.bar:has(.bar__placeholder[hidden]) { z-index: calc(var(--z-tray) + 10); }
 
 /* The task's quick action (quick_actions/task): where it goes beside what needs doing on the first
 /* row, then its rows of fields (two to a row: lead and who else, due and the client switch) full

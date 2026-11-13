@@ -1,76 +1,77 @@
 <%# locals: () %>
-<%# Every key the keyboard controller answers to, grouped. Shown in the ? sheet. Letters act outside inputs; a pair like g c is pressed in sequence. %>
+<%# Every key the keyboard controller answers to, grouped, each key a ui :kbd. Shown in the ? sheet.
+    Letters act outside inputs; a pair like g c is pressed in sequence. %>
 <div class="shortcuts__groups">
   <section>
     <h3 class="shortcuts__heading">Move around</h3>
     <dl class="shortcut-list">
-      <dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Next or previous item on the page</dd>
-      <dt><kbd>g</kbd><kbd>g</kbd> <kbd>G</kbd></dt><dd>First or last item</dd>
-      <dt><kbd>Enter</kbd> <kbd>o</kbd></dt><dd>Open the item</dd>
-      <dt><kbd>e</kbd></dt><dd>Edit the item, or the title of the record on screen</dd>
-      <dt><kbd>d</kbd></dt><dd>Delete, archive or close it (asks first; a <%= term(:task).downcase %> goes at once, with Undo)</dd>
-      <dt><kbd>c</kbd></dt><dd>Copy a task’s brief for your AI</dd>
-      <dt><kbd>x</kbd></dt><dd>Pick the row, to act on several at once (in a table)</dd>
-      <dt><kbd>Esc</kbd></dt><dd>Drop the selection, then go up a level</dd>
+      <dt><%= ui :kbd, content: "j" %> <%= ui :kbd, content: "k" %></dt><dd>Next or previous item on the page</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "g" %> <%= ui :kbd, content: "G" %></dt><dd>First or last item</dd>
+      <dt><%= ui :kbd, content: "Enter" %> <%= ui :kbd, content: "o" %></dt><dd>Open the item</dd>
+      <dt><%= ui :kbd, content: "e" %></dt><dd>Edit the item, or the title of the record on screen</dd>
+      <dt><%= ui :kbd, content: "d" %></dt><dd>Delete, archive or close it (asks first; a <%= term(:task).downcase %> goes at once, with Undo)</dd>
+      <dt><%= ui :kbd, content: "c" %></dt><dd>Copy a task’s brief for your AI</dd>
+      <dt><%= ui :kbd, content: "x" %></dt><dd>Pick the row, to act on several at once (in a table)</dd>
+      <dt><%= ui :kbd, content: "Esc" %></dt><dd>Close a menu or dialog, then drop the selection, then go up a level</dd>
     </dl>
   </section>
 
   <section>
     <h3 class="shortcuts__heading">Go to</h3>
     <dl class="shortcut-list">
-      <dt><kbd>g</kbd><kbd>c</kbd></dt><dd><%= term(:client, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>w</kbd></dt><dd><%= term(:work, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>t</kbd></dt><dd><%= term(:task, count: 2) %></dd>
-      <dt><kbd>g</kbd><kbd>b</kbd></dt><dd><%= term(:task, count: 2) %> board</dd>
-      <dt><kbd>g</kbd><kbd>u</kbd></dt><dd>Users</dd>
-      <dt><kbd>g</kbd><kbd>i</kbd></dt><dd>Intake</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "c" %></dt><dd><%= term(:client, count: 2) %></dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "w" %></dt><dd><%= term(:work, count: 2) %></dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "t" %></dt><dd><%= term(:task, count: 2) %></dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "b" %></dt><dd><%= term(:task, count: 2) %> board</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "u" %></dt><dd>Users</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "i" %></dt><dd>Intake</dd>
       <% nav_plugin_shortcuts.each do |label, _url, _icon, keys| %>
         <%# herb:key keys %>
-        <dt><kbd>g</kbd><kbd><%= keys.delete_prefix("g ") %></kbd></dt><dd><%= label %></dd>
+        <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: keys.delete_prefix("g ") %></dt><dd><%= label %></dd>
       <% end %>
-      <dt><kbd>g</kbd><kbd>n</kbd></dt><dd>Notifications</dd>
-      <dt><kbd>g</kbd><kbd>s</kbd></dt><dd>Settings</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "n" %></dt><dd>Notifications</dd>
+      <dt><%= ui :kbd, content: "g" %><%= ui :kbd, content: "s" %></dt><dd>Settings</dd>
     </dl>
   </section>
 
   <section>
     <h3 class="shortcuts__heading">On a page</h3>
     <dl class="shortcut-list">
-      <dt><kbd>n</kbd></dt><dd>New one, on a list page</dd>
-      <dt><kbd>v</kbd></dt><dd>Switch cards, table and board</dd>
-      <dt><kbd>/</kbd></dt><dd>Filter what’s on the page</dd>
-      <dt><kbd>s</kbd> <kbd>⌘K</kbd></dt><dd>Search everything</dd>
-      <dt><kbd>a</kbd></dt><dd>Add a note, document, <%= term(:task).downcase %> or time</dd>
-      <dt><kbd>g</kbd> <kbd>t</kbd> <kbd>n</kbd></dt><dd>Add a <%= term(:task).downcase %> to any <%= term(:work).downcase %> or <%= term(:client).downcase %></dd>
+      <dt><%= ui :kbd, content: "n" %></dt><dd>New one, on a list page</dd>
+      <dt><%= ui :kbd, content: "v" %></dt><dd>Switch between table and board</dd>
+      <dt><%= ui :kbd, content: "/" %></dt><dd>Filter what’s on the page</dd>
+      <dt><%= ui :kbd, content: "s" %> <%= ui :kbd, keys: %w[⌘ K] %></dt><dd>Search everything</dd>
+      <dt><%= ui :kbd, content: "a" %></dt><dd>Add a note, document, <%= term(:task).downcase %> or time</dd>
+      <dt><%= ui :kbd, content: "g" %> <%= ui :kbd, content: "t" %> <%= ui :kbd, content: "n" %></dt><dd>Add a <%= term(:task).downcase %> to any <%= term(:work).downcase %> or <%= term(:client).downcase %></dd>
       <% Runwell::Plugins.enabled_shortcuts.each do |shortcut| %>
         <%# herb:key shortcut.keys %>
-        <dt><kbd><%= shortcut.keys %></kbd></dt><dd><%= shortcut.description %></dd>
+        <dt><%= ui :kbd, content: shortcut.keys %></dt><dd><%= shortcut.description %></dd>
       <% end %>
-      <dt><kbd>[</kbd></dt><dd>Collapse or expand the menu</dd>
-      <dt><kbd>]</kbd></dt><dd>Hide or show a record’s details sidebar</dd>
-      <dt><kbd>?</kbd></dt><dd>This list</dd>
-      <dt><kbd>.</kbd></dt><dd>Hint mode: show each key on the button it presses</dd>
+      <dt><%= ui :kbd, content: "[" %></dt><dd>Collapse or expand the menu</dd>
+      <dt><%= ui :kbd, content: "]" %></dt><dd>Hide or show a record’s details sidebar</dd>
+      <dt><%= ui :kbd, content: "?" %></dt><dd>This list</dd>
+      <dt><%= ui :kbd, content: "." %></dt><dd>Hint mode: show each key on the button it presses</dd>
     </dl>
   </section>
 
   <section>
     <h3 class="shortcuts__heading">Board</h3>
     <dl class="shortcut-list">
-      <dt><kbd>h</kbd> <kbd>l</kbd></dt><dd>Previous or next column</dd>
-      <dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Up or down the column</dd>
-      <dt><kbd>H</kbd> <kbd>L</kbd></dt><dd>Move the card a column left or right</dd>
-      <dt><kbd>J</kbd> <kbd>K</kbd></dt><dd>Move the card down or up its column</dd>
-      <dt><kbd>Enter</kbd></dt><dd>Open the card</dd>
+      <dt><%= ui :kbd, content: "h" %> <%= ui :kbd, content: "l" %></dt><dd>Previous or next column</dd>
+      <dt><%= ui :kbd, content: "j" %> <%= ui :kbd, content: "k" %></dt><dd>Up or down the column</dd>
+      <dt><%= ui :kbd, content: "H" %> <%= ui :kbd, content: "L" %></dt><dd>Move the card a column left or right</dd>
+      <dt><%= ui :kbd, content: "J" %> <%= ui :kbd, content: "K" %></dt><dd>Move the card down or up its column</dd>
+      <dt><%= ui :kbd, content: "Enter" %></dt><dd>Open the card</dd>
     </dl>
   </section>
 
   <section>
     <h3 class="shortcuts__heading">Forms and editors</h3>
     <dl class="shortcut-list">
-      <dt><kbd>⌘</kbd><kbd>Enter</kbd></dt><dd>Save (Ctrl+Enter on Windows and Linux)</dd>
-      <dt><kbd>Esc</kbd></dt><dd>Cancel: close a form opened on the page, or go back</dd>
-      <dt><kbd>@</kbd></dt><dd>Mention a teammate</dd>
-      <dt><kbd>↑</kbd> <kbd>↓</kbd> <kbd>Enter</kbd></dt><dd>Pick from search results and notifications</dd>
+      <dt><%= ui :kbd, keys: %w[⌘ Enter] %></dt><dd>Save (Ctrl+Enter on Windows and Linux)</dd>
+      <dt><%= ui :kbd, content: "Esc" %></dt><dd>Cancel: close a form opened on the page, or go back</dd>
+      <dt><%= ui :kbd, content: "@" %></dt><dd>Mention a teammate</dd>
+      <dt><%= ui :kbd, content: "↑" %> <%= ui :kbd, content: "↓" %> <%= ui :kbd, content: "Enter" %></dt><dd>Pick from search results, menus and notifications</dd>
     </dl>
   </section>
 </div>

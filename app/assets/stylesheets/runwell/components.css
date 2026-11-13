@@ -188,21 +188,19 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .confirm-button, .confirm-button:hover { color: var(--danger); }
 .confirm-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
 
-/* The ? sheet (layouts/shared/_shortcuts): groups in two columns, each a list of what a key
-/* does with its keys at the end; the footer turns hint mode on and off. */
-.dialog.shortcuts { width: min(56rem, calc(100vw - 2rem)); }
-.shortcuts__groups { columns: 2 20rem; column-gap: var(--s-6); }
-.shortcuts__groups section { display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-5); break-inside: avoid; }
-.shortcuts__heading { color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight-strong); }
-.shortcut-list { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: dense; }
-.shortcut-list :is(dt, dd) { padding: 7px 0; border-bottom: 1px solid var(--line); }
-.shortcut-list dt { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; padding-left: var(--s-4); white-space: nowrap; }
+/* The ? sheet (layouts/shared/_shortcuts, runeui's ui :dialog): groups in two columns, each a list
+/* of what a key does with its keys (ui :kbd) at the end; the footer has hint mode's switch. Inside
+/* runeui's dialog, so it reads runeui's tokens. */
+.shortcuts__groups { columns: 2 20rem; column-gap: 2rem; }
+.shortcuts__groups section { display: flex; flex-direction: column; gap: .25rem; padding-bottom: 1.25rem; break-inside: avoid; }
+.shortcuts__heading { color: var(--muted-foreground); font-size: var(--text-meta); font-weight: 500; }
+.shortcut-list { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: dense; margin: 0; }
+.shortcut-list :is(dt, dd) { margin: 0; padding: .4375rem 0; border-bottom: 1px solid var(--border); }
+.shortcut-list dt { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .25rem; padding-left: 1rem; white-space: nowrap; }
 .shortcut-list dd { grid-column: 1; }
 .shortcut-list :is(dt, dd):last-of-type { border-bottom: 0; }
-.shortcut-list kbd { text-transform: none; }
-.shortcuts__footer { margin: 0 calc(var(--s-5) * -1); padding: var(--s-4) var(--s-5) 0; border-top: 1px solid var(--line); }
-.hints-switch__hide, html[data-hints] .hints-switch__show { display: none; }
-html[data-hints] .hints-switch__hide { display: inline; }
+.shortcuts [data-slot="dialog-footer"] { align-items: center; }
+.shortcuts [data-slot="dialog-footer"] [data-slot="choice"] { margin-inline-end: auto; }
 
 /* A snippet outside rich text (code_block): a command or request to read or copy, coloured with
 /* the theme's code tokens (_global.css), as code in rich text is. */
@@ -221,23 +219,26 @@ html[data-hints] .hints-switch__hide { display: inline; }
 
 /* Hint mode (keyboard_controller, the . key): each control's key as a keycap on it, from
 /* data-key-hint, and a strip of the keys with no control at the foot of the page. Keycaps are
-/* overlays, so turning hints on moves nothing. */
+/* overlays, so turning hints on moves nothing: runeui's kbd (its size, corners and type), in the
+/* text's colour so it stands out on any control. */
 :where(html[data-hints] [data-key-hint]:not(input, textarea, select)) { position: relative; }
-html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd))::after {
-  content: attr(data-key-hint); position: absolute; inset: -.55em -.55em auto auto; z-index: 2;
-  min-width: 1.4em; padding: .25em .4em; border-radius: var(--radius-xs); background: var(--text); color: var(--panel);
-  box-shadow: 0 0 0 2px var(--panel); font-family: var(--font-sans); font-size: .65rem; font-weight: 600; line-height: 1;
-  text-align: center; text-transform: none; white-space: pre; word-spacing: .2em; pointer-events: none;
+html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd, [data-slot="kbd"]))::after {
+  content: attr(data-key-hint); position: absolute; inset: -.5rem -.5rem auto auto; z-index: 2;
+  display: grid; place-items: center; min-width: 1rem; height: 1rem; padding: 0 .25rem; border-radius: var(--radius-xs);
+  background: var(--text); color: var(--panel); box-shadow: 0 0 0 2px var(--panel);
+  font-family: var(--font-sans); font-size: .625rem; font-weight: 500; line-height: 1;
+  text-transform: none; white-space: pre; word-spacing: .2em; pointer-events: none;
 }
-html[data-hints] [data-slot="sidebar-menu-button"][data-key-hint]::after { inset: 50% var(--s-2) auto auto; translate: 0 -50%; }
+html[data-hints] [data-slot="sidebar-menu-button"][data-key-hint]::after { inset: 50% .5rem auto auto; translate: 0 -50%; }
 html[data-hints] :is([data-filter-target~="item"], [data-keyboard-item]):not(:hover, :focus-within, [data-keyboard-current], [aria-selected="true"]) [data-key-hint]::after { display: none; }
+/* The strip (layouts/shared/_hint_legend): a floating bar of ui :kbd keys. */
 .hint-legend { display: none; }
 html[data-hints] .hint-legend {
-  position: fixed; bottom: var(--s-4); left: 50%; translate: -50% 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: var(--s-2) var(--s-4); max-width: calc(100vw - 2rem); padding: var(--s-2) var(--s-3); border-radius: var(--radius);
+  position: fixed; bottom: 1rem; left: 50%; translate: -50% 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: .5rem 1rem; max-width: calc(100vw - 2rem); padding: .375rem .375rem .375rem .75rem; border: 1px solid var(--line); border-radius: calc(.75rem * var(--radius-scale, 1));
   background: var(--panel); box-shadow: var(--shadow-popover); color: var(--text-muted); font-size: var(--text-meta);
 }
-.hint-legend__item { display: inline-flex; align-items: center; gap: 4px; }
+.hint-legend__item { display: inline-flex; align-items: center; gap: .25rem; }
 @media (any-hover: none) { html[data-hints] [data-key-hint]::after { display: none; } }
 
 @media (any-hover: none) { .hide-on-touch { display: none !important; } }

@@ -2,10 +2,15 @@
 <%# The breadcrumb (Home › Search) is the page's title. %>
 <%= parent_page term(:task, count: 2), tasks_path %>
 
-<%# /search: the bar's search box and results, framed on the page. %>
+<%# /search: every result for a query (the palette's "See all"), a field over the results, which
+    follow it as you type (the frame, the address keeping q). %>
 <div class="search-page">
-  <%= render "searches/form", query_terms: @query, turbo_action: "advance", target_turbo_frame: "bar_content", cancel_path: root_path %>
-  <%= turbo_frame_tag "bar_content" do %>
+  <%= form_with url: search_path, method: :get, class: "search-page__form", data: { controller: "form", turbo_frame: "search_results", turbo_action: "advance" } do %>
+    <%= ui :input, type: "search", name: "q", value: @query, autofocus: true, autocomplete: "off",
+          placeholder: "Search #{term(:client, count: 2).downcase}, #{term(:task, count: 2).downcase}, notes…",
+          aria: { label: "Search" }, data: { action: "input->form#debouncedSubmit" } %>
+  <% end %>
+  <%= turbo_frame_tag "search_results" do %>
     <%= render "searches/results", results: @search.results, query: @query, people: @search.people %>
   <% end %>
 </div>

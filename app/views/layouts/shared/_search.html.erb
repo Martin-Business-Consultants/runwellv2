@@ -1,0 +1,13 @@
+<%# locals: () %>
+<%# Search (s or ⌘K): runeui's command palette over the page. As you type, from two characters, it
+    asks /search (searches#show answers the palette's items, searches/_palette, when the request
+    carries Runeui-Command) and lists what matched grouped as the /search page does: clients, work,
+    tasks, people, then the rest, with a last line to see them all there. Enter or a click opens one:
+    a task in the side panel, anything else its page. Its button is on the page but out of sight, so
+    s (the keyboard controller) can press it; ⌘K is the palette's own. %>
+<% trigger = capture do %><button type="button" class="visually-hidden" title="Search (S or ⌘K)" data-keys="s">Search</button><% end %>
+<%= ui :command, id: "search", dialog: true, trigger: trigger, shortcut: "mod+k", title: "Search",
+      src: search_path, min: 2,
+      placeholder: "Search #{term(:client, count: 2).downcase}, #{term(:task, count: 2).downcase}, notes…",
+      prompt: "Search #{term(:client, count: 2).downcase}, contacts, #{term(:work, count: 2).downcase}, #{term(:task, count: 2).downcase}, notes and documents.",
+      empty: "No results found.", class: "search-palette", data: { controller: "search-palette", action: "openchange->search-palette#closed" } %>

@@ -122,7 +122,7 @@ turbo-frame:not([data-slot]) { display: contents; }
 /* reach them, since keys act on what's on the page, clipped or not. */
 .nav-filter__key { display: none; }
 .nav-filter:not(:focus-within):has(.nav-filter__input:placeholder-shown),
-.nav-shortcuts-button { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+.nav-shortcuts-button { position: absolute; margin: 0; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
 .nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) .nav-filter__input { width: 100%; }
 [data-filter-target~="item"][hidden] { display: none !important; }
 

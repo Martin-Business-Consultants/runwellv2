@@ -215,6 +215,44 @@ core (plugins go through the compatibility layer).
    on runeui's tone dot (planned an outline), not the status-dot icons.
 7. **Search, quick actions, keys**: the bar and tray → `ui :command, dialog: true`; the keyboard
    controller kept, pointed at runeui's markup (`data-keys` unchanged); hint mode kept.
+   **Done:** search is `ui :command, dialog: true, src: search_path, min: 2`
+   (`layouts/shared/_search`, permanent in the footer): `s` presses its out-of-sight button, ⌘K is
+   the palette's own; from two characters it asks /search, and `searches#show` answers a request
+   carrying `Runeui-Command` with the palette's items (`searches/_palette`, `search_palette_items`:
+   the same groups and order, people included, each result a link, a task's opening the side panel,
+   then "See all results" to /search); the `search-palette` controller empties it as it closes.
+   /search is a `ui :input` over the results frame (`form#debouncedSubmit`). Runwell has no recent
+   or jump-to items, so none were added; before two characters the palette says what it searches.
+   Quick actions are a `ui :popover` under the + (`#quick-actions`, `a` presses the +): the record
+   picker is `quick_actions/_record_picker`, a `ui :combobox, trigger: true, src:` reading
+   `quick_actions/records` as JSON by kind (`quick_action_record_items`; `record=` leaves out the
+   one the picker already holds), set to `current_record`; the actions are buttons submitting the same GET form into
+   the `quick_action` frame (`data-runeui-close` shuts the popover); the modal (`quick_actions#new`)
+   keeps its `<dialog>` and takes the same picker; `g t n` unchanged. The `?` sheet is `ui :dialog`
+   (`#shortcuts`, size xl) with every key a `ui :kbd` and hint mode's `ui :switch`
+   (`#hints-switch`, `keyboard#setHints`, kept in step by the controller); the account menu still
+   presses its button (`rune-proxy`). The hint legend's keys are `ui :kbd`; keycaps keep their
+   place, sized like runeui's kbd. The keyboard controller's `OVERLAY` now takes in runeui's
+   select, combobox and date-picker popups and `ui-command`, so a key pressed in one never reaches
+   the page and Esc closes it before dropping the selection or going up. Gone: `bar/_bar`,
+   `searches/_form`, `quick_actions/_picker`, `_records`, `records/index`, the `bar`,
+   `search-form`, `record-search`, Fizzy's `combobox` and `rune-dialog` controllers, the bar,
+   search box, tray-actions and picker CSS, `--z-bar`. Kept: `popup_menu` / `PopupHelper` and the
+   `.popup` CSS (the plugin contract; the meetings plugin uses `.popup__*`), the `dialog`
+   controller (the notifications tray, the modals, `popup_menu`, the meetings plugin),
+   `navigable-list` (notifications), `filter` (the page filter; meetings' picker), `rune-proxy`
+   (the account menu's Keyboard shortcuts), `searches/_results`, `_result`, `_person` (/search),
+   `QuickAction#records`. Added to runeui: `src:`, `min:`, `prompt:` on `ui :command` (HTML from the
+   server through `remote.js`, sent with `Runeui-Command`, `ui-command-status`), `part: "items"`
+   to draw just the items, and on a command `description:`, `meta:`, `link:` (a real link,
+   `as-child`) and an icon given as markup; a combobox behind a button with `src:` loading its
+   first page empty (it searched for the chosen label) and not searching as it closes. Accepted:
+   Esc in the palette clears the box first, then closes (UI SDK's command); the match isn't bold
+   (UI SDK's item text keeps text only); `g b` reaches the board only from Tasks (as before:
+   it's declared on the view toggle). Left: the notifications tray (Fizzy's `dialog` and
+   `navigable-list`) and the modals' `<dialog>` (`layouts/shared/_modal`, the quick-action and
+   placeholder modals); the picker lists the chosen record after a search's results (runeui's
+   `src:` keeps the value's option).
 8. **Settings, public pages and the portal**: every settings page, sign-in and its showcase, the
    portal's pages and sheet.
 9. **The flip and the clean-up**: runeui's tokens on `:root`, the bridge out; the old sheets

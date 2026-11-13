@@ -38,13 +38,42 @@ module SearchesHelper
     end
   end
 
-  # A result's link: it closes the bar, and a task opens in the side panel (side_panel_link_to).
+  # A result's link: a task opens in the side panel (side_panel_link_to), anything else its page.
   def search_result_link_to(result, **options, &block)
     if result.is_a?(Task)
-      side_panel_link_to(result, data: { action: "bar#reset" }, **options, &block)
+      side_panel_link_to(result, **options, &block)
     else
-      link_to(search_result_path(result), data: { turbo_frame: "_top", action: "bar#reset" }, **options, &block)
+      link_to(search_result_path(result), data: { turbo_frame: "_top" }, **options, &block)
     end
+  end
+
+  # The search palette's items (searches/_palette): search_result_groups as ui :command's groups,
+  # each result a link (a task's opening the side panel), then a line to every result on /search.
+  def search_palette_items(results, query:, people:)
+    groups = search_result_groups(results, people: people).to_h do |kind, group|
+      [ kind, group.map { it.is_a?(User) ? search_palette_person(it) : search_palette_result(it) } ]
+    end
+    see_all = { label: "See all results for “#{query}”", value: "search:all", icon: icon_tag("search"), href: search_path(q: query), link: { data: { turbo_frame: "_top" } } }
+    groups.merge("" => [ see_all ])
+  end
+
+  # A result's line of the match: the index's highlight as it is, else the record's own text with
+  # its markup taken out (a description is rich text), cut short.
+  def search_excerpt(content)
+    content.html_safe? ? content : strip_tags(content.gsub("><", "> <")).squish.truncate(200)
+  end
+
+  def search_palette_result(result)
+    content = result.hit.highlight(:content) || result.search_content.presence
+    { label: result.hit.highlight(:title) || result.search_title, value: QuickAction.value_for(result),
+      description: (search_excerpt(content) if content), meta: search_result_context(result),
+      icon: icon_tag(search_result_icon(result)), href: (result.is_a?(Task) ? task_path(result) : search_result_path(result)),
+      link: { data: (result.is_a?(Task) ? side_panel_link_data(result) : { turbo_frame: "_top" }) } }
+  end
+
+  def search_palette_person(person)
+    { label: person.display_name, value: "User:#{person.id}", description: person.email_address, meta: person.role.capitalize,
+      icon: person_tag(person), href: user_path(person), link: { data: { turbo_frame: "_top" } } }
   end
 
   SEARCH_ICONS = { "Client" => "everyone", "Contact" => "person", "Work" => "clipboard", "Task" => "check-circle",

@@ -1,0 +1,4 @@
+<%# locals: (results:, query:, people:) %>
+<%# The search palette's items for what was typed (layouts/shared/_search): search_palette_items, in
+    the /search page's groups and order, then a line to see them all on /search. %>
+<%= ui :command, part: "items", items: search_palette_items(results, query: query, people: people) %>

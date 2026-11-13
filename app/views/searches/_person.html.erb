@@ -1,7 +1,7 @@
 <%# locals: (person:) %>
 <%# A team member in search results: their avatar, name and address, to their page in Users. %>
 <li>
-  <%= link_to user_path(person), class: "search-results__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
+  <%= link_to user_path(person), class: "search-results__result", data: { turbo_frame: "_top" } do %>
     <span class="search-results__icon"><%= person_tag person %></span>
     <span class="search-results__text">
       <span class="search-results__title"><%= person.display_name %></span>

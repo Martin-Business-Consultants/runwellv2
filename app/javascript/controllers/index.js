@@ -1,4 +1,4 @@
-// Runwell's controllers (controllers/**/*_controller). The rune_* ones (rune-dialog, rune-proxy…)
+// Runwell's controllers (controllers/**/*_controller). The rune_* ones (rune-proxy, rune-clipboard…)
 // are the rune_ui gem's, carried here when the gem came out; each goes as its markup moves to a
 // runeui component (docs/runeui-migration.md).
 import { application } from "controllers/application"

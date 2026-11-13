@@ -1,0 +1,13 @@
+<%# locals: (record:, form_id:, types: nil) %>
+<%# Where a quick action goes (the tray and the modal): a combobox behind a button, writing
+    "Type:id" into the form's record field, set to the record on screen. Its list comes from the
+    server (quick_actions/records, JSON): opened, that record and the most recently changed few;
+    typed into, what matches. So a page never carries every record, only the chosen one's label. %>
+<% types ||= QuickAction::RECORD_TYPES %>
+<% kinds = types.map { record_type_term(it).downcase }.uniq.to_sentence(last_word_connector: " or ", two_words_connector: " or ") %>
+<% current = record && QuickAction.value_for(record) %>
+<%= ui :combobox, id: "#{form_id}_record", name: "record", form: form_id, trigger: true, value: current,
+      options: quick_action_record_options([ record ].compact),
+      src: quick_action_records_path(types: types.join(","), record: current),
+      placeholder: "Choose…", search: "Find a #{kinds}…", empty: "Nothing matches.", class: "quick-action__record",
+      aria: { label: "Where it goes" } %>

@@ -42,10 +42,13 @@ const EXTEND_TIMEOUT = 600 // how long g w waits for a third key before it goes
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "meta" : "ctrl"
 const BOARD_ARROWS = { j: "ArrowDown", k: "ArrowUp", h: "ArrowLeft", l: "ArrowRight" }
 const HINTS_KEY = "keyHints"
+const HINTS_SWITCH = "hints-switch" // the ? sheet's (layouts/shared/_shortcuts)
 
-// What takes the keys for itself while it's open: a <dialog>, and runeui's dialogs, sheets and
-// menus (UI SDK's elements, which close on Esc and move through their own items).
-const OVERLAY = "dialog[open], [aria-modal='true'][data-open], ui-menu-content, ui-popover-content"
+// What takes the keys for itself while it's open: a <dialog>, and runeui's dialogs, sheets,
+// palettes and popups (UI SDK's elements, which close on Esc and move through their own items),
+// so a key pressed in one never reaches the page: Esc closes the popup, and only the next one
+// drops the selection or goes up a level.
+const OVERLAY = "dialog[open], [aria-modal='true'][data-open], ui-menu-content, ui-popover-content, ui-select-content, ui-combobox-content, ui-date-picker-content, ui-command"
 const MODAL = "dialog:modal, [aria-modal='true'][data-open]"
 
 export default class extends Controller {
@@ -69,7 +72,16 @@ export default class extends Controller {
   // Hint mode, from . or a button (data-action="keyboard#toggleHints").
   toggleHints(event) {
     event?.preventDefault()
-    const on = !document.documentElement.hasAttribute("data-hints")
+    this.#rememberHints(!document.documentElement.hasAttribute("data-hints"))
+  }
+
+  // The ? sheet's switch (data-action="change->keyboard#setHints"): on or off as it says.
+  setHints({ currentTarget }) {
+    const on = !!currentTarget.checked
+    if (on !== document.documentElement.hasAttribute("data-hints")) this.#rememberHints(on)
+  }
+
+  #rememberHints(on) {
     try { localStorage.setItem(HINTS_KEY, on ? "on" : "off") } catch {}
     this.#showHints(on)
   }
@@ -150,6 +162,8 @@ export default class extends Controller {
 
   #showHints(on) {
     document.documentElement.toggleAttribute("data-hints", on)
+    const control = document.getElementById(HINTS_SWITCH)
+    if (control && control.checked !== on) control.checked = on
     this.hintObserver?.disconnect()
     this.hintObserver = null
     if (!on) return

@@ -322,7 +322,7 @@ is reported and left out.
 | --- | --- | --- |
 | `Search.new(terms).results`, `Search.new(terms).people` | 5.5 | Experimental |
 
-The core's search, as the search bar uses it: `results` is up to 50 clients, works, tasks and the
+The core's search, as the search palette uses it: `results` is up to 50 clients, works, tasks and the
 rest, ranked, matching each typed word exactly, by its start ("acm" finds Acme) or within a typo or
 two ("clinet"); `people` is the team whose name or address contains what was typed. Pass
 `fuzzy: false` for exact matches only. The index catches up a moment after a save.
