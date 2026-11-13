@@ -1,47 +1,47 @@
 /* Record pages and their forms: clients, contacts, works, a piece of work, scope items,
-/* documents, notes, custom fields, history, on rune_ui's tokens (docs/rune-ui-migration.md).
-/* Unlayered, so these win over rune's components.
+/* documents, notes, custom fields, history.
+/* Unlayered, so these win over runeui's layers; on runeui's tokens (appearance.css, docs/theming.md).
 /*
 /* A record page (.record-page) is a header row across the top, then the working column (2/3:
 /* tabs over cards) beside a sidebar of cards (1/3: details, contacts, history). Its cards are
-/* rune's .card; facts are rune's dl.details; rows are rune's .list-row.
+/* runeui's (record_card); facts are a dl.details; rows are .item-row.
 /*
 /* 1 Page   2 Cards   3 Tabs   4 Lists   5 Work on a record   6 Activity feed   7 Notes
 /* 8 Documents   9 Forms   10 Work sidebar   11 Indexes */
 
 /* ======================================================================= 1 Page */
 
-.record-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+.record-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; align-items: start; }
 @media (min-width: 960px) { .record-page { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
 /* A page whose working column opens with its tabs (record-page--tabbed: clients, work, sections):
 /* the tab row sits above both columns, so the sidebar starts level with the first card under the
 /* tabs: runeui's tab row (its height, 2.25rem) and the tabs' gap down. */
 @media (min-width: 960px) {
-  .record-page--tabbed .record-page__aside { padding-top: calc(2.25rem + var(--s-4)); }
+  .record-page--tabbed .record-page__aside { padding-top: calc(2.25rem + 1rem); }
 }
 
 /* The core's header row (record_header: runeui's ui :page_header): the title, changed in place,
 /* and the lines under it at the start, the page's actions at the end. */
 .record-page > .record-header { grid-column: 1 / -1; min-width: 0; margin-bottom: 0; }
-.record-header [data-slot="page-header-text"] { flex: 1 1 20rem; gap: var(--s-2); }
+.record-header [data-slot="page-header-text"] { flex: 1 1 20rem; gap: .5rem; }
 .record-header [data-slot="page-actions"] { align-items: center; }
-.record-header__line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--s-3); margin: 0; color: var(--text-muted); }
-.record-header__next { margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+.record-header__line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px .75rem; margin: 0; color: var(--muted-foreground); }
+.record-header__next { margin: 0; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 .record-header__form { display: contents; }
 .record-header .page-title { overflow-wrap: anywhere; }
 
 /* The header row: the title and a line about the record at the start, its actions at the end. */
-.record-page__header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s-4); min-width: 0; }
-.record-page__heading { display: flex; flex: 1 1 20rem; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.record-page__header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; min-width: 0; }
+.record-page__heading { display: flex; flex: 1 1 20rem; flex-direction: column; gap: .5rem; min-width: 0; }
 .record-page__heading .page-title { overflow-wrap: anywhere; }
-.record-page__description { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--s-3); color: var(--text-muted); }
+.record-page__description { display: flex; flex-wrap: wrap; align-items: center; gap: 6px .75rem; color: var(--muted-foreground); }
 
-.record-page__main, .record-page__aside { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+.record-page__main, .record-page__aside { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
 /* Links in a record's text (its description line, facts, notes): the text's colour, underlined,
-/* rather than rune's accent, so a page of facts doesn't read as a page of links. */
-.record-page a:not([class], [data-slot]) { color: var(--text); font-weight: var(--weight-strong); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
-.record-page a:not([class], [data-slot]):hover { color: var(--text); text-decoration-color: currentColor; }
+/* rather than the brand's colour, so a page of facts doesn't read as a page of links. */
+.record-page a:not([class], [data-slot]) { color: var(--foreground); font-weight: 500; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+.record-page a:not([class], [data-slot]):hover { color: var(--foreground); text-decoration-color: currentColor; }
 
 /* Hiding the sidebar (]): the working column takes the width; the toggle in the header turns to
 /* face the other way. */
@@ -50,144 +50,143 @@ html[data-sidebar="collapsed"] .record-page__aside { display: none; }
 html[data-sidebar="collapsed"] :is(.record-page__header, .record-header) .sidebar-toggle .icon { transform: scaleX(-1); }
 
 /* The toggle (layouts/shared/_sidebar_toggle) drawn as an icon button in the header row. */
-.record-page__header .sidebar-toggle { display: inline-grid; place-items: center; width: var(--control-h); height: var(--control-h); padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); }
-.record-page__header .sidebar-toggle:hover { background: var(--hover); color: var(--text); }
+.record-page__header .sidebar-toggle { display: inline-grid; place-items: center; width: var(--ui-h); height: var(--ui-h); padding: 0; border: 0; border-radius: var(--ui-radius-md); background: none; color: var(--muted-foreground); }
+.record-page__header .sidebar-toggle:hover { background: var(--ui-ghost-hover); color: var(--foreground); }
 
 /* ======================================================================= 2 Cards */
 
 /* A record's cards (record_card: runeui's ui :card). Their content stacks; their title is a heading
 /* in the card's title; their add buttons sit at the start of the footer, under the list they add
-/* to. Runwell's markup inside reads --accent and --ring as the brand colour and focus shadow. */
-.record-card > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) { --accent: var(--rune-accent); --ring: var(--rune-ring); }
-.record-card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+/* to. */
+.record-card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
 .record-card__title { margin: 0; font: inherit; }
 .record-card__hint { margin: 0; }
 .record-card > [data-slot="card-footer"] { flex-wrap: wrap; justify-content: flex-start; }
 .record-card > [data-slot="card-footer"]:has(.record-add[open]) { align-items: stretch; }
-.record-card [data-slot="card-action"] { display: flex; align-items: center; gap: var(--s-2); }
+.record-card [data-slot="card-action"] { display: flex; align-items: center; gap: .5rem; }
 /* On a phone the head's action (a filter, a switch) goes under its title and line. */
 @media (max-width: 640px) {
   .record-card > [data-slot="card-header"] { grid-template-columns: minmax(0, 1fr); }
   .record-card [data-slot="card-action"] { grid-column: 1; grid-row: auto; justify-self: start; flex-wrap: wrap; }
-  .record-card > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) { padding-inline: var(--s-4); }
+  .record-card > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) { padding-inline: 1rem; }
 }
 /* Kept for plugins' hand-written cards (docs/plugin-contract.md). */
 .record-card > .card__footer { justify-content: flex-start; }
 .record-card > .card__footer:has(.record-add[open]) { align-items: stretch; }
 
-.record-card__stack { display: flex; flex-direction: column; gap: var(--s-4); }
-.record-card__empty { color: var(--text-muted); }
-.record-card__prose { font-size: var(--text-read); line-height: 1.6; }
+.record-card__stack { display: flex; flex-direction: column; gap: 1rem; }
+.record-card__empty { color: var(--muted-foreground); }
+.record-card__prose { font-size: var(--ui-text-sm); line-height: 1.6; }
 
 /* What comes next, in order, down a sidebar. */
-.record-steps { display: flex; flex-direction: column; gap: var(--s-2); padding-left: 1.25rem; color: var(--text-muted); line-height: 1.5; }
+.record-steps { display: flex; flex-direction: column; gap: .5rem; padding-left: 1.25rem; color: var(--muted-foreground); line-height: 1.5; }
 
 /* A record's custom field values under its facts, on a rule (custom_fields/_values). Each pair is
 /* in a row element that lays out as if it weren't there. */
 .custom-fields__row { display: contents; }
-.record-page .custom-fields { padding-top: var(--s-4); border-top: 1px solid var(--line); }
+.record-page .custom-fields { padding-top: 1rem; border-top: 1px solid var(--border); }
 
 /* ======================================================================= 3 Tabs */
 
 /* A contact's Portal card: what they see there, then signing them out. */
-.contact-portal, .contact-portal__scope { display: flex; flex-direction: column; gap: var(--s-3); }
+.contact-portal, .contact-portal__scope { display: flex; flex-direction: column; gap: .75rem; }
 
 /* The working column's tabs (layouts/shared/_record_tabs) above the tab's cards. */
-.record-tabs { display: flex; flex-direction: column; gap: var(--s-4); }
+.record-tabs { display: flex; flex-direction: column; gap: 1rem; }
 /* runeui's tab row (ui :tabs as links): scrolls sideways where the tabs don't fit (a phone). */
 .record-tabs__list [data-slot="tabs-list"] { justify-content: flex-start; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .record-tabs__list [data-slot="tabs-tab"] { flex: none; }
-.record-tabs__panel { display: flex; flex-direction: column; gap: var(--s-5); }
+.record-tabs__panel { display: flex; flex-direction: column; gap: 1.5rem; }
 
 /* ======================================================================= 4 Lists */
 
 /* A card's list of rows (.item-row, or a plugin's .list-row): a hairline between them. Rows run
 /* into the card's padding, so their text lines up with the card's title and the hover tint has room. */
 .record-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
-.record-list > li + li { border-top: 1px solid var(--line); }
-.record-list > li > :is(.item-row, .list-row), .record-list__row { margin-inline: calc(-1 * var(--s-3)); }
-.record-list :is(.item-row, .list-row) { padding-block: var(--s-2); }
+.record-list > li + li { border-top: 1px solid var(--border); }
+.record-list > li > :is(.item-row, .list-row), .record-list__row { margin-inline: calc(-1 * .75rem); }
+.record-list :is(.item-row, .list-row) { padding-block: .5rem; }
 /* A row that is the list item itself (documents, work) keeps to the column. */
 .record-list > li:is(.item-row, .list-row), li.record-list__row { margin-inline: 0; padding-inline: 0; }
 
-.record-list__badges { display: flex; flex-wrap: wrap; gap: var(--s-1); padding-top: 2px; }
+.record-list__badges { display: flex; flex-wrap: wrap; gap: .25rem; padding-top: 2px; }
 
 /* The work partials' own row names (tasks/_task), drawn as .list-row's parts. */
-.record-list__row { display: flex; align-items: center; gap: var(--s-3); min-width: 0; padding: var(--s-2) var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
-a.record-list__row:hover { background: var(--hover); color: var(--text); }
+.record-list__row { display: flex; align-items: center; gap: .75rem; min-width: 0; padding: .5rem .75rem; border-radius: var(--ui-radius-sm); color: var(--foreground); text-decoration: none; }
+a.record-list__row:hover { background: var(--ui-ghost-hover); color: var(--foreground); }
 .record-list__main { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; color: inherit; text-decoration: none; }
-.record-list__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
-.record-list__description { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
-.record-list__actions { display: flex; flex-shrink: 0; align-items: center; gap: var(--s-2); }
+.record-list__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.record-list__description { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint-foreground); font-size: var(--ui-text-xs); line-height: 1rem; }
+.record-list__actions { display: flex; flex-shrink: 0; align-items: center; gap: .5rem; }
 
 /* A contact's portal access and approval, as icons at the end of their row. */
-.contact-marks { display: flex; flex-shrink: 0; align-items: center; gap: 6px; color: var(--text-muted); }
+.contact-marks { display: flex; flex-shrink: 0; align-items: center; gap: 6px; color: var(--muted-foreground); }
 .contact-marks__mark { display: inline-flex; }
-.contact-marks__mark--approve { color: var(--ok); }
+.contact-marks__mark--approve { color: var(--success); }
 
 /* ======================================================================= 5 Work on a record */
 
 /* A piece of work in a record's list: its status circle leads, like a task list's checkbox, and
 /* its title underlines under the pointer. */
-.task-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
+.task-item .status-dot-picker__trigger { margin-left: calc(-1 * .25rem); }
 .task-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
 
 /* A piece of work's work, grouped by scope item: each group's name, done of total and state over its rows. */
 .task-groups { display: flex; flex-direction: column; }
-.task-group + .task-group { border-top: 1px solid var(--line); }
-.task-group__header { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) 0 var(--s-1); }
+.task-group + .task-group { border-top: 1px solid var(--border); }
+.task-group__header { display: flex; align-items: center; gap: .75rem; padding: 1rem 0 .25rem; }
 .task-group:first-child .task-group__header { padding-top: 0; }
-.task-group__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; text-decoration: none; }
-a.task-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
-.task-group__count, .task-focus__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.task-group__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--foreground); font-weight: 600; text-decoration: none; }
+a.task-group__name:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
+.task-group__count, .task-focus__count { color: var(--muted-foreground); font-size: var(--ui-text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* One scope item's work alone: its name, how much is done, its state and a way to its page. */
-.task-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); }
-.task-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-read); font-weight: 600; }
+.task-focus { display: flex; align-items: center; gap: .625rem; padding: .625rem .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-lg); }
+.task-focus__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ui-text-sm); font-weight: 600; }
 
 /* Adding work or a scope item in place: a small button that opens its form below it. */
-.record-add { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--s-4); }
-.record-add[open] > summary { background: var(--layer-2); color: var(--text); }
+.record-add { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: 1rem; }
+.record-add[open] > summary { background: var(--muted); color: var(--foreground); }
 /* Open, the form runs the card's full width: its fields fill the row instead of shrinking to fit. */
 .record-add[open] { align-self: stretch; width: 100%; }
 /* Adding work in place (tasks/_add): the title across, then owner, due date and section side by
 /* side as room allows, then Add at the end. */
-.record-add__form { gap: var(--s-3); width: 100%; }
-.record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: var(--s-3); }
-.record-add__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
+.record-add__form { gap: .75rem; width: 100%; }
+.record-add__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: .75rem; }
+.record-add__actions { display: flex; justify-content: flex-end; gap: .5rem; }
 
 /* ======================================================================= 6 Activity feed (notes, history) */
 
 .record-feed { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
-.record-feed__item { display: flex; align-items: flex-start; gap: var(--s-3); padding-block: var(--s-4); }
+.record-feed__item { display: flex; align-items: flex-start; gap: .75rem; padding-block: 1rem; }
 .record-feed__item:first-child { padding-top: 0; }
 .record-feed__item:last-child { padding-bottom: 0; }
-.record-feed__item + .record-feed__item { border-top: 1px solid var(--line); }
+.record-feed__item + .record-feed__item { border-top: 1px solid var(--border); }
 .record-feed__avatar { display: inline-flex; flex-shrink: 0; }
-.record-feed__avatar .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
-.record-feed__body { display: flex; flex: 1; flex-direction: column; gap: var(--s-1); min-width: 0; }
-.record-feed__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-height: 2rem; }
-.record-feed__title { font-weight: var(--weight-strong); }
-.record-feed__meta { gap: 2px 6px; font-size: var(--text-meta); }
+.record-feed__avatar .avatar { width: 2rem; height: 2rem; font-size: var(--ui-text-xs); }
+.record-feed__body { display: flex; flex: 1; flex-direction: column; gap: .25rem; min-width: 0; }
+.record-feed__head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 2rem; }
+.record-feed__title { font-weight: 500; }
+.record-feed__meta { gap: 2px 6px; font-size: var(--ui-text-xs); }
 .record-feed__meta.dot-list > * + *::before { margin-right: 6px; }
-.record-feed__details { color: var(--text-muted); font-size: var(--text-meta); overflow-wrap: anywhere; }
-.record-feed__text { font-size: var(--text-read); line-height: 1.6; }
+.record-feed__details { color: var(--muted-foreground); font-size: var(--ui-text-xs); overflow-wrap: anywhere; }
+.record-feed__text { font-size: var(--ui-text-sm); line-height: 1.6; }
 
 /* History in the sidebar is narrower: smaller avatars, tighter rows. */
-.record-page__aside .record-feed__item { padding-block: var(--s-3); }
+.record-page__aside .record-feed__item { padding-block: .75rem; }
 .record-page__aside .record-feed__item:first-child { padding-top: 0; }
 .record-page__aside .record-feed__item:last-child { padding-bottom: 0; }
-.record-page__aside .record-feed__avatar .avatar { width: 1.5rem; height: 1.5rem; font-size: var(--text-xs); }
+.record-page__aside .record-feed__avatar .avatar { width: 1.5rem; height: 1.5rem; font-size: var(--ui-text-xs); }
 
 /* History folds (events/timeline: ui :collapsible in the card): its title and hint, then the chevron. */
 .record-timeline [data-slot="collapsible"] { gap: 0; }
-.record-timeline [data-slot="collapsible-content"] { display: block; padding-top: var(--s-4); }
-.record-timeline__trigger { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
-.record-timeline__trigger:focus-visible { border-radius: var(--radius-sm); outline: 2px solid var(--rune-accent); outline-offset: 2px; }
+.record-timeline [data-slot="collapsible-content"] { display: block; padding-top: 1rem; }
+.record-timeline__trigger { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.record-timeline__trigger:focus-visible { border-radius: var(--ui-radius-sm); outline: 2px solid var(--primary); outline-offset: 2px; }
 .record-timeline__head { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .record-timeline__title { font-weight: 600; }
-.record-timeline__hint { color: var(--text-faint); font-size: var(--text-meta); }
-.record-timeline__chevron { flex: none; color: var(--text-muted); transition: transform .15s ease; }
+.record-timeline__hint { color: var(--faint-foreground); font-size: var(--ui-text-xs); }
+.record-timeline__chevron { flex: none; color: var(--muted-foreground); transition: transform .15s ease; }
 .record-timeline__trigger[data-open] .record-timeline__chevron, .record-timeline__trigger[aria-expanded="true"] .record-timeline__chevron { transform: rotate(90deg); }
 
 /* ======================================================================= 7 Notes */
@@ -196,18 +195,18 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* always shown, so focusing it shifts nothing), the kind, source and Add note along its foot. */
 /* The side panel's composer before it's wanted (notes/_section deferred): a line that looks like
 /* the empty editor; clicking it brings the editor in its place. */
-.note-composer__trigger { width: 100%; min-height: 4.5rem; padding: var(--s-3); border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); color: var(--text-faint); font: inherit; font-size: var(--text-read); text-align: start; cursor: text; }
-.note-composer__trigger:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line-strong)); }
-.note-composer__trigger:focus-visible { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-.note-composer { gap: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); transition: border-color .12s, box-shadow .12s; }
-.note-composer:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+.note-composer__trigger { width: 100%; min-height: 4.5rem; padding: .75rem; border: 1px solid var(--input); border-radius: var(--ui-radius-lg); background: var(--background); color: var(--faint-foreground); font: inherit; font-size: var(--ui-text-sm); text-align: start; cursor: text; }
+.note-composer__trigger:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--input)); }
+.note-composer__trigger:focus-visible { outline: none; border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
+.note-composer { gap: 0; border: 1px solid var(--input); border-radius: var(--ui-radius-lg); background: var(--background); transition: border-color .12s, box-shadow .12s; }
+.note-composer:focus-within { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
 .note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .note-composer .lexxy-editor__content { min-height: 3lh; }
 
-.note-composer__footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); padding: 6px; border-top: 1px solid var(--line); }
+.note-composer__footer { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; padding: 6px; border-top: 1px solid var(--border); }
 .note-composer__footer :is(select, input) { border-color: transparent; background-color: transparent; }
-.note-composer__footer :is(select, input):hover { background-color: var(--hover); }
-.note-composer__footer :is(select, input):focus { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); }
+.note-composer__footer :is(select, input):hover { background-color: var(--ui-ghost-hover); }
+.note-composer__footer :is(select, input):focus { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); }
 .note-composer__kind { flex: 0 0 auto; }
 .note-composer__source { flex: 1 1 10rem; min-width: 0; }
 .note-composer__submit { margin-left: auto; }
@@ -216,14 +215,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* Documents/_section: the drop box (.upload-drop, runwell/components.css), then the files as
 /* rows: the file's type tag, name and details as the thing to click, its switch and delete. */
-.document-link__wrap { display: contents; }
-.document-link { display: flex; flex: 1; align-items: center; gap: var(--s-3); min-width: 0; padding: 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
-.document-link:hover { color: var(--text); }
+.document-link { display: flex; flex: 1; align-items: center; gap: .75rem; min-width: 0; padding: 0; border: 0; background: none; color: var(--foreground); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.document-link:hover { color: var(--foreground); }
 .document-link:hover .document-link__name { text-decoration: underline; text-underline-offset: 4px; }
-.document-link__icon { display: grid; flex-shrink: 0; place-items: center; width: 2.25rem; height: 2.25rem; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--layer-2); color: var(--text-muted); font-size: .625rem; font-weight: 600; text-transform: uppercase; }
+.document-link__icon { display: grid; flex-shrink: 0; place-items: center; width: 2.25rem; height: 2.25rem; overflow: hidden; border: 1px solid var(--border); border-radius: var(--ui-radius-sm); background: var(--muted); color: var(--muted-foreground); font-size: .625rem; font-weight: 600; text-transform: uppercase; }
 .document-link__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.document-link__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
-.document-link__meta { display: flex; align-items: center; gap: var(--s-1); min-width: 0; overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); white-space: nowrap; }
+.document-link__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.document-link__meta { display: flex; align-items: center; gap: .25rem; min-width: 0; overflow: hidden; color: var(--faint-foreground); font-size: var(--ui-text-xs); white-space: nowrap; }
 .document-link__meta .avatar { width: 1rem; height: 1rem; font-size: .5625rem; }
 
 /* The visible-to-client switch is a form of its own, on the row's line. */
@@ -232,19 +230,14 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* An image's preview: the picture as large as fits, its name and links under it. */
 /* An image's preview (documents/_link, ui :dialog): as wide as the picture allows. */
 .document-preview [data-slot="dialog-content"] { width: fit-content; min-width: min(24rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); }
-.document-preview [data-slot="dialog-title"] { min-width: 0; padding-right: var(--s-6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25; }
-.document-preview__image { display: block; max-width: 100%; max-height: calc(100dvh - 12rem); margin-inline: auto; object-fit: contain; border-radius: var(--radius-sm); }
+.document-preview [data-slot="dialog-title"] { min-width: 0; padding-right: 2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25; }
+.document-preview__image { display: block; max-width: 100%; max-height: calc(100dvh - 12rem); margin-inline: auto; object-fit: contain; border-radius: var(--ui-radius-sm); }
 
 /* ======================================================================= 9 Forms */
 
 /* A record's form (clients/_form and the like): a card of fields with Cancel and the main action
 /* at its foot. Short fields pair up in a .field-row, which stacks when narrow. */
-.record-form__body { gap: var(--s-4); }
-/* An on/off choice drawn as a row (the AI plugin's settings still use it). */
-.record-form__toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: .625rem var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); transition: background .12s, border-color .12s; }
-.record-form__toggle:hover { background: var(--hover); }
-.record-form__toggle:has(:checked) { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
-.record-form__toggle-text { min-width: 0; color: var(--text-muted); }
+.record-form__body { gap: 1rem; }
 /* A short field (a status) beside a long one (a time zone). */
 
 /* A group of fields under its own heading (a fieldset's legend). A legend sits outside the
@@ -256,72 +249,72 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* ======================================================================= 10 Work sidebar */
 
 /* Its sections and General as runeui's tabs (ui :tabs), the tab row the card's width. */
-.work-sidebar__tabs { gap: var(--s-4); }
+.work-sidebar__tabs { gap: 1rem; }
 .work-sidebar__tabs [data-slot="tabs-list"] { width: 100%; }
 
-/* A piece of work's scope items (works/_scope): each with rune's status dot for its state, done of total
+/* A piece of work's scope items (works/_scope): each with a status dot for its state, done of total
 /* and a thin bar. The one whose work is shown is raised, as a nav marks its page. */
-.scope-section { display: flex; flex-direction: column; gap: var(--s-3); }
-.scope-nav { display: flex; flex-direction: column; gap: 2px; margin-inline: calc(-1 * var(--s-2)); }
-.scope-nav__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px var(--s-3); padding: var(--s-2); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
-.scope-nav__item:hover { background: var(--hover); color: var(--text); }
+.scope-section { display: flex; flex-direction: column; gap: .75rem; }
+.scope-nav { display: flex; flex-direction: column; gap: 2px; margin-inline: calc(-1 * .5rem); }
+.scope-nav__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px .75rem; padding: .5rem; border-radius: var(--ui-radius-sm); color: var(--foreground); text-decoration: none; }
+.scope-nav__item:hover { background: var(--ui-ghost-hover); color: var(--foreground); }
 /* The sections in the work's order, each moved by a grip in the list's left gutter that shows on
 /* hover or focus (always on touch); the one being dragged is tinted. */
 .scope-nav__sections, .scope-nav__list { display: flex; flex-direction: column; gap: 2px; }
 .scope-nav__row { position: relative; }
 .scope-nav__grip {
-  position: absolute; top: .45rem; left: calc(-1 * var(--s-4)); z-index: 1; display: grid; place-items: center; width: var(--s-4); height: 1.25rem;
-  color: var(--text-faint); cursor: grab; opacity: 0; transition: opacity 80ms ease-out;
+  position: absolute; top: .45rem; left: calc(-1 * 1rem); z-index: 1; display: grid; place-items: center; width: 1rem; height: 1.25rem;
+  color: var(--faint-foreground); cursor: grab; opacity: 0; transition: opacity 80ms ease-out;
 }
 .scope-nav__grip .icon { width: .8rem; height: .8rem; }
 .scope-nav__row:hover .scope-nav__grip, .scope-nav__grip:focus-visible { opacity: 1; }
-.scope-nav__grip:hover { color: var(--text); }
+.scope-nav__grip:hover { color: var(--foreground); }
 .scope-nav__grip:active { cursor: grabbing; }
-.scope-nav__grip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: var(--radius-sm); color: var(--text); }
+.scope-nav__grip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; border-radius: var(--ui-radius-sm); color: var(--foreground); }
 @media (hover: none) { .scope-nav__grip { opacity: 1; } }
 .scope-nav__row--dragging .scope-nav__item { background: var(--brand-tint); opacity: .8; }
-.scope-nav__item[aria-current="page"] { background: var(--layer-2); font-weight: var(--weight-strong); }
-.scope-nav__name { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.scope-nav__item[aria-current="page"] { background: var(--muted); font-weight: 500; }
+.scope-nav__name { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .scope-nav__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.scope-nav__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; }
-.scope-nav__progress { grid-column: 1 / -1; width: 100%; height: 2px; overflow: hidden; border: 0; border-radius: var(--radius-pill); background: var(--layer-3); appearance: none; }
-.scope-nav__progress::-webkit-progress-bar { background: var(--layer-3); }
-.scope-nav__progress::-webkit-progress-value { background: var(--ok); }
-.scope-nav__progress::-moz-progress-bar { background: var(--ok); }
+.scope-nav__count { color: var(--muted-foreground); font-size: var(--ui-text-xs); font-variant-numeric: tabular-nums; }
+.scope-nav__progress { grid-column: 1 / -1; width: 100%; height: 2px; overflow: hidden; border: 0; border-radius: var(--ui-radius-full); background: light-dark(color-mix(in oklab, var(--foreground) 6%, var(--muted)), color-mix(in oklab, var(--foreground) 14%, var(--muted))); appearance: none; }
+.scope-nav__progress::-webkit-progress-bar { background: light-dark(color-mix(in oklab, var(--foreground) 6%, var(--muted)), color-mix(in oklab, var(--foreground) 14%, var(--muted))); }
+.scope-nav__progress::-webkit-progress-value { background: var(--success); }
+.scope-nav__progress::-moz-progress-bar { background: var(--success); }
 
 /* A scope item's name in place (scope_items/_item, _new): the field, then its button, on one line. */
-.scope-item-fields { display: flex; align-items: center; gap: var(--s-2); font-size: var(--text-meta); }
+.scope-item-fields { display: flex; align-items: center; gap: .5rem; font-size: var(--ui-text-xs); }
 .scope-item-fields form { display: contents; }
-.scope-item-fields input { flex: 1; min-width: 0; height: var(--control-h-sm); font-size: var(--text-meta); }
+.scope-item-fields input { flex: 1; min-width: 0; height: var(--ui-h-sm); font-size: var(--ui-text-xs); }
 
 /* Finishing, reopening and erasing a piece of work (works/_close: each choice asked in runeui's
 /* alert dialog with a note; _erase). */
-.work-finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.work-finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
 .work-reopen { display: contents; }
-.work-finish__danger, .work-finish__danger:hover { color: var(--danger); }
-.work-finish__danger:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
+.work-finish__danger, .work-finish__danger:hover { color: var(--destructive); }
+.work-finish__danger:hover { background: color-mix(in srgb, var(--destructive) 9%, transparent); }
 
 /* ======================================================================= 11 Indexes */
 
 /* A piece of work's row in the table: its title as plain text to click, its client quieter. */
-.work-row__title, .work-row__client { color: var(--text); text-decoration: none; }
-.work-row__client { color: var(--text-muted); }
-:is(.work-row__title, .work-row__client):hover { color: var(--accent); }
+.work-row__title, .work-row__client { color: var(--foreground); text-decoration: none; }
+.work-row__client { color: var(--muted-foreground); }
+:is(.work-row__title, .work-row__client):hover { color: var(--primary); }
 
 /* A client's status badge that opens its picker (clients/_status_picker): the badge is the button. */
 .status-picker { position: relative; display: inline-block; }
-.status-picker__trigger { display: inline-flex; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; font: inherit; cursor: pointer; }
+.status-picker__trigger { display: inline-flex; padding: 0; border: 0; border-radius: var(--ui-radius-full); background: none; font: inherit; cursor: pointer; }
 .status-picker__trigger:hover [data-slot="badge"] { filter: brightness(.95); }
 .status-picker__display { display: contents; }
 
 /* A piece of work's title with its info button (the description, in a dialog), and the next step
 /* under the meta line, where the Overview card used to be. */
-.record-header__title-row { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
+.record-header__title-row { display: flex; align-items: center; gap: .25rem; min-width: 0; }
 /* The title is as wide as its words, so what follows it (a work's info button) sits right beside
    it. Where a browser can't size a field to its content, the title keeps the row and the button
    its end. */
 @supports (field-sizing: content) {
-  .record-header__title-row .record-title-form { flex: 0 1 auto; margin-left: calc(var(--s-2) * -1); }
+  .record-header__title-row .record-title-form { flex: 0 1 auto; margin-left: calc(.5rem * -1); }
   .record-header__title-row .record-title { field-sizing: content; width: auto; min-width: 4ch; max-width: 100%; margin-inline: 0; }
 }
 
@@ -342,142 +335,134 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* A record page's fields in the install's order (RecordLayout, record_fields/zone): inputs on new
 /* and edit, a details list on show (label beside value in the sidebar, stacked in the working
 /* column). A sidebar card of fields shows only when one of them has something to show. */
-.record-fields { display: flex; flex-direction: column; gap: var(--s-4); }
+.record-fields { display: flex; flex-direction: column; gap: 1rem; }
 dl.record-fields { display: grid; }
 dl.record-fields .layout-field { display: contents; }
 /* A field that draws two (a task's work and its section) keeps the column's gap between them. */
-.record-fields:not(dl) .layout-field { display: flex; flex-direction: column; gap: var(--s-4); }
-dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
-dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
+.record-fields:not(dl) .layout-field { display: flex; flex-direction: column; gap: 1rem; }
+dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+dl.record-fields--stacked dd { margin-bottom: .75rem; }
 .record-fields__prose { overflow-wrap: anywhere; }
-.record-fields-card:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .field--inline)) { display: none; }
+.record-fields-card:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"])) { display: none; }
 .record-form__footer { flex-direction: row; justify-content: flex-end; }
 
 /* Arranging (record-layout controller): the page keeps its own look, label beside value, and only
 /* hints at what moves: each column a faint dashed outline, each field a hover tint and a grip,
 /* its inputs inert; the bar across the top with the Hidden tray. */
 .record-page--arranging .record-fields-card { display: flex; }
-.record-page--arranging [data-zone] { min-height: 2.5rem; border-radius: var(--radius); outline: 1px dashed color-mix(in srgb, var(--line-strong) 70%, transparent); outline-offset: 6px; }
+.record-page--arranging [data-zone] { min-height: 2.5rem; border-radius: var(--ui-radius-lg); outline: 1px dashed color-mix(in srgb, var(--input) 70%, transparent); outline-offset: 6px; }
 .record-page--arranging .layout-field {
-  position: relative; margin-inline: calc(var(--s-2) * -1); padding: var(--s-1) var(--s-2) var(--s-1) var(--s-5);
-  border-radius: var(--radius-sm); text-align: start; cursor: grab; transition: background .12s;
+  position: relative; margin-inline: calc(.5rem * -1); padding: .25rem .5rem .25rem 1.5rem;
+  border-radius: var(--ui-radius-sm); text-align: start; cursor: grab; transition: background .12s;
 }
 .record-page--arranging .layout-field::after {
-  content: ""; position: absolute; top: 50%; left: var(--s-1); width: .5rem; height: .875rem; translate: 0 -50%; opacity: .55;
-  background: radial-gradient(circle, var(--text-faint) 1.1px, transparent 1.4px) 0 0 / 4px 4px;
+  content: ""; position: absolute; top: 50%; left: .25rem; width: .5rem; height: .875rem; translate: 0 -50%; opacity: .55;
+  background: radial-gradient(circle, var(--faint-foreground) 1.1px, transparent 1.4px) 0 0 / 4px 4px;
 }
-.record-page--arranging .layout-field:hover { background: var(--hover); }
+.record-page--arranging .layout-field:hover { background: var(--ui-ghost-hover); }
 .record-page--arranging .layout-field:hover::after { opacity: 1; }
-.record-page--arranging .layout-field:focus-visible { outline: none; background: var(--brand-tint); box-shadow: var(--ring); }
+.record-page--arranging .layout-field:focus-visible { outline: none; background: var(--brand-tint); box-shadow: var(--ui-focus-ring); }
 /* A details list stays a list of rows: label column, value column. */
 /* Every row runs the column's full width, so each grip sits at the left edge, one under another
-/* (rune's details list centres its items, which a flex column would turn into centred rows). */
+/* (dl.details centres its items, which a flex column would turn into centred rows). */
 .record-page--arranging [data-zone] { align-items: stretch; justify-items: stretch; }
 .record-page--arranging dl.record-fields { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
 .record-page--arranging .layout-field { width: auto; justify-self: stretch; }
-.record-page--arranging dl.record-fields .layout-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-height: 2rem; }
+.record-page--arranging dl.record-fields .layout-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: 1.5rem; min-height: 2rem; }
 .record-page--arranging dl.record-fields--stacked .layout-field { grid-template-columns: minmax(0, 1fr); }
 /* A form (new and edit pages) reads as the same rows while arranging: label beside a one-line
 /* glimpse of its input, hints hidden, a rich text editor cropped, the "who sees it" pill at the
 /* row's end. */
 .record-page--arranging .record-fields:not(dl) { gap: 2px; }
-.record-page--arranging .record-fields:not(dl) .layout-field:has(.layout-field__control) { display: flex; align-items: center; gap: var(--s-2); }
-.record-page--arranging .record-fields:not(dl) .layout-field .field { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-width: 0; }
+.record-page--arranging .record-fields:not(dl) .layout-field:has(.layout-field__control) { display: flex; align-items: center; gap: .5rem; }
+.record-page--arranging .record-fields:not(dl) .layout-field .field { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: 1.5rem; min-width: 0; }
 .record-page--arranging .record-fields:not(dl) :is(.field__hint, [data-slot="field-description"]) { display: none; }
-.record-page--arranging .record-fields:not(dl) .field__label { color: var(--text-muted); font-weight: var(--weight); }
+.record-page--arranging .record-fields:not(dl) .field__label { color: var(--muted-foreground); font-weight: 400; }
 .record-page--arranging .record-fields:not(dl) lexxy-editor { max-height: 2.25rem; min-height: 0; overflow: hidden; }
 .record-page--arranging .record-fields:not(dl) lexxy-editor :is(lexxy-toolbar, .lexxy-editor__toolbar) { display: none; }
 
-.record-page--arranging dd:has(.layout-field__control) { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
-.record-page--arranging .layout-field:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .field--inline, .card))::before,
-.layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--text-muted); }
+.record-page--arranging dd:has(.layout-field__control) { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.record-page--arranging .layout-field:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .card))::before,
+.layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--muted-foreground); }
 .layout-field--dragging { opacity: .4; }
 
 .layout-bar {
-  position: sticky; top: var(--s-2); z-index: 20; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4);
-  padding: var(--s-3) var(--s-4); border-radius: var(--radius-lg); background: var(--brand-tint-strong); box-shadow: var(--shadow-popover);
+  position: sticky; top: .5rem; z-index: 20; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem;
+  padding: .75rem 1rem; border-radius: var(--ui-radius-xl); background: var(--brand-tint-strong); box-shadow: 0 0 0 1px var(--border), var(--ui-shadow-lg);
 }
 .layout-bar__text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: 2px; min-width: 0; }
-.layout-bar__hint { color: var(--text-muted); font-size: var(--text-meta); }
-.layout-bar__hidden { display: flex; flex: 1 1 14rem; align-items: center; gap: var(--s-2); min-width: 0; }
-.layout-bar__label { color: var(--text-muted); font-size: var(--text-meta); }
-.layout-bar__tray { display: flex; flex: 1; flex-wrap: wrap; gap: var(--s-1); min-height: 2.25rem; padding: 4px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
-.layout-bar__tray .layout-field { display: inline-flex; padding: 2px var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--layer-1); font-size: var(--text-meta); cursor: grab; }
+.layout-bar__hint { color: var(--muted-foreground); font-size: var(--ui-text-xs); }
+.layout-bar__hidden { display: flex; flex: 1 1 14rem; align-items: center; gap: .5rem; min-width: 0; }
+.layout-bar__label { color: var(--muted-foreground); font-size: var(--ui-text-xs); }
+.layout-bar__tray { display: flex; flex: 1; flex-wrap: wrap; gap: .25rem; min-height: 2.25rem; padding: 4px; border: 1px dashed var(--input); border-radius: var(--ui-radius-lg); background: var(--background); }
+.layout-bar__tray .layout-field { display: inline-flex; padding: 2px .5rem; border: 1px solid var(--border); border-radius: var(--ui-radius-full); background: color-mix(in oklab, var(--muted) 50%, var(--background)); font-size: var(--ui-text-xs); cursor: grab; }
 .layout-bar__tray .layout-field * { display: none; }
 .layout-bar__tray .layout-field { margin: 0; }
 .layout-bar__tray .layout-field::after { display: none; }
-.layout-bar__actions { display: flex; gap: var(--s-2); }
+.layout-bar__actions { display: flex; gap: .5rem; }
 
 /* A custom field only some roles see: a lock beside its label; and, while arranging, the pill that
 /* says who and opens the roles to tick (record_fields/visibility). */
-.field-lock { display: inline-flex; color: var(--text-faint); vertical-align: middle; }
+.field-lock { display: inline-flex; color: var(--faint-foreground); vertical-align: middle; }
 .field-lock .icon { width: .75rem; height: .75rem; }
 .layout-field__control { display: none; }
 .record-page--arranging .layout-field__control { display: inline-flex; }
 .layout-field__visibility.ui-button { gap: 4px; }
-.layout-visibility [data-slot="popover-content"] { gap: var(--s-3); width: auto; min-width: 16rem; }
-.layout-visibility__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
-.field-visibility { display: flex; flex-direction: column; gap: var(--s-2); margin: 0; padding: 0; border: 0; }
-.field-visibility__legend { padding-bottom: var(--s-1); font-size: var(--ui-text-sm, .875rem); font-weight: 500; }
+.layout-visibility [data-slot="popover-content"] { gap: .75rem; width: auto; min-width: 16rem; }
+.layout-visibility__actions { display: flex; justify-content: flex-end; gap: .5rem; }
+.field-visibility { display: flex; flex-direction: column; gap: .5rem; margin: 0; padding: 0; border: 0; }
+.field-visibility__legend { padding-bottom: .25rem; font-size: var(--ui-text-sm, .875rem); font-weight: 500; }
 
 /* While arranging, card headings (and the line under each) are written in place: a dashed line
    under them, and a placeholder where there’s none yet. */
-.record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--line-strong); border-radius: calc(2px * var(--radius-scale, 1)); cursor: text; }
-.record-page--arranging [data-layout-text]:focus { outline: none; border-bottom-color: var(--accent); background: var(--brand-tint); }
-.record-page--arranging [data-layout-text]:empty::before { content: attr(data-placeholder); color: var(--text-faint); }
+.record-page--arranging [data-layout-text] { min-width: 6rem; padding-inline: 2px; border-bottom: 1px dashed var(--input); border-radius: calc(var(--ui-radius-lg) * 0.2); cursor: text; }
+.record-page--arranging [data-layout-text]:focus { outline: none; border-bottom-color: var(--primary); background: var(--brand-tint); }
+.record-page--arranging [data-layout-text]:empty::before { content: attr(data-placeholder); color: var(--faint-foreground); }
 
-/* A modal's form card (record_fields/main_card, head_key): who it's for beside the heading, and
-/* the fields that would be a sidebar two to a row (work type and shape), stacking on a phone. */
-.record-form__head--field { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem); }
-.record-form__head-field { align-self: center; }
-.record-form__head-field .field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/* A modal's form card (record_fields/main_card): the fields that would be a sidebar two to a row
+/* (work type and shape), stacking when narrow. */
 .record-fields--paired { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); align-items: start; }
-.record-form__head-field .field { flex: 1; min-width: 0; }
-@media (max-width: 639px) {
-  .record-form__head--field { grid-template-columns: minmax(0, 1fr); }
-  .record-form__head--field .record-form__head-field { grid-column: 1; grid-row: auto; padding-top: var(--s-2); }
-}
 
 /* A piece of work's Tasks: the hint with its + (a new section), and each section an accordion that
    drags by its grip (tasks/_section). */
-.task-section__hint { display: flex; align-items: center; gap: var(--s-2); }
-.task-section__new { display: inline-flex; flex-direction: column; gap: var(--s-2); }
+.task-section__hint { display: flex; align-items: center; gap: .5rem; }
+.task-section__new { display: inline-flex; flex-direction: column; gap: .5rem; }
 .task-section__new[open] { flex-basis: 100%; }
 .task-section__add { list-style: none; }
 .task-section__add::-webkit-details-marker { display: none; }
-.task-section__new[open] .task-section__add { color: var(--accent); }
+.task-section__new[open] .task-section__add { color: var(--primary); }
 .task-groups__list { display: flex; flex-direction: column; }
 .task-group__header { cursor: pointer; list-style: none; }
 .task-group__header::-webkit-details-marker { display: none; }
-.task-group__caret { flex: none; width: .8rem; height: .8rem; color: var(--text-muted); transform: rotate(-90deg); transition: transform 120ms ease-out; }
+.task-group__caret { flex: none; width: .8rem; height: .8rem; color: var(--muted-foreground); transform: rotate(-90deg); transition: transform 120ms ease-out; }
 .task-group[open] .task-group__caret { transform: none; }
-.task-group__grip { display: inline-grid; flex: none; place-items: center; margin-left: calc(-1 * var(--s-1)); color: var(--text-muted); cursor: grab; }
+.task-group__grip { display: inline-grid; flex: none; place-items: center; margin-left: calc(-1 * .25rem); color: var(--muted-foreground); cursor: grab; }
 .task-group__grip .icon { width: 1rem; height: 1rem; }
-.task-group__grip:hover { color: var(--text); }
+.task-group__grip:hover { color: var(--foreground); }
 .task-group--dragging { opacity: .5; }
-.task-groups--hover { border-radius: var(--radius-md); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
-.task-group:not([open]) .task-group__header { padding-bottom: var(--s-3); }
+.task-groups--hover { border-radius: var(--ui-radius-md); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 35%, transparent); }
+.task-group:not([open]) .task-group__header { padding-bottom: .75rem; }
 @media (prefers-reduced-motion: reduce) { .task-group__caret { transition: none; } }
 
 /* A record page's heading, changed in place (layouts/shared/_record_title): an input that reads as
    the heading until it's hovered or focused, as a task's title does in its panel. */
 .record-title-form { gap: 0; min-width: 0; }
 .record-title-form .page-title { margin: 0; }
-.record-title { width: 100%; padding: var(--s-1) var(--s-2); margin-inline: calc(var(--s-2) * -1); border-color: transparent; background: none; box-shadow: none; font: inherit; color: inherit; }
-.record-title:hover { border-color: var(--line); }
-.record-title:focus { border-color: var(--line-strong); background: var(--panel); }
+.record-title { width: 100%; padding: .25rem .5rem; margin-inline: calc(.5rem * -1); border-color: transparent; background: none; box-shadow: none; font: inherit; color: inherit; }
+.record-title:hover { border-color: var(--border); }
+.record-title:focus { border-color: var(--input); background: var(--background); }
 
 /* Fields in place (record_fields/_zone in_place): each one's form holds only inline=field. */
 .record-field-form { display: none; }
 
 /* Rich text changed in place (the save-when-dirty behavior): its Save shows once it's been typed in. */
-.rich-text-in-place__actions { display: none; justify-content: flex-end; gap: var(--s-2); }
+.rich-text-in-place__actions { display: none; justify-content: flex-end; gap: .5rem; }
 form[data-dirty] .rich-text-in-place__actions { display: flex; }
 
 /* A New form on its way into the modal (layouts/shared/_modal_placeholder). */
-.record-modal__placeholder { display: flex; flex-direction: column; gap: var(--s-4); }
+.record-modal__placeholder { display: flex; flex-direction: column; gap: 1rem; }
 .record-modal__skeleton { block-size: 2rem; }
 .record-modal__skeleton--title { inline-size: 40%; block-size: 1.25rem; }
 .record-modal__skeleton--short { inline-size: 60%; }
 /* A switch's hint in a record's fields reads as its neighbours' hints do. */
-.record-fields .switch-field [data-slot="field-description"] { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
+.record-fields .switch-field [data-slot="field-description"] { color: var(--faint-foreground); font-size: var(--ui-text-xs); line-height: 1rem; }

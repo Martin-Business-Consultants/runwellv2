@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { refreshTheme } from "runeui"
 
 // Settings > Appearance (and Your account's text size): applies a choice to the page at once, then
 // saves it. Each choice is a runeui radio group (settings/appearances/_choices), whose change
@@ -11,13 +12,9 @@ export default class extends Controller {
 
     if (key === "theme") {
       // Picking the default here also drops your own sun/moon choice, so you see what you picked.
-      try { localStorage.removeItem("theme") } catch {}
+      try { localStorage.removeItem("runeui-theme") } catch {}
       root.dataset.defaultTheme = target.value
-      if (target.value === "system") {
-        root.removeAttribute("data-theme")
-      } else {
-        root.dataset.theme = target.value
-      }
+      refreshTheme()
     } else if (key === "text_size" && !target.value) {
       // Your account: blank follows the install's default.
       root.dataset.textSize = this.element.dataset.installTextSize

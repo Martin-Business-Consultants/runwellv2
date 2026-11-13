@@ -118,26 +118,74 @@ documented in 2.25.4, stable), and `tasks/ai_brief` (`task:`, `labelled:`; copie
 local AI, `c` on a keyboard item: documented in 2.28, stable). The brief itself is
 `Task::Brief.new(task, base_url:, person:).to_s` (Markdown: the tasks, scope, notes, other dated tasks,
 plugins' sections and the `runwell` commands to report back; documented in 2.28, stable). Design tokens for its CSS are in
-[theming.md](theming.md) (2.12, stable).
+[theming.md](theming.md) (2.12; shadcn's and runeui's since 6.0).
 
 Any other core helper is not part of this contract and may go without notice. Two plugins used
 were removed in 3.0 with agreements: `contact_options` and `default_approver`; keep a copy in the
 plugin (QuickBooks has `quickbooks_contact_options` and `quickbooks_default_contact`).
 
-**The UI kit (4.0).** A plugin's views are drawn with rune_ui, the core's UI kit, and its helpers
-are part of this contract: `button_link`, `action_button`, `submit_button`, `icon_button`,
-`button_classes` (variants `:primary`, `:secondary`, `:ghost`, `:danger`; size `:sm`), `badge`,
-`card`, `list_row`, `field`, `form_errors`, `empty_state`, `menu`, `popover_menu`, `menu_link`,
-`menu_button`, `menu_label`, `menu_divider`, `dialog`, `sheet`, `dialog_actions`,
-`confirm_dialog`, `tabs`, `callout`, `avatar`, `avatar_stack`, `settings_group`, `setting_row`,
-`switch`, `segmented`, `copy_button`, `copy_field`, `progress_bar`, `time_ago` and `icon`
-(`icon_tag` draws the core's icons by name). So are the classes they emit and the ones rune_ui
-documents for markup written by hand (`btn`, `icon-button`, `pill`, `card` and its parts,
-`list-row` and its parts, `field`, `badge`, `tabs`, `alert`, `table`, `dl.details`, `empty`,
-`stack`, `button-row`, `muted`…); its README lists them. Its Stimulus controllers (`rune-*`) may
-be used from markup. Runwell's own classes (an area's `record-page`, `settings-section`,
-`task-group`…) are still not an API. A plugin's stylesheet reads the tokens in
-[theming.md](theming.md), never the core's class names.
+**The UI kit (6.0).** A plugin's views are drawn with runeui, the core's UI kit (`../runeui`; its
+README lists every component): `ui :name` (`ui :button`, `ui :badge`, `ui :card`, `ui :table`,
+`ui :menu`, `ui :dialog`, `ui :alert`, `ui :empty`…) and `form.ui :field` inside `form_with`, with
+`icon_tag` for the core's icons by name. A plugin's stylesheet reads runeui's tokens, which are
+shadcn's (`--background`, `--foreground`, `--primary` for the brand's colour, `--muted-foreground`,
+`--border`, `--destructive`, runeui's `--ui-*` scale…), plus the core's `--faint-foreground`,
+`--brand-tint` and `--brand-tint-strong`: [theming.md](theming.md) lists them. Runwell's own
+classes (an area's `record-page`, `settings-section`, `task-group`…) are still not an API.
+
+**The compatibility layer (6.0 until 7.0).** What plugins drew with rune_ui before 6.0 keeps
+working, drawn by runeui in the install's theme, and goes in 7.0, so a plugin moves off it before
+then:
+
+- The helpers (`RuneCompatHelper`): `button_link`, `action_button`, `submit_button`,
+  `icon_button`, `button_classes` (variants `:primary`, `:secondary`, `:ghost`, `:danger`; size
+  `:sm`), `badge`, `card`, `list_row`, `field`, `form_errors`, `empty_state`, `menu`,
+  `popover_menu`, `menu_link`, `menu_button`, `menu_label`, `menu_divider`, `dialog`, `sheet`,
+  `dialog_actions`, `confirm_dialog`, `tabs`, `callout`, `avatar`, `avatar_stack`,
+  `settings_group`, `setting_row`, `switch_tag`, `copy_button`, `copy_field`, `progress_bar`,
+  `status_dot`, `time_ago`, `crumbs`, `flash_messages`, and `popup_menu` (`PopupHelper`, with the
+  `dialog` controller); the Stimulus controllers `rune-clipboard` and `rune-local-time`.
+- The classes (`runwell/compat.css`): `btn` (`--primary`, `--secondary`, `--ghost`, `--danger`,
+  `--sm`, `--accent`), `icon-button`, `pill`, `card` and its parts (`__head`, `__title`, `__hint`,
+  `__action`, `__content`, `__footer`; `--flush`, `--sm`), `list-row` and its parts, `field`,
+  `field__label`, `field__hint`, `field-row`, `badge` and its tones, `count`, `chip`, `kbd`,
+  `separator`, `tabs` / `tabs__tab` (`--pills`, `--icons`), `alert` (`--danger`), `table` in a
+  `table-wrap` (`table__grow`, `number`), `data-table`, `dl.details`, `empty`, `stack`, `grid-2`,
+  `catalog`, `dot-list`, `button-row`, `page-header`, `menu`, `popover-menu`, `popup` and its
+  parts, `switch`, `checkbox`, `search`, `copy-field`, `status--*`, `letter`, `avatar`, `skeleton`,
+  `crumbs`, `muted`, `faint`, `small`, `nowrap`, `visually-hidden`, `[data-tooltip]`; and bare
+  inputs, selects, textareas, headings, links and forms (a flex column) styled as rune_ui did.
+  Classes nothing used in 5.x's plugins went in 6.0: `card--danger`, `card--fold`, `fold`,
+  `list-row--tall`, `list-row--outline`, `field--inline`, `icon-button--danger`, `alert--attention`,
+  `dialog__body`, `menu__*`, `prose`, `table--even`, `table__cap`, `crumbs__sep`, `crumbs__current`.
+- The token names, each defined from runeui's (so they follow every scheme, corner, font and
+  custom theme):
+
+  | Old name | 6.0 reads it as |
+  | --- | --- |
+  | `--panel`, `--page` | `--background`, `--sidebar` |
+  | `--layer-1`, `--layer-2`, `--layer-3` | `--muted` halfway into `--background`, `--muted`, `--muted` a step darker |
+  | `--text`, `--text-muted`, `--text-faint` | `--foreground`, `--muted-foreground`, `--faint-foreground` |
+  | `--line`, `--line-strong`, `--hover` | `--border`, `--input`, `--foreground` at 4% (8% in dark) |
+  | `--accent` (the brand), `--accent-ink`, `--accent-hover`, `--accent-soft` | `--primary` (see below), `--primary-foreground`, `--primary` 90% into `--background`, `--brand-tint` |
+  | `--ring` (the focus shadow) | `--ui-focus-ring` (see below) |
+  | `--ok`, `--danger`, `--attention` | `--success`, `--destructive`, `--warning` |
+  | `--s-1` … `--s-6` | `0.25rem` … `2rem` |
+  | `--radius-sm`, `--radius-md` / `--radius-control`, `--radius-lg` / `--radius-panel`, `--radius-xs`, `--radius-pill` | `--ui-radius-sm`, `--ui-radius-md`, `--ui-radius-xl`, `--radius` − 6px, `--ui-radius-full` |
+  | `--radius-scale` | Corners as a number: 0.4 (Sharp), 1, 1.6 (Round) |
+  | `--control-h`, `--control-h-sm`, `--row-h` | `--ui-h`, `--ui-h-sm`, `2.5rem` |
+  | `--text-xs` / `--text-meta`, `--text-ui` / `--text-read`, `--text-title` | `--ui-text-xs`, `--ui-text-sm`, `1.25rem` |
+  | `--weight`, `--weight-strong`, `--leading`, `--leading-tight` | `400`, `500`, `1.25rem`, `1rem` |
+  | `--shadow-popover`, `--motion*`, `--ease` | a hairline and `--ui-shadow-lg`; as before |
+  | Fizzy's `--color-ink*`, `--color-canvas`, `--color-link`, `--color-positive`, `--color-negative`, `--color-selected*`, `--focus-ring-color`, `--inline-space*`, `--block-space*`, `--text-x-small` … `--text-xx-large` | `--foreground` … `--border`, `--background`, `--primary`, `--success`, `--destructive`, the brand tints, `--ring` at half, as before |
+
+  Two names are runeui's own now and mean what shadcn means: `--accent` is the quiet hover fill and
+  `--ring` a colour. So that a plugin's stylesheet keeps its look, the core reads its
+  `var(--accent)` as `var(--primary)` and its `var(--ring)` as `var(--ui-focus-ring)` as it serves
+  the sheet (`lib/rails_ext/propshaft_plugin_stylesheets.rb`, for stylesheets registered with
+  `Runwell::Plugins.stylesheet`). Moving to runeui's names, a plugin writes `--primary` for the
+  brand's colour and `--ui-focus-ring` for focus, and from then on `--accent` and `--ring` mean
+  shadcn's.
 
 A plugin with several pages of its own lists them in a sidebar beside the page, as Settings does:
 each page calls `section_nav "Its name" do … end` once (a partial of the plugin's, given the
@@ -508,6 +556,19 @@ record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners),
 `settings.layout` is a security event (Settings > Audit log).
 
 ## Changes to this contract
+
+**6.0** moved the core's UI from rune_ui to runeui (`docs/runeui-migration.md`): runeui's tokens
+(shadcn's) on `:root`, its components everywhere in the core, and Settings › Appearance and custom
+CSS acting on those tokens. Plugins keep working through the compatibility layer above, until 7.0:
+rune_ui's helpers drawn by runeui, its classes, and its token names defined from runeui's (the
+table above), with a plugin stylesheet's `var(--accent)` and `var(--ring)` read as the brand's
+colour and the focus shadow. To move, a plugin draws with `ui :name` and `form.ui`, reads runeui's
+tokens (`--primary` for the brand's colour, `--muted-foreground`, `--border`, `--ui-focus-ring`…),
+and sets `requires: ">= 6.0.0"`. Gone in 6.0: Fizzy's palette (`--lch-*`) and `--text-scale`,
+which no plugin read; and the compatibility classes listed above as gone. Dark mode is runeui's
+`.dark` on `<html>`, set before the first paint; `html[data-theme="dark"]` still matches (runeui
+sets it beside `.dark`, now also when dark comes from the system), but a new dark rule is
+`.dark …`.
 
 **5.1.1** folded a client's contacts into users: a contact is a `User` with the role `client`
 (`User::Role::CLIENT`), and `Contact` is that slice of users (`class Contact < User`, a default

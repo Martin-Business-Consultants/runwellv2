@@ -1,5 +1,5 @@
-/* Settings (every page), Users and Invitations, on rune_ui's tokens (docs/rune-ui-migration.md). Unlayered, so these win over rune's
-/* components.
+/* Settings (every page), Users and Invitations.
+/* Unlayered, so these win over runeui's layers; on runeui's tokens (appearance.css, docs/theming.md).
 /*
 /* 1 Header and nav   2 A settings page and its sections   3 Lists, choices and small pieces
 /* 4 Pages (Roles, Plugins, Your menu, Connected apps, Webhooks, Updates, Names,
@@ -9,13 +9,13 @@
 
 /* "Settings" and its line across both columns of the settings layout (runwell.css 5), over a
 /* rule. It rides in with the nav (settings/_header), so it's the layout's first grid item. */
-.settings-layout:has(.settings-header) { row-gap: var(--s-4); }
-.settings-header { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-5); border-bottom: 1px solid var(--line); }
-.settings-header__description { color: var(--text-muted); font-size: var(--text-read); }
+.settings-layout:has(.settings-header) { row-gap: 1rem; }
+.settings-header { grid-column: 1 / -1; display: flex; flex-direction: column; gap: .25rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.settings-header__description { color: var(--muted-foreground); font-size: var(--ui-text-sm); }
 
 /* The nav (settings/_nav, and a plugin's section_nav): ghost links grouped under small muted
 /* labels, the current one tinted; a scrolling row over the page when narrow. */
-.settings-nav { display: flex; flex-direction: column; gap: var(--s-1); }
+.settings-nav { display: flex; flex-direction: column; gap: .25rem; }
 
 /* Wide, a settings page is two panes in a panel the window's height: the nav and the page each
 /* scroll on their own, so the nav's foot is always in reach whatever the page's length (sticky
@@ -26,15 +26,15 @@
   .settings-layout { flex: 1 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
   .settings-layout .settings-nav,
   .settings-layout__page { align-self: stretch; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-  .settings-layout .settings-nav { padding-bottom: var(--s-6); }
-  .settings-layout__page { padding-bottom: calc(var(--s-6) * 2); }
+  .settings-layout .settings-nav { padding-bottom: 2rem; }
+  .settings-layout__page { padding-bottom: calc(2rem * 2); }
 }
 /* A heading has room above it, but not the first (a plugin's section_nav_heading comes wrapped
 /* in a span in development, hence the second selector). */
-.settings-nav__heading { display: flex; align-items: center; height: calc(var(--control-h) + var(--s-4)); padding: var(--s-4) var(--s-3) 0; color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight-strong); }
-.settings-nav > .settings-nav__heading:first-child, .settings-nav > :first-child > .settings-nav__heading:only-child { height: var(--control-h); padding-top: 0; }
+.settings-nav__heading { display: flex; align-items: center; height: calc(var(--ui-h) + 1rem); padding: 1rem .75rem 0; color: var(--faint-foreground); font-size: var(--ui-text-xs); font-weight: 500; }
+.settings-nav > .settings-nav__heading:first-child, .settings-nav > :first-child > .settings-nav__heading:only-child { height: var(--ui-h); padding-top: 0; }
 .settings-nav__list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.settings-nav__list--nested { padding-top: 2px; padding-left: var(--s-2); border-left: 1px solid var(--line); margin-left: 1.25rem; }
+.settings-nav__list--nested { padding-top: 2px; padding-left: .5rem; border-left: 1px solid var(--border); margin-left: 1.25rem; }
 /* Each link is runeui's ghost button (settings_nav_link), across the column, the current one on
 /* the muted fill (shadcn's settings nav). */
 .settings-nav__link.ui-button { justify-content: flex-start; width: 100%; gap: 6px; }
@@ -44,7 +44,7 @@
 .settings-nav__link--nested.ui-button[aria-current="page"] { color: var(--foreground); font-weight: 500; }
 @media (max-width: 860px) { .settings-nav__link.ui-button { width: auto; } }
 @media (max-width: 860px) {
-  .settings-nav { position: static; flex-direction: row; max-height: none; padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: visible; }
+  .settings-nav { position: static; flex-direction: row; max-height: none; padding-bottom: .75rem; border-bottom: 1px solid var(--border); overflow-x: auto; overflow-y: visible; }
   .settings-nav__heading { display: none; }
   .settings-nav__list { flex-direction: row; }
   .settings-nav__list li { display: contents; }
@@ -57,23 +57,23 @@
 /* holds. --wide (the audit log's table) takes the page's width. */
 .settings-page { display: flex; flex-direction: column; gap: 2.5rem; max-width: 48rem; min-width: 0; }
 .settings-page--wide { max-width: none; }
-.settings-section { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
-.settings-section__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-1) var(--s-4); align-items: start; padding-bottom: var(--s-5); border-bottom: 1px solid var(--line); }
+.settings-section { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.settings-section__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: .25rem 1rem; align-items: start; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
 .settings-section__head:last-child { padding-bottom: 0; border-bottom: 0; }
 .settings-section__head:has(> .settings-section__actions) { grid-template-columns: minmax(0, 1fr) auto; }
-.settings-section__head > :is(h1, h2) { grid-column: 1; font-size: calc(var(--text-read) * 1.25); font-weight: var(--weight-strong); line-height: 1.5; letter-spacing: normal; }
-.settings-section__description { grid-column: 1; color: var(--text-muted); font-size: var(--text-read); line-height: 1.5; }
-.settings-section__description code { color: var(--text); }
-.settings-section__actions { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.settings-section__head > :is(h1, h2) { grid-column: 1; font-size: calc(var(--ui-text-sm) * 1.25); font-weight: 500; line-height: 1.5; letter-spacing: normal; }
+.settings-section__description { grid-column: 1; color: var(--muted-foreground); font-size: var(--ui-text-sm); line-height: 1.5; }
+.settings-section__description code { color: var(--foreground); }
+.settings-section__actions { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 
 /* Text in a section: an error. And what's pushed to the end of its row (Download CSV, a
 /* plugin's Delete). */
-.settings-error { color: var(--danger); }
+.settings-error { color: var(--destructive); }
 .settings-end { margin-left: auto; }
 
-/* Forms: fields roomier than rune's default, and an input with its button at its end. */
-.settings-form { gap: var(--s-5); min-width: 0; }
-.settings-inline { display: flex; flex-flow: row wrap; align-items: center; gap: var(--s-2); }
+/* Forms: fields roomier than runeui's default, and an input with its button at its end. */
+.settings-form { gap: 1.5rem; min-width: 0; }
+.settings-inline { display: flex; flex-flow: row wrap; align-items: center; gap: .5rem; }
 .settings-inline :is(input, select, .secret-field) { flex: 1 1 14rem; min-width: 0; }
 .settings-inline--fit :is(input, select) { flex: 0 0 auto; }
 /* runeui's fields in the same row (trial): the wrapper element takes the field's share. */
@@ -81,190 +81,184 @@
 
 /* Switches with their hints (switch_field: runeui's field with control:) in one bordered box, a
 /* rule between them. */
-.settings-switches { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
-.settings-switches .switch-field { min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
-.settings-switches .switch-field + .switch-field { border-top: 1px solid var(--line); }
+.settings-switches { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: var(--background); }
+.settings-switches .switch-field { min-height: 3.25rem; padding: .75rem 1rem; }
+.settings-switches .switch-field + .switch-field { border-top: 1px solid var(--border); }
 /* A column of a section's pieces, and a row of its buttons. */
-.settings-stack { display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-stack { display: flex; flex-direction: column; gap: .75rem; }
 .settings-stack[hidden], .settings-buttons[hidden] { display: none; }
-.settings-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.settings-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 
 /* A form opened in place (a <details> whose summary is the button): a bordered box under it. */
-.settings-fold { display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-fold { display: flex; flex-direction: column; gap: .75rem; }
 .settings-fold > summary { width: fit-content; }
 /* A field's Change (Fields): at the end of its row, and across the row once open. */
 .settings-field__change[open] { flex-basis: 100%; }
 /* A field's drag handle (the core's drag-and-drop controller): grab it to move the row. The row
    being dragged shows dashed where it will land; archived rows keep an empty slot to stay aligned. */
-.settings-field__handle { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.25rem; align-self: center; color: var(--text-faint); cursor: grab; }
-.settings-field__handle:hover { color: var(--text-muted); }
+.settings-field__handle { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.25rem; align-self: center; color: var(--faint-foreground); cursor: grab; }
+.settings-field__handle:hover { color: var(--muted-foreground); }
 .settings-field__handle:active { cursor: grabbing; }
 .settings-field__handle--off { cursor: default; }
-.settings-field.drag-and-drop__dragged-item { background: var(--brand-tint, var(--hover)); box-shadow: inset 0 0 0 1px var(--accent); opacity: .7; }
+.settings-field.drag-and-drop__dragged-item { background: var(--brand-tint); box-shadow: inset 0 0 0 1px var(--primary); opacity: .7; }
 .settings-field__change[open] > summary { align-self: flex-end; }
-.settings-subform { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.settings-subform { padding: 1rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); }
 
-/* Email's tabs (rune's tabs over the frame they swap) and the tab's sections under them. */
-.settings-tabs { display: flex; flex-direction: column; gap: var(--s-5); }
+/* Email's tabs (the tabs over the frame they swap) and the tab's sections under them. */
+.settings-tabs { display: flex; flex-direction: column; gap: 1.5rem; }
 .settings-tabs__panel { display: flex; flex-direction: column; gap: 2.5rem; }
 
 /* Radio cards' group, under its name and line (Appearance, Views). */
-.settings-fieldset { display: grid; gap: var(--s-2); min-width: 0; margin: 0; padding: 0; border: 0; }
-.settings-fieldset > legend { padding: 0 0 var(--s-2); }
-.settings-fieldset > .settings-choices { padding-top: var(--s-1); }
+.settings-fieldset { display: grid; gap: .5rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+.settings-fieldset > legend { padding: 0 0 .5rem; }
+.settings-fieldset > .settings-choices { padding-top: .25rem; }
 
 /* ======================================================================= 3 Lists, choices and small pieces */
 
 /* A list: rows in one bordered box, a hairline over each (a shadow, so the wrapper spans Herb
 /* adds in development can't break it; the box clips the first one's). */
-.settings-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); overflow: hidden; }
+.settings-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: var(--background); overflow: hidden; }
 .settings-list--scroll { max-height: 28rem; overflow-y: auto; }
 /* Rows keep their own height in a list that scrolls (a flex column would squeeze them together). */
 .settings-list > * { flex-shrink: 0; }
 /* A row (.settings-item): what it is (an icon or avatar, a title, muted lines) and its actions at
 /* the end; what doesn't fit (a form opened in place) wraps under it. */
-.settings-item { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: var(--s-3); box-shadow: 0 -1px 0 var(--line); }
-.settings-item__media { display: inline-flex; flex: none; align-items: center; color: var(--text-faint); }
+.settings-item { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; min-height: 2.5rem; padding: .75rem; box-shadow: 0 -1px 0 var(--border); }
+.settings-item__media { display: inline-flex; flex: none; align-items: center; color: var(--faint-foreground); }
 .settings-item__content { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
-.settings-item__title { min-width: 0; overflow-wrap: anywhere; font-weight: var(--weight-strong); }
-.settings-item__desc { min-width: 0; color: var(--text-muted); overflow-wrap: anywhere; }
-.settings-item__actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-left: auto; }
+.settings-item__title { min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+.settings-item__desc { min-width: 0; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.settings-item__actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: .5rem; margin-left: auto; }
 .settings-item__actions form { display: contents; }
 /* A title with a badge or a key beside it. */
-.settings-item__title:has([data-slot="badge"]) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.settings-item__title:has([data-slot="badge"]) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 /* A line of small print under a form's fields. */
-.settings-note { color: var(--text-muted); font-size: var(--text-meta); }
+.settings-note { color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 
 /* A row of badges (what a plugin adds, a person's role and state). */
 .settings-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 
 /* The one thing that can't be undone, in a card tinted the danger colour. */
-.settings-danger { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4); padding: var(--s-4) var(--s-5); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--danger) 4%, var(--panel)); }
+.settings-danger { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; padding: 1rem 1.5rem; border: 1px solid color-mix(in srgb, var(--destructive) 35%, var(--border)); border-radius: var(--ui-radius-xl); background: color-mix(in srgb, var(--destructive) 4%, var(--background)); }
 .settings-danger__text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: 2px; min-width: 0; }
-.settings-danger__title { color: var(--danger); font-size: var(--text-ui); }
-.settings-danger__text p { color: var(--text-muted); }
+.settings-danger__title { color: var(--destructive); font-size: var(--ui-text-sm); }
+.settings-danger__text p { color: var(--muted-foreground); }
 
 /* Choice cards (Appearance, Your account's text size: settings/appearances/_choices): runeui's
 /* radio group, each radio a bordered preview with its name under it, the chosen one edged in the
 /* accent. The radio itself is out of sight; its focus rings the card. */
-.settings-choices[data-slot="radio-group"] { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--s-4); }
-.settings-choice[data-slot="choice"] { position: relative; display: grid; gap: var(--s-2); min-width: 0; color: var(--text); font-size: var(--text-ui); text-align: center; cursor: pointer; }
+.settings-choices[data-slot="radio-group"] { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: 1rem; }
+.settings-choice[data-slot="choice"] { position: relative; display: grid; gap: .5rem; min-width: 0; color: var(--foreground); font-size: var(--ui-text-sm); text-align: center; cursor: pointer; }
 .settings-choice__radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.settings-choice__preview { --icon-size: 1.5rem; display: flex; align-items: center; justify-content: center; height: 5rem; padding: var(--s-1); overflow: hidden; border: 2px solid var(--line); border-radius: var(--radius); background: var(--panel); transition: border-color .15s, box-shadow .15s; }
-.settings-choice:hover .settings-choice__preview { border-color: var(--line-strong); }
-.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__preview { border-color: var(--rune-accent); }
-.settings-choice:has([data-slot="radio"]:focus-visible) .settings-choice__preview { box-shadow: var(--rune-ring); }
+.settings-choice__preview { --icon-size: 1.5rem; display: flex; align-items: center; justify-content: center; height: 5rem; padding: .25rem; overflow: hidden; border: 2px solid var(--border); border-radius: var(--ui-radius-lg); background: var(--background); transition: border-color .15s, box-shadow .15s; }
+.settings-choice:hover .settings-choice__preview { border-color: var(--input); }
+.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__preview { border-color: var(--primary); }
+.settings-choice:has([data-slot="radio"]:focus-visible) .settings-choice__preview { box-shadow: var(--ui-focus-ring); }
 .settings-choice__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__label { font-weight: var(--weight-strong); }
-.settings-fieldset__legend { padding-bottom: var(--s-1); font-weight: var(--weight-strong); }
+.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__label { font-weight: 500; }
+.settings-fieldset__legend { padding-bottom: .25rem; font-weight: 500; }
 
 /* A value to copy (a new token): the value, cut short, beside its Copy button. */
-.settings-copy { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.settings-copy { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .settings-copy code { flex: 1; min-width: 0; padding: 5px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Copy buttons (copy_to_clipboard_controller): flash the accent once copied. */
-.settings-copied:is(.btn, .ui-button) { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+.settings-copied:is(.btn, .ui-button) { background: var(--primary); border-color: transparent; color: var(--primary-foreground); }
 
 
 /* ======================================================================= 4 Pages */
 
 /* Roles: each role beside what it may do; stacked in a narrow sidebar. */
-.settings-roles { display: grid; grid-template-columns: max-content 1fr; gap: var(--s-2) var(--s-5); font-size: var(--text-read); }
-.settings-roles dt { font-weight: var(--weight-strong); }
-.settings-roles dd { color: var(--text-muted); }
-.settings-roles--stacked { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: var(--text-ui); }
-.settings-roles--stacked dd:not(:last-child) { padding-bottom: var(--s-2); }
+.settings-roles { display: grid; grid-template-columns: max-content 1fr; gap: .5rem 1.5rem; font-size: var(--ui-text-sm); }
+.settings-roles dt { font-weight: 500; }
+.settings-roles dd { color: var(--muted-foreground); }
+.settings-roles--stacked { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: var(--ui-text-sm); }
+.settings-roles--stacked dd:not(:last-child) { padding-bottom: .5rem; }
 
 /* Plugins: cards two or three to a row. Active or Dormant follows the switch the moment it
 /* flips, before the save lands. */
-.settings-plugins { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
+.settings-plugins { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
 .plugin-card, .plugin-card > [data-slot="card"] { height: 100%; }
-.plugin-card__title { font-size: var(--text-read); line-height: 1.25; }
-.plugin-card [data-slot="card-content"] { display: flex; flex: 1; flex-direction: column; gap: var(--s-3); color: var(--text-muted); line-height: 1.5; }
-.plugin-card [data-slot="card-footer"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.plugin-card__title { font-size: var(--ui-text-sm); line-height: 1.25; }
+.plugin-card [data-slot="card-content"] { display: flex; flex: 1; flex-direction: column; gap: .75rem; color: var(--muted-foreground); line-height: 1.5; }
+.plugin-card [data-slot="card-footer"] { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 .plugin-card__switch { flex-direction: row; align-items: center; }
 .plugin-card:has(ui-switch:is([data-checked], [default-checked]:not(:defined))) .plugin-card__dormant,
 .plugin-card:not(:has(ui-switch:is([data-checked], [default-checked]:not(:defined)))) .plugin-card__active { display: none; }
 
 /* A change's or an update's log (why it failed). */
-.settings-log { max-height: 16rem; color: var(--danger); font-size: var(--text-meta); }
-.settings-notes { display: flex; flex-direction: column; gap: var(--s-2); max-height: 20rem; overflow-y: auto; }
+.settings-log { max-height: 16rem; color: var(--destructive); font-size: var(--ui-text-xs); }
+.settings-notes { display: flex; flex-direction: column; gap: .5rem; max-height: 20rem; overflow-y: auto; }
 
 /* Your menu: each plugin's row, its keys, ↑ ↓ and a switch. A hidden one is faint; the first's
 /* ↑ and the last's ↓ keep their place, unseen. */
-.settings-menu__item--hidden { color: var(--text-faint); }
+.settings-menu__item--hidden { color: var(--faint-foreground); }
 .settings-menu__item--hidden .settings-item__media { opacity: .5; }
 .settings-menu .icon-button[disabled] { visibility: hidden; }
 
 /* Connected apps: a new token to copy, and each connection's recent calls under Activity. */
-.settings-activity { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--s-3); }
-.settings-activity > summary { width: fit-content; color: var(--text-faint); font-size: var(--text-meta); }
-.settings-activity > summary:hover { color: var(--text); }
-.settings-activity__calls { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: var(--text-meta); }
-.settings-activity__call { display: flex; align-items: center; gap: var(--s-2); min-width: 0; color: var(--text-faint); }
-.settings-activity__call code { font-size: inherit; color: var(--text); }
-.settings-activity__error { color: var(--danger); }
+.settings-activity { flex-basis: 100%; display: flex; flex-direction: column; gap: .75rem; }
+.settings-activity > summary { width: fit-content; color: var(--faint-foreground); font-size: var(--ui-text-xs); }
+.settings-activity > summary:hover { color: var(--foreground); }
+.settings-activity__calls { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: var(--ui-text-xs); }
+.settings-activity__call { display: flex; align-items: center; gap: .5rem; min-width: 0; color: var(--faint-foreground); }
+.settings-activity__call code { font-size: inherit; color: var(--foreground); }
+.settings-activity__error { color: var(--destructive); }
 .settings-activity__summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Webhooks: one card per endpoint. */
-.settings-webhook__title { overflow: hidden; font-size: var(--text-read); text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+.settings-webhook__title { overflow: hidden; font-size: var(--ui-text-sm); text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
 .settings-webhook [data-slot="card-description"] code { overflow-wrap: anywhere; }
-.settings-webhook [data-slot="card-action"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
-.settings-webhook [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-4); }
+.settings-webhook [data-slot="card-action"] { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.settings-webhook [data-slot="card-content"] { display: flex; flex-direction: column; gap: 1rem; }
 
 /* Updates: what's running, each fact's name beside it. */
-.settings-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-3) var(--s-5); align-items: center; font-size: var(--text-read); }
-.settings-facts dt { color: var(--text-muted); }
+.settings-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .75rem 1.5rem; align-items: center; font-size: var(--ui-text-sm); }
+.settings-facts dt { color: var(--muted-foreground); }
 .settings-facts dd { min-width: 0; overflow-wrap: anywhere; }
 
 /* Names: each type's switch, names and prefix in a row, under a line of headings. */
 
 /* Two-factor setup: numbered steps, the QR code on white (authenticator apps read it best dark
 /* on light, whatever the theme), and a code field six digits wide. */
-.settings-steps { display: flex; flex-direction: column; gap: var(--s-5); margin: 0; padding-left: 1.25rem; font-size: var(--text-read); }
-.settings-steps > li { padding-left: var(--s-1); }
-.settings-steps > li::marker { color: var(--text-muted); font-weight: var(--weight-strong); }
-.settings-steps__step { display: flex; flex-direction: column; gap: var(--s-3); }
-.settings-steps__qr { width: fit-content; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; }
-.settings-steps__key { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); }
-.settings-steps__key > summary { color: var(--text-muted); }
-.settings-steps__key code { font-size: var(--text-ui); }
+.settings-steps { display: flex; flex-direction: column; gap: 1.5rem; margin: 0; padding-left: 1.25rem; font-size: var(--ui-text-sm); }
+.settings-steps > li { padding-left: .25rem; }
+.settings-steps > li::marker { color: var(--muted-foreground); font-weight: 500; }
+.settings-steps__step { display: flex; flex-direction: column; gap: .75rem; }
+.settings-steps__qr { width: fit-content; padding: .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: #fff; }
+.settings-steps__key { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+.settings-steps__key > summary { color: var(--muted-foreground); }
+.settings-steps__key code { font-size: var(--ui-text-sm); }
 .two-factor__qr { display: block; width: 11rem; height: 11rem; }
-input.settings-code { width: 11ch; font-family: var(--font-mono); font-size: var(--text-read); font-weight: 600; letter-spacing: .15em; }
 
 /* Appearance: the custom CSS box, uploads, and the previews inside each radio card. */
-textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(--font-mono); font-size: var(--text-meta); line-height: 1.5; tab-size: 2; white-space: pre; resize: vertical; }
-.settings-upload { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--s-2); width: 100%; height: 5rem; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted); font-weight: var(--weight-strong); cursor: pointer; }
-.settings-upload:hover { background: var(--hover); color: var(--text); }
-.settings-upload:has(input:focus-visible) { box-shadow: var(--ring); }
+textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(--font-mono); font-size: var(--ui-text-xs); line-height: 1.5; tab-size: 2; white-space: pre; resize: vertical; }
+.settings-upload { position: relative; display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%; height: 5rem; border: 1px dashed var(--input); border-radius: var(--ui-radius-xl); color: var(--muted-foreground); font-weight: 500; cursor: pointer; }
+.settings-upload:hover { background: var(--ui-ghost-hover); color: var(--foreground); }
+.settings-upload:has(input:focus-visible) { box-shadow: var(--ui-focus-ring); }
 .settings-upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.settings-upload__current { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.settings-upload__current { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 
-/* appearance.css draws the samples (fonts, sizes, swatches, the theme's little page) and stays
-/* the theming contract; these are the parts of it drawn with shadcn's old tokens, on rune's. */
-[class*="appearance-swatch--"] { box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line-strong); }
-[class*="appearance-corner--"] { background-color: var(--layer-2); border-color: var(--text); }
-.theme-mock { border-radius: calc(var(--radius) - 2px); }
 
 /* ======================================================================= 5 People */
 
 /* A person's page and the invitation page: the working card and, beside it for those who manage
 /* people, a narrower card of what's around them (2 : 1), stacked when narrow. */
-.person-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+.person-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; align-items: start; }
 @media (min-width: 960px) { .person-page--split { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
 /* Both columns are runeui cards (ui :card); their sections stack in the card's content. */
-.person-page__main > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-6); min-width: 0; }
+.person-page__main > [data-slot="card-content"] { display: flex; flex-direction: column; gap: 2rem; min-width: 0; }
 .person-page__side { position: relative; }
 .person-page__side > [data-slot="card-content"] { display: flex; flex-direction: column; gap: 1.75rem; min-width: 0; }
-.person-page__side .settings-section { gap: var(--s-4); }
+.person-page__side .settings-section { gap: 1rem; }
 .person-page__side .settings-section__head { padding-bottom: 0; border-bottom: 0; }
-.person-page__side .settings-section__head > h2 { font-size: var(--text-read); }
+.person-page__side .settings-section__head > h2 { font-size: var(--ui-text-sm); }
 .person-page__side .settings-list--scroll { max-height: 18rem; }
-@media (max-width: 640px) { :is(.person-page__main, .person-page__side) > [data-slot="card-content"] { padding-inline: var(--s-4); } }
+@media (max-width: 640px) { :is(.person-page__main, .person-page__side) > [data-slot="card-content"] { padding-inline: 1rem; } }
 
 /* The invitation page's sidebar hides for a wider working column (], panes_controller): a thin
 /* strip that keeps the button bringing it back. Only where that button is. */
-.person-page__side .sidebar-toggle { position: absolute; top: var(--s-4); right: var(--s-4); z-index: 1; }
+.person-page__side .sidebar-toggle { position: absolute; top: 1rem; right: 1rem; z-index: 1; }
 .person-page__side:has(.sidebar-toggle) .settings-section:first-of-type > .settings-section__head { padding-right: 2rem; }
 @media (min-width: 960px) {
   html[data-sidebar="collapsed"] .person-page--split:has(> .person-page__side .sidebar-toggle) { grid-template-columns: minmax(0, 1fr) 2.75rem; }
@@ -276,7 +270,7 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 
 /* A person's heading: their avatar, larger, beside their name and badges. */
-.person-page__heading { display: flex; align-items: center; gap: var(--s-4); }
+.person-page__heading { display: flex; align-items: center; gap: 1rem; }
 .person-page__heading .avatar { width: 3.5rem; height: 3.5rem; font-size: 1.25rem; }
 .person-page__name { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
@@ -284,8 +278,8 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 /* A table on a settings page (Roles, Past updates, a webhook's deliveries: ui :table), in a
 /* bordered box; a row's detail (what went wrong) runs under it, across the table. */
-[data-slot="table-container"]:has(> [data-slot="table-scroll"] > .settings-table) [data-slot="table-scroll"] { max-height: 28rem; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); }
-.settings-table__muted, .settings-dash { color: var(--text-muted); }
+[data-slot="table-container"]:has(> [data-slot="table-scroll"] > .settings-table) [data-slot="table-scroll"] { max-height: 28rem; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); }
+.settings-table__muted, .settings-dash { color: var(--muted-foreground); }
 .settings-table__detail td { padding-top: 0; }
 .settings-table__detail .settings-log { margin: 0; white-space: pre-wrap; }
 
@@ -295,33 +289,157 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 /* Settings > Sidebar (settings/sidebars): each section a card, its name written in place over its
    pages; pages drag between sections and the Hidden tray (nav-layout controller). */
-.nav-editor { display: flex; flex-direction: column; gap: var(--s-4); }
-.nav-editor__sections { display: flex; flex-direction: column; gap: var(--s-3); }
-.nav-editor__section { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
-.nav-editor__section-head { display: flex; align-items: center; gap: var(--s-2); }
+.nav-editor { display: flex; flex-direction: column; gap: 1rem; }
+.nav-editor__sections { display: flex; flex-direction: column; gap: .75rem; }
+.nav-editor__section { display: flex; flex-direction: column; gap: .5rem; padding: .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: var(--background); }
+.nav-editor__section-head { display: flex; align-items: center; gap: .5rem; }
 .nav-editor__section-head ui-input { flex: 1; min-width: 0; }
-.nav-editor__label { font-weight: var(--weight-strong); }
-.nav-editor__hint { color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight); }
-.nav-editor__items { display: flex; flex-direction: column; gap: 2px; min-height: 2.25rem; margin: 0; padding: var(--s-1); border: 1px dashed transparent; border-radius: var(--radius-md); list-style: none; }
-.nav-editor__items:empty { border-color: var(--line); }
-.nav-editor__items--hidden { border-color: var(--line); background: var(--layer-1); }
+.nav-editor__label { font-weight: 500; }
+.nav-editor__hint { color: var(--muted-foreground); font-size: var(--ui-text-xs); font-weight: 400; }
+.nav-editor__items { display: flex; flex-direction: column; gap: 2px; min-height: 2.25rem; margin: 0; padding: .25rem; border: 1px dashed transparent; border-radius: var(--ui-radius-md); list-style: none; }
+.nav-editor__items:empty { border-color: var(--border); }
+.nav-editor__items--hidden { border-color: var(--border); background: color-mix(in oklab, var(--muted) 50%, var(--background)); }
 .nav-editor__item {
-  display: flex; align-items: center; gap: var(--s-2); min-height: var(--row-h); padding: 0 var(--s-2);
-  border-radius: var(--radius-md); background: var(--panel); cursor: grab;
+  display: flex; align-items: center; gap: .5rem; min-height: 2.5rem; padding: 0 .5rem;
+  border-radius: var(--ui-radius-md); background: var(--background); cursor: grab;
 }
-.nav-editor__item:hover { background: var(--hover); }
-.nav-editor__item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nav-editor__item:hover { background: var(--ui-ghost-hover); }
+.nav-editor__item:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .nav-editor__item--dragging { opacity: .5; }
-.nav-editor__grip { width: 1rem; height: 1rem; color: var(--text-muted); }
-.nav-editor__item:hover .nav-editor__grip { color: var(--text); }
+.nav-editor__grip { width: 1rem; height: 1rem; color: var(--muted-foreground); }
+.nav-editor__item:hover .nav-editor__grip { color: var(--foreground); }
 .nav-editor__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nav-editor__hidden { display: flex; flex-direction: column; gap: var(--s-2); }
-.nav-editor__hidden-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); margin: 0; font-size: var(--text-ui); font-weight: var(--weight-strong); }
-.nav-editor__actions { padding-top: var(--s-2); border-top: 1px solid var(--line); }
+.nav-editor__hidden { display: flex; flex-direction: column; gap: .5rem; }
+.nav-editor__hidden-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; margin: 0; font-size: var(--ui-text-sm); font-weight: 500; }
+.nav-editor__actions { padding-top: .5rem; border-top: 1px solid var(--border); }
 
 /* Notifications on this device (Settings > Your account, the push controller): why it can't. */
-.push-note { padding: 0 var(--s-4) var(--s-3); }
+.push-note { padding: 0 1rem .75rem; }
 .push-note[hidden] { display: none; }
 
 /* A link-like button in a line of text (Stop requiring it). */
 .settings-link.ui-button { height: auto; padding: 0; vertical-align: baseline; }
+
+/* Settings > Appearance: each choice shows what it does, inside its radio card
+/* (settings/appearances/_choices). */
+.appearance-sample {
+  block-size: 2.25rem;
+  display: inline-grid;
+  font-size: 1.25rem;
+  font-weight: 600;
+  inline-size: 2.25rem;
+  place-items: center;
+}
+
+/* Each scheme's primary, as it is in the theme on screen. */
+.appearance-swatch--fizzy { background: light-dark(oklch(20.5% 0 0), oklch(92.2% 0 0)); }
+.appearance-swatch--indigo { background: light-dark(oklch(51.1% 0.262 276.966), oklch(67.3% 0.182 276.935)); }
+.appearance-swatch--forest { background: light-dark(oklch(52.7% 0.154 150.069), oklch(72.3% 0.219 149.579)); }
+.appearance-swatch--plum { background: light-dark(oklch(55.8% 0.288 302.321), oklch(71.4% 0.203 305.504)); }
+.appearance-swatch--ocean { background: light-dark(oklch(52% 0.105 223.128), oklch(71.5% 0.143 215.221)); }
+.appearance-swatch--graphite { background: light-dark(oklch(37.2% 0.044 257.287), oklch(86.9% 0.022 252.894)); }
+
+[class*="appearance-swatch--"] {
+  block-size: 2rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--background), 0 0 0 4px var(--input);
+  color: transparent;
+  inline-size: 2rem;
+}
+
+[class*="appearance-corner--"] {
+  background-color: var(--muted);
+  border: 2px solid var(--foreground);
+  border-block-end: 0;
+  border-inline-end: 0;
+  color: transparent;
+  translate: 0.375rem 0.375rem;
+}
+
+.appearance-corner--sharp { border-start-start-radius: 0.125rem; }
+.appearance-corner--fizzy { border-start-start-radius: 0.625rem; }
+.appearance-corner--round { border-start-start-radius: 1rem; }
+
+.appearance-font--system { font-family: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.appearance-font--humanist { font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, sans-serif; }
+.appearance-font--rounded { font-family: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, "Arial Rounded MT", sans-serif; }
+.appearance-font--serif { font-family: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", Georgia, serif; }
+.appearance-font--mono { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; }
+
+.appearance-size--small { font-size: 0.875rem; }
+.appearance-size--default { font-size: 1.125rem; }
+.appearance-size--large { font-size: 1.375rem; }
+.appearance-size--larger { font-size: 1.625rem; }
+
+/* The theme's preview: a little page of cards, light or dark whatever the page is now, and
+/* System half of each. */
+.theme-mock {
+  --mock-page: oklch(97% 0 0);
+  --mock-card: oklch(100% 0 0);
+  --mock-line: oklch(90% 0 0);
+
+  background: var(--mock-page);
+  block-size: 100%;
+  border-radius: calc(var(--ui-radius-lg) - 2px);
+  display: grid;
+  gap: 0.25rem;
+  grid-auto-rows: 1fr;
+  inline-size: 100%;
+  padding: 0.375rem;
+}
+
+.theme-mock--dark {
+  --mock-page: oklch(14.5% 0 0);
+  --mock-card: oklch(26.9% 0 0);
+  --mock-line: oklch(42% 0 0);
+}
+
+.theme-mock--system {
+  --mock-line: oklch(60% 0 0 / 45%);
+
+  background: linear-gradient(90deg, var(--mock-page) 50%, oklch(14.5% 0 0) 50%);
+
+  /* Cards sit evenly inside the page, so their middle is the page's. */
+  .theme-mock__card {
+    background: linear-gradient(90deg, var(--mock-card) 50%, oklch(26.9% 0 0) 50%);
+  }
+}
+
+.theme-mock__card {
+  align-items: center;
+  background: var(--mock-card);
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px oklch(0% 0 0 / 8%);
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.375rem;
+}
+
+.theme-mock__line {
+  background: var(--mock-line);
+  block-size: 0.25rem;
+  border-radius: 99rem;
+  flex: 1;
+}
+
+.theme-mock__line--short {
+  flex: 0 0 40%;
+}
+
+.theme-mock__dot {
+  aspect-ratio: 1;
+  background: var(--mock-line);
+  block-size: 0.5rem;
+  border-radius: 50%;
+}
+
+.appearance-upload {
+  block-size: 2.5rem;
+  inline-size: auto;
+  max-inline-size: 14rem;
+  object-fit: contain;
+}
+
+.appearance-upload--favicon {
+  inline-size: 2.5rem;
+}

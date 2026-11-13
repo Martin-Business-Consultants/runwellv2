@@ -1,6 +1,7 @@
 # Settings > Appearance > Custom CSS: a stylesheet loaded after the app's (ThemesController),
-# meant to set the design tokens in docs/theming.md. It can't reach outside the install or run
-# anything: no imports, no url() but data: URIs, none of the old script hooks.
+# unlayered, meant to be a shadcn theme (`:root { … }` and `.dark { … }` blocks of the tokens in
+# docs/theming.md). It can't reach outside the install or run anything: no imports, no url() but
+# data: URIs, none of the old script hooks.
 module Setting::CustomCss
   extend ActiveSupport::Concern
 

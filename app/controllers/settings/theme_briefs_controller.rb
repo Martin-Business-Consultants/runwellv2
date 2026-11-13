@@ -2,7 +2,7 @@
 # for an agent about to call update_appearance with custom_css.
 class Settings::ThemeBriefsController < Settings::BaseController
   agent_tool :theme_brief, on: :show, title: "Get the brief for writing a theme",
-    description: "The theming guide (design tokens, rules, an example) with this install's appearance and custom CSS. Write a theme from it, then apply it with update_appearance (custom_css)."
+    description: "The theming guide (shadcn's design tokens, rules, an example) with this install's appearance and custom CSS. Write a theme from it (a :root and a .dark block), then apply it with update_appearance (custom_css)."
 
   def show
     @brief = ThemeBrief.new.to_s

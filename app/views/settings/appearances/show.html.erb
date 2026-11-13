@@ -87,8 +87,8 @@
     <header class="settings-section__head">
       <h2>Custom CSS</h2>
       <p class="settings-section__description">
-        Make Runwell your own by giving its design tokens new values: colors, fonts, corners, spacing.
-        Copy the brief, paste it into any AI with your logo or website, and paste its answer here. The rules are in
+        Make Runwell your own with a shadcn theme: its <code>:root</code> and <code>.dark</code> blocks of colors, fonts and corners
+        (from tweakcn, ui.shadcn.com/themes, or an AI: copy the brief, paste it in with your logo or website, and paste its answer here). The rules are in
         <%= link_to "the theming guide", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/theming.md", target: "_blank", rel: "noopener" %>.
         Add <code>?theme=off</code> to any address to see a page without it.
       </p>
@@ -101,7 +101,7 @@
       <p class="settings-error">Custom CSS <%= @setting.errors[:custom_css].to_sentence %>. Nothing was saved.</p>
     <% end %>
     <%= form_with model: @setting, url: settings_appearance_path, method: :patch, namespace: "custom_css" do |form| %>
-      <%= form.text_area :custom_css, class: "settings-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --lch-accent: 58% 0.14 40;\n  --radius-scale: 1.4;\n}", aria: { label: "Custom CSS" } %>
+      <%= form.text_area :custom_css, class: "settings-css", rows: 12, spellcheck: false, autocomplete: "off", placeholder: ":root {\n  --primary: oklch(0.58 0.14 40);\n  --radius: 0.875rem;\n}\n\n.dark {\n  --primary: oklch(0.72 0.13 45);\n}", aria: { label: "Custom CSS" } %>
       <%= form.ui :checkbox, :custom_css_everywhere, label: "Use it on #{term(:client).downcase} pages too: the portal" %>
       <div><%= ui :button, type: :submit, content: "Save CSS" %></div>
     <% end %>

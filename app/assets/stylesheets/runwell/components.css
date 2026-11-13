@@ -1,65 +1,19 @@
-/* Runwell's shared pieces on rune_ui's tokens: the ones every area uses and rune_ui doesn't have
-/* (its behaviour is Runwell's: popups with their keys, the index toolbar, the data table, bulk
-/* actions, index cards). Unlayered, so these win over rune's components.
+/* Runwell's shared pieces: the ones every area uses that runeui doesn't draw (the index toolbar,
+/* what Runwell puts in runeui's table and bulk bar, cards plugins render, hint mode, form widgets).
+/* Unlayered, so these win over runeui's layers; on runeui's tokens (appearance.css, docs/theming.md).
 /*
-/* 1 Popups   2 Index toolbar and filters   3 Lists   4 Bulk bar   5 Index cards
+/* 2 Index toolbar and filters   3 Lists   4 Bulk bar   5 Index cards
 /* 6 Small pieces   7 Form widgets */
-
-/* ======================================================================= 1 Popups */
-
-/* A <dialog class="popup"> (PopupHelper#popup_menu) opened by the dialog controller below its
-/* trigger, drawn as rune's menu: left for the quick-actions tray's record picker (phase 7) and
-/* plugins' popup_menu. Items are
-/* .popup__item > .popup__btn; the chosen one carries a check. */
-.popup {
-  position: absolute; inset: calc(100% + 4px) auto auto 0; z-index: 40;
-  display: none; flex-direction: column; gap: 1px;
-  min-width: 12.5rem; max-width: min(22rem, calc(100vw - 1rem)); max-height: min(24rem, 70vh); overflow-y: auto;
-  margin: 0; padding: 4px; border: 0; border-radius: var(--radius);
-  background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
-  font-size: var(--text-ui); text-align: start;
-}
-.popup[open] { display: flex; animation: rune-pop var(--motion-fast) var(--ease); }
-.popup.orient-left { inset-inline: auto 0; translate: var(--orient-offset, 0px); }
-.popup.orient-right { inset-inline: 0 auto; translate: var(--orient-offset, 0px); }
-.popup form { display: contents; }
-/* Pinned to the viewport beside its trigger (fixed_popup_controller), so a scrolling list can't clip it. */
-.fixed-popup--placed .popup[open] { position: fixed; inset: var(--popup-top) auto auto var(--popup-left); translate: none; z-index: 50; }
-
-.popup__title { padding: var(--s-2) var(--s-3) var(--s-1); color: var(--text-faint); font-size: var(--text-meta); font-weight: var(--weight); white-space: nowrap; }
-.popup__title:focus-visible { box-shadow: none; }
-.popup__list { display: flex; flex-direction: column; gap: 1px; width: 100%; margin: 0; padding: 0; list-style: none; }
-.popup__item { position: relative; display: flex; align-items: center; width: 100%; border-radius: calc(5px * var(--radius-scale)); }
-.popup__item[aria-selected] { background: var(--layer-2); }
-.popup__item:has(.popup__btn[disabled]) { pointer-events: none; }
-.popup__item--form { gap: var(--s-2); padding: var(--s-1); }
-.popup .popup__btn {
-  display: flex; align-items: center; gap: var(--s-2); flex: 1 1 auto; width: 100%; min-width: 0; min-height: var(--control-h);
-  padding: 0 var(--s-3); border: 0; border-radius: inherit; background: none; color: var(--text);
-  font: inherit; text-align: start; text-decoration: none; cursor: pointer;
-}
-.popup .popup__btn:is(:hover, :focus-visible) { background: var(--layer-2); color: var(--text); box-shadow: none; }
-.popup .popup__btn[disabled] { opacity: .5; }
-.popup .popup__btn .icon { color: var(--text-faint); }
-.popup__item[aria-checked] .popup__btn { padding-right: 2rem; }
-.popup__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.popup__item .checked { display: none; position: absolute; right: var(--s-3); color: var(--text-muted); pointer-events: none; }
-.popup__item[aria-checked="true"] .checked { display: block; }
-.popup__item[aria-checked="true"] .popup__btn { font-weight: var(--weight-strong); }
-/* The popup is a flex column that scrolls past its max height: its filter box and list keep their
-/* size (a long list would otherwise squeeze the box until typing shortens the list). */
-.popup input:is([type="search"], [type="text"]) { flex: none; height: var(--control-h-sm); margin-bottom: 4px; }
-.popup .popup__list { flex: none; }
 
 /* ======================================================================= 2 Index toolbar and filters */
 
 /* An index's top row: its filters (ui :filter pills in ui :filter_bar), and across from them the
 /* view toggle and New. */
-.index-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-3); min-height: var(--control-h); }
-.index-toolbar__filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); min-width: 0; min-height: var(--control-h); }
-.index-toolbar__end { display: flex; align-items: center; gap: var(--s-3); flex: 0 0 auto; }
+.index-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; min-height: var(--ui-h); }
+.index-toolbar__filters { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; min-height: var(--ui-h); }
+.index-toolbar__end { display: flex; align-items: center; gap: .75rem; flex: 0 0 auto; }
 /* The row of filters as plugins' pages write it by hand. */
-.filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 .view-toggle .icon { width: 1rem; height: 1rem; }
 /* On a phone the filters take a row of their own under the view toggle and New. */
 @media (max-width: 640px) {
@@ -68,20 +22,20 @@
 }
 
 /* New: the page's primary action, with its key. On a phone, just the icon. */
-.new-link kbd { height: 1.125rem; min-width: 1.125rem; border-color: color-mix(in srgb, var(--panel) 25%, transparent); background: transparent; color: inherit; opacity: .7; }
+.new-link kbd { height: 1.125rem; min-width: 1.125rem; border-color: color-mix(in srgb, var(--background) 25%, transparent); background: transparent; color: inherit; opacity: .7; }
 @media (max-width: 640px) {
-  .ui-button.new-link { width: var(--control-h); padding: 0; }
+  .ui-button.new-link { width: var(--ui-h); padding: 0; }
   .new-link :is(.new-link__text, .new-link__key) { display: none; }
 }
 
 /* A link that opens a sheet, with the arrow to the record's own page after it (page_link_to):
    faint until the row or the link is pointed at or focused. */
-.sheet-link { display: inline-flex; align-items: center; gap: var(--s-1); min-width: 0; max-width: 100%; }
+.sheet-link { display: inline-flex; align-items: center; gap: .25rem; min-width: 0; max-width: 100%; }
 .sheet-link > a:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.page-link { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: var(--radius-xs); color: var(--text-faint); opacity: .55; transition: opacity var(--motion-fast), color var(--motion-fast), background-color var(--motion-fast); }
+.page-link { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: calc(var(--ui-radius-sm) - 2px); color: var(--faint-foreground); opacity: .55; transition: opacity var(--ui-duration), color var(--ui-duration), background-color var(--ui-duration); }
 .page-link svg { width: .875rem; height: .875rem; }
-:is(tr, li, .sheet-link, .side-panel__context):hover .page-link, .page-link:focus-visible { opacity: 1; }
-.page-link:hover { background: var(--hover); color: var(--accent); }
+:is(tr, li, .sheet-link):hover .page-link, .page-link:focus-visible { opacity: 1; }
+.page-link:hover { background: var(--ui-ghost-hover); color: var(--primary); }
 
 /* ======================================================================= 3 Lists */
 
@@ -90,22 +44,19 @@
 /* data-grow taking the rest and cutting a long name short) and scrolls the table sideways in its
 /* container when a window is too narrow for them. What's here is Runwell's own: the panel, the
 /* links and pickers in the cells, the row the keys are on, and the row's edit and delete. */
-.list-table { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
-.list-table [data-slot="table-scroll"] { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+.list-table { display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.list-table [data-slot="table-scroll"] { border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: var(--background); }
 .list-table { --ui-table-truncate: 14rem; }
 /* Tasks has the most columns: its work and client give the task's title the room. */
 #tasks_list { --ui-table-truncate: 10rem; }
-.list-table [data-slot="table"] :is(th, td):first-child { padding-inline-start: var(--s-3); }
-.list-table [data-slot="table"] :is(th, td):last-child { padding-inline-end: var(--s-3); }
-.list-table [data-slot="table"] th { color: var(--text-muted); font-size: var(--text-meta); }
-.list-table [data-slot="table"] td { height: var(--row-h); }
-.list-table [data-slot="table"] :is(th, td)[data-slot="table-select"] { padding-inline: var(--s-3) 0; }
-/* Runwell's markup in a cell reads --accent and --ring as the brand colour and the focus shadow
-/* (runwell.css, 2); runeui's parts inside set their own again. */
-[data-slot="table"] td, [data-slot="bulk-bar"] form { --accent: var(--rune-accent); --ring: var(--rune-ring); }
-.list-table td strong { font-weight: var(--weight-strong); }
-.list-table td a:not([class]), .list-table td a.row-link { color: var(--text); font-weight: var(--weight-strong); text-decoration: none; }
-.list-table td a:not([class]):hover, .list-table td a.row-link:hover { color: var(--accent); }
+.list-table [data-slot="table"] :is(th, td):first-child { padding-inline-start: .75rem; }
+.list-table [data-slot="table"] :is(th, td):last-child { padding-inline-end: .75rem; }
+.list-table [data-slot="table"] th { color: var(--muted-foreground); font-size: var(--ui-text-xs); }
+.list-table [data-slot="table"] td { height: 2.5rem; }
+.list-table [data-slot="table"] :is(th, td)[data-slot="table-select"] { padding-inline: .75rem 0; }
+.list-table td strong { font-weight: 500; }
+.list-table td a:not([class]), .list-table td a.row-link { color: var(--foreground); font-weight: 500; text-decoration: none; }
+.list-table td a:not([class]):hover, .list-table td a.row-link:hover { color: var(--primary); }
 /* The growing column's link cuts short with it (a sheet-link is a flex row: its link shrinks). */
 .list-table td:is([data-grow], [data-truncate]) > a { display: block; overflow: hidden; text-overflow: ellipsis; }
 .list-table td:is([data-grow], [data-truncate]) .sheet-link { display: flex; }
@@ -115,7 +66,7 @@
 /* A cell whose text runs over lines instead of being cut (the audit log's details). */
 .list-table td.list-table__wrap { white-space: normal; overflow-wrap: anywhere; }
 .list-table__corner { width: 1%; }
-.list-table__corner [data-slot="menu"] { display: inline-flex; margin-block: -0.25rem; font-weight: var(--weight); }
+.list-table__corner [data-slot="menu"] { display: inline-flex; margin-block: -0.25rem; font-weight: 400; }
 
 /* The row j / k landed on. */
 [data-slot="table"] tbody tr:focus-visible { outline: none; box-shadow: none; }
@@ -134,8 +85,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .pagination-list { display: contents; }
 .pagination-link.pagination-link--manual { flex: none; margin: 0 auto; pointer-events: auto; }
 .table .pagination-row td { height: 0; padding: 0; border: 0; }
-.list-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
-.list-pagination__summary { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.list-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.list-pagination__summary { color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
 .list-pagination [data-slot="pagination"] { width: auto; }
 
 /* ======================================================================= 4 Bulk bar */
@@ -144,8 +95,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 /* index toolbar's row: the toolbar steps aside and the bar is as tall as it was, so the table
 /* doesn't move. Each action is a form of its own (BulkHelper). */
 #main:has(.list-table [data-slot="bulk-bar"]:not([hidden])) .index-toolbar { display: none; }
-.list-table [data-slot="bulk-bar"] { margin-bottom: var(--s-4); flex-wrap: wrap; }
-[data-slot="bulk-bar"] .bulk-form { display: inline-flex; flex-direction: row; align-items: center; gap: var(--s-2); margin: 0; }
+.list-table [data-slot="bulk-bar"] { margin-bottom: 1rem; flex-wrap: wrap; }
+[data-slot="bulk-bar"] .bulk-form { display: inline-flex; flex-direction: row; align-items: center; gap: .5rem; margin: 0; }
 [data-slot="bulk-bar"] [data-slot="bulk-actions"] { flex-wrap: wrap; align-items: center; }
 /* A plugin page's bar, in the index toolbar (content_for :index_bulk): it takes the filters' place. */
 #main[data-bulk-active] :is(.index-toolbar__filter-pills, .index-toolbar__end) { display: none !important; }
@@ -158,25 +109,25 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* A record as a card (app-card: layouts/shared/_card, which plugins render). Indexes are tables
 /* only since 5.0; the board's cards are runeui's (tasks.css, 4). */
-.app-card { position: relative; justify-content: space-between; gap: var(--s-4); min-width: 0; padding: var(--s-4); transition: border-color .12s; }
-.app-card:hover { border-color: var(--line-strong); }
-.app-card:has(.app-card__link:focus-visible) { box-shadow: var(--ring); }
+.app-card { position: relative; justify-content: space-between; gap: 1rem; min-width: 0; padding: 1rem; transition: border-color .12s; }
+.app-card:hover { border-color: var(--input); }
+.app-card:has(.app-card__link:focus-visible) { box-shadow: var(--ui-focus-ring); }
 .app-card__link { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
 .app-card__link:focus-visible { box-shadow: none; }
 .app-card__header { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.app-card__eyebrow { display: flex; align-items: center; gap: var(--s-2); min-width: 0; color: var(--text-faint); font-size: var(--text-meta); }
-.app-card__ref { flex: 0 0 auto; color: var(--text-muted); font-weight: var(--weight-strong); }
+.app-card__eyebrow { display: flex; align-items: center; gap: .5rem; min-width: 0; color: var(--faint-foreground); font-size: var(--ui-text-xs); }
+.app-card__ref { flex: 0 0 auto; color: var(--muted-foreground); font-weight: 500; }
 .app-card__context { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.app-card__ref + .app-card__context { padding-left: var(--s-2); border-left: 1px solid var(--line); }
-.app-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: var(--text-read); font-weight: var(--weight-strong); line-height: 1.375; }
-.app-card__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-width: 0; }
+.app-card__ref + .app-card__context { padding-left: .5rem; border-left: 1px solid var(--border); }
+.app-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: var(--ui-text-sm); font-weight: 500; line-height: 1.375; }
+.app-card__footer { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-width: 0; }
 .app-card__badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
 .app-card__people { position: relative; z-index: 2; display: inline-flex; align-items: center; flex: 0 0 auto; margin-left: auto; }
 
 /* ======================================================================= 6 Small pieces */
 
 /* People: nobody's placeholder, and "+N" at the end of a stack. */
-.person__none { color: var(--text-faint); font-size: var(--text-meta); }
+.person__none { color: var(--faint-foreground); font-size: var(--ui-text-xs); }
 /* An avatar (ui :avatar through avatar and person_tag): its initials on its own colour (letter--N),
 /* and the smallest size, which runeui has no name for. */
 .avatar [data-slot="avatar-fallback"] { background: transparent; color: inherit; }
@@ -185,15 +136,15 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* A destructive action on a record's own page (confirm_button, layouts/shared/_confirm): a quiet
 /* red button; the question is asked in the page's confirm dialog. */
-.confirm-button.ui-button, .danger-button.ui-button { color: var(--danger); }
-.confirm-button.ui-button:hover, .danger-button.ui-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); color: var(--danger); }
+.confirm-button.ui-button, .danger-button.ui-button { color: var(--destructive); }
+.confirm-button.ui-button:hover, .danger-button.ui-button:hover { background: color-mix(in srgb, var(--destructive) 9%, transparent); color: var(--destructive); }
 
 /* The ? sheet (layouts/shared/_shortcuts, runeui's ui :dialog): groups in two columns, each a list
 /* of what a key does with its keys (ui :kbd) at the end; the footer has hint mode's switch. Inside
 /* runeui's dialog, so it reads runeui's tokens. */
 .shortcuts__groups { columns: 2 20rem; column-gap: 2rem; }
 .shortcuts__groups section { display: flex; flex-direction: column; gap: .25rem; padding-bottom: 1.25rem; break-inside: avoid; }
-.shortcuts__heading { color: var(--muted-foreground); font-size: var(--text-meta); font-weight: 500; }
+.shortcuts__heading { color: var(--muted-foreground); font-size: var(--ui-text-xs); font-weight: 500; }
 .shortcut-list { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: dense; margin: 0; }
 .shortcut-list :is(dt, dd) { margin: 0; padding: .4375rem 0; border-bottom: 1px solid var(--border); }
 .shortcut-list dt { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .25rem; padding-left: 1rem; white-space: nowrap; }
@@ -203,16 +154,16 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .shortcuts [data-slot="dialog-footer"] [data-slot="choice"] { margin-inline-end: auto; }
 
 /* A snippet outside rich text (code_block): a command or request to read or copy, coloured with
-/* the theme's code tokens (_global.css), as code in rich text is. */
-.code-block { margin: 0; padding: var(--s-3) var(--s-4); overflow-x: auto; border-radius: var(--radius); background: var(--layer-2); border: 0; font-family: var(--font-mono); font-size: var(--text-meta); tab-size: 2; text-align: start; white-space: pre; overflow-wrap: normal; }
-.code-block :is(.token.attr-name, .token.atrule, .token.attr, .token.keyword) { color: var(--color-code-token__att); }
-.code-block :is(.token.boolean, .token.constant, .token.number, .token.property, .token.symbol, .token.tag) { color: var(--color-code-token__property); }
-.code-block :is(.token.attr-value, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string) { color: var(--color-code-token__selector); }
-.code-block :is(.token.comment, .token.cdata, .token.doctype, .token.prolog) { color: var(--color-code-token__comment); font-style: italic; }
-.code-block :is(.token.deleted, .token.entity, .token.operator, .token.url) { color: var(--color-code-token__operator); }
-.code-block :is(.token.class, .token.class-name, .token.function) { color: var(--color-code-token__function); }
-.code-block :is(.token.important, .token.namespace, .token.regex, .token.variable) { color: var(--color-code-token__variable); }
-.code-block .token.punctuation { color: var(--color-code-token__punctuation); }
+/* Lexxy's code colours (runeui/lexxy.css, light and dark), as code in rich text is. */
+.code-block { margin: 0; padding: .75rem 1rem; overflow-x: auto; border-radius: var(--ui-radius-lg); background: var(--muted); border: 0; font-family: var(--font-mono); font-size: var(--ui-text-xs); tab-size: 2; text-align: start; white-space: pre; overflow-wrap: normal; }
+.code-block :is(.token.attr-name, .token.atrule, .token.attr, .token.keyword) { color: var(--lexxy-color-code-token-att); }
+.code-block :is(.token.boolean, .token.constant, .token.number, .token.property, .token.symbol, .token.tag) { color: var(--lexxy-color-code-token-property); }
+.code-block :is(.token.attr-value, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string) { color: var(--lexxy-color-code-token-selector); }
+.code-block :is(.token.comment, .token.cdata, .token.doctype, .token.prolog) { color: var(--lexxy-color-code-token-comment); font-style: italic; }
+.code-block :is(.token.deleted, .token.entity, .token.operator, .token.url) { color: var(--lexxy-color-code-token-operator); }
+.code-block :is(.token.class, .token.class-name, .token.function) { color: var(--lexxy-color-code-token-function); }
+.code-block :is(.token.important, .token.namespace, .token.regex, .token.variable) { color: var(--lexxy-color-code-token-variable); }
+.code-block .token.punctuation { color: var(--lexxy-color-code-token-punctuation); }
 
 
 /* Hint mode (keyboard_controller, the . key): each control's key as a keycap on it, from
@@ -222,8 +173,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 :where(html[data-hints] [data-key-hint]:not(input, textarea, select)) { position: relative; }
 html[data-hints] [data-key-hint]:not(input, textarea, select, :has(kbd, [data-slot="kbd"]))::after {
   content: attr(data-key-hint); position: absolute; inset: -.5rem -.5rem auto auto; z-index: 2;
-  display: grid; place-items: center; min-width: 1rem; height: 1rem; padding: 0 .25rem; border-radius: var(--radius-xs);
-  background: var(--text); color: var(--panel); box-shadow: 0 0 0 2px var(--panel);
+  display: grid; place-items: center; min-width: 1rem; height: 1rem; padding: 0 .25rem; border-radius: calc(var(--ui-radius-sm) - 2px);
+  background: var(--foreground); color: var(--background); box-shadow: 0 0 0 2px var(--background);
   font-family: var(--font-sans); font-size: .625rem; font-weight: 500; line-height: 1;
   text-transform: none; white-space: pre; word-spacing: .2em; pointer-events: none;
 }
@@ -233,8 +184,8 @@ html[data-hints] :is([data-filter-target~="item"], [data-keyboard-item]):not(:ho
 .hint-legend { display: none; }
 html[data-hints] .hint-legend {
   position: fixed; bottom: 1rem; left: 50%; translate: -50% 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: .5rem 1rem; max-width: calc(100vw - 2rem); padding: .375rem .375rem .375rem .75rem; border: 1px solid var(--line); border-radius: calc(.75rem * var(--radius-scale, 1));
-  background: var(--panel); box-shadow: var(--shadow-popover); color: var(--text-muted); font-size: var(--text-meta);
+  gap: .5rem 1rem; max-width: calc(100vw - 2rem); padding: .375rem .375rem .375rem .75rem; border: 1px solid var(--border); border-radius: calc(var(--ui-radius-lg) * 1.2);
+  background: var(--background); box-shadow: 0 0 0 1px var(--border), var(--ui-shadow-lg); color: var(--muted-foreground); font-size: var(--ui-text-xs);
 }
 .hint-legend__item { display: inline-flex; align-items: center; gap: .25rem; }
 @media (any-hover: none) { html[data-hints] [data-key-hint]::after { display: none; } }
@@ -244,7 +195,7 @@ html[data-hints] .hint-legend {
 /* ======================================================================= 7 Form widgets */
 
 /* The fields Runwell builds from more than one input (ApplicationHelper's date_input, money_field,
-/* rich_text_field; DocumentsHelper's document_drop_target). Bare inputs inside them are rune's. */
+/* rich_text_field; DocumentsHelper's document_drop_target). Bare inputs inside them are the compatibility layer's. */
 
 /* A form's own controls (selects, a combobox behind its button, a date) fill their field, as its
 /* inputs do: runeui's are as wide as their words, which left a column of fields ragged. */
@@ -254,28 +205,13 @@ html[data-hints] .hint-legend {
 
 /* A form's fields side by side, two or more to a row as room allows (runeui's fields stack), and
 /* its buttons at its end. */
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-4); }
-.form-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1rem; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .5rem; }
 
 /* Money (money_field): the dollars people type and the cents sent, laid out as the one field. */
 .money-field { display: contents; }
 
-/* Rich text (rich_text_field, Lexxy): the app's faces and the ring every other field shows on
-/* focus, but Lexxy's own corners (--lexxy-radius, its frame a toolbar gap rounder), never the
-/* app's: Corners would make a tall editor a pill. */
-:root {
-  --lexxy-font-base: var(--font-sans);
-  --lexxy-font-mono: var(--font-mono);
-  --lexxy-focus-ring-color: var(--accent);
-}
-lexxy-editor { border-radius: calc(var(--lexxy-radius) + var(--lexxy-toolbar-gap, 2px)); font-size: var(--text-read); }
-lexxy-editor:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); }
-.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) { border-radius: var(--lexxy-radius); background: transparent; }
-.lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):is([aria-pressed="true"], [aria-expanded="true"]) { background: var(--layer-2); color: var(--text); }
-@media (any-hover: hover) {
-  .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *):hover:not([aria-pressed="true"]) { background: var(--hover); color: var(--text); }
-}
+/* Rich text (rich_text_field, Lexxy) is runeui's editor skin (runeui_tags lexxy: true). */
 /* Saved rich text: a list reads as tight as it did in the editor (Lexxy wraps each item's text
 /* in a paragraph). */
 .lexxy-content li > p { margin: 0; padding: 0; }
@@ -285,16 +221,16 @@ lexxy-toolbar { border-bottom: 1px solid var(--line); color: var(--text-muted); 
 /* so a click chooses and a drop fills it; the upload controller writes progress into it. Hovered,
 /* dragged over or focused, it takes the accent. */
 .upload-drop {
-  position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-2); width: 100%;
-  padding: var(--s-5); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted);
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem; width: 100%;
+  padding: 1.5rem; border: 1px dashed var(--input); border-radius: var(--ui-radius-xl); color: var(--muted-foreground);
   text-align: center; cursor: pointer; transition: background .12s, border-color .12s, color .12s;
 }
-.upload-drop:is(:hover, .drag-and-drop__hover-container) { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); background: var(--accent-soft); color: var(--text); }
-.upload-drop:has(input:focus-visible) { border-color: var(--accent); box-shadow: var(--ring); }
+.upload-drop:is(:hover, .drag-and-drop__hover-container) { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); background: var(--brand-tint); color: var(--foreground); }
+.upload-drop:has(input:focus-visible) { border-color: var(--primary); box-shadow: var(--ui-focus-ring); }
 .upload-drop input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 0; cursor: pointer; }
 .upload-drop input[type="file"]::file-selector-button { cursor: pointer; }
-.upload-drop__choose { color: var(--text); font-weight: var(--weight-strong); text-decoration: underline; text-underline-offset: 4px; }
-.upload-drop progress { flex-basis: 100%; width: 100%; height: 4px; accent-color: var(--accent); }
+.upload-drop__choose { color: var(--foreground); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+.upload-drop progress { flex-basis: 100%; width: 100%; height: 4px; accent-color: var(--primary); }
 .upload-drop[aria-busy="true"], form[aria-busy="true"] .upload-drop { cursor: progress; }
 .styleguide-skeleton { width: 12rem; }
 
@@ -309,40 +245,26 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 /* Notices and alerts are runeui's toasts (ui :toaster in layouts/shared/_feedback; the flash and
 /* turbo_stream_flash), in the bottom right corner, over the side panel, the trays and the search
 /* bar (the bell and the + are in the bar at the top). */
-#runeui-toaster { z-index: calc(var(--z-tray) + 12); }
+#runeui-toaster { z-index: 63; }
 
 /* ======================================================================= The brand's colour */
 
-/* The scheme's colour (Settings > Appearance, --accent) carries through what's chosen, current or
-/* under the keys: its tints (the palette's --lch-accent-lightest and -lighter: shadcn's quiet
-/* --accent fill by default, the scheme's hue when one is picked, light or dark), and the colour
-/* itself on the icon of what's highlighted, on checkboxes and on selected text. Focus rings take
-/* --lch-ring. Mixes here are in OKLab: in OKLCH white, greys and transparent carry a hue of 0
-/* (red), and a mix swings round the wheel toward it. */
-:root {
-  --brand-tint: var(--accent-soft);
-  --brand-tint-strong: oklch(var(--lch-accent-lighter));
-}
-input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
-::selection { background: color-mix(in oklab, var(--accent) 28%, transparent); }
-.popup .popup__btn:is(:hover, :focus-visible), .popup__item[aria-selected] { background: var(--brand-tint); }
-.popup .popup__btn:is(:hover, :focus-visible) .icon:not(.checked) { color: var(--accent); }
-.popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--accent); }
+/* The scheme's colour (Settings > Appearance, --primary) carries through what's chosen, current or
+/* under the keys: its tints (--brand-tint and --brand-tint-strong, appearance.css: shadcn's quiet
+/* --accent fill in the neutral scheme, the scheme's hue in the others, light or dark), and the
+/* colour itself on the icon of what's highlighted, on checkboxes and on selected text. Mixes here
+/* are in OKLab: in OKLCH white, greys and transparent carry a hue of 0 (red), and a mix swings
+/* round the wheel toward it. */
+input:is([type="checkbox"], [type="radio"]) { accent-color: var(--primary); }
+::selection { background: color-mix(in oklab, var(--primary) 28%, transparent); }
 [data-slot="table"] tbody tr:focus-visible, [data-slot="table"] tbody tr[data-keyboard-current] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
-.settings-nav__link[aria-current="page"] .icon { color: var(--rune-accent); }
+.settings-nav__link[aria-current="page"] .icon { color: var(--primary); }
 .record-list__row[data-keyboard-current], :is(.item-row, .list-row)[data-keyboard-current] { background: var(--brand-tint); }
 
 /* A person in a table's cell (person_cell): the owner column's avatar, then the name. */
-.person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; max-width: 100%; vertical-align: middle; }
+.person-cell { display: inline-flex; align-items: center; gap: .5rem; min-width: 0; max-width: 100%; vertical-align: middle; }
 .person-cell > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* rune_ui's column convention for plain tables (the portal's, settings lists), carried here until
-/* the next rune_ui release reaches this install's Gemfile.lock; then this block goes. */
-.table:not(.table--even, :has(colgroup)) :is(th, td):not(:first-child) { width: 1%; white-space: nowrap; }
-.table:not(.table--even, :has(colgroup)):has(.table__grow) :is(th, td):first-child { width: 1%; white-space: nowrap; }
-.table:not(.table--even, :has(colgroup)) :is(th, td).table__grow { width: auto; white-space: normal; }
-.table .table__cap { display: inline-block; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 
 /* Optimistic: what's sent shows at once, dimmed, until the server answers (the pending controller's
    rows, a row being deleted, the rows a bulk action is changing, a tab's frame loading). */
@@ -351,7 +273,7 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 tr.is-pending,
 .is-pending { opacity: 0.5; pointer-events: none; transition: opacity 150ms ease; }
 tr.is-leaving { opacity: 0; transition: opacity 200ms ease; }
-.task-item__pending-dot { inline-size: 0.875rem; block-size: 0.875rem; border-radius: 50%; border: 1.5px dashed var(--line-strong); flex: none; }
+.task-item__pending-dot { inline-size: 0.875rem; block-size: 0.875rem; border-radius: 50%; border: 1.5px dashed var(--input); flex: none; }
 #record_tab[aria-busy="true"] .record-tabs__panel { opacity: 0.5; transition: opacity 150ms ease 100ms; }
 @media (prefers-reduced-motion: reduce) {
   tr.is-leaving, .is-pending, #record_tab[aria-busy="true"] .record-tabs__panel { transition: none; }
@@ -363,42 +285,41 @@ tr.is-fresh { animation: row-fresh 2.4s ease-out; }
 @media (prefers-reduced-motion: reduce) { tr.is-fresh { animation: none; background: var(--brand-tint); } }
 
 /* A form's draft came back from the browser (the draft controller): said quietly, with Discard. */
-.draft-notice { display: flex; align-items: center; gap: var(--s-2); margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+.draft-notice { display: flex; align-items: center; gap: .5rem; margin: 0; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 .draft-notice[hidden] { display: none; }
-.draft-notice__discard { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer; }
+.draft-notice__discard { padding: 0; border: 0; background: none; color: var(--primary); font: inherit; cursor: pointer; }
 .draft-notice__discard:hover { text-decoration: underline; }
 
 /* The connection gone (layouts/shared/_connection_status, the connection controller): a quiet pill
    at the foot of the page, and anything waiting to be sent marked unsaved. */
-.connection-status { position: fixed; inset-inline: 0; bottom: calc(var(--s-3) + env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: var(--s-2); width: fit-content; margin: 0 auto; padding: var(--s-1) var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-pill, 99rem); background: var(--panel); box-shadow: var(--shadow-popover, 0 8px 24px rgb(0 0 0 / .12)); color: var(--text-muted); font-size: var(--text-meta); }
+.connection-status { position: fixed; inset-inline: 0; bottom: calc(.75rem + env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: .5rem; width: fit-content; margin: 0 auto; padding: .25rem .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-full); background: var(--background); box-shadow: 0 0 0 1px var(--border), var(--ui-shadow-lg); color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 .connection-status[hidden] { display: none; }
-.connection-status__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--attention); }
+.connection-status__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--warning); }
 form[data-unsaved] input,
 form[data-unsaved] textarea,
 .layout-field:has(form[data-unsaved]) input,
-.layout-field:has(form[data-unsaved]) textarea { border-color: var(--attention); }
+.layout-field:has(form[data-unsaved]) textarea { border-color: var(--warning); }
 .layout-field:has(form[data-unsaved])::after,
-form[data-unsaved].record-title-form::after { content: "Not saved yet"; color: var(--attention); font-size: var(--text-xs); }
+form[data-unsaved].record-title-form::after { content: "Not saved yet"; color: var(--warning); font-size: var(--ui-text-xs); }
 
 /* A count beside a tab's name (record tabs, a section's filter: ui :tabs as links). */
-.tab-count { min-width: 1.125rem; padding: 0 6px; border-radius: var(--radius-pill, 99rem); background: var(--layer-3); color: var(--text-muted); font-size: var(--text-xs); font-weight: 600; line-height: 1.125rem; text-align: center; }
+.tab-count { min-width: 1.125rem; padding: 0 6px; border-radius: var(--ui-radius-full); background: light-dark(color-mix(in oklab, var(--foreground) 6%, var(--muted)), color-mix(in oklab, var(--foreground) 14%, var(--muted))); color: var(--muted-foreground); font-size: var(--ui-text-xs); font-weight: 600; line-height: 1.125rem; text-align: center; }
 
 /* A row in a card's list (records' contacts, work and documents, a section's focus): what it is,
 /* muted lines under it, what it's at on the right. A link row tints on hover. */
-.item-row { display: flex; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: 6px var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
-a.item-row:hover, a.item-row:focus-visible { background: var(--hover); color: var(--text); }
-.item-row__media { display: inline-flex; flex: 0 0 auto; align-items: center; color: var(--text-faint); }
+.item-row { display: flex; align-items: center; gap: .75rem; min-height: 2.5rem; padding: 6px .75rem; border-radius: var(--ui-radius-sm); color: var(--foreground); text-decoration: none; }
+a.item-row:hover, a.item-row:focus-visible { background: var(--ui-ghost-hover); color: var(--foreground); }
 .item-row__content { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
-.item-row__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
-.item-row__desc { min-width: 0; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); overflow-wrap: anywhere; }
-.item-row__meta { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-2); color: var(--text-faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.item-row__actions { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-2); margin-left: auto; }
+.item-row__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.item-row__desc { min-width: 0; color: var(--faint-foreground); font-size: var(--ui-text-xs); line-height: 1rem; overflow-wrap: anywhere; }
+.item-row__meta { display: flex; flex: 0 0 auto; align-items: center; gap: .5rem; color: var(--faint-foreground); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.item-row__actions { display: flex; flex: 0 0 auto; align-items: center; gap: .5rem; margin-left: auto; }
 
 /* A line of small print under a field (the work's description, a person's email). */
-.field-note { color: var(--text-muted); font-size: var(--text-meta); }
+.field-note { color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 
 /* A section's state as a dot (works/_scope). */
-.state-dot { display: inline-block; flex: 0 0 auto; width: .5rem; height: .5rem; border-radius: 50%; background: var(--text-faint); }
-.state-dot--accent { background: var(--rune-accent); }
-.state-dot--danger { background: var(--danger); }
-.state-dot--ok { background: var(--ok); }
+.state-dot { display: inline-block; flex: 0 0 auto; width: .5rem; height: .5rem; border-radius: 50%; background: var(--faint-foreground); }
+.state-dot--accent { background: var(--primary); }
+.state-dot--danger { background: var(--destructive); }
+.state-dot--ok { background: var(--success); }

@@ -70,7 +70,7 @@
                   { label: safe_join([ icon_tag("person"), tag.span("Your account") ]), href: portal_account_path },
                   { label: safe_join([ icon_tag("email"), tag.span("Your requests") ]), href: portal_requests_path },
                   { label: safe_join([ icon_tag("settings-outline"), tag.span("Connected apps") ]), href: portal_connected_apps_path },
-                  { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
+                  { label: theme, value: "theme", data: { runeui_theme: "toggle" } },
                   :separator,
                   { label: safe_join([ icon_tag("logout"), tag.span("Sign out") ]), href: portal_session_path, method: :delete } ] %>
           </div>

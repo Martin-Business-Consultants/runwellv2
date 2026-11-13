@@ -1,221 +1,83 @@
-/* Settings > Appearance, applied as attributes on <html> (data-scheme, data-radius,
-/* data-font) so a change previews instantly.
+/* Runwell's theme: runeui's tokens (shadcn/ui's names and meanings, runeui/tokens.css) as
+/* Settings > Appearance sets them. Linked first, so its layer order is the page's:
 /*
-/* Colours are shadcn/ui's idea of a theme: the greys stay neutral and a scheme colours the
-/* primary, which here is the accent (--lch-accent: buttons, links, switches, the focus ring,
-/* the current item) with --lch-ink-inverted the text on it. The default, "fizzy" (Neutral), sets
-/* nothing: it is _global.css's near-black. Each colour is a Tailwind step picked to read as text
-/* on the canvas and under its own foreground (4.5:1 or better), light and dark.
+/*   ui-sdk, runeui.tokens, runeui.base, runeui.rune (the compatibility layer's classes, until
+/*   7.0: runwell/compat.css), runeui.components, runeui.utilities, then runwell.theme (this).
 /*
-/* Fizzy's tokens are unlayered (_global.css), so scheme and font overrides are too; the
-/* corner overrides target component variables, which live in the components layer. */
+/* runeui's defaults are shadcn's neutral theme; this layer sits over them, so Appearance's
+/* choices (attributes on <html>: data-scheme, data-radius, data-font, data-text-size; light and
+/* dark are runeui's .dark, set before the first paint) win over runeui's, and a custom theme
+/* (Settings > Appearance > Custom CSS, unlayered and linked last: docs/theming.md) wins over
+/* both, whatever its selectors. Runwell's own stylesheets read only these tokens. */
 
-:root[data-scheme="indigo"] { --scheme: 51.1% 0.262 276.966; --scheme-ink: 96.2% 0.018 272.314; --scheme-dark: 67.3% 0.182 276.935; --scheme-dark-ink: 25.7% 0.09 281.288; --scheme-hue: 277; }
-:root[data-scheme="forest"] { --scheme: 52.7% 0.154 150.069; --scheme-ink: 98.2% 0.018 155.826; --scheme-dark: 72.3% 0.219 149.579; --scheme-dark-ink: 26.6% 0.065 152.934; --scheme-hue: 150; }
-:root[data-scheme="plum"] { --scheme: 55.8% 0.288 302.321; --scheme-ink: 97.7% 0.014 308.299; --scheme-dark: 71.4% 0.203 305.504; --scheme-dark-ink: 29.1% 0.149 302.717; --scheme-hue: 304; }
-:root[data-scheme="ocean"] { --scheme: 52% 0.105 223.128; --scheme-ink: 98.4% 0.019 200.873; --scheme-dark: 71.5% 0.143 215.221; --scheme-dark-ink: 30.2% 0.056 229.695; --scheme-hue: 220; }
-:root[data-scheme="graphite"] { --scheme: 37.2% 0.044 257.287; --scheme-ink: 98.4% 0.003 247.858; --scheme-dark: 86.9% 0.022 252.894; --scheme-dark-ink: 20.8% 0.042 265.755; --scheme-hue: 257; --scheme-chroma: 0.3; }
+@layer ui-sdk, runeui.tokens, runeui.base, runeui.rune, runeui.components, runeui.utilities, runwell.theme;
 
-:root[data-scheme]:not([data-scheme="fizzy"]) {
-  --lch-accent: var(--scheme);
-  --lch-ink-inverted: var(--scheme-ink);
-  --lch-ring: var(--scheme);
-  --color-showcase: oklch(var(--lch-accent));
-  --scheme-light: 87% calc(0.065 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  --scheme-lighter: 93% calc(0.032 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  --scheme-lightest: 97% calc(0.014 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  --lch-accent-light: var(--scheme-light);
-  --lch-accent-lighter: var(--scheme-lighter);
-  --lch-accent-lightest: var(--scheme-lightest);
-  --scheme-tint: oklch(var(--scheme-lightest));
-}
+@layer runwell.theme {
+  :root {
+    /* Inter, bundled (font-face.css), so the app looks the same everywhere. */
+    --font-sans: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Runwell", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
-html[data-theme="dark"][data-scheme]:not([data-scheme="fizzy"]) {
-  --lch-accent: var(--scheme-dark);
-  --lch-ink-inverted: var(--scheme-dark-ink);
-  --lch-ring: var(--scheme-dark);
-  --scheme-light: 40% calc(0.09 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  --scheme-lighter: 32% calc(0.055 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  --scheme-lightest: 27% calc(0.035 * var(--scheme-chroma, 1)) var(--scheme-hue);
-}
+    /* runeui's status colours (badges, alerts, toasts), Runwell's: a deeper green and an amber
+       that read as text on the page; information in the brand's colour. */
+    --success: oklch(55% 0.162 147);
+    --warning: oklch(58% 0.156 60);
+    --info: var(--primary);
 
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme])[data-scheme]:not([data-scheme="fizzy"]) {
-    --lch-accent: var(--scheme-dark);
-    --lch-ink-inverted: var(--scheme-dark-ink);
-    --lch-ring: var(--scheme-dark);
-    --scheme-light: 40% calc(0.09 * var(--scheme-chroma, 1)) var(--scheme-hue);
-    --scheme-lighter: 32% calc(0.055 * var(--scheme-chroma, 1)) var(--scheme-hue);
-    --scheme-lightest: 27% calc(0.035 * var(--scheme-chroma, 1)) var(--scheme-hue);
-  }
-}
+    /* The nav's current item and focus in the brand's colour, as everything chosen is. */
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-ring: var(--ring);
 
-/* Fonts: local font stacks only, nothing downloaded. */
-:root[data-font="humanist"] { --font-sans: Seravek, "Gill Sans Nova", Ubuntu, Calibri, "DejaVu Sans", source-sans-pro, sans-serif; }
-:root[data-font="rounded"] { --font-sans: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari, "Arial Rounded MT", "Arial Rounded MT Bold", Calibri, source-sans-pro, sans-serif; }
-:root[data-font="serif"] { --font-sans: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, Georgia, serif; }
-:root[data-font="mono"] { --font-sans: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
-
-/* Corners. Every radius in the app's stylesheets is written against these variables:
-/* containers (panels, cards, dialogs, the editor) multiply by --radius-scale, pill shapes
-/* use --radius-pill, and true circles (50%) stay circles. Every control (buttons, inputs,
-/* selects, toggles, tags) reads var(--radius-control) so they always match each other.
-/*
-/* Soft is shadcn's default, --radius: 0.625rem, and the steps it derives, under rune's names:
-/* rounded-sm (6px: menu items, rows), rounded-md (8px: controls), rounded-lg (10px, --radius:
-/* tabs, alerts, menus) and rounded-xl (14px: cards, dialogs, the page's panel). Sharp and Round
-/* scale them all. */
-:root {
-  --radius-scale: 1;
-  --radius-pill: 99rem;
-  --radius-xs: calc(0.25rem * var(--radius-scale));
-  --radius-sm: calc(0.375rem * var(--radius-scale));
-  --radius-md: calc(0.5rem * var(--radius-scale));
-  --radius: calc(0.625rem * var(--radius-scale));
-  --radius-lg: calc(0.875rem * var(--radius-scale));
-  --radius-panel: calc(0.875rem * var(--radius-scale));
-  --radius-control: calc(0.5rem * var(--radius-scale));
-}
-:root[data-radius="sharp"] { --radius-scale: 0.25; --radius-pill: 0.4em; }
-:root[data-radius="round"] { --radius-scale: 1.6; --radius-control: 99rem; }
-
-/* Unlayered, so these beat the component rules (and their modifiers) in every layer. */
-.btn { --btn-border-radius: var(--radius-control, var(--radius-lg)); }
-.input, .input--select { --input-border-radius: var(--radius-control, var(--radius-lg)); }
-
-/* An uploaded logo sits where the wordmark was, at the wordmark's height. */
-@layer components {
-  .header__logo-image {
-    block-size: 1.6em;
-    inline-size: auto;
-    max-inline-size: 12em;
-    object-fit: contain;
-    vertical-align: middle;
-  }
-}
-
-/* Settings > Appearance: each choice shows what it does, inside its radio card
-/* (ui/app-settings.css). */
-@layer ui {
-  .appearance-sample {
-    block-size: 2.25rem;
-    display: inline-grid;
-    font-size: 1.25rem;
-    font-weight: 600;
-    inline-size: 2.25rem;
-    place-items: center;
+    /* Runwell's additions, derived from the theme so any scheme or custom theme carries them:
+       a third step of text under --muted-foreground (hints, meta), and the brand's tints behind
+       what's chosen, current or under the keys (shadcn's quiet --accent fill in the neutral
+       scheme, the scheme's hue in the others). */
+    --faint-foreground: light-dark(color-mix(in oklab, var(--muted-foreground) 80%, transparent), color-mix(in oklab, var(--muted-foreground) 72%, transparent));
+    --brand-tint: light-dark(color-mix(in oklab, var(--primary) 4%, var(--background)), color-mix(in oklab, var(--primary) 16%, var(--background)));
+    --brand-tint-strong: light-dark(color-mix(in oklab, var(--primary) 7.5%, var(--background)), color-mix(in oklab, var(--primary) 22.5%, var(--background)));
   }
 
-  /* Each scheme's primary, as it is in the theme on screen. */
-  .appearance-swatch--fizzy { background: light-dark(oklch(20.5% 0 0), oklch(92.2% 0 0)); }
-  .appearance-swatch--indigo { background: light-dark(oklch(51.1% 0.262 276.966), oklch(67.3% 0.182 276.935)); }
-  .appearance-swatch--forest { background: light-dark(oklch(52.7% 0.154 150.069), oklch(72.3% 0.219 149.579)); }
-  .appearance-swatch--plum { background: light-dark(oklch(55.8% 0.288 302.321), oklch(71.4% 0.203 305.504)); }
-  .appearance-swatch--ocean { background: light-dark(oklch(52% 0.105 223.128), oklch(71.5% 0.143 215.221)); }
-  .appearance-swatch--graphite { background: light-dark(oklch(37.2% 0.044 257.287), oklch(86.9% 0.022 252.894)); }
-
-  [class*="appearance-swatch--"] {
-    block-size: 2rem;
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line);
-    color: transparent;
-    inline-size: 2rem;
+  .dark {
+    --success: oklch(62% 0.1261 146);
+    --warning: oklch(62.1% 0.146 70);
+    /* Cards and popovers on the page's own ground in dark (shadcn's are a step lighter). */
+    --card: var(--background);
+    --popover: var(--background);
   }
 
-  [class*="appearance-corner--"] {
-    background-color: var(--layer-2);
-    border: 2px solid var(--text);
-    border-block-end: 0;
-    border-inline-end: 0;
-    color: transparent;
-    translate: 0.375rem 0.375rem;
-  }
+  /* Colour schemes: shadcn's idea of a theme, the greys neutral and the primary coloured (buttons,
+     links, switches, the focus ring, the current item), light and dark. Neutral ("fizzy", the
+     default) is runeui's own. Each colour is a Tailwind step that reads as text on the page and
+     under its own foreground (4.5:1 or better). Setting#brand_color is each light primary in hex,
+     for email. */
+  :root[data-scheme="indigo"] { --primary: oklch(51.1% 0.262 276.966); --primary-foreground: oklch(96.2% 0.018 272.314); }
+  :root[data-scheme="forest"] { --primary: oklch(52.7% 0.154 150.069); --primary-foreground: oklch(98.2% 0.018 155.826); }
+  :root[data-scheme="plum"] { --primary: oklch(55.8% 0.288 302.321); --primary-foreground: oklch(97.7% 0.014 308.299); }
+  :root[data-scheme="ocean"] { --primary: oklch(52% 0.105 223.128); --primary-foreground: oklch(98.4% 0.019 200.873); }
+  :root[data-scheme="graphite"] { --primary: oklch(37.2% 0.044 257.287); --primary-foreground: oklch(98.4% 0.003 247.858); }
+  :root.dark[data-scheme="indigo"] { --primary: oklch(67.3% 0.182 276.935); --primary-foreground: oklch(25.7% 0.09 281.288); }
+  :root.dark[data-scheme="forest"] { --primary: oklch(72.3% 0.219 149.579); --primary-foreground: oklch(26.6% 0.065 152.934); }
+  :root.dark[data-scheme="plum"] { --primary: oklch(71.4% 0.203 305.504); --primary-foreground: oklch(29.1% 0.149 302.717); }
+  :root.dark[data-scheme="ocean"] { --primary: oklch(71.5% 0.143 215.221); --primary-foreground: oklch(30.2% 0.056 229.695); }
+  :root.dark[data-scheme="graphite"] { --primary: oklch(86.9% 0.022 252.894); --primary-foreground: oklch(20.8% 0.042 265.755); }
+  /* A coloured scheme's focus ring is its colour. */
+  :root[data-scheme]:not([data-scheme="fizzy"]) { --ring: var(--primary); }
 
-  .appearance-corner--sharp { border-start-start-radius: 0.125rem; }
-  .appearance-corner--fizzy { border-start-start-radius: 0.625rem; }
-  .appearance-corner--round { border-start-start-radius: 1rem; }
+  /* Corners: --radius, from which runeui derives every corner (--ui-radius-sm…xl). Soft is
+     shadcn's 0.625rem. */
+  :root[data-radius="sharp"] { --radius: 0.25rem; }
+  :root[data-radius="round"] { --radius: 1rem; }
 
-  .appearance-font--system { font-family: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .appearance-font--humanist { font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, sans-serif; }
-  .appearance-font--rounded { font-family: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, "Arial Rounded MT", sans-serif; }
-  .appearance-font--serif { font-family: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", Georgia, serif; }
-  .appearance-font--mono { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; }
+  /* Fonts: local stacks only, nothing downloaded. */
+  :root[data-font="humanist"] { --font-sans: Seravek, "Gill Sans Nova", Ubuntu, Calibri, "DejaVu Sans", source-sans-pro, sans-serif; }
+  :root[data-font="rounded"] { --font-sans: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari, "Arial Rounded MT", "Arial Rounded MT Bold", Calibri, source-sans-pro, sans-serif; }
+  :root[data-font="serif"] { --font-sans: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, Georgia, serif; }
+  :root[data-font="mono"] { --font-sans: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
 
-  .appearance-size--small { font-size: 0.875rem; }
-  .appearance-size--default { font-size: 1.125rem; }
-  .appearance-size--large { font-size: 1.375rem; }
-  .appearance-size--larger { font-size: 1.625rem; }
-
-  /* The theme's preview: a little page of cards, light or dark whatever the page is now, and
-  /* System half of each. */
-  .theme-mock {
-    --mock-page: oklch(97% 0 0);
-    --mock-card: oklch(100% 0 0);
-    --mock-line: oklch(90% 0 0);
-
-    background: var(--mock-page);
-    block-size: 100%;
-    border-radius: calc(var(--radius-md) - 2px);
-    display: grid;
-    gap: 0.25rem;
-    grid-auto-rows: 1fr;
-    inline-size: 100%;
-    padding: 0.375rem;
-  }
-
-  .theme-mock--dark {
-    --mock-page: oklch(14.5% 0 0);
-    --mock-card: oklch(26.9% 0 0);
-    --mock-line: oklch(42% 0 0);
-  }
-
-  .theme-mock--system {
-    --mock-line: oklch(60% 0 0 / 45%);
-
-    background: linear-gradient(90deg, var(--mock-page) 50%, oklch(14.5% 0 0) 50%);
-
-    /* Cards sit evenly inside the page, so their middle is the page's. */
-    .theme-mock__card {
-      background: linear-gradient(90deg, var(--mock-card) 50%, oklch(26.9% 0 0) 50%);
-    }
-  }
-
-  .theme-mock__card {
-    align-items: center;
-    background: var(--mock-card);
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 2px oklch(0% 0 0 / 8%);
-    display: flex;
-    gap: 0.25rem;
-    padding: 0 0.375rem;
-  }
-
-  .theme-mock__line {
-    background: var(--mock-line);
-    block-size: 0.25rem;
-    border-radius: 99rem;
-    flex: 1;
-  }
-
-  .theme-mock__line--short {
-    flex: 0 0 40%;
-  }
-
-  .theme-mock__dot {
-    aspect-ratio: 1;
-    background: var(--mock-line);
-    block-size: 0.5rem;
-    border-radius: 50%;
-  }
-
-  .appearance-upload {
-    block-size: 2.5rem;
-    inline-size: auto;
-    max-inline-size: 14rem;
-    object-fit: contain;
-  }
-
-  .appearance-upload--favicon {
-    inline-size: 2.5rem;
-  }
+  /* Text size (the install's, or a person's own): the root's size, which every rem scales from
+     (Default is the browser's, 16px). */
+  :root[data-text-size="small"] { font-size: 87.5%; }
+  :root[data-text-size="large"] { font-size: 112.5%; }
+  :root[data-text-size="larger"] { font-size: 125%; }
 }

@@ -1,21 +1,20 @@
-/* Work: the task index and table, the board, status dots and the owner picker, bulk, on rune_ui's
-/* tokens (docs/rune-ui-migration.md). Unlayered, so these win over rune's components. Ported from
-/* Fizzy's card-columns.css, task-status.css, drag_and_drop.css, blank-slates.css and ai-brief.css,
-/* and from ui/app-cards.css (the board) and ui/app-records.css (work on a record's page).
+/* Tasks: the index and table, the board (runeui's), status dots and the owner picker, bulk, work
+/* on a record's page.
+/* Unlayered, so these win over runeui's layers; on runeui's tokens (appearance.css, docs/theming.md).
 /*
 /* 1 Status colours and dots   2 Pickers (status, owners)   3 The table   4 The board (runeui's,
 /* its cards and a column's own page)   7 Work on a record's page   8 Copy for AI */
 
 /* ======================================================================= 1 Status colours and dots */
 
-/* Each status's colour, shared by its dot and its board column. Rune has no token for yellow,
-/* green or red as a palette step, so these read Runwell's palette directly. */
+/* Each status's colour, shared by its dot and its board column: yellow, green and red steps of
+/* their own (runeui's tokens have no palette steps), a shade lighter in dark. */
 :root {
-  --task-planned: var(--text-faint);
-  --task-in-progress: oklch(var(--lch-yellow-medium));
-  --task-in-review: oklch(var(--lch-green-medium));
-  --task-blocked: oklch(var(--lch-red-medium));
-  --task-done: var(--accent);
+  --task-planned: var(--faint-foreground);
+  --task-in-progress: light-dark(oklch(74% 0.184 70), oklch(62.1% 0.146 70));
+  --task-in-review: light-dark(oklch(66% 0.208 146), oklch(62% 0.1261 146));
+  --task-blocked: light-dark(oklch(66% 0.204 40), oklch(62% 0.154 40));
+  --task-done: var(--primary);
 }
 
 /* A task's status as Linear draws it (tasks/_status_dot): a ring that fills as work moves on.
@@ -36,7 +35,7 @@
 .status-dot--done { --status-dot-color: var(--task-done); padding: 0; background: var(--status-dot-color); }
 .status-dot--done::after {
   content: ""; position: absolute; inset: .1em auto auto .3em; width: .22em; height: .45em;
-  border: solid var(--accent-ink); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+  border: solid var(--primary-foreground); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
 }
 
 /* ======================================================================= 2 Pickers (status, owners) */
@@ -54,7 +53,7 @@
 ui-combobox.picker-menu { display: contents; }
 .picker-menu__label { flex: 1; min-width: 0; }
 .picker-menu__check { display: none; margin-inline-start: auto; color: var(--muted-foreground); }
-[data-picker-current] { font-weight: var(--weight-strong); }
+[data-picker-current] { font-weight: 500; }
 [data-picker-current] .picker-menu__check { display: block; }
 .picker-form { display: none; }
 
@@ -65,24 +64,24 @@ ui-combobox.picker-menu { display: contents; }
   display: inline-grid; place-items: center; padding: .35em; border: 0; border-radius: 50%;
   background: none; color: inherit; font-size: 1rem; cursor: pointer; transition: background-color 80ms ease-out;
 }
-.status-dot-picker__trigger:hover { background: var(--hover); }
+.status-dot-picker__trigger:hover { background: var(--ui-ghost-hover); }
 .status-dot-picker__trigger:has(.status-dot-picker__label) {
-  grid-auto-flow: column; gap: var(--s-1); padding-inline: .5em .7em; border-radius: var(--radius-pill); font: inherit;
+  grid-auto-flow: column; gap: .25rem; padding-inline: .5em .7em; border-radius: var(--ui-radius-full); font: inherit;
 }
-.status-dot-picker__trigger:has(.status-dot-picker__label):hover { background: var(--layer-2); }
+.status-dot-picker__trigger:has(.status-dot-picker__label):hover { background: var(--muted); }
 .status-dot-picker__label { white-space: nowrap; }
 
 /* The owners picker's trigger: the avatars (or a dashed circle for nobody), with the names when
 /* labelled. The lead's avatar sits on top of the others. */
 .owner-picker__trigger {
-  display: inline-flex; align-items: center; gap: var(--s-1); max-width: 14em; padding: .15em;
-  border: 0; border-radius: var(--radius-pill); background: none; color: inherit; font: inherit; text-align: start; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .25rem; max-width: 14em; padding: .15em;
+  border: 0; border-radius: var(--ui-radius-full); background: none; color: inherit; font: inherit; text-align: start; cursor: pointer;
 }
-.owner-picker__trigger:hover { background: var(--layer-2); }
+.owner-picker__trigger:hover { background: var(--muted); }
 .owner-picker__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .owner-picker__empty {
   display: inline-grid; place-items: center; flex: none; width: 1.5rem; height: 1.5rem;
-  border: 1px dashed var(--line-strong); border-radius: 50%; color: var(--text-faint);
+  border: 1px dashed var(--input); border-radius: 50%; color: var(--faint-foreground);
 }
 .owner-picker__empty .icon { width: .8rem; height: .8rem; }
 .owner-picker__empty[hidden] { display: none; }
@@ -92,31 +91,31 @@ ui-combobox.picker-menu { display: contents; }
 
 /* The list of the team: each with their picture, Out when away on the due date, and a hint at
 /* the foot. */
-.owner-menu [data-slot="combobox-item"] { gap: var(--s-2); }
+.owner-menu [data-slot="combobox-item"] { gap: .5rem; }
 .owner-menu [data-slot="combobox-item"] [data-slot="avatar"] { --avatar-size: 1.25rem; }
 .owner-menu [data-slot="combobox-item-text"] { flex: 1; min-width: 0; }
-.owner-picker__hint { margin: 0; padding: var(--s-1) var(--s-2); color: var(--text-muted); font-size: var(--text-meta); }
+.owner-picker__hint { margin: 0; padding: .25rem .5rem; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 
 /* The due date's calendar, with Today and No date under it. */
-.due-menu [data-slot="popover-content"] { padding: var(--s-2); }
-.due-menu__foot { display: flex; gap: var(--s-2); padding-top: var(--s-2); border-top: 1px solid var(--line); }
+.due-menu [data-slot="popover-content"] { padding: .5rem; }
+.due-menu__foot { display: flex; gap: .5rem; padding-top: .5rem; border-top: 1px solid var(--border); }
 .due-menu__foot > * { flex: 1; }
 
 /* ======================================================================= 3 The table */
 
 /* A piece of work's ref in its cell: plain ink, the accent under the pointer. */
-.task-table__work { color: var(--text); text-decoration: none; }
-.task-table__work:hover { color: var(--accent); }
+.task-table__work { color: var(--foreground); text-decoration: none; }
+.task-table__work:hover { color: var(--primary); }
 
 /* A due date with Overdue beside it. */
-.task-due { display: inline-flex; align-items: center; gap: var(--s-2); }
+.task-due { display: inline-flex; align-items: center; gap: .5rem; }
 /* Changed in place: the date is a quiet button, as wide as its words, that opens the calendar. */
 .task-due__button {
-  height: var(--control-h-sm); margin-inline-start: -6px; padding: 0 6px; border: 1px solid transparent; border-radius: var(--radius-control);
+  height: var(--ui-h-sm); margin-inline-start: -6px; padding: 0 6px; border: 1px solid transparent; border-radius: var(--ui-radius-md);
   background: transparent; color: inherit; font: inherit; white-space: nowrap; cursor: pointer;
 }
-.task-due__button:is(:hover, :focus-visible, [aria-expanded="true"]) { border-color: var(--line-strong); background: var(--panel); }
-.task-due__button[data-empty] { color: var(--text-faint); }
+.task-due__button:is(:hover, :focus-visible, [aria-expanded="true"]) { border-color: var(--input); background: var(--background); }
+.task-due__button[data-empty] { color: var(--faint-foreground); }
 
 /* ======================================================================= 4 The board */
 
@@ -125,15 +124,14 @@ ui-combobox.picker-menu { display: contents; }
 /* and height, the cards' lines, and phones. Runwell's markup in a card reads --accent and --ring as
 /* the brand colour and focus shadow. */
 .task-board { --ui-board-column-width: 20rem; --ui-board-height: calc(100dvh - 9rem); min-height: 20lh; }
-.task-board [data-slot="board-column-header"] { min-height: var(--control-h); }
+.task-board [data-slot="board-column-header"] { min-height: var(--ui-h); }
 /* runeui's lane tint over the panel, so nothing under a lane shows through it (a phone's second
 /* row of filters runs under the board). */
-.task-board [data-slot="board-column"] { background-color: var(--panel); background-image: linear-gradient(color-mix(in oklab, var(--muted) 60%, transparent) 0 0); }
+.task-board [data-slot="board-column"] { background-color: var(--background); background-image: linear-gradient(color-mix(in oklab, var(--muted) 60%, transparent) 0 0); }
 .task-board [data-slot="board-column"][data-drop] { background-image: linear-gradient(var(--muted) 0 0); }
-.task-board [data-slot="board-column-title"] { font-size: var(--text-read); font-weight: var(--weight-strong); }
-.task-board [data-slot="board-card"] { --accent: var(--rune-accent); --ring: var(--rune-ring); }
-.task-board [data-slot="board-card"][data-keyboard-current] { border-color: var(--rune-accent); }
-.task-board .task-board__more { display: block; padding: var(--s-2); }
+.task-board [data-slot="board-column-title"] { font-size: var(--ui-text-sm); font-weight: 500; }
+.task-board [data-slot="board-card"][data-keyboard-current] { border-color: var(--primary); }
+.task-board .task-board__more { display: block; padding: .5rem; }
 /* Each column's dot in its status's colour (task_column_tone), as the status dots are. */
 .task-board [data-slot="board-column-dot"] { width: .625rem; height: .625rem; }
 .task-board [data-tone="planned"] [data-slot="board-column-dot"] { box-shadow: inset 0 0 0 1.5px var(--task-planned); background: none; }
@@ -144,12 +142,12 @@ ui-combobox.picker-menu { display: contents; }
 
 /* A card (tasks/display/_preview): its work and client on a faint line, the title, then the due
 /* date and the people on it. */
-.task-card [data-slot="board-card-meta"] { display: flex; align-items: center; gap: var(--s-2); min-width: 0; order: -1; }
-.task-card__ref { flex: none; color: var(--text-muted); font-weight: var(--weight-strong); }
+.task-card [data-slot="board-card-meta"] { display: flex; align-items: center; gap: .5rem; min-width: 0; order: -1; }
+.task-card__ref { flex: none; color: var(--muted-foreground); font-weight: 500; }
 .task-card__client { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .task-card [data-slot="board-card-footer"] { justify-content: space-between; }
 .task-card [data-slot="board-card-footer"]:not(:has(.badge, .avatar, .agent-made, [data-slot="avatar"])) { display: none; }
-.task-card__badges { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); }
+.task-card__badges { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
 .task-card__people [data-slot="avatar"], .task-card__people .avatar { width: 1.375rem; height: 1.375rem; }
 
 /* A column on a page of its own (tasks/columns/show): its cards in a grid across the page. */
@@ -162,7 +160,7 @@ ui-combobox.picker-menu { display: contents; }
 @media (max-width: 639px) {
   .task-board { --ui-board-column-width: calc(100vw - 4rem); scroll-snap-type: x mandatory; }
   body.contained-scrolling [data-slot="app-inset"] { height: 100dvh; min-height: 0; }
-  body.contained-scrolling #main { flex: 1 1 auto; min-height: 0; padding-bottom: var(--s-4); }
+  body.contained-scrolling #main { flex: 1 1 auto; min-height: 0; padding-bottom: 1rem; }
   body.contained-scrolling .task-board { flex: 1 1 auto; min-height: 0; --ui-board-height: 100%; }
 }
 
@@ -170,7 +168,7 @@ ui-combobox.picker-menu { display: contents; }
 
 /* A piece of work in a record's list (record-list, records.css): the status circle leads, like a
 /* task list's checkbox, and the title underlines under the pointer. */
-.task-item .status-dot-picker__trigger { margin-left: calc(-1 * var(--s-1)); }
+.task-item .status-dot-picker__trigger { margin-left: calc(-1 * .25rem); }
 .task-item .record-list__main:hover .record-list__title {
   text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 40%, transparent); text-underline-offset: 4px;
 }
@@ -179,19 +177,19 @@ ui-combobox.picker-menu { display: contents; }
 /* between them, each under a header of its name, "done of total" and its delivery state. */
 .task-groups { display: flex; flex-direction: column; }
 .task-group { display: flex; flex-direction: column; }
-.task-group + .task-group { border-top: 1px solid var(--line); }
-.task-group__header { display: flex; align-items: center; gap: var(--s-3); padding-block: var(--s-4) var(--s-1); }
+.task-group + .task-group { border-top: 1px solid var(--border); }
+.task-group__header { display: flex; align-items: center; gap: .75rem; padding-block: 1rem .25rem; }
 .task-group:first-child .task-group__header { padding-top: 0; }
 .task-group__name {
-  flex: 1; min-width: 0; overflow: hidden; color: var(--text); font-size: var(--text-read); font-weight: var(--weight-strong);
+  flex: 1; min-width: 0; overflow: hidden; color: var(--foreground); font-size: var(--ui-text-sm); font-weight: 500;
   text-decoration: none; text-overflow: ellipsis; white-space: nowrap;
 }
-a.task-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
-.task-group__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
+a.task-group__name:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
+.task-group__count { color: var(--muted-foreground); font-size: var(--ui-text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* One scope item's work alone: the item as an outlined row over its work. */
-.task-focus.item-row { border: 1px solid var(--line); border-radius: var(--radius); }
-.task-focus__title { font-size: var(--text-read); }
+.task-focus.item-row { border: 1px solid var(--border); border-radius: var(--ui-radius-lg); }
+.task-focus__title { font-size: var(--ui-text-sm); }
 .task-focus__count { font-variant-numeric: tabular-nums; }
 
 
@@ -199,11 +197,11 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* tasks/_ai_brief: the AI mark in the accent; once copied, a tooltip says so and fades. */
 .ai-brief { position: relative; }
-.ai-brief .icon { color: var(--rune-accent); }
+.ai-brief .icon { color: var(--primary); }
 .ai-brief--copied::after {
-  content: "Copied"; position: absolute; inset: auto auto calc(100% + var(--s-1)) 50%; transform: translateX(-50%); z-index: 5;
-  padding: 6px var(--s-3); border-radius: var(--radius-sm); background: var(--text); color: var(--panel);
-  font-size: var(--text-xs); font-weight: var(--weight); line-height: 1rem; white-space: nowrap; pointer-events: none;
+  content: "Copied"; position: absolute; inset: auto auto calc(100% + .25rem) 50%; transform: translateX(-50%); z-index: 5;
+  padding: 6px .75rem; border-radius: var(--ui-radius-sm); background: var(--foreground); color: var(--background);
+  font-size: var(--ui-text-xs); font-weight: 400; line-height: 1rem; white-space: nowrap; pointer-events: none;
   animation: ai-brief-copied 1.6s ease forwards;
 }
 @keyframes ai-brief-copied {
@@ -212,29 +210,29 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 }
 
 /* A piece of work's Work card: the Open / Done / All filter beside the List / Board switch. */
-.task-section__actions { display: flex; align-items: center; gap: var(--s-2); }
+.task-section__actions { display: flex; align-items: center; gap: .5rem; }
 
 /* ======================================================================= The side panel */
 
 /* A task (tasks/_panel) or a peek (<type>/_peek) in runeui's side panel (ui :side_panel, in
 /* layouts/shared/_side_panel), which slides it in down the right edge and scrolls it; full width
 /* on a phone. What's here is the content's own layout. */
-.task-panel { display: flex; flex-direction: column; gap: var(--s-4); }
+.task-panel { display: flex; flex-direction: column; gap: 1rem; }
 #runeui-side-panel [data-side-panel-content] { width: min(34rem, 100vw); }
 @media (max-width: 639px) { #runeui-side-panel [data-side-panel-content] { width: 100vw; } }
 
-.task-panel__header { display: flex; align-items: center; gap: var(--s-2); }
-.task-panel__context { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
+.task-panel__header { display: flex; align-items: center; gap: .5rem; }
+.task-panel__context { flex: 1; min-width: 0; overflow: hidden; color: var(--muted-foreground); font-size: var(--ui-text-xs); text-overflow: ellipsis; white-space: nowrap; }
 .task-panel__context a { color: inherit; }
 .task-panel__actions { display: flex; align-items: center; gap: 2px; }
 .task-panel__title-form { gap: 0; }
-.task-panel__title { width: 100%; padding: var(--s-1) var(--s-2); margin-inline: calc(var(--s-2) * -1); border-color: transparent; background: none; box-shadow: none; font-size: var(--text-title); font-weight: var(--weight-strong); }
-.task-panel__title:hover { border-color: var(--line); }
-.task-panel__title:focus { border-color: var(--line-strong); background: var(--panel); }
+.task-panel__title { width: 100%; padding: .25rem .5rem; margin-inline: calc(.5rem * -1); border-color: transparent; background: none; box-shadow: none; font-size: 1.25rem; font-weight: 500; }
+.task-panel__title:hover { border-color: var(--border); }
+.task-panel__title:focus { border-color: var(--input); background: var(--background); }
 .task-panel__details dd { min-width: 0; }
 .task-panel__field { flex-direction: row; gap: 0; }
 .task-panel__field :is(select, .date-picker) { max-width: 16rem; }
-.task-panel__description { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+.task-panel__description { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; }
 .task-panel .record-card { box-shadow: none; }
 
 /* The Tasks table's list context (data-task-list for status changes): no box of its own. */
@@ -252,18 +250,18 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
    being typed: its + sits where a task's status dot does (the same box: the dot, its padding and the
    trigger's), and what's typed starts where titles start, in their weight. No hover or focus
    fill; the + takes the accent while it's being typed in. */
-.task-quick-add__form { flex-direction: row; align-items: center; gap: var(--s-3); padding-block: var(--s-2); }
+.task-quick-add__form { flex-direction: row; align-items: center; gap: .75rem; padding-block: .5rem; }
 .task-quick-add__icon {
   flex: none; box-sizing: content-box; width: calc(.95rem + 3px); height: calc(.95rem + 3px); padding: .35rem;
-  margin-left: calc(-1 * var(--s-1)); color: var(--text-faint);
+  margin-left: calc(-1 * .25rem); color: var(--faint-foreground);
 }
 .task-quick-add__input {
   flex: 1; min-width: 0; height: auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none;
-  color: var(--text); font: inherit; font-weight: var(--weight-strong);
+  color: var(--foreground); font: inherit; font-weight: 500;
 }
-.task-quick-add__input::placeholder { color: var(--text-faint); font-weight: var(--weight); }
+.task-quick-add__input::placeholder { color: var(--faint-foreground); font-weight: 400; }
 .task-quick-add__input:focus, .task-quick-add__input:focus-visible { outline: none; box-shadow: none; }
-.task-quick-add__form:focus-within .task-quick-add__icon { color: var(--accent); }
+.task-quick-add__form:focus-within .task-quick-add__icon { color: var(--primary); }
 .task-quick-add__hint { visibility: hidden; }
 .task-quick-add__form:focus-within .task-quick-add__hint { visibility: visible; }
 
@@ -271,37 +269,37 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
    both; the ↗ after the title sits above it and goes to the task's own page, showing while the row
    is pointed at or focused (always on touch). */
 .task-item__main { position: relative; }
-.task-item__heading { display: flex; align-items: center; gap: var(--s-1); min-width: 0; }
+.task-item__heading { display: flex; align-items: center; gap: .25rem; min-width: 0; }
 .task-item__link { color: inherit; text-decoration: none; }
 .task-item__link::after { content: ""; position: absolute; inset: 0; }
 .task-item__open {
   position: relative; z-index: 1; display: inline-grid; flex: none; place-items: center; padding: 2px;
-  border-radius: var(--radius-control); color: var(--text-faint); opacity: 0; transition: opacity 80ms ease-out;
+  border-radius: var(--ui-radius-md); color: var(--faint-foreground); opacity: 0; transition: opacity 80ms ease-out;
 }
 .task-item__open .icon { width: .9rem; height: .9rem; }
-.task-item__open:hover { background: var(--hover); color: var(--text); }
+.task-item__open:hover { background: var(--ui-ghost-hover); color: var(--foreground); }
 .task-item:hover .task-item__open, .task-item:focus-within .task-item__open, .task-item[data-keyboard-current] .task-item__open { opacity: 1; }
 @media (hover: none) { .task-item__open { opacity: 1; } }
 
 /* A task an agent added (agent_made_tag): the AI icon after its title, the agent named in its
    tooltip, or beside it in the side panel's context line. */
-.agent-made { display: inline-flex; flex: none; align-items: center; gap: var(--s-1); color: var(--accent); vertical-align: -0.15em; }
+.agent-made { display: inline-flex; flex: none; align-items: center; gap: .25rem; color: var(--primary); vertical-align: -0.15em; }
 .agent-made .icon { width: .9rem; height: .9rem; }
-.agent-made--label { margin-inline-start: var(--s-2); color: var(--text-muted); vertical-align: baseline; }
-.agent-made--label .icon { color: var(--accent); }
+.agent-made--label { margin-inline-start: .5rem; color: var(--muted-foreground); vertical-align: baseline; }
+.agent-made--label .icon { color: var(--primary); }
 
 /* Whose agent did it, in AI activity: the person's avatar with the AI mark on its corner. */
 .agent-actor { position: relative; display: inline-flex; }
-.agent-actor__mark { position: absolute; inset-block-end: -3px; inset-inline-end: -5px; width: .75rem; height: .75rem; padding: 1px; border-radius: 50%; background: var(--panel); color: var(--accent); }
+.agent-actor__mark { position: absolute; inset-block-end: -3px; inset-inline-end: -5px; width: .75rem; height: .75rem; padding: 1px; border-radius: 50%; background: var(--background); color: var(--primary); }
 
 /* Intake (intakes/show): where each thing came from, an avatar and a word; None yet, for a task on
    no piece of work, opens it to be filed. */
-.intake-source { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
-.intake-source__word { overflow: hidden; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; }
-.intake__home { display: inline-flex; gap: var(--s-1); min-width: 0; max-width: 100%; white-space: nowrap; }
+.intake-source { display: inline-flex; align-items: center; gap: .5rem; min-width: 0; }
+.intake-source__word { overflow: hidden; color: var(--muted-foreground); text-overflow: ellipsis; white-space: nowrap; }
+.intake__home { display: inline-flex; gap: .25rem; min-width: 0; max-width: 100%; white-space: nowrap; }
 .intake__home .muted { overflow: hidden; text-overflow: ellipsis; }
-.intake__file { flex: none; color: var(--text-faint); }
-.intake__decide { display: inline-flex; align-items: center; gap: var(--s-1); }
+.intake__file { flex: none; color: var(--faint-foreground); }
+.intake__decide { display: inline-flex; align-items: center; gap: .25rem; }
 /* With no row left (the last decided, by stream), the table goes and the empty state shows. */
 .intake:has(.intake-row) .intake__empty, .intake:not(:has(.intake-row)) .list-table { display: none; }
 .task-panel__intake-slot:empty { display: none; }
@@ -311,22 +309,22 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .intake-decline { position: relative; }
 .intake-decline > summary { list-style: none; cursor: pointer; }
 .intake-decline > summary::-webkit-details-marker { display: none; }
-.intake-decline__form { position: absolute; z-index: 20; inset-block-start: 50%; inset-inline-end: calc(100% + var(--s-1)); transform: translateY(-50%); flex-direction: row; align-items: center; gap: var(--s-2); width: 20rem; padding: var(--s-1); border: 1px solid var(--line); border-radius: calc(var(--radius-lg) * var(--radius-scale, 1)); background: var(--panel); box-shadow: var(--shadow-popover); }
+.intake-decline__form { position: absolute; z-index: 20; inset-block-start: 50%; inset-inline-end: calc(100% + .25rem); transform: translateY(-50%); flex-direction: row; align-items: center; gap: .5rem; width: 20rem; padding: .25rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: var(--background); box-shadow: 0 0 0 1px var(--border), var(--ui-shadow-lg); }
 .intake-decline__form input { flex: 1; min-width: 0; }
 
 /* The side panel's Intake bar: Accept and Decline beside "Waiting in Intake". */
-.task-panel__intake { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-3); border-radius: calc(var(--radius-lg) * var(--radius-scale, 1)); background: var(--brand-tint, var(--accent-soft)); }
-.task-panel__intake-text { flex: 1; color: var(--text-muted); font-size: var(--text-meta); }
-.intake__file:hover { color: var(--accent); }
+.task-panel__intake { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .5rem .75rem; border-radius: var(--ui-radius-xl); background: var(--brand-tint); }
+.task-panel__intake-text { flex: 1; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
+.intake__file:hover { color: var(--primary); }
 
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
-.owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--radius-pill, 99rem); background: color-mix(in srgb, var(--attention) 18%, transparent); color: var(--attention); font-size: var(--text-xs); font-weight: var(--weight-strong); }
+.owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--ui-radius-full); background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); font-size: var(--ui-text-xs); font-weight: 500; }
 [data-away-on-due] .owner-picker__away { display: inline-block; }
 
 /* A client, a piece of work or a contact peeked at in the side panel (<type>/_peek): the task
    panel's frame, its title changed in place, then its fields, open tasks and notes. */
-.peek-panel .record-title-form .page-title { font-size: var(--text-title); }
-.peek-panel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: 0; color: var(--text-muted); font-size: var(--text-meta); }
+.peek-panel .record-title-form .page-title { font-size: 1.25rem; }
+.peek-panel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 /* What a peek is and, on the same row, something worth a glance (a client's status). */
 .task-panel__header--meta .task-panel__context { flex: 0 1 auto; }
 .task-panel__meta { display: flex; flex: 1; align-items: center; min-width: 0; }
@@ -334,35 +332,35 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
    focused (the title's own way, .task-panel__title); a hint shows while its field is being
    changed. Rich text keeps its editor, under its label. */
 .peek-panel .record-fields--in-place { gap: 2px; }
-.peek-panel .record-fields--in-place .field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
-.peek-panel .record-fields--in-place .field :is(.field__label, [data-slot="field-label"]) { color: var(--text-muted); font-weight: var(--weight); }
-.peek-panel .record-fields--in-place .field :is(.field__hint, [data-slot="field-description"]) { grid-column: 2; display: none; padding-inline: var(--s-2); }
+.peek-panel .record-fields--in-place .field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: .75rem; min-height: var(--ui-h); }
+.peek-panel .record-fields--in-place .field :is(.field__label, [data-slot="field-label"]) { color: var(--muted-foreground); font-weight: 400; }
+.peek-panel .record-fields--in-place .field :is(.field__hint, [data-slot="field-description"]) { grid-column: 2; display: none; padding-inline: .5rem; }
 .peek-panel .record-fields--in-place .field:focus-within :is(.field__hint, [data-slot="field-description"]) { display: block; }
-.peek-panel .record-fields--in-place .field:has(lexxy-editor) { grid-template-columns: minmax(0, 1fr); row-gap: var(--s-1); padding-block: var(--s-1); }
+.peek-panel .record-fields--in-place .field:has(lexxy-editor) { grid-template-columns: minmax(0, 1fr); row-gap: .25rem; padding-block: .25rem; }
 /* Its controls (an input, a select's or combobox's button, a date) read as their value, with
 /* their chevron or calendar showing once pointed at, focused or open. */
-.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), [data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]) { border-color: transparent; background: none; box-shadow: none; padding-inline: var(--s-2); }
+.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), [data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]) { border-color: transparent; background: none; box-shadow: none; padding-inline: .5rem; }
 .peek-panel .record-fields--in-place .field [data-slot="date-picker-control"] input[data-slot="date-picker-input"] { padding: 0; }
 .peek-panel .record-fields--in-place .field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]) :is(.ui-select-icon, .ui-icon) { opacity: 0; }
-.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), [data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):hover { border-color: var(--line); }
+.peek-panel .record-fields--in-place .field :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), [data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):hover { border-color: var(--border); }
 .peek-panel .record-fields--in-place .field input:not([type="checkbox"], [type="radio"], [type="hidden"]):focus,
-.peek-panel .record-fields--in-place .field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):is(:focus-visible, :focus-within, [aria-expanded="true"]) { border-color: var(--line-strong); background: var(--panel); }
+.peek-panel .record-fields--in-place .field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):is(:focus-visible, :focus-within, [aria-expanded="true"]) { border-color: var(--input); background: var(--background); }
 .peek-panel .record-fields--in-place .field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):is(:hover, :focus-visible, :focus-within, [aria-expanded="true"]) :is(.ui-select-icon, .ui-icon) { opacity: 1; }
-.peek-panel .record-fields--in-place .field input::placeholder { color: var(--text-faint); }
+.peek-panel .record-fields--in-place .field input::placeholder { color: var(--faint-foreground); }
 /* A switch: its label where the others' are, the switch where their values are, its hint dropped. */
-.peek-panel .record-fields--in-place .switch-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
-.peek-panel .record-fields--in-place .switch-field [data-slot="field-label"] { color: var(--text-muted); font-weight: var(--weight); }
+.peek-panel .record-fields--in-place .switch-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: .75rem; min-height: var(--ui-h); }
+.peek-panel .record-fields--in-place .switch-field [data-slot="field-label"] { color: var(--muted-foreground); font-weight: 400; }
 .peek-panel .record-fields--in-place .switch-field [data-slot="field-description"] { display: none; }
-.peek-panel .record-fields--in-place .switch-field ui-switch { justify-self: start; margin-left: var(--s-2); }
-.peek-panel__section { display: flex; flex-direction: column; gap: var(--s-2); }
-.peek-panel__heading { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
+.peek-panel .record-fields--in-place .switch-field ui-switch { justify-self: start; margin-left: .5rem; }
+.peek-panel__section { display: flex; flex-direction: column; gap: .5rem; }
+.peek-panel__heading { margin: 0; color: var(--muted-foreground); font-size: var(--ui-text-xs); font-weight: 500; }
 
 /* Intake > Schedule (intakes/shifts): a line per person, its pickers wrapping beside the avatar. */
-.intake-schedule { display: flex; flex-direction: column; gap: var(--s-4); max-width: 72rem; }
-.intake-schedule__body { display: flex; flex-direction: column; gap: var(--s-3); }
+.intake-schedule { display: flex; flex-direction: column; gap: 1rem; max-width: 72rem; }
+.intake-schedule__body { display: flex; flex-direction: column; gap: .75rem; }
 .intake-schedule__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .intake-schedule__list:empty { display: none; }
-.intake-schedule__add { flex-direction: row; align-items: center; gap: var(--s-2); max-width: 32rem; }
+.intake-schedule__add { flex-direction: row; align-items: center; gap: .5rem; max-width: 32rem; }
 .intake-shift { align-items: flex-end; }
-.intake-shift__form { flex: 1; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: var(--s-3); min-width: 0; }
-.intake-shift__field { display: flex; flex-direction: column; gap: var(--s-1); width: auto; min-width: 7rem; }
+.intake-shift__form { flex: 1; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: .75rem; min-width: 0; }
+.intake-shift__field { display: flex; flex-direction: column; gap: .25rem; width: auto; min-width: 7rem; }

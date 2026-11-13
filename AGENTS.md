@@ -11,9 +11,10 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 - Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
   gems); the core itself makes none
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
-  `app/assets/stylesheets` served by Propshaft, no build step. Components are rune_ui (a gem
-  shared with Botter, `../rune_ui`) plus Runwell's own pieces in `app/assets/stylesheets/runwell`
-  (Frontend, below); behaviour (keys, boards, popups, pagination) is modelled on Fizzy (`../fizzy`)
+  `app/assets/stylesheets` served by Propshaft, no build step. Components are runeui (`../runeui`:
+  shadcn/ui's look and tokens on UI SDK's web components, `ui :name`) plus Runwell's own pieces in
+  `app/assets/stylesheets/runwell` (Frontend, below); Runwell's keyboard system, pagination and
+  drag-and-drop lists are its own, first modelled on Fizzy (`../fizzy`)
 - Search: ActiveSearch (`rails-active_search`) over SQLite FTS5, one polymorphic
   `:searchable` index (`config/search.rb`, `SearchableDocument`)
 - ReActionView (https://reactionview.dev) compiles every `.html.erb` through
@@ -185,7 +186,7 @@ event); every event has a source.
   its buttons `ui :button` across it, `auth__button`) and also says `content_for :showcase, "team"`
   (or `"client"`): the public layout then splits, the form on the left with no card and, on a wide
   screen, `layouts/shared/_showcase` on the right (a panel mixed from the scheme's colour,
-  `--color-link`, with frosted cards of made-up examples in the install's terms, runeui's cards,
+  `--primary`, with frosted cards of made-up examples in the install's terms, runeui's cards,
   badges and avatars, and the theme toggle in its cut-out corner). Other public pages (consents,
   plugins' signing pages) keep the centred card
 - Multi-line text is rich text: Lexxy (`<lexxy-editor>`, Fizzy's editor)
@@ -567,47 +568,54 @@ is in the address). `any: false` because Runwell's lists name their own "all" ch
 options. `layouts/shared/quick_filter` is the same thing under the name plugins render. Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
-Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter
-(`Martin-Business-Consultants/rune_ui` on GitHub, locked by revision; to work on it beside the
-core, `bundle config local.rune_ui ../rune_ui`; its README lists every helper and class). A fix to
-a component goes in the gem, so both apps get it. Runwell's own CSS is in `app/assets/stylesheets`, after rune's (which is all in
-the `rune` layer, so Runwell's unlayered rules win), listed in order in `RUNWELL_STYLESHEETS`:
-the theming contract (`_global`, `appearance`, `font-face`), `rune-theme` (points rune's tokens
-at the palette), `runwell` (the shell: sidebar, page filter, settings layout, sign-in and portal
-layouts), `runwell/components` (what every area shares: popups, the index toolbar and filters,
-lists, the bulk bar, index cards, hint mode, form widgets) and one file per area
-(`runwell/home`, `tasks`, `records`, `settings`, `public`). The styleguide is at `/ui` in
-development. Build new markup with it:
+Styling: components come from **runeui** (`../runeui`, a gem path for now; its README lists every
+component and AGENTS.md how one is built; its gallery is `/runeui` in development). A missing or
+wrong component is fixed in runeui (and its `script/test` run), never worked around here. runeui is
+linked as any app links it (`runeui_tags` in `app_stylesheet_tags`, `AppearanceHelper`): its
+tokens on `:root`, its page base, every component's sheet, Lexxy with runeui's skin, its theme
+script (light and dark), its toaster and confirm. Runwell's own CSS is in `app/assets/stylesheets`,
+in order: `appearance` first (its `@layer` statement is the page's order; Runwell's theme, below),
+`runwell/compat` (the compatibility layer, for plugins until 7.0: Plugins), runeui's sheets, then,
+unlayered so they win, `RUNWELL_STYLESHEETS`: `font-face` (Inter, bundled), `runwell` (the shell:
+the nav's brand and foot, the page filter, settings layout, sign-in and portal layouts),
+`runwell/components` (what every area shares: the index toolbar, what Runwell puts in runeui's
+tables and bulk bar, hint mode, form widgets) and one file per area (`runwell/home`, `tasks`,
+`records`, `settings`, `public`); plugins' sheets come after. Build new markup with it:
 
-- The brand's colour (`--accent`, Settings > Appearance) marks what's chosen, current or under the
-  keys: `--brand-tint` / `--brand-tint-strong` (mixed from `--accent`, so they follow any scheme,
-  light or dark) behind it and `--accent` on its icon (menus, comboboxes, the selected row, the
-  current nav entry, search results), plus checkboxes and selected text. New highlight states use
-  them rather than a grey layer
-- Tokens are rune's: `--page`, `--panel`, `--layer-1..3`, `--text`, `--text-muted`,
-  `--text-faint`, `--line`, `--line-strong`, `--hover`, `--accent`, `--accent-soft`, `--ok`,
-  `--danger`, `--attention`; space `--s-1..6`; `--radius-*`; `--control-h`, `--control-h-sm`,
-  `--row-h`; type `--text-xs`, `--text-meta`, `--text-ui` (the body, 13px), `--text-read`,
-  `--text-title`, `--weight`, `--weight-strong`. `rune-theme.css` builds them from the theming
-  tokens (`docs/theming.md`), so Appearance and custom CSS reach them. New CSS reads these, never
-  `--color-*` or `--lch-*` directly (unless it needs a palette colour rune has no token for)
-- Helpers spell the components (markup built in Ruby, so Herb can't mangle it): `button_link`,
-  `action_button`, `submit_button`, `icon_button`, `button_classes` (for `link_to`, `button_to`,
-  `form.button`; variants `:primary`, `:secondary`, `:ghost`, `:danger`, size `:sm`), `badge`
-  (`ui_status_badge` / `status_tag` for a Runwell status, toned by `STATUS_TONES`), `card`,
-  `list_row`, `field`, `empty_state`, `menu` / `popover_menu` with `menu_link`, `menu_button`,
-  `menu_label`, `menu_divider`, `dialog` / `sheet` / `confirm_dialog`, `tabs`, `callout`,
-  `avatar` / `avatar_stack`, `settings_group` / `setting_row`, `switch`, `segmented`,
-  `copy_button`, `progress_bar`. `icon_tag name` draws one of the icons
-  `config/initializers/rune_ui.rb` registers (rune-style inline SVG); an unknown name draws a dot
-- Classes where markup is written by hand: `btn btn--*`, `icon-button`, `pill` (a filter or
-  picker's trigger), `card` (`__head`, `__title`, `__hint`, `__action`, `__content`, `__footer`;
-  `--flush`, `--sm`), `list-row` (`__media`, `__content`, `__title`, `__desc`, `__actions`),
-  `field` / `field__label` / `field__hint` / `field-row`, `badge`, `count`, `tabs` / `tabs__tab`
-  (`--pills`, `--icons`), `alert`, `table` in a `table-wrap`, `dl.details`, `empty`, `stack`,
-  `grid-2`, `button-row`, `separator`, `<kbd>`, `muted`, `faint`, `small`, `visually-hidden`.
-  Bare inputs, selects and textareas need no class; every `<form>` is a flex column with a gap
-  (`form.button_to` is inline), so an inline form gets its own layout class
+- Tokens are runeui's, which are shadcn's by name and meaning (`docs/theming.md`):
+  `--background`, `--foreground`, `--card`, `--popover`, `--primary` (the brand's colour, Settings >
+  Appearance) and `--primary-foreground`, `--secondary`, `--muted` and `--muted-foreground`,
+  `--accent` (shadcn's quiet hover fill, not the brand), `--destructive`, `--border`, `--input`,
+  `--ring` (a colour), `--sidebar*`; runeui's `--success`, `--warning`, `--info` and its scale
+  (`--ui-radius-sm…xl`, `--ui-radius-full`, `--ui-h-sm`, `--ui-h`, `--ui-text-xs`, `--ui-text-sm`
+  (the body, 14px), `--ui-shadow-*`, `--ui-focus-ring` (the focus shadow), `--ui-ghost-hover`,
+  `--ui-duration`, `--ui-ease`); and Runwell's few additions, derived from those
+  (`appearance.css`): `--faint-foreground` (a third step of text), `--brand-tint` and
+  `--brand-tint-strong`. Spacing and weights are plain values (`.5rem`, `500`). New CSS reads only
+  these, never the compatibility layer's names (`--panel`, `--text`, `--line`, `--s-*`…), which
+  are for plugins and go in 7.0
+- The brand's colour (`--primary`) marks what's chosen, current or under the keys:
+  `--brand-tint` / `--brand-tint-strong` behind it and `--primary` on its icon (menus, the selected
+  row, the current nav entry, search results), plus checkboxes and selected text. New highlight
+  states use them rather than a grey layer. Mix in OKLab (`color-mix(in oklab, …)`), never OKLCH
+- Light and dark: runeui's `.dark` on `<html>` (and `data-theme`), set before the first paint by
+  runeui's theme script from the person's choice (localStorage `runeui-theme`) or the install's
+  default (`data-default-theme`). A rule for dark is `.dark …`; a colour that differs reads
+  `light-dark()` or a token. A switch is `data-runeui-theme="toggle"` (a button or a menu item)
+- Helpers: runeui's `ui :name` for every component (`ui :button`, `ui :badge`, `ui :card`,
+  `ui :menu`, `ui :dialog`, `form.ui :field`…), and Runwell's own on top of them
+  (`record_header`, `record_card`, `portal_card`, `auth_card`, `delete_button`, `confirm_button`,
+  `ui_status_badge` / `status_tag` for a Runwell status, toned by `STATUS_TONES`, `person_tag`,
+  `select_control`, `date_input`, `switch_field`, `rich_text_field`…). `icon_tag name` draws one of
+  Runwell's icons (`Runwell::Icons`, 16px inline SVG); an unknown name draws a dot. The
+  compatibility layer's helpers (`button_link`, `card`, `list_row`, `field`, `menu`, `tabs`…,
+  `RuneCompatHelper`) and classes (`btn`, `card`, `list-row`, `field`, `table`…,
+  `runwell/compat.css`) are for plugins until 7.0: the core uses only `avatar` / `avatar_stack`
+  and a few utilities (`muted`, `button-row`, `stack`, `visually-hidden`, `hide-on-touch`), and new
+  markup uses runeui. Its styleguide is `/ui` in development
+- Bare inputs, selects and textareas outside runeui's controls take the compatibility layer's
+  look; every `<form>` is a flex column with a gap (`form.button_to` is inline), so an inline form
+  gets its own layout class
 - Menus and pickers are runeui's (`ui :menu`, `ui :combobox`, `ui :popover`, `ui :select`). Fizzy's
   popup (`<dialog class="popup">`, `popup_menu`, the `dialog` controller) is left for plugins, and
   the `dialog` controller for the notifications tray and the modals
@@ -853,6 +861,14 @@ plugins that are on, and a plugin's controllers and subscribers check
 `secret_field`. A plugin with several pages lists them in a sidebar beside the page, as Settings
 does: `section_nav "Name" do … end` with `section_nav_heading` and `section_nav_link`
 (`SectionNavHelper`, placed by the application layout), never a row of buttons.
+
+A plugin's interface is runeui's (`ui :name`, the tokens in `docs/theming.md`), as the core's is.
+Plugins written before 6.0 keep working through the compatibility layer until 7.0: rune_ui's
+helpers drawn by runeui (`RuneCompatHelper`), its classes and old token names defined from
+runeui's (`runwell/compat.css`), and, in a plugin's stylesheet, `var(--accent)` and `var(--ring)`
+read as `--primary` and `--ui-focus-ring` (`lib/rails_ext/propshaft_plugin_stylesheets.rb`:
+those two names mean what shadcn means now). `docs/plugin-contract.md` lists it all and the
+mapping.
 
 Register in the engine's `config.to_prepare`; add routes to the app's route set from an
 initializer (`app.routes.append { scope "time", module: "time_tracking", as: "time_tracking" … }`)
@@ -1326,30 +1342,41 @@ task onto the page (`turbo_stream.refresh`).
 
 Settings > Appearance sets the install's default theme (system, light, dark), color
 scheme, corners and font, plus a logo and favicon (Active Storage on `Setting`). Each
-layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font` and
-`data-default-theme` (`appearance_data`); `appearance.css` turns them into the palette tokens (which `rune-theme.css` hands to rune_ui),
-and the page previews a change instantly (`appearance` controller) before saving. Each choice is
-a runeui radio group drawn as picture cards (`settings/appearances/_choices`, also Your account's
-text size): arrows move between them, and a change previews and saves.
-A person's sun/moon choice (localStorage) beats the install's default theme.
+layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font`, `data-text-size` and
+`data-default-theme` (`appearance_data`). `appearance.css` is Runwell's theme: runeui's tokens
+(shadcn's) as those attributes set them, in the `runwell.theme` cascade layer over runeui's
+defaults: a scheme sets `--primary`, `--primary-foreground` and `--ring` (light, and under `.dark`),
+Neutral (`fizzy`) is runeui's own; corners set `--radius` (Sharp `0.25rem`, Soft `0.625rem`, Round
+`1rem`), from which runeui derives every corner; a font sets `--font-sans`; text size the root's
+font size. The page previews a change instantly (`appearance` controller) before saving. Each
+choice is a runeui radio group drawn as picture cards (`settings/appearances/_choices`, also Your
+account's text size): arrows move between them, and a change previews and saves.
+Light and dark are runeui's: its theme script (in `runeui_tags`) puts `.dark` and `data-theme` on
+`<html>` before the first paint, from the person's sun/moon choice (localStorage `runeui-theme`,
+set by `data-runeui-theme="toggle"` buttons and menu items) or else the install's default
+(`data-default-theme`); a choice kept before 6.0 (`theme`) is carried over once
+(`layouts/_theme_preference`). Picking the default in Appearance forgets your own choice
+(`refreshTheme()`).
 Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
-the root font size (16px times `--text-scale`, `rune-theme.css`; rune_ui's text steps, the body 13px); a person's own choice in
+the root font size (87.5% to 125%; runeui's text steps, the body 14px); a person's own choice in
 Settings > Your account (`User#text_size`, blank follows the install) beats it. Every font size in
 the stylesheets is rem or em so it all scales; tables size their columns from what they hold, so
 they follow.
 
-Every border radius in the stylesheets goes through two variables so Corners reaches the
-whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill shapes are
-`var(--radius-pill, 99rem)`, true circles stay `50%`, and every control (buttons, inputs,
-selects, toggles, tags) uses `var(--radius-control)` so they always match. A textarea is a box, not a control: it takes
-`var(--radius-lg)`, since round corners make the control radius a pill (rune_ui's forms
-stylesheet). The Lexxy editor keeps Lexxy's own corners (`--lexxy-radius`), never the app's. Write new CSS
-the same way.
-Schemes and fonts override the palette's unlayered tokens, so they are unlayered too.
-Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: values for the design tokens
-in `docs/theming.md`, the contract (tokens stable across releases, class names not). It is served
-from `/theme/:digest` (`ThemesController`, never a `<style>`), linked last and unlayered on staff
-pages, and on the portal only with `custom_css_everywhere`; `?theme=off` skips it.
+Every corner in the stylesheets comes from `--radius` so Corners and a theme reach the whole UI:
+runeui's steps (`--ui-radius-sm` for rows and items, `-md` for controls and menus, `-lg`, `-xl` for
+cards and dialogs, `--ui-radius-full` for pills; a size that isn't a step is
+`calc(var(--radius) * n)`), and true circles stay `50%`. The Lexxy editor takes runeui's field
+look (`runeui/lexxy`). Write new CSS the same way.
+The email's colour (`Setting#brand_color`) is each scheme's light primary in hex
+(`SCHEME_COLORS`), since email knows neither oklch nor CSS variables, and the installed app's
+(the manifest's `theme_color`) is the same.
+Custom CSS (Settings > Appearance, `Setting::CustomCss`) is a theme: a shadcn theme (`:root { … }`
+and `.dark { … }` blocks of the tokens in `docs/theming.md`, as tweakcn writes them), the contract
+(tokens stable across releases, class names not). It is served from `/theme/:digest`
+(`ThemesController`, never a `<style>`), linked last and unlayered, so it wins over Appearance's
+layered choices, on staff pages, and on the portal only with `custom_css_everywhere`; `?theme=off`
+skips it.
 No `@import`, no `url()` but `data:`. `ThemeBrief` (Copy brief for AI, the `theme_brief` tool) is
 that guide with the install's current choices, for an AI to write one; `update_appearance` takes
 `custom_css`. A new token worth theming goes in the guide's tables.

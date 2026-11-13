@@ -1,79 +1,59 @@
-/* The compatibility layer's stylesheet (docs/runeui-migration.md, phase 1): what the rune_ui gem's
- * sheets styled, carried into Runwell when the gem came out of the Gemfile, so the class names the
- * core's views, Runwell's own CSS and the plugins still write keep their look: the tokens
- * (--page, --panel, --text, --line, --accent, --s-1..6, --radius-*, --control-h…), the bare
- * elements (the page, headings, links, inputs, selects, textareas, tables, forms as flex
- * columns), the classes (btn, icon-button, pill, card, list-row, field, badge, count, tabs,
- * alert, table, dl.details, empty, stack, grid-2, button-row, separator, kbd, muted, faint,
- * small, visually-hidden, the settings rows, switches, menus, popovers, dialogs, sheets, toasts)
- * and what's left of the shell (a page's column, the portal's brand and crumbs).
+/* The compatibility layer's stylesheet (docs/runeui-migration.md; docs/plugin-contract.md): what
+ * the rune_ui gem's sheets styled, kept for plugins until 7.0, so the names they write keep
+ * working: the old token names (defined from runeui's, below), the bare elements (the page,
+ * headings, links, inputs, selects, textareas, tables, forms as flex columns), the classes (btn,
+ * icon-button, pill, card, list-row, field, badge, count, tabs, alert, table, dl.details, empty,
+ * stack, grid-2, button-row, separator, kbd, muted, faint, small, visually-hidden, the settings
+ * rows, switches, menus, popovers, dialogs, sheets) and rune's breadcrumb.
  *
- * It is rune_ui's CSS as it was (revision c909a1a), in one cascade layer (`runeui.rune`, below), so
- * Runwell's own unlayered sheets still win over it, and linked first (rune_ui_stylesheet_tags,
- * before runeui's sheets) so the layer order below, the first the page meets, is the one that
- * holds. rune-theme.css points the colour tokens at Runwell's palette.
- *
- * It goes with the layer: each area's classes as its phase moves the markup to runeui's
- * components, the tokens in the flip (phase 9), the rest when the plugins have moved (phase 10).
- * At the end of the file, unlayered: what dresses a runeui component a compat helper now draws
- * (RuneCompatHelper) so it sits right among the classes above. */
+ * rune_ui's CSS as it was (revision c909a1a), in one cascade layer (`runeui.rune`), so Runwell's
+ * own unlayered sheets win over it. At the end of the file, unlayered: what dresses a runeui
+ * component a compat helper draws (RuneCompatHelper) so it sits right among the classes above.
+ * The core's own views use only a few of these (utilities: muted, button-row, stack,
+ * visually-hidden); it all goes when the plugins have moved to runeui (phase 10, then 7.0). */
 
 /* rune's layers sit between runeui's base and its components, which only a layer inside
    `runeui` can do (layers nest: a sibling of `runeui` is over or under all of it). So the old
-   `rune` layer is `runeui.rune` here. Over runeui's base, which resets every button and field
-   inside a runeui part (font, colour, border colour): what a compat helper's block holds is rune
-   markup (btn, icon-button, bare inputs), and it keeps its look inside a runeui card or dialog.
-   Under runeui's components, so a runeui control (a native input or button with a ui- class)
-   still beats the bare-element rules here. Runwell's own sheets are unlayered, over both. */
-@layer ui-sdk, runeui.tokens, runeui.base, runeui.rune, runeui.components, runeui.utilities, runeui-bridge;
+   `rune` layer is `runeui.rune` here (the order is appearance.css's, linked first). Over
+   runeui's base, which resets every button and field inside a runeui part (font, colour, border
+   colour): what a compat helper's block holds is rune markup (btn, icon-button, bare inputs), and
+   it keeps its look inside a runeui card or dialog. Under runeui's components, so a runeui
+   control (a native input or button with a ui- class) still beats the bare-element rules here. */
+@layer ui-sdk, runeui.tokens, runeui.base, runeui.rune, runeui.components, runeui.utilities, runwell.theme;
 
-/* ---- rune_ui/tokens.css ---- */
-/* rune_ui: plain CSS, light and dark.
- *
- * Every rule is in a layer of `rune`, declared here in order, so an app's own (unlayered) CSS
- * always wins, whatever its specificity. To restyle, set tokens on :root (an app can point the
- * colours at its own palette, as Runwell does with its OKLCH theme tokens).
- *
- * Sizes are rem, so the root's size (calc(1rem * --text-scale)) scales the whole UI. Corners go
- * through --radius-scale; controls share --radius-control; pills are --radius-pill (round at any
- * scale, square when the scale is 0, like every other corner). Multi-line fields
- * (textarea, the Lexxy editor) are boxes: --radius-lg, never the control radius.
- *
- * Rules the sheets keep:
- * - Containers space their children with gap, never sibling margins (`> * + *`): ERB
- *   tooling can wrap output in <span style="display: contents">, which gap sees through.
- * - Two control heights: --control-h (page and form actions, inputs) and --control-h-sm
- *   (inside cards, rows and bars; icon buttons).
- * - No coloured edge stripes: states show as tints, weight, dots and badges. */
+/* ---- The old token names, from runeui's ---- */
+/* rune_ui's names (--page, --panel, --text, --line, --s-1…) and the few of Fizzy's that plugins
+   still read (--color-link, --inline-space…), each defined from runeui's tokens (shadcn's,
+   runeui/tokens.css, as Settings > Appearance and a custom theme set them: appearance.css), so
+   they follow every scheme, corner, font and custom theme. For plugins and this layer's own
+   classes until 7.0; Runwell's own sheets read runeui's names.
+   Two names are runeui's now and mean what shadcn means: --accent (the quiet hover fill; the
+   brand's colour is --primary) and --ring (a colour; the focus shadow is --ui-focus-ring). A
+   plugin stylesheet's var(--accent) and var(--ring) are read as --primary and --ui-focus-ring
+   until 7.0 (lib/rails_ext/propshaft_plugin_stylesheets.rb rewrites them as it serves the sheet). */
 
 @layer runeui.rune.tokens, runeui.rune.base, runeui.rune.components, runeui.rune.utilities;
 
 @layer runeui.rune.tokens {
   :root {
-    /* Each colour is light-dark(light, dark): the device's setting picks one, and data-theme
-       on <html> (theme_data) overrides it through color-scheme. */
-    color-scheme: light dark;
-
-    --page: light-dark(#ededed, #0a0a0a);
-    --panel: light-dark(#ffffff, #161616);
-    --layer-1: light-dark(#f7f7f7, #1b1b1b);
-    --layer-2: light-dark(#f0f0f0, #232323);
-    --layer-3: light-dark(#e6e6e6, #2d2d2d);
-    --text: light-dark(#161616, #ededed);
-    --text-muted: light-dark(#646464, #a0a0a0);
-    --text-faint: light-dark(#8f8f8f, #6e6e6e);
-    --line: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .08));
-    --line-strong: light-dark(rgb(0 0 0 / .15), rgb(255 255 255 / .15));
-    --hover: light-dark(rgb(0 0 0 / .045), rgb(255 255 255 / .05));
-    --accent: light-dark(#3b6cf6, #5b84ff);
-    --accent-hover: light-dark(#2f5de0, #7a9bff);
-    --accent-ink: light-dark(#ffffff, #0a0f1f);
-    --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--panel));
-    --attention: light-dark(#c98d0a, #f2c14e);
-    --danger: light-dark(#d23f3f, #f06a6a);
-    --ok: light-dark(#1f8a57, #4cc38a);
-    --shadow-popover: light-dark(0 10px 30px rgb(0 0 0 / .14), 0 12px 32px rgb(0 0 0 / .6)), 0 0 0 1px var(--line);
-    --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+    --page: var(--sidebar);
+    --panel: var(--background);
+    --layer-1: color-mix(in oklab, var(--muted) 50%, var(--background));
+    --layer-2: var(--muted);
+    --layer-3: light-dark(color-mix(in oklab, var(--foreground) 6%, var(--muted)), color-mix(in oklab, var(--foreground) 14%, var(--muted)));
+    --text: var(--foreground);
+    --text-muted: var(--muted-foreground);
+    --text-faint: var(--faint-foreground);
+    --line: var(--border);
+    --line-strong: var(--input);
+    --hover: light-dark(color-mix(in oklab, var(--foreground) 4%, transparent), color-mix(in oklab, var(--foreground) 8%, transparent));
+    --accent-hover: color-mix(in oklab, var(--primary) 90%, var(--background));
+    --accent-ink: var(--primary-foreground);
+    --accent-soft: var(--brand-tint);
+    --attention: var(--warning);
+    --danger: var(--destructive);
+    --ok: var(--success);
+    --shadow-popover: 0 0 0 1px var(--border), var(--ui-shadow-lg);
 
     --s-1: .25rem;
     --s-2: .5rem;
@@ -82,58 +62,90 @@
     --s-5: 1.5rem;
     --s-6: 2rem;
 
+    /* Corners from --radius, as runeui's: --radius itself is runeui's. --radius-scale is the
+       corners' setting as a number (Sharp, Soft, Round), for plugins that multiply by it. */
     --radius-scale: 1;
-    --radius-xs: calc(4px * var(--radius-scale));
-    --radius-sm: calc(6px * var(--radius-scale));
-    --radius: calc(8px * var(--radius-scale));
-    --radius-lg: calc(10px * var(--radius-scale));
-    --radius-panel: calc(12px * var(--radius-scale));
-    --radius-control: var(--radius-sm);
-    --radius-pill: calc(999px * var(--radius-scale)); /* round at any scale, square at 0 */
+    --radius-xs: max(0px, calc(var(--radius) - 6px));
+    --radius-sm: var(--ui-radius-sm);
+    --radius-md: var(--ui-radius-md);
+    --radius-lg: var(--ui-radius-xl);
+    --radius-panel: var(--ui-radius-xl);
+    --radius-control: var(--ui-radius-md);
+    --radius-pill: var(--ui-radius-full);
     --ease: cubic-bezier(.2, .8, .2, 1);
-    /* Motion: everything that appears comes in the same way. Small things (menus) quickly, larger
-       ones (dialogs, panels, the tray, search) a little slower, toasts the slowest; anything
-       leaving goes quicker than it came. Reduced motion makes them all instant. */
     --motion-fast: 120ms;
     --motion: 200ms;
     --motion-slow: 320ms;
     --motion-out: 140ms;
     --ease-in: cubic-bezier(.4, 0, 1, 1);
 
-    --control-h: 2rem;
-    --control-h-sm: 1.75rem;
+    --control-h: var(--ui-h);
+    --control-h-sm: var(--ui-h-sm);
     --row-h: 2.5rem;
     --icon-size: 1rem;
-    --main-width: 1080px;
-    --breakpoint-narrow: 860px; /* for reference: media queries can't read it */
+    --main-width: 1400px;
 
-    --font-sans: "Inter", "InterVariable", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-    --text-scale: 1;
-    --text-xs: .6875rem;   /* 11px: badges, counts */
-    --text-meta: .75rem;  /* 12px: hints, meta */
-    --text-ui: .8125rem;   /* 13px: the UI */
-    --text-read: .875rem;  /* 14px: reading (chat, prose) */
-    --text-title: 1.25rem; /* 20px: h1 */
+    --text-xs: var(--ui-text-xs);
+    --text-meta: var(--ui-text-xs);
+    --text-ui: var(--ui-text-sm);
+    --text-read: var(--ui-text-sm);
+    --text-title: 1.25rem;
     --leading: 1.25rem;
     --leading-tight: 1rem;
-    --weight: 440;
-    --weight-strong: 530;
+    --weight: 400;
+    --weight-strong: 500;
+
+    /* Fizzy's, as plugins written before 4.0 read them. */
+    --color-ink: var(--foreground);
+    --color-ink-dark: var(--muted-foreground);
+    --color-ink-medium: var(--faint-foreground);
+    --color-ink-light: var(--input);
+    --color-ink-lighter: var(--border);
+    --color-ink-lightest: var(--muted);
+    --color-ink-inverted: var(--primary-foreground);
+    --color-canvas: var(--background);
+    --color-link: var(--primary);
+    --color-positive: var(--success);
+    --color-negative: var(--destructive);
+    --color-selected: var(--brand-tint-strong);
+    --color-selected-light: var(--brand-tint);
+    --color-hover: var(--hover);
+    --focus-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    --inline-space: 1ch;
+    --inline-space-half: calc(var(--inline-space) / 2);
+    --inline-space-double: calc(var(--inline-space) * 2);
+    --block-space: 1rem;
+    --block-space-half: calc(var(--block-space) / 2);
+    --block-space-double: calc(var(--block-space) * 2);
+    --text-xx-small: 0.75rem;
+    --text-x-small: 0.75rem;
+    --text-small: 0.875rem;
+    --text-normal: 0.875rem;
+    --text-medium: 1rem;
+    --text-large: 1.25rem;
+    --text-x-large: 1.5rem;
+    --text-xx-large: 1.875rem;
+
+    @media (max-width: 639px) {
+      --text-xx-small: 0.8125rem;
+      --text-x-small: 0.8125rem;
+      --text-small: 0.9375rem;
+      --text-normal: 0.9375rem;
+      --text-medium: 1.0625rem;
+    }
   }
+
+  :root[data-radius="sharp"] { --radius-scale: .4; --radius-pill: .4em; }
+  :root[data-radius="round"] { --radius-scale: 1.6; }
 
   @media (prefers-reduced-motion: reduce) {
     :root { --motion-fast: 1ms; --motion: 1ms; --motion-slow: 1ms; --motion-out: 1ms; }
   }
-
-  :root[data-theme="light"] { color-scheme: light; }
-  :root[data-theme="dark"] { color-scheme: dark; }
 }
 
 /* ---- rune_ui/base.css ---- */
 @layer runeui.rune.base {
   * { box-sizing: border-box; }
-  /* 16px, the browser's own, times --text-scale: every size in rune_ui is rem from here. */
-  html { font-size: calc(1rem * var(--text-scale, 1)); }
   body {
     margin: 0; background: var(--page); color: var(--text);
     font-family: var(--font-sans); font-size: var(--text-ui); line-height: var(--leading); font-weight: var(--weight); letter-spacing: -.005em;
@@ -144,7 +156,7 @@
   h2 { font-size: var(--text-read); line-height: var(--leading); font-weight: var(--weight-strong); }
   h3 { font-size: var(--text-ui); font-weight: var(--weight-strong); }
   strong, b { font-weight: var(--weight-strong); }
-  a { color: var(--accent); text-underline-offset: 2px; }
+  a { color: var(--primary); text-underline-offset: 2px; }
   a:hover { color: var(--accent-hover); }
   ul, ol { padding-left: 1.4em; }
   code, pre, kbd, samp { font-family: var(--font-mono); font-size: var(--text-meta); line-height: 1.125rem; }
@@ -154,10 +166,11 @@
   img, svg, video { max-width: 100%; }
   summary { cursor: pointer; list-style: none; }
   summary::-webkit-details-marker { display: none; }
-  :focus-visible { outline: none; box-shadow: var(--ring); }
+  /* runeui's own parts draw their own focus (runeui/base.css): this is everything else's. */
+  :focus-visible:where(:not([data-slot], [class^="ui-"], [class*=" ui-"])) { outline: none; box-shadow: var(--ui-focus-ring); }
   [hidden] { display: none !important; }
   turbo-cable-stream-source, turbo-stream-source { display: none; }
-  ::selection { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+  ::selection { background: color-mix(in srgb, var(--primary) 24%, transparent); }
 
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulse { 50% { opacity: .3; } }
@@ -169,24 +182,12 @@
 }
 
 /* ---- rune_ui/shell.css ---- */
-/* What's left of rune's shell: the breadcrumb plugins draw by hand (.crumbs), and the page's
-   column (.main: the sign-in pages, the portal and the staff page's box), kept in this layer so
-   runeui's app-content wins where the two differ. The column goes with the flip (phase 9). */
+/* What's left of rune's shell: the breadcrumb plugins draw by hand (.crumbs, the crumbs helper). */
 
 @layer runeui.rune.components {
   .crumbs { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-weight: var(--weight-strong); }
   .crumbs a { color: var(--text-muted); text-decoration: none; font-weight: var(--weight); white-space: nowrap; }
   .crumbs a:hover { color: var(--text); }
-  .crumbs__sep { color: var(--text-faint); }
-  .crumbs__current { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .main { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--s-2) var(--s-6) calc(var(--s-6) * 2); max-width: var(--main-width); width: 100%; margin: 0 auto; }
-  .main--narrow { max-width: 25rem; margin: 12vh auto 0; padding: var(--s-4); }
-
-  @media (max-width: 860px) {
-    .main { padding: var(--s-4) var(--s-4) var(--s-6); }
-  }
-
 }
 
 /* ---- rune_ui/layout.css ---- */
@@ -241,7 +242,7 @@
 
   .status { flex: 0 0 auto; display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; }
   .status--attention { background: var(--attention); }
-  .status--unread, .status--accent { background: var(--accent); }
+  .status--unread, .status--accent { background: var(--primary); }
   .status--failed, .status--danger { background: var(--danger); }
   .status--ok { background: var(--ok); }
   .status--neutral { background: var(--text-faint); }
@@ -252,7 +253,7 @@
   .badge--ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
   .badge--danger { background: color-mix(in srgb, var(--danger) 13%, transparent); color: var(--danger); }
   .badge--attention { background: color-mix(in srgb, var(--attention) 16%, transparent); color: var(--attention); }
-  .badge--accent, .badge--busy { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); }
+  .badge--accent, .badge--busy { background: color-mix(in srgb, var(--primary) 13%, transparent); color: var(--primary); }
   .badge--busy::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
   .badge--outline { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
 
@@ -281,9 +282,9 @@
   }
   .btn .icon { width: .875rem; height: .875rem; }
   .btn--sm { height: var(--control-h-sm); padding: 0 .625rem; font-size: var(--text-meta); }
-  .btn--primary { background: var(--text); color: var(--panel); }
-  .btn--primary:hover { color: var(--panel); opacity: .86; }
-  .btn--accent { background: var(--accent); color: var(--accent-ink); }
+  .btn--primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn--primary:hover { color: var(--primary-foreground); opacity: .86; }
+  .btn--accent { background: var(--primary); color: var(--accent-ink); }
   .btn--accent:hover { background: var(--accent-hover); color: var(--accent-ink); }
   .btn--secondary { background: var(--panel); border-color: var(--line-strong); color: var(--text); }
   .btn--secondary:hover { background: var(--layer-1); color: var(--text); }
@@ -305,25 +306,10 @@
   .icon-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: var(--control-h-sm); height: var(--control-h-sm); padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); text-decoration: none; cursor: pointer; }
   .icon-button:hover, .icon-button[aria-pressed="true"] { background: var(--hover); color: var(--text); }
   .icon-button.is-done { color: var(--ok); }
-  .icon-button--danger { color: var(--danger); }
-  .icon-button--danger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
-
-
 
   .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 
   .menu { position: relative; display: inline-flex; }
-  .menu__items { position: absolute; top: calc(100% + 4px); right: 0; z-index: 15; display: flex; flex-direction: column; min-width: 12.5rem; max-height: min(24rem, 70vh); overflow-y: auto; padding: 4px; background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow-popover); }
-  .menu__items form { width: 100%; }
-  .menu__item { display: flex; align-items: center; gap: var(--s-2); width: 100%; min-height: var(--control-h); padding: 0 var(--s-3); border: 0; border-radius: calc(5px * var(--radius-scale)); background: none; color: var(--text); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
-  .menu__item:hover, .menu__item:focus-visible { background: var(--layer-2); color: var(--text); box-shadow: none; }
-  .menu__item .icon { color: var(--text-faint); }
-  .menu__item[aria-checked="true"] { font-weight: var(--weight-strong); }
-  .menu__item[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--text-muted); }
-  .menu__item kbd { margin-left: auto; }
-  .menu__label { padding: var(--s-2) var(--s-3) var(--s-1); color: var(--text-faint); font-size: var(--text-meta); }
-  .menu__divider { height: 1px; margin: 4px 0; background: var(--line); }
-  .menu--up .menu__items { top: auto; bottom: calc(100% + 4px); left: 0; right: auto; }
 }
 
 /* ---- rune_ui/forms.css ---- */
@@ -338,10 +324,10 @@
   /* Several lines are a box, so a box's corners: round corners make a control a pill, not a textarea. */
   textarea { height: auto; min-height: 5rem; padding: var(--s-2) .625rem; border-radius: var(--radius-lg); resize: vertical; }
   select { padding-right: 1.75rem; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
+  :is(input, select, textarea):focus:where(:not([data-slot], [class^="ui-"], [class*=" ui-"])) { outline: none; border-color: color-mix(in srgb, var(--primary) 60%, var(--line-strong)); box-shadow: var(--ui-focus-ring); }
   input::placeholder, textarea::placeholder { color: var(--text-faint); }
   input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: color-mix(in srgb, var(--danger) 60%, var(--line-strong)); }
-  input[type="checkbox"], input[type="radio"] { width: .9375rem; height: .9375rem; margin: 0; accent-color: var(--accent); }
+  input[type="checkbox"], input[type="radio"] { width: .9375rem; height: .9375rem; margin: 0; accent-color: var(--primary); }
   fieldset { padding: 0; border: 0; min-width: 0; }
   legend { padding: 0; font-weight: var(--weight-strong); }
   label { cursor: default; }
@@ -351,7 +337,6 @@
   .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .field > label, .field__label { font-weight: var(--weight-strong); }
   .field__hint { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
-  .field--inline { display: flex; flex-direction: row; align-items: center; gap: var(--s-2); }
 
   /* Fields side by side, one column on a narrow screen. */
   .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-4); }
@@ -365,20 +350,18 @@
   .switch input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
   .switch__track { position: relative; width: 100%; height: 100%; border-radius: var(--radius-pill); background: var(--layer-3); transition: background .17s var(--ease); }
   .switch__track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 1rem; height: 1rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .25); transition: transform .17s var(--ease); }
-  .switch input:checked + .switch__track { background: var(--accent); }
+  .switch input:checked + .switch__track { background: var(--primary); }
   .switch input:checked + .switch__track::after { transform: translateX(.875rem); }
-  .switch input:focus-visible + .switch__track { box-shadow: var(--ring); }
+  .switch input:focus-visible + .switch__track { box-shadow: var(--ui-focus-ring); }
   .switch input:disabled + .switch__track { opacity: .45; }
 
   .choice { display: flex; flex-direction: column; gap: var(--s-2); padding: 0; border: 0; }
-
 
   /* rune-rows: the list of repeating rows. */
 
   .search { position: relative; display: flex; align-items: center; flex: 1 1 16rem; min-width: 12rem; }
   .search .icon { position: absolute; left: .625rem; color: var(--text-faint); pointer-events: none; }
   .search input { padding-left: 2rem; }
-
 
   .copy-field { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
   .copy-field code { flex: 1; min-width: 0; padding: 5px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -399,26 +382,16 @@
   .card--flush { gap: 0; padding: 0; overflow: hidden; }
   .card--flush > .card__head { padding: var(--s-3) var(--s-5); border-bottom: 1px solid var(--line); }
   .card--flush > .list { padding: var(--s-1); }
-  .card--danger { background: color-mix(in srgb, var(--danger) 5%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
 
   /* A card's parts beyond its head: .card__content (the body, when it needs one), .card__action
      (beside the title and hint, top right), and a rule under the head or over the footer. */
   .card__content { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
   .card__head:has(.card__action) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s-3); }
-  .card__head:has(.card__action) :is(.card__title, .card__hint, .card__header) { grid-column: 1; }
+  .card__head:has(.card__action) :is(.card__title, .card__hint) { grid-column: 1; }
   .card__action { grid-column: 2; grid-row: 1 / span 2; align-self: start; display: flex; align-items: center; gap: var(--s-2); }
   .card__head--bordered { padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
-  .card__footer--bordered { padding-top: var(--s-3); border-top: 1px solid var(--line); }
   .card--sm { gap: var(--s-3); padding: var(--s-3) var(--s-4); }
   .card--flush > .card__content, .card--flush > .card__footer { padding: var(--s-3) var(--s-5); }
-
-  /* A <details> that folds: .fold > summary.fold__summary (with a .fold__chevron icon). */
-  .fold { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading); }
-  .fold__chevron { width: .75rem; height: .75rem; color: var(--text-faint); transition: transform .12s var(--ease); }
-  [open] > .fold__summary .fold__chevron, [open] > .card__fold-summary .fold__chevron { transform: rotate(90deg); }
-  .card--fold { display: block; }
-  .card__fold-summary { display: flex; align-items: center; justify-content: space-between; font-weight: var(--weight-strong); }
-  .card--fold[open] > .card__fold-summary { margin-bottom: var(--s-4); }
 
   .empty { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); padding: var(--s-6) var(--s-5); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--text-muted); text-align: center; }
   .empty--compact { align-items: flex-start; padding: var(--s-3) var(--s-4); border: 0; text-align: left; color: var(--text-faint); }
@@ -431,11 +404,9 @@
   .list { display: flex; flex-direction: column; gap: 1px; }
   .list-row { display: flex; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: 6px var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
   a.list-row:hover, a.list-row:focus-visible { background: var(--hover); color: var(--text); }
-  .list-row--tall { align-items: flex-start; }
   .list-row > .icon { color: var(--text-faint); }
   .list-row__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
   .list-row__sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); }
-  .list-row--tall .list-row__sub { white-space: normal; }
   .list-row__meta { flex: 0 0 auto; display: flex; align-items: center; gap: var(--s-2); color: var(--text-faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   /* A row with more to it: a picture (__media), a title over a description (__content with
@@ -445,10 +416,8 @@
   .list-row__content > .list-row__title { flex: none; }
   .list-row__desc { min-width: 0; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); overflow-wrap: anywhere; }
   .list-row__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
-  .list-row--outline { border: 1px solid var(--line); border-radius: var(--radius); }
 
-
-  [data-nav-item]:focus-visible { box-shadow: var(--ring); }
+  [data-nav-item]:focus-visible { box-shadow: var(--ui-focus-ring); }
 }
 
 /* ---- rune_ui/settings.css ---- */
@@ -460,31 +429,7 @@
   .settings-group .setting-row + .setting-row { padding-top: var(--s-3); border-top: 1px solid var(--line); }
   @media (max-width: 860px) {
     .setting-row { flex-direction: column; align-items: stretch; }
-    .setting-row__control input:not([type="checkbox"], [type="radio"]) { width: 100%; }
   }
-}
-
-/* ---- rune_ui/palette.css ---- */
-/* The ⌘K palette. */
-
-@layer runeui.rune.components {
-}
-
-/* ---- rune_ui/prose.css ---- */
-/* .prose: rendered Markdown or rich text, spaced with gap. */
-
-@layer runeui.rune.components {
-  .prose > :is(ul, ol) { display: flex; flex-direction: column; gap: var(--s-1); }
-  .prose :is(h1, h2, h3, h4) { margin-top: var(--s-2); font-size: .9375rem; line-height: 1.375rem; font-weight: 600; }
-  .prose :is(th, td) { padding: var(--s-2) var(--s-3); border: 1px solid var(--line); text-align: left; }
-}
-
-/* ---- rune_ui/composer.css ---- */
-/* The composer: a message box (Lexxy, no toolbar) with its context and send button. Put it in
-   .composer-dock to keep it at the bottom of the panel as the page scrolls. */
-
-@layer runeui.rune.components {
-  .composer { gap: var(--s-2); }
 }
 
 /* ---- rune_ui/overlays.css ---- */
@@ -492,9 +437,8 @@
 
 @layer runeui.rune.components {
   .popover-menu { display: inline-flex; }
-  .popover.menu__items { position: fixed; inset: auto; right: auto; margin: 0; border: 0; color: var(--text); }
   .popover:not(:popover-open) { display: none; }
-  :is(.popover:popover-open, .menu[open] .menu__items) { animation: rune-pop var(--motion-fast) var(--ease); }
+  .popover:popover-open { animation: rune-pop var(--motion-fast) var(--ease); }
 
   .dialog-wrap { display: contents; }
   .dialog { width: min(32rem, calc(100vw - 2rem)); max-height: calc(100vh - 4rem); margin: 10vh auto auto; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); overflow: auto; }
@@ -503,7 +447,6 @@
   .dialog[open]::backdrop { animation: rune-fade var(--motion) var(--ease); }
   .dialog__title { font-size: var(--text-read); }
 
-  .dialog__body { display: flex; flex-direction: column; gap: var(--s-4); }
   .dialog__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }
 
   .sheet { width: min(28rem, 100vw); height: 100vh; max-height: none; margin: 0 0 0 auto; border-radius: var(--radius-panel) 0 0 var(--radius-panel); }
@@ -529,19 +472,9 @@
   .table tbody tr:last-child td { border-bottom: 0; }
   .table tbody tr:hover td { background: var(--hover); }
   .table a:not([class]) { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
-  .table a:not([class]):hover { color: var(--accent); }
+  .table a:not([class]):hover { color: var(--primary); }
   .table .number { text-align: right; }
 
-  /* Column widths, one convention for every table: the column that identifies the row (the first,
-     or the one marked table__grow) takes the leftover width and wraps or truncates; every other
-     column fits its content, one gap apart, so narrow facts (type, status, dates) sit together.
-     table__cap keeps long text in a fitted column from taking over (it truncates). table--even
-     opts out, for a table whose columns are all alike; a table that sizes its own columns with a
-     <colgroup> is left to it. */
-  .table:not(.table--even, :has(colgroup)) :is(th, td):not(:first-child) { width: 1%; white-space: nowrap; }
-  .table:not(.table--even, :has(colgroup)):has(.table__grow) :is(th, td):first-child { width: 1%; white-space: nowrap; }
-  .table:not(.table--even, :has(colgroup)) :is(th, td).table__grow { width: auto; white-space: normal; }
-  .table .table__cap { display: inline-block; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
   .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
 
   .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); border-bottom: 1px solid var(--line); }
@@ -557,20 +490,18 @@
   .tabs--pills .tabs__tab:is([aria-current="page"], [aria-pressed="true"], [aria-selected="true"]) { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
   /* Plugins' hand-written tables (class data-table), which the core's old data table styled. */
   .data-table td a:not([class]) { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
-  .data-table td a:not([class]):hover { color: var(--accent); }
+  .data-table td a:not([class]):hover { color: var(--primary); }
   .table a.row-link { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
-  .table a.row-link:hover { color: var(--accent); }
+  .table a.row-link:hover { color: var(--primary); }
 
   .alert { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); border: 1px solid; border-radius: var(--radius); }
   .alert__title { font-weight: var(--weight-strong); }
-  .alert--attention { background: color-mix(in srgb, var(--attention) 8%, var(--panel)); border-color: color-mix(in srgb, var(--attention) 32%, transparent); }
   .alert--danger { background: color-mix(in srgb, var(--danger) 7%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
 
   .alert:has(.alert__icon) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--s-3); }
   .alert:has(.alert__icon) :is(.alert__title, .alert__body, p, ul) { grid-column: 2; }
   .alert__icon { grid-row: 1 / span 2; margin-top: 2px; }
   .alert--danger .alert__icon { color: var(--danger); }
-  .alert--attention .alert__icon { color: var(--attention); }
   .alert__body { color: var(--text-muted); }
   ul.alert__body { padding-left: 1.2em; }
 
@@ -578,7 +509,6 @@
   @keyframes skeleton { to { background-position: -200% 0; } }
 
 }
-
 
 /* ---- The compatibility helpers' runeui parts (RuneCompatHelper) ---- */
 
@@ -591,16 +521,6 @@
 
 /* Unlayered from here, so these win over runeui's layers: what makes a runeui part drawn by a
    compat helper sit right among rune's classes still written by hand around it. */
-
-/* Inside a runeui part the bridge gives --accent and --ring shadcn's meanings (a quiet fill, a
-   colour). What callers put in a compat helper's block is rune markup (btn, links, bare inputs),
-   which reads them as the brand colour and the focus shadow: those slots get rune's back. */
-.card > [data-slot="card-content"], .card [data-slot="card-action"], .callout > [data-slot="alert-description"],
-.empty > [data-slot="empty-action"], .page-header > [data-slot="page-actions"], .dialog-wrap [data-slot="dialog-body"],
-.dialog-wrap [data-slot="drawer-body"], .field[data-slot="field"] {
-  --accent: var(--rune-accent);
-  --ring: var(--rune-ring);
-}
 
 /* menu(…, trigger_class:): the trigger fills the menu's box as rune's <summary> did, and shows
    it's open. */
@@ -624,7 +544,6 @@
 .ui-button.btn--sm { padding: 0 .625rem; font-size: var(--text-meta); }
 .ui-button.icon-button { color: var(--text-muted); }
 .ui-button.icon-button:hover { color: var(--text); }
-.ui-button.icon-button--danger, .ui-button.icon-button--danger:hover { color: var(--danger); }
 .ui-button.btn .icon, .ui-button.icon-button .icon { flex: 0 0 auto; }
 
 /* badge(): a pill, as the badges and counts written by hand beside it; busy pulses. */
@@ -647,3 +566,55 @@
 /* progress_bar(): as wide as the caller's .progress says (runeui's keeps a minimum for a bar
    on its own line), and the muted track rune's bar had. */
 .progress[data-slot="progress"] { flex: 0 0 auto; min-width: 0; }
+
+/* popup_menu (PopupHelper): a <dialog class="popup"> the dialog controller opens below its
+   trigger, drawn as a menu, for plugins (the meetings plugin's picker). Items are
+   .popup__item > .popup__btn; the chosen one carries a check, and the one under the pointer or
+   the keys the brand's tint. */
+.popup {
+  position: absolute; inset: calc(100% + 4px) auto auto 0; z-index: 40;
+  display: none; flex-direction: column; gap: 1px;
+  min-width: 12.5rem; max-width: min(22rem, calc(100vw - 1rem)); max-height: min(24rem, 70vh); overflow-y: auto;
+  margin: 0; padding: 4px; border: 0; border-radius: var(--ui-radius-lg);
+  background: var(--background); color: var(--foreground); box-shadow: 0 0 0 1px var(--border), var(--ui-shadow-lg);
+  font-size: var(--ui-text-sm); text-align: start;
+}
+.popup[open] { display: flex; animation: rune-pop var(--ui-duration) var(--ui-ease); }
+.popup.orient-left { inset-inline: auto 0; translate: var(--orient-offset, 0px); }
+.popup.orient-right { inset-inline: 0 auto; translate: var(--orient-offset, 0px); }
+.popup form { display: contents; }
+
+.popup__title { padding: .5rem .75rem .25rem; color: var(--faint-foreground); font-size: var(--ui-text-xs); font-weight: 400; white-space: nowrap; }
+.popup__title:focus-visible { box-shadow: none; }
+.popup__list { display: flex; flex-direction: column; gap: 1px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.popup__item { position: relative; display: flex; align-items: center; width: 100%; border-radius: calc(var(--ui-radius-lg) * 0.5); }
+.popup__item[aria-selected] { background: var(--muted); }
+.popup__item:has(.popup__btn[disabled]) { pointer-events: none; }
+.popup .popup__btn {
+  display: flex; align-items: center; gap: .5rem; flex: 1 1 auto; width: 100%; min-width: 0; min-height: var(--ui-h);
+  padding: 0 .75rem; border: 0; border-radius: inherit; background: none; color: var(--foreground);
+  font: inherit; text-align: start; text-decoration: none; cursor: pointer;
+}
+.popup .popup__btn:is(:hover, :focus-visible) { background: var(--muted); color: var(--foreground); box-shadow: none; }
+.popup .popup__btn[disabled] { opacity: .5; }
+.popup .popup__btn .icon { color: var(--faint-foreground); }
+.popup__item[aria-checked] .popup__btn { padding-right: 2rem; }
+.popup__item .checked { display: none; position: absolute; right: .75rem; color: var(--muted-foreground); pointer-events: none; }
+.popup__item[aria-checked="true"] .checked { display: block; }
+.popup__item[aria-checked="true"] .popup__btn { font-weight: 500; }
+/* The popup is a flex column that scrolls past its max height: its filter box and list keep their
+/* size (a long list would otherwise squeeze the box until typing shortens the list). */
+.popup input:is([type="search"], [type="text"]) { flex: none; height: var(--ui-h-sm); margin-bottom: 4px; }
+.popup .popup__list { flex: none; }
+.popup .popup__btn:is(:hover, :focus-visible), .popup__item[aria-selected] { background: var(--brand-tint); }
+.popup .popup__btn:is(:hover, :focus-visible) .icon:not(.checked) { color: var(--primary); }
+.popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--primary); }
+
+/* .table's column widths, one convention for every table: the column that identifies the row (the
+   first, or the one marked table__grow) takes the leftover width and wraps; every other column
+   fits its content, one gap apart, so narrow facts (type, status, dates) sit together. A table
+   that sizes its own columns with a <colgroup> is left to it. Unlayered, so it holds on a plugin's
+   ui :table given class "table" too. */
+.table:not(:has(colgroup)) :is(th, td):not(:first-child) { width: 1%; white-space: nowrap; }
+.table:not(:has(colgroup)):has(.table__grow) :is(th, td):first-child { width: 1%; white-space: nowrap; }
+.table:not(:has(colgroup)) :is(th, td).table__grow { width: auto; white-space: normal; }

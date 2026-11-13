@@ -1,32 +1,27 @@
-# How every page looks: Runwell's stylesheets (and plugins'), the install's custom CSS, and
-# Settings > Appearance as attributes on <html>.
+# How every page looks: runeui, Runwell's stylesheets (and plugins'), the install's custom CSS,
+# and Settings > Appearance as attributes on <html>.
 module AppearanceHelper
-  # What the rune_ui gem's sheets styled, carried into Runwell with the compatibility layer
-  # (docs/runeui-migration.md, phase 1): the old tokens, bare elements and classes, in the `rune`
-  # cascade layer, and the Lexxy editor's skin. Linked first, before runeui's sheets, so rune's
-  # layers come before runeui's (a runeui component beats a bare-element rule) and everything
-  # below, unlayered, beats both.
-  COMPAT_STYLESHEETS = %w[runwell/compat runwell/compat-lexxy].freeze
+  # Runwell's theme (appearance.css): runeui's tokens as Settings > Appearance sets them, in a
+  # layer over runeui's defaults. Linked first, since its @layer statement is the page's order.
+  # Then the compatibility layer (runwell/compat.css): the old token names, derived from runeui's,
+  # and rune_ui's classes, for plugins until 7.0 (docs/plugin-contract.md).
+  THEME_STYLESHEETS = %w[appearance runwell/compat].freeze
 
-  # Runwell's own stylesheets, after those (which are in the `rune` layer, so these win):
-  # the palette and its settings (_global, appearance, font-face: the theming contract,
-  # docs/theming.md), the bridge that points rune's tokens at it (rune-theme), the shell
-  # (runwell), the pieces every area shares (runwell/components) and each area's own.
-  RUNWELL_STYLESHEETS = %w[_global appearance font-face rune-theme runwell runwell/components runwell/home runwell/tasks runwell/records runwell/settings runwell/public].freeze
+  # Runwell's own stylesheets, after runeui's (unlayered, so these win over every layer): the
+  # Inter font, the shell (runwell), the pieces every area shares (runwell/components) and each
+  # area's own.
+  RUNWELL_STYLESHEETS = %w[font-face runwell runwell/components runwell/home runwell/tasks runwell/records runwell/settings runwell/public].freeze
 
   # Herb compiles stylesheet_link_tag into a single <link>, so each list is spelled out.
-  # Plugin stylesheets get their own tag.
+  # runeui comes as an app's does: its tokens on :root, its page base, its components, Lexxy and
+  # runeui's skin for it, and light and dark (the theme script in runeui_tags sets .dark on <html>
+  # before the first paint, from the person's choice or data-default-theme). Its toaster shows the
+  # flash and turbo_stream_flash, and data-turbo-confirm asks in its dialog (both rendered by
+  # layouts/shared/_feedback). Plugin stylesheets get their own tag, last but for custom CSS.
   def app_stylesheet_tags
     safe_join([
-      stylesheet_link_tag(*COMPAT_STYLESHEETS.reject { it == "runwell/compat-lexxy" && !defined?(::Lexxy) }, "data-turbo-track": "reload"),
-      # runeui, beside the old classes until the flip (docs/runeui-migration.md): its components'
-      # sheets only, with no tokens, page styles or theme switch of its own. Its toaster shows the
-      # flash and turbo_stream_flash, and data-turbo-confirm asks in its dialog (both rendered by
-      # layouts/shared/_feedback). Then the bridge, which defines runeui's tokens from rune's on
-      # runeui's own parts, so Appearance reaches them and nothing of runeui's lands on the page.
-      # Runwell's sheets still come last.
-      runeui_tags(tokens: false, page: false, theme: false, "data-turbo-track": "reload"),
-      stylesheet_link_tag("runeui/bridges/rune_ui", "data-turbo-track": "reload"),
+      stylesheet_link_tag(*THEME_STYLESHEETS, "data-turbo-track": "reload"),
+      runeui_tags(lexxy: defined?(::Lexxy).present?, "data-turbo-track": "reload"),
       stylesheet_link_tag(*RUNWELL_STYLESHEETS, "data-turbo-track": "reload"),
       (stylesheet_link_tag(*Runwell::Plugins.enabled_stylesheets, "data-turbo-track": "reload") if Runwell::Plugins.enabled_stylesheets.any?)
     ].compact, "\n")
@@ -42,7 +37,8 @@ module AppearanceHelper
   end
 
   # Settings > Appearance, as attributes on <html> so CSS (appearance.css) and a live preview
-  # can both use them.
+  # can both use them. data-default-theme is what runeui's theme script falls back to when the
+  # person hasn't chosen light or dark themselves.
   def appearance_data
     setting = Setting.current
     { scheme: setting.scheme, radius: setting.radius, font: setting.font, default_theme: setting.theme,

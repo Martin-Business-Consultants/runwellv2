@@ -7,9 +7,10 @@ class ThemeBrief
 
   def to_s
     <<~MARKDOWN
-      You're writing a theme for #{@setting.brand_name == "Runwell" ? "a Runwell install" : "#{@setting.brand_name}'s Runwell install"}: a stylesheet
-      that sets Runwell's design tokens. Follow the guide below exactly: tokens first, both light and
-      dark, nothing it forbids. Answer with one CSS block and a line on what you chose and why.
+      You're writing a theme for #{@setting.brand_name == "Runwell" ? "a Runwell install" : "#{@setting.brand_name}'s Runwell install"}: a shadcn/ui
+      theme, a stylesheet of shadcn's design tokens in a `:root { … }` block for light and a
+      `.dark { … }` block for dark. Follow the guide below exactly: tokens only, both blocks, nothing
+      it forbids. Answer with one CSS block and a line on what you chose and why.
 
       Ask me for the business's name, logo, website or colors if I haven't given them.
 

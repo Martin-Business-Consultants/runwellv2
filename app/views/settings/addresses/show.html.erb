@@ -10,9 +10,6 @@
         Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
       </p>
     </header>
-    <%# runeui trial: this page's alert, fields, time zone list and buttons are runeui components
-        (ui :alert, form.ui :field / :input / :combobox, ui :button), themed by Appearance through
-        runeui/bridges/rune_ui. %>
     <% if !Runwell.host_set? %>
       <% not_set = capture do %>Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.<% end %>
       <%= ui :alert, variant: :warning, icon: :info, title: "Not set yet", description: not_set, role: "status" %>

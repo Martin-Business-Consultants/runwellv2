@@ -24,7 +24,7 @@
   <%= ui :menu, trigger: tag.button(account, type: "button", class: "nav-account__button"), side: :top, align: :start, label: "Your menu", class: "nav-account__menu", items: [
         { label: safe_join([ icon_tag("person"), tag.span("Your account") ]), href: settings_account_path },
         { label: settings, href: settings_path, data: { keys: "g s", keys_anywhere: true } },
-        { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
+        { label: theme, value: "theme", data: { runeui_theme: "toggle" } },
         { label: shortcuts, value: "shortcuts", data: { runeui_open: "shortcuts" } },
         :separator,
         { label: safe_join([ icon_tag("logout"), tag.span("Sign out") ]), href: session_path, method: :delete } ] %>

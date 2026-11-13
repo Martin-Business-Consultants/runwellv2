@@ -2,7 +2,10 @@
 
 Runwell's whole interface moves onto runeui (`../runeui`: components on UI SDK's behaviours,
 shadcn/ui's look and tokens, no build step), with nothing left of rune_ui or of the pieces taken
-from Fizzy. Branch `runeui-trial`. `docs/runeui-trial.md` is how the trial went.
+from Fizzy. Branch `runeui-trial`. It began as a trial (the trial's notes are folded into "How the
+two kits shared a page", below): runeui linked beside rune_ui with a bridge for its tokens, one
+page (Settings › Address) converted, and every other page pixel-identical with and without
+runeui loaded, which is what made the area-by-area move below possible.
 
 ## Decisions (Ted, 2026-11-13)
 
@@ -21,15 +24,20 @@ from Fizzy. Branch `runeui-trial`. `docs/runeui-trial.md` is how the trial went.
    `ui :side_panel`, the board onto `ui :board`. Lexxy stays (shadcn has no rich text editor),
    with runeui's skin.
 
-## How the two kits share a page until the end
+## How the two kits shared a page (phases 0 to 8), and the flip (phase 9)
 
-The vocabularies collide (`--accent` and `--ring` mean different things; Runwell's `--border` is
-a border shorthand), so until the old CSS is gone runeui is linked as in the trial:
-`runeui_tags(tokens: false, page: false, theme: false, confirm: false, toasts: false)` then
-`runeui/bridges/rune_ui`, which defines runeui's tokens on runeui's own parts from the page's.
-The page's tokens keep their old names and meanings for whatever is still old (and for plugins).
-The look changes by changing those tokens' values, not their names. The last phase flips this:
-runeui's tokens on `:root`, the bridge and the old names gone.
+The vocabularies collide (`--accent` and `--ring` mean different things; Runwell's `--border` was
+a border shorthand), so until the old CSS was gone runeui was linked as in the trial:
+`runeui_tags(tokens: false, page: false, theme: false)` then `runeui/bridges/rune_ui`, which
+defined runeui's tokens on runeui's own parts from the page's. The page's tokens kept their old
+names and meanings for whatever was still old (and for plugins); the look changed by changing
+those tokens' values, not their names. Runwell markup inside a runeui part read runeui's meanings
+for the shared names, so Runwell gave `--accent` and `--ring` back inside the parts that hold its
+markup (runwell.css section 2, components.css, records.css, compat.css: "the restore machinery").
+
+Phase 9 flipped it: runeui is linked as any app links it, its tokens (shadcn's) on `:root`, and
+Runwell's theme (`appearance.css`), its own sheets and the compatibility layer read those. The
+bridge (`runeui/bridges/rune_ui.css`) stays in runeui for other apps; Runwell no longer links it.
 
 ## Phases
 
@@ -314,6 +322,125 @@ core (plugins go through the compatibility layer).
 9. **The flip and the clean-up**: runeui's tokens on `:root`, the bridge out; the old sheets
    (`rune-theme`, what's left of `runwell/*`), Fizzy's controllers and the unused behaviors
    deleted; AGENTS.md, docs/theming.md, docs/plugin-contract.md rewritten; VERSION 6.0.0.
+   **Done:** runeui is linked as any app links it: `runeui_tags(lexxy: true)` (its tokens on
+   `:root`, `page.css`, the theme script, toasts and confirm, Lexxy with `runeui/lexxy`), with
+   nothing turned off; `runeui/bridges/rune_ui` isn't linked. `appearance.css` is Runwell's theme,
+   in a `runwell.theme` layer over runeui's tokens (linked first: its `@layer` statement is the
+   page's order): Inter, Runwell's `--success` / `--warning` / `--info`, `--sidebar-primary` as the
+   brand, dark cards and popovers on the page's ground, and its additions derived from shadcn's
+   (`--faint-foreground`, `--brand-tint`, `--brand-tint-strong`); schemes set `--primary`,
+   `--primary-foreground` (light, and `.dark`) and `--ring`; corners `--radius` (Sharp 0.25rem,
+   Soft 0.625rem, Round 1rem); fonts `--font-sans`; text size the root's font size (87.5–125%).
+   Light and dark are one mechanism, runeui's: its theme script sets `.dark` and `data-theme` before
+   the first paint from localStorage `runeui-theme` or `data-default-theme`; the toggles are
+   `data-runeui-theme="toggle"` (buttons and menu items); a 5.x choice (`theme`) is carried over
+   once (`layouts/_theme_preference`); Appearance's preview calls `refreshTheme()`. Runwell's own
+   sheets read only runeui's tokens (and its three additions): `--primary` for the brand,
+   `--ui-focus-ring` for focus, plain rems for spacing, `--ui-radius-*` / `calc(var(--radius) * n)`
+   for corners. `runwell/compat.css` defines every old name plugins read from runeui's tokens
+   (rune_ui's and Fizzy's; `--accent` and `--ring` excepted: they're runeui's), and
+   `lib/rails_ext/propshaft_plugin_stylesheets.rb` reads a plugin stylesheet's `var(--accent)` /
+   `var(--ring)` as `--primary` / `--ui-focus-ring`. Custom CSS is a shadcn theme (`:root` and
+   `.dark` blocks, unlayered, last), `ThemeBrief`, the Appearance page and docs/theming.md say so;
+   the validation rules are unchanged. Gone: `rune-theme.css`, `_global.css` (Fizzy's palette, its
+   `--border` shorthand and layer order), `runwell/compat-lexxy.css`, the restore machinery
+   (`--rune-accent`, `--rune-ring` and every rule giving `--accent` / `--ring` back inside runeui's
+   parts: runwell.css 2, components.css, records.css, tasks.css, compat.css), the `theme` and
+   `frame` controllers (the second unused since the board moved), `.main` in compat's layer (it's
+   Runwell's own now, unlayered in runwell.css with the portal's and sign-in's overrides after it:
+   only `flex: 1` and padding of runeui's app-content are layered under it, and runwell.css sets
+   that padding), dead CSS (the board's old popup leftovers, `fixed-popup--placed`,
+   `record-form__toggle`, `record-form__head*`, `document-link__wrap`, `settings-code`, the
+   `menu__items` width, a duplicate table convention) and compatibility classes neither the core
+   nor any plugin uses (listed in plugin-contract.md, 6.0); `docs/runeui-trial.md` (folded in
+   above) and `docs/rune-ui-migration.md` (4.0's record). Moved: the popups' CSS (`popup_menu`, the
+   meetings plugin) from components.css into compat.css; the appearance samples into settings.css;
+   code blocks take Lexxy's code colours. Kept: `font-face.css` (Inter is bundled; runeui ships no
+   font), `/ui` as the compatibility layer's styleguide (runeui's gallery is `/runeui`).
+   compat.css's bare focus rules now skip runeui's own parts (they draw their own focus; the bridge
+   had hidden this by making `--ring` a colour inside them, so a palette input showed no double
+   ring). Added to runeui: a menu item with `data-runeui-theme` acting when chosen with the keys or
+   the pointer (once), and `refreshTheme()`.
+   Differences on screen, all from runeui's own values where the bridge had mapped Runwell's:
+   faint text a hair different (`--faint-foreground` is `--muted-foreground` at 80% / 72%);
+   dialog and empty-state titles 18px (runeui's `--ui-text-lg`; were 20px); menus, selects and
+   popovers at runeui's control radius (8px; the bridge rounded them 14px), textareas likewise;
+   the Lexxy editor as a runeui field (closed border, a faint fill in dark); `--secondary` /
+   `--accent-foreground` text a step lighter in light (shadcn's `0.205`); the brand tints mixed
+   from `--primary` (a hair off the old fixed steps); Round corners no longer make controls pills
+   (`--radius: 1rem` for everything); in dark from the system, the sign-in showcase's dark shading
+   and card borders now apply (they were written for `data-theme="dark"`, which runeui now always
+   sets). The browser bar's dark `theme-color` is the page's (`#0a0a0a`, was Fizzy's `#0d181d`).
+
+### For phase 10 (each plugin onto runeui)
+
+Each plugin in `../runwell-*` moves its views to `ui :name` / `form.ui` and its stylesheet to
+runeui's tokens, sets `requires: ">= 6.0.0"`, and once all have, 7.0 deletes `runwell/compat.css`,
+`RuneCompatHelper`, `PopupHelper`, `views/ui/show`, the `rune-clipboard`, `rune-local-time` and
+`dialog` controllers (only `popup_menu` uses the last now) with `helpers/orientation_helpers`, and
+`propshaft_plugin_stylesheets.rb`. Writing `--accent`
+in a migrated plugin means shadcn's fill: rename the brand uses to `--primary` and focus shadows to
+`--ui-focus-ring` in the same commit. What each still uses (from its CSS, views and helpers; class
+names approximate, matched as words):
+
+| Plugin | Old token names | Compat helpers | Compat classes (main ones) |
+| --- | --- | --- | --- |
+| ads | `--accent`, `--danger`, `--radius-control`, `--s-1…5`, `--text-faint`, `--text-meta`, `--text-muted`, `--text-title` | `badge`, `callout`, `card`, `field` | `btn*`, `card`, `field*`, `table`, `table-wrap`, `table__grow`, `badge`, `switch`, `empty`, `stack`, `button-row` |
+| approvals | `--accent`, `--brand-tint`, `--line`, `--radius-lg`, `--s-2…5`, `--text-meta`, `--text-muted`, `--weight-strong` | `card`, `sheet` | `btn*`, `card*` (`--flush`, `__head--bordered`), `table`, `switch`, `empty`, `copy` |
+| brain | `--accent`, `--brand-tint`, `--danger`, `--line`, `--ok`, `--radius-scale`, `--s-1…4`, `--text-meta`, `--text-muted`, `--weight-strong` | `badge`, `card`, `menu` | `btn*`, `card*` (`--sm`, `__action`, `__footer`), `list-row*`, `field*`, `select--sm`, `separator`, `table` |
+| calendar | `--accent`, `--accent-ink`, `--attention`, `--brand-tint`, `--control-h-sm`, `--danger`, `--hover`, `--layer-1`, `--layer-2`, `--line`, `--line-strong`, `--ok`, `--panel`, `--radius-pill`, `--radius-scale`, `--s-1…4`, `--text`, `--text-faint`, `--text-meta`, `--text-muted`, `--text-title`, `--text-ui`, `--text-xs`, `--weight-strong` | `badge`, `card`, `copy_field`, `field`, `tabs` | `btn*`, `card*`, `list-row*`, `tabs*` (`--pills`), `alert--danger`, `badge--*`, `pill`, `search`, `table*`, `field*` |
+| client-dashboard | `--line`, `--s-1…5`, `--text`, `--text-meta`, `--text-muted`, `--text-read`, `--text-title`, `--weight-strong` | `badge`, `card`, `empty_state` | `card*` (`--flush`), `list-row*`, `alert--danger`, `table`, `field*`, `checkbox`, `select--sm` |
+| desktop | none | none | none |
+| google-ads | Fizzy's: `--block-space*`, `--color-ink`, `--color-ink-lighter`, `--color-ink-medium`, `--color-link`, `--color-positive`, `--inline-space*`, `--text-x-large`, `--text-xx-large` | `card`, `field` | `btn`, `card`, `field`, `progress`, `search` |
+| leads | `--accent`, `--brand-tint`, `--danger`, `--hover`, `--layer-1`, `--line`, `--panel`, `--radius-scale`, `--s-1…4`, `--text-faint`, `--text-meta`, `--text-title`, `--text-ui`, `--weight-strong` | `action_button`, `badge`, `button_classes`, `button_link`, `callout`, `card`, `copy_field`, `dialog`, `dialog_actions`, `field`, `submit_button`, `time_ago` | `btn*`, `list-row*`, `grid-2`, `count--quiet`, `pill`, `table*`, `field*` |
+| media | `--accent`, `--accent-soft`, `--brand-tint`, `--brand-tint-strong`, `--control-h`, `--danger`, `--hover`, `--layer-1`, `--layer-2`, `--line`, `--line-strong`, `--ok`, `--panel`, `--radius-control`, `--radius-lg`, `--radius-pill`, `--radius-sm`, `--s-1…6`, `--text`, `--text-faint`, `--text-meta`, `--text-muted`, `--text-read`, `--text-xs`, `--weight-strong` | `badge`, `card`, `crumbs`, `dialog`, `icon`, `sheet`, `tabs` | `btn*`, `card*`, `tabs*` (`--icons`, `--pills`), `badge--ok`, `badge--outline`, `crumbs`, `pill`, `search`, `switch` |
+| meetings | Fizzy's: `--block-space*`, `--color-canvas`, `--color-ink-dark`, `--color-ink-lighter`, `--color-ink-medium`, `--color-link`, `--color-positive`, `--color-selected*`, `--focus-ring-color`, `--inline-space`, `--text-medium`, `--text-small`, `--text-x-small`; `--radius-control` | `card`, `dialog`, `field`, `menu`, `popup_menu` | `popup__*`, `data-table`, `dialog__title`, `menu`, `btn`, `card`, `table` |
+| plugin-template | `--block-space-half`, `--color-ink-lighter`, `--inline-space`, `--radius-scale` | `field` | `data-table`, `table`, `btn`, `field` |
+| quickbooks | none | `field` | `btn`, `field` |
+
+## 6.0 release notes (draft)
+
+**Runwell 6.0: a new interface.** Every page is rebuilt on runeui, shadcn/ui's look: the nav,
+tables and filters, the board, the side panel, pickers and forms, search (⌘K), quick actions,
+Settings, sign-in and the client portal. Everything works as before (the same pages, addresses,
+keys, agent tools and permissions); it looks cleaner and more consistent.
+
+What people see:
+
+- shadcn's neutral look by default; Settings › Appearance's colours (Indigo, Forest, Plum, Ocean,
+  Graphite), corners (Sharp, Soft, Round), fonts and text size act on it. Round corners round
+  everything more; buttons and fields are no longer pills.
+- Light or dark is remembered as before and applies before the page shows, with no flash, whether
+  it's your choice, the install's default or your device's. (Your choice is carried over.)
+- Menus and popovers have slightly tighter corners, dialog titles are a touch smaller, and the
+  rich text editor looks like the other fields.
+
+For whoever wrote custom CSS (Settings › Appearance › Custom CSS):
+
+- **A theme written for 5.x stops working.** Custom CSS is now a shadcn theme: `:root { … }` and
+  `.dark { … }` blocks of shadcn's tokens (`--background`, `--foreground`, `--primary`, `--muted`,
+  `--border`, `--radius`…), as tweakcn (tweakcn.com) and ui.shadcn.com/themes write them: paste
+  one in (without its `@import` line). Fizzy's palette (`--lch-*`), rune_ui's tokens (`--panel`,
+  `--text`, `--accent` as the brand, `--radius-scale`, `--text-scale`) and `html[data-theme="dark"]`
+  blocks do nothing now, or, for `--accent`, recolour hovers. docs/theming.md has the tokens and a
+  mapping from the old names; Copy brief for AI hands an AI the new guide.
+- The rules are unchanged: no `@import`, no `url()` but `data:`; `?theme=off` still skips it.
+
+For plugin authors:
+
+- Plugins keep working unchanged through a compatibility layer, until 7.0: rune_ui's helpers
+  (`card`, `badge`, `button_link`, `field`, `menu`, `tabs`…) are drawn by runeui, its classes
+  (`.btn`, `.card`, `.table`…) and token names (`--panel`, `--text`, `--line`, `--s-*`…) are
+  defined from runeui's tokens, and a plugin stylesheet's `var(--accent)` / `var(--ring)` are
+  read as the brand's colour and the focus shadow.
+- Move before 7.0: draw with `ui :name` and `form.ui :field`, read runeui's (shadcn's) tokens:
+  `--primary` for the brand's colour (`--accent` is now shadcn's hover fill), `--ui-focus-ring` for
+  focus, `--muted-foreground`, `--border`… (docs/plugin-contract.md: The UI kit, the compatibility
+  layer and its token table), and set `requires: ">= 6.0.0"`.
+- Gone: a handful of compatibility classes no published plugin used (`card--danger`, `card--fold`,
+  `fold`, `list-row--tall`, `list-row--outline`, `field--inline`, `icon-button--danger`,
+  `alert--attention`, `dialog__body`, `menu__*`, `prose`, `table--even`, `table__cap`,
+  `crumbs__sep`, `crumbs__current`).
 10. **Plugins**, one repository at a time, onto runeui's API; then the compatibility layer goes
     (7.0, as the contract says).
 

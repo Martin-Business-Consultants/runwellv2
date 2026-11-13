@@ -1,12 +1,18 @@
 <%# locals: () %>
+<%# Before the first paint, ahead of runeui's theme script (runeui_tags), which sets light or dark
+    from the person's choice (localStorage "runeui-theme") or the install's default
+    (data-default-theme). %>
 <%= javascript_tag nonce: true do %>
   {
     const root = document.documentElement
-    const stored = localStorage.getItem("theme")
-    const theme = stored && stored !== "auto" ? stored : (stored === "auto" ? null : root.dataset.defaultTheme)
-    if (theme === "light" || theme === "dark") {
-      root.dataset.theme = theme
-    }
+    try {
+      // A choice made before 6.0 was kept as "theme" (light, dark or auto): carried over once.
+      const old = localStorage.getItem("theme")
+      if (old) {
+        if (!localStorage.getItem("runeui-theme")) localStorage.setItem("runeui-theme", old === "auto" ? "system" : old)
+        localStorage.removeItem("theme")
+      }
+    } catch {}
 
     // A record page's collapsed details sidebar (panes controller), set before the first paint.
     try { if (localStorage.getItem("sidebar") === "collapsed") root.dataset.sidebar = "collapsed" } catch {}
