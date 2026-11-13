@@ -408,20 +408,21 @@ archive) is `render "layouts/shared/confirm", trigger:, title:, body:, button:, 
 (`confirm_button`; `d` presses it), and the bulk bar's Delete is `bulk_delete`. Erasing a closed
 piece of work asks for its title to be typed: `ui :alert_dialog, confirm_text:` (`works/_erase`).
 
-Boards are Fizzy's board wholesale, not a new take on it: the same
-`card-columns` markup and data attributes, `column_tag` / `column_frame_tag`
-(`ColumnsHelper`, verbatim), the stream / doing columns / closed anatomy, an
-expander per column, maximize pages, cards in column frames (each column's first page rendered
-with the board, `task_board_page` and `tasks/board/_cards`, the rest loading from the column's
-address as it scrolls), card
-previews in the index cards' markup (`app-card app-card--compact`), and drops posting to one endpoint per
-destination (`Columns::…::Drops::{Streams,Columns,Closures}Controller`) that
-answer with a morphing `turbo_stream.replace` of the target column. The Tasks
-board (`tasks/board/*`, `tasks/columns/show`, `columns/tasks/drops/*`) is the
-reference. Two departures: column colors come from classes (`runwell/tasks.css`), not inline
-styles; and cards keep a manual order (`Task#board_position`, positioned per status). A column
-marked `data-drag-and-drop-sortable` lets a card be dragged up and down it, and every drop sends
-`before` (the card it now sits before) for `Task#move!`.
+Boards are runeui's board (`ui :board`, `ui :board_column`, `ui :board_card`): the Tasks board
+(`tasks/board/_columns`, a `tasks/board/_column` per status, `TasksBoardHelper`) is the reference.
+A card (`tasks/display/_preview`, `board-card-<id>`) is dragged between columns and up and down
+one, or moved from the keys; runeui shows the move at once and posts it to the column's own
+endpoint (`task_drop_url`: `Columns::Tasks::Drops::{Streams,Columns,Closures}Controller`, the card
+named in the path as `__card__`) with `before` (the card it now sits before) for `Task#move!`,
+whose answer replaces that column (`board-column-<status>`) with a morph; a refused move puts the
+card back. Cards keep a manual order (`Task#board_position`, positioned per status; Done sorts by
+date). Each column's first page is drawn with the board (`task_board_page`) and says its total
+(`total:`); the rest load as it scrolls (`task_board_more`: a lazy frame at the list's end, which
+`Tasks::ColumnsController` answers with the next page's cards in its place, `tasks/board/_more`).
+Planned stays open; the doing columns and Done fold to strips from their titles, remembered per
+browser (the board's id). A card's title opens it in the side panel (`side_panel_link_data`). A
+column's own page (`tasks/columns/show`, its maximize button) is the same column as a grid. Column
+dots take their status's colour (`task_column_tone`, `runwell/tasks.css`), never inline styles.
 
 Staff pages are runeui's shell (`ui :app_shell`, inset, in the application layout): a left nav
 (`layouts/shared/_sidenav`, with `_sidenav_brand` and `_sidenav_foot`; `ui :sidebar_group` and `ui :sidebar_item`; `runwell.css`) beside the page in an inset panel. The nav has the install at the top, then its
@@ -734,7 +735,7 @@ one place they are documented for people: add a new key there.
 | `i` | Ask AI (the AI plugin) |
 | `g t n` | Add a task (the quick action) to a piece of work or client picked in it, the one on screen to start; `g t` waits a moment for the `n`, vim style |
 | `.` | Hint mode on or off |
-| Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Columns and cards (Fizzy's navigable lists), move the card a column, or down / up its column |
+| Board: `h` `l` `j` `k`, `H` `L`, `J` `K` | Cards across and down the columns, move the card a column, or down / up its column (handed to runeui's board as arrows and Shift+arrows; the card you land on is selected, so the side panel follows) |
 
 Moving with the keys fetches ahead: the row `j` / `k` lands on has its page (the plain link Enter
 follows) fetched, and `g` fetches the pages its chords reach, once per page

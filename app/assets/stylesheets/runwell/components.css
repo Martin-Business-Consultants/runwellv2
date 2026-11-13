@@ -156,11 +156,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* ======================================================================= 5 Cards */
 
-/* The board's cards (app-card, tasks/display/_preview) and a maximized column's grid of them
-/* (tasks/columns/show). Indexes are tables only since 5.0. */
-.cards--grid { width: 100%; }
-.cards--grid .cards__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); align-items: stretch; gap: var(--s-4); }
-.cards--grid :is(.pagination-link, .empty) { grid-column: 1 / -1; }
+/* A record as a card (app-card: layouts/shared/_card, which plugins render). Indexes are tables
+/* only since 5.0; the board's cards are runeui's (tasks.css, 4). */
 .app-card { position: relative; justify-content: space-between; gap: var(--s-4); min-width: 0; padding: var(--s-4); transition: border-color .12s; }
 .app-card:hover { border-color: var(--line-strong); }
 .app-card:has(.app-card__link:focus-visible) { box-shadow: var(--ring); }

@@ -14,7 +14,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "table[data-slot=table] tbody tr[data-filter-target=item]", 2
     get tasks_path(view: "board")
     assert_response :success
-    assert_select ".card-columns"
+    assert_select "[data-slot=board].task-board"
 
     get tasks_path, as: :json
     assert_equal 2, work.size

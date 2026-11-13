@@ -1,17 +1,14 @@
 <%# locals: (status:, count:, board:) %>
-<%= column_tag id: "tasks-#{status}", name: status.humanize, drop_url: columns_task_drops_column_path("__id__", task_board_filters.merge(column_id: status)),
-      card_color: task_column_color(status), class: "cards--doing cards--#{status.dasherize}",
-  data: {
-    drag_and_strum_target: "container",
-    drag_and_drop_sortable: true,
-    collapsible_columns_target: "column",
-    action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
-  } do %>
-  <header class="cards__header">
-    <%= render "tasks/board/expander", title: status.humanize, count: count, column_id: "tasks-#{status}", status: status %>
-    <%= render "tasks/board/maximize", column_path: tasks_column_path(status, task_board_filters) %>
-  </header>
-  <%= column_frame_tag "#{status}_cards" do %>
-    <%= render "tasks/board/cards", status: status, page: task_board_page(board, status) %>
-  <% end %>
+<%# One column of the Tasks board (runeui's ui :board_column): its status's dot, name and how many,
+    the way to its own page (maximize), its first page of cards, and the next page loading as it
+    scrolls (task_board_more). Moves into it post to its drop endpoint (task_drop_url), whose
+    answer redraws it (columns/tasks/drops/*/create). Planned stays open; the rest fold. %>
+<% page = task_board_page(board, status) %>
+<% records = page.records.to_a %>
+<%= ui :board_column, id: status, title: status.humanize, total: count, tone: task_column_tone(status), url: task_drop_url(status),
+      collapsible: (status != "planned"), collapsed: (status != "planned"), class: "task-column task-column--#{status.dasherize}",
+      empty: (status == "done" ? "No #{term(:task, count: 2).downcase} here" : "Drag #{term(:task, count: 2).downcase} here"),
+      action: render("tasks/board/maximize", column_path: tasks_column_path(status, task_board_filters)),
+      more: task_board_more(status, page, shown: records.size, total: count) do %>
+  <%= render partial: "tasks/display/preview", collection: records, as: :task %>
 <% end %>

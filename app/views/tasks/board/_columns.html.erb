@@ -1,36 +1,14 @@
 <%# locals: (board:) %>
+<%# The Tasks board (and a piece of work's, ?task_view=board): runeui's board, a column per status
+    (tasks/board/column). A card is dragged between columns and up and down one, or moved from the
+    keys (H / L a column, J / K up and down; the keyboard controller hands h j k l to the card as
+    arrows); each move posts to its column's own drop endpoint (Columns::Tasks::Drops::*) with the
+    card it now sits before, which answers by redrawing that column. The doing columns and Done
+    fold to strips from their titles, remembered per browser. %>
 <% counts = board.reorder(nil).group(:status).count %>
-<%= tag.div class: "card-columns", data: {
-      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list",
-      drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
-      drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
-      collapsible_columns_board_value: "tasks",
-      collapsible_columns_collapsed_class: "is-collapsed",
-      collapsible_columns_expanded_class: "is-expanded",
-      collapsible_columns_no_transitions_class: "no-transitions",
-      collapsible_columns_title_not_visible_class: "is-off-screen",
-      navigable_list_supports_vertical_navigation_value: false,
-      navigable_list_has_nested_navigation_value: true,
-      navigable_list_prevent_handled_keys_value: true,
-      navigable_list_auto_select_value: false,
-      navigable_list_auto_scroll_value: false,
-      action: "
-        keydown->navigable-list#navigate
-        dragstart->drag-and-drop#dragStart
-        dragover->drag-and-drop#dragOver
-        dragenter->drag-and-strum#dragEnter
-        drop->drag-and-drop#drop
-        dragend->drag-and-drop#dragEnd
-        click@document->navigable-list#deselectWhenClickingOutside" } do %>
-  <div class="card-columns__left"></div>
-
-  <%= render "tasks/board/stream", count: counts.fetch("planned", 0), board: board %>
-
-  <div class="card-columns__right">
-    <% Task::BOARD_COLUMNS.each do |status| %>
-      <%# herb:key status %>
-      <%= render "tasks/board/column", status: status, count: counts.fetch(status, 0), board: board %>
-    <% end %>
-    <%= render "tasks/board/closed", count: counts.fetch("done", 0), board: board %>
-  </div>
+<%= ui :board, id: "tasks-board", method: :post, label: "#{term(:task, count: 2)} by status", class: "task-board" do %>
+  <% task_board_statuses.each do |status| %>
+    <%# herb:key status %>
+    <%= render "tasks/board/column", status: status, count: counts.fetch(status, 0), board: board %>
+  <% end %>
 <% end %>

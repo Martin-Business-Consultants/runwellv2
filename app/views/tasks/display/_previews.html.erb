@@ -1,5 +1,0 @@
-<%# locals: (tasks:, draggable: nil) %>
-<% tasks.each do |task| %>
-  <%# herb:key task.id %>
-  <%= render "tasks/display/preview", task: task, draggable: draggable %>
-<% end %>

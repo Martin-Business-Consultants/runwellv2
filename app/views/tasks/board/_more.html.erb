@@ -1,0 +1,13 @@
+<%# locals: (status:, page:, frame:) %>
+<%# The answer to a column's next-page frame (task_board_more): it replaces the item it was in with
+    this page's cards and, if there are more, the next such item. %>
+<turbo-frame id="<%= frame %>">
+  <turbo-stream action="replace" targets="#board-list-<%= status.parameterize %> > [data-slot=board-more]">
+    <template>
+      <%= render partial: "tasks/display/preview", collection: page.records, as: :task %>
+      <% unless page.last? %>
+        <li data-slot="board-more"><%= task_board_more(status, page) %></li>
+      <% end %>
+    </template>
+  </turbo-stream>
+</turbo-frame>

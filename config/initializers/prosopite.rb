@@ -17,6 +17,6 @@ if defined?(Prosopite)
     Prosopite.allow_stack_paths = [ "app/models/agent/resolver.rb", "app/controllers/concerns/bulk_action.rb",
       "TasksController#update", "Tasks::StatusesController#update", "Task::Intake#decline!", "Work#erase!",
       # The board renders each column's first page (one query a column, a handful, on purpose).
-      "app/views/tasks/board/_cards.html.erb" ]
+      "app/views/tasks/board/_column.html.erb" ]
   end
 end

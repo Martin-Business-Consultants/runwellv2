@@ -19,11 +19,16 @@ module TasksHelper
   # A text link is followed by the arrow to the task's page (PeekHelper#page_link_to; open: false
   # leaves it off).
   def side_panel_link_to(task, content = nil, data: {}, open: true, **options, &block)
-    action = [ data[:action], "side-panel#open" ].compact.join(" ")
-    data = data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, turbo_prefetch: false)
+    data = side_panel_link_data(task, data)
     return link_to(task_path(task), data: data, **options, &block) if block
 
     with_page_link(link_to(content, task_path(task), data: data, **options), task_path(task), task.title, open)
+  end
+
+  # What makes a link open its task in the side panel (side_panel_link_to; a board card's title).
+  def side_panel_link_data(task, data = {})
+    action = [ data[:action], "side-panel#open" ].compact.join(" ")
+    data.merge(turbo_frame: data[:turbo_frame] || "_top", action: action, side_panel_task_param: task.id, turbo_prefetch: false)
   end
 
   # The team for the inline owner picker, loaded once per page however many rows use it.

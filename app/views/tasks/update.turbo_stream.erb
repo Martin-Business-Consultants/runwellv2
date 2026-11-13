@@ -3,7 +3,7 @@
 <%= turbo_stream.replace dom_id(@task, :panel), method: :morph, partial: "tasks/panel", locals: { task: @task } %>
 <%= turbo_stream.replace dom_id(@task, :row), method: :morph, partial: "tasks/row", locals: { task: @task, listed: CustomField.for("Task").listed.to_a } %>
 <%= turbo_stream.replace dom_id(@task, :item), method: :morph, partial: "tasks/task", locals: { task: @task } %>
-<%= turbo_stream.replace dom_id(@task, :article), method: :morph, partial: "tasks/display/preview", locals: { task: @task, draggable: true } %>
+<%= turbo_stream.replace "board-card-#{@task.id}", method: :morph, partial: "tasks/display/preview", locals: { task: @task } %>
 <%= intake_streams(@task) %>
 <%= turbo_stream_flash(notice: (@alert ? nil : "Saved."), alert: @alert) %>
 <%# A repeating task marked done made the next one: the page reloads in place to show it. %>

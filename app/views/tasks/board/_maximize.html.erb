@@ -1,5 +1,3 @@
 <%# locals: (column_path:) %>
-<%= link_to column_path, class: "cards__maximize-button icon-button", title: "Expand column", data: { turbo_frame: "_top" } do %>
-  <%= icon_tag "maximize" %>
-  <span class="visually-hidden">Expand column</span>
-<% end %>
+<%# A column's way to its own page (tasks/columns/show), in its header. %>
+<%= ui :button, href: column_path, variant: :ghost, size: :icon_xs, class: "task-column__maximize", title: "Expand column", aria: { label: "Expand column" }, data: { turbo_frame: "_top" }, content: icon_tag("maximize") %>

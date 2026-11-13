@@ -1,1 +1,1 @@
-<%= turbo_stream.replace("tasks-#{@status}", partial: "tasks/board/column", method: :morph, locals: { status: @status, count: @count, board: board_tasks }) %>
+<%= turbo_stream.replace("board-column-#{@status}", partial: "tasks/board/column", method: :morph, locals: { status: @status, count: @count, board: board_tasks }) %>

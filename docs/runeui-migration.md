@@ -192,6 +192,27 @@ core (plugins go through the compatibility layer).
    drawn in a stream answer links to the work's page (`tasks/_view_switch, work:`).
 6. **The board**: `tasks/board/*`, `columns/*`, the Fizzy drag-and-drop → `ui :board`
    (`Task#move!`, `before`, one endpoint).
+   **Done:** the Tasks board and a work's board are `ui :board` (`tasks/board/_columns`), a
+   `ui :board_column` per status (`tasks/board/_column`: `total:`, a lazy next-page item `more:`,
+   `collapsible:` for the doing columns and Done, `url:` its own drop endpoint with `__card__`), the
+   cards `ui :board_card` (`tasks/display/_preview`, its title link `side_panel_link_data`). The
+   drop endpoints and `Task#move!` with `before` are unchanged; their answers replace
+   `board-column-<status>`. Later pages: `task_board_more` (a lazy frame) answered by
+   `Tasks::ColumnsController` with `tasks/board/_more` (a stream replacing the item with the next
+   page's cards). A column's own page is a one-column board laid out as a grid. Keys: the keyboard
+   controller hands h j k l to the focused card as arrows and H J K L as Shift+arrows, then selects
+   the card it lands on (the side panel follows). Gone: `ColumnsHelper` (`column_tag`,
+   `column_frame_tag`), the `collapsible-columns`, `drag-and-strum` and `css-variable-counter`
+   controllers, `tasks/board/_cards`, `_closed`, `_stream`, `_expander`, `tasks/display/_previews`,
+   `tasks/columns/_empty_placeholder`, the `card-columns` / `cards__*` / `app-card--compact` CSS.
+   Added to runeui: a url naming the card (`__card__`), moves through Turbo's fetch, `total:` and a
+   next-page item (`more:`) on a column, folding columns (`collapsible:`, `collapsed:`, kept per
+   browser, safe from morphs, opening as a card is held over or moved into one), `link:` attributes
+   on a card's title, Enter marked handled, the card after a card found in document order (cards an
+   app wraps, as ReActionView's debug spans do). Kept: `drag-and-drop` (plugins and the core's
+   other sortable lists use it), `navigable-list` (notifications, quick actions),
+   `layouts/shared/card` and `.app-card` (plugins). Left: column dots are Runwell's status colours
+   on runeui's tone dot (planned an outline), not the status-dot icons.
 7. **Search, quick actions, keys**: the bar and tray → `ui :command, dialog: true`; the keyboard
    controller kept, pointed at runeui's markup (`data-keys` unchanged); hint mode kept.
 8. **Settings, public pages and the portal**: every settings page, sign-in and its showcase, the

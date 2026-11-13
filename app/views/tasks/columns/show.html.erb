@@ -1,9 +1,12 @@
 <% @page_title = "Column: #{@status.humanize}" %>
-<%# The breadcrumb names the page ("Work › Column: Planned"), and Esc goes back to the board. %>
+<%# A board column on a page of its own: the same column (runeui's board, one column laid out as a
+    grid), its cards a page at a time as it scrolls. The breadcrumb names the page ("Tasks › Column:
+    Planned"), and Esc goes back to the board. %>
 <%= parent_page term(:task, count: 2), tasks_path(task_board_filters.merge(view: "board")) %>
 
-<section class="cards cards--grid">
-  <turbo-frame id="<%= @status %>_cards">
-    <%= render "tasks/board/cards", status: @status, page: @page %>
-  </turbo-frame>
-</section>
+<%= ui :board, id: "tasks-column-board", method: :post, label: "#{term(:task, count: 2)}: #{@status.humanize}", class: "task-board task-board--single" do %>
+  <%= ui :board_column, id: @status, title: @status.humanize, total: @total, tone: task_column_tone(@status), url: task_drop_url(@status),
+        class: "task-column task-column--#{@status.dasherize}", empty: "No #{term(:task, count: 2).downcase} here", more: task_board_more(@status, @page, shown: @tasks.size, total: @total) do %>
+    <%= render partial: "tasks/display/preview", collection: @tasks, as: :task %>
+  <% end %>
+<% end %>

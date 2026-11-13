@@ -1,4 +1,4 @@
-<%= turbo_stream.replace("done-tasks", partial: "tasks/board/closed", method: :morph, locals: { count: @count, board: board_tasks }) %>
+<%= turbo_stream.replace("board-column-done", partial: "tasks/board/column", method: :morph, locals: { status: "done", count: @count, board: board_tasks }) %>
 <%# A repeating task dropped on Done made the next one: the board reloads in place to show it. %>
 <% if @task.repeated_task %>
   <%= turbo_stream.refresh(request_id: nil) %>

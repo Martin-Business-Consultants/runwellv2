@@ -1,6 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { post } from "@rails/request.js"
-import { nextFrame } from "helpers/timing_helpers"
 import { prefetchLink } from "helpers/page_prefetch"
 
 // Every key the app answers to, vim style, in one place (on <body>). Letters act outside
@@ -14,8 +12,8 @@ import { prefetchLink } from "helpers/page_prefetch"
 // - every other key clicks the visible element declaring it (data-keys="e"), or focuses it
 //   (data-keys-focus). One inside the current item wins over the page's own, so e and d
 //   act on the row you're on
-// - on the Work board, h / l and j / k drive Fizzy's column navigation and H / L move the
-//   card a column, posting to the same drop endpoint a drag would
+// - on the board, h j k l move between cards and H J K L move the card you're on (runeui's board,
+//   handed the arrows), posting to the same drop endpoint a drag would
 //
 // The ? sheet (layouts/shared/_shortcuts) lists them all. Esc in a form opened in place closes it
 // (its data-keys="esc" Cancel, or its <details>); with nothing selected it goes up a level
@@ -351,108 +349,42 @@ export default class extends Controller {
   // Board
 
   get #board() {
-    return document.querySelector(".card-columns")
+    return document.querySelector("[data-slot=board].task-board")
   }
 
+  // runeui's board moves between its cards with the arrows and moves a card with Shift and an
+  // arrow (posting to its column's drop endpoint), so h j k l are handed to the card you're on as
+  // arrows, and H J K L as Shift with them. The card it lands on becomes the current item, so the
+  // side panel follows as it does down a list.
   #boardKey(key, event) {
-    if (BOARD_ARROWS[key]) {
-      this.#relay(BOARD_ARROWS[key], event)
-      return true
-    }
-    if (key === "H" || key === "L") {
-      this.#moveCard(key === "L" ? 1 : -1, event)
-      return true
-    }
-    if (key === "J" || key === "K") {
-      this.#reorderCard(key === "J" ? 1 : -1, event)
-      return true
-    }
-    return false
-  }
+    const arrow = BOARD_ARROWS[key.toLowerCase()]
+    if (!arrow) return false
 
-  // Fizzy's navigable lists listen for arrow keys on the board, so hand them one.
-  async #relay(arrow, event) {
     event.preventDefault()
+    const card = this.#boardCard()
+    if (!card) return true
+
+    card.dispatchEvent(new KeyboardEvent("keydown", { key: arrow, shiftKey: key !== key.toLowerCase(), bubbles: true, cancelable: true }))
+    requestAnimationFrame(() => {
+      const now = document.activeElement?.closest?.("[data-slot=board-card]")
+      if (now && now !== this.current) this.#select(now)
+    })
+    return true
+  }
+
+  // The card in focus, else the current one (focused now), else the first: then nothing more
+  // happens this time, the first key only puts you on the board.
+  #boardCard() {
     const board = this.#board
-    if (!board.contains(document.activeElement)) {
-      (board.querySelector("section.cards[aria-selected]") || board.querySelector("section.cards"))?.focus()
-      await nextFrame()
-      await nextFrame()
-    }
-    const target = board.contains(document.activeElement) ? document.activeElement : board
-    target.dispatchEvent(new KeyboardEvent("keydown", { key: arrow, bubbles: true, cancelable: true }))
-  }
+    const focused = document.activeElement?.closest?.("[data-slot=board-card]")
+    if (focused && board.contains(focused)) return focused
 
-  // The selected card, the focused one, or the one just moved (redrawn cards lose selection).
-  #boardCard(board) {
-    return board.querySelector("section.cards[aria-selected] .card[aria-selected]") || document.activeElement?.closest(".card") ||
-      (this.movedId && board.querySelector(`.card[data-id="${this.movedId}"]`))
-  }
+    const current = this.current?.matches?.("[data-slot=board-card]") && board.contains(this.current) ? this.current : null
+    if (current) { current.focus(); return current }
 
-  async #moveCard(delta, event) {
-    event.preventDefault()
-    const board = this.#board
-    const card = this.#boardCard(board)
-    if (!card) return
-
-    const columns = Array.from(board.querySelectorAll("section.cards"))
-    const from = card.closest("section.cards")
-    const to = columns[columns.indexOf(from) + delta]
-    if (!to) return
-
-    const id = card.dataset.id
-    const list = to.querySelector("[data-drag-drop-item-container]")
-    const body = new FormData()
-    // A sortable column takes the card at its top, where it shows up.
-    if (to.hasAttribute("data-drag-and-drop-sortable")) body.append("before", list?.querySelector(".card[data-id]")?.dataset.id || "")
-    adjustCount(from, -1)
-    adjustCount(to, 1)
-    list?.prepend(card)
-    this.movedId = id
-    await post(to.dataset.dragAndDropUrl.replaceAll("__id__", id), { body, headers: { Accept: "text/vnd.turbo-stream.html" } })
-    from.querySelector("[data-drag-and-drop-refresh]")?.reload()
-    await this.#pickUpAgain(board, card, id)
-  }
-
-  // J / K: a card one place down or up its column, kept there (the column's drop endpoint with
-  // the card it now sits before).
-  async #reorderCard(delta, event) {
-    event.preventDefault()
-    const board = this.#board
-    const card = this.#boardCard(board)
-    const column = card?.closest("section.cards")
-    if (!column?.hasAttribute("data-drag-and-drop-sortable")) return
-
-    const cards = Array.from(column.querySelectorAll(".card[data-id]"))
-    const neighbour = cards[cards.indexOf(card) + delta]
-    if (!neighbour) return
-
-    delta > 0 ? neighbour.after(card) : neighbour.before(card)
-    const next = cards.filter(other => other !== card)[cards.indexOf(card) + delta]
-    const body = new FormData()
-    body.append("before", delta > 0 ? (next?.dataset.id || "") : neighbour.dataset.id)
-
-    const id = card.dataset.id
-    this.movedId = id
-    await post(column.dataset.dragAndDropUrl.replaceAll("__id__", id), { body, headers: { Accept: "text/vnd.turbo-stream.html" } })
-    await this.#pickUpAgain(board, card, id)
-  }
-
-  async #pickUpAgain(board, card, id) {
-    // The target column is redrawn from the server; wait for the card's new node, then pick it
-    // up again so the next H or L keeps moving it.
-    for (let i = 0; i < 20; i++) {
-      await new Promise(resolve => setTimeout(resolve, 50))
-      const moved = board.querySelector(`.card[data-id="${id}"]`)
-      if (moved && moved !== card && moved.isConnected) {
-        moved.dispatchEvent(new Event("mouseenter"))
-        moved.focus()
-        return
-      }
-    }
-    const moved = board.querySelector(`.card[data-id="${id}"]`)
-    moved?.dispatchEvent(new Event("mouseenter"))
-    moved?.focus()
+    const first = Array.from(board.querySelectorAll("[data-slot=board-card]")).find(card => card.checkVisibility())
+    if (first) { first.focus(); this.#select(first) }
+    return null
   }
 }
 
@@ -490,9 +422,4 @@ function hintFor(keys) {
 function usable(element) {
   if (element.hasAttribute("data-keys-anywhere")) return true
   return !element.closest("[hidden], dialog:not([open])") && element.checkVisibility()
-}
-
-function adjustCount(column, delta) {
-  const counter = column.querySelector("[data-drag-and-drop-counter]")
-  if (counter && /^\d+$/.test(counter.textContent)) counter.textContent = Number(counter.textContent) + delta
 }
