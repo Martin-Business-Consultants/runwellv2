@@ -3,30 +3,27 @@
     someone off redraws it whole (the hint changes with it); a change to a line redraws that line. %>
 <% people = User.people.active.ordered.map { [ it.display_name, it.id ] } %>
 <div class="intake-schedule" id="intake_schedule">
-  <section class="card">
-    <header class="card__head">
-      <h2 class="card__title">Who hears what comes in</h2>
-      <p class="card__hint">
+  <% hint = capture do %>
         <% if shifts.empty? %>
           Nobody’s on the schedule, so every owner and manager hears each <%= term(:client).downcase %>’s request as it comes in, and nothing else notifies.
         <% else %>
           Each line hears about what comes in from its sources: as it arrives, inside its hours, or in a digest of everything waiting. Anything that comes in while nobody’s window covers it waits for the next one to open. Times are <%= Time.zone.name %>.
         <% end %>
-      </p>
-    </header>
-    <div class="card__content intake-schedule__body">
+  <% end %>
+  <%= ui :card, title: tag.h2("Who hears what comes in", class: "record-card__title"), description: hint, class: "intake-schedule__card" do %>
+    <div class="intake-schedule__body">
     <ul class="intake-schedule__list" id="intake_shifts">
       <%= render partial: "intakes/shifts/shift", collection: shifts, as: :shift, locals: { people: people } %>
     </ul>
     <% if can?(:manage_intake) %>
       <%= form_with model: IntakeShift.new, url: intake_shifts_path, scope: :intake_shift, namespace: "new_intake_shift", class: "intake-schedule__add" do |form| %>
         <%= form.select :user_id, people, { include_blank: "Someone on the team…" }, required: true, search: true, aria: { label: "Who" } %>
-        <%= form.button class: "btn btn--secondary btn--sm" do %>
+        <%= form.button class: "ui-button", data: { variant: "outline", size: "sm" } do %>
           <%= icon_tag "add" %> <span>Add to the schedule</span>
         <% end %>
       <% end %>
-      <p class="field__hint">They start on weekdays, 08:00–17:00, hearing <%= term(:client).downcase %> requests as they come in. Change any of it on their line.</p>
+      <p class="settings-note">They start on weekdays, 08:00–17:00, hearing <%= term(:client).downcase %> requests as they come in. Change any of it on their line.</p>
     <% end %>
     </div>
-  </section>
+  <% end %>
 </div>

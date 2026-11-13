@@ -28,7 +28,7 @@
       <% end %>
       <% Array(meta).compact_blank.each do |text| %>
         <%# herb:key text %>
-        <span class="badge badge--outline"><%= text %></span>
+        <%= ui :badge, variant: :outline, content: text %>
       <% end %>
     </div>
     <% if people.present? %>

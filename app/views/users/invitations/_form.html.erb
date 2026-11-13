@@ -2,19 +2,16 @@
 <%# Who to invite and as what: on the Invite page, or in a modal over Users (modal: true). %>
 <%= form_with model: invitation, url: user_invitations_path, class: "settings-form", data: draft_data("new:invitation") do |form| %>
   <%= draft_notice %>
-  <div class="field">
-    <%= form.label :email_address, "Email address", class: "field__label" %>
+  <%= form.ui :field, :email_address, label: "Email address" do %>
     <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "off", placeholder: "name@example.com" %>
-  </div>
-  <div class="field">
-    <%= form.label :role, "Role", class: "field__label" %>
+  <% end %>
+  <%= form.ui :field, :role, label: "Role", description: "What they may do; see each role on the right." do %>
     <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {} %>
-    <p class="field__hint">What they may do; see each role on the right.</p>
-  </div>
-  <div class="button-row">
+  <% end %>
+  <div class="form-actions">
     <% if modal %>
-      <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
+      <%= ui :button, type: :button, variant: :outline, content: "Cancel", data: { runeui_close: "modal_dialog" } %>
     <% end %>
-    <button type="submit" class="btn btn--primary">Send invitation</button>
+    <%= ui :button, type: :submit, content: "Send invitation" %>
   </div>
 <% end %>

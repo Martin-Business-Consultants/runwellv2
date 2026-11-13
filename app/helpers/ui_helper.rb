@@ -1,12 +1,14 @@
 # Runwell's own builders over runeui (ui :table, ui :badge…; ../runeui/README.md): statuses in
 # their tones and an index's table. The styleguide at /ui (development) shows the components.
 module UiHelper
-  # Runwell's status tones (ApplicationHelper::STATUS_TONES) as rune_ui's badge tones.
-  STATUS_BADGES = { "positive" => :ok, "negative" => :danger, "waiting" => :attention, "progress" => :accent, "neutral" => :neutral }.freeze
+  # Runwell's status tones (ApplicationHelper::STATUS_TONES) as runeui's badge variants.
+  STATUS_BADGES = { "positive" => :success, "negative" => :destructive, "waiting" => :warning, "progress" => :info, "neutral" => :secondary }.freeze
 
-  # A status in its tone: ui_status_badge("overdue").
+  # A status in its tone (ui :badge): ui_status_badge("overdue"). A snake_case status shows
+  # humanized; other text as it is.
   def ui_status_badge(label, highlight: false, **options)
-    badge(label, tone: STATUS_BADGES.fetch(status_tone(label, highlight: highlight)), **options)
+    text = label.is_a?(Symbol) || label.to_s.match?(/\A[a-z_]+\z/) ? label.to_s.humanize : label.to_s
+    ui :badge, content: text, variant: STATUS_BADGES.fetch(status_tone(label, highlight: highlight)), **options
   end
 
   # An index's table (layouts/shared/_list_table, on runeui's ui :table): one column of it. key

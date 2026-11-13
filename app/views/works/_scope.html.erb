@@ -37,7 +37,7 @@
               <% end %>
               <a href="<%= work_path(work, filters.merge(tab: "tasks", item: id)) %>" class="scope-nav__item" draggable="false"<% if current.to_s == id.to_s %> aria-current="page"<% end %>>
                 <span class="scope-nav__name" title="<%= name %>">
-                  <%= status_dot({ "in_progress" => :accent, "blocked" => :danger, "done" => :ok }.fetch(state, :neutral), label: state.humanize) %>
+                  <span class="state-dot state-dot--<%= { "in_progress" => "accent", "blocked" => "danger", "done" => "ok" }.fetch(state, "neutral") %>" title="<%= state.humanize %>" role="img" aria-label="<%= state.humanize %>"></span>
                   <span class="scope-nav__label"><%= name %></span>
                 </span>
                 <span class="scope-nav__count"><%= item_statuses.count("done") %>/<%= item_statuses.size %></span>

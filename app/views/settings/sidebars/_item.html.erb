@@ -6,6 +6,6 @@
   <%= icon_tag icon %>
   <span class="nav-editor__name"><%= name %></span>
   <% if NavLayout.plugin_key(item) %>
-    <span class="badge">Plugin</span>
+    <%= ui :badge, variant: :secondary, content: "Plugin" %>
   <% end %>
 </li>

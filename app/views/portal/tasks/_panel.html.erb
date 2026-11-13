@@ -17,9 +17,8 @@
       <% end %>
     </p>
     <div class="task-panel__actions">
-      <button type="button" class="icon-button" title="Close (Esc)" data-keys="esc" data-action="side-panel#close keydown.esc@document->side-panel#close">
+      <button type="button" class="ui-button" data-variant="ghost" data-size="icon-sm" title="Close (Esc)" aria-label="Close" data-keys="esc" data-action="side-panel#close keydown.esc@document->side-panel#close">
         <%= icon_tag "close" %>
-        <span class="visually-hidden">Close</span>
       </button>
     </div>
   </header>
@@ -27,7 +26,7 @@
   <div class="portal-task__about">
   <h2 class="task-panel__title task-panel__title--static"><%= task.title %></h2>
 
-  <dl class="details task-panel__details">
+  <dl class="task-panel__details">
     <dt>Status</dt><dd><%= portal_status_tag(task) %></dd>
     <% if task.status == "done" && task.completed_at %>
       <dt>Done</dt><dd><%= l task.completed_at.in_time_zone.to_date, format: :long %></dd>
@@ -37,7 +36,7 @@
         <% if task.due_on %>
           <%= portal_due(task, format: :long) %>
         <% else %>
-          <span class="muted">No date</span>
+          <span class="portal-muted">No date</span>
         <% end %>
       </dd>
     <% end %>
@@ -57,7 +56,7 @@
     <% if task.description.present? %>
       <div class="record-card__prose"><%= rich_text task.description %></div>
     <% else %>
-      <p class="muted">No description.</p>
+      <p class="portal-muted">No description.</p>
     <% end %>
   </div>
 

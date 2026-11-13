@@ -1,44 +1,23 @@
 <%# locals: () %>
-<%# The bell at the right of the panel bar (g n) and its popover: a header with the way to every
-    notification and Clear all, over the newest few as list rows (notifications/trays/show). The
-    dialog stacks in reverse, so the header sits on top while the rows come first for the keys.
-    Permanent, so its loaded list rides along from page to page. %>
-<section class="tray tray--notifications" id="notifications_tray" data-turbo-permanent data-controller="dialog badge" data-badge-unread-class="unread" data-action="turbo:frame-render->badge#update" data-dialog-sizing-value="false">
-  <dialog class="tray__dialog"
-      aria-label="Notifications"
-      data-controller="navigable-list"
-      data-dialog-target="dialog"
-      data-navigable-list-actionable-items-value="true"
-      data-navigable-list-reverse-navigation-value="true"
-      data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
-    <turbo-frame id="notifications" src="<%= notifications_tray_path %>" refresh="morph" data-controller="frame-reloader" data-action="focus@window->frame-reloader#reload"></turbo-frame>
-
-    <p class="tray__empty">You’re all caught up.</p>
-
-    <div class="tray__item tray__item--hat">
-      <h2 class="tray__title">Notifications</h2>
-      <div data-navigable-list-target="item" class="tray__hat-action">
-        <%= link_to notifications_path, class: "btn btn--ghost btn--sm tray__see-all", data: { action: "click->dialog#close" } do %>
-          <span class="tray__new-notifications">See all new</span>
-          <span class="tray__old-notifications">View all</span>
-        <% end %>
-      </div>
-
-      <%= button_to bulk_reading_path(from_tray: true),
-            class: "btn btn--ghost btn--sm tray__clear-notifications",
-            title: "Mark all notifications as read",
-            data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
-            form: { class: "tray__hat-action", data: { navigable_list_target: "item" } } do %>
-        <%= icon_tag "check" %>
-        <span>Clear all</span>
-      <% end %>
-    </div>
-  </dialog>
-
-  <button type="button" class="tray__toggle" data-action="dialog#toggle" data-keys="g n" aria-label="Toggle notifications stack" aria-haspopup="true">
-    <span class="tray__toggle-btn">
-      <%= icon_tag "bell" %>
-      <span class="tray__toggle-text">Notifications</span>
-    </span>
+<%# The bell at the right of the panel bar (g n) and its menu (ui :menu): the newest few unread as
+    items (notifications/trays/show, loaded into the notifications frame and reloaded on every
+    refresh the person's notifications broadcast), each opening its record and reading it on the
+    way, then the way to every notification and Mark all as read. Arrows, Home / End and Esc are
+    the menu's. Permanent, so its loaded list rides along from page to page; the badge controller
+    keeps the tab's title and the app's badge to the unread total, and the bell carries a dot while
+    anything is unread. %>
+<% trigger = capture do %>
+  <button type="button" class="tray__toggle" aria-label="Notifications" title="Notifications (G N)" data-keys="g n">
+    <span class="tray__toggle-btn"><%= icon_tag "bell" %></span>
   </button>
-</section>
+<% end %>
+<div class="tray tray--notifications" id="notifications_tray" data-turbo-permanent data-controller="badge" data-action="turbo:frame-render->badge#update">
+  <%= ui :menu, id: "notifications-menu", trigger: trigger, side: :bottom, align: :end, label: "Notifications", class: "notifications-menu" do %>
+    <ui-menu-group-label data-slot="menu-group-label" class="notifications-menu__title">Notifications</ui-menu-group-label>
+    <turbo-frame id="notifications" src="<%= notifications_tray_path %>" refresh="morph" data-controller="frame-reloader" data-action="focus@window->frame-reloader#reload"></turbo-frame>
+    <p class="notifications-menu__empty">You’re all caught up.</p>
+    <%= ui :menu, part: "items", items: [ :separator,
+          { label: tag.span(safe_join([ tag.span("See all new", class: "notifications-menu__new"), tag.span("View all", class: "notifications-menu__all") ])), href: notifications_path, icon: :inbox },
+          { label: "Mark all as read", href: bulk_reading_path(from_tray: true), method: :post, icon: :check, data: { action: "click->badge#clear" } } ] %>
+  <% end %>
+</div>

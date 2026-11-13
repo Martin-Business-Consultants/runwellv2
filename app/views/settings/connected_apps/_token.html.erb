@@ -1,26 +1,26 @@
 <%# locals: (token:, holder: nil) %>
 <%# One connection as a row: what it is, whose (holder: for an owner's list of everyone's),
     whether it's paused, and its recent calls (AgentCall) under Activity. %>
-<li class="list-row" data-filter-target="item">
-  <div class="list-row__content">
-    <p class="list-row__title">
+<li class="settings-item" data-filter-target="item">
+  <div class="settings-item__content">
+    <p class="settings-item__title">
       <%= token.name %>
       <% if token.paused? %>
-        <%= badge "Paused", tone: :attention %>
+        <%= ui :badge, variant: :warning, content: "Paused" %>
       <% end %>
     </p>
-    <p class="list-row__desc">
+    <p class="settings-item__desc">
       <% if holder %>
         <%= token.client? ? "#{token.contact.name} (#{token.contact.client.name})" : token.holder_name %> ·
       <% end %>
       <%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · made <%= time_ago_in_words(token.created_at) %> ago · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %>
     </p>
   </div>
-  <div class="list-row__actions">
+  <div class="settings-item__actions">
     <% if token.paused? %>
-      <%= button_to "Resume", settings_connected_app_pause_path(token), method: :delete, class: "btn btn--secondary btn--sm" %>
+      <%= button_to "Resume", settings_connected_app_pause_path(token), method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" } %>
     <% else %>
-      <%= button_to "Pause", settings_connected_app_pause_path(token), class: "btn btn--secondary btn--sm" %>
+      <%= button_to "Pause", settings_connected_app_pause_path(token), class: "ui-button", data: { variant: "outline", size: "sm" } %>
     <% end %>
     <%= render "layouts/shared/delete_dialog", name: token.name, path: settings_connected_app_path(token),
           message: "It stops working at once. Anything it already did stays, marked with its name." %>

@@ -18,69 +18,60 @@
 
     <% @endpoints.each do |endpoint| %>
       <%# herb:key endpoint.id %>
-      <article class="card settings-webhook" id="<%= dom_id(endpoint) %>">
-        <header class="card__head">
-          <h3 class="card__title"><%= endpoint.description.presence || endpoint.url %></h3>
-          <p class="card__hint">
-            <code><%= endpoint.url %></code><br>
-            <%= endpoint.kinds.present? ? endpoint.kinds_text : "Every event" %><%= ", with sign-in and security" if endpoint.include_security? %>
-            <% if endpoint.failures_in_a_row.positive? %> · <%= pluralize(endpoint.failures_in_a_row, "failure") %> in a row<% end %>
-          </p>
-          <div class="card__action">
-            <% if endpoint.active? %>
-              <span class="badge badge--ok">On</span>
-            <% else %>
-              <span class="badge badge--danger">Off</span>
-            <% end %>
-            <%= render "layouts/shared/delete_dialog", name: "this webhook", path: settings_webhook_path(endpoint), message: "Events stop going to #{endpoint.url}." %>
-          </div>
-        </header>
-        <div class="card__content">
-          <%= form_with model: endpoint, url: settings_webhook_path(endpoint), method: :patch, namespace: dom_id(endpoint) do |form| %>
-            <div class="field">
-              <%= form.label :secret, "Secret", class: "field__label" %>
+      <% hint = capture do %>
+        <code><%= endpoint.url %></code><br>
+        <%= endpoint.kinds.present? ? endpoint.kinds_text : "Every event" %><%= ", with sign-in and security" if endpoint.include_security? %>
+        <% if endpoint.failures_in_a_row.positive? %> · <%= pluralize(endpoint.failures_in_a_row, "failure") %> in a row<% end %>
+      <% end %>
+      <% actions = capture do %>
+        <% if endpoint.active? %>
+          <%= ui :badge, variant: :success, content: "On" %>
+        <% else %>
+          <%= ui :badge, variant: :destructive, content: "Off" %>
+        <% end %>
+        <%= render "layouts/shared/delete_dialog", name: "this webhook", path: settings_webhook_path(endpoint), message: "Events stop going to #{endpoint.url}." %>
+      <% end %>
+      <%= ui :card, id: dom_id(endpoint), class: "settings-webhook", title: tag.h3(endpoint.description.presence || endpoint.url, class: "settings-webhook__title"), description: hint, action: actions do %>
+          <%= form_with model: endpoint, url: settings_webhook_path(endpoint), method: :patch, namespace: dom_id(endpoint), class: "settings-form" do |form| %>
+            <%= form.ui :field, :secret, label: "Secret" do %>
               <%= secret_field form, :secret, readonly: true %>
-            </div>
-            <div class="field">
-              <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
+            <% end %>
+            <%= form.ui :field, :kinds_text, label: "Only these kinds" do %>
               <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. work.closed, task.*", autocomplete: "off" %>
-            </div>
-            <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
-            <label class="checkbox"><%= form.check_box :active %> <span>On</span></label>
-            <div class="button-row">
-              <button type="submit" class="btn btn--primary btn--sm">Save</button>
-              <button type="submit" name="ping" value="1" class="btn btn--secondary btn--sm">Send a test</button>
+            <% end %>
+            <%= form.ui :checkbox, :include_security, label: "Include sign-ins and security changes" %>
+            <%= form.ui :checkbox, :active, label: "On" %>
+            <div class="settings-buttons">
+              <%= ui :button, type: :submit, size: :sm, content: "Save" %>
+              <%= ui :button, type: :submit, variant: :outline, size: :sm, content: "Send a test", name: "ping", value: "1" %>
             </div>
           <% end %>
           <% deliveries = @deliveries[endpoint.id] || [] %>
           <% if deliveries.any? %>
-            <div class="table-wrap">
-              <table class="table">
-                <thead><tr><th>When</th><th>Event</th><th>Result</th><th>Tries</th></tr></thead>
+            <%= ui :table, class: "settings-table" do %>
+                <thead><tr><th>When</th><th>Event</th><th data-grow>Result</th><th data-align="end">Tries</th></tr></thead>
                 <tbody>
                   <% deliveries.each do |delivery| %>
                     <%# herb:key delivery.id %>
                     <tr>
-                      <td class="nowrap"><%= l delivery.created_at, format: :short %></td>
+                      <td><%= l delivery.created_at, format: :short %></td>
                       <td><code><%= delivery.kind %></code></td>
-                      <td>
+                      <td data-grow>
                         <% if delivery.ok? %>
-                          <span class="badge badge--ok"><%= delivery.status_code %></span> <span class="muted"><%= delivery.duration_ms %> ms</span>
+                          <%= ui :badge, variant: :success, content: delivery.status_code.to_s %> <span class="settings-table__muted"><%= delivery.duration_ms %> ms</span>
                         <% elsif delivery.attempts.zero? %>
-                          <span class="badge badge--attention">Queued</span>
+                          <%= ui :badge, variant: :warning, content: "Queued" %>
                         <% else %>
-                          <span class="badge badge--danger"><%= delivery.status_code || "Failed" %></span> <span class="muted"><%= delivery.error %></span>
+                          <%= ui :badge, variant: :destructive, content: (delivery.status_code || "Failed").to_s %> <span class="settings-table__muted"><%= delivery.error %></span>
                         <% end %>
                       </td>
-                      <td><%= delivery.attempts %></td>
+                      <td data-align="end"><%= delivery.attempts %></td>
                     </tr>
                   <% end %>
                 </tbody>
-              </table>
-            </div>
+            <% end %>
           <% end %>
-        </div>
-      </article>
+      <% end %>
     <% end %>
   </section>
 
@@ -90,22 +81,17 @@
       <p class="settings-section__description">Event kinds are listed in the <%= link_to "plugin contract", "https://github.com/Martin-Business-Consultants/runwellv2/blob/main/docs/plugin-contract.md#events", target: "_blank", rel: "noopener" %>; sign-in ones in the audit log.</p>
     </header>
     <%= form_with model: @endpoint, url: settings_webhooks_path, class: "settings-form" do |form| %>
-      <div class="field">
-        <%= form.label :url, "Address", class: "field__label" %>
+      <%= form.ui :field, :url, label: "Address" do %>
         <%= form.url_field :url, placeholder: "https://hooks.example.com/runwell", required: true, autocomplete: "off" %>
-      </div>
-      <div class="field">
-        <%= form.label :description, "Name", class: "field__label" %>
+      <% end %>
+      <%= form.ui :field, :description, label: "Name", description: "Optional." do %>
         <%= form.text_field :description, placeholder: "Zapier: closed work to the sales sheet", autocomplete: "off" %>
-        <p class="field__hint">Optional.</p>
-      </div>
-      <div class="field">
-        <%= form.label :kinds_text, "Only these kinds", class: "field__label" %>
+      <% end %>
+      <%= form.ui :field, :kinds_text, label: "Only these kinds", description: "Optional: blank sends every event." do %>
         <%= form.text_field :kinds_text, placeholder: "Blank for every event, or e.g. work.closed, task.*", autocomplete: "off" %>
-        <p class="field__hint">Optional: blank sends every event.</p>
-      </div>
-      <label class="checkbox"><%= form.check_box :include_security %> <span>Include sign-ins and security changes</span></label>
-      <div><button type="submit" class="btn btn--primary">Add webhook</button></div>
+      <% end %>
+      <%= form.ui :checkbox, :include_security, label: "Include sign-ins and security changes" %>
+      <div><%= ui :button, type: :submit, content: "Add webhook" %></div>
     <% end %>
   </section>
 </div>

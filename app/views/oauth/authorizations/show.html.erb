@@ -1,39 +1,26 @@
 <% @page_title = "Connect " + @client.name %>
 
 <div class="auth auth--wide">
-  <section class="card auth__card">
-    <header class="card__head auth__header">
-      <h1 class="card__title auth__title">Connect <%= @client.name %>?</h1>
-      <p class="card__hint">
-        <strong class="auth__strong"><%= @client.name %></strong> will act as your agent, <strong class="auth__strong"><%= Current.user.agent&.display_name || Current.user.display_name %></strong>, in Runwell:
-        everything your role (<%= Current.user.role %>) allows, from reading <%= term(:client, count: 2).downcase %> and <%= term(:work, count: 2).downcase %> to adding <%= term(:task, count: 2).downcase %> and notes.
-      </p>
-    </header>
-
-    <div class="card__content auth__content">
-      <p class="muted">
+  <% hint = capture do %><strong class="auth__strong"><%= @client.name %></strong> will act as your agent, <strong class="auth__strong"><%= Current.user.agent&.display_name || Current.user.display_name %></strong>, in Runwell:
+        everything your role (<%= Current.user.role %>) allows, from reading <%= term(:client, count: 2).downcase %> and <%= term(:work, count: 2).downcase %> to adding <%= term(:task, count: 2).downcase %> and notes.<% end %>
+  <%= auth_card title: "Connect #{@client.name}?", hint: hint do %>
+      <p class="auth__muted">
         It asks you before anything reaches a client, and what it does is marked as your agent “via <%= @client.name %>”. You can disconnect it any time in Settings → Connected apps.
       </p>
 
       <%= form_with url: oauth_authorization_path, method: :post, class: "auth__form", data: { turbo: false } do %>
-        <label class="checkbox">
-          <%= check_box_tag :read_only, "1", params[:scope].to_s.split.include?("runwell:read"), id: "read_only" %>
-          <span>Read only: it can look at everything you can, and change nothing</span>
-        </label>
+        <%= ui :checkbox, name: "read_only", value: "1", id: "read_only", checked: params[:scope].to_s.split.include?("runwell:read"), label: "Read only: it can look at everything you can, and change nothing" %>
         <% %w[client_id redirect_uri response_type code_challenge code_challenge_method state scope resource].each do |key| %>
           <%# herb:key key %>
           <input type="hidden" name="<%= key %>" value="<%= params[key] %>">
         <% end %>
         <div class="auth__actions">
-          <button type="submit" name="approve" value="0" class="btn btn--secondary">Cancel</button>
-          <button type="submit" name="approve" value="1" class="btn btn--primary">
-            <span>Connect</span>
-            <%= icon_tag "arrow-right" %>
-          </button>
+          <%= ui :button, type: :submit, variant: :outline, content: "Cancel", name: "approve", value: "0" %>
+          <%= ui :button, type: :submit, name: "approve", value: "1", content: safe_join([ tag.span("Connect"), icon_tag("arrow-right") ]) %>
         </div>
       <% end %>
 
-      <p class="faint small auth__return">
+      <p class="auth__return">
         Returning to
         <% if OauthClient.loopback?(@redirect_uri) %>
           <%= @client.name %> on this computer
@@ -41,6 +28,5 @@
           <%= URI(@redirect_uri).host %>
         <% end %>
       </p>
-    </div>
-  </section>
+  <% end %>
 </div>

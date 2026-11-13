@@ -9,7 +9,7 @@
       <%= hidden_field_tag :inline_item, item, id: nil %>
     <% end %>
     <%= form.text_field :description, required: true, autocomplete: "off", placeholder: "New #{term(:scope_item).downcase}", aria: { label: "New #{term(:scope_item).downcase}" } %>
-    <button type="submit" class="btn btn--primary btn--sm" title="Add">
+    <button type="submit" class="ui-button" data-variant="default" data-size="sm" title="Add">
       <span>Add</span>
       <%= icon_tag "add" %>
     </button>

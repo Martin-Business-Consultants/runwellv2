@@ -1,6 +1,0 @@
-<%# locals: (notification:) %>
-<%# What a notification says: who did what (a mention, a client's reply, a request), and the words. %>
-<span class="list-row__title"><%= notification.title %></span>
-<span class="notification__body">
-  <%= notification.excerpt.truncate(200) %>
-</span>

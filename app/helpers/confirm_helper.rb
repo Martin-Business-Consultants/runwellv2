@@ -15,19 +15,20 @@ module ConfirmHelper
   # (layouts/shared/_delete_dialog). keys: the key that presses it ("d").
   def delete_button(name:, path:, message: nil, trigger_class: nil, keys: nil)
     title = "Delete #{name}?"
-    button_to path, method: :delete, class: class_names("icon-button icon-button--danger", trigger_class), title: title,
+    button_to path, method: :delete, class: class_names("ui-button danger-button", trigger_class), title: title,
       aria: { label: title }, form: { data: { turbo_frame: "_top" } },
-      data: { keys: keys, **confirm_data(title, description: message || "This can’t be undone.") }.compact do
+      data: { variant: "ghost", size: "icon-sm", keys: keys, **confirm_data(title, description: message || "This can’t be undone.") }.compact do
       icon_tag("trash")
     end
   end
 
   # A quiet button for something destructive on a record's own page (delete, archive, deactivate),
-  # asking first (layouts/shared/_confirm). d presses it (keys: nil for none). css: its classes,
-  # when it isn't the quiet red one.
-  def confirm_button(trigger:, title:, body:, button:, path:, method: nil, icon: nil, keys: "d", css: nil)
-    button_to path, method: method || :delete, class: css || "btn btn--ghost btn--sm confirm-button", form: { data: { turbo_frame: "_top" } },
-      data: { keys: keys, **confirm_data(title, description: body, button: button) }.compact do
+  # asking first (layouts/shared/_confirm): runeui's small button, ghost and red unless variant:
+  # says otherwise (:destructive, a filled red one). d presses it (keys: nil for none). css:
+  # classes of its own beside runeui's.
+  def confirm_button(trigger:, title:, body:, button:, path:, method: nil, icon: nil, keys: "d", css: nil, variant: :ghost)
+    button_to path, method: method || :delete, class: class_names("ui-button", css, "confirm-button": variant == :ghost), form: { data: { turbo_frame: "_top" } },
+      data: { variant: variant.to_s, size: "sm", keys: keys, **confirm_data(title, description: body, button: button) }.compact do
       safe_join([ icon_tag(icon || "trash"), tag.span(trigger) ])
     end
   end

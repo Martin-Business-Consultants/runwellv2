@@ -33,7 +33,7 @@
       </header>
       <% unless me %>
         <div class="button-row">
-          <%= button_to user_password_path(@person), class: "btn btn--secondary" do %>
+          <%= button_to user_password_path(@person), class: "ui-button", data: { variant: "outline", size: "default" } do %>
             <%= icon_tag "email" %> <span>Email them a link to choose one</span>
           <% end %>
         </div>
@@ -54,7 +54,7 @@
           </div>
           <div class="button-row">
             <% if @person.deactivated? %>
-              <%= button_to "Reactivate", user_deactivation_path(@person), method: :delete, class: "btn btn--secondary btn--sm" %>
+              <%= button_to "Reactivate", user_deactivation_path(@person), method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" } %>
             <% else %>
               <%= render "layouts/shared/confirm", trigger: "Deactivate #{@person.display_name}", title: "Deactivate #{@person.display_name}?",
                     body: "They’re signed out everywhere, their connected apps stop, and they can’t sign in. Their name stays on their work, and you can reactivate them.",
@@ -85,7 +85,7 @@
         <% unless me %>
           <% if @sessions.any? %>
             <div class="settings-section__actions">
-              <%= button_to "Sign out everywhere", user_sessions_path(@person), method: :delete, class: "btn btn--secondary btn--sm" %>
+              <%= button_to "Sign out everywhere", user_sessions_path(@person), method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" } %>
             </div>
           <% end %>
         <% end %>
@@ -94,10 +94,10 @@
         <ul class="settings-list settings-list--scroll">
           <% @sessions.each do |session| %>
             <%# herb:key session.id %>
-            <li class="list-row">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= session.user_agent.to_s.truncate(80).presence || "A browser" %></p>
-                <p class="list-row__desc"><%= session.ip_address %> · since <%= l session.created_at, format: :short %></p>
+            <li class="settings-item">
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= session.user_agent.to_s.truncate(80).presence || "A browser" %></p>
+                <p class="settings-item__desc"><%= session.ip_address %> · since <%= l session.created_at, format: :short %></p>
               </div>
             </li>
           <% end %>
@@ -121,10 +121,10 @@
         <ul class="settings-list">
           <% @connections.each do |token| %>
             <%# herb:key token.id %>
-            <li class="list-row">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= token.name %></p>
-                <p class="list-row__desc"><%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %></p>
+            <li class="settings-item">
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= token.name %></p>
+                <p class="settings-item__desc"><%= token.kind == "oauth" ? "Connected app" : "Personal token" %><%= " · read only" if token.read_only? %> · <%= token.last_used_at ? "last used #{time_ago_in_words(token.last_used_at)} ago" : "never used" %></p>
               </div>
             </li>
           <% end %>
@@ -163,10 +163,10 @@
         <ul class="settings-list settings-list--scroll">
           <% @sign_ins.each do |event| %>
             <%# herb:key event.id %>
-            <li class="list-row">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= event.kind == "user.signed_in" ? "Signed in" : "Failed to sign in" %><%= " with #{event.payload["method"]}" if event.payload["method"].present? %></p>
-                <p class="list-row__desc"><%= l event.occurred_at, format: :short %><%= " · #{event.payload["ip"]}" if event.payload["ip"].present? %></p>
+            <li class="settings-item">
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= event.kind == "user.signed_in" ? "Signed in" : "Failed to sign in" %><%= " with #{event.payload["method"]}" if event.payload["method"].present? %></p>
+                <p class="settings-item__desc"><%= l event.occurred_at, format: :short %><%= " · #{event.payload["ip"]}" if event.payload["ip"].present? %></p>
               </div>
             </li>
           <% end %>

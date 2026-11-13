@@ -7,30 +7,35 @@
 
 /* ======================================================================= 1 The auth card */
 
-/* One card that names the step in its centred header, then the fields, a full-width button and
-/* the other ways in. The card and its parts are roomier than rune's default card, as the old
-/* login blocks were: this card is the whole page. */
+/* One card (auth_card: runeui's card) that names the step in its centred header, then the fields,
+/* a full-width button and the other ways in. */
 .auth { display: flex; flex-direction: column; gap: var(--s-5); }
-.auth__card { gap: var(--s-5); padding: var(--s-5); }
-.auth__header { gap: var(--s-1); text-align: center; }
-.auth__title { font-size: var(--text-title); line-height: 1.2; letter-spacing: -.01em; }
-.auth__header .card__hint { color: var(--text-muted); font-size: var(--text-read); line-height: var(--leading); }
-.auth__strong { color: var(--text); }
-.auth__content { gap: var(--s-5); }
+.auth__card[data-slot="card"] { gap: var(--s-5); }
+.auth__card > [data-slot="card-header"] { text-align: center; }
+.auth__title { font-size: var(--text-title); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; }
+.auth__card [data-slot="card-description"] { font-size: var(--text-read); line-height: 1.5; }
+.auth__card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-5); }
+.auth__strong { color: var(--foreground); }
 .auth__form { gap: var(--s-5); }
+.auth__button.ui-button { width: 100%; }
+.auth__muted { color: var(--muted-foreground); }
+
+/* "Or" between two ways in, on a rule. */
+.auth__or { display: flex; align-items: center; gap: var(--s-3); color: var(--muted-foreground); font-size: var(--text-meta); }
+.auth__or [data-slot="separator"] { flex: 1; }
 
 /* Password's label with "Forgot your password?" across from it. */
 .auth__label-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
-.auth__aside-link { color: var(--text); text-decoration: none; text-underline-offset: 4px; }
-.auth__aside-link:hover { color: var(--text); text-decoration: underline; }
+.auth__aside-link { color: var(--foreground); font-size: var(--text-meta); text-decoration: none; text-underline-offset: 4px; }
+.auth__aside-link:hover { color: var(--foreground); text-decoration: underline; }
 
 /* The two-factor code reads as six spaced digits. */
 .auth__code { font-variant-numeric: tabular-nums; letter-spacing: .2em; }
 
 /* Cancel and Connect on an OAuth consent share the row. */
 .auth__actions { display: flex; gap: var(--s-2); }
-.auth__actions .btn { flex: 1 1 0; }
-.auth__return { text-align: center; }
+.auth__actions .ui-button { flex: 1 1 0; }
+.auth__return { color: var(--muted-foreground); font-size: var(--text-meta); text-align: center; }
 
 /* Small muted lines under the card (another way in) and in the footer (what Runwell is). */
 .auth__note, .auth-footer { color: var(--text-muted); font-size: var(--text-read); text-align: center; text-wrap: balance; }
@@ -66,25 +71,39 @@
 
 /* ======================================================================= 3 Portal cards, lists and tables */
 
-.portal-card:not(.card--flush) { padding: var(--s-5); }
-.portal-card.card--flush > .card__head { padding: var(--s-4) var(--s-5); }
-.portal-card--highlight { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+/* A portal card (portal_card: runeui's card). Flush, its list or table runs to the card's edges
+/* under a ruled header, the card's padding at the rows' ends. */
+.portal-card__title { font-size: var(--text-read); font-weight: 600; line-height: 1.3; }
+.portal-card__hint { display: block; }
+.portal-card--highlight[data-slot="card"] { border-color: color-mix(in srgb, var(--rune-accent) 40%, var(--border)); }
+.portal-card--flush[data-slot="card"] { gap: 0; padding-bottom: 0; overflow: hidden; }
+.portal-card--flush > [data-slot="card-header"] { padding-bottom: var(--s-4); border-bottom: 1px solid var(--border); }
+.portal-card--flush > [data-slot="card-content"] { padding: 0; }
+.portal-card [data-slot="card-content"]:has(> .portal-stack) { display: contents; }
+.portal-stack > [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-4); }
 
-/* Rows in a flush card run edge to edge, the card's padding at their ends and a rule between. */
 /* A card's list, however deep (the sortable ones sit in a drop container): rows edge to edge, their
-/* text on the card's own left edge, under its heading. */
-.portal-card .list { gap: 0; padding: 0; }
-.portal-card .list > .list-row, .portal-card .list .portal-task-link > .list-row { padding: var(--s-3) var(--s-5); border-radius: 0; }
-.portal-card .list > li + li { border-top: 1px solid var(--line); }
-.portal-card .list .list-row__title { white-space: normal; overflow-wrap: anywhere; }
-.portal-card .empty--compact { padding: var(--s-5); color: var(--text-muted); font-size: var(--text-read); }
+/* text on the card's own left edge, under its heading, a rule between. */
+.portal-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.portal-list > li + li { border-top: 1px solid var(--border); }
+.portal-row { display: flex; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: var(--s-3) var(--s-5); color: var(--foreground); text-decoration: none; }
+.portal-row__content { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.portal-row__title { min-width: 0; overflow-wrap: anywhere; font-weight: var(--weight-strong); }
+.portal-row__desc { min-width: 0; color: var(--muted-foreground); font-size: var(--text-meta); }
+.portal-row__actions { display: flex; flex: none; align-items: center; gap: var(--s-2); margin-left: auto; }
+.portal-row__actions form { display: contents; }
+.portal-muted { color: var(--text-muted); }
+.portal-card [data-slot="empty"] { padding: var(--s-5); }
 
 /* A connected app's name, truncated, then Paused when it is. */
 .portal-token__title { display: flex; align-items: center; gap: var(--s-2); }
 .portal-token__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* The new token's Copy button while the copy-to-clipboard controller says it worked. */
-.btn.portal-copied, .btn.portal-copied:hover { background: var(--text); border-color: transparent; color: var(--panel); }
+/* The new token, cut short, beside its Copy button; the button while the copy-to-clipboard
+/* controller says it worked. */
+.portal-copy { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.portal-copy code { flex: 1; min-width: 0; padding: 5px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-button.portal-copied, .ui-button.portal-copied:hover { background: var(--foreground); border-color: transparent; color: var(--background); }
 
 /* A document's row: the whole row is its link (documents/_link). */
 .portal-documents .document-link { flex: 1; min-width: 0; color: var(--text); text-decoration: none; }
@@ -94,7 +113,9 @@
 .portal-prose { font-size: var(--text-read); line-height: 1.6; }
 .portal-prose .lexxy-content > :first-child { margin-top: 0; }
 .portal-prose .lexxy-content > :last-child { margin-bottom: 0; }
-.portal-details { grid-template-columns: minmax(0, 1fr) auto; font-size: var(--text-read); }
+.portal-details { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3) var(--s-5); align-items: center; font-size: var(--text-read); }
+.portal-task .task-panel__details { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-3) var(--s-5); align-items: center; }
+.portal-task .task-panel__details dt { color: var(--text-muted); }
 .portal-details dd { font-weight: var(--weight-strong); text-align: right; }
 .portal-grid__side .custom-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line); font-size: var(--text-read); }
 .portal-grid__side .custom-fields__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -102,29 +123,28 @@
 /* What plugins add to the portal's pages sits in a card; their settings sections take its padding. */
 .portal-slot .settings__section { padding-inline: 0; }
 
-/* Tables in a flush card: no frame of their own, the card's padding at the row ends, a tinted head. */
-.portal-card > .table-wrap { border: 0; border-radius: 0; background: none; }
-.portal-table thead tr { background: var(--layer-1); }
+/* Tables in a flush card (ui :table): no frame of their own, the card's padding at the row ends,
+/* a tinted head. */
+.portal-table thead tr { background: var(--muted); }
 .portal-table :is(th, td) { padding-inline: var(--s-3); }
 .portal-table td { padding-block: var(--s-3); }
 .portal-table :is(th, td):first-child { padding-left: var(--s-5); }
 .portal-table :is(th, td):last-child { padding-right: var(--s-5); }
 .portal-table__title { font-weight: var(--weight-strong); }
-/* Column widths follow rune_ui's convention (the title grows, the rest fit their content). */
 .portal-table__link { color: inherit; text-decoration: none; }
-.portal-table__link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+.portal-table__link:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
 @media (max-width: 639px) { .portal-table__secondary { display: none; } }
 
 /* ======================================================================= 4 Portal forms */
 
-.portal-form-card { width: 100%; max-width: 42rem; }
 .portal-form { gap: var(--s-5); }
 .portal-form lexxy-editor { min-height: 10rem; }
-.portal-form__actions { justify-content: flex-end; }
+.portal-form .form-actions { justify-content: flex-end; }
+.portal-form-card { width: 100%; max-width: 42rem; }
 
 /* Making a key: the name takes the room, Read only and the button beside it, wrapping when narrow. */
 .portal-token-form { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
-.portal-token-form__name { flex: 1 1 12rem; width: auto; }
+.portal-token-form ui-input { flex: 1 1 12rem; width: auto; }
 
 /* Viewing the portal as a contact (Contacts::PreviewsController): a bar across the top saying whose
 /* view it is, in the brand's tint, with Stop viewing. */
@@ -149,8 +169,8 @@
 @media (min-width: 1024px) { .portal-grid--alone { grid-template-columns: minmax(0, 1fr); } }
 
 /* A task holding a message its reader hasn't opened: a dot in the brand's colour after its title. */
-.portal-unread { display: inline-block; flex: none; width: .5rem; height: .5rem; margin-left: var(--s-1); border-radius: 50%; background: var(--accent); vertical-align: middle; }
-.portal-nav__link .count { margin-left: var(--s-1); background: var(--accent); color: var(--panel); }
+.portal-unread { display: inline-block; flex: none; width: .5rem; height: .5rem; margin-left: var(--s-1); border-radius: 50%; background: var(--rune-accent); vertical-align: middle; }
+.portal-nav__count[data-slot="badge"] { margin-left: var(--s-1); }
 
 /* A date an open task has passed. */
 .portal-due--late { color: var(--danger); }
@@ -158,14 +178,14 @@
 
 /* How far along a piece of work is: a short bar, then "3 of 8". */
 .portal-progress { display: inline-flex; align-items: center; gap: var(--s-2); color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.portal-progress .progress { width: 4.5rem; }
-@media (max-width: 639px) { .portal-progress .progress { display: none; } }
+.portal-progress__bar[data-slot="progress"] { flex: none; width: 4.5rem; min-width: 0; }
+@media (max-width: 639px) { .portal-progress__bar[data-slot="progress"] { display: none; } }
 
 /* The account page keeps to a readable width. */
 .portal-account { width: 100%; max-width: 42rem; }
 .portal-task-link { color: inherit; text-decoration: none; }
-.portal-task-link:hover .list-row, a.portal-task-link:hover { color: var(--text); }
-.portal-task-link .list-row:hover { background: var(--hover); }
+a.portal-task-link:hover { color: var(--text); }
+.portal-task-link .portal-row:hover { background: var(--hover); }
 td a.portal-task-link:hover { text-decoration: underline; }
 
 /* The client's order of priority (ClientPrioritized): rows, sections and tasks drag by a grip at
@@ -189,8 +209,8 @@ td a.portal-task-link:hover { text-decoration: underline; }
   .portal-sortable__grip:not(.portal-sortable__grip--preview) { display: none; }
   .portal-sortable__moves { position: absolute; top: 50%; left: 2px; z-index: 1; display: flex; flex-direction: column; transform: translateY(-50%); }
   .portal-table td.portal-sortable__cell:has(.portal-sortable__moves) { padding-left: 2.5rem; }
-  .portal-card .list > .portal-sortable__item:has(.portal-sortable__moves),
-  .portal-card .list > .portal-sortable__item:has(.portal-sortable__moves) .portal-task-link > .list-row { padding-left: 2.5rem; }
+  .portal-list > .portal-sortable__item:has(.portal-sortable__moves),
+  .portal-list > .portal-sortable__item:has(.portal-sortable__moves) .portal-task-link > .portal-row { padding-left: 2.5rem; }
 }
 .portal-task-group { display: flex; flex-direction: column; scroll-margin-top: var(--s-6); }
 /* A section in the work's sidebar: clicking it shows only its tasks; the one chosen (or All) is marked. */
@@ -199,7 +219,7 @@ td a.portal-task-link:hover { text-decoration: underline; }
 a.portal-section-filter { color: var(--text); text-decoration: none; }
 .portal-section-filter:hover { background: var(--hover); }
 .portal-section-filter[aria-current="page"] { background: var(--brand-tint, var(--layer-2)); }
-.portal-section-filter[aria-current="page"] .list-row__title { font-weight: var(--weight-strong); }
+.portal-section-filter[aria-current="page"] .portal-row__title { font-weight: var(--weight-strong); }
 .portal-section-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .portal-task-group + .portal-task-group { border-top: 1px solid var(--line); }
 .portal-task-group__heading { margin: 0; padding: var(--s-3) var(--s-5) 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
@@ -236,28 +256,23 @@ a.portal-section-filter { color: var(--text); text-decoration: none; }
 /* larger heading, roomy fields and a full-width button with a little lift. The same at any width;
 /* only the showcase waits for a wide screen. */
 .auth-layout--split .auth { gap: var(--s-6); }
-.auth-layout--split .auth__card { gap: var(--s-6); padding: 0; border: 0; background: none; box-shadow: none; }
+.auth-layout--split .auth__card[data-slot="card"] { gap: var(--s-6); padding: 0; border: 0; background: none; box-shadow: none; }
+.auth-layout--split .auth__card > [data-slot] { padding-inline: 0; }
 .auth-layout--split .auth-layout__header { gap: var(--s-3); }
 .auth-layout--split .auth-layout__brand { flex-direction: column; gap: var(--s-2); color: var(--text-muted); font-size: var(--text-meta); }
-.auth-layout--split .auth-layout__brand .sidebar__logo {
+.auth-layout--split .auth-layout__brand .auth-layout__logo {
   width: 3rem; height: 3rem; border-radius: calc(.875rem * var(--radius-scale, 1)); font-size: 1.25rem;
   box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 8px 18px -8px rgb(0 0 0 / .4);
 }
 .auth-layout--split .auth-layout__brand .header__logo-image { max-height: 2.75rem; }
-.auth-layout--split .auth__header { gap: var(--s-2); }
+.auth-layout--split .auth__card > [data-slot="card-header"] { gap: var(--s-2); }
 .auth-layout--split .auth__title { font-size: 1.625rem; font-weight: 650; letter-spacing: -.025em; }
 .auth-layout--split .auth__form { gap: var(--s-5); }
-.auth-layout--split .auth .field { gap: var(--s-2); }
-.auth-layout--split .auth .field__label { font-weight: var(--weight-strong); }
-.auth-layout--split .auth input:is([type="email"], [type="password"], [type="text"], [type="search"], [type="tel"], [type="number"]) {
-  height: 2.75rem; padding-inline: .875rem; font-size: 1rem;
-  transition: border-color .15s, box-shadow .15s;
-}
-.auth-layout--split .auth input:focus-visible { border-color: color-mix(in srgb, var(--accent) 65%, var(--line-strong)); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
-.auth-layout--split .auth .btn--block { height: 2.75rem; font-size: .9375rem; }
-.auth-layout--split .auth .btn--primary { box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 6px 14px -6px rgb(0 0 0 / .35); }
-.auth-layout--split .auth__aside-link { color: var(--color-link, var(--accent)); font-size: var(--text-meta); }
-.auth-layout--split .auth__aside-link:hover { color: var(--color-link, var(--accent)); }
+.auth-layout--split .auth .ui-input { height: 2.75rem; padding-inline: .875rem; font-size: 1rem; }
+.auth-layout--split .auth .auth__button.ui-button { height: 2.75rem; font-size: .9375rem; }
+.auth-layout--split .auth .auth__button.ui-button[data-variant="default"] { box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 6px 14px -6px rgb(0 0 0 / .35); }
+.auth-layout--split .auth__aside-link { color: var(--color-link, var(--rune-accent)); }
+.auth-layout--split .auth__aside-link:hover { color: var(--color-link, var(--rune-accent)); }
 
 /* The showcase: the right half, a panel in the scheme's colour (--color-showcase: the accent, or a dark
 /* grey in dark when no scheme is picked; mixed in oklch, so it
@@ -296,24 +311,23 @@ html[data-theme="dark"] .showcase__scene::before { background: linear-gradient(r
 }
 .showcase__notch::before { top: 0; left: 100%; }
 .showcase__notch::after { top: 100%; left: 0; }
-.showcase__theme {
-  display: grid; place-items: center; width: 4rem; height: 4rem; padding: 0; border: 0; border-radius: 50%;
-  background: var(--layer-1); color: var(--text-muted); cursor: pointer; transition: background .15s, color .15s;
-}
-.showcase__theme:hover { background: var(--layer-2); color: var(--text); }
+.showcase__theme.ui-button { width: 4rem; height: 4rem; border: 0; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); box-shadow: none; }
+.showcase__theme.ui-button:hover { background: var(--accent); color: var(--foreground); }
 .showcase__theme:focus-visible { outline: 2px solid var(--showcase-color); outline-offset: 2px; }
 .showcase__theme .icon { width: 1.25rem; height: 1.25rem; }
 
-/* The frosted cards: the panel's colour through them, a hairline of light round the edge. */
-.showcase__card, .showcase__caption {
+/* The frosted cards (runeui's cards, so on its tokens): the panel's colour through them, a
+/* hairline of light round the edge. */
+.showcase__card[data-slot="card"], .showcase__caption {
   position: absolute; z-index: 1; display: flex; flex-direction: column; gap: .625rem; padding: 1rem 1.25rem;
   border: 1px solid rgb(255 255 255 / .45); border-radius: calc(1rem * var(--radius-scale, 1));
-  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  background: color-mix(in oklab, var(--card, var(--panel)) 80%, transparent);
   -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
   box-shadow: 0 24px 48px -24px rgb(0 0 0 / .45), 0 2px 6px rgb(0 0 0 / .06);
-  color: var(--text); font-size: var(--text-meta); line-height: 1.35;
+  color: var(--card-foreground, var(--text)); font-size: var(--text-meta); line-height: 1.35;
 }
-html[data-theme="dark"] :is(.showcase__card, .showcase__caption) { border-color: rgb(255 255 255 / .12); }
+.showcase__card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: .625rem; padding: 0; }
+html[data-theme="dark"] :is(.showcase__card[data-slot="card"], .showcase__caption) { border-color: rgb(255 255 255 / .12); }
 .showcase__card--main { top: 40%; left: 12%; width: min(23rem, 64%); }
 .showcase__card--side { top: 15%; right: 7%; width: min(20rem, 58%); }
 .showcase__caption {
@@ -322,33 +336,27 @@ html[data-theme="dark"] :is(.showcase__card, .showcase__caption) { border-color:
 }
 .showcase__row { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .showcase__title { flex: 1; min-width: 0; font-size: var(--text-ui); font-weight: var(--weight-strong); }
-.showcase__sub { color: var(--text-muted); }
-.showcase__pill {
-  display: inline-flex; align-items: center; gap: .3rem; flex: none; padding: .1rem .5rem; border-radius: var(--radius-pill, 99rem);
-  background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: var(--text-xs); font-weight: var(--weight-strong);
-}
-.showcase__pill--review { background: color-mix(in srgb, var(--attention) 18%, transparent); color: color-mix(in srgb, var(--attention) 75%, var(--text)); }
-.showcase__pill--progress { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.showcase__sub { color: var(--muted-foreground); }
+.showcase__pill[data-slot="badge"] { flex: none; gap: .3rem; }
 .showcase__dot { width: .375rem; height: .375rem; border-radius: 50%; background: currentColor; }
-.showcase__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .25rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.showcase__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .25rem; padding-top: .75rem; border-top: 1px solid var(--border); }
 .showcase__stats > span { display: flex; flex-direction: column; gap: 2px; }
-.showcase__label { color: var(--text-muted); font-size: var(--text-xs); }
+.showcase__label { color: var(--muted-foreground); font-size: var(--text-xs); }
 .showcase__value { font-weight: var(--weight-strong); font-variant-numeric: tabular-nums; }
-.showcase__bar { height: .375rem; overflow: hidden; border-radius: var(--radius-pill, 99rem); background: var(--layer-2); }
+.showcase__bar { height: .375rem; overflow: hidden; border-radius: var(--radius-pill, 99rem); background: var(--muted); }
 .showcase__bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--showcase-color); }
 .showcase__bar-fill--two-thirds { width: 66%; }
-.showcase__ring { flex: none; width: .875rem; height: .875rem; border: 2px solid var(--text-faint); border-radius: 50%; }
+.showcase__ring { flex: none; width: .875rem; height: .875rem; border: 2px solid var(--muted-foreground); border-radius: 50%; opacity: .6; }
+.showcase__ring--half { opacity: 1; }
 .showcase__ring--half { border-color: var(--showcase-color); background: conic-gradient(var(--showcase-color) 0 50%, transparent 50%); }
 .showcase__task { flex: 1; min-width: 0; overflow: hidden; font-weight: var(--weight-strong); text-overflow: ellipsis; white-space: nowrap; }
-.showcase__card--side .showcase__row + .showcase__row { padding-top: .625rem; border-top: 1px solid var(--line); }
-.showcase__avatar {
-  display: grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
-  background: oklch(from var(--showcase-color) calc(l - .05) c calc(h + 40)); color: #fff; font-size: .625rem; font-weight: 700;
-}
-.showcase__avatar--two { background: oklch(from var(--showcase-color) calc(l + .05) c calc(h - 60)); }
+.showcase__card--side .showcase__row + .showcase__row { padding-top: .625rem; border-top: 1px solid var(--border); }
+.showcase__avatar[data-slot="avatar"] { flex: none; width: 1.5rem; height: 1.5rem; }
+.showcase__avatar [data-slot="avatar-fallback"] { background: oklch(from var(--showcase-color) calc(l - .05) c calc(h + 40)); color: #fff; font-size: .625rem; font-weight: 700; }
+.showcase__avatar--two [data-slot="avatar-fallback"] { background: oklch(from var(--showcase-color) calc(l + .05) c calc(h - 60)); }
 .showcase__who { flex: 1; min-width: 0; font-weight: var(--weight-strong); }
 .showcase__new { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--showcase-color); }
-.showcase__message { margin: 0; color: var(--text); font-size: var(--text-ui); }
+.showcase__message { margin: 0; font-size: var(--text-ui); }
 .showcase__caption-title { font-size: var(--text-ui); font-weight: var(--weight-strong); }
 .showcase__caption-line { display: flex; align-items: center; gap: .5rem; color: rgb(255 255 255 / .88); }
 .showcase__caption-line .icon { flex: none; width: .9rem; height: .9rem; }
@@ -362,3 +370,11 @@ html[data-theme="dark"] :is(.showcase__card, .showcase__caption) { border-color:
 @keyframes showcase-drift { 50% { translate: 0 -7px; } }
 @media (prefers-reduced-motion: reduce) { :is(.showcase__card, .showcase__caption) { animation: none; } }
 
+
+/* A flush card with no header (a list's table): the table starts at the card's top edge. */
+.portal-card--flush[data-slot="card"]:not(:has(> [data-slot="card-header"])) { padding-top: 0; }
+/* A filter's tabs keep to their width, the search box at the row's end. */
+.portal-filter [data-slot="tabs"] { flex: none; width: auto; }
+/* A row's title link reads as the row's name, not a link. */
+.portal-table a.row-link { color: var(--foreground); font-weight: var(--weight-strong); text-decoration: none; }
+.portal-table a.row-link:hover { text-decoration: underline; text-underline-offset: 4px; }

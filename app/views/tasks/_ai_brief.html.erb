@@ -3,12 +3,12 @@
     runwell commands to update status and leave notes, acting as the person's agent. In a row it's
     an icon button; on the task's page, a button with its name and key. %>
 <% title = "Copy a brief for your AI (c)" %>
-<button type="button" class="<%= class_names("ai-brief", "icon-button row-action": !labelled, "btn btn--secondary": labelled) %>" title="<%= title %>" data-keys="c"
+<button type="button" class="<%= class_names("ui-button ai-brief", "row-action": !labelled) %>" data-variant="<%= labelled ? "outline" : "ghost" %>" data-size="<%= labelled ? "default" : "icon-sm" %>" title="<%= title %>" data-keys="c"
   data-controller="copy-to-clipboard" data-copy-to-clipboard-url-value="<%= brief_task_path(task, format: :text) %>" data-copy-to-clipboard-success-class="ai-brief--copied" data-action="copy-to-clipboard#copy">
   <%= icon_tag "ai" %>
   <% if labelled %>
     <span>Copy for AI</span>
-    <kbd class="hide-on-touch">C</kbd>
+    <%= ui :kbd, content: "C", class: "hide-on-touch" %>
   <% else %>
     <span class="visually-hidden">Copy a brief of <%= task.title %> for your AI</span>
   <% end %>

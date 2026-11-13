@@ -3,7 +3,7 @@
     which asks for the title to be typed so it can't happen by accident (confirm_text: the button
     stays off until it matches; the server checks it again). %>
 <% trigger = capture do %>
-  <button type="button" class="btn btn--ghost btn--sm work-finish__danger" aria-haspopup="dialog"><%= icon_tag "trash" %> <span>Delete permanently</span></button>
+  <button type="button" class="ui-button work-finish__danger" data-variant="ghost" data-size="sm" aria-haspopup="dialog"><%= icon_tag "trash" %> <span>Delete permanently</span></button>
 <% end %>
 <%= ui :alert_dialog, id: dom_id(work, :erase), trigger: trigger, title: "Delete #{work.title} for good?",
       description: "It removes the #{term(:work).downcase} with its #{term(:scope_item, count: 2).downcase}, its #{term(:task, count: 2).downcase}, notes, documents and history. There’s no undo; the #{term(:client).downcase} keeps one note that it was deleted.",

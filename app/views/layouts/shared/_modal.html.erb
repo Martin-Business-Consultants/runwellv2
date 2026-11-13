@@ -1,15 +1,13 @@
-<%# locals: (title:) %>
+<%# locals: (title:, description: nil) %>
 <%# A form opened over the page you're on (the New button on an index, into the layout's modal
-    frame), so making a record doesn't lose your place. The form inside submits in the frame:
-    refused, the modal comes back with what was typed and why; saved, the new record's row joins
-    the list you're on (a stream that also closes this), or for a record whose next step is on its
-    own page (new work), you go there. Esc or Cancel closes it. %>
+    frame), so making a record doesn't lose your place: ui :dialog, open as it arrives. The form
+    inside submits in the frame: refused, the modal comes back with what was typed and why; saved,
+    the new record's row joins the list you're on (a stream that also empties the frame, closing
+    this), or for a record whose next step is on its own page (new work), you go there (the
+    frame's breaks-out behavior). Esc, the ✕ or Cancel closes it, and the frame empties
+    (empties-on-close), so Back never brings it up again. %>
 <turbo-frame id="modal">
-  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#closeOnEscape">
-    <dialog class="dialog dialog--lg record-modal" aria-label="<%= title %>" data-dialog-target="dialog">
-      <div class="dialog__box">
-        <%= yield %>
-      </div>
-    </dialog>
-  </div>
+  <%= ui :dialog, id: "modal_dialog", open: true, title: title, description: description, size: :lg, class: "record-modal" do %>
+    <%= yield %>
+  <% end %>
 </turbo-frame>

@@ -21,7 +21,7 @@
       <header class="settings-section__head">
         <h2><%= custom_field_model_name(model, count: 2) %></h2>
         <div class="settings-section__actions">
-          <span class="badge badge--outline"><%= pluralize(fields.size, "field") %></span>
+          <%= ui :badge, variant: :outline, content: pluralize(fields.size, "field") %>
         </div>
       </header>
 
@@ -34,24 +34,24 @@
           data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
           <% fields.each do |field| %>
             <%# herb:key field.id %>
-            <li class="list-row settings-field" data-filter-target="item"<% unless field.archived? %> data-drag-and-drop-target="item" data-id="<%= field.id %>"<% end %>>
+            <li class="settings-item settings-field" data-filter-target="item"<% unless field.archived? %> data-drag-and-drop-target="item" data-id="<%= field.id %>"<% end %>>
               <% if field.archived? %>
                 <span class="settings-field__handle settings-field__handle--off" aria-hidden="true"></span>
               <% else %>
                 <span class="settings-field__handle" draggable="true" title="Drag to move <%= field.label %>" aria-label="Drag to move <%= field.label %>"><%= icon_tag "move" %></span>
               <% end %>
-              <div class="list-row__content">
-                <p class="list-row__title">
+              <div class="settings-item__content">
+                <p class="settings-item__title">
                   <%= field.label %>
                   <% if field.archived? %>
-                    <span class="badge">Archived</span>
+                    <%= ui :badge, variant: :secondary, content: "Archived" %>
                   <% end %>
                 </p>
-                <p class="list-row__desc"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to " + term(:client, count: 2).downcase if field.client_visible %></p>
+                <p class="settings-item__desc"><%= field.kind_label %> · <code><%= field.key %></code><%= " · " + field.choices.join(", ") if field.kind == "choice" %><%= " · listed" if field.listed %><%= " · shown to " + term(:client, count: 2).downcase if field.client_visible %></p>
               </div>
-              <div class="list-row__actions">
+              <div class="settings-item__actions">
                 <% if field.archived? %>
-                  <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "btn btn--secondary btn--sm" %>
+                  <%= button_to "Restore", settings_field_path(field), method: :patch, params: { field: { archived: false } }, class: "ui-button", data: { variant: "outline", size: "sm" } %>
                 <% else %>
                   <%= render "layouts/shared/delete_dialog", name: field.label, path: settings_field_path(field),
                         message: "It’s archived: hidden from forms, pages and agents, with its values kept. You can restore it." %>
@@ -61,27 +61,18 @@
                 <details class="settings-fold settings-field__change">
                   <summary class="ui-button" data-variant="outline" data-size="sm">Change</summary>
                   <%= form_with model: field, url: settings_field_path(field), method: :patch, scope: :field, namespace: dom_id(field), class: "settings-subform" do |form| %>
-                    <div class="field">
-                      <%= form.label :label, "Label", class: "field__label" %>
+                    <%= form.ui :field, :label, label: "Label" do %>
                       <%= form.text_field :label, required: true, autocomplete: "off" %>
-                    </div>
-                    <% if field.kind == "choice" %>
-                      <div class="field">
-                        <%= form.label :choices, "Choices", class: "field__label" %>
-                        <%= form.text_field :choices, value: field.choices.join(", "), autocomplete: "off" %>
-                        <p class="field__hint">Separated by commas.</p>
-                      </div>
                     <% end %>
-                    <label class="checkbox">
-                      <%= form.check_box :listed %>
-                      <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
-                    </label>
-                    <label class="checkbox">
-                      <%= form.check_box :client_visible %>
-                      <span>Shown to the <%= term(:client).downcase %> in the portal</span>
-                    </label>
+                    <% if field.kind == "choice" %>
+                      <%= form.ui :field, :choices, label: "Choices", description: "Separated by commas." do %>
+                        <%= form.text_field :choices, value: field.choices.join(", "), autocomplete: "off" %>
+                      <% end %>
+                    <% end %>
+                    <%= form.ui :checkbox, :listed, label: "A column in the #{custom_field_model_name(model, count: 2).downcase} table" %>
+                    <%= form.ui :checkbox, :client_visible, label: "Shown to the #{term(:client).downcase} in the portal" %>
                     <%= field_visibility_inputs "field[visible_to][]", field %>
-                    <div><button type="submit" class="btn btn--primary btn--sm">Save</button></div>
+                    <div><%= ui :button, type: :submit, size: :sm, content: "Save" %></div>
                   <% end %>
                 </details>
               <% end %>
@@ -96,31 +87,21 @@
         <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Add a field</summary>
         <%= form_with url: settings_fields_path, scope: :field, namespace: "new_#{model.downcase}", class: "settings-subform" do |form| %>
           <%= form.hidden_field :model_type, value: model %>
-          <div class="field-row">
-            <div class="field">
-              <%= form.label :label, "Label", class: "field__label" %>
+          <div class="form-grid">
+            <%= form.ui :field, :label, label: "Label" do %>
               <%= form.text_field :label, required: true, autocomplete: "off", placeholder: "Property address" %>
-            </div>
-            <div class="field">
-              <%= form.label :kind, "Kind", class: "field__label" %>
+            <% end %>
+            <%= form.ui :field, :kind, label: "Kind" do %>
               <%= form.select :kind, CustomField::KINDS.map { [ CustomField::KIND_LABELS[it], it ] }, {} %>
-            </div>
+            <% end %>
           </div>
-          <div class="field">
-            <%= form.label :choices, "Choices", class: "field__label" %>
+          <%= form.ui :field, :choices, label: "Choices", description: "For a choice field, separated by commas. The kind can’t change once the field has values." do %>
             <%= form.text_field :choices, autocomplete: "off", placeholder: "Small, Medium, Large" %>
-            <p class="field__hint">For a choice field, separated by commas. The kind can’t change once the field has values.</p>
-          </div>
-          <label class="checkbox">
-            <%= form.check_box :listed %>
-            <span>A column in the <%= custom_field_model_name(model, count: 2).downcase %> table</span>
-          </label>
-          <label class="checkbox">
-            <%= form.check_box :client_visible %>
-            <span>Shown to the <%= term(:client).downcase %> in the portal</span>
-          </label>
+          <% end %>
+          <%= form.ui :checkbox, :listed, label: "A column in the #{custom_field_model_name(model, count: 2).downcase} table" %>
+          <%= form.ui :checkbox, :client_visible, label: "Shown to the #{term(:client).downcase} in the portal" %>
           <%= field_visibility_inputs "field[visible_to][]", CustomField.new, namespace: "new_#{model.downcase}" %>
-          <div><button type="submit" class="btn btn--primary btn--sm">Add field</button></div>
+          <div><%= ui :button, type: :submit, size: :sm, content: "Add field" %></div>
         <% end %>
       </details>
     </section>

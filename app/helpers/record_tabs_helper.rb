@@ -21,8 +21,17 @@ module RecordTabsHelper
   # frame and advances history; a count sits beside its name.
   def record_tab_links(tabs)
     tabs.map do |tab|
-      label = tab.count.to_i.positive? ? safe_join([ tab.label, tag.span(tab.count, class: "count count--quiet") ], " ") : tab.label
+      label = tab.count.to_i.positive? ? safe_join([ tab.label, tag.span(tab.count, class: "tab-count") ], " ") : tab.label
       { value: tab.key, label: label, href: record_tab_path(tab.key), data: { turbo_frame: "record_tab", turbo_action: "advance" } }
+    end
+  end
+
+  # A section's filter as link tabs (layouts/shared/segmented_filter): each choice swaps one query
+  # param, with its count beside it when given.
+  def segmented_filter_links(param, options, counts: nil)
+    options.map do |text, value|
+      label = counts ? safe_join([ text, tag.span(counts.fetch(value, 0), class: "tab-count") ], " ") : text
+      { value: value, label: label, href: url_for(request.query_parameters.merge(param.to_s => value)), data: { turbo_action: "replace" } }
     end
   end
 

@@ -2,11 +2,7 @@
 
 <% content_for :header do %>
   <%= parent_page term(:work, count: 2), portal_root_path %>
-  <nav class="crumbs portal-page-header__crumbs" aria-label="Breadcrumb">
-    <%= link_to term(:work, count: 2), portal_root_path %>
-    <span class="crumbs__sep" aria-hidden="true">/</span>
-    <span class="crumbs__current" aria-current="page"><%= @work.title %></span>
-  </nav>
+  <%= ui :breadcrumb, items: [ [ term(:work, count: 2), portal_root_path ], @work.title ], class: "portal-page-header__crumbs" %>
   <h1 class="portal-page-header__title"><%= @page_title %></h1>
   <div class="portal-page-header__meta">
     <%= status_tag @work.state_label, highlight: @work.active? %>

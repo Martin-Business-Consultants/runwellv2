@@ -25,11 +25,11 @@
       </div>
 
       <div class="button-row">
-        <button type="button" class="btn btn--secondary btn--sm" data-action="nav-layout#addSection"><%= icon_tag "add" %> <span>Add section</span></button>
+        <%= ui :button, type: :button, variant: :outline, size: :sm, data: { action: "nav-layout#addSection" }, content: safe_join([ icon_tag("add"), tag.span("Add section") ], " ") %>
       </div>
 
       <section class="nav-editor__hidden" aria-label="Hidden">
-        <h3 class="nav-editor__hidden-title">Hidden <span class="muted small">Out of the sidebar for everyone. Drag a page here, or press Delete on it.</span></h3>
+        <h3 class="nav-editor__hidden-title">Hidden <span class="nav-editor__hint">Out of the sidebar for everyone. Drag a page here, or press Delete on it.</span></h3>
         <ul class="nav-editor__items nav-editor__items--hidden" data-nav-layout-target="zone" data-zone="hidden">
           <%= render partial: "settings/sidebars/item", collection: @layout.hidden, as: :item %>
         </ul>
@@ -40,7 +40,7 @@
       </template>
 
       <div class="button-row nav-editor__actions">
-        <button type="button" class="btn btn--primary" data-action="nav-layout#save">Save sidebar</button>
+        <%= ui :button, type: :button, content: "Save sidebar", data: { action: "nav-layout#save" } %>
         <% if @layout.customized? %>
           <%= render "layouts/shared/confirm", trigger: "Put it back as it came", title: "Put the sidebar back as it came?",
                 body: "One section, Workspace, with every page in it. Section names and what’s hidden go.", button: "Put it back", path: settings_sidebar_path, icon: "refresh" %>

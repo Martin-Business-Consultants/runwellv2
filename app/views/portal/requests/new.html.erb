@@ -1,12 +1,6 @@
 <% @page_title = "Ask for something" %>
 <% if turbo_frame_request_id == "modal" %>
-  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
-    <header class="dialog__header">
-      <div>
-        <h2 class="dialog__title"><%= @page_title %></h2>
-        <p class="dialog__hint">A change, a question, something new. We’ll get back to you.</p>
-      </div>
-    </header>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title, description: "A change, a question, something new. We’ll get back to you." } do %>
     <%= render "portal/requests/form", request_record: @request_record, modal: true %>
   <% end %>
 <% else %>
@@ -15,9 +9,7 @@
     <p class="portal-page-header__description">A change, a question, something new. We’ll get back to you.</p>
   <% end %>
 
-  <section class="card portal-card portal-form-card">
-    <div class="card__content">
-      <%= render "portal/requests/form", request_record: @request_record %>
-    </div>
-  </section>
+  <%= portal_card css: "portal-form-card" do %>
+    <%= render "portal/requests/form", request_record: @request_record %>
+  <% end %>
 <% end %>

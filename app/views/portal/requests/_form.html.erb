@@ -9,42 +9,36 @@
 <%= form_with model: request_record, scope: :request, url: portal_requests_path, multipart: true, class: "portal-form",
       data: { controller: "form draft", draft_key_value: "portal:request:#{request_record.client_id}", action: "keydown.esc->form#cancel" } do |form| %>
   <%= draft_notice %>
-  <div class="field">
-    <%= form.label :subject, "Subject", class: "field__label" %>
+  <%= form.ui :field, :subject, label: "Subject" do %>
     <%= form.text_field :subject, value: request_record.title, required: true, autofocus: true, autocomplete: "off" %>
-  </div>
+  <% end %>
 
-  <div class="field">
-    <label class="field__label" for="<%= form.field_id(:body) %>">Details</label>
+  <%= form.ui :field, :body, label: "Details" do %>
     <%= rich_text_field_tag form.field_name(:body), request_record.description, id: form.field_id(:body) %>
-  </div>
+  <% end %>
 
-  <div class="field-row">
+  <div class="form-grid">
     <% if works.any? %>
-      <div class="field">
-        <%= form.label :work, "About", class: "field__label" %>
+      <%= form.ui :field, :work, label: "About" do %>
         <%= form.select :work, works, { include_blank: "Nothing in particular", selected: request_record.work&.ref }, search: true %>
-      </div>
+      <% end %>
     <% end %>
-    <div class="field">
-      <%= form.label :due_on, "Needed by", class: "field__label" %>
+    <%= form.ui :field, :due_on, label: "Needed by", description: "Leave it empty if there’s no rush." do %>
       <%= date_input form, :due_on %>
-      <p class="field__hint">Leave it empty if there’s no rush.</p>
-    </div>
-  </div>
-
-  <div class="field">
-    <%= form.label :files, "Files", class: "field__label" %>
-    <%= form.file_field :files, multiple: true, include_hidden: false, class: "portal-form__files" %>
-    <p class="field__hint">A screenshot, a document, anything that helps. Up to <%= number_to_human_size(Document::MAX_SIZE) %> each.</p>
-  </div>
-
-  <div class="button-row portal-form__actions">
-    <% if modal %>
-      <button type="button" class="btn btn--secondary" data-form-target="cancel" data-action="dialog#close">Cancel</button>
-    <% else %>
-      <%= link_to "Cancel", portal_requests_path, class: "btn btn--secondary", data: { form_target: "cancel" } %>
     <% end %>
-    <button type="submit" class="btn btn--primary" data-form-target="submit">Send request</button>
+  </div>
+
+  <%= form.ui :field, :files, label: "Files" do %>
+    <%= form.ui :file_input, :files, multiple: true, dropzone: false, class: "portal-form__files" %>
+    <ui-field-description data-slot="field-description">A screenshot, a document, anything that helps. Up to <%= number_to_human_size(Document::MAX_SIZE) %> each.</ui-field-description>
+  <% end %>
+
+  <div class="form-actions">
+    <% if modal %>
+      <%= ui :button, type: :button, variant: :outline, content: "Cancel", "data-form-target": "cancel", "data-runeui-close": "modal_dialog" %>
+    <% else %>
+      <%= ui :button, href: portal_requests_path, variant: :outline, content: "Cancel", data: { form_target: "cancel" } %>
+    <% end %>
+    <%= ui :button, type: :submit, content: "Send request", "data-form-target": "submit" %>
   </div>
 <% end %>

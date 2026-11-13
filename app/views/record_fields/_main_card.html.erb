@@ -6,7 +6,8 @@
     client), and left out of the columns below; the modal's sidebar fields go two to a row. In the
     modal the form submits inside its frame: refused, it comes back there with what was typed;
     saved, the answer either stays on the page (a stream with the new row) or goes to the new
-    record's page (the frame's breaks-out behavior). %>
+    record's page (the frame's breaks-out behavior). The modal (layouts/shared/modal) names the
+    record in its own title, so the card has none there. %>
 <% builder = record_fields_builder(record, scope: scope) %>
 <% draft_key = record.persisted? ? "edit:#{record.model_name.param_key}:#{record.id}" : [ "new", record.model_name.param_key, url ].compact.join(":") %>
 <%= render "layouts/shared/errors", record: record %>
@@ -19,7 +20,7 @@
       <%= hidden_field_tag name, value, id: nil %>
     <% end %>
     <% if modal %>
-      <button type="button" class="ui-button" data-variant="outline" data-size="default" data-form-target="cancel" data-action="dialog#close">Cancel</button>
+      <button type="button" class="ui-button" data-variant="outline" data-size="default" data-form-target="cancel" data-runeui-close="modal_dialog">Cancel</button>
     <% else %>
       <%= link_to "Cancel", cancel, class: "ui-button", data: { variant: "outline", size: "default", form_target: "cancel" } %>
     <% end %>
@@ -27,7 +28,7 @@
   <% end %>
 <% end %>
 <%= record_card css: class_names("record-form", "record-form--head-field": head_key),
-      title: layout_text_tag(layout, "main.title", title, class: "record-card__title"),
+      title: (layout_text_tag(layout, "main.title", title, class: "record-card__title") unless modal),
       hint: layout_text_tag(layout, "main.hint", hint, tag: :p, class: "record-card__hint"),
       action: (render(record_field_partial(layout, head_key), record: record, form: builder, form_id: form_id) if head_key),
       footer: form_footer do %>

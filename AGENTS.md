@@ -181,10 +181,12 @@ event); every event has a source.
 - Signed-out and client-facing pages use `layout "public"`; staff pages use
   the application layout
 - A way in (sign in, a link, a code, a new password, sign-up, an invitation, the portal's sign in)
-  also says `content_for :showcase, "team"` (or `"client"`): the public layout then splits, the form
-  on the left with no card and, on a wide screen, `layouts/shared/_showcase` on the right (a panel
-  mixed from the scheme's colour, `--color-link`, with frosted cards of made-up examples in the
-  install's terms, and the theme toggle in its cut-out corner). Other public pages (consents,
+  is one `auth_card title:, hint:, shake:` (`AuthHelper`: runeui's card, its fields `form.ui :field`,
+  its buttons `ui :button` across it, `auth__button`) and also says `content_for :showcase, "team"`
+  (or `"client"`): the public layout then splits, the form on the left with no card and, on a wide
+  screen, `layouts/shared/_showcase` on the right (a panel mixed from the scheme's colour,
+  `--color-link`, with frosted cards of made-up examples in the install's terms, runeui's cards,
+  badges and avatars, and the theme toggle in its cut-out corner). Other public pages (consents,
   plugins' signing pages) keep the centred card
 - Multi-line text is rich text: Lexxy (`<lexxy-editor>`, Fizzy's editor)
   writing HTML into the plain text column. In forms use
@@ -303,11 +305,15 @@ Back, refresh and links work, and there's no client-side router:
   client's status), open tasks and notes, and Open to its page; plugins' slots stay on the page
 - **Creating in a modal**: an index's New (`index_toolbar … new_modal: true`) and an in-page add
   (Add a contact) load the new page into the layout's `modal` frame; `new.html.erb` renders
-  `layouts/shared/_modal` around its form (`modal: true`) when `turbo_frame_request_id == "modal"`.
-  The form submits inside the frame, so a refused save comes back in the modal with what was typed.
-  Saved, the action answers `from_modal?` with its `create.turbo_stream.erb` (the modal emptied, the
-  new row added and marked `is-fresh`, a toast linking to it); a record whose next step is on its
-  own page (new work) redirects, and the frame's `breaks-out` behavior visits that answer
+  `layouts/shared/_modal` around its form (`modal: true`) when `turbo_frame_request_id == "modal"`:
+  a `ui :dialog` (`#modal_dialog`, drawn open, the record named in its title, `description:` under
+  it), Cancel `data-runeui-close="modal_dialog"`. The form submits inside the frame, so a refused
+  save comes back in the modal with what was typed. Saved, the action answers `from_modal?` with its
+  `create.turbo_stream.erb` (the modal emptied, the new row added and marked `is-fresh`, a toast
+  linking to it); a record whose next step is on its own page (new work) redirects, and the frame's
+  `breaks-out` behavior visits that answer. Esc, ✕ or Cancel closes it (a runeui popup inside takes
+  Esc first) and the frame empties (`empties-on-close`), so Back never brings it up again. The
+  quick actions' modal (`quick_actions#new`, the `quick_action` frame) is the same dialog
 - **Drafts**: every Lexxy editor and multi-field form keeps unsent typing in `localStorage` (the
   `draft` controller, `draft_data(key)` and `draft_notice`; `record_fields/main_card` does it for new
   and edit forms), restored with "Draft restored" and Discard, cleared when the save works. So
@@ -388,7 +394,8 @@ Shared pieces, so the same markup is never written twice (all helpers, so they w
 as the task pickers do), or `popup_menu label:, title: do … end` (`PopupHelper`, Fizzy's popup,
 left for plugins); an on/off switch is
 `switch_field form, :attr, label:, hint:, submit_on_change:` (`ui :switch`, sending "0" when off;
-with a hint, the settings row; without, the switch beside its label), or `ui :switch, name:` with
+with a hint, runeui's field with `control:`: label and hint on the left, the switch at the row's
+end; without, `ui :switch, label:`), or `ui :switch, name:` with
 no form builder (`switch_tag { check_box_tag … }`, the old native one, stays for plugins); a
 field with its label, hint and the record's errors is `form.ui :field, :attr, label:,
 description: do … end` (`record_fields/*`); an empty list is
@@ -746,7 +753,8 @@ follows) fetched, and `g` fetches the pages its chords reach, once per page
 side panel do); a task's link leaves it to the side panel. Back or Forward to a list picks the row
 you were on again (kept per address in `sessionStorage`). The sidenav keeps its scroll position from
 page to page (runeui's sidebar controller), and the modal shows a placeholder for a New form that
-takes more than 150ms (`loading-placeholder`, `layouts/shared/_modal_placeholder`).
+takes more than 150ms (`loading-placeholder`, `layouts/shared/_modal_placeholder`: the dialog with
+`ui :skeleton` lines).
 
 Declare a key on the element it acts on: `data-keys="e"` clicks it, `data-keys-focus` focuses
 it instead, `data-keys-anywhere` works while the element is out of sight (in a closed menu), `data-keys="g c"` is a chord, `data-keys="s, mod+k"` lists alternatives (`mod` is
@@ -787,7 +795,10 @@ which skips self-mentions and creates a `Notification`. Two more things notify t
 client's reply on a task and a request from outside (Clients and the portal); a notification says
 what it is through its source (`notification_title`, `notification_excerpt`, `notifiable_target`),
 so the tray, the email and the push need nothing per kind. Notifications show in the
-tray (`notifications/_tray`), which the bell at the right of the panel bar opens (`g n`), and on `/notifications`, and are emailed
+bell's menu (`notifications/_tray`: a `ui :menu` whose items are the newest unread, each a link
+that reads it on the way to its record, then See all and Mark all as read; arrows and Esc are the
+menu's), which the bell at the right of the panel bar opens (`g n`), and on `/notifications` (two
+`record_card`s of rows, `j` / `k`, each with its read toggle), and are emailed
 (`NotificationMailer`). Opening one reads it and redirects to its record
 (`notifications#show`). Client-facing editors never get the prompt.
 
@@ -970,8 +981,12 @@ sign-in handling (its own sign-in page is marked too), but no peek and no undo. 
 they're signed in, with Sign out everywhere else. A portal session nobody has used in 90 days is over
 (`Contact::PORTAL_SESSION_IDLE`, pruned nightly), and a sign-in link carries the page they were
 after (`return_to`), so it lands there on any device. The top bar names the business with the
-client under it; the footer says how to ask for something, by email too when the install takes
-requests that way.
+client under it, its sections, New request (`ui :button`) and the contact's menu (`ui :menu`); the
+footer says how to ask for something, by email too when the install takes requests that way. Its
+pages are runeui's pieces in the portal's own frame: cards are `portal_card title:, hint:, action:,
+flush:` (`PortalHelper`, runeui's card), lists `ui :table` or `portal-list` rows, a list's filter
+`layouts/shared/segmented_filter` (`ui :tabs` as links) beside `portal_search` (`ui :input`),
+files `ui :file_input`, and the View-as bar a strip over the top bar.
 
 The plugins Runwell publishes (Agreements, AI, Account management, Cloudflare, Code, Factory, Google Ads, Meetings,
 Outsend, QA, QuickBooks, Reporting, Stripe, Time tracking) each live in their own repository; what each does
@@ -1276,7 +1291,7 @@ points at it with `on_delete: :cascade` and copy those rows aside and back, or u
 
 ## Settings and names
 
-Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Sidebar (the nav, `NavLayout`), Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `ui/app-settings.css`), each plugin's settings page nested under Plugins. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
+Settings (the gear, `/settings`, where owners land on Address) has Address (where the install is reached: every emailed link points there, `Runwell.host`, before `APP_HOST`), Appearance, Names, Fields, Sidebar (the nav, `NavLayout`), Email, Plugins and Updates (`manage_settings`), People (`manage_people`), and Connected apps and Help for everyone. They're listed in a grouped sidebar (`settings/_nav`, `runwell/settings.css`; each link runeui's ghost button, `settings_nav_link`, as plugins' `section_nav_link` are), each plugin's settings page nested under Plugins. A page is sections (`settings-section`: a heading, a line, a rule) of runeui's pieces: `form.ui :field` (a switch's row is `switch_field` with a hint), `ui :card`, `ui :table`, `ui :badge`, `ui :alert`, lists of `settings-item` rows. A settings page starts with `render "settings/header", current: :key`, which sets the header's title and hands the sidebar to the application layout (`content_for :settings_nav`); pages add no navigation of their own. Names are core: the words for
 client, work, scope item and tasks. Defaults live in `config/locales/terms.en.yml`; overrides in
 `Setting#terminology` (one row, single tenant). In views use `term(:work)`,
 `term(:work, count: 2)`, `label_term(label)` and `label_options(current)` — never
@@ -1313,7 +1328,9 @@ Settings > Appearance sets the install's default theme (system, light, dark), co
 scheme, corners and font, plus a logo and favicon (Active Storage on `Setting`). Each
 layout's `<html>` carries them as `data-scheme`, `data-radius`, `data-font` and
 `data-default-theme` (`appearance_data`); `appearance.css` turns them into the palette tokens (which `rune-theme.css` hands to rune_ui),
-and the page previews a change instantly (`appearance` controller) before saving.
+and the page previews a change instantly (`appearance` controller) before saving. Each choice is
+a runeui radio group drawn as picture cards (`settings/appearances/_choices`, also Your account's
+text size): arrows move between them, and a change previews and saves.
 A person's sun/moon choice (localStorage) beats the install's default theme.
 Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
 the root font size (16px times `--text-scale`, `rune-theme.css`; rune_ui's text steps, the body 13px); a person's own choice in

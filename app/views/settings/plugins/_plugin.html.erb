@@ -1,6 +1,6 @@
 <%# locals: (plugin:, enabled:) %>
 <%# One plugin as a card, once per plugin. The switch shows Active or Dormant at once by CSS
-    (.plugin-card:has(.switch input:checked)), not state: a server-mode partial rendered more than
+    (.plugin-card:has(ui-switch[data-checked])), not state: a server-mode partial rendered more than
     once only sends its first copy's state. The save then renders the page fresh, with whatever the
     plugin adds or hides. %>
 <% settings = Runwell::Plugins.settings_pages[plugin.key] %>
@@ -9,51 +9,45 @@
 <% name = plugin.key.to_s %>
 <% source = InstalledPlugins.metadata(name)["repo"] %>
 <% newer = PluginRelease.newer(name) %>
-<li class="card plugin-card" data-filter-target="item">
-  <header class="card__head">
-    <h3 class="card__title"><%= plugin.name %></h3>
-    <p class="card__hint"><%= [ plugin.version, plugin.author, source ].compact.join(" · ") %></p>
-    <div class="card__action">
-      <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "plugin-card__switch", data: { controller: "form", turbo_action: "advance" } do |form| %>
-        <%= ui :switch, name: "plugin[enabled]", checked: enabled, unchecked_value: "0", id: "plugin_#{plugin.key}_enabled", title: "Switch on or off", aria: { label: "Switch #{plugin.name} on or off" }, data: { action: "change->form#submit" } %>
+<% switch = capture do %>
+  <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "plugin-card__switch", data: { controller: "form", turbo_action: "advance" } do |form| %>
+    <%= ui :switch, name: "plugin[enabled]", checked: enabled, unchecked_value: "0", id: "plugin_#{plugin.key}_enabled", title: "Switch on or off", aria: { label: "Switch #{plugin.name} on or off" }, data: { action: "change->form#submit" } %>
+  <% end %>
+<% end %>
+<% footer = capture do %>
+  <%= link_to page_path, class: "ui-button", data: { variant: "outline", size: "sm" }, title: gear_title do %>
+    <%= icon_tag "settings-outline" %>
+    <span><%= enabled && settings ? "Settings" : "Details" %></span>
+  <% end %>
+  <% if plugin.homepage.present? %>
+    <%= link_to "About", plugin.homepage, class: "ui-button", data: { variant: "ghost", size: "sm" }, target: "_blank", rel: "noopener" %>
+  <% end %>
+  <% if source %>
+    <% if newer %>
+      <%= button_to settings_plugin_upgrade_path(plugin.key), class: "ui-button", data: { variant: "default", size: "sm" } do %>
+        <%= icon_tag "refresh" %>
+        <span>Update to <%= newer %></span>
       <% end %>
+    <% end %>
+    <div class="settings-end">
+      <%= render "layouts/shared/delete_dialog", name: plugin.name, path: settings_plugin_path(plugin.key),
+        message: "Its code comes off this server and Runwell restarts. Its tables and data stay, so installing it again brings them back." %>
     </div>
-  </header>
-
-  <div class="card__content">
+  <% end %>
+<% end %>
+<li class="plugin-card" data-filter-target="item">
+  <%= ui :card, title: tag.h3(plugin.name, class: "plugin-card__title"), description: [ plugin.version, plugin.author, source ].compact.join(" · "), action: switch, footer: footer do %>
     <p><%= plugin.description %></p>
     <% unless plugin.compatible? %>
       <p class="settings-error">Needs Runwell <%= plugin.requires %>; this is <%= Runwell::VERSION %>.</p>
     <% end %>
     <div class="settings-chips">
-      <span class="plugin-card__active"><%= badge "Active", tone: :ok %></span>
-      <span class="plugin-card__dormant"><%= badge "Dormant", tone: :neutral %></span>
+      <span class="plugin-card__active"><%= ui :badge, variant: :success, content: "Active" %></span>
+      <span class="plugin-card__dormant"><%= ui :badge, variant: :secondary, content: "Dormant" %></span>
       <% Runwell::Plugins.additions(plugin.key).each do |addition| %>
         <%# herb:key addition %>
-        <span class="badge"><%= addition %></span>
+        <%= ui :badge, variant: :outline, content: addition %>
       <% end %>
     </div>
-  </div>
-
-  <footer class="card__footer">
-    <%= link_to page_path, class: "btn btn--secondary btn--sm", title: gear_title do %>
-      <%= icon_tag "settings-outline" %>
-      <span><%= enabled && settings ? "Settings" : "Details" %></span>
-    <% end %>
-    <% if plugin.homepage.present? %>
-      <%= link_to "About", plugin.homepage, class: "btn btn--ghost btn--sm", target: "_blank", rel: "noopener" %>
-    <% end %>
-    <% if source %>
-      <% if newer %>
-        <%= button_to settings_plugin_upgrade_path(plugin.key), class: "btn btn--primary btn--sm" do %>
-          <%= icon_tag "refresh" %>
-          <span>Update to <%= newer %></span>
-        <% end %>
-      <% end %>
-      <div class="settings-end">
-        <%= render "layouts/shared/delete_dialog", name: plugin.name, path: settings_plugin_path(plugin.key),
-          message: "Its code comes off this server and Runwell restarts. Its tables and data stay, so installing it again brings them back." %>
-      </div>
-    <% end %>
-  </footer>
+  <% end %>
 </li>

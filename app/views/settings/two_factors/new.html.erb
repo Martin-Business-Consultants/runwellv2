@@ -18,19 +18,20 @@
         </details>
       </li>
       <li>
-        <%= form_with url: settings_two_factor_path, class: "field", data: { controller: "form" } do |form| %>
-          <%= form.label :code, "Enter the 6-digit code it shows.", class: "field__label" %>
-          <div class="settings-inline settings-inline--fit">
-            <%= form.text_field :code, required: true, class: "settings-code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 7 %>
-            <button type="submit" class="btn btn--primary">Turn on</button>
-          </div>
+        <%= form_with url: settings_two_factor_path, data: { controller: "form" } do %>
+          <%= ui :field, label: "Enter the 6-digit code it shows." do %>
+            <div class="settings-inline settings-inline--fit">
+              <%= ui :otp_input, name: "code", id: "code", groups: [ 3, 3 ], required: true, autofocus: true, aria: { label: "The 6-digit code" } %>
+              <%= ui :button, type: :submit, content: "Turn on" %>
+            </div>
+          <% end %>
         <% end %>
       </li>
     </ol>
     <% if Setting.current.require_two_factor? && can?(:manage_people) %>
       <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch do |form| %>
         <%= form.hidden_field :require_two_factor, value: "0" %>
-        <p class="muted">This install requires two-factor sign-in. Changed your mind? <button type="submit" class="link-button">Stop requiring it</button></p>
+        <p class="settings-note">This install requires two-factor sign-in. Changed your mind? <%= ui :button, type: :submit, variant: :link, size: :sm, content: "Stop requiring it", class: "settings-link" %></p>
       <% end %>
     <% end %>
   </section>

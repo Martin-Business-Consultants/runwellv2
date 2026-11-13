@@ -21,30 +21,28 @@
       <h2>Permissions</h2>
       <p class="settings-section__description">Everyone can work on <%= term(:client, count: 2).downcase %>, <%= term(:work, count: 2).downcase %>, <%= term(:task, count: 2).downcase %>, notes and documents. Plugins that are on add their own permissions here.</p>
     </header>
-    <div class="table-wrap">
-      <table class="table">
+    <%= ui :table, class: "settings-table" do %>
         <thead>
-          <tr><th>Permission</th><% User::ROLES.each do |role| %><%# herb:key role %><th class="settings-center"><%= role.capitalize %></th><% end %></tr>
+          <tr><th data-grow>Permission</th><% User::ROLES.each do |role| %><%# herb:key role %><th data-align="center"><%= role.capitalize %></th><% end %></tr>
         </thead>
         <tbody>
           <% User.permissions.each do |key, permission| %>
             <%# herb:key key %>
             <tr>
-              <td><%= permission[:name] %></td>
+              <td data-grow><%= permission[:name] %></td>
               <% User::ROLES.each do |role| %>
                 <%# herb:key role %>
-                <td class="settings-center">
+                <td data-align="center">
                   <% if permission[:roles].include?(role) %>
                     <%= icon_tag "check" %><span class="visually-hidden">Yes</span>
                   <% else %>
-                    <span class="muted">—</span>
+                    <span class="settings-dash">—</span>
                   <% end %>
                 </td>
               <% end %>
             </tr>
           <% end %>
         </tbody>
-      </table>
-    </div>
+    <% end %>
   </section>
 </div>

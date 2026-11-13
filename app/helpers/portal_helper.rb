@@ -22,10 +22,10 @@ module PortalHelper
 
   # How far along a piece of work is, from the tasks shared with the client: a bar and "3 of 8".
   def portal_progress(progress)
-    return tag.span("—", class: "muted") if progress.nil? || progress[:total].zero?
+    return tag.span("—", class: "portal-muted") if progress.nil? || progress[:total].zero?
 
     tag.span class: "portal-progress" do
-      safe_join([ progress_bar(progress[:done] * 100.0 / progress[:total], label: "#{progress[:done]} of #{progress[:total]} done"),
+      safe_join([ ui(:progress, value: (progress[:done] * 100.0 / progress[:total]).round, size: :sm, class: "portal-progress__bar", aria: { label: "#{progress[:done]} of #{progress[:total]} done" }),
                   tag.span("#{progress[:done]} of #{progress[:total]}", class: "portal-progress__count") ])
     end
   end
@@ -35,10 +35,19 @@ module PortalHelper
     form_with url: request.path, method: :get, class: "portal-search", data: { turbo_action: "replace" } do
       safe_join([
         *request.query_parameters.except("q", "page", "task").map { |name, value| hidden_field_tag(name, value, id: nil) },
-        search_field_tag(:q, params[:q], placeholder: placeholder, class: "portal-search__field", autocomplete: "off", aria: { label: placeholder }),
-        (link_to("Clear", url_for(request.query_parameters.except("q", "page")), class: "btn btn--ghost btn--sm") if params[:q].present?)
+        ui(:input, name: "q", type: :search, value: params[:q], placeholder: placeholder, class: "portal-search__field", autocomplete: "off", aria: { label: placeholder }),
+        (link_to("Clear", url_for(request.query_parameters.except("q", "page")), class: "ui-button", data: { variant: "ghost", size: "sm" }) if params[:q].present?)
       ].compact)
     end
+  end
+
+  # A card on a portal page: runeui's card, its title (any markup: a layout's text in template mode)
+  # and hint in its header, action: at the header's end. flush: its list or table runs to the
+  # card's edges. Other options (the drag-and-drop controller's data) go on the card.
+  def portal_card(title: nil, hint: nil, action: nil, flush: false, css: nil, **attrs, &body)
+    title = tag.h2(title, class: "portal-card__title") if title.present? && !title.html_safe?
+    ui :card, title: title.presence, description: hint.presence, action: action.presence,
+      class: class_names("portal-card", css, "portal-card--flush": flush), content: (capture(&body).presence if body), **attrs
   end
 
   # Who on the team has a task, by name: a client doesn't know our faces.

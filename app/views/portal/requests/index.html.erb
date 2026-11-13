@@ -6,12 +6,11 @@
 <% end %>
 
 <% if @requests.any? %>
-  <section class="card card--flush portal-card">
-    <div class="table-wrap">
-      <table class="table portal-table">
+  <%= portal_card flush: true do %>
+      <%= ui :table, class: "portal-table" do %>
         <thead>
           <tr>
-            <th>Subject</th>
+            <th data-grow>Subject</th>
             <th class="portal-table__secondary"><%= term(:work) %></th>
             <th class="portal-table__date portal-table__secondary">Sent</th>
             <th class="portal-table__date">Needed by</th>
@@ -22,24 +21,23 @@
           <% @requests.each do |request_record| %>
             <%# herb:key request_record.id %>
             <tr>
-              <td class="portal-table__title">
+              <td class="portal-table__title" data-grow="wrap">
                 <%= portal_task_link_to(request_record) { request_record.title } %>
                 <%= portal_unread_mark(request_record) %>
               </td>
-              <td class="portal-table__secondary muted">
+              <td class="portal-table__secondary portal-muted">
                 <% if request_record.work %>
                   <%= link_to request_record.work.title, portal_work_path(request_record.work), class: "portal-table__link" %>
                 <% end %>
               </td>
-              <td class="portal-table__date portal-table__secondary muted nowrap"><%= l request_record.created_at.in_time_zone.to_date, format: :short %></td>
-              <td class="portal-table__date muted nowrap"><%= portal_due(request_record) %></td>
+              <td class="portal-table__date portal-table__secondary portal-muted"><%= l request_record.created_at.in_time_zone.to_date, format: :short %></td>
+              <td class="portal-table__date portal-muted"><%= portal_due(request_record) %></td>
               <td class="portal-table__status"><%= portal_status_tag(request_record) %></td>
             </tr>
           <% end %>
         </tbody>
-      </table>
-    </div>
-  </section>
+      <% end %>
+  <% end %>
   <%= table_pagination @page %>
 <% else %>
   <%= render "layouts/shared/empty", text: "Nothing yet.", action_text: "Ask for something", action_path: new_portal_request_path, action_frame: "modal" %>

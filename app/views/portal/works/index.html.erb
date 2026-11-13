@@ -24,12 +24,12 @@
           too. Staff viewing as them see the grips inactive. Beside each, how far along it is from the
           tasks shared with them, and the next date due. %>
       <% sortable = @works.size > 1 %>
-      <section class="card card--flush portal-card" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
-        <div class="table-wrap">
-          <table class="table portal-table" data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_work_priority_path("__id__") %>">
+      <%= portal_card flush: true, data: { controller: "drag-and-drop", drag_and_drop_dragged_item_class: "portal-sortable--dragging", drag_and_drop_hover_container_class: "portal-sortable--hover",
+            action: "dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd" } do %>
+          <%= ui :table, class: "portal-table", data: { drag_and_drop_target: "container", drag_and_drop_sortable: "", drag_and_drop_url: portal_work_priority_path("__id__") } do %>
             <thead>
               <tr>
-                <th>Title</th>
+                <th data-grow>Title</th>
                 <th class="portal-table__secondary">Type</th>
                 <th class="portal-table__progress">Done</th>
                 <th class="portal-table__date portal-table__secondary">Next due</th>
@@ -41,15 +41,15 @@
                 <%# herb:key work.id %>
                 <% progress = @progress[work.id] %>
                 <tr data-drag-and-drop-target="item" data-id="<%= work.ref %>">
-                  <td class="portal-table__title portal-sortable__cell">
+                  <td class="portal-table__title portal-sortable__cell" data-grow="wrap">
                     <% if sortable %>
                       <%= portal_priority_grip(work.title) %>
                     <% end %>
                     <%= link_to work.title, portal_work_path(work), class: "row-link", draggable: "false" %>
                   </td>
-                  <td class="portal-table__secondary"><%= badge work.label_name, tone: :outline %></td>
+                  <td class="portal-table__secondary"><%= ui :badge, variant: :outline, content: work.label_name %></td>
                   <td class="portal-table__progress"><%= portal_progress(progress) %></td>
-                  <td class="portal-table__date portal-table__secondary muted nowrap">
+                  <td class="portal-table__date portal-table__secondary portal-muted">
                     <% if progress[:next_due] %>
                       <span class="<%= class_names("portal-due", "portal-due--late": progress[:next_due] < Date.current) %>"><%= l progress[:next_due], format: :short %></span>
                     <% end %>
@@ -58,9 +58,8 @@
                 </tr>
               <% end %>
             </tbody>
-          </table>
-        </div>
-      </section>
+          <% end %>
+      <% end %>
     <% elsif @state == "active" %>
       <%= render "layouts/shared/empty", text: "Nothing active right now. Need something?", action_text: "Ask for it", action_path: new_portal_request_path, action_frame: "modal" %>
     <% else %>
@@ -76,9 +75,9 @@
         </section>
       <% end %>
       <% if plugins.present? %>
-        <section class="card portal-card portal-slot">
+        <%= portal_card css: "portal-slot" do %>
           <%= plugins %>
-        </section>
+        <% end %>
       <% end %>
     </aside>
   <% end %>

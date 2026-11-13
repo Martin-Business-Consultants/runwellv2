@@ -12,22 +12,22 @@
 <% groups = ScopeItem.in_client_order(work.scope_items).filter_map { |item| [ item.description, by_section[item.id], dom_id(item, :tasks) ] if by_section[item.id] } %>
 <% groups << [ (groups.any? ? "Other " + term(:task, count: 2).downcase : nil), by_section[nil], "other_tasks" ] if by_section[nil] %>
 <% sortable = true %>
-<section class="card card--flush portal-card">
-  <header class="card__head card__head--bordered">
-    <% if section %>
-      <h2 class="card__title"><%= section.description %></h2>
-    <% else %>
-      <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "card__title" %>
-    <% end %>
-    <%= layout_text_tag record_layout(:portal_work), "tasks.hint", "What we’re doing on it for you.", tag: :p, class: "card__hint" %>
-    <% if tasks.size > 1 %>
-      <p class="card__hint portal-sortable__hint">Move them by <%= icon_tag "grip" %> into the order that matters most to you.</p>
-    <% end %>
-    <div class="card__action">
-      <%= render "layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
-            options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: counts %>
-    </div>
-  </header>
+<% title = capture do %>
+  <% if section %>
+    <h2 class="portal-card__title"><%= section.description %></h2>
+  <% else %>
+    <%= layout_text_tag record_layout(:portal_work), "tasks.title", term(:task, count: 2), class: "portal-card__title" %>
+  <% end %>
+<% end %>
+<% hint = capture do %>
+  <%= layout_text_tag record_layout(:portal_work), "tasks.hint", "What we’re doing on it for you.", tag: :span, class: "portal-card__hint" %>
+  <% if tasks.size > 1 %>
+    <span class="portal-card__hint portal-sortable__hint">Move them by <%= icon_tag "grip" %> into the order that matters most to you.</span>
+  <% end %>
+<% end %>
+<% filter = render("layouts/shared/segmented_filter", label: "Show " + term(:task, count: 2).downcase, param: :tasks, current: state,
+     options: [ [ "Open", "open" ], [ "Done", "done" ], [ "All", "all" ] ], counts: counts) %>
+<%= portal_card title: title, hint: hint, action: filter, flush: true do %>
   <% if tasks.any? %>
     <% groups.each do |heading, group, anchor| %>
       <%# herb:key anchor %>
@@ -37,7 +37,7 @@
           <h3 class="portal-task-group__heading"><%= heading %></h3>
         <% end %>
         <div data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_task_priority_path("__id__") %>">
-          <ul class="list" data-drag-drop-item-container>
+          <ul class="portal-list" data-drag-drop-item-container>
             <% group.each do |task| %>
               <%# herb:key task.id %>
               <li class="portal-sortable__item" data-drag-and-drop-target="item" data-id="<%= task.id %>">
@@ -45,14 +45,14 @@
                   <%= portal_priority_grip(task.title) %>
                 <% end %>
                 <%= portal_task_link_to(task) do %>
-                  <span class="list-row">
-                    <span class="list-row__content">
-                      <span class="list-row__title"><%= task.title %> <%= portal_unread_mark(task) %></span>
+                  <span class="portal-row">
+                    <span class="portal-row__content">
+                      <span class="portal-row__title"><%= task.title %> <%= portal_unread_mark(task) %></span>
                       <% if task.due_on %>
-                        <span class="list-row__desc"><%= portal_due(task, prefix: "Due ") %></span>
+                        <span class="portal-row__desc"><%= portal_due(task, prefix: "Due ") %></span>
                       <% end %>
                     </span>
-                    <span class="list-row__actions">
+                    <span class="portal-row__actions">
                       <%= portal_status_tag(task) %>
                     </span>
                   </span>
@@ -64,6 +64,6 @@
       </div>
     <% end %>
   <% else %>
-    <%= empty_state(state == "done" ? "Nothing done yet." : "Nothing open right now. If you need something on this, send a request.", compact: true) %>
+    <%= ui :empty, size: :sm, description: (state == "done" ? "Nothing done yet." : "Nothing open right now. If you need something on this, send a request.") %>
   <% end %>
-</section>
+<% end %>

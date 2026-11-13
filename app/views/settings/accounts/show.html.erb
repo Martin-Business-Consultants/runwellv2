@@ -8,7 +8,7 @@
       <h2>Ways to sign in</h2>
       <p class="settings-section__description">Your password always works. These add to it.</p>
     </header>
-    <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "settings-group__card", data: { controller: "form" } do |form| %>
+    <%= form_with model: @user, url: settings_passwordless_path, method: :patch, class: "settings-switches", data: { controller: "form" } do |form| %>
       <%= switch_field form, :passwordless, label: "Sign in with an emailed link", submit_on_change: true,
             hint: "“Email me a sign-in link” on the sign-in page sends you a link that works once, for 15 minutes. Your password keeps working too." %>
     <% end %>
@@ -21,15 +21,10 @@
       <h2>Notifications on this device</h2>
       <p class="settings-section__description">When someone mentions you, this browser (or Runwell installed as an app) shows it, as well as the email. Switch it on on each device you want them on.</p>
     </header>
-    <div class="settings-group__card" data-controller="push" data-push-key-value="<%= Setting.current.push_keys[:public_key] %>" data-push-url-value="<%= settings_push_subscription_path %>">
-      <div class="setting-row setting-row--field">
-        <div class="setting-row__text">
-          <label class="setting-row__label" for="push_switch">Show my notifications here</label>
-          <span class="setting-row__hint">Your browser asks first. Clicking one opens what it’s about.</span>
-        </div>
-        <%= ui :switch, name: "push", id: "push_switch", data: { push_target: "switch", action: "change->push#toggle" } %>
-      </div>
-      <p class="setting-row__hint push-note" hidden data-push-target="note"
+    <div class="settings-switches" data-controller="push" data-push-key-value="<%= Setting.current.push_keys[:public_key] %>" data-push-url-value="<%= settings_push_subscription_path %>">
+      <%= ui :field, label: "Show my notifications here", description: "Your browser asks first. Clicking one opens what it’s about.", class: "switch-field", control_id: "push_switch",
+            control: ui(:switch, name: "push", id: "push_switch", data: { push_target: "switch", action: "change->push#toggle" }) %>
+      <p class="settings-note push-note" hidden data-push-target="note"
         data-unsupported="This browser can’t show notifications from a website. On an iPhone or iPad, add Runwell to your Home Screen first."
         data-denied="Notifications are blocked for Runwell in this browser’s settings."
         data-failed="That didn’t work. Try again in a moment."></p>
@@ -42,20 +37,20 @@
       <p class="settings-section__description">A code from an app on your phone after your password, so a stolen password isn’t enough to get in.</p>
     </header>
     <div class="settings-list">
-      <div class="list-row">
-        <div class="list-row__media"><%= icon_tag "lock" %></div>
-        <div class="list-row__content">
+      <div class="settings-item">
+        <div class="settings-item__media"><%= icon_tag "lock" %></div>
+        <div class="settings-item__content">
           <% if @user.two_factor? %>
-            <p class="list-row__title">Authenticator app <%= badge "On", tone: :ok %></p>
-            <p class="list-row__desc">Since <%= l @user.otp_enabled_at.to_date, format: :long %>. <%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
+            <p class="settings-item__title">Authenticator app <%= ui :badge, variant: :success, content: "On" %></p>
+            <p class="settings-item__desc">Since <%= l @user.otp_enabled_at.to_date, format: :long %>. <%= pluralize(@user.recovery_codes_left, "recovery code") %> left.</p>
           <% else %>
-            <p class="list-row__title">Authenticator app <%= badge "Off", tone: :neutral %></p>
-            <p class="list-row__desc">Turn it on and Runwell asks for a code after your password.</p>
+            <p class="settings-item__title">Authenticator app <%= ui :badge, variant: :secondary, content: "Off" %></p>
+            <p class="settings-item__desc">Turn it on and Runwell asks for a code after your password.</p>
           <% end %>
         </div>
         <% unless @user.two_factor? %>
-          <div class="list-row__actions">
-            <%= link_to "Set up", new_settings_two_factor_path, class: "btn btn--primary btn--sm" %>
+          <div class="settings-item__actions">
+            <%= link_to "Set up", new_settings_two_factor_path, class: "ui-button", data: { variant: "default", size: "sm" } %>
           </div>
         <% end %>
       </div>
@@ -64,7 +59,7 @@
       <%= render "settings/accounts/two_factor_changes", required: Setting.current.require_two_factor? %>
     <% end %>
     <% if can?(:manage_people) %>
-      <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "settings-group__card", data: { controller: "form" } do |form| %>
+      <%= form_with model: Setting.current, url: settings_two_factor_requirement_path, method: :patch, class: "settings-switches", data: { controller: "form" } do |form| %>
         <%= switch_field form, :require_two_factor, label: "Require it for everyone", submit_on_change: true,
               hint: "On unless you turn it off. After their password, everyone enters a code from an authenticator app; anyone without it sets it up on their next page. #{term(:client, count: 2).upcase_first} sign in by emailed link and aren’t affected." %>
       <% end %>
@@ -76,25 +71,8 @@
       <h2>Text size</h2>
       <p class="settings-section__description">Yours alone, on every device you sign in on. The install’s default is <%= Setting::TEXT_SIZES[install_size] %>.</p>
     </header>
-    <%= form_with model: @user, url: settings_account_path, method: :patch, data: { controller: "appearance", install_text_size: install_size } do |form| %>
-      <div class="settings-choices">
-        <label class="settings-choice">
-          <span class="settings-choice__preview" aria-hidden="true"><%= icon_tag "settings-outline" %></span>
-          <span class="settings-choice__label">Install default</span>
-          <%= form.radio_button :text_size, "", checked: @user.text_size.blank?, data: { action: "click->appearance#preview" } %>
-        </label>
-        <% Setting::TEXT_SIZES.each do |value, label| %>
-          <%# herb:key value %>
-          <label class="settings-choice">
-            <span class="settings-choice__preview" aria-hidden="true">
-              <% sample_class = "appearance-sample appearance-size--" + value %>
-              <span class="<%= sample_class %>">Aa</span>
-            </span>
-            <span class="settings-choice__label"><%= label %></span>
-            <%= form.radio_button :text_size, value, checked: @user.text_size == value, data: { action: "click->appearance#preview" } %>
-          </label>
-        <% end %>
-      </div>
+    <%= form_with model: @user, url: settings_account_path, method: :patch, data: { controller: "appearance", action: "change->appearance#preview", install_text_size: install_size } do |form| %>
+      <%= render "settings/appearances/choices", form: form, attribute: :text_size, choices: Setting::TEXT_SIZES, current: @user.text_size, sample_class: "appearance-size", blank: "Install default", label: "Text size" %>
     <% end %>
   </section>
 
@@ -114,12 +92,12 @@
           <% menu.each do |key, label, icon| %>
             <%# herb:key key %>
             <% hidden = @user.person.nav_plugin_hidden?(key) %>
-            <li class="<%= class_names("list-row", "settings-menu__item--hidden": hidden) %>">
-              <div class="list-row__media"><%= icon_tag icon %></div>
-              <div class="list-row__content">
-                <p class="list-row__title"><%= label %></p>
+            <li class="<%= class_names("settings-item", "settings-menu__item--hidden": hidden) %>">
+              <div class="settings-item__media"><%= icon_tag icon %></div>
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= label %></p>
               </div>
-              <div class="list-row__actions">
+              <div class="settings-item__actions">
                 <%= ui :switch, name: "shown[]", value: key, checked: !hidden, id: "shown_#{key}", title: "Show #{label} in your menu", aria: { label: "Show #{label} in your menu" }, data: { action: "change->form#submit" } %>
               </div>
             </li>

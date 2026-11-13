@@ -2,24 +2,16 @@
 <% content_for :showcase, "team" %>
 
 <div class="auth">
-  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
-    <header class="card__head auth__header">
-      <h1 class="card__title auth__title"><%= @page_title %></h1>
-      <p class="card__hint">We’ll email you a link to choose a new one.</p>
-    </header>
-
-    <div class="card__content auth__content">
+  <%= auth_card title: @page_title, hint: "We’ll email you a link to choose a new one.", shake: flash[:alert] do %>
       <%= form_with url: passwords_path, class: "auth__form" do |form| %>
-        <div class="field">
-          <%= form.label :email_address, "Email", class: "field__label" %>
+        <%= form.ui :field, :email_address, label: "Email" do %>
           <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address] %>
-        </div>
+        <% end %>
 
         <%= bot_check_tag %>
-        <button type="submit" class="btn btn--primary btn--block">Email reset link</button>
+        <%= ui :button, type: :submit, content: "Email reset link", class: "auth__button" %>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 
   <p class="auth__note"><%= link_to "Back to sign in", new_session_path %></p>
 </div>

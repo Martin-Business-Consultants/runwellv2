@@ -20,7 +20,7 @@
         <h2>Installed plugins</h2>
         <p class="settings-section__description">Plugins add to Runwell without changing it. They live on this server, outside Runwell itself, so they stay through updates; each updates only when you press its Update button. Runwell comes with none, and a plugin starts off: switch it on here. Switching one off hides everything it adds and keeps its data.</p>
         <div class="settings-section__actions">
-          <%= button_to settings_plugins_check_path, class: "btn btn--secondary btn--sm" do %>
+          <%= button_to settings_plugins_check_path, class: "ui-button", data: { variant: "outline", size: "sm" } do %>
             <%= icon_tag "refresh" %>
             <span>Check for updates</span>
           <% end %>
@@ -50,12 +50,13 @@
         <p class="settings-section__description">By its GitHub repository, as owner/repo. Runwell installs its latest release; it starts off until you switch it on above.</p>
       </header>
 
-      <%= form_with url: settings_plugins_installations_path, class: "field" do |form| %>
-        <%= form.label :repo, "GitHub repository", class: "field__label" %>
-        <div class="settings-inline">
-          <%= form.text_field :repo, placeholder: "owner/runwell-thing", autocomplete: "off", required: true %>
-          <button type="submit" class="btn btn--primary">Install</button>
-        </div>
+      <%= form_with url: settings_plugins_installations_path do |form| %>
+        <%= form.ui :field, :repo, label: "GitHub repository" do %>
+          <div class="settings-inline">
+            <%= form.text_field :repo, placeholder: "owner/runwell-thing", autocomplete: "off", required: true %>
+            <%= ui :button, type: :submit, content: "Install" %>
+          </div>
+        <% end %>
       <% end %>
     </section>
 
@@ -67,13 +68,13 @@
         <ul class="settings-list settings-list--scroll">
           <% @changes.each do |change| %>
             <%# herb:key change.id %>
-            <li class="list-row">
+            <li class="settings-item">
               <% if change.requested_by %>
-                <div class="list-row__media"><%= person_tag change.requested_by %></div>
+                <div class="settings-item__media"><%= person_tag change.requested_by %></div>
               <% end %>
-              <div class="list-row__content">
-                <p class="list-row__title"><%= change.summary %> <%= ui_status_badge change.status %></p>
-                <p class="list-row__desc"><%= time_ago_in_words(change.created_at) %> ago</p>
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= change.summary %> <%= ui_status_badge change.status %></p>
+                <p class="settings-item__desc"><%= time_ago_in_words(change.created_at) %> ago</p>
                 <% if change.message.present? %>
                   <pre class="settings-log"><%= change.message %></pre>
                 <% end %>

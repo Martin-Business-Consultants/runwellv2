@@ -16,18 +16,16 @@
       <span class="nav-account__email"><%= Current.user.email_address %></span>
     </span>
   <% end %>
-  <%= menu account, up: true, trigger_class: "nav-account__button" do %>
-    <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), settings_account_path %>
-    <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Settings and help"), tag.kbd("G S") ]), settings_path,
-          data: { keys: "g s", keys_anywhere: true }, aria: { current: (request.path.start_with?(settings_path) ? "page" : "false") } %>
-    <%# Items that run a Stimulus action rather than go somewhere: runeui's menu items, as data. %>
-    <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
-    <% shortcuts = capture do %><%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <kbd>?</kbd><% end %>
-    <%= ui :menu, part: "items", items: [
-          { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
-          { label: shortcuts, value: "shortcuts", data: { controller: "rune-proxy", action: "select->rune-proxy#click", rune_proxy_selector_param: "[data-keys='?']" } }
-        ] %>
-    <%= menu_divider %>
-    <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), session_path, method: :delete %>
-  <% end %>
+  <%# Their menu (ui :menu), opening upwards: their account, settings (g s), light or dark, the
+      shortcut sheet (it opens the sheet's ui :dialog, #shortcuts) and signing out. %>
+  <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
+  <% shortcuts = capture do %><%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <%= ui :kbd, content: "?" %><% end %>
+  <% settings = capture do %><%= icon_tag "settings-outline" %> <span>Settings and help</span> <%= ui :kbd, keys: %w[G S] %><% end %>
+  <%= ui :menu, trigger: tag.button(account, type: "button", class: "nav-account__button"), side: :top, align: :start, label: "Your menu", class: "nav-account__menu", items: [
+        { label: safe_join([ icon_tag("person"), tag.span("Your account") ]), href: settings_account_path },
+        { label: settings, href: settings_path, data: { keys: "g s", keys_anywhere: true } },
+        { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
+        { label: shortcuts, value: "shortcuts", data: { runeui_open: "shortcuts" } },
+        :separator,
+        { label: safe_join([ icon_tag("logout"), tag.span("Sign out") ]), href: session_path, method: :delete } ] %>
 </div>

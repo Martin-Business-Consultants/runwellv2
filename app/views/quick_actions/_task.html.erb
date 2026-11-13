@@ -15,44 +15,39 @@
 <%= form_with model: Task.new, url: tasks_path, id: form_id, namespace: "quick_action", class: "quick-action__form", data: { turbo_frame: "_top" } do |form| %>
   <% rows.each do |row| %>
     <%# herb:key row.join("-") %>
-    <div class="<%= row.size > 1 ? "field-row quick-action__row" : "quick-action__single" %>">
+    <div class="<%= row.size > 1 ? "form-grid quick-action__row" : "quick-action__single" %>">
       <% row.each do |key| %>
         <%# herb:key key %>
         <% if key == "title" %>
-          <div class="field quick-action__lead-field">
-            <%= form.label :title, "What needs doing", class: "field__label" %>
+          <%= form.ui :field, :title, label: "What needs doing", class: "quick-action__lead-field" do %>
             <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "Send the proposal…", autofocus: true %>
-          </div>
+          <% end %>
         <% elsif key == "description" %>
-          <div class="field">
-            <span class="field__label">Details <span class="quick-action__optional">Optional</span></span>
+          <%= form.ui :field, :description, label: safe_join([ "Details ", tag.span("Optional", class: "quick-action__optional") ]) do %>
             <%= rich_text_field form, :description, placeholder: "Anything that helps…" %>
-          </div>
+          <% end %>
         <% elsif key == "lead" %>
-          <div class="field">
-            <%= form.label :owner_id, "Lead", class: "field__label" %>
+          <%= form.ui :field, :owner_id, label: "Lead" do %>
             <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned", selected: me.id }, search: true %>
-          </div>
+          <% end %>
         <% elsif key == "others" %>
-          <div class="field">
-            <%= form.label :other_owner_ids, "Also on it", class: "field__label" %>
+          <%= form.ui :field, :other_owner_ids, label: "Also on it" do %>
             <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else" }, multiple: true %>
-          </div>
+          <% end %>
         <% elsif key == "due" %>
-          <div class="field">
-            <%= form.label :due_on, "Due", class: "field__label" %>
+          <%= form.ui :field, :due_on, label: "Due" do %>
             <%= date_input form, :due_on %>
-          </div>
+          <% end %>
         <% elsif key == "client_visible" %>
-          <div class="field quick-action__switch">
+          <div class="quick-action__switch">
             <%= switch_field form, :client_visible, label: "Visible to the #{term(:client).downcase}" %>
           </div>
         <% end %>
       <% end %>
     </div>
   <% end %>
-  <div class="dialog__actions">
-    <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
-    <button type="submit" class="btn btn--primary">Add <%= term(:task).downcase %></button>
+  <div class="form-actions">
+    <%= ui :button, type: :button, variant: :outline, content: "Cancel", data: { runeui_close: "quick_action_dialog" } %>
+    <%= ui :button, type: :submit, content: "Add " + term(:task).downcase %>
   </div>
 <% end %>

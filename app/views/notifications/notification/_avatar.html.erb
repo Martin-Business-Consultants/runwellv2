@@ -1,0 +1,9 @@
+<%# locals: (notification:) %>
+<%# Who a notification is from: their picture, or an envelope for mail from outside. %>
+<span class="notification__avatar">
+  <% if notification.creator %>
+    <%= avatar_image_tag notification.creator %>
+  <% else %>
+    <%= icon_tag "email" %>
+  <% end %>
+</span>

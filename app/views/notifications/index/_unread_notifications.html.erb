@@ -1,20 +1,15 @@
 <%# locals: (unread:) %>
 <%# New for you. The empty line shows once the list under it has nothing in it, so reading the
     last one (a turbo stream moves it to Previously seen) brings it back without a reload. %>
-<section class="card card--flush notifications-list" aria-labelledby="notifications-new-title">
-  <header class="card__head">
-    <h2 class="card__title" id="notifications-new-title">New for you</h2>
-    <p class="card__hint">Mentions you haven’t opened yet.</p>
-    <% if unread.any? %>
-      <div class="card__action">
-        <%= button_to "Mark all as read", bulk_reading_path, class: button_classes(variant: :secondary, size: :sm), data: { action: "badge#clear" } %>
-      </div>
-    <% end %>
-  </header>
-
+<% action = capture do %>
+  <% if unread.any? %>
+    <%= button_to "Mark all as read", bulk_reading_path, class: "ui-button", data: { variant: "outline", size: "sm", action: "badge#clear" } %>
+  <% end %>
+<% end %>
+<%= record_card title: tag.h2("New for you", id: "notifications-new-title", class: "record-card__title"), hint: "Mentions you haven’t opened yet.", action: action,
+      css: "notifications-list", aria: { labelledby: "notifications-new-title" } do %>
   <p class="notifications-list__empty">Nothing new for you.</p>
-
   <div id="notifications_list" class="notifications-list__items">
     <%= render partial: "notifications/notification", collection: unread, as: :notification %>
   </div>
-</section>
+<% end %>

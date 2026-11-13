@@ -1,7 +1,7 @@
 <%# locals: (work:) %>
 <% panels = visible_plugin_slots(:portal_work_panel, work: work) %>
 <% if panels.present? %>
-  <section class="card portal-card portal-slot">
+  <%= portal_card css: "portal-slot" do %>
     <%= panels %>
-  </section>
+  <% end %>
 <% end %>

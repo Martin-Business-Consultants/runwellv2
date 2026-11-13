@@ -1,21 +1,18 @@
 <%# locals: (form_id:) %>
 <%= form_with model: Note.new, url: notes_path, id: form_id, namespace: "quick_action", class: "quick-action__form", data: { turbo_frame: "_top" } do |form| %>
-  <div class="field">
-    <span class="field__label">Note</span>
+  <%= form.ui :field, :body, label: "Note" do %>
     <%= rich_text_field form, :body, placeholder: "What was said or decided…", staff: true %>
-  </div>
-  <div class="field-row">
-    <div class="field">
-      <%= form.label :kind, "Kind", class: "field__label" %>
+  <% end %>
+  <div class="form-grid">
+    <%= form.ui :field, :kind, label: "Kind" do %>
       <%= form.select :kind, Note::KINDS.map { |kind| [ kind.humanize, kind ] }, { selected: "internal" } %>
-    </div>
-    <div class="field">
-      <%= form.label :source, "Source", class: "field__label" %>
+    <% end %>
+    <%= form.ui :field, :source, label: "Source" do %>
       <%= form.text_field :source, autocomplete: "off", placeholder: "Call with Ann, 24 Sep" %>
-    </div>
+    <% end %>
   </div>
-  <div class="dialog__actions">
-    <button type="button" class="btn btn--secondary" data-action="dialog#close">Cancel</button>
-    <button type="submit" class="btn btn--primary">Add note</button>
+  <div class="form-actions">
+    <%= ui :button, type: :button, variant: :outline, content: "Cancel", data: { runeui_close: "quick_action_dialog" } %>
+    <%= ui :button, type: :submit, content: "Add note" %>
   </div>
 <% end %>

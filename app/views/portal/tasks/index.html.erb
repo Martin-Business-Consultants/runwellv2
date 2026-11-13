@@ -16,12 +16,12 @@
 <% if @tasks.any? %>
   <%# In the client's order of priority (ClientPrioritized), each row moved by its grip. %>
   <% sortable = @tasks.size > 1 && params[:q].blank? %>
-  <section class="card card--flush portal-card" data-controller="drag-and-drop" data-drag-and-drop-dragged-item-class="portal-sortable--dragging" data-drag-and-drop-hover-container-class="portal-sortable--hover" data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
-    <div class="table-wrap">
-      <table class="table portal-table" data-drag-and-drop-target="container" data-drag-and-drop-sortable data-drag-and-drop-url="<%= portal_task_priority_path("__id__") %>">
+  <%= portal_card flush: true, data: { controller: "drag-and-drop", drag_and_drop_dragged_item_class: "portal-sortable--dragging", drag_and_drop_hover_container_class: "portal-sortable--hover",
+              action: "dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd" } do %>
+      <%= ui :table, class: "portal-table", data: { drag_and_drop_target: "container", drag_and_drop_sortable: "", drag_and_drop_url: portal_task_priority_path("__id__") } do %>
         <thead>
           <tr>
-            <th>Title</th>
+            <th data-grow>Title</th>
             <th class="portal-table__secondary"><%= term(:work) %></th>
             <th class="portal-table__date">Due</th>
             <th class="portal-table__status">Status</th>
@@ -31,28 +31,27 @@
           <% @tasks.each do |task| %>
             <%# herb:key task.id %>
             <tr data-drag-and-drop-target="item" data-id="<%= task.id %>">
-              <td class="portal-table__title portal-sortable__cell">
+              <td class="portal-table__title portal-sortable__cell" data-grow="wrap">
                 <% if sortable %>
                   <%= portal_priority_grip(task.title) %>
                 <% end %>
                 <%= portal_task_link_to(task) { task.title } %>
                 <%= portal_unread_mark(task) %>
               </td>
-              <td class="portal-table__secondary muted">
+              <td class="portal-table__secondary portal-muted">
                 <% if task.work %>
                   <%= link_to task.work.title, portal_work_path(task.work), class: "portal-table__link", draggable: "false" %>
                 <% else %>
                   General
                 <% end %>
               </td>
-              <td class="portal-table__date muted nowrap"><%= portal_due(task) %></td>
+              <td class="portal-table__date portal-muted"><%= portal_due(task) %></td>
               <td class="portal-table__status"><%= portal_status_tag(task) %></td>
             </tr>
           <% end %>
         </tbody>
-      </table>
-    </div>
-  </section>
+      <% end %>
+  <% end %>
   <%= table_pagination @page %>
 <% elsif params[:q].present? %>
   <%= render "layouts/shared/empty", text: "Nothing matches “#{params[:q]}”." %>

@@ -46,14 +46,10 @@ module FieldsHelper
   def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
     # Saving as it flips: the switch shows the change at once, and flips back if the save fails.
     data = (options.delete(:data) || {}).merge(submit_on_change ? { action: "change->form#submit", revert_on_failure: true } : {})
-    switch = form.ui(:switch, method, data: data.presence, **options)
-
     if hint
-      tag.div(class: "setting-row setting-row--field") do
-        safe_join([ tag.div(class: "setting-row__text") { safe_join([ form.label(method, label, class: "setting-row__label"), tag.span(hint, class: "setting-row__hint") ]) }, switch ])
-      end
+      form.ui :field, method, label: label, description: hint, control: form.ui(:switch, method, data: data.presence, **options), class: "switch-field"
     else
-      tag.div(class: "field--inline") { safe_join([ switch, form.label(method, label) ]) }
+      form.ui(:switch, method, label: label, data: data.presence, **options)
     end
   end
 

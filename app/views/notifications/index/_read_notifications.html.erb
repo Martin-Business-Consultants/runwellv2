@@ -1,12 +1,8 @@
 <%# locals: (read:) %>
 <% if read.any? %>
-  <section class="card card--flush notifications-list notifications-list--read" aria-labelledby="notifications-read-title">
-    <header class="card__head">
-      <h2 class="card__title" id="notifications-read-title">Previously seen</h2>
-    </header>
-
+  <%= record_card title: tag.h2("Previously seen", id: "notifications-read-title", class: "record-card__title"), css: "notifications-list notifications-list--read", aria: { labelledby: "notifications-read-title" } do %>
     <div id="notifications_list_read" class="notifications-list__items">
       <%= render partial: "notifications/notification", collection: read, as: :notification %>
     </div>
-  </section>
+  <% end %>
 <% end %>

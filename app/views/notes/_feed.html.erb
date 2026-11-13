@@ -14,11 +14,11 @@
             <div class="record-feed__head">
               <p class="record-feed__meta dot-list">
                 <% if note.from_client? %>
-                  <%= badge "From the #{term(:client).downcase}", tone: :accent %>
+                  <%= ui :badge, variant: :info, content: "From the #{term(:client).downcase}" %>
                 <% elsif note.client_visible? %>
-                  <%= badge "Shared with the #{term(:client).downcase}", tone: :accent %>
+                  <%= ui :badge, variant: :info, content: "Shared with the #{term(:client).downcase}" %>
                 <% else %>
-                  <span class="badge badge--outline"><%= note.kind.humanize %></span>
+                  <%= ui :badge, variant: :outline, content: note.kind.humanize %>
                 <% end %>
                 <time datetime="<%= note.occurred_at.iso8601 %>"><%= l(note.occurred_at, format: :short) %></time>
                 <% if note.source.present? %>

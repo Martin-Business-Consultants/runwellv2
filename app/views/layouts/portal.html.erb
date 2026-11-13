@@ -19,13 +19,13 @@
               <span class="portal-preview__note">They can’t sign in yet: <%= current_contact.portal_access? ? "they have no email address" : "portal access is off" %>.</span>
             <% end %>
           </span>
-          <%= button_to "Stop viewing", contact_preview_path(current_contact), method: :delete, class: button_classes(variant: :secondary, size: :sm), form: { data: { turbo: false } } %>
+          <%= button_to "Stop viewing", contact_preview_path(current_contact), method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" }, form: { data: { turbo: false } } %>
         </div>
       <% end %>
       <header class="portal-topbar" id="header">
         <div class="portal-topbar__inner">
-          <%= link_to portal_root_path, class: "sidebar__brand portal-topbar__brand" do %>
-            <span class="sidebar__logo"><%= render "layouts/shared/logo_mark" %></span>
+          <%= link_to portal_root_path, class: "portal-topbar__brand" do %>
+            <span class="portal-topbar__logo"><%= render "layouts/shared/logo_mark" %></span>
             <span class="portal-topbar__names">
               <span class="portal-topbar__name"><%= Setting.current.brand_name %></span>
               <span class="portal-topbar__client"><%= current_contact.client.name %></span>
@@ -37,7 +37,7 @@
             <%= link_to portal_tasks_path, class: "portal-nav__link", aria: { current: (request.path.start_with?(portal_tasks_path)) ? "page" : "false" } do %>
               <span><%= term(:task, count: 2) %></span>
               <% if portal_unread_task_ids.any? %>
-                <span class="count" title="<%= pluralize portal_unread_task_ids.size, "new message" %>"><%= portal_unread_task_ids.size %></span>
+                <%= ui :badge, content: portal_unread_task_ids.size.to_s, class: "portal-nav__count", title: pluralize(portal_unread_task_ids.size, "new message") %>
               <% end %>
             <% end %>
             <%= portal_page_link :documents, "Documents", portal_documents_path, class: "portal-nav__link" %>
@@ -47,34 +47,32 @@
 
           <div class="portal-topbar__actions">
             <%= plugin_slots(:portal_actions, contact: current_contact) %>
-            <%= link_to new_portal_request_path, class: button_classes(variant: :primary, size: :sm, extra: "portal-topbar__new"), data: { turbo_frame: "modal" } do %>
-              <%= icon_tag "add" %>
-              <span class="portal-topbar__new-label">New request</span>
-            <% end %>
+            <%= ui :button, href: new_portal_request_path, size: :sm, class: "portal-topbar__new", data: { turbo_frame: "modal" },
+                  content: safe_join([ icon_tag("add"), tag.span("New request", class: "portal-topbar__new-label") ]) %>
 
+            <%# The contact's menu (ui :menu): who they are, their account, requests and connected apps,
+                light or dark, and signing out. %>
             <% you = capture do %>
-              <%= avatar current_contact.name, size: :md %>
-              <span class="visually-hidden">Your menu</span>
+              <button type="button" class="portal-user__button" title="Your menu">
+                <%= ui :avatar, name: current_contact.name, initials: initials(current_contact.name), size: :sm %>
+                <span class="visually-hidden">Your menu</span>
+              </button>
             <% end %>
-            <%= menu you, trigger_class: "portal-user__button" do %>
-              <% who = capture do %>
-                <span class="portal-user__label">
-                  <strong class="portal-user__name"><%= current_contact.name %></strong>
-                  <span class="portal-user__email"><%= current_contact.email %></span>
-                </span>
-              <% end %>
-              <%= menu_label who %>
-              <%= menu_divider %>
-              <%= menu_link safe_join([ icon_tag("person"), tag.span("Your account") ]), portal_account_path,
-                    aria: { current: ("page" if request.path == portal_account_path) } %>
-              <%= menu_link safe_join([ icon_tag("email"), tag.span("Your requests") ]), portal_requests_path %>
-              <%= menu_link safe_join([ icon_tag("settings-outline"), tag.span("Connected apps") ]), portal_connected_apps_path,
-                    aria: { current: ("page" if request.path == portal_connected_apps_path) } %>
-              <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
-              <%= ui :menu, part: "items", items: [ { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } } ] %>
-              <%= menu_divider %>
-              <%= menu_button safe_join([ icon_tag("logout"), tag.span("Sign out") ]), portal_session_path, method: :delete %>
+            <% who = capture do %>
+              <span class="portal-user__label">
+                <strong class="portal-user__name"><%= current_contact.name %></strong>
+                <span class="portal-user__email"><%= current_contact.email %></span>
+              </span>
             <% end %>
+            <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
+            <%= ui :menu, trigger: you, align: :end, label: "Your menu", class: "portal-user", items: [
+                  { heading: who }, :separator,
+                  { label: safe_join([ icon_tag("person"), tag.span("Your account") ]), href: portal_account_path },
+                  { label: safe_join([ icon_tag("email"), tag.span("Your requests") ]), href: portal_requests_path },
+                  { label: safe_join([ icon_tag("settings-outline"), tag.span("Connected apps") ]), href: portal_connected_apps_path },
+                  { label: theme, value: "theme", data: { controller: "theme", action: "select->theme#toggle" } },
+                  :separator,
+                  { label: safe_join([ icon_tag("logout"), tag.span("Sign out") ]), href: portal_session_path, method: :delete } ] %>
           </div>
         </div>
       </header>
@@ -101,7 +99,7 @@
         placeholder lines while it loads and a full visit for an answer that isn't the modal. %>
     <%= render "layouts/shared/connection_status" %>
     <%= render "layouts/shared/modal_placeholder" %>
-    <turbo-frame id="modal" data-loading-placeholder="modal_placeholder" data-breaks-out></turbo-frame>
+    <turbo-frame id="modal" data-loading-placeholder="modal_placeholder" data-breaks-out data-empties-on-close></turbo-frame>
     <%# A shared task opens here, read-only (?task=: runeui's side panel and the side-panel
         controller, as on staff pages). %>
     <% if current_contact %>

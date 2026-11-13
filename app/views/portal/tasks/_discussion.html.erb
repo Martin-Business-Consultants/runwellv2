@@ -22,7 +22,7 @@
       <% end %>
     </ol>
   <% else %>
-    <p class="muted portal-thread__empty">Nothing here yet. Ask a question or add something, and the team sees it on this <%= term(:task).downcase %>.</p>
+    <p class="portal-muted portal-thread__empty">Nothing here yet. Ask a question or add something, and the team sees it on this <%= term(:task).downcase %>.</p>
   <% end %>
   <%= form_with url: portal_task_notes_path(task), scope: :note, multipart: true, class: "portal-thread__reply", namespace: dom_id(task, :portal_reply),
         data: { controller: "form pending draft", draft_key_value: "portal:reply:task:#{task.id}",
@@ -32,11 +32,11 @@
     <%= rich_text_field_tag form.field_name(:body), nil, id: form.field_id(:body), placeholder: "Write a message…" %>
     <%= draft_notice %>
     <div class="portal-thread__actions">
-      <%= form.file_field :files, multiple: true, include_hidden: false, class: "portal-thread__files", disabled: Current.previewing?, aria: { label: "Files to send" } %>
+      <%= form.ui :file_input, :files, multiple: true, dropzone: false, class: "portal-thread__files", disabled: Current.previewing?, button: "Add files", aria: { label: "Files to send" } %>
       <% if Current.previewing? %>
-        <span class="portal-thread__preview muted small">You’re viewing as <%= current_contact.name %>, so nothing is sent.</span>
+        <span class="portal-thread__preview portal-muted">You’re viewing as <%= current_contact.name %>, so nothing is sent.</span>
       <% end %>
-      <%= tag.button "Send", type: "submit", class: "btn btn--primary btn--sm", disabled: Current.previewing? %>
+      <%= ui :button, type: :submit, size: :sm, content: "Send", disabled: Current.previewing? %>
     </div>
   <% end %>
 </section>

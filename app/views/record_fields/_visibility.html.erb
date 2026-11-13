@@ -1,19 +1,22 @@
 <%# locals: (field:) %>
-<%# Template mode's "who sees it" for a custom field (owners): a pill naming who, opening the roles
-    to tick; Save sets the field's visible_to at once (record-layout#saveVisibility), apart from the
-    arrangement's Done. Shown only while arranging, and never made inert with the field. %>
+<%# Template mode's "who sees it" for a custom field (owners): a button naming who, opening a
+    popover (ui :popover) of the roles to tick; Save sets the field's visible_to at once
+    (record-layout#saveVisibility), apart from the arrangement's Done. Shown only while arranging,
+    and never made inert with the field. %>
 <% if can?(:manage_settings) %>
   <span class="layout-field__control" data-layout-control>
-    <button type="button" class="pill layout-field__visibility" popovertarget="field_visibility_<%= field.id %>">
-      <%= icon_tag "lock" %>
-      <span data-visibility-label><%= field.visible_to_label %></span>
-    </button>
-    <span id="field_visibility_<%= field.id %>" class="layout-visibility" popover data-url="<%= settings_field_path(field) %>">
+    <% trigger = capture do %>
+      <button type="button" class="ui-button layout-field__visibility" data-variant="outline" data-size="xs">
+        <%= icon_tag "lock" %>
+        <span data-visibility-label><%= field.visible_to_label %></span>
+      </button>
+    <% end %>
+    <%= ui :popover, id: "field_visibility_#{field.id}", trigger: trigger, align: :start, class: "layout-visibility", data: { url: settings_field_path(field) } do %>
       <%= field_visibility_inputs "field[visible_to][]", field, namespace: "layout" %>
       <span class="layout-visibility__actions">
-        <button type="button" class="btn btn--secondary btn--sm" popovertarget="field_visibility_<%= field.id %>" popovertargetaction="hide">Cancel</button>
-        <button type="button" class="btn btn--primary btn--sm" data-action="record-layout#saveVisibility">Save</button>
+        <%= ui :button, type: :button, variant: :outline, size: :sm, content: "Cancel", data: { runeui_close: "field_visibility_#{field.id}" } %>
+        <%= ui :button, type: :button, size: :sm, content: "Save", data: { action: "record-layout#saveVisibility" } %>
       </span>
-    </span>
+    <% end %>
   </span>
 <% end %>

@@ -7,59 +7,47 @@
 
 <div class="portal-stack portal-account">
   <%= render "layouts/shared/errors", record: current_contact %>
-  <section class="card portal-card">
-    <header class="card__head">
-      <h2 class="card__title">Your details</h2>
-      <p class="card__hint">You sign in as <strong><%= current_contact.email %></strong>. To change that address, ask us.</p>
-    </header>
-    <div class="card__content">
+  <% details_hint = capture do %>You sign in as <strong><%= current_contact.email %></strong>. To change that address, ask us.<% end %>
+  <%= portal_card title: "Your details", hint: details_hint do %>
       <%= form_with model: current_contact, scope: :account, url: portal_account_path, method: :patch, class: "portal-form" do |form| %>
-        <div class="field">
-          <%= form.label :name, "Name", class: "field__label" %>
+        <%= form.ui :field, :name, label: "Name" do %>
           <%= form.text_field :name, required: true, autocomplete: "name" %>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <%= form.label :title, "Job title", class: "field__label" %>
+        <% end %>
+        <div class="form-grid">
+          <%= form.ui :field, :title, label: "Job title" do %>
             <%= form.text_field :title, autocomplete: "organization-title" %>
-          </div>
-          <div class="field">
-            <%= form.label :phone, "Phone", class: "field__label" %>
+          <% end %>
+          <%= form.ui :field, :phone, label: "Phone" do %>
             <%= form.telephone_field :phone, autocomplete: "tel" %>
-          </div>
+          <% end %>
         </div>
         <%= switch_field form, :portal_emails, label: "Email me about my work", hint: "When we write to you on something, pick up or finish what you asked for, or share a file. Sign-in links always come." %>
-        <div class="button-row portal-form__actions">
-          <%= tag.button "Save", type: "submit", class: "btn btn--primary", disabled: Current.previewing? %>
+        <div class="form-actions">
+          <%= ui :button, type: :submit, content: "Save", disabled: Current.previewing? %>
         </div>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 
-  <section class="card card--flush portal-card">
-    <header class="card__head card__head--bordered">
-      <h2 class="card__title">Where you’re signed in</h2>
-      <p class="card__hint">A browser nobody has used in three months is signed out by itself.</p>
-      <% if @sessions.size > 1 %>
-        <div class="card__action">
-          <%= button_to "Sign out everywhere else", portal_account_sessions_path, method: :delete, class: "btn btn--secondary btn--sm" %>
-        </div>
-      <% end %>
-    </header>
+  <% sign_out = capture do %>
+    <% if @sessions.size > 1 %>
+      <%= button_to "Sign out everywhere else", portal_account_sessions_path, method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" } %>
+    <% end %>
+  <% end %>
+  <%= portal_card title: "Where you’re signed in", hint: "A browser nobody has used in three months is signed out by itself.", action: sign_out, flush: true do %>
     <% if @sessions.any? %>
-      <ul class="list">
+      <ul class="portal-list">
         <% @sessions.each do |session_record| %>
           <%# herb:key session_record.id %>
-          <li class="list-row">
-            <div class="list-row__content">
-              <p class="list-row__title"><%= portal_browser_name(session_record.user_agent) %><% if session_record.id == Current.portal_session&.id %> <%= status_tag "This one", highlight: true %><% end %></p>
-              <p class="list-row__desc">Signed in <%= l session_record.created_at.in_time_zone.to_date, format: :long %> · last used <%= time_ago_in_words(session_record.updated_at) %> ago</p>
+          <li class="portal-row">
+            <div class="portal-row__content">
+              <p class="portal-row__title"><%= portal_browser_name(session_record.user_agent) %><% if session_record.id == Current.portal_session&.id %> <%= status_tag "This one", highlight: true %><% end %></p>
+              <p class="portal-row__desc">Signed in <%= l session_record.created_at.in_time_zone.to_date, format: :long %> · last used <%= time_ago_in_words(session_record.updated_at) %> ago</p>
             </div>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <%= empty_state "No browser is signed in.", compact: true %>
+      <%= ui :empty, size: :sm, description: "No browser is signed in." %>
     <% end %>
-  </section>
+  <% end %>
 </div>

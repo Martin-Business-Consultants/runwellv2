@@ -11,11 +11,11 @@
           <div class="settings-section__actions">
             <%= confirm_button trigger: "Clear failed updates", title: "Clear #{pluralize(@failed_count, "failed update")}?",
                   body: "They leave Past updates, with what went wrong. Updates that worked stay.", button: "Clear",
-                  path: settings_updates_failures_path, keys: nil, css: "btn btn--danger btn--sm" %>
+                  path: settings_updates_failures_path, keys: nil, variant: :destructive %>
           </div>
         <% end %>
       </header>
-      <dl class="details settings-facts">
+      <dl class="settings-facts">
         <dt>Running</dt>
         <dd>Runwell <%= Runwell::VERSION %></dd>
         <dt>Newest release</dt>
@@ -44,7 +44,7 @@
         <p class="settings-error">Couldn’t check: <%= Release.check_error %></p>
       <% end %>
       <div class="button-row">
-        <%= button_to settings_updates_check_path, class: "btn btn--secondary btn--sm" do %>
+        <%= button_to settings_updates_check_path, class: "ui-button", data: { variant: "outline", size: "sm" } do %>
           <%= icon_tag "refresh" %>
           <span>Check now</span>
         <% end %>
@@ -64,17 +64,16 @@
           <p class="muted">Using the HOSTER_TOKEN set on KamalCloud.</p>
         <% else %>
           <%= form_with model: Setting.current, url: settings_updates_hoster_token_path, method: :patch, scope: :setting, class: "settings-form" do |form| %>
-            <div class="field">
-              <%= form.label :hoster_token, "KamalCloud token", class: "field__label" %>
+            <%= form.ui :field, :hoster_token, label: "KamalCloud token" do %>
               <%= secret_field form, :hoster_token, placeholder: "From KamalCloud, Settings > Connected apps" %>
-              <p class="field__hint">An admin’s personal token from <%= link_to "KamalCloud", Upgrade::Hoster.url, target: "_blank", rel: "noopener" %> (Settings &gt; Connected apps), so it can change this app’s image and deploy it. Stored encrypted.</p>
-            </div>
+              <ui-field-description data-slot="field-description">An admin’s personal token from <%= link_to "KamalCloud", Upgrade::Hoster.url, target: "_blank", rel: "noopener" %> (Settings &gt; Connected apps), so it can change this app’s image and deploy it. Stored encrypted.</ui-field-description>
+            <% end %>
             <div class="button-row">
-              <button type="submit" class="btn btn--primary btn--sm">Save</button>
+              <%= ui :button, type: :submit, size: :sm, content: "Save" %>
             </div>
           <% end %>
           <% if Setting.current.hoster_token.present? %>
-            <%= button_to "Remove the token", settings_updates_hoster_token_path, method: :delete, class: "btn btn--ghost btn--sm" %>
+            <%= button_to "Remove the token", settings_updates_hoster_token_path, method: :delete, class: "ui-button", data: { variant: "ghost", size: "sm" } %>
           <% end %>
         <% end %>
       </section>
@@ -85,16 +84,16 @@
         <header class="settings-section__head">
           <h2>Updating to <%= @upgrade.to_version %></h2>
         </header>
-        <div class="list-row list-row--tall upgrade-status">
+        <div class="settings-item upgrade-status">
           <% if @upgrade.requested_by %>
-            <div class="list-row__media"><%= person_tag @upgrade.requested_by %></div>
+            <div class="settings-item__media"><%= person_tag @upgrade.requested_by %></div>
           <% end %>
-          <div class="list-row__content">
-            <p class="list-row__title">Started <%= time_ago_in_words(@upgrade.created_at) %> ago<% if @upgrade.requested_by %> by <%= @upgrade.requested_by.display_name %><% end %></p>
+          <div class="settings-item__content">
+            <p class="settings-item__title">Started <%= time_ago_in_words(@upgrade.created_at) %> ago<% if @upgrade.requested_by %> by <%= @upgrade.requested_by.display_name %><% end %></p>
             <% if @upgrade.via == "hoster" %>
-              <p class="list-row__desc">KamalCloud is starting <%= @upgrade.to_version %> beside this install. It backs up and migrates as it starts, and traffic moves to it once it’s healthy; until then <%= Runwell::VERSION %> keeps serving. This page checks every few seconds.</p>
+              <p class="settings-item__desc">KamalCloud is starting <%= @upgrade.to_version %> beside this install. It backs up and migrates as it starts, and traffic moves to it once it’s healthy; until then <%= Runwell::VERSION %> keeps serving. This page checks every few seconds.</p>
             <% else %>
-              <p class="list-row__desc">The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running. This page checks every few seconds.</p>
+              <p class="settings-item__desc">The install backs up its databases, migrates and restarts on <%= @upgrade.to_version %>; until then <%= Runwell::VERSION %> keeps running. This page checks every few seconds.</p>
             <% end %>
           </div>
         </div>
@@ -119,7 +118,7 @@
             Runwell backs up its databases, updates and restarts. It’s unavailable for a minute or two; nobody is signed out.
             If anything fails, <%= Runwell::VERSION %> keeps running and this page says why.
           </p>
-          <div class="button-row"><%= button_to "Update to " + @release.version, settings_updates_path, class: "btn btn--primary" %></div>
+          <div class="settings-buttons"><%= button_to "Update to " + @release.version, settings_updates_path, class: "ui-button", data: { variant: "default", size: "default" } %></div>
         <% else %>
           <p>Updating from here isn’t set up on this install. On the server:</p>
           <%= code_block manual_update_command(@release) %>
@@ -135,26 +134,25 @@
         <header class="settings-section__head">
           <h2>Past updates</h2>
         </header>
-        <div class="table-wrap settings-table">
-          <table class="table">
+        <%= ui :table, class: "settings-table" do %>
             <thead>
               <tr>
-                <th>Update</th>
+                <th data-grow>Update</th>
                 <th>Status</th>
                 <th>By</th>
                 <th>When</th>
-                <th><span class="visually-hidden">Deploy log</span></th>
+                <th data-align="end"><span class="visually-hidden">Deploy log</span></th>
               </tr>
             </thead>
             <tbody>
               <% @upgrades.each do |upgrade| %>
                 <%# herb:key upgrade.id %>
                 <tr>
-                  <td class="nowrap"><strong><%= upgrade.from_version %> → <%= upgrade.to_version %></strong></td>
+                  <td data-grow><strong><%= upgrade.from_version %> → <%= upgrade.to_version %></strong></td>
                   <td><%= ui_status_badge upgrade.status %></td>
                   <td><%= person_tag upgrade.requested_by, fallback: "Runwell" %></td>
-                  <td class="muted nowrap"><time datetime="<%= upgrade.created_at.iso8601 %>" title="<%= l upgrade.created_at, format: :long %>"><%= time_ago_in_words(upgrade.created_at) %> ago</time></td>
-                  <td class="settings-table__end">
+                  <td class="settings-table__muted"><time datetime="<%= upgrade.created_at.iso8601 %>" title="<%= l upgrade.created_at, format: :long %>"><%= time_ago_in_words(upgrade.created_at) %> ago</time></td>
+                  <td data-align="end">
                     <% if upgrade.external_url %>
                       <%= link_to "Deploy log", upgrade.external_url, target: "_blank", rel: "noopener" %>
                     <% end %>
@@ -167,8 +165,7 @@
                 <% end %>
               <% end %>
             </tbody>
-          </table>
-        </div>
+        <% end %>
       </section>
     <% end %>
   </div>

@@ -1,0 +1,8 @@
+<%# locals: (notification:) %>
+<%# A notification in the bell's menu: a menu item that's a link (opening it reads it and goes to its
+    record), who, what and where, and when. %>
+<%= notification_menu_item notification do %>
+  <%= render "notifications/notification/avatar", notification: notification %>
+  <%= render "notifications/notification/body", notification: notification %>
+  <span class="notification__time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+<% end %>

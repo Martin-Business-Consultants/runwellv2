@@ -21,7 +21,7 @@
         <span>By <%= term(:scope_item).downcase %>, soonest due first.</span>
         <% unless work.closed? %>
           <details class="task-section__new">
-            <summary class="icon-button task-section__add" title="Add a <%= term(:scope_item).downcase %>"><%= icon_tag "add" %><span class="visually-hidden">Add a <%= term(:scope_item).downcase %></span></summary>
+            <summary class="ui-button task-section__add" data-variant="ghost" data-size="icon-sm" title="Add a <%= term(:scope_item).downcase %>"><%= icon_tag "add" %><span class="visually-hidden">Add a <%= term(:scope_item).downcase %></span></summary>
             <%= render "scope_items/new", work: work, state: state, item: focus_item %>
           </details>
         <% end %>
@@ -47,10 +47,10 @@
     <%= render "tasks/pending" %>
     <% if focus %>
       <% done = tasks.count { |task| task.status == "done" } %>
-      <div class="list-row list-row--outline task-focus">
-        <div class="list-row__content">
-          <h3 class="list-row__title task-focus__title"><%= picked ? picked.description : "Other " + term(:task, count: 2).downcase %></h3>
-          <span class="list-row__desc task-focus__count"><%= done %> of <%= tasks.size %> done</span>
+      <div class="item-row task-focus">
+        <div class="item-row__content">
+          <h3 class="item-row__title task-focus__title"><%= picked ? picked.description : "Other " + term(:task, count: 2).downcase %></h3>
+          <span class="item-row__desc task-focus__count"><%= done %> of <%= tasks.size %> done</span>
         </div>
         <% if picked %>
           <%= status_tag picked.delivery_state.humanize, highlight: picked.delivery_state == "done" %>

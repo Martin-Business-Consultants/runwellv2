@@ -1,14 +1,9 @@
 <%# locals: (work:) %>
-<section class="card portal-card">
-  <header class="card__head">
-    <%= layout_text_tag record_layout(:portal_work), "details.title", "Details", class: "card__title" %>
-    <%= layout_text_tag record_layout(:portal_work), "details.hint", nil, tag: :p, class: "card__hint" %>
-  </header>
-  <div class="card__content">
-    <dl class="details portal-details">
-      <dt>Type</dt>
-      <dd><%= work.label_name %></dd>
-    </dl>
-    <%= render "custom_fields/values", record: work, client: true %>
-  </div>
-</section>
+<% layout = record_layout(:portal_work) %>
+<%= portal_card title: layout_text_tag(layout, "details.title", "Details", class: "portal-card__title"), hint: layout_text_tag(layout, "details.hint", nil, tag: :p, class: "portal-card__hint") do %>
+  <dl class="portal-details">
+    <dt>Type</dt>
+    <dd><%= work.label_name %></dd>
+  </dl>
+  <%= render "custom_fields/values", record: work, client: true %>
+<% end %>

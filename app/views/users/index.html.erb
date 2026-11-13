@@ -28,25 +28,22 @@
 <% end %>
 
 <% if manage && @invitations.any? %>
-  <section class="card card--flush users-invitations">
-    <header class="card__head">
-      <h2 class="card__title">Invitations out</h2>
-    </header>
-    <ul class="list">
+  <%= ui :card, title: tag.h2("Invitations out", class: "record-card__title"), class: "users-invitations" do %>
+    <ul class="settings-list">
       <% @invitations.each do |invitation| %>
         <%# herb:key invitation.id %>
-        <li class="list-row">
-          <div class="list-row__content">
-            <p class="list-row__title"><%= invitation.email_address %></p>
-            <p class="list-row__desc"><%= invitation.role.capitalize %> · invited by <%= invitation.invited_by.display_name %> <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
+        <li class="settings-item">
+          <div class="settings-item__content">
+            <p class="settings-item__title"><%= invitation.email_address %></p>
+            <p class="settings-item__desc"><%= invitation.role.capitalize %> · invited by <%= invitation.invited_by.display_name %> <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
           </div>
-          <div class="list-row__actions">
-            <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "btn btn--secondary btn--sm" %>
+          <div class="settings-item__actions">
+            <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "ui-button", data: { variant: "outline", size: "sm" } %>
             <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: user_invitation_path(invitation),
                   message: "The link they were sent stops working." %>
           </div>
         </li>
       <% end %>
     </ul>
-  </section>
+  <% end %>
 <% end %>

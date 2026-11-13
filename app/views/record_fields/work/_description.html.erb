@@ -4,7 +4,7 @@
   <%= form.ui :field, :description, label: "Description", class: "field" do %>
     <%= rich_text_field form, :description, staff: true, form_id: form_id %>
     <% unless record.internal? %>
-      <span class="field__hint">Shown to the <%= term(:client).downcase %> in the portal.</span>
+      <span class="field-note">Shown to the <%= term(:client).downcase %> in the portal.</span>
     <% end %>
   <% end %>
 <% end %>

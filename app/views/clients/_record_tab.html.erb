@@ -19,12 +19,12 @@
               <% works.each do |work| %>
                 <%# herb:key work.id %>
                 <li data-filter-target="item">
-                  <%= link_to work, class: "list-row" do %>
-                    <span class="list-row__content">
-                      <span class="list-row__title"><%= work.title %></span>
-                      <span class="list-row__desc"><%= work.label_name %></span>
+                  <%= link_to work, class: "item-row" do %>
+                    <span class="item-row__content">
+                      <span class="item-row__title"><%= work.title %></span>
+                      <span class="item-row__desc"><%= work.label_name %></span>
                     </span>
-                    <span class="list-row__meta"><%= status_tag work.state_label, highlight: work.active? %></span>
+                    <span class="item-row__meta"><%= status_tag work.state_label, highlight: work.active? %></span>
                   <% end %>
                 </li>
               <% end %>

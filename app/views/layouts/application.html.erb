@@ -44,7 +44,7 @@
         <%= turbo_stream_from Current.user, :notifications %>
         <%= render "layouts/shared/connection_status" %>
         <%= render "layouts/shared/modal_placeholder" %>
-        <turbo-frame id="modal" data-loading-placeholder="modal_placeholder" data-breaks-out></turbo-frame>
+        <turbo-frame id="modal" data-loading-placeholder="modal_placeholder" data-breaks-out data-empties-on-close></turbo-frame>
         <%# The menus' templates rows copy from, once, out of every row and panel (TasksHelper#page_template). %>
         <%= yield :page_templates %>
       <% end %>

@@ -189,7 +189,8 @@ ui-combobox.picker-menu { display: contents; }
 a.task-group__name:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
 .task-group__count { color: var(--text-muted); font-size: var(--text-meta); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* One scope item's work alone: the item as an outlined row (rune's list-row) over its work. */
+/* One scope item's work alone: the item as an outlined row over its work. */
+.task-focus.item-row { border: 1px solid var(--line); border-radius: var(--radius); }
 .task-focus__title { font-size: var(--text-read); }
 .task-focus__count { font-variant-numeric: tabular-nums; }
 
@@ -198,7 +199,7 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 
 /* tasks/_ai_brief: the AI mark in the accent; once copied, a tooltip says so and fades. */
 .ai-brief { position: relative; }
-.ai-brief .icon { color: var(--accent); }
+.ai-brief .icon { color: var(--rune-accent); }
 .ai-brief--copied::after {
   content: "Copied"; position: absolute; inset: auto auto calc(100% + var(--s-1)) 50%; transform: translateX(-50%); z-index: 5;
   padding: 6px var(--s-3); border-radius: var(--radius-sm); background: var(--text); color: var(--panel);
@@ -349,10 +350,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .peek-panel .record-fields--in-place .field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker-control"]):is(:hover, :focus-visible, :focus-within, [aria-expanded="true"]) :is(.ui-select-icon, .ui-icon) { opacity: 1; }
 .peek-panel .record-fields--in-place .field input::placeholder { color: var(--text-faint); }
 /* A switch: its label where the others' are, the switch where their values are, its hint dropped. */
-.peek-panel .record-fields--in-place .setting-row { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
-.peek-panel .record-fields--in-place .setting-row__label { color: var(--text-muted); font-weight: var(--weight); }
-.peek-panel .record-fields--in-place .setting-row__hint { display: none; }
-.peek-panel .record-fields--in-place .setting-row .switch { justify-self: start; margin-left: var(--s-2); }
+.peek-panel .record-fields--in-place .switch-field { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-3); min-height: var(--control-h); }
+.peek-panel .record-fields--in-place .switch-field [data-slot="field-label"] { color: var(--text-muted); font-weight: var(--weight); }
+.peek-panel .record-fields--in-place .switch-field [data-slot="field-description"] { display: none; }
+.peek-panel .record-fields--in-place .switch-field ui-switch { justify-self: start; margin-left: var(--s-2); }
 .peek-panel__section { display: flex; flex-direction: column; gap: var(--s-2); }
 .peek-panel__heading { margin: 0; color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight-strong); }
 
@@ -364,4 +365,4 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .intake-schedule__add { flex-direction: row; align-items: center; gap: var(--s-2); max-width: 32rem; }
 .intake-shift { align-items: flex-end; }
 .intake-shift__form { flex: 1; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: var(--s-3); min-width: 0; }
-.intake-shift__field { display: flex; flex-direction: column; gap: var(--s-1); min-width: 7rem; }
+.intake-shift__field { display: flex; flex-direction: column; gap: var(--s-1); width: auto; min-width: 7rem; }

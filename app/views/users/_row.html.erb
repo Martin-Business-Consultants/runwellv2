@@ -27,14 +27,14 @@
       <%= status_tag(client ? "Archived" : "Deactivated") %>
     <% elsif client %>
       <% if person.portal_access? %>
-        <%= badge "Portal", tone: :ok, title: "Signs in to the #{term(:client).downcase} portal by emailed link" %>
+        <%= ui :badge, variant: :success, content: "Portal", title: "Signs in to the #{term(:client).downcase} portal by emailed link" %>
       <% else %>
         <%= status_tag "Active" %>
       <% end %>
     <% elsif person.two_factor? %>
-      <%= badge "Two-factor", tone: :ok, title: "Signs in with a code from an authenticator app" %>
+      <%= ui :badge, variant: :success, content: "Two-factor", title: "Signs in with a code from an authenticator app" %>
     <% elsif Setting.current.require_two_factor? %>
-      <%= badge "Two-factor pending", tone: :attention, title: "Sets it up on their next page" %>
+      <%= ui :badge, variant: :warning, content: "Two-factor pending", title: "Sets it up on their next page" %>
     <% else %>
       <%= status_tag "Active" %>
     <% end %>

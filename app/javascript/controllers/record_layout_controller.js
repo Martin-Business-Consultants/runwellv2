@@ -51,7 +51,8 @@ export default class extends Controller {
   // A custom field's "who sees it" (record_fields/visibility): saved to the field at once, and its
   // pill renamed, without leaving the arrangement.
   async saveVisibility(event) {
-    const popover = event.target.closest("[popover]")
+    // The field's "who sees it" (record_fields/visibility): a ui :popover carrying the field's url.
+    const popover = event.target.closest("ui-popover")
     const body = new FormData()
     body.append("inline", "1")
     // The roles' boxes are ui :checkbox (field_visibility_inputs), after a hidden empty one.
@@ -66,7 +67,7 @@ export default class extends Controller {
     const all = boxes.length
     const label = roles.length === all ? "Everyone" : roles.length === 0 ? "Owners only" : `Owners and ${roles.map(role => `${role}s`).join(" and ")}`
     popover.closest("[data-layout-control]").querySelector("[data-visibility-label]").textContent = label
-    popover.hidePopover()
+    popover.open = false
   }
 
   // Dragging: the field follows the pointer into whichever column it's over, before the field

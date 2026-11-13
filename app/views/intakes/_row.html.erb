@@ -22,7 +22,7 @@
   <td class="muted" data-column="came_in" title="<%= task.created_at.iso8601 %>"><%= activity_time(task.created_at, short: true) %></td>
   <td data-column="decide">
     <span class="intake__decide">
-      <%= button_to task_acceptance_path(task), params: { inline: "row" }, class: button_classes(variant: :secondary, size: :sm), title: "Accept: #{task.owner ? "#{task.owner.display_name} owns it" : "you take it on"}" do %>
+      <%= button_to task_acceptance_path(task), params: { inline: "row" }, class: "ui-button", data: { variant: "outline", size: "sm" }, title: "Accept: #{task.owner ? "#{task.owner.display_name} owns it" : "you take it on"}" do %>
         <%= icon_tag "check" %><span>Accept</span>
       <% end %>
       <%= render "intakes/decline", task: task, inline: "row" %>

@@ -46,35 +46,24 @@
 .panel-bar__context:has(.tray) { gap: var(--s-1); }
 .tray { position: relative; z-index: var(--z-tray); display: flex; flex-direction: column; align-items: flex-end; }
 
-.tray__dialog[open] {
-  position: absolute; inset: calc(100% + 6px) 0 auto auto; display: flex; flex-direction: column-reverse; width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem);
-  margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover);
-  transform-origin: top right; animation: rune-pop var(--motion) var(--ease);
-}
-.tray__item { position: relative; }
-
 /* The bell: a round button, with a red dot while something is unread. */
 .tray__toggle { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .tray__toggle-btn { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--text); transition: background .12s; }
-.tray__toggle:hover .tray__toggle-btn, .tray__dialog[open] ~ .tray__toggle .tray__toggle-btn { background: var(--layer-2); }
-.tray__toggle-text { display: none; }
-html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notification) ~ .tray__toggle::after {
+.tray__toggle:hover .tray__toggle-btn, .tray__toggle[aria-expanded="true"] .tray__toggle-btn { background: var(--layer-2); }
+html:not([data-hints]) .tray--notifications:has(.notification--item) .tray__toggle::after {
   content: ""; position: absolute; inset: 0 0 auto auto; width: .625rem; height: .625rem; border: 2px solid var(--panel); border-radius: 50%; background: var(--danger);
 }
 
-/* The notifications popover: a header (See all, Clear all), then the newest six. */
-.tray__item--hat { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-1); padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); border-bottom: 1px solid var(--line); }
-.tray__title { flex: 1; font-size: var(--text-ui); font-weight: 600; }
-.tray__hat-action { display: flex; flex-direction: row; gap: 0; }
-.tray__hat-action[aria-selected] .btn { background: var(--hover); color: var(--text); }
-.tray__new-notifications { display: none; }
-.tray__dialog:has(#notifications .tray__item:nth-child(7)) .tray__new-notifications { display: inline; }
-.tray__dialog:has(#notifications .tray__item:nth-child(7)) .tray__old-notifications { display: none; }
-.tray--notifications:not(:has(.tray__item--notification)) .tray__clear-notifications { display: none; }
-.tray--notifications #notifications { display: block; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-.tray--notifications .tray__item--notification:nth-child(n + 7) { display: none; }
-.tray__empty { display: none; padding: var(--s-6) var(--s-4); color: var(--text-muted); text-align: center; }
-.tray__dialog:not(:has(.tray__item--notification)) .tray__empty { display: block; }
+/* The bell's menu (notifications/_tray, ui :menu): a title, the newest six, then See all and Mark
+/* all as read. Wider than a menu of actions, each item a notification's three lines. */
+.notifications-menu [data-slot="menu-content"] { width: min(24rem, 100vw - 1.5rem); max-height: min(34rem, 100dvh - 5rem); }
+.notifications-menu #notifications { display: block; }
+.notifications-menu__empty { padding: var(--s-5) var(--s-4); color: var(--muted-foreground); font-size: var(--ui-text-sm); text-align: center; }
+.notifications-menu:has(.notification--item) .notifications-menu__empty { display: none; }
+.notifications-menu:not(:has(.notification--item)) [data-slot="menu-link-item"]:has([href*="from_tray"]) { display: none; }
+.notifications-menu__new { display: none; }
+.notifications-menu:has([data-notifications-more]) .notifications-menu__new { display: inline; }
+.notifications-menu:has([data-notifications-more]) .notifications-menu__all { display: none; }
 
 /* The quick actions (quick_actions/_tray, runeui's ui :popover under the +): a label, where it goes
 /* (the record picker), then a row per action. Runwell's markup inside a runeui part, so the
@@ -91,42 +80,49 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 
 /* ======================================================================= 4 Notifications */
 
-/* A notification (the popover and /notifications): a row of who, what and where, with the time,
-/* an unread dot and the read toggle on the right. A rule between rows. */
-.notification + .notification { border-top: 1px solid var(--line); }
-.notification .notification__link { align-items: flex-start; flex-wrap: nowrap; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-radius: 0; }
-.notification .notification__link:focus-visible { background: var(--accent-soft); box-shadow: none; }
-.notification[aria-selected] .notification__link { background: var(--layer-2); }
+/* A notification (the bell's menu and /notifications): who, what and where, and when; on the page
+/* an unread dot and the read toggle at the end, a rule between rows. */
+.notification__link { display: flex; flex: 1; align-items: flex-start; gap: var(--s-3); min-width: 0; color: inherit; text-decoration: none; }
+.notification__avatar { flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; color: var(--text-muted); }
 .notification__avatar img { display: block; width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover; }
-.notification__body { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-muted); }
+.notification__content { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.notification__title { font-weight: var(--weight-strong); }
+.notification__excerpt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-muted); }
 .notification__context { overflow: hidden; color: var(--text-faint); font-size: var(--text-meta); text-overflow: ellipsis; white-space: nowrap; }
-.notification__meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; gap: var(--s-1); }
-.notification__meta form { display: contents; }
-.notification__time { display: inline-flex; align-items: center; gap: 6px; color: var(--text-faint); font-size: var(--text-meta); white-space: nowrap; }
-.unread .notification__time::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--accent); }
+.notification__time { display: inline-flex; flex: none; align-items: center; gap: 6px; color: var(--text-faint); font-size: var(--text-meta); white-space: nowrap; }
+.notification--item .notification__link { padding-block: var(--s-1); }
+.notification--item .notification__time::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--rune-accent); }
+
+/* On /notifications: a row per notification, the link taking the room, the toggle at the end. */
+.notifications-list__items .notification { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); }
+.notifications-list__items .notification + .notification { border-top: 1px solid var(--line); }
+.notifications-list__items .notification[data-keyboard-current] { background: var(--brand-tint); }
+.notifications-list__items .notification__link:focus-visible { outline: none; }
+.notifications-list__items .notification:has(.notification__link:focus-visible) { background: var(--brand-tint); }
+.notifications-list__items .notification.unread .notification__title::after { content: ""; display: inline-block; width: .5rem; height: .5rem; margin-left: 6px; border-radius: 50%; background: var(--rune-accent); vertical-align: middle; }
+.notification__toggle-form { display: contents; }
 
 /* Mark read or unread: there on hover, focus or the j / k row, always on touch. */
 .notification__toggle { position: relative; opacity: 0; }
-.notification__toggle .icon { width: .875rem; height: .875rem; }
-.notification:is(:hover, :focus-within, [aria-selected]) .notification__toggle, .notification__toggle:focus-visible { opacity: 1; }
+.notification:is(:hover, :focus-within, [data-keyboard-current]) .notification__toggle, .notification__toggle:focus-visible { opacity: 1; }
 @media (any-hover: none) { .notification__toggle { opacity: 1; } }
-.notification__count { position: absolute; inset: -.25rem -.25rem auto auto; min-width: 1rem; padding: 0 4px; font-size: .625rem; line-height: 1rem; }
+.notification__count { position: absolute; inset: -.25rem -.25rem auto auto; min-width: 1rem; padding: 0 4px; border-radius: 99rem; background: var(--rune-accent); color: var(--panel); font-size: .625rem; line-height: 1rem; }
 
 /* /notifications: a card of the new over a card of the seen. */
 .notifications-page { display: flex; flex-direction: column; gap: var(--s-5); width: min(100%, 42rem); margin-inline: auto; }
 .notifications-page__lists { display: contents; }
+.notifications-list [data-slot="card-content"] { padding-inline: 0; }
 .notifications-list__empty { padding: 2.5rem var(--s-4); color: var(--text-muted); text-align: center; }
-.notifications-list:has(.tray__item--notification) .notifications-list__empty { display: none; }
-.notifications-list--read:not(:has(.tray__item--notification)) { display: none; }
+.notifications-list:has(.notification) .notifications-list__empty { display: none; }
+.notifications-list--read:not(:has(.notification)) { display: none; }
 
 /* ======================================================================= 5 Quick actions */
 
-/* The modal (quick_actions#new): a title and hint with ✕ across, where it goes, the form. */
-.quick-action:focus-visible { box-shadow: var(--shadow-popover); }
-.quick-action__header { align-items: flex-start; }
-.quick-action__heading { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.quick-action__heading kbd { margin-inline: 1px; }
-.quick-action__optional { color: var(--text-muted); font-weight: var(--weight); }
+/* The modal (quick_actions#new, ui :dialog): its title and hint, where it goes, the form. */
+.quick-action__body { display: flex; flex-direction: column; gap: var(--s-4); }
+.quick-action__form { display: flex; flex-direction: column; gap: var(--s-4); }
+.quick-action__optional { color: var(--muted-foreground); font-weight: 400; }
+[data-slot="dialog-description"] [data-slot="kbd-group"] { vertical-align: baseline; }
 
 /* The picker in the modal: as wide as the field. */
 .quick-action__where [data-slot="combobox"], .quick-action__where [data-slot="combobox-trigger"] { width: 100%; }
@@ -139,16 +135,16 @@ html:not([data-hints]) .tray--notifications .tray__dialog:has(.tray__item--notif
 
 /* The task's quick action (quick_actions/task): where it goes beside what needs doing on the first
 /* row, then its rows of fields (two to a row: lead and who else, due and the client switch) full
-/* width. Its form takes no box (display: contents) so the title joins the dialog's grid; it still
+/* width. Its form takes no box (display: contents) so the title joins the body's grid; it still
 /* submits as one. Stacked on a phone. */
 .quick-action__single { display: contents; }
 .quick-action__row { align-items: end; }
-.quick-action__switch { justify-content: flex-end; min-height: var(--control-h); }
+.quick-action__switch { display: flex; align-items: center; min-height: var(--ui-h); }
 @media (min-width: 640px) {
-  .quick-action .dialog__box:has(.quick-action__lead-field) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
-  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__form { display: contents; }
-  .quick-action .dialog__box:has(.quick-action__lead-field) :is(.quick-action__header, .quick-action__single .field, .quick-action__row, .dialog__actions) { grid-column: 1 / -1; }
-  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__header { grid-row: 1; }
-  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__where { grid-row: 2; grid-column: 1; }
-  .quick-action .dialog__box:has(.quick-action__lead-field) .quick-action__single .quick-action__lead-field { grid-row: 2; grid-column: 2; }
+  .quick-action__body:has(.quick-action__lead-field) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
+  .quick-action__body:has(.quick-action__lead-field) .quick-action__form { display: contents; }
+  .quick-action__body:has(.quick-action__lead-field) :is(.quick-action__single > *, .quick-action__row, .form-actions) { grid-column: 1 / -1; }
+  .quick-action__body:has(.quick-action__lead-field) .quick-action__where { grid-row: 1; grid-column: 1; }
+  .quick-action__body:has(.quick-action__lead-field) .quick-action__single .quick-action__lead-field { grid-row: 1; grid-column: 2; }
 }
+

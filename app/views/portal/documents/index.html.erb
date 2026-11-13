@@ -12,16 +12,16 @@
 <% end %>
 
 <% if @documents.any? %>
-  <section class="card card--flush portal-card">
-    <ul class="list portal-documents">
+  <%= portal_card flush: true do %>
+    <ul class="portal-list portal-documents">
       <% @documents.each do |document| %>
         <%# herb:key document.id %>
-        <li class="list-row">
+        <li class="portal-row">
           <%= render "documents/link", document: document, meta: portal_document_meta(document) %>
         </li>
       <% end %>
     </ul>
-  </section>
+  <% end %>
   <%= table_pagination @page %>
 <% elsif params[:q].present? %>
   <%= render "layouts/shared/empty", text: "No file’s name matches “#{params[:q]}”." %>

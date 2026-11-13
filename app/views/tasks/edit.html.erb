@@ -38,7 +38,7 @@
 
     <% if can?(:delete_records) %>
       <%# Removed at once, with Undo in the toast for a few seconds (PendingRemoval): no dialog. %>
-      <%= button_to task_path(@task), method: :delete, class: button_classes(variant: :secondary, size: :sm) do %>
+      <%= button_to task_path(@task), method: :delete, class: "ui-button", data: { variant: "outline", size: "sm" } do %>
         <%= icon_tag "trash" %>
         <span>Remove this <%= term(:task).downcase %></span>
       <% end %>

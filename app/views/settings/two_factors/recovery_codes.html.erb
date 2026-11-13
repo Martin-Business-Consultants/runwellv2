@@ -7,13 +7,10 @@
       <h2>Save your recovery codes</h2>
       <p class="settings-section__description">If you lose your phone, each of these signs you in once in place of a code. Keep them somewhere safe, like your password manager.</p>
     </header>
-    <div class="alert alert--attention" role="status">
-      <%= icon_tag "lock", class: "alert__icon" %>
-      <p class="alert__title">They won’t be shown again.</p>
-    </div>
+    <%= ui :alert, variant: :warning, title: "They won’t be shown again.", role: "status" %>
     <%= code_block @recovery_codes.join("\n"), language: "plain" %>
-    <div class="button-row">
-      <%= link_to "I’ve saved them", settings_account_path, class: "btn btn--primary" %>
+    <div class="settings-buttons">
+      <%= link_to "I’ve saved them", settings_account_path, class: "ui-button", data: { variant: "default", size: "default" } %>
     </div>
   </section>
 </div>

@@ -2,24 +2,15 @@
 <% content_for :showcase, "team" %>
 
 <div class="auth">
-  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
-    <header class="card__head auth__header">
-      <h1 class="card__title auth__title">One more step</h1>
-      <p class="card__hint">Enter the 6-digit code from your authenticator app.</p>
-    </header>
-
-    <div class="card__content auth__content">
+  <%= auth_card title: "One more step", hint: "Enter the 6-digit code from your authenticator app.", shake: flash[:alert] do %>
       <%= form_with url: session_two_factor_path, class: "auth__form", data: { controller: "form" } do |form| %>
-        <div class="field">
-          <%= form.label :code, "Code", class: "field__label" %>
+        <%= form.ui :field, :code, label: "Code", description: "Lost your phone? Enter one of your recovery codes instead. If you have none, an owner can reset two-factor sign-in for you in Users." do %>
           <%= form.text_field :code, required: true, class: "auth__code", autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123456", maxlength: 11 %>
-          <p class="field__hint">Lost your phone? Enter one of your recovery codes instead. If you have none, an owner can reset two-factor sign-in for you in Users.</p>
-        </div>
+        <% end %>
 
-        <button type="submit" class="btn btn--primary btn--block" data-form-target="submit">Sign in</button>
+        <%= ui :button, type: :submit, content: "Sign in", "data-form-target": "submit", class: "auth__button" %>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 
   <p class="auth__note"><%= link_to "Start over", new_session_path %></p>
 </div>

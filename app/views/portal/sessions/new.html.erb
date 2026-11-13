@@ -2,27 +2,16 @@
 <% content_for :showcase, "client" %>
 
 <div class="auth">
-  <section class="card auth__card <%= "auth__card--shake" if flash[:alert] %>">
-    <header class="card__head auth__header">
-      <h1 class="card__title auth__title">Sign in to your portal</h1>
-      <p class="card__hint">Enter the email we have for you and we’ll send you a link. No password needed.</p>
-    </header>
-
-    <div class="card__content auth__content">
+  <%= auth_card title: "Sign in to your portal", hint: "Enter the email we have for you and we’ll send you a link. No password needed.", shake: flash[:alert] do %>
       <%= form_with url: portal_session_path, class: "auth__form" do |form| %>
-        <div class="field">
-          <%= form.label :email, "Email", class: "field__label" %>
+        <%= form.ui :field, :email, label: "Email" do %>
           <%= form.email_field :email, required: true, autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
-        </div>
+        <% end %>
 
         <%= bot_check_tag %>
-        <button type="submit" class="btn btn--primary btn--block">
-          <%= icon_tag "email" %>
-          <span>Email me a link</span>
-        </button>
+        <%= ui :button, type: :submit, class: "auth__button", content: safe_join([ icon_tag("email"), tag.span("Email me a link") ]) %>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 </div>
 
 <% content_for :footer do %>

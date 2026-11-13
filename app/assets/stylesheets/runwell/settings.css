@@ -35,12 +35,14 @@
 .settings-nav > .settings-nav__heading:first-child, .settings-nav > :first-child > .settings-nav__heading:only-child { height: var(--control-h); padding-top: 0; }
 .settings-nav__list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .settings-nav__list--nested { padding-top: 2px; padding-left: var(--s-2); border-left: 1px solid var(--line); margin-left: 1.25rem; }
-.settings-nav__link { display: flex; align-items: center; gap: 6px; height: var(--control-h); padding: 0 var(--s-3); border-radius: var(--radius-control); color: var(--text); font-weight: var(--weight-strong); text-decoration: none; white-space: nowrap; }
-.settings-nav__link:hover { background: var(--hover); color: var(--text); }
-.settings-nav__link[aria-current="page"] { background: var(--layer-2); color: var(--text); }
+/* Each link is runeui's ghost button (settings_nav_link), across the column, the current one on
+/* the muted fill (shadcn's settings nav). */
+.settings-nav__link.ui-button { justify-content: flex-start; width: 100%; gap: 6px; }
+.settings-nav__link.ui-button[aria-current="page"] { background: var(--brand-tint); }
 .settings-nav__link .icon { flex: 0 0 auto; color: inherit; }
-.settings-nav__link--nested { color: var(--text-muted); font-weight: var(--weight); }
-.settings-nav__link--nested[aria-current="page"] { font-weight: var(--weight-strong); }
+.settings-nav__link--nested.ui-button { color: var(--muted-foreground); font-weight: 400; }
+.settings-nav__link--nested.ui-button[aria-current="page"] { color: var(--foreground); font-weight: 500; }
+@media (max-width: 860px) { .settings-nav__link.ui-button { width: auto; } }
 @media (max-width: 860px) {
   .settings-nav { position: static; flex-direction: row; max-height: none; padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: visible; }
   .settings-nav__heading { display: none; }
@@ -77,8 +79,15 @@
 /* runeui's fields in the same row (trial): the wrapper element takes the field's share. */
 .settings-inline :is(ui-input, ui-combobox) { flex: 1 1 14rem; width: auto; min-width: 0; }
 
-/* A switch with its hint (switch_field) on a settings page: a setting row in rune's card. */
-.settings-group__card .setting-row--field { min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
+/* Switches with their hints (switch_field: runeui's field with control:) in one bordered box, a
+/* rule between them. */
+.settings-switches { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+.settings-switches .switch-field { min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
+.settings-switches .switch-field + .switch-field { border-top: 1px solid var(--line); }
+/* A column of a section's pieces, and a row of its buttons. */
+.settings-stack { display: flex; flex-direction: column; gap: var(--s-3); }
+.settings-stack[hidden], .settings-buttons[hidden] { display: none; }
+.settings-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 
 /* A form opened in place (a <details> whose summary is the button): a bordered box under it. */
 .settings-fold { display: flex; flex-direction: column; gap: var(--s-3); }
@@ -112,10 +121,19 @@
 .settings-list--scroll { max-height: 28rem; overflow-y: auto; }
 /* Rows keep their own height in a list that scrolls (a flex column would squeeze them together). */
 .settings-list > * { flex-shrink: 0; }
-.settings-list .list-row { flex-wrap: wrap; gap: var(--s-3); padding: var(--s-3); border-radius: 0; box-shadow: 0 -1px 0 var(--line); }
-.settings-list .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading); }
+/* A row (.settings-item): what it is (an icon or avatar, a title, muted lines) and its actions at
+/* the end; what doesn't fit (a form opened in place) wraps under it. */
+.settings-item { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: var(--s-3); box-shadow: 0 -1px 0 var(--line); }
+.settings-item__media { display: inline-flex; flex: none; align-items: center; color: var(--text-faint); }
+.settings-item__content { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.settings-item__title { min-width: 0; overflow-wrap: anywhere; font-weight: var(--weight-strong); }
+.settings-item__desc { min-width: 0; color: var(--text-muted); overflow-wrap: anywhere; }
+.settings-item__actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-left: auto; }
+.settings-item__actions form { display: contents; }
 /* A title with a badge or a key beside it. */
-.settings-list .list-row__title:has(.badge) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); white-space: normal; }
+.settings-item__title:has([data-slot="badge"]) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+/* A line of small print under a form's fields. */
+.settings-note { color: var(--text-muted); font-size: var(--text-meta); }
 
 /* A row of badges (what a plugin adds, a person's role and state). */
 .settings-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -126,24 +144,27 @@
 .settings-danger__title { color: var(--danger); font-size: var(--text-ui); }
 .settings-danger__text p { color: var(--text-muted); }
 
-/* Radio cards (Appearance, Views, Your account's text size): a bordered preview, its name under
-/* it, the chosen one edged in the accent. The radio covers the card, invisibly, so it's still a
-/* real, focusable radio. */
-.settings-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--s-4); }
-.settings-choice { position: relative; display: grid; gap: var(--s-2); min-width: 0; color: var(--text); font-weight: var(--weight); text-align: center; cursor: pointer; }
-.settings-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; appearance: none; opacity: 0; cursor: pointer; }
+/* Choice cards (Appearance, Your account's text size: settings/appearances/_choices): runeui's
+/* radio group, each radio a bordered preview with its name under it, the chosen one edged in the
+/* accent. The radio itself is out of sight; its focus rings the card. */
+.settings-choices[data-slot="radio-group"] { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--s-4); }
+.settings-choice[data-slot="choice"] { position: relative; display: grid; gap: var(--s-2); min-width: 0; color: var(--text); font-size: var(--text-ui); text-align: center; cursor: pointer; }
+.settings-choice__radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .settings-choice__preview { --icon-size: 1.5rem; display: flex; align-items: center; justify-content: center; height: 5rem; padding: var(--s-1); overflow: hidden; border: 2px solid var(--line); border-radius: var(--radius); background: var(--panel); transition: border-color .15s, box-shadow .15s; }
 .settings-choice:hover .settings-choice__preview { border-color: var(--line-strong); }
-.settings-choice:has(input:checked) .settings-choice__preview { border-color: var(--accent); }
-.settings-choice:has(input:focus-visible) .settings-choice__preview { box-shadow: var(--ring); }
+.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__preview { border-color: var(--rune-accent); }
+.settings-choice:has([data-slot="radio"]:focus-visible) .settings-choice__preview { box-shadow: var(--rune-ring); }
 .settings-choice__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.settings-choice:has(input:checked) .settings-choice__label { font-weight: var(--weight-strong); }
+.settings-choice:has([data-slot="radio"]:is([data-checked], [aria-checked="true"])) .settings-choice__label { font-weight: var(--weight-strong); }
+.settings-fieldset__legend { padding-bottom: var(--s-1); font-weight: var(--weight-strong); }
+
+/* A value to copy (a new token): the value, cut short, beside its Copy button. */
+.settings-copy { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.settings-copy code { flex: 1; min-width: 0; padding: 5px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Copy buttons (copy_to_clipboard_controller): flash the accent once copied. */
-.btn.settings-copied { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+.settings-copied:is(.btn, .ui-button) { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
 
-/* A table's centred column (Roles' permissions, a tick or a dash per role). */
-.table :is(th, td).settings-center { text-align: center; }
 
 /* ======================================================================= 4 Pages */
 
@@ -157,10 +178,10 @@
 /* Plugins: cards two or three to a row. Active or Dormant follows the switch the moment it
 /* flips, before the save lands. */
 .settings-plugins { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
-.settings-plugins > .card { height: 100%; }
-.settings-plugins .card__title { line-height: 1.25; }
-.settings-plugins .card__content { flex: 1; color: var(--text-muted); line-height: 1.5; }
-.settings-plugins .card__footer { justify-content: flex-start; }
+.plugin-card, .plugin-card > [data-slot="card"] { height: 100%; }
+.plugin-card__title { font-size: var(--text-read); line-height: 1.25; }
+.plugin-card [data-slot="card-content"] { display: flex; flex: 1; flex-direction: column; gap: var(--s-3); color: var(--text-muted); line-height: 1.5; }
+.plugin-card [data-slot="card-footer"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 .plugin-card__switch { flex-direction: row; align-items: center; }
 .plugin-card:has(ui-switch:is([data-checked], [default-checked]:not(:defined))) .plugin-card__dormant,
 .plugin-card:not(:has(ui-switch:is([data-checked], [default-checked]:not(:defined)))) .plugin-card__active { display: none; }
@@ -172,7 +193,7 @@
 /* Your menu: each plugin's row, its keys, ↑ ↓ and a switch. A hidden one is faint; the first's
 /* ↑ and the last's ↓ keep their place, unseen. */
 .settings-menu__item--hidden { color: var(--text-faint); }
-.settings-menu__item--hidden .list-row__media { opacity: .5; }
+.settings-menu__item--hidden .settings-item__media { opacity: .5; }
 .settings-menu .icon-button[disabled] { visibility: hidden; }
 
 /* Connected apps: a new token to copy, and each connection's recent calls under Activity. */
@@ -186,12 +207,15 @@
 .settings-activity__summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Webhooks: one card per endpoint. */
-.settings-webhook .card__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
-.settings-webhook .card__hint code { overflow-wrap: anywhere; }
-.settings-webhook .card__action { flex-wrap: wrap; }
+.settings-webhook__title { overflow: hidden; font-size: var(--text-read); text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+.settings-webhook [data-slot="card-description"] code { overflow-wrap: anywhere; }
+.settings-webhook [data-slot="card-action"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.settings-webhook [data-slot="card-content"] { display: flex; flex-direction: column; gap: var(--s-4); }
 
-/* Updates: what's running. */
-.settings-facts { font-size: var(--text-read); }
+/* Updates: what's running, each fact's name beside it. */
+.settings-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-3) var(--s-5); align-items: center; font-size: var(--text-read); }
+.settings-facts dt { color: var(--text-muted); }
+.settings-facts dd { min-width: 0; overflow-wrap: anywhere; }
 
 /* Names: each type's switch, names and prefix in a row, under a line of headings. */
 
@@ -240,15 +264,16 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 /* The invitation page's sidebar hides for a wider working column (], panes_controller): a thin
 /* strip that keeps the button bringing it back. Only where that button is. */
-.person-page__side > .sidebar-toggle { position: absolute; top: var(--s-4); right: var(--s-4); z-index: 1; }
-.person-page__side:has(> .sidebar-toggle) > .settings-section:first-of-type > .settings-section__head { padding-right: 2rem; }
+.person-page__side .sidebar-toggle { position: absolute; top: var(--s-4); right: var(--s-4); z-index: 1; }
+.person-page__side:has(.sidebar-toggle) .settings-section:first-of-type > .settings-section__head { padding-right: 2rem; }
 @media (min-width: 960px) {
-  html[data-sidebar="collapsed"] .person-page--split:has(> .person-page__side > .sidebar-toggle) { grid-template-columns: minmax(0, 1fr) 2.75rem; }
-  html[data-sidebar="collapsed"] .person-page__side:has(> .sidebar-toggle) { align-items: center; min-height: 2.75rem; padding: 6px; }
-  html[data-sidebar="collapsed"] .person-page__side:has(> .sidebar-toggle) > :not(.sidebar-toggle) { display: none; }
-  html[data-sidebar="collapsed"] .person-page__side > .sidebar-toggle { position: static; }
-  html[data-sidebar="collapsed"] .person-page__side > .sidebar-toggle .icon { transform: scaleX(-1); }
+  html[data-sidebar="collapsed"] .person-page--split:has(> .person-page__side .sidebar-toggle) { grid-template-columns: minmax(0, 1fr) 2.75rem; }
+  html[data-sidebar="collapsed"] .person-page__side:has(.sidebar-toggle) { align-items: center; min-height: 2.75rem; padding: 6px; }
+  html[data-sidebar="collapsed"] .person-page__side:has(.sidebar-toggle) [data-slot="card-content"] > :not(.sidebar-toggle) { display: none; }
+  html[data-sidebar="collapsed"] .person-page__side .sidebar-toggle { position: static; }
+  html[data-sidebar="collapsed"] .person-page__side .sidebar-toggle .icon { transform: scaleX(-1); }
 }
+
 
 /* A person's heading: their avatar, larger, beside their name and badges. */
 .person-page__heading { display: flex; align-items: center; gap: var(--s-4); }
@@ -257,17 +282,16 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 
 /* The users table's name cell: the avatar beside the name. */
 
-/* A small table on a settings page (Past updates): rune's table, scrolling past a screenful, its
-/* last column to the right; a row's detail (what went wrong) runs under it, across the table. */
-.settings-table { max-height: 28rem; overflow-y: auto; }
-.settings-table .settings-table__end { text-align: right; }
+/* A table on a settings page (Roles, Past updates, a webhook's deliveries: ui :table), in a
+/* bordered box; a row's detail (what went wrong) runs under it, across the table. */
+[data-slot="table-container"]:has(> [data-slot="table-scroll"] > .settings-table) [data-slot="table-scroll"] { max-height: 28rem; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.settings-table__muted, .settings-dash { color: var(--text-muted); }
 .settings-table__detail td { padding-top: 0; }
 .settings-table__detail .settings-log { margin: 0; white-space: pre-wrap; }
 
 /* An update under way (Settings > Updates): who started it beside what happens next, flush with
 /* the section's heading rather than padded like a list's row. */
-.upgrade-status { padding-inline: 0; }
-.upgrade-status .list-row__desc { color: var(--text-muted); font-size: var(--text-ui); line-height: var(--leading, 1.5); }
+.upgrade-status { padding-inline: 0; box-shadow: none; }
 
 /* Settings > Sidebar (settings/sidebars): each section a card, its name written in place over its
    pages; pages drag between sections and the Hidden tray (nav-layout controller). */
@@ -275,7 +299,9 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 .nav-editor__sections { display: flex; flex-direction: column; gap: var(--s-3); }
 .nav-editor__section { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
 .nav-editor__section-head { display: flex; align-items: center; gap: var(--s-2); }
-.nav-editor__label { flex: 1; font-weight: var(--weight-strong); }
+.nav-editor__section-head ui-input { flex: 1; min-width: 0; }
+.nav-editor__label { font-weight: var(--weight-strong); }
+.nav-editor__hint { color: var(--text-muted); font-size: var(--text-meta); font-weight: var(--weight); }
 .nav-editor__items { display: flex; flex-direction: column; gap: 2px; min-height: 2.25rem; margin: 0; padding: var(--s-1); border: 1px dashed transparent; border-radius: var(--radius-md); list-style: none; }
 .nav-editor__items:empty { border-color: var(--line); }
 .nav-editor__items--hidden { border-color: var(--line); background: var(--layer-1); }
@@ -296,3 +322,6 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 /* Notifications on this device (Settings > Your account, the push controller): why it can't. */
 .push-note { padding: 0 var(--s-4) var(--s-3); }
 .push-note[hidden] { display: none; }
+
+/* A link-like button in a line of text (Stop requiring it). */
+.settings-link.ui-button { height: auto; padding: 0; vertical-align: baseline; }

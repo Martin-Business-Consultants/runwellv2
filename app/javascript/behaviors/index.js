@@ -20,8 +20,9 @@ import picksCurrent from "behaviors/picks-current"
 import revertOnFailure from "behaviors/revert-on-failure"
 import loadingPlaceholder from "behaviors/loading-placeholder"
 import breaksOut from "behaviors/breaks-out"
+import emptiesOnClose from "behaviors/empties-on-close"
 
-const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty, "picks-current": picksCurrent, "revert-on-failure": revertOnFailure, "loading-placeholder": loadingPlaceholder, "breaks-out": breaksOut }
+const BEHAVIORS = { open, "keep-open": keepOpen, "save-on-change": saveOnChange, "save-when-dirty": saveWhenDirty, "picks-current": picksCurrent, "revert-on-failure": revertOnFailure, "loading-placeholder": loadingPlaceholder, "breaks-out": breaksOut, "empties-on-close": emptiesOnClose }
 
 const runtime = Runtime.start({ state: { debounce: 150, refetch: "off" } })
 // ReActionView matches a behavior by the attribute's whole name, and the markup writes these as

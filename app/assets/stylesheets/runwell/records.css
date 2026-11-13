@@ -101,14 +101,14 @@ html[data-sidebar="collapsed"] :is(.record-page__header, .record-header) .sideba
 
 /* ======================================================================= 4 Lists */
 
-/* A card's list of rows (rune's .list-row): a hairline between them. Rows run into the card's
-/* padding, so their text lines up with the card's title and the hover tint has room. */
+/* A card's list of rows (.item-row, or a plugin's .list-row): a hairline between them. Rows run
+/* into the card's padding, so their text lines up with the card's title and the hover tint has room. */
 .record-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .record-list > li + li { border-top: 1px solid var(--line); }
-.record-list > li > .list-row, .record-list__row { margin-inline: calc(-1 * var(--s-3)); }
-.record-list .list-row { padding-block: var(--s-2); }
+.record-list > li > :is(.item-row, .list-row), .record-list__row { margin-inline: calc(-1 * var(--s-3)); }
+.record-list :is(.item-row, .list-row) { padding-block: var(--s-2); }
 /* A row that is the list item itself (documents, work) keeps to the column. */
-.record-list > li.list-row, li.record-list__row { margin-inline: 0; padding-inline: 0; }
+.record-list > li:is(.item-row, .list-row), li.record-list__row { margin-inline: 0; padding-inline: 0; }
 
 .record-list__badges { display: flex; flex-wrap: wrap; gap: var(--s-1); padding-top: 2px; }
 
@@ -230,10 +230,10 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .document-row__visible { display: flex; flex-direction: row; align-items: center; gap: 0; }
 
 /* An image's preview: the picture as large as fits, its name and links under it. */
-.document-preview { width: fit-content; max-width: calc(100vw - 2rem); max-height: calc(100dvh - 4rem); margin: auto; }
+/* An image's preview (documents/_link, ui :dialog): as wide as the picture allows. */
+.document-preview [data-slot="dialog-content"] { width: fit-content; min-width: min(24rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); }
+.document-preview [data-slot="dialog-title"] { min-width: 0; padding-right: var(--s-6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25; }
 .document-preview__image { display: block; max-width: 100%; max-height: calc(100dvh - 12rem); margin-inline: auto; object-fit: contain; border-radius: var(--radius-sm); }
-.document-preview__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
-.document-preview__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ======================================================================= 9 Forms */
 
@@ -311,7 +311,7 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* A client's status badge that opens its picker (clients/_status_picker): the badge is the button. */
 .status-picker { position: relative; display: inline-block; }
 .status-picker__trigger { display: inline-flex; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; font: inherit; cursor: pointer; }
-.status-picker__trigger:hover .badge { filter: brightness(.95); }
+.status-picker__trigger:hover [data-slot="badge"] { filter: brightness(.95); }
 .status-picker__display { display: contents; }
 
 /* A piece of work's title with its info button (the description, in a dialog), and the next step
@@ -329,10 +329,13 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 /* The notes under the composer (notes/_feed): a box of their own only so a stream can replace them. */
 .notes-feed { display: contents; }
 
-/* A form in a modal over an index (layouts/shared/_modal): the dialog is the frame, so the form
-/* card inside loses its own. */
-.record-modal .record-form { border: 0; box-shadow: none; background: none; }
-.record-modal__body { padding: var(--s-2); }
+/* A form in a modal over an index (layouts/shared/_modal, ui :dialog): the dialog is the frame, so
+/* the form card inside loses its own, and its hint sits under the dialog's title. */
+.record-modal .record-form { padding: 0; border: 0; box-shadow: none; background: none; }
+.record-modal .record-form > [data-slot="card-header"], .record-modal .record-form > [data-slot="card-content"],
+.record-modal .record-form > [data-slot="card-footer"] { padding-inline: 0; }
+.record-modal .record-form > [data-slot="card-header"] { padding-top: 0; }
+.record-modal .record-form > [data-slot="card-footer"] { padding-bottom: 0; }
 
 /* ======================================================================= Template mode */
 
@@ -347,7 +350,7 @@ dl.record-fields .layout-field { display: contents; }
 dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
 dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-fields__prose { overflow-wrap: anywhere; }
-.record-fields-card:not(:has(dt, .field, .setting-row, .field--inline)) { display: none; }
+.record-fields-card:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .field--inline)) { display: none; }
 .record-form__footer { flex-direction: row; justify-content: flex-end; }
 
 /* Arranging (record-layout controller): the page keeps its own look, label beside value, and only
@@ -380,13 +383,13 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-page--arranging .record-fields:not(dl) { gap: 2px; }
 .record-page--arranging .record-fields:not(dl) .layout-field:has(.layout-field__control) { display: flex; align-items: center; gap: var(--s-2); }
 .record-page--arranging .record-fields:not(dl) .layout-field .field { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: var(--s-5); min-width: 0; }
-.record-page--arranging .record-fields:not(dl) :is(.field__hint, .setting-row__hint) { display: none; }
+.record-page--arranging .record-fields:not(dl) :is(.field__hint, [data-slot="field-description"]) { display: none; }
 .record-page--arranging .record-fields:not(dl) .field__label { color: var(--text-muted); font-weight: var(--weight); }
 .record-page--arranging .record-fields:not(dl) lexxy-editor { max-height: 2.25rem; min-height: 0; overflow: hidden; }
 .record-page--arranging .record-fields:not(dl) lexxy-editor :is(lexxy-toolbar, .lexxy-editor__toolbar) { display: none; }
-.record-page--arranging .record-fields:not(dl) .setting-row { padding-block: 0; }
+
 .record-page--arranging dd:has(.layout-field__control) { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
-.record-page--arranging .layout-field:not(:has(dt, .field, .setting-row, .field--inline, .card))::before,
+.record-page--arranging .layout-field:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .field--inline, .card))::before,
 .layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--text-muted); }
 .layout-field--dragging { opacity: .4; }
 
@@ -411,11 +414,11 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .field-lock .icon { width: .75rem; height: .75rem; }
 .layout-field__control { display: none; }
 .record-page--arranging .layout-field__control { display: inline-flex; }
-.layout-field__visibility { gap: 4px; height: 1.5rem; padding: 0 var(--s-2); font-size: var(--text-xs); }
-.layout-visibility[popover] { margin: auto; padding: var(--s-4); border: 0; border-radius: var(--radius-lg); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); }
-.layout-visibility[popover]:popover-open { display: flex; flex-direction: column; gap: var(--s-3); animation: rune-pop var(--motion-fast) var(--ease); }
+.layout-field__visibility.ui-button { gap: 4px; }
+.layout-visibility [data-slot="popover-content"] { gap: var(--s-3); width: auto; min-width: 16rem; }
 .layout-visibility__actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
-.field-visibility { display: flex; flex-direction: column; gap: var(--s-1); margin: 0; padding: 0; border: 0; }
+.field-visibility { display: flex; flex-direction: column; gap: var(--s-2); margin: 0; padding: 0; border: 0; }
+.field-visibility__legend { padding-bottom: var(--s-1); font-size: var(--ui-text-sm, .875rem); font-weight: 500; }
 
 /* While arranging, card headings (and the line under each) are written in place: a dashed line
    under them, and a placeholder where there’s none yet. */
@@ -472,7 +475,9 @@ dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 form[data-dirty] .rich-text-in-place__actions { display: flex; }
 
 /* A New form on its way into the modal (layouts/shared/_modal_placeholder). */
-.record-modal__placeholder { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-5); }
+.record-modal__placeholder { display: flex; flex-direction: column; gap: var(--s-4); }
 .record-modal__skeleton { block-size: 2rem; }
 .record-modal__skeleton--title { inline-size: 40%; block-size: 1.25rem; }
 .record-modal__skeleton--short { inline-size: 60%; }
+/* A switch's hint in a record's fields reads as its neighbours' hints do. */
+.record-fields .switch-field [data-slot="field-description"] { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }

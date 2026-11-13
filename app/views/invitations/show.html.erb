@@ -2,30 +2,22 @@
 <% content_for :showcase, "team" %>
 
 <div class="auth">
-  <section class="card auth__card <%= "auth__card--shake" if @user.errors.any? %>">
-    <header class="card__head auth__header">
-      <h1 class="card__title auth__title">Join Runwell</h1>
-      <p class="card__hint"><%= @invitation.invited_by.display_name %> invited <strong class="auth__strong"><%= @invitation.email_address %></strong> as <%= @invitation.role == "owner" ? "an owner" : "a " + @invitation.role %>.</p>
-    </header>
-
-    <div class="card__content auth__content">
+  <% hint = capture do %><%= @invitation.invited_by.display_name %> invited <strong class="auth__strong"><%= @invitation.email_address %></strong> as <%= @invitation.role == "owner" ? "an owner" : "a " + @invitation.role %>.<% end %>
+  <%= auth_card title: "Join Runwell", hint: hint, shake: @user.errors.any? do %>
       <%= render "layouts/shared/errors", record: @user %>
 
       <%= form_with model: @user, url: invitation_path(params[:token]), method: :patch, scope: :user, class: "auth__form", data: { controller: "form" } do |form| %>
-        <div class="field">
-          <%= form.label :name, "Full name", class: "field__label" %>
+        <%= form.ui :field, :name, label: "Full name" do %>
           <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name", maxlength: 240 %>
-        </div>
+        <% end %>
 
-        <div class="field">
-          <%= form.label :password, "Choose a password", class: "field__label" %>
+        <%= form.ui :field, :password, label: "Choose a password" do %>
           <%= form.password_field :password, required: true, autocomplete: "new-password", maxlength: 72 %>
-        </div>
+        <% end %>
 
-        <button type="submit" class="btn btn--primary btn--block" data-form-target="submit">Join</button>
+        <%= ui :button, type: :submit, content: "Join", "data-form-target": "submit", class: "auth__button" %>
       <% end %>
-    </div>
-  </section>
+  <% end %>
 </div>
 
 <% content_for :footer do %>

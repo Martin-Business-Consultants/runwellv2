@@ -10,9 +10,9 @@
       <p class="settings-section__description"><%= [ @plugin.version, @plugin.author, InstalledPlugins.metadata(@plugin.key.to_s)["repo"] ].compact.join(" · ") %></p>
       <div class="settings-section__actions">
         <% if on %>
-          <%= badge "Active", tone: :ok %>
+          <%= ui :badge, variant: :success, content: "Active" %>
         <% else %>
-          <%= badge "Dormant", tone: :neutral %>
+          <%= ui :badge, variant: :secondary, content: "Dormant" %>
         <% end %>
       </div>
     </header>
@@ -32,7 +32,7 @@
     <div class="settings-chips">
       <% Runwell::Plugins.additions(@plugin.key).each do |addition| %>
         <%# herb:key addition %>
-        <span class="badge"><%= addition %></span>
+        <%= ui :badge, variant: :outline, content: addition %>
       <% end %>
     </div>
   </section>
@@ -43,14 +43,14 @@
       <% settings_note = if on && settings then "#{@plugin.name} has its own settings." elsif settings then "Switch it on to set it up." else "Nothing to set up: switching it on is all it needs." end %>
       <p class="settings-section__description"><%= settings_note %></p>
     </header>
-    <div class="button-row">
+    <div class="settings-buttons">
       <% if on && settings %>
-        <%= link_to instance_exec(&settings.last), class: "btn btn--primary" do %>
+        <%= link_to instance_exec(&settings.last), class: "ui-button", data: { variant: "default", size: "default" } do %>
           <%= icon_tag "settings-outline" %>
           <span>Open <%= @plugin.name %> settings</span>
         <% end %>
       <% end %>
-      <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: class_names("btn", "btn--primary": !on, "btn--secondary": on) do %>
+      <%= button_to settings_plugin_path(@plugin.key), method: :patch, params: { plugin: { enabled: on ? "0" : "1" } }, class: "ui-button", data: { variant: (on ? "outline" : "default"), size: "default" } do %>
         <span><%= on ? "Switch #{@plugin.name} off" : "Switch #{@plugin.name} on" %></span>
       <% end %>
     </div>

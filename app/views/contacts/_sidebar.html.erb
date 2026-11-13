@@ -18,11 +18,10 @@
       <% works = client.works.ordered.map { [ it.title, it.ref ] } %>
       <%= form_with url: contact_portal_scope_path(contact), scope: :scope, method: :patch, class: "contact-portal__scope", namespace: dom_id(contact, :portal_scope) do |form| %>
         <%= ui :checkbox, name: "scope[limited]", checked: contact.portal_limited?, unchecked_value: "0", id: dom_id(contact, :portal_limited), label: "Only some of the #{term(:work).downcase}" %>
-        <div class="field">
-          <%= form.label :works, "Which", class: "field__label" %>
+        <%= form.ui :field, :works, label: "Which" do %>
           <%= form.select :works, works, { selected: contact.limited_works.map(&:ref) }, multiple: true %>
-          <p class="field__hint">Ticked, they see only these, the <%= term(:task, count: 2).downcase %> and files on them, and what they asked for themselves. Unticked, everything shared with <%= client.name %>.</p>
-        </div>
+          <ui-field-description data-slot="field-description">Ticked, they see only these, the <%= term(:task, count: 2).downcase %> and files on them, and what they asked for themselves. Unticked, everything shared with <%= client.name %>.</ui-field-description>
+        <% end %>
         <div class="button-row"><%= ui :button, type: :submit, variant: :outline, size: :sm, content: "Save what they see" %></div>
       <% end %>
       <% if sessions.positive? %>
@@ -39,12 +38,12 @@
         <% others.each do |other| %>
           <%# herb:key other.id %>
           <li data-filter-target="item">
-            <%= link_to edit_contact_path(other), class: "list-row" do %>
+            <%= link_to edit_contact_path(other), class: "item-row" do %>
               <%= avatar other.name, size: :md %>
-              <span class="list-row__content">
-                <span class="list-row__title"><%= other.name %></span>
+              <span class="item-row__content">
+                <span class="item-row__title"><%= other.name %></span>
                 <% if other.title.present? %>
-                  <span class="list-row__desc"><%= other.title %></span>
+                  <span class="item-row__desc"><%= other.title %></span>
                 <% end %>
                 <% if other.portal? || other.can_approve? %>
                   <span class="record-list__badges">

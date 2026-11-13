@@ -1,19 +1,15 @@
 <%# locals: (documents:) %>
 <%# The work's documents shared with the client, as a card of rows (portal/works/show). %>
 <% if documents.any? %>
-  <section class="card card--flush portal-card">
-    <header class="card__head card__head--bordered">
-      <%= layout_text_tag record_layout(:portal_work), "documents.title", "Documents", class: "card__title" %>
-      <%= layout_text_tag record_layout(:portal_work), "documents.hint", nil, tag: :p, class: "card__hint" %>
-    </header>
-
-    <ul class="list portal-documents">
+  <% layout = record_layout(:portal_work) %>
+  <%= portal_card title: layout_text_tag(layout, "documents.title", "Documents", class: "portal-card__title"), hint: layout_text_tag(layout, "documents.hint", nil, tag: :p, class: "portal-card__hint"), flush: true do %>
+    <ul class="portal-list portal-documents">
       <% documents.each do |document| %>
         <%# herb:key document.id %>
-        <li class="list-row">
+        <li class="portal-row">
           <%= render "documents/link", document: document, meta: "#{number_to_human_size(document.byte_size)} · #{l document.created_at.to_date, format: :long}" %>
         </li>
       <% end %>
     </ul>
-  </section>
+  <% end %>
 <% end %>

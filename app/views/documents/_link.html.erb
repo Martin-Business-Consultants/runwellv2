@@ -1,26 +1,20 @@
 <%# locals: (document:, meta:) %>
-<%# A document's name as the thing to click: an image opens in a preview dialog (with open
+<%# A document's name as the thing to click: an image opens in a preview dialog (ui :dialog, with open
     and download links), a PDF opens in a new tab, anything else downloads. %>
 <% kind = document_preview_kind(document) %>
 <% if kind == :image %>
-  <div class="document-link__wrap" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-    <button type="button" class="document-link" title="Preview <%= document.filename %>" data-action="dialog#open">
+  <% trigger = capture do %>
+    <button type="button" class="document-link" title="Preview <%= document.filename %>">
       <%= render "documents/file", document: document, meta: meta %>
     </button>
-    <dialog class="dialog dialog--lg document-preview" data-dialog-target="dialog" aria-label="<%= document.filename %>">
-      <div class="dialog__box">
-        <%= image_tag rails_blob_path(document.file, disposition: :inline), class: "document-preview__image", alt: document.filename, loading: "lazy" %>
-        <footer class="document-preview__footer">
-          <strong class="document-preview__name"><%= document.filename %></strong>
-          <div class="button-row">
-            <%= link_to "Open", rails_blob_path(document.file, disposition: :inline), class: "btn btn--secondary btn--sm", target: "_blank", rel: "noopener" %>
-            <%= link_to "Download", rails_blob_path(document.file, disposition: :attachment), class: "btn btn--secondary btn--sm", download: document.filename.to_s %>
-            <button type="button" class="btn btn--primary btn--sm" data-action="dialog#close">Close <kbd class="hide-on-touch">Esc</kbd></button>
-          </div>
-        </footer>
-      </div>
-    </dialog>
-  </div>
+  <% end %>
+  <% footer = capture do %>
+    <%= ui :button, variant: :outline, size: :sm, href: rails_blob_path(document.file, disposition: :inline), content: "Open", target: "_blank", rel: "noopener" %>
+    <%= ui :button, variant: :outline, size: :sm, href: rails_blob_path(document.file, disposition: :attachment), content: "Download", download: document.filename.to_s %>
+  <% end %>
+  <%= ui :dialog, trigger: trigger, title: document.filename.to_s, size: :lg, class: "document-preview", footer: footer do %>
+    <%= image_tag rails_blob_path(document.file, disposition: :inline), class: "document-preview__image", alt: document.filename, loading: "lazy" %>
+  <% end %>
 <% elsif kind == :tab %>
   <%= link_to rails_blob_path(document.file, disposition: :inline), class: "document-link", title: "Open #{document.filename} in a new tab", target: "_blank", rel: "noopener" do %>
     <%= render "documents/file", document: document, meta: meta %>

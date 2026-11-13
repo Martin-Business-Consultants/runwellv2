@@ -9,11 +9,11 @@
         <% contacts.each do |contact| %>
           <%# herb:key contact.id %>
           <li data-filter-target="item">
-            <%= peek_link_to contact, class: "list-row" do %>
+            <%= peek_link_to contact, class: "item-row" do %>
               <%= avatar contact.name, size: :md %>
-              <span class="list-row__content">
-                <span class="list-row__title"><%= contact.name %></span>
-                <span class="list-row__desc"><%= [ contact.title, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
+              <span class="item-row__content">
+                <span class="item-row__title"><%= contact.name %></span>
+                <span class="item-row__desc"><%= [ contact.title, contact.email, contact.phone ].compact_blank.join(" · ") %></span>
               </span>
               <span class="contact-marks">
                 <% if contact.portal? %>

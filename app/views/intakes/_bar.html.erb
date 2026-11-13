@@ -6,7 +6,7 @@
   <% if task.intake? %>
     <div class="task-panel__intake">
       <span class="task-panel__intake-text">Waiting in Intake</span>
-      <%= button_to task_acceptance_path(task), params: { inline: "panel" }, class: button_classes(variant: :primary, size: :sm) do %>
+      <%= button_to task_acceptance_path(task), params: { inline: "panel" }, class: "ui-button", data: { variant: "default", size: "sm" } do %>
         <%= icon_tag "check" %><span>Accept</span>
       <% end %>
       <%= render "intakes/decline", task: task, inline: "panel", label: "Decline" %>

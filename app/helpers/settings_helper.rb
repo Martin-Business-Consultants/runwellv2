@@ -1,9 +1,10 @@
 module SettingsHelper
-  # A link in the Settings sidebar (settings/_nav), marked when it's the page on screen.
+  # A link in the Settings sidebar (settings/_nav, and a plugin's section_nav): runeui's ghost
+  # button as a link, shadcn's settings nav, marked when it's the page on screen. Without an icon
+  # it's a page nested under the link above it.
   def settings_nav_link(label, path, current:, icon: nil)
-    link_to path, class: class_names("settings-nav__link", "settings-nav__link--nested": icon.nil?), aria: { current: ("page" if current) } do
-      safe_join([ (icon_tag(icon) if icon), tag.span(label) ].compact)
-    end
+    ui :button, variant: :ghost, href: path, class: class_names("settings-nav__link", "settings-nav__link--nested": icon.nil?),
+      aria: { current: ("page" if current) }, content: safe_join([ (icon_tag(icon) if icon), tag.span(label) ].compact)
   end
 
   # The plugins nested under Plugins in the sidebar: each switched-on plugin with a settings

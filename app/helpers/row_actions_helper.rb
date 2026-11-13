@@ -6,7 +6,7 @@ module RowActionsHelper
   def row_remove_button(name:, path:)
     title = "Remove #{name}"
     button_to path, method: :delete, params: { inline: "row" }, authenticity_token: false,
-      class: "icon-button icon-button--danger row-action", title: title, aria: { label: title }, data: { keys: "d" },
+      class: "ui-button danger-button row-action", title: title, aria: { label: title }, data: { variant: "ghost", size: "icon-sm", keys: "d" },
       form: { class: "row-action-form", data: { turbo_frame: "_top", action: "turbo:submit-start->row-delete#leave turbo:submit-end->row-delete#settle" } } do
       icon_tag("trash")
     end
@@ -18,8 +18,8 @@ module RowActionsHelper
   def row_delete_button(name:, path:, message: nil)
     title = "Delete #{name}?"
     button_to path, method: :delete, params: { inline: "row" }, authenticity_token: false,
-      class: "icon-button icon-button--danger row-action", title: title, aria: { label: title },
-      data: { keys: "d", **confirm_data(title, description: message || "This can’t be undone.") },
+      class: "ui-button danger-button row-action", title: title, aria: { label: title },
+      data: { variant: "ghost", size: "icon-sm", keys: "d", **confirm_data(title, description: message || "This can’t be undone.") },
       form: { class: "row-action-form", data: { turbo_frame: "_top", action: "turbo:submit-start->row-delete#leave turbo:submit-end->row-delete#settle" } } do
       icon_tag("trash")
     end

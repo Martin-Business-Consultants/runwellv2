@@ -25,7 +25,10 @@ module PaginationHelper
 
   def link_to_next_page(namespace, page, activate_when_observed: false, label: default_pagination_label(activate_when_observed), url: nil, data: {}, **attributes)
     if more_pages_after?(page) && !params[:previous]
-      attributes[:class] = class_names(attributes[:class], "btn btn--secondary btn--sm pagination-link--manual": !activate_when_observed)
+      unless activate_when_observed
+        attributes[:class] = class_names(attributes[:class], "ui-button pagination-link--manual")
+        data = data.merge(variant: "outline", size: "sm")
+      end
       pagination_link(namespace, page.number + 1, label: label, activate_when_observed: activate_when_observed, url: url, data: data, **attributes)
     end
   end

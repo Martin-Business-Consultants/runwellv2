@@ -185,8 +185,8 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* A destructive action on a record's own page (confirm_button, layouts/shared/_confirm): a quiet
 /* red button; the question is asked in the page's confirm dialog. */
-.confirm-button, .confirm-button:hover { color: var(--danger); }
-.confirm-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
+.confirm-button.ui-button, .danger-button.ui-button { color: var(--danger); }
+.confirm-button.ui-button:hover, .danger-button.ui-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); color: var(--danger); }
 
 /* The ? sheet (layouts/shared/_shortcuts, runeui's ui :dialog): groups in two columns, each a list
 /* of what a key does with its keys (ui :kbd) at the end; the footer has hint mode's switch. Inside
@@ -214,8 +214,6 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 .code-block :is(.token.important, .token.namespace, .token.regex, .token.variable) { color: var(--color-code-token__variable); }
 .code-block .token.punctuation { color: var(--color-code-token__punctuation); }
 
-/* A switch with a hint, in a form (switch_field): a setting row without its card. */
-.setting-row--field { min-height: 0; padding: 0; }
 
 /* Hint mode (keyboard_controller, the . key): each control's key as a keycap on it, from
 /* data-key-hint, and a strip of the keys with no control at the foot of the page. Keycaps are
@@ -250,9 +248,14 @@ html[data-hints] .hint-legend {
 
 /* A form's own controls (selects, a combobox behind its button, a date) fill their field, as its
 /* inputs do: runeui's are as wide as their words, which left a column of fields ragged. */
-.field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker"]),
-.field ui-combobox:has(> ui-combobox-trigger) { width: 100%; }
-.field [data-slot="date-picker-input"] { flex: 1; }
+:is(.field, [data-slot="field"]) :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker"]),
+:is(.field, [data-slot="field"]) ui-combobox:has(> ui-combobox-trigger) { width: 100%; }
+:is(.field, [data-slot="field"]) [data-slot="date-picker-input"] { flex: 1; }
+
+/* A form's fields side by side, two or more to a row as room allows (runeui's fields stack), and
+/* its buttons at its end. */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-4); }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }
 
 /* Money (money_field): the dollars people type and the cents sent, laid out as the one field. */
 .money-field { display: contents; }
@@ -327,16 +330,12 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--accent); }
 [data-slot="table"] tbody tr:focus-visible, [data-slot="table"] tbody tr[data-keyboard-current] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
-.settings-nav__link[aria-current="page"] .icon { color: var(--accent); }
-.record-list__row[data-keyboard-current], .list-row[data-keyboard-current] { background: var(--brand-tint); }
+.settings-nav__link[aria-current="page"] .icon { color: var(--rune-accent); }
+.record-list__row[data-keyboard-current], :is(.item-row, .list-row)[data-keyboard-current] { background: var(--brand-tint); }
 
 /* A person in a table's cell (person_cell): the owner column's avatar, then the name. */
 .person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; max-width: 100%; vertical-align: middle; }
 .person-cell > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* A switch beside its label (switch_field without a hint, .field--inline): a centred row with a
-/* gap, as rune_ui's next release makes it on its own; carried until then. */
-.field--inline { display: flex; flex-direction: row; align-items: center; gap: var(--s-2); }
 
 /* rune_ui's column convention for plain tables (the portal's, settings lists), carried here until
 /* the next rune_ui release reaches this install's Gemfile.lock; then this block goes. */
@@ -380,3 +379,26 @@ form[data-unsaved] textarea,
 .layout-field:has(form[data-unsaved]) textarea { border-color: var(--attention); }
 .layout-field:has(form[data-unsaved])::after,
 form[data-unsaved].record-title-form::after { content: "Not saved yet"; color: var(--attention); font-size: var(--text-xs); }
+
+/* A count beside a tab's name (record tabs, a section's filter: ui :tabs as links). */
+.tab-count { min-width: 1.125rem; padding: 0 6px; border-radius: var(--radius-pill, 99rem); background: var(--layer-3); color: var(--text-muted); font-size: var(--text-xs); font-weight: 600; line-height: 1.125rem; text-align: center; }
+
+/* A row in a card's list (records' contacts, work and documents, a section's focus): what it is,
+/* muted lines under it, what it's at on the right. A link row tints on hover. */
+.item-row { display: flex; align-items: center; gap: var(--s-3); min-height: var(--row-h); padding: 6px var(--s-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+a.item-row:hover, a.item-row:focus-visible { background: var(--hover); color: var(--text); }
+.item-row__media { display: inline-flex; flex: 0 0 auto; align-items: center; color: var(--text-faint); }
+.item-row__content { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.item-row__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-strong); }
+.item-row__desc { min-width: 0; color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); overflow-wrap: anywhere; }
+.item-row__meta { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-2); color: var(--text-faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.item-row__actions { display: flex; flex: 0 0 auto; align-items: center; gap: var(--s-2); margin-left: auto; }
+
+/* A line of small print under a field (the work's description, a person's email). */
+.field-note { color: var(--text-muted); font-size: var(--text-meta); }
+
+/* A section's state as a dot (works/_scope). */
+.state-dot { display: inline-block; flex: 0 0 auto; width: .5rem; height: .5rem; border-radius: 50%; background: var(--text-faint); }
+.state-dot--accent { background: var(--rune-accent); }
+.state-dot--danger { background: var(--danger); }
+.state-dot--ok { background: var(--ok); }

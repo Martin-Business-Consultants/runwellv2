@@ -1,24 +1,14 @@
-<%# The quick action as a modal dialog: a title, where it goes (the picker), the action's own form. %>
+<%# The quick action as a modal: ui :dialog, open as it arrives in the tray's quick_action frame
+    (which empties as it closes). A title and hint, where it goes (the picker), the action's own
+    form. %>
 <turbo-frame id="quick_action">
-  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#closeOnEscape">
-    <dialog class="dialog dialog--lg quick-action" aria-labelledby="quick_action_title" data-dialog-target="dialog">
-      <div class="dialog__box">
-        <header class="dialog__header quick-action__header">
-          <div class="quick-action__heading">
-            <h2 class="dialog__title" id="quick_action_title"><%= @action.title %></h2>
-            <p class="dialog__hint">Choose where it goes, then fill it in. <kbd class="hide-on-touch">⌘</kbd><kbd class="hide-on-touch">↵</kbd> saves.</p>
-          </div>
-          <button type="button" class="icon-button" title="Close" data-action="dialog#close">
-            <%= icon_tag "close" %>
-            <span class="visually-hidden">Close</span>
-          </button>
-        </header>
-        <div class="field quick-action__where">
-          <span class="field__label">Where it goes</span>
-          <%= render "quick_actions/record_picker", record: @record, form_id: "quick_action_form", types: @action.types %>
-        </div>
-        <%= render @action.partial, form_id: "quick_action_form" %>
-      </div>
-    </dialog>
-  </div>
+  <%= ui :dialog, id: "quick_action_dialog", open: true, size: :lg, class: "quick-action", title: @action.title,
+        description: safe_join([ "Choose where it goes, then fill it in. ", ui(:kbd, keys: %w[⌘ ↵], class: "hide-on-touch"), " saves." ]) do %>
+    <div class="quick-action__body">
+      <%= ui :field, label: "Where it goes", class: "quick-action__where" do %>
+        <%= render "quick_actions/record_picker", record: @record, form_id: "quick_action_form", types: @action.types %>
+      <% end %>
+      <%= render @action.partial, form_id: "quick_action_form" %>
+    </div>
+  <% end %>
 </turbo-frame>

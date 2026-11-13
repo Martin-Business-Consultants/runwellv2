@@ -159,17 +159,15 @@ module RuneCompatHelper
     tag.div(class: "copy-field") { tag.code(value, title: value) + copy_button(value) }
   end
 
-  # Settings rows: a heading above a card of rows, each a label (and hint) on the left and its
-  # control on the right. rune's own markup (runeui has no settings row), styled by compat.css.
+  # Settings rows: a card of rows under a title (runeui's card), each a label (and hint) on the left
+  # and its control on the right (runeui's field with control:). for_id: kept for callers; the
+  # field names its control itself.
   def settings_group(title, hint: nil, &rows)
-    tag.section safe_join([ tag.h2(title, class: "settings-group__title"), (tag.p(hint, class: "settings-group__hint") if hint.present?),
-                            tag.div(capture(&rows), class: "settings-group__card") ].compact), class: "settings-group"
+    ui :card, title: tag.h2(title, class: "settings-group__title"), description: hint.presence, content: capture(&rows), class: "settings-group"
   end
 
   def setting_row(label, hint: nil, for_id: nil, &control)
-    label_html = for_id ? label_tag(for_id, label, class: "setting-row__label") : tag.span(label, class: "setting-row__label")
-    text = tag.div(safe_join([ label_html, (tag.span(hint, class: "setting-row__hint") if hint.present?) ].compact), class: "setting-row__text")
-    tag.div safe_join([ text, tag.div(capture(&control), class: "setting-row__control") ]), class: "setting-row"
+    ui :field, label: label, description: hint.presence, control: capture(&control), class: "setting-row"
   end
 
   # ---- Menus: runeui's menu ----

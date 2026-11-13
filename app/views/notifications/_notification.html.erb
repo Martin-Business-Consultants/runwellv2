@@ -1,6 +1,8 @@
 <%# locals: (notification:) %>
-<%# A notification as a list row: who, what, where; the time, read toggle and unread dot on the right. %>
+<%# A notification on /notifications: who, what, where as a link to it (read on the way there), then
+    when and a button to mark it read or unread. j / k move through them (the keyboard controller). %>
 <%= notification_tag notification do %>
+  <%= render "notifications/notification/avatar", notification: notification %>
   <%= render "notifications/notification/body", notification: notification %>
-  <%= render "notifications/notification/header", notification: notification %>
+  <span class="notification__time"><%= time_ago_in_words(notification.created_at) %> ago</span>
 <% end %>

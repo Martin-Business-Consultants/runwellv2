@@ -1,12 +1,12 @@
 <%# locals: (kind:) %>
 <%# Beside a way in, on a wide screen (layouts/public, content_for :showcase): a panel in the
     install's own colour (it follows the scheme, light or dark) with a few frosted cards showing
-    what's inside, for the team ("team") or for a client ("client"). The cards are a picture, not
+    what's inside (runeui's cards, badges and avatars on the scheme's tokens), for the team ("team") or for a client ("client"). The cards are a picture, not
     data: made-up examples in the install's own words (term), hidden from screen readers. The
     theme toggle sits in the panel's cut-out corner. %>
 <aside class="showcase showcase--<%= kind %>">
   <div class="showcase__notch">
-    <button type="button" class="showcase__theme theme-toggle" data-controller="theme" data-action="theme#toggle" title="Switch between light and dark">
+    <button type="button" class="ui-button showcase__theme theme-toggle" data-variant="outline" data-size="icon" data-controller="theme" data-action="theme#toggle" title="Switch between light and dark">
       <%= icon_tag "moon", class: "theme-toggle__moon" %>
       <%= icon_tag "sun", class: "theme-toggle__sun" %>
       <span class="visually-hidden">Switch between light and dark</span>
@@ -15,10 +15,10 @@
 
   <div class="showcase__scene" aria-hidden="true">
     <% if kind == "client" %>
-      <div class="showcase__card showcase__card--main">
+      <%= ui :card, class: "showcase__card showcase__card--main" do %>
         <div class="showcase__row">
           <span class="showcase__title">Spring launch</span>
-          <span class="showcase__pill"><span class="showcase__dot"></span>Active</span>
+          <%= ui :badge, variant: :success, class: "showcase__pill", content: safe_join([ tag.span(class: "showcase__dot"), "Active" ]) %>
         </div>
         <span class="showcase__sub"><%= term(:work) %> · we’re on it</span>
         <span class="showcase__bar"><span class="showcase__bar-fill showcase__bar-fill--two-thirds"></span></span>
@@ -27,16 +27,16 @@
           <span><span class="showcase__label">Next due</span><span class="showcase__value">Friday</span></span>
           <span><span class="showcase__label">Files</span><span class="showcase__value">4 new</span></span>
         </div>
-      </div>
+      <% end %>
 
-      <div class="showcase__card showcase__card--side">
+      <%= ui :card, class: "showcase__card showcase__card--side" do %>
         <div class="showcase__row">
-          <span class="showcase__avatar">SM</span>
+          <%= ui :avatar, initials: "SM", name: "Sarah", size: :sm, class: "showcase__avatar" %>
           <span class="showcase__who">Sarah, from the team</span>
           <span class="showcase__new"></span>
         </div>
         <p class="showcase__message">The plan is ready. Have a look when you can, and tell us what you think.</p>
-      </div>
+      <% end %>
 
       <div class="showcase__caption">
         <span class="showcase__caption-title">Everything we’re doing for you</span>
@@ -44,10 +44,10 @@
         <span class="showcase__caption-line"><%= icon_tag "email" %>Ask us for anything, any time</span>
       </div>
     <% else %>
-      <div class="showcase__card showcase__card--main">
+      <%= ui :card, class: "showcase__card showcase__card--main" do %>
         <div class="showcase__row">
           <span class="showcase__title">Spring launch</span>
-          <span class="showcase__pill"><span class="showcase__dot"></span>Active</span>
+          <%= ui :badge, variant: :success, class: "showcase__pill", content: safe_join([ tag.span(class: "showcase__dot"), "Active" ]) %>
         </div>
         <span class="showcase__sub">Bloom &amp; Co · <%= term(:work) %></span>
         <div class="showcase__stats">
@@ -55,22 +55,22 @@
           <span><span class="showcase__label">Done</span><span class="showcase__value">4 of 9</span></span>
           <span><span class="showcase__label">Next due</span><span class="showcase__value">Friday</span></span>
         </div>
-      </div>
+      <% end %>
 
-      <div class="showcase__card showcase__card--side">
+      <%= ui :card, class: "showcase__card showcase__card--side" do %>
         <div class="showcase__row">
           <span class="showcase__ring"></span>
           <span class="showcase__task">Confirm the final plan</span>
-          <span class="showcase__pill showcase__pill--review">In review</span>
-          <span class="showcase__avatar">SM</span>
+          <%= ui :badge, variant: :warning, class: "showcase__pill", content: "In review" %>
+          <%= ui :avatar, initials: "SM", name: "Sarah", size: :sm, class: "showcase__avatar" %>
         </div>
         <div class="showcase__row">
           <span class="showcase__ring showcase__ring--half"></span>
           <span class="showcase__task">Book the photographer</span>
-          <span class="showcase__pill showcase__pill--progress">In progress</span>
-          <span class="showcase__avatar showcase__avatar--two">JB</span>
+          <%= ui :badge, variant: :info, class: "showcase__pill", content: "In progress" %>
+          <%= ui :avatar, initials: "JB", name: "Jordan", size: :sm, class: "showcase__avatar showcase__avatar--two" %>
         </div>
-      </div>
+      <% end %>
 
       <div class="showcase__caption">
         <span class="showcase__caption-title">What needs you, at a glance</span>

@@ -12,11 +12,11 @@
     <% if edit_path %>
       <% edit_label = "Edit " + name %>
       <% if peek %>
-        <%= peek_link_to peek, class: "icon-button row-action", title: edit_label, aria: { label: edit_label }, data: { keys: "e" } do %>
+        <%= peek_link_to peek, class: "ui-button row-action", title: edit_label, aria: { label: edit_label }, data: { variant: "ghost", size: "icon-sm", keys: "e" } do %>
           <%= icon_tag "pencil" %>
         <% end %>
       <% else %>
-        <%= link_to edit_path, class: "icon-button row-action", title: edit_label, aria: { label: edit_label }, data: { keys: "e" } do %>
+        <%= link_to edit_path, class: "ui-button row-action", title: edit_label, aria: { label: edit_label }, data: { variant: "ghost", size: "icon-sm", keys: "e" } do %>
           <%= icon_tag "pencil" %>
         <% end %>
       <% end %>

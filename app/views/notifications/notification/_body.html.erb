@@ -1,14 +1,8 @@
 <%# locals: (notification:) %>
+<%# What a notification says (a mention, a client's reply, a request), the words, and what it's about. %>
 <% ref, name = notification_target_label(notification.notifiable_target) %>
-<span class="list-row__media notification__avatar">
-  <% if notification.creator %>
-    <%= avatar_image_tag notification.creator %>
-  <% else %>
-    <%= icon_tag "email" %>
-  <% end %>
-</span>
-
-<span class="list-row__content">
-  <%= render "notifications/notification/mention/body", notification: notification %>
+<span class="notification__content">
+  <span class="notification__title"><%= notification.title %></span>
+  <span class="notification__excerpt"><%= notification.excerpt.truncate(200) %></span>
   <span class="notification__context"><%= [ ref, name ].compact_blank.join(" · ") %></span>
 </span>

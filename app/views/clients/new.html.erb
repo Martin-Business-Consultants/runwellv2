@@ -38,9 +38,9 @@
             <% recent.each do |client| %>
               <%# herb:key client.id %>
               <li data-filter-target="item">
-                <%= link_to client, class: "list-row" do %>
-                  <span class="list-row__content"><span class="list-row__title"><%= client.name %></span></span>
-                  <span class="list-row__meta"><%= l client.created_at.to_date, format: :short %></span>
+                <%= link_to client, class: "item-row" do %>
+                  <span class="item-row__content"><span class="item-row__title"><%= client.name %></span></span>
+                  <span class="item-row__meta"><%= l client.created_at.to_date, format: :short %></span>
                 <% end %>
               </li>
             <% end %>

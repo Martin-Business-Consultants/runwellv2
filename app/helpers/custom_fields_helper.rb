@@ -30,13 +30,13 @@ module CustomFieldsHelper
     prefix = [ namespace, dom_id(field.new_record? ? CustomField.new : field, :visible) ].compact.join("_")
     tag.fieldset(class: "field-visibility") do
       safe_join([
-        tag.legend("Who on the team sees it", class: "field__label"),
+        tag.legend("Who on the team sees it", class: "field-visibility__legend"),
         hidden_field_tag(name, "", id: nil),
         ui(:checkbox, checked: true, disabled: true, label: "Owners", id: "#{prefix}_owner"),
         *CustomField::RESTRICTABLE_ROLES.map do |role|
           ui(:checkbox, name: name, value: role, checked: field.seen_by_role?(role), id: "#{prefix}_#{role}", label: role.capitalize.pluralize)
         end,
-        tag.p("A field only some see is left out for everyone else wherever it shows, and never shown to #{term(:client, count: 2).downcase}.", class: "field__hint")
+        tag.p("A field only some see is left out for everyone else wherever it shows, and never shown to #{term(:client, count: 2).downcase}.", class: "settings-note")
       ])
     end
   end

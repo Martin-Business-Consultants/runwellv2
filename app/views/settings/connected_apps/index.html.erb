@@ -13,16 +13,12 @@
 <div class="settings-page">
   <% if @new_token %>
     <section class="settings-section">
-      <div class="alert" role="status">
-        <%= icon_tag "lock", class: "alert__icon" %>
-        <p class="alert__title">Your new token</p>
-        <div class="alert__body">
-          <p>Copy it now: it won’t be shown again. It acts as <%= Current.user.agent&.display_name || "your agent" %>, with your role, until you disconnect it.</p>
-        </div>
-      </div>
-      <div class="copy-field">
+      <%= ui :alert, variant: :info, title: "Your new token", role: "status",
+            description: "Copy it now: it won’t be shown again. It acts as #{Current.user.agent&.display_name || "your agent"}, with your role, until you disconnect it." %>
+      <div class="settings-copy">
         <code id="new_token"><%= @new_token.plaintext %></code>
-        <button type="button" class="btn btn--secondary" data-controller="copy-to-clipboard" data-copy-to-clipboard-content-value="<%= @new_token.plaintext %>" data-copy-to-clipboard-success-class="settings-copied" data-action="copy-to-clipboard#copy">Copy</button>
+        <%= ui :button, type: :button, variant: :outline, content: "Copy",
+              data: { controller: "copy-to-clipboard", copy_to_clipboard_content_value: @new_token.plaintext, copy_to_clipboard_success_class: "settings-copied", action: "copy-to-clipboard#copy" } %>
       </div>
     </section>
   <% end %>
@@ -55,17 +51,17 @@
       <p class="settings-section__description">Anything you can do here, an AI app connected as you can do too, and it asks before anything reaches a <%= term(:client).downcase %>.</p>
     </header>
     <ul class="settings-list">
-      <li class="list-row">
-        <div class="list-row__content">
-          <p class="list-row__title">MCP</p>
-          <p class="list-row__desc">Give your AI app this address as an MCP server. It signs in here, or takes a personal token as its key.</p>
+      <li class="settings-item">
+        <div class="settings-item__content">
+          <p class="settings-item__title">MCP</p>
+          <p class="settings-item__desc">Give your AI app this address as an MCP server. It signs in here, or takes a personal token as its key.</p>
           <%= code_block mcp_url %>
         </div>
       </li>
-      <li class="list-row">
-        <div class="list-row__content">
-          <p class="list-row__title">CLI</p>
-          <p class="list-row__desc">Install the <code>runwell</code> command, then sign in.</p>
+      <li class="settings-item">
+        <div class="settings-item__content">
+          <p class="settings-item__title">CLI</p>
+          <p class="settings-item__desc">Install the <code>runwell</code> command, then sign in.</p>
           <%= code_block "curl -fsSL #{cli_install_url} | sh\nrunwell login" %>
         </div>
       </li>
@@ -78,15 +74,11 @@
       <p class="settings-section__description">For scripts and tools that can’t sign in through the browser.</p>
     </header>
     <%= form_with url: settings_connected_apps_path, scope: :access_token do |form| %>
-      <div class="field">
-        <%= form.label :name, "Token name", class: "field__label" %>
+      <%= form.ui :field, :name, label: "Token name" do %>
         <%= form.text_field :name, autocomplete: "off", placeholder: "Name it, like “My laptop” or “Zapier”" %>
-      </div>
-      <label class="checkbox">
-        <%= form.check_box :read_only %>
-        <span>Read only</span>
-      </label>
-      <div><button type="submit" class="btn btn--primary">Make a personal token</button></div>
+      <% end %>
+      <%= form.ui :checkbox, :read_only, label: "Read only" %>
+      <div><%= ui :button, type: :submit, content: "Make a personal token" %></div>
     <% end %>
   </section>
       <% when "everyone" %>

@@ -25,17 +25,15 @@
         </header>
 
         <%= form_with model: @setting, url: settings_email_path, method: :patch, class: "settings-form" do |form| %>
-          <div class="field-row">
-            <div class="field">
-              <%= form.label :mail_from_name, "From name", class: "field__label" %>
+          <div class="form-grid">
+            <%= form.ui :field, :mail_from_name, label: "From name" do %>
               <%= form.text_field :mail_from_name, autocomplete: "off", placeholder: Mail::Address.new(Setting.default_mail_sender).display_name %>
-            </div>
-            <div class="field">
-              <%= form.label :mail_from_email, "From email", class: "field__label" %>
+            <% end %>
+            <%= form.ui :field, :mail_from_email, label: "From email" do %>
               <%= form.email_field :mail_from_email, autocomplete: "off", placeholder: Mail::Address.new(Setting.default_mail_sender).address %>
-            </div>
+            <% end %>
           </div>
-          <div><button type="submit" class="btn btn--primary">Save</button></div>
+          <div><%= ui :button, type: :submit, content: "Save" %></div>
         <% end %>
       </section>
       <% when "smtp" %>
@@ -61,44 +59,37 @@
 
         <% unless Setting.smtp_from_environment? %>
             <%= form_with model: @setting, url: settings_email_smtp_path, method: :patch, scope: :smtp, class: "settings-form" do |form| %>
-              <div class="field-row">
-                <div class="field">
-                  <%= form.label :smtp_address, "Server", class: "field__label" %>
+              <div class="form-grid">
+                <%= form.ui :field, :smtp_address, label: "Server" do %>
                   <%= form.text_field :smtp_address, value: @setting.smtp_address, autocomplete: "off", placeholder: "smtp.example.com" %>
-                </div>
-                <div class="field">
-                  <%= form.label :smtp_port, "Port", class: "field__label" %>
+                <% end %>
+                <%= form.ui :field, :smtp_port, label: "Port" do %>
                   <%= form.number_field :smtp_port, value: @setting.smtp_port, placeholder: "587", min: 1, max: 65535 %>
-                </div>
-                <div class="field">
-                  <%= form.label :smtp_security, "Security", class: "field__label" %>
+                <% end %>
+                <%= form.ui :field, :smtp_security, label: "Security" do %>
                   <%= form.select :smtp_security, Setting::SMTP_SECURITIES.invert, { selected: @setting.smtp_security } %>
-                </div>
+                <% end %>
               </div>
-              <div class="field-row">
-                <div class="field">
-                  <%= form.label :smtp_username, "Username", class: "field__label" %>
+              <div class="form-grid">
+                <%= form.ui :field, :smtp_username, label: "Username" do %>
                   <%= form.text_field :smtp_username, value: @setting.smtp_username, autocomplete: "off" %>
-                </div>
-                <div class="field">
-                  <%= form.label :smtp_password, "Password", class: "field__label" %>
+                <% end %>
+                <%= form.ui :field, :smtp_password, label: "Password" do %>
                   <%= secret_field form, :smtp_password, placeholder: (@setting.smtp_password.present? ? "Saved: leave blank to keep it" : "") %>
-                </div>
+                <% end %>
               </div>
-              <p class="field__hint">The password is stored encrypted. Save, then send a test email below to check it.</p>
-              <div><button type="submit" class="btn btn--primary">Save</button></div>
+              <p class="settings-note">The password is stored encrypted. Save, then send a test email below to check it.</p>
+              <div><%= ui :button, type: :submit, content: "Save" %></div>
             <% end %>
         <% end %>
 
-        <%= form_with url: settings_email_test_message_path, class: "field" do |form| %>
-          <%= form.label :to, "Send a test to", class: "field__label" %>
-          <div class="settings-inline">
-            <%= form.email_field :to, value: Current.user.email_address, autocomplete: "off", placeholder: "you@example.com" %>
-            <button type="submit" class="btn btn--secondary">
-              <%= icon_tag "paper-plane" %>
-              <span>Send a test email</span>
-            </button>
-          </div>
+        <%= form_with url: settings_email_test_message_path do |form| %>
+          <%= form.ui :field, :to, label: "Send a test to" do %>
+            <div class="settings-inline">
+              <%= form.email_field :to, value: Current.user.email_address, autocomplete: "off", placeholder: "you@example.com" %>
+              <%= ui :button, type: :submit, variant: :outline, content: safe_join([ icon_tag("paper-plane"), tag.span("Send a test email") ], " ") %>
+            </div>
+          <% end %>
         <% end %>
 
         <%# The test message is sent from a job (TestEmailJob); this frame reloads until it's gone or failed. %>
@@ -123,25 +114,26 @@
           </p>
         </header>
 
-        <%= form_with model: @setting, url: settings_email_path, method: :patch, namespace: "requests", class: "field" do |form| %>
-          <%= form.label :requests_email, "Requests address", class: "field__label" %>
-          <div class="settings-inline">
-            <%= form.email_field :requests_email, autocomplete: "off", placeholder: "requests@yourcompany.com" %>
-            <button type="submit" class="btn btn--primary">Save</button>
-          </div>
+        <%= form_with model: @setting, url: settings_email_path, method: :patch, namespace: "requests" do |form| %>
+          <%= form.ui :field, :requests_email, label: "Requests address" do %>
+            <div class="settings-inline">
+              <%= form.email_field :requests_email, autocomplete: "off", placeholder: "requests@yourcompany.com" %>
+              <%= ui :button, type: :submit, content: "Save" %>
+            </div>
+          <% end %>
         <% end %>
 
         <% ingress = Setting.inbound_ingress %>
         <% if ingress %>
           <p>
-            <%= badge "Receiving", tone: :ok %>
+            <%= ui :badge, variant: :success, content: "Receiving" %>
             Mail comes in through <%= inbound_ingress_name(ingress) %>. Forward the requests address there, to:
           </p>
           <%= code_block inbound_ingress_url(ingress) %>
           <p class="muted"><%= inbound_ingress_secret_hint(ingress) %> See <code>docs/install.md</code>.</p>
         <% else %>
           <p>
-            <%= badge "Off", tone: :neutral %>
+            <%= ui :badge, variant: :secondary, content: "Off" %>
             Runwell can’t receive mail on its own: a service (Cloudflare Email Routing, Postmark, SendGrid) or your own mail server forwards the address here.
             Choose it below, or let a plugin set it up.
           </p>
@@ -150,18 +142,20 @@
         <%= plugin_slots(:email_inbound) %>
 
         <% unless Setting.inbound_from_environment? %>
-          <%= form_with url: settings_email_inbound_path, method: :patch, scope: :inbound, class: "field" do |form| %>
-            <%= form.label :ingress, "Comes in through", class: "field__label" %>
-            <div class="settings-inline">
-              <%= form.select :ingress, [ [ "Nothing yet", "" ], [ "Relay (Cloudflare Email Routing, your mail server)", "relay" ], [ "Postmark", "postmark" ], [ "SendGrid", "sendgrid" ] ], { selected: @setting.inbound_ingress.to_s } %>
-              <button type="submit" class="btn btn--primary">Save</button>
-            </div>
+          <%= form_with url: settings_email_inbound_path, method: :patch, scope: :inbound do |form| %>
+            <%= form.ui :field, :ingress, label: "Comes in through" do %>
+              <div class="settings-inline">
+                <%= form.select :ingress, [ [ "Nothing yet", "" ], [ "Relay (Cloudflare Email Routing, your mail server)", "relay" ], [ "Postmark", "postmark" ], [ "SendGrid", "sendgrid" ] ], { selected: @setting.inbound_ingress.to_s } %>
+                <%= ui :button, type: :submit, content: "Save" %>
+              </div>
+            <% end %>
           <% end %>
           <% if @setting.inbound_password.present? %>
-            <%= form_with model: @setting, url: settings_email_path, class: "field" do |form| %>
-              <%= form.label :inbound_password, "Password", class: "field__label" %>
-              <%= secret_field form, :inbound_password, readonly: true %>
-              <p class="field__hint">The service signs in with it as <code>actionmailbox</code>. It was made for this install; it isn’t shown anywhere else.</p>
+            <%= form_with model: @setting, url: settings_email_path do |form| %>
+              <%= form.ui :field, :inbound_password, label: "Password" do %>
+                <%= secret_field form, :inbound_password, readonly: true %>
+                <ui-field-description data-slot="field-description">The service signs in with it as <code>actionmailbox</code>. It was made for this install; it isn’t shown anywhere else.</ui-field-description>
+              <% end %>
             <% end %>
           <% end %>
         <% end %>
@@ -176,25 +170,22 @@
           </p>
         </header>
         <%= form_with model: @setting, url: settings_email_bot_check_path, method: :patch, scope: :bot_check, class: "settings-form" do |form| %>
-          <div class="field">
-            <%= form.label :bot_check_provider, "Provider", class: "field__label" %>
+          <%= form.ui :field, :bot_check_provider, label: "Provider" do %>
             <%= form.select :bot_check_provider, Setting::BOT_CHECK_PROVIDERS.invert, { include_blank: "Off", selected: @setting.bot_check_provider } %>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <%= form.label :bot_check_site_key, "Site key", class: "field__label" %>
+          <% end %>
+          <div class="form-grid">
+            <%= form.ui :field, :bot_check_site_key, label: "Site key" do %>
               <%= form.text_field :bot_check_site_key, value: @setting.bot_check_site_key, autocomplete: "off", spellcheck: false %>
-            </div>
-            <div class="field">
-              <%= form.label :bot_check_secret_key, "Secret key", class: "field__label" %>
+            <% end %>
+            <%= form.ui :field, :bot_check_secret_key, label: "Secret key" do %>
               <%= secret_field form, :bot_check_secret_key, placeholder: (@setting.bot_check_secret_key.present? ? "Saved: leave blank to keep it" : "") %>
-            </div>
+            <% end %>
           </div>
-          <p class="field__hint">
+          <p class="settings-note">
             reCAPTCHA: a v2 “I’m not a robot” site at google.com/recaptcha/admin. Turnstile: a widget in Cloudflare’s dashboard. The secret key is stored encrypted.
             <% if @setting.bot_check? %>On now, with <%= Setting::BOT_CHECK_PROVIDERS[@setting.bot_check_provider] %>.<% else %>Off now.<% end %>
           </p>
-          <div><button type="submit" class="btn btn--primary">Save</button></div>
+          <div><%= ui :button, type: :submit, content: "Save" %></div>
         <% end %>
       </section>
       <% end %>

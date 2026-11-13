@@ -1,12 +1,18 @@
-<%# locals: (form:, attribute:, choices:, current:, icons: nil, sample_class: nil, mock: nil) %>
-<%# One Appearance choice as radio cards: a bordered preview of what it does, its name
-    under it. The radio covers the card, invisibly, and previews the choice at once. %>
-<div class="settings-choices">
-  <% choices.each do |value, label| %>
+<%# locals: (form:, attribute:, choices:, current:, icons: nil, sample_class: nil, mock: nil, blank: nil, label: nil) %>
+<%# One Appearance choice as cards: runeui's radio group (form.ui :radio_group), each radio a card
+    with a preview of what it does and its name under it, the chosen one edged in the accent.
+    Arrows move between them; choosing one previews it at once and saves (the appearance
+    controller, on the form). blank: a first card for "" (Your account's Install default). %>
+<% options = (blank ? [ [ "", blank ] ] : []) + choices.to_a %>
+<% group_id = form.field_id(attribute, :choices) %>
+<%= form.ui :radio_group, attribute, id: group_id, value: current.to_s, orientation: :horizontal, class: "settings-choices", aria: { label: label } do %>
+  <% options.each do |value, text| %>
     <%# herb:key value %>
-    <label class="settings-choice">
+    <label data-slot="choice" class="settings-choice" id="<%= group_id %>-choice-<%= value.presence || "blank" %>">
       <span class="settings-choice__preview" aria-hidden="true">
-        <% if mock %>
+        <% if value.blank? %>
+          <%= icon_tag "settings-outline" %>
+        <% elsif mock %>
           <% mock_class = "theme-mock theme-mock--" + value %>
           <span class="<%= mock_class %>">
             <span class="theme-mock__card"><span class="theme-mock__line theme-mock__line--short"></span><span class="theme-mock__line"></span></span>
@@ -20,8 +26,8 @@
           <span class="<%= sample %>">Aa</span>
         <% end %>
       </span>
-      <span class="settings-choice__label"><%= label %></span>
-      <%= form.radio_button attribute, value, checked: value == current, data: { action: "click->appearance#preview" } %>
+      <ui-radio data-slot="radio" value="<%= value %>" class="settings-choice__radio"><ui-radio-indicator data-slot="radio-indicator"></ui-radio-indicator></ui-radio>
+      <span data-slot="choice-label" class="settings-choice__label"><%= text %></span>
     </label>
   <% end %>
-</div>
+<% end %>

@@ -8,12 +8,12 @@
     <div class="settings-chips">
       <%= badge person.role.capitalize, tone: :outline %>
       <% if person.deactivated? %>
-        <%= badge "Deactivated", tone: :neutral %>
+        <%= ui :badge, variant: :secondary, content: "Deactivated" %>
       <% else %>
-        <%= badge "Active", tone: :ok %>
+        <%= ui :badge, variant: :success, content: "Active" %>
       <% end %>
       <% if manage && person.two_factor? %>
-        <%= badge "Two-factor", tone: :ok %>
+        <%= ui :badge, variant: :success, content: "Two-factor" %>
       <% end %>
     </div>
   </div>

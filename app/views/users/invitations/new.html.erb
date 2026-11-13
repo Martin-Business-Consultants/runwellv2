@@ -1,20 +1,14 @@
 <% @page_title = "Invite someone" %>
 <% if turbo_frame_request_id == "modal" %>
-  <%= render layout: "layouts/shared/modal", locals: { title: @page_title } do %>
-    <section class="settings-section record-modal__body">
-      <header class="settings-section__head">
-        <h2><%= @page_title %></h2>
-        <p class="settings-section__description">They get an email with a link to choose a name and password.</p>
-      </header>
-      <%= render "layouts/shared/errors", record: @invitation %>
-      <%= render "users/invitations/form", invitation: @invitation, modal: true %>
-    </section>
+  <%= render layout: "layouts/shared/modal", locals: { title: @page_title, description: "They get an email with a link to choose a name and password." } do %>
+    <%= render "layouts/shared/errors", record: @invitation %>
+    <%= render "users/invitations/form", invitation: @invitation, modal: true %>
   <% end %>
 <% else %>
 <%= parent_page "Users", users_path %>
 
 <div class="person-page person-page--split">
-  <div class="card person-page__main">
+  <%= ui :card, class: "person-page__main" do %>
     <section class="settings-section">
       <header class="settings-section__head">
         <h1><%= @page_title %></h1>
@@ -22,9 +16,9 @@
       </header>
       <%= render "users/invitations/form", invitation: @invitation %>
     </section>
-  </div>
+  <% end %>
 
-  <aside class="card person-page__side">
+  <%= ui :card, class: "person-page__side" do %>
     <%= render "layouts/shared/sidebar_toggle" %>
     <section class="settings-section">
       <header class="settings-section__head">
@@ -47,13 +41,13 @@
         <ul class="settings-list settings-list--scroll">
           <% @invitations.each do |invitation| %>
             <%# herb:key invitation.id %>
-            <li class="list-row" data-filter-target="item">
-              <div class="list-row__content">
-                <p class="list-row__title"><%= invitation.email_address %></p>
-                <p class="list-row__desc"><%= invitation.role.capitalize %> · <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
+            <li class="settings-item" data-filter-target="item">
+              <div class="settings-item__content">
+                <p class="settings-item__title"><%= invitation.email_address %></p>
+                <p class="settings-item__desc"><%= invitation.role.capitalize %> · <%= time_ago_in_words(invitation.sent_at) %> ago<%= " · expired" if invitation.expired? %></p>
               </div>
-              <div class="list-row__actions">
-                <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "btn btn--secondary btn--sm" %>
+              <div class="settings-item__actions">
+                <%= button_to "Resend", user_invitation_path(invitation), method: :patch, class: "ui-button", data: { variant: "outline", size: "sm" } %>
                 <%= render "layouts/shared/delete_dialog", name: "the invitation to " + invitation.email_address, path: user_invitation_path(invitation),
                       message: "The link they were sent stops working." %>
               </div>
@@ -62,6 +56,6 @@
         </ul>
       </section>
     <% end %>
-  </aside>
+  <% end %>
 </div>
 <% end %>

@@ -169,9 +169,9 @@
 }
 
 /* ---- rune_ui/shell.css ---- */
-/* What's left of rune's shell now the staff pages are runeui's (ui :app_shell; runwell.css, 2):
-   a page's column (.main: the sign-in pages and the portal, and the staff page's box), the
-   portal's brand and its breadcrumb. They go with the public pages and the portal (phase 8). */
+/* What's left of rune's shell: the breadcrumb plugins draw by hand (.crumbs), and the page's
+   column (.main: the sign-in pages, the portal and the staff page's box), kept in this layer so
+   runeui's app-content wins where the two differ. The column goes with the flip (phase 9). */
 
 @layer runeui.rune.components {
   .crumbs { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-weight: var(--weight-strong); }
@@ -183,14 +183,10 @@
   .main { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--s-2) var(--s-6) calc(var(--s-6) * 2); max-width: var(--main-width); width: 100%; margin: 0 auto; }
   .main--narrow { max-width: 25rem; margin: 12vh auto 0; padding: var(--s-4); }
 
-  .sidebar__brand { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-size: var(--text-read); font-weight: var(--weight-strong); color: var(--text); text-decoration: none; }
-  .sidebar__brand:hover { color: var(--text); }
-  .sidebar__brand img { width: 1.25rem; height: 1.25rem; border-radius: var(--radius-xs); object-fit: contain; }
-  .sidebar__logo { width: 1.25rem; height: 1.25rem; border-radius: calc(5px * var(--radius-scale)); background: var(--text); color: var(--panel); display: grid; place-items: center; font-size: var(--text-xs); font-weight: 700; }
-
   @media (max-width: 860px) {
     .main { padding: var(--s-4) var(--s-4) var(--s-6); }
   }
+
 }
 
 /* ---- rune_ui/layout.css ---- */
@@ -300,7 +296,6 @@
   .btn[aria-busy="true"]::before { content: ""; width: .75rem; height: .75rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
   .btn[aria-pressed="true"] { background: var(--layer-2); color: var(--text); }
 
-  .btn--block { width: 100%; }
   /* A filter or picker's trigger: a quiet outline button with a chevron after its choice. */
   .pill { display: inline-flex; align-items: center; gap: 6px; max-width: 16rem; height: var(--control-h-sm); padding: 0 var(--s-2) 0 .625rem; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text); font: inherit; font-size: var(--text-meta); font-weight: var(--weight-strong); white-space: nowrap; cursor: pointer; }
   .pill:hover, .pill[aria-expanded="true"] { background: var(--layer-1); }
@@ -314,8 +309,6 @@
   .icon-button--danger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
 
 
-  .link-button { padding: 0; border: 0; background: none; font: inherit; color: var(--text-faint); cursor: pointer; }
-  .link-button:hover { color: var(--text); }
 
   .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 
@@ -379,7 +372,6 @@
 
   .choice { display: flex; flex-direction: column; gap: var(--s-2); padding: 0; border: 0; }
 
-  .segmented { display: inline-flex; padding: 2px; border-radius: var(--radius); background: var(--layer-3); }
 
   /* rune-rows: the list of repeating rows. */
 
@@ -463,17 +455,9 @@
 /* Settings: a heading above a card of label / control rows. */
 
 @layer runeui.rune.components {
-  .settings-group { display: flex; flex-direction: column; gap: var(--s-2); }
-  .settings-group__title { padding: 0 var(--s-1); color: var(--text-muted); font-size: var(--text-ui); }
-  .settings-group__hint { padding: 0 var(--s-1); color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
-  .settings-group__card { display: flex; flex-direction: column; background: var(--layer-1); border: 1px solid var(--line); border-radius: var(--radius-lg); }
-  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 3.25rem; padding: var(--s-3) var(--s-4); }
-  .setting-row + .setting-row { border-top: 1px solid var(--line); }
-  .setting-row__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .setting-row__label { color: var(--text); }
-  .setting-row__hint { color: var(--text-faint); font-size: var(--text-meta); line-height: var(--leading-tight); }
-  .setting-row__control { display: flex; align-items: center; gap: var(--s-3); }
-  .setting-row__control input:not([type="checkbox"], [type="radio"]) { width: 20rem; max-width: 100%; }
+  /* settings_group / setting_row (plugins): runeui's card holding runeui's fields with control:,
+     a rule between rows. */
+  .settings-group .setting-row + .setting-row { padding-top: var(--s-3); border-top: 1px solid var(--line); }
   @media (max-width: 860px) {
     .setting-row { flex-direction: column; align-items: stretch; }
     .setting-row__control input:not([type="checkbox"], [type="radio"]) { width: 100%; }
@@ -517,11 +501,7 @@
   .dialog::backdrop { background: rgb(0 0 0 / .45); }
   .dialog[open] { animation: rune-pop var(--motion) var(--ease); }
   .dialog[open]::backdrop { animation: rune-fade var(--motion) var(--ease); }
-  .dialog--lg { width: min(48rem, calc(100vw - 2rem)); }
-  .dialog__box { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-4) var(--s-5) var(--s-5); }
-  .dialog__header { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
   .dialog__title { font-size: var(--text-read); }
-  .dialog__hint { color: var(--text-muted); }
 
   .dialog__body { display: flex; flex-direction: column; gap: var(--s-4); }
   .dialog__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s-2); }

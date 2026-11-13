@@ -42,7 +42,9 @@ turbo-frame:not([data-slot]) { display: contents; }
 /* colour). Everything Runwell puts in the shell reads them as the brand colour and the focus
 /* shadow, so its boxes get those back (as compat.css does for the compat helpers' parts). */
 [data-slot="app-content"], [data-slot="app-header-content"], [data-slot="sidebar-header"], [data-slot="sidebar-footer"], [data-slot="side-panel-frame"],
-.record-header > [data-slot], [data-slot="tabs-panel"], [data-slot="collapsible-content"], .work-about [data-slot="dialog-body"], .work-finish__dialog [data-slot="dialog-body"] {
+.record-header > [data-slot], [data-slot="tabs-panel"], [data-slot="collapsible-content"], .work-about [data-slot="dialog-body"], .work-finish__dialog [data-slot="dialog-body"],
+.record-modal [data-slot="dialog-body"], .quick-action [data-slot="dialog-body"],
+[data-slot="card"] > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) {
   --accent: var(--rune-accent);
   --ring: var(--rune-ring);
 }
@@ -80,7 +82,7 @@ turbo-frame:not([data-slot]) { display: contents; }
 
 /* Its foot: the filter and plugins' actions in a row, then the person and their menu. */
 .nav-tools { display: flex; align-items: center; gap: var(--s-1); min-width: 0; padding: 0 var(--s-1); }
-.nav-account .menu { display: block; min-width: 0; }
+.nav-account__button { border: 0; background: none; font: inherit; cursor: pointer; }
 .nav-account__button { display: flex; align-items: center; gap: .625rem; width: 100%; min-height: 2.75rem; padding: 4px var(--s-2); border-radius: var(--radius-sm); color: var(--text-muted); }
 .nav-account__button:hover, .nav-account__button[aria-expanded="true"] { background: var(--hover); color: var(--text); }
 .nav-account__avatar { flex: 0 0 auto; width: 2rem; height: 2rem; overflow: hidden; border-radius: var(--radius); }
@@ -101,11 +103,6 @@ turbo-frame:not([data-slot]) { display: contents; }
   }
 }
 
-/* The portal's and the sign-in pages' brand (their layouts, until they move: phase 8). */
-.sidebar__brand { flex: 1; gap: var(--s-2); padding: 4px var(--s-2); border-radius: var(--radius-sm); }
-.sidebar__brand:hover { background: var(--hover); }
-.sidebar__logo { width: 2rem; height: 2rem; border-radius: var(--radius); font-size: var(--text-read); overflow: hidden; }
-.sidebar__logo img { width: 100%; height: 100%; object-fit: contain; }
 
 /* ======================================================================= 3 Page filter ("/") */
 
@@ -156,7 +153,8 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 .auth-layout__header { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); }
 .auth-layout__theme { position: fixed; top: calc(var(--s-4) + var(--custom-safe-inset-top, 0px)); right: var(--s-4); }
 .auth-layout__brand { display: flex; align-items: center; gap: var(--s-2); color: var(--text); font-size: var(--text-read); font-weight: var(--weight-strong); }
-.auth-layout__brand .sidebar__logo { width: 1.5rem; height: 1.5rem; border-radius: var(--radius-sm); font-size: var(--text-xs); }
+.auth-layout__logo { display: grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: var(--radius-sm); background: var(--text); color: var(--panel); font-size: var(--text-xs); font-weight: 700; }
+.auth-layout__logo img { width: 100%; height: 100%; object-fit: contain; }
 .auth-layout__brand .header__logo-image { width: auto; max-width: 12rem; max-height: 2rem; }
 /* rune's .main--narrow, without its own top margin and padding: the body centres it. A consent
 /* (.auth--wide) has more to say, so a little more room. */
@@ -192,17 +190,18 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
   border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px);
 }
 .portal-topbar__inner { display: flex; align-items: center; gap: 0 var(--s-5); width: 100%; max-width: var(--portal-width); min-height: 3.5rem; margin: 0 auto; padding: 0 var(--s-5); }
-.portal-topbar__brand { flex: 0 1 auto; min-width: 0; }
-.portal-topbar__brand .sidebar__logo { flex: 0 0 auto; width: 1.75rem; height: 1.75rem; font-size: var(--text-meta); }
+.portal-topbar__brand { display: flex; flex: 0 1 auto; align-items: center; gap: var(--s-2); min-width: 0; padding: 4px var(--s-2); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.portal-topbar__brand:hover { background: var(--hover); color: var(--text); }
+.portal-topbar__logo { display: grid; flex: 0 0 auto; place-items: center; width: 1.75rem; height: 1.75rem; overflow: hidden; border-radius: var(--radius); background: var(--text); color: var(--panel); font-size: var(--text-meta); font-weight: 700; }
 /* An uploaded logo keeps its own shape: the bar's height (less a little air), as wide as it is,
 /* no badge behind it, then the client's name. The letter fallback stays a small badge. */
 /* The image sets its own height and its width follows from its shape (capped, so a wide wordmark
 /* can't push the nav away); the box around it is a plain flex box that shrinks to the image, never
 /* the grid badge sized by the file's natural width, which left a gap beside a square or large one. */
-.portal-topbar__brand .sidebar__logo:has(img) { display: flex; align-items: center; width: auto; height: auto; border-radius: 0; background: none; box-shadow: none; overflow: hidden; }
-.portal-topbar__brand .sidebar__logo:has(img) img { display: block; width: auto; height: 2.25rem; max-width: 12rem; max-height: 2.25rem; border-radius: 0; object-fit: contain; object-position: left center; }
+.portal-topbar__logo:has(img) { display: flex; align-items: center; width: auto; height: auto; border-radius: 0; background: none; box-shadow: none; overflow: hidden; }
+.portal-topbar__logo:has(img) img { display: block; width: auto; height: 2.25rem; max-width: 12rem; max-height: 2.25rem; border-radius: 0; object-fit: contain; object-position: left center; }
 @media (max-width: 640px) {
-  .portal-topbar__brand .sidebar__logo:has(img) img { height: 1.75rem; max-height: 1.75rem; max-width: 7rem; }
+  .portal-topbar__logo:has(img) img { height: 1.75rem; max-height: 1.75rem; max-width: 7rem; }
 }
 /* Whose portal it is, and under it the client it's for. */
 .portal-topbar__names { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
@@ -219,9 +218,9 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
 .portal-nav__link[aria-current="page"] { background: var(--layer-2); color: var(--text); }
 
 .portal-topbar__actions { display: flex; align-items: center; gap: var(--s-2); min-height: 3.5rem; margin-left: auto; }
-.portal-user__button { display: inline-grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer; }
+.portal-user__button { display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .portal-user__button:hover { box-shadow: 0 0 0 3px var(--hover); }
-.portal-user__button .avatar { width: 2rem; height: 2rem; font-size: var(--text-meta); }
+.portal-user__button [data-slot="avatar"] { width: 2rem; height: 2rem; font-size: var(--text-meta); }
 .portal-topbar .menu__items { min-width: 14rem; }
 .portal-user__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .portal-user__name { overflow: hidden; color: var(--text); font-size: var(--text-ui); font-weight: var(--weight-strong); text-overflow: ellipsis; white-space: nowrap; }
@@ -239,7 +238,7 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__sun { display: inline-block
   .portal-main { padding: var(--s-5) var(--s-4) 3rem; }
 }
 @media (max-width: 479px) {
-  .portal-topbar__new { width: var(--control-h-sm); padding: 0; }
+  .portal-topbar__new.ui-button { width: var(--control-h-sm); padding: 0; }
   /* Only the icon shows; the label stays for screen readers. */
   .portal-topbar__new-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }

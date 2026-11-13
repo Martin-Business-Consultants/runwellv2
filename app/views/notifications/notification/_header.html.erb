@@ -1,6 +1,0 @@
-<%# locals: (notification:) %>
-<%# The right of a notification's row: when, and a button to mark it read or unread. %>
-<span class="notification__meta">
-  <span class="notification__time"><%= time_ago_in_words(notification.created_at) %> ago</span>
-  <%= notification_toggle_read_button(notification, url: notification_reading_path(notification)) %>
-</span>

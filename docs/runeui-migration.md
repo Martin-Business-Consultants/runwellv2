@@ -255,6 +255,62 @@ core (plugins go through the compatibility layer).
    `src:` keeps the value's option).
 8. **Settings, public pages and the portal**: every settings page, sign-in and its showcase, the
    portal's pages and sheet.
+   **Done:** the modals are `ui :dialog` drawn open inside their frames (`layouts/shared/_modal`,
+   `#modal_dialog`, title and `description:`; `quick_actions/new`, `#quick_action_dialog`); Cancel is
+   `data-runeui-close`, a refused save still comes back in the dialog, success still answers with
+   streams or breaks out, and a new `empties-on-close` behavior empties the frame once the dialog
+   has closed (so Turbo's snapshot never brings it back). The placeholder is the same dialog with
+   `ui :skeleton` lines; `loading-placeholder` now stops its timer as the answer starts rendering
+   (a slow render showed the skeleton over the form) and marks its copy
+   `data-loading-placeholder-content` (UI SDK puts `data-placeholder` on an empty select, which
+   emptied a refused modal). The quick-action forms are `form.ui :field`, `form-grid`,
+   `form-actions`. The bell's tray is a `ui :menu` (`notifications/_tray`, `_tray_item`,
+   `notification_menu_item`: each notification a link item, then See all and Mark all as read, which
+   now answers the tray with a stream emptying its frame since the broadcast refresh skips the tab
+   that asked); /notifications is two `record_card`s of Runwell rows with the read toggle
+   (`ui-button`), `j` / `k` from the keyboard controller. Settings: the nav's links are runeui ghost
+   buttons (`settings_nav_link`, so plugins' `section_nav_link` too); every page's fields are
+   `form.ui :field`, checkboxes `form.ui :checkbox`, tables `ui :table`, badges `ui :badge`, alerts
+   `ui :alert`, cards `ui :card` (plugins, webhooks, the intake schedule, the invitation page),
+   rows `settings-item` (Runwell's own); Appearance's and Your account's choice cards are
+   `form.ui :radio_group` with picture-card radios (`settings/appearances/_choices`, the appearance
+   controller previewing on the group's change); 2FA setup is `ui :otp_input`; "who sees it" is a
+   `ui :popover`; switches with hints are runeui's field with `control:` (new); `setting_row` and
+   `settings_group` draw that and `ui :card` for plugins. Public pages are `auth_card`
+   (`AuthHelper`, runeui's card) with `form.ui :field` and full-width `ui :button`s; the showcase's
+   cards, pills and avatars are `ui :card`, `ui :badge`, `ui :avatar` on runeui's tokens; the theme
+   toggles are `ui-button`s. The portal: `portal_card` (runeui's card), `ui :table` for its lists,
+   `portal-list` rows, `ui :breadcrumb`, `ui :badge`, `ui :progress`, `ui :file_input` for request and
+   reply files, `ui :menu` for the contact's menu, `ui :input` for search; `segmented_filter` (core
+   and portal) is `ui :tabs` as links. Also moved while here: row actions, delete and confirm
+   buttons, the AI brief button and the leftover `btn`/`list-row`/`field__hint` markup on record
+   pages (`item-row`, `field-note`, `state-dot`), the account menu (`ui :menu`; Keyboard shortcuts
+   opens the sheet by `data-runeui-open`), the document preview (`ui :dialog`), form errors
+   (`ui :alert`), `ui_status_badge` (draws `ui :badge` itself). Added to runeui: `control:` on
+   `ui :field` (label and description in `field-content`, the control at the row's end; with
+   `control_id:`, which `form.ui :field` fills in, the label is a native `<label for>`, since UI SDK's
+   field doesn't always link a control that upgrades after it), and a menu
+   item carrying `data-runeui-open` / `-close` acting when chosen with the keys too (UI SDK fires
+   `select`, not `click`). Gone: `navigable_list_controller`, `rune_proxy_controller`, the
+   notification header/mention partials, the tray's and modals' old CSS, compat's `.segmented`,
+   `.sidebar__brand` / `__logo`, `.btn--block`, `.link-button`, `.dialog--lg` / `__box` / `__header` /
+   `__hint`. Kept for plugins (the compatibility layer): every `RuneCompatHelper` helper
+   (`button_link`, `action_button`, `submit_button`, `icon_button`, `button_classes`, `badge`, `card`,
+   `list_row`, `field`, `empty_state`, `menu`, `popover_menu`, `menu_link`, `menu_button`,
+   `menu_label`, `menu_divider`, `dialog`, `sheet`, `dialog_actions`, `confirm_dialog`, `tabs`,
+   `callout`, `avatar`, `avatar_stack`, `settings_group`, `setting_row`, `copy_button`, `copy_field`,
+   `progress_bar`, `status_dot`, `time_ago`, `crumbs`, `flash_messages`), `switch_tag`,
+   `popup_menu` / `PopupHelper` with the `dialog` controller and `.popup` CSS (the meetings plugin),
+   `layouts/shared/card` (`.app-card`), the `rune-clipboard` and `rune-local-time` controllers,
+   compat.css's classes (`btn`, `card`, `list-row`, `field`, `field-row`, `alert`, `tabs`, `count`,
+   `pill`, `icon-button`, `table`, `table-wrap`, `crumbs`, utilities), and `views/ui/show` (the
+   styleguide of that layer). The core still calls `avatar` / `avatar_stack` (they draw
+   `ui :avatar`, keeping Runwell's lettered colours) and uses compat's utility classes (`muted`,
+   `button-row`, `stack`, `visually-hidden`, `hide-on-touch`) and the `.main` column (kept in
+   compat's layer so runeui's app-content wins). Accepted: runeui's sizes for small buttons and
+   field descriptions (14px where rune's were 12–13px), a section filter's inactive tabs no longer
+   muted, the portal's avatar in runeui's neutral, the tray without a per-row read toggle (it's on
+   /notifications), the modal 42rem wide (was 48rem).
 9. **The flip and the clean-up**: runeui's tokens on `:root`, the bridge out; the old sheets
    (`rune-theme`, what's left of `runwell/*`), Fizzy's controllers and the unused behaviors
    deleted; AGENTS.md, docs/theming.md, docs/plugin-contract.md rewritten; VERSION 6.0.0.
