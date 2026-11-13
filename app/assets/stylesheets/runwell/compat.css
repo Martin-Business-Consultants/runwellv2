@@ -575,6 +575,9 @@
   .tabs--pills { gap: 2px; padding: 2px; border: 0; border-radius: var(--radius); background: var(--layer-2); width: fit-content; }
   .tabs--pills .tabs__tab { height: var(--control-h-sm); padding: 0 var(--s-3); margin: 0; border: 0; border-radius: var(--radius-sm); }
   .tabs--pills .tabs__tab:is([aria-current="page"], [aria-pressed="true"], [aria-selected="true"]) { background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  /* Plugins' hand-written tables (class data-table), which the core's old data table styled. */
+  .data-table td a:not([class]) { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
+  .data-table td a:not([class]):hover { color: var(--accent); }
   .table a.row-link { color: var(--text); text-decoration: none; font-weight: var(--weight-strong); }
   .table a.row-link:hover { color: var(--accent); }
 

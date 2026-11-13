@@ -1,6 +1,5 @@
-# Runwell's own builders over rune_ui (the gem's helpers: button_link, button_classes, badge,
-# avatar, menu, popover_menu, dialog, tabs…; see ../rune_ui/README.md). The styleguide at /ui
-# (development) shows the components.
+# Runwell's own builders over runeui (ui :table, ui :badge…; ../runeui/README.md): statuses in
+# their tones and an index's table. The styleguide at /ui (development) shows the components.
 module UiHelper
   # Runwell's status tones (ApplicationHelper::STATUS_TONES) as rune_ui's badge tones.
   STATUS_BADGES = { "positive" => :ok, "negative" => :danger, "waiting" => :attention, "progress" => :accent, "neutral" => :neutral }.freeze
@@ -10,67 +9,65 @@ module UiHelper
     badge(label, tone: STATUS_BADGES.fetch(status_tone(label, highlight: highlight)), **options)
   end
 
-  # Data table (ui/_data_table): one column of it. key names the column (its cells carry
-  # data-column="key", so the Columns menu can hide them); sort: the TableSorting key that
-  # orders by it; width: a COLUMN_SHAPES shape or [characters, header] for ui_data_table_colgroup (the
-  # column that isn't hideable takes the leftover width instead);
-  # hideable: false keeps it out of the Columns menu (the name column).
-  # grow: true names the column that takes the leftover width, where it isn't the one that can't be
-  # hidden.
-  UiColumn = Data.define(:key, :label, :sort, :width, :align, :hideable, :header_class, :grow)
+  # An index's table (layouts/shared/_list_table, on runeui's ui :table): one column of it. key
+  # names the column (its cells carry data-column="key", so the Columns menu can hide them);
+  # sort: the TableSorting key that orders by it; align: :end for numbers, :center; hideable: false
+  # keeps it out of the Columns menu (the column that names the row). That column takes the width
+  # the others leave and cuts a long name short (data-grow on its cells); grow: true names it where
+  # it isn't the one that can't be hidden. Every other column is as wide as what it holds.
+  UiColumn = Data.define(:key, :label, :sort, :align, :hideable, :grow)
 
-  def ui_column(key, label = key.to_s.humanize, sort: nil, width: :text, align: nil, hideable: true, header_class: nil, grow: nil)
-    width = [ width, label ] if width.is_a?(Numeric) || width.nil?
-    UiColumn.new(key: key.to_s, label: label, sort: sort, width: width, align: align, hideable: hideable, header_class: header_class, grow: grow)
+  def ui_column(key, label = key.to_s.humanize, sort: nil, align: nil, hideable: true, grow: nil)
+    UiColumn.new(key: key.to_s, label: label, sort: sort, align: align, hideable: hideable, grow: grow)
   end
 
-  def ui_data_table_th(column)
-    classes = class_names(column.header_class, "data-table__number" => column.align == :end, "data-table__center" => column.align == :center)
+  # The column of a list that takes the leftover width.
+  def list_table_grow(columns)
+    columns.find(&:grow) || columns.find { !it.hideable } || columns.first
+  end
+
+  # A column's header: a link that sorts by it (ui :sort_header, which writes the sort and
+  # direction params TableSorting reads, keeps the page's others and drops the page), or its name.
+  def list_table_th(column, grow: false)
+    data = { column: column.key, grow: (true if grow) }.compact
     if column.sort
-      sortable_th(column.label, column.sort, class: classes.presence, data: { column: column.key })
+      current, direction = current_sort
+      ui :sort_header, label: column.label, key: column.sort, sort: current, direction: direction, align: column.align, data: data
     else
-      tag.th(column.label, class: classes.presence, data: { column: column.key })
+      ui_tag :th, { data: data.merge(align: column.align&.to_s) }, {}, column.label
     end
   end
 
-  # The data table's colgroup, rune_ui's column convention (data.css): the column that identifies
-  # the row (hideable: false, else the first) takes the leftover width; every other column is as
-  # wide as its content, from the data (column_widths' longest value, never narrower than its
-  # header) or its shape (COLUMN_SHAPES), so the widths hold still whatever the sort or page, and
-  # narrow facts sit together one gap apart. Long text in a fitted column is capped (it truncates).
-  # Each data column's <col> carries its key, so hiding a column (the Columns menu) hides its width.
-  FIT_CAP = 28
+  # Under a list: which rows are showing, and the pages (ui :pagination, over geared_pagination's
+  # page). Nothing for one page.
+  def table_pagination(page)
+    count = page.recordset.page_count
+    return if count <= 1
 
-  def ui_data_table_colgroup(columns, selectable:, actions:)
-    grow = columns.find(&:grow) || columns.find { !it.hideable } || columns.first
-    entries = [ *([ [ nil, :select, false ] ] if selectable), *columns.map { [ it.key, it.width, it.equal?(grow) ] }, *([ [ nil, :actions, false ] ] if actions) ]
-
-    tag.colgroup do
-      safe_join(entries.map do |key, width, growing|
-        tag.col(class: growing ? "data-table__col--grow" : "data-table__col--w#{column_characters(width)}", data: { column: key })
-      end)
+    per_page = page.recordset.ratios[page.number]
+    first_row = (page.number - 1) * per_page + 1
+    last_row = [ page.number * per_page, page.recordset.records_count ].min
+    tag.div(class: "list-pagination") do
+      safe_join([ tag.span("#{first_row}–#{last_row} of #{page.recordset.records_count}", class: "list-pagination__summary"),
+        ui(:pagination, page: page.number, pages: count, label: "Pages") ])
     end
   end
 
-  # The table's least width, as a class (data-table--min-wN, in characters): every fitted column's
-  # width and padding, plus room for the growing column (GROW_MIN), so a narrow window scrolls the
-  # table sideways rather than squeezing the column that names each row to nothing.
-  GROW_MIN = 28
-  CELL_PADDING = 4
-
-  def ui_data_table_min_width_class(columns, selectable:, actions:)
-    grow = columns.find(&:grow) || columns.find { !it.hideable } || columns.first
-    widths = [ *(:select if selectable), *columns.reject { it.equal?(grow) }.map(&:width), *(:actions if actions) ]
-    total = widths.sum { column_characters(it) + CELL_PADDING } + GROW_MIN + CELL_PADDING
-    "data-table--min-w#{((total / 10.0).ceil * 10).clamp(40, 240)}"
+  # New: an index's primary action (ui :button), with the key that presses it. On a phone, just
+  # the icon. frame: the Turbo Frame its form opens in ("modal").
+  def new_link(text, path, icon: "add", key: "n", frame: nil)
+    ui :button, href: path, class: "new-link", data: { keys: key, turbo_frame: frame },
+      content: safe_join([ icon_tag(icon), tag.span(text, class: "new-link__text"), tag.kbd(key.upcase, class: "new-link__key hide-on-touch") ])
   end
 
-  # A fitted column's width in characters: its shape's, or its longest value's (capped), and never
-  # narrower than its header.
-  def column_characters(width)
-    return TableSortingHelper::COLUMN_SHAPES.fetch(width) if width.is_a?(Symbol)
-
-    length, header = width
-    [ [ length.to_i, FIT_CAP ].min, header.to_s.length + 2 ].max.clamp(3, 48)
+  # An index's views as links (ui :toggle_group): each keeps the page's other params; v goes to
+  # the one after the current, g b to the board. views: [key, label, icon] each.
+  def view_toggle(current, views)
+    following = views[(views.index { |key, _label, _icon| key == current } || -1) + 1]&.first || views.first.first
+    options = views.map do |key, label, icon|
+      keys = [ ("v" if key == following), ("g b" if key == "board") ].compact.join(", ").presence
+      [ label, key, { icon: icon_tag(icon), title: label, href: url_for(request.query_parameters.merge("view" => key)), data: { keys: keys }.compact } ]
+    end
+    ui :toggle_group, value: current, variant: :outline, size: :sm, label: "View", class: "view-toggle", options: options
   end
 end

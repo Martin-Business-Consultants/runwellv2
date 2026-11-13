@@ -11,7 +11,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
   test "index in table and board views with filters" do
     get tasks_path(view: "table", owner: "any")
     assert_response :success
-    assert_select "table.data-table tbody tr[data-filter-target=item]", 2
+    assert_select "table[data-slot=table] tbody tr[data-filter-target=item]", 2
     get tasks_path(view: "board")
     assert_response :success
     assert_select ".card-columns"

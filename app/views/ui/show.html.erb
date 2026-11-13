@@ -107,12 +107,11 @@
 
 <%= card "Runwell’s own", hint: "Pieces rune_ui gained for Runwell, and Runwell’s shared partials (layouts/shared, runwell/components.css)." do %>
   <div class="index-toolbar">
-    <div class="filters">
-      <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: "active", options: [ [ "Active", "active" ], [ "Dormant", "dormant" ], [ "All", "all" ] ] %>
-      <button type="button" class="pill"><span>Owner</span><%= icon_tag "caret-down" %></button>
-    </div>
+    <%= ui :filter_bar, clear: false do %>
+      <%= ui :filter, param: :status, label: "Show", value: "active", any: false, options: [ [ "Active", "active" ], [ "Dormant", "dormant" ], [ "All", "all" ] ] %>
+    <% end %>
     <div class="index-toolbar__end">
-      <%= render "layouts/shared/view_toggle", current: "cards" %>
+      <%= render "layouts/shared/view_toggle", current: "table", extra: [ [ "board", "Board", "board" ] ] %>
       <%= render "layouts/shared/new_link", text: "New client", path: ui_path %>
     </div>
   </div>
@@ -144,5 +143,5 @@
     <p class="alert__title">That didn’t work</p>
     <p class="alert__body">Name can’t be blank.</p>
   </div>
-  <%= render "layouts/shared/empty", text: "No dormant clients.", action_text: "Show all", action_path: ui_path %>
+  <%= ui :empty, description: "No dormant clients.", action: ui(:button, href: ui_path, variant: :outline, size: :sm, content: "Show all") %>
 <% end %>

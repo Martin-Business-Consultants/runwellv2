@@ -26,7 +26,6 @@ class UsersController < ApplicationController
     @who = params[:who].presence_in(WHO.keys) || "everyone"
     people = WHO[@who].call
     scope = @status == "all" ? people : people.public_send(@status)
-    @column_widths = column_widths(scope, :name, :email, :client) if @view == "table"
     @people = paginate sorted(scope.includes(:agent, :client).ordered)
     @counts = { "active" => people.active.count, "deactivated" => people.deactivated.count }
     @invitations = can?(:manage_people) ? Invitation.pending.ordered.includes(:invited_by).to_a : []

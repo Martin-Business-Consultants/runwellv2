@@ -33,7 +33,6 @@ class WorksController < ApplicationController
     @state = Work.filter_from(params)
     @label = params[:label].presence_in(Work.labels) || "all"
     scope = Work.filtered(state: @state, label: @label, scope: Work.includes(:custom_values))
-    @column_widths = column_widths(scope, :title, :client) if @view == "table"
     @works = paginate sorted(scope)
   end
 

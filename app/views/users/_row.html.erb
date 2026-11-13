@@ -1,5 +1,5 @@
 <%# locals: (person:, manage:) %>
-<%# One person in the users index's data table (ui/_data_table): the cells in the columns' order.
+<%# One person in the users index's data table (layouts/shared/_list_table): the cells in the columns' order.
     Someone at a client (the client role) shows their client and portal access and opens on their
     contact page; the bulk bar's roles are the team's, so they have no checkbox. %>
 <% client = person.client? %>
@@ -7,17 +7,17 @@
 <tr id="<%= dom_id(person, :row) %>" data-filter-target="item">
   <% if manage %>
     <% if client %>
-      <td class="data-table__select"></td>
+      <td data-slot="table-select"></td>
     <% else %>
-      <%= bulk_select_cell person, person.display_name %>
+      <%= ui :select_cell, value: person.id, label: person.display_name, checkbox: { data: { keys: "x" } } %>
     <% end %>
   <% end %>
-  <td data-column="name">
+  <td data-column="name" data-grow>
     <%= person_cell person, label: (person == Current.user ? "#{person.display_name} (you)" : nil), path: path %>
   </td>
-  <td class="muted" data-column="email"><%= person.email_address %></td>
+  <td class="muted" data-column="email" data-truncate><%= person.email_address %></td>
   <td data-column="role"><%= client ? term(:client) : person.role.capitalize %></td>
-  <td data-column="client">
+  <td data-column="client" data-truncate>
     <% if person.client %>
       <%= link_to person.client.name, client_path(person.client) %>
     <% end %>

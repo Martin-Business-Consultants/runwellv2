@@ -89,6 +89,36 @@ core (plugins go through the compatibility layer).
 3. **Lists**: `ui/_data_table` → `ui :table` with `selectable:`, `ui :sort_header`,
    `ui :select_cell`, `ui :bulk_bar`, `ui :pagination` (geared_pagination's pages kept);
    `quick_filter` → `ui :filter` / `ui :filter_bar`; the Columns menu → `ui :menu`.
+   **Done:** every index (clients, work, tasks, users, intake, AI activity, the audit log) is
+   `layouts/shared/_list_table`: `ui :table` with `ui :sort_header` (the `sort` / `direction`
+   params `TableSorting` already read), `ui :select_cell` and runeui's selection controller,
+   the page's `bulk_bar` (`ui :bulk_bar` holding `ui :menu`, `ui :popover` with `ui :date_picker`
+   or `ui :input`, `ui :button`; `BulkHelper`) handed to the table, `ui :columns_menu` in the
+   header's corner and `ui :pagination` under it (`table_pagination`). The table sizes itself:
+   no colgroup, no measured widths (`column_widths`, `COLUMN_SHAPES`, `CustomField.column_widths`
+   and the 13px exception are gone); the naming column grows and truncates (`data-grow`), free
+   text is capped (`data-truncate`). Filters are `ui :filter` in `ui :filter_bar` (the index
+   toolbar), labelled ("Owner: Anyone"), advancing history so Back undoes one; New is `ui :button`,
+   the Table / Board toggle `ui :toggle_group` as links, empty lists `ui :empty`. Runwell's `bulk`
+   controller keeps only the sending (ids added to the bar's forms, rows dimmed, selection
+   cleared); `data-table`, `rune-popover`, `ui/_data_table*` and their CSS are gone. Enter on a row
+   now opens the link in its naming cell (`[data-grow]`), not the first button (a task's owner
+   picker came first). Added to runeui for it: `data-grow` / `data-truncate` / `data-align="center"`
+   and a scroll box inside the table's container (the bulk bar stays put above it), `checkbox:`
+   on `ui :select_cell`, `columns:` on `ui :table` with `ui :columns_menu` and the
+   `runeui--columns` controller, `search:` on `ui :filter` (a combobox behind the pill,
+   `runeui--filter`), a filter marked active only when its param is in the address, filters put
+   back before Turbo caches the page (Back showed the choice just made), `ui :toggle_group` as
+   links (`href:` options). Kept for plugins, drawn the new way: `layouts/shared/quick_filter`,
+   `index_toolbar` (with `content_for :index_filters` and `:index_bulk`), `row_actions`, `empty`,
+   `new_link` / `new_button` / `view_toggle`, `bulk_bar`, `bulk_menu`, `bulk_button`, `bulk_date`,
+   `bulk_text`, `bulk_delete`, `sortable_th`, `table_pagination`, `table_next_page_row`; and, as
+   they were, `bulk_select_all_header` / `bulk_select_cell` and `data-bulk-target="item"` (native
+   checkboxes, whose selection the `bulk` controller still keeps for a bar in the toolbar). Left:
+   avatars (`person_tag`, `task_owners_tag`, `contact_stack`) stay rune's markup until the pickers
+   that redraw them move (phase 4); the status and owner pickers and the due date in rows are
+   phase 4's, inside the new cells; plain `.table`s (settings' roles, webhooks and updates, the
+   portal's lists) and `segmented_filter` (rune's tabs) are phases 5 and 8's.
 4. **Pickers and forms**: `ComboboxFormBuilder`, `combobox_tag`, the status and owner pickers,
    `popup_menu` → `ui :select`, `ui :combobox`, `ui :menu`; `date_input` → `ui :date_picker`;
    `switch_field` → `ui :switch`; `money_field` → `ui :number_input` (cents kept);

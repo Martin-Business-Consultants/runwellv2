@@ -1,17 +1,17 @@
 <%# locals: (task:, listed:) %>
-<%# One piece of work in the index's data table (ui/_data_table): the cells in the columns' order. %>
+<%# One piece of work in the index's data table (layouts/shared/_list_table): the cells in the columns' order. %>
 <tr id="<%= dom_id(task, :row) %>" data-filter-target="item">
-  <%= bulk_select_cell task, task.title %>
+  <%= ui :select_cell, value: task.id, label: task.title, checkbox: { data: { keys: "x" } } %>
   <td data-column="owner"><%= render "tasks/owner_picker", task: task %></td>
-  <td data-column="title"><%= side_panel_link_to task, task.title %> <%= agent_made_tag(task) %></td>
-  <td data-column="work">
+  <td data-column="title" data-grow="wrap"><%= side_panel_link_to task, task.title %> <%= agent_made_tag(task) %></td>
+  <td data-column="work" data-truncate>
     <% if task.work %>
       <%= peek_link_to task.work, task.work.title, class: "task-table__work", title: task.work.label_name %>
     <% end %>
   </td>
-  <td class="muted" data-column="client"><%= task.client&.name %></td>
-  <td class="nowrap" data-column="due"><%= render "tasks/due", task: task %></td>
-  <td class="data-table__center" data-column="status"><%= render "tasks/status_dot", task: task %></td>
+  <td class="muted" data-column="client" data-truncate><%= task.client&.name %></td>
+  <td data-column="due"><%= render "tasks/due", task: task %></td>
+  <td data-align="center" data-column="status"><%= render "tasks/status_dot", task: task %></td>
   <% listed.each do |field| %>
     <%# herb:key field.id %>
     <%= custom_field_cell(field, task.custom_value(field)) %>

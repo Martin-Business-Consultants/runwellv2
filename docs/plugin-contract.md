@@ -168,6 +168,16 @@ its forms is sent with the picked ids as `ids[]`. For tasks, the core's own `bul
 (PATCH `task[status]`, `task[owner_id]`, `task[due_on]`, `task[client_visible]`; DELETE) runs each
 task's verbs and redirects back. Documented in 2.25.4, stable.
 
+Since 6.0 the core's own lists are runeui's (`ui :table` with `ui :select_cell`, `ui :filter`,
+`ui :empty`; `docs/runeui-migration.md`), and the names above are kept for plugins, drawn with
+runeui, with the same locals and params: `layouts/shared/quick_filter` (a labelled pill now,
+"Owner: Anyone", with a search box past eight choices; picking one adds a history entry, so Back
+undoes it), `index_toolbar`, `row_actions`, `empty`, the `bulk_*` helpers (the bar is
+`ui :bulk_bar`; `bulk_menu` opens a `ui :menu`) and `bulk_select_all_header` / `bulk_select_cell`
+(still native checkboxes for the `bulk` controller). The data table's own classes
+(`data-table__*`, `quick-filter`, `bulk-bar__*`) were never the contract and are gone; `.table`,
+`.table-wrap` and `.table__grow` stay.
+
 Dragging items between lists is the core's `drag-and-drop` Stimulus controller (the Tasks board's):
 on a wrapper, `data-controller="drag-and-drop"` with
 `data-drag-and-drop-dragged-item-class` (`drag-and-drop__dragged-item`) and

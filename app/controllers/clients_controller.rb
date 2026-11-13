@@ -23,7 +23,6 @@ class ClientsController < ApplicationController
     @view = index_view
     @status = params[:status].presence_in(Client::STATUSES + %w[all]) || "active"
     scope = @status == "all" ? Client.all : Client.where(status: @status)
-    @column_widths = column_widths(scope, :name) if @view == "table"
     @clients = paginate sorted(scope.ordered.includes(:contacts, :works, :custom_values))
   end
 

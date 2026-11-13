@@ -4,23 +4,23 @@
 <% agents = User.people.active.ordered.where.not(id: Current.user.person.id).includes(:agent).filter_map(&:agent) %>
 
 <% content_for :index_filters do %>
-  <%= render "layouts/shared/quick_filter", title: "Agent…", param: :whose, current: @whose,
+  <%= ui :filter, param: :whose, label: "Agent", value: @whose, any: false, search: true,
         options: [ [ "Your agent", "me" ], [ "Every agent", "any" ] ] + agents.map { [ it.display_name, it.agent_owner_id.to_s ] } %>
-  <%= render "layouts/shared/quick_filter", title: "What…", param: :area, current: @area,
+  <%= ui :filter, param: :area, label: "What", value: @area, any: false,
         options: AgentActivitiesController::AREAS.map { [ agent_activity_area_label(it), it ] } %>
-  <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days,
+  <%= ui :filter, param: :days, label: "When", value: @days, any: false,
         options: AgentActivitiesController::PERIODS.map { |key, label| [ label, key ] } %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view %>
 
 <% if @events.any? %>
-  <% columns = [ ui_column(:who, "Agent", width: :avatar),
-                 ui_column(:what, "What", width: [ 16, "What" ]),
+  <% columns = [ ui_column(:who, "Agent"),
+                 ui_column(:what, "What"),
                  ui_column(:on, "On", hideable: false),
-                 ui_column(:details, "Details", width: [ 24, "Details" ]),
-                 ui_column(:when, "When", width: :date) ] %>
-  <%= render "ui/data_table", id: "agent_activity", columns: columns, rows: @events, row: "agent_activities/row", as: :event, page: @page %>
+                 ui_column(:details, "Details"),
+                 ui_column(:when, "When") ] %>
+  <%= render "layouts/shared/list_table", id: "agent_activity", columns: columns, rows: @events, row: "agent_activities/row", as: :event, page: @page %>
 <% else %>
-  <%= render "layouts/shared/empty", text: agent_activity_empty_text(@person, @whose),
-        action_text: ("Connect an AI" if @whose == "me"), action_path: (settings_connected_apps_path if @whose == "me") %>
+  <%= ui :empty, description: agent_activity_empty_text(@person, @whose),
+        action: (ui(:button, href: settings_connected_apps_path, variant: :outline, size: :sm, content: "Connect an AI") if @whose == "me") %>
 <% end %>

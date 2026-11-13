@@ -1,14 +1,6 @@
 <%# locals: (title:, param:, options:, current:) %>
-<%# A quick filter on an index: the app's combobox (the small kind, with its search box), its choice
-    swapping one query param of this page's address, so filters are bookmarkable and Back works. The
-    page's other params ride along as hidden fields; picking submits at once and replaces the
-    address. The same combobox every select in the app is. %>
-<%= form_with url: request.path, method: :get, class: "quick-filter", data: { filter_show: "true", controller: "form", turbo_action: "replace" } do |form| %>
-  <% request.query_parameters.except(param.to_s).each do |name, value| %>
-    <%# herb:key name %>
-    <% if value.is_a?(String) %>
-      <input type="hidden" name="<%= name %>" value="<%= value %>">
-    <% end %>
-  <% end %>
-  <%= form.select param, options, { selected: current }, class: "select--sm", aria: { label: title.to_s.delete_suffix("…") }, data: { action: "change->form#submit" } %>
-<% end %>
+<%# A filter above a list, as plugins render it (the plugin contract, to 7.0): runeui's ui :filter,
+    which the core's own pages call directly. A pill in a GET form of its own that swaps one query
+    param of this page's address and keeps the others, so filters are bookmarkable and Back works.
+    title names it ("Owner…"); a list past eight choices gets a box to search it. %>
+<%= ui :filter, param: param, label: title.to_s.delete_suffix("…"), value: current.to_s, any: false, options: options.map { |text, value| [ text, value.to_s ] }, search: options.size > 8 %>

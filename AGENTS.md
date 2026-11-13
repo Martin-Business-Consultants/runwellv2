@@ -198,7 +198,7 @@ event); every event has a source.
 - Every select is a combobox, Fizzy's, and every combobox has a box to search its choices: a button
   opening the app's popup of choices (`combobox` or, for `multiple`, `multi-selection-combobox`, with
   `dialog`, `navigable-list` and the filter box, `popup-filter`), writing hidden fields. It's the one
-  way to pick anywhere in the app, an index's filters included (`quick_filter`, below).
+  way to pick in a form (an index's filters are runeui's `ui :filter`, below).
   The default form builder (`ComboboxFormBuilder`) renders `form.select`, `time_zone_select`,
   `collection_select` and `grouped_collection_select` as usual and `combobox_tag` (`ComboboxHelper`)
   rebuilds that `<select>` as the combobox, so include_blank (sent as ""), selected, disabled and
@@ -375,7 +375,8 @@ Shared pieces, so the same markup is never written twice (all helpers, so they w
 on/off switch is `switch_field form, :attr, label:, hint:, submit_on_change:` (with a hint, the
 settings row; without, the switch beside its label), or `switch_tag(title:, screen_reader_label:) { check_box_tag … }`
 around a checkbox with no form method; an empty list is
-`render "layouts/shared/empty", text:, action_text:, action_path:` (where its records come from).
+`ui :empty, description:, action:` (where its records come from; `layouts/shared/empty` is the
+same under the name plugins render).
 A list of the same partial is `render partial:, collection:, as:` (herb lint's
 `actionview-prefer-collection-render`), not a loop.
 
@@ -423,23 +424,34 @@ over the page. Every index shows its records as a table (there's no
 cards view since 5.0), and has no heading: the nav marks the current section. The controller sets
 `@view = index_view` ("table"; Tasks adds `extra: %w[board]`, read from `?view=`). The page starts with
 `render "layouts/shared/index_toolbar", view: @view, new_text:, new_path:`: the page's
-quick_filter pills on the left (wrap them in `<% content_for :index_filters do %>` before
-rendering the toolbar), and on the right the New button, with the Table / Board icon toggle
-where an index has a second view (Tasks), spanning the page's column. Then the data table
-(`render "ui/data_table"`, below), whose
+filters on the left (`ui :filter` pills, wrapped in `<% content_for :index_filters do %>` before
+rendering the toolbar, which puts them in `ui :filter_bar`), and on the right the New button
+(`new_link`, a `ui :button`), with the Table / Board toggle (`view_toggle`: `ui :toggle_group` as
+links) where an index has a second view (Tasks). Then the table
+(`render "layouts/shared/list_table"`, below: runeui's `ui :table`), whose
 last cell per row is `render "layouts/shared/row_actions", name:, edit_path:, delete_path:` (pass nil for an
-action the record doesn't allow: work delete only while it has no tasks). Every table can act on several rows at once: `<main>` carries the `bulk` controller, the first
-column is `bulk_select_all_header` / `bulk_select_cell record, label`, and `bulk_bar` (given to the
-index toolbar with `content_for :index_bulk`) takes the toolbar's row while rows are picked, in the
-filters' own pills and menus (`bulk_menu`, `bulk_button`, `bulk_date`, and `delete:` `bulk_delete`
-where New sits; `BulkHelper`),
+action the record doesn't allow: work delete only while it has no tasks). Every table can act on several rows at once: picking is runeui's (`ui :table, selectable: true` and a
+`ui :select_cell` per row and, `all: true`, in the header: the `runeui--selection` controller does
+select-all, the mixed header, shift-ranges and the count; `x` presses the checkbox of the row you're
+on, `checkbox: { data: { keys: "x" } }`), and the page builds its bar with `bulk_bar` (`BulkHelper`,
+on `ui :bulk_bar`: `bulk_menu` a `ui :menu`, `bulk_button`, `bulk_date` a `ui :date_picker` in a
+`ui :popover`, `bulk_text`, and `delete:` `bulk_delete`) and hands it to the table (`bulk:`, with
+`noun:` for "3 clients selected"). While rows are picked the bar takes the toolbar's row (CSS,
+`runwell/components.css`). Each action is a small form of its own; the `bulk` controller on
+`<main>` adds the picked ids as it's sent (`ids[]`), dims the picked rows while it runs and clears
+the selection after,
 each posting to a `Bulk::` controller that runs the record's own verb on each picked row with
-`BulkAction#apply_to_each` (skipped ones named), with an agent tool beside it. Lists page Fizzy's way (geared_pagination, `PaginationHelper`, the `pagination`
-controller): the action wraps its records in `paginate` (HTML only; JSON for agents stays whole),
-and a table's
-`<tbody id="<%= pagination_frame_id_for(:name_rows, @page.number) %>">` ends with
+`BulkAction#apply_to_each` (skipped ones named), with an agent tool beside it. Plugins' pages still
+pick rows the old way until they move (the plugin contract: native checkboxes from
+`bulk_select_all_header` / `bulk_select_cell` or their own `data-bulk-target="item"`, and the bar in
+the toolbar through `content_for :index_bulk`), which the `bulk` controller keeps working. Lists
+page with geared_pagination: the action wraps its records in `paginate` (HTML only; JSON for agents
+stays whole), 13 rows a page, and the table shows which rows are showing and the pages under it
+(`table_pagination`: `ui :pagination`). A list that loads its next page as you scroll instead
+(plugins' tables, a maximized board column) is Fizzy's way (`PaginationHelper`, the `pagination`
+controller): a table's `<tbody id="<%= pagination_frame_id_for(:name_rows, @page.number) %>">` ends with
 `table_next_page_row :name_rows, @page, columns:` on a `<table>` carrying the pagination
-controller in discard-frame mode. The next page loads as you scroll. Mark each card or row `data-filter-target="item"` so "/"
+controller in discard-frame mode. Mark each card or row `data-filter-target="item"` so "/"
 filters it. The filter itself is one control at the foot of the nav
 (`layouts/shared/nav_filter`): out of sight until "/" focuses it, and absent on pages with
 nothing to filter. Pages never render their own. The filter controller lives on
@@ -506,11 +518,14 @@ changes in place with `tasks/status_dot`. Both pickers show a choice before the 
 takes out of its list fades, and a save that fails outright is put back.
 
 Filters on an index page sit above the list, not inside the card: a row of
-`render "layouts/shared/quick_filter", title:, param:, options:, current:` in
-`content_for :index_filters`, which the index toolbar shows. Each is the app's combobox (the small
-kind, `select--sm`, with its search box) in a GET form of its own that swaps one query param,
-carrying the page's others, so filters are bookmarkable and Back works; the
-controller reads the params (`works#index`). Don't drive a list with
+`ui :filter, param:, label:, value:, any: false, options:` in
+`content_for :index_filters`, which the index toolbar shows in `ui :filter_bar`. Each is runeui's
+filter pill ("Owner: Anyone"; `search: true` for a long list, which gets a box to search it) in a
+GET form of its own that swaps one query param, carrying the page's others and dropping `page`, so
+filters are bookmarkable and Back undoes the last one; the controller reads the params
+(`works#index`) and passes what it settled on as `value:` (the pill is tinted only while the param
+is in the address). `any: false` because Runwell's lists name their own "all" choice among the
+options. `layouts/shared/quick_filter` is the same thing under the name plugins render. Don't drive a list with
 ReActionView state: in 0.6 a list stops refetching after the first change.
 
 Styling: components come from **rune_ui**, the UI kit Runwell shares with Botter
@@ -521,7 +536,7 @@ the `rune` layer, so Runwell's unlayered rules win), listed in order in `RUNWELL
 the theming contract (`_global`, `appearance`, `font-face`), `rune-theme` (points rune's tokens
 at the palette), `runwell` (the shell: sidebar, page filter, settings layout, sign-in and portal
 layouts), `runwell/components` (what every area shares: popups, the index toolbar and filters,
-the data table, the bulk bar, index cards, hint mode, form widgets) and one file per area
+lists, the bulk bar, index cards, hint mode, form widgets) and one file per area
 (`runwell/home`, `tasks`, `records`, `settings`, `public`). The styleguide is at `/ui` in
 development. Build new markup with it:
 
@@ -559,22 +574,25 @@ development. Build new markup with it:
   `popup__list` / `popup__item` / `popup__btn` under the `dialog`, `picker`, `fixed-popup` or
   `combobox` controllers. A new menu with no such behaviour is `popover_menu`
 - Native elements over JavaScript: `<dialog>` (opened by `rune-dialog`, or the `dialog`
-  controller for popups), the `popover` attribute (placed by `rune-popover`), `<details>`, real
+  controller for popups), runeui's `ui :popover` and `ui :menu`, `<details>`, real
   checkboxes and radios. CSS uses descendant or class selectors, not child ones: in development
   ReActionView wraps every ERB output in a `display: contents` span
-- Index tables are the **data table** (`ui/_data_table`, `runwell/components.css`): describe the
-  columns with `ui_column(key, label, sort:, width:, align:, hideable:)` and pass a row partial
-  (`clients/_row`: `bulk_select_cell`, then `<td data-column="key">` per column in order, then
-  `layouts/shared/row_actions`). Columns follow one convention (rune_ui's, for every table): the
-  column that identifies the row takes the leftover width (`hideable: false`, or `grow: true`
-  where that isn't it), and every other column is as wide as its content (measured from the data
-  by `column_widths`, or a `COLUMN_SHAPES` shape), long text in it capped, so narrow facts sit
-  together one gap apart. Order follows meaning (the identifier, what describes it, then state),
-  and alignment the data (text and pills left, numbers right). A plain `.table` does the same on its
-  own: its first column (or `.table__grow`) grows. It brings sortable headers (TableSorting), the checkbox column
-  (bulk actions), a Columns menu that hides columns (`data-table` controller, per browser), fixed
-  widths (`table_colgroup`) and `table_pagination`. What every row shares goes in `row_locals:`
-  so it's read once (Prosopite)
+- Index tables are `layouts/shared/_list_table` (runeui's `ui :table`, `runwell/components.css`
+  section 3): describe the columns with `ui_column(key, label, sort:, align:, hideable:, grow:)`
+  and pass a row partial (`clients/_row`: `ui :select_cell`, then `<td data-column="key">` per
+  column in order, then `layouts/shared/row_actions`). The table sizes itself, as shadcn's does:
+  every column is as wide as what it holds, on one line; the column that identifies the row
+  (`hideable: false`, or `grow: true` where that isn't it) takes the leftover width and cuts a long
+  name short, its cells marked `data-grow`; a column of free text is capped with `data-truncate`
+  (a title carries the whole value; `--ui-table-truncate` sets the cap); and a window too narrow
+  for the columns scrolls the table sideways inside its box. No widths are measured or set. Order
+  follows meaning (the identifier, what describes it, then state), and alignment the data (text and
+  pills left, numbers `data-align="end"`). It brings sortable headers (`ui :sort_header`, writing
+  the `sort` and `direction` params `TableSorting` reads), the checkbox column and bulk bar
+  (above), a Columns menu in the header's corner that hides columns (`ui :columns_menu`, runeui's
+  `runeui--columns` controller, per browser) and `table_pagination`. What every row shares goes
+  in `row_locals:` so it's read once (Prosopite). A plain `.table` (settings lists, the portal,
+  plugins) keeps the old convention: its first column (or `.table__grow`) grows
 - An area's own pieces are BEM classes in that area's stylesheet. Space with `gap`, never
   sibling margins; no coloured left borders (states are tints, weight, dots and badges)
 
@@ -1252,8 +1270,8 @@ A person's sun/moon choice (localStorage) beats the install's default theme.
 Text size (`Setting#text_size`: small, default, large, larger) sets `data-text-size`, which scales
 the root font size (16px times `--text-scale`, `rune-theme.css`; rune_ui's text steps, the body 13px); a person's own choice in
 Settings > Your account (`User#text_size`, blank follows the install) beats it. Every font size in
-the stylesheets is rem or em so it all scales, and table column shares (`COLUMN_SHAPES`) leave room
-for the larger sizes.
+the stylesheets is rem or em so it all scales; tables size their columns from what they hold, so
+they follow.
 
 Every border radius in the stylesheets goes through two variables so Corners reaches the
 whole UI: ordinary corners are `calc(<size> * var(--radius-scale, 1))`, pill shapes are

@@ -1,13 +1,14 @@
 <%# locals: (view: nil, extra_views: nil, new_text: nil, new_path: nil, new_modal: nil, new_frame: nil) %>
-<%# An index page's top row: the page's filter pills (content_for :index_filters), and across
-    from them the view toggle and New button. While table rows are picked, the bulk bar
-    (content_for :index_bulk, BulkHelper) takes the row: its actions where the filters were, Delete
-    where New was. The nav underline says which index this is, so there's no heading. %>
+<%# An index page's top row: the page's filters (content_for :index_filters: ui :filter pills, in
+    runeui's filter bar), and across from them the view toggle and New. The nav marks which index
+    this is, so there's no heading. While rows are picked the table's bulk bar takes this row's
+    place (runwell/components.css). content_for :index_bulk is a plugin page's bar (BulkHelper),
+    which shows here in the filters' place. %>
 <% content_for :index_toolbar, "yes" %>
 <div class="index-toolbar">
   <div class="index-toolbar__filters">
     <% if content_for?(:index_filters) %>
-      <div class="filters index-toolbar__filter-pills"><%= content_for(:index_filters) %></div>
+      <%= ui :filter_bar, clear: false, class: "index-toolbar__filter-pills", content: content_for(:index_filters) %>
     <% end %>
     <% if content_for?(:index_bulk) %>
       <%= content_for(:index_bulk) %>

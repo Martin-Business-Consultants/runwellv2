@@ -311,7 +311,7 @@ export default class extends Controller {
   // The page Enter would open from the item you're on, fetched ahead (a task's link opens the side
   // panel instead, which fetches its own).
   #prefetchOpener(item) {
-    const opener = item.matches(OPENER) ? item : item.querySelector(OPENER)
+    const opener = this.#opener(item)
     if (opener?.matches("a[href]") && !opener.matches("[data-action*='side-panel#open']")) prefetchLink(opener)
   }
 
@@ -324,12 +324,20 @@ export default class extends Controller {
     this.current = null
   }
 
+  // What Enter opens on an item: the item itself, else the link in the cell that names a table's
+  // row (data-grow: a picker may come before it, as a task's owner does), else its first link or
+  // button.
+  #opener(item) {
+    if (item.matches(OPENER)) return item
+    return item.querySelector(`[data-grow] ${OPENER}`) || item.querySelector(OPENER)
+  }
+
   #open(event) {
     const item = this.current
     if (!item?.isConnected) return false
     if (document.activeElement !== item && item.contains(document.activeElement)) return false
 
-    const opener = item.matches(OPENER) ? item : item.querySelector(OPENER)
+    const opener = this.#opener(item)
     if (!opener) return false
 
     event.preventDefault()

@@ -46,7 +46,6 @@ class TasksController < ApplicationController
     @board = text_filtered(scope)
     scope = scope.open if @status == "open"
     scope = scope.where(status: @status) unless @status.in?(%w[open all])
-    @column_widths = column_widths(scope, :title, :work, :client) if @view == "table"
     @tasks = paginate sorted(scope.includes(:custom_values).order(:due_on, :position, :id))
   end
 

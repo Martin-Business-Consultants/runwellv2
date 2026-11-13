@@ -3,27 +3,23 @@
 <% listed = CustomField.for("Client").listed.to_a %>
 
 <% content_for :index_filters do %>
-  <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status, options: Client.filter_options %>
+  <%= ui :filter, param: :status, label: "Show", value: @status, any: false, options: Client.filter_options %>
 <% end %>
-<% if @view == "table" %>
-  <% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with work can’t be deleted, and are skipped and named.") : nil) do %>
-    <%= bulk_menu bulk_clients_path, method: :patch, name: "client[status]", label: "Status", choices: Client::STATUSES.map { [ it.humanize, it ] }, params: { list_status: @status } %>
-  <% end %>
-  <% end %>
+<% bar = bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_clients_path, noun: term(:client, count: 2).downcase, message: "Any with work can’t be deleted, and are skipped and named.") : nil) do %>
+  <%= bulk_menu bulk_clients_path, method: :patch, name: "client[status]", label: "Status", choices: Client::STATUSES.map { [ it.humanize, it ] }, params: { list_status: @status } %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: "New " + term(:client).downcase, new_path: new_client_path, new_modal: true %>
 
 <% if @clients.any? %>
-  <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
-                 ui_column(:status, "Status", sort: :status, width: :status),
-                 ui_column(:contacts, "Contacts", width: :avatars),
-                 ui_column(:works, "Open " + term(:work, count: 2).downcase, width: :number, align: :end),
+  <% columns = [ ui_column(:name, "Name", sort: :name, hideable: false),
+                 ui_column(:status, "Status", sort: :status),
+                 ui_column(:contacts, "Contacts"),
+                 ui_column(:works, "Open " + term(:work, count: 2).downcase, align: :end),
                  *custom_field_columns(listed) ] %>
-  <%= render "ui/data_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client, row_locals: { listed: listed },
-        page: @page, selectable: true, actions: true %>
+  <%= render "layouts/shared/list_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client, row_locals: { listed: listed },
+        page: @page, selectable: true, noun: term(:client).downcase, bulk: bar, actions: true %>
 <% elsif Client.exists? %>
-  <%= render "layouts/shared/empty", text: "No #{@status} #{term(:client, count: 2).downcase}.", action_text: "Show all", action_path: clients_path(status: "all", view: params[:view]) %>
+  <%= ui :empty, description: "No #{@status} #{term(:client, count: 2).downcase}.", action: ui(:button, href: clients_path(status: "all", view: params[:view]), variant: :outline, size: :sm, content: "Show all") %>
 <% else %>
-  <%= render "layouts/shared/empty", text: "No #{term(:client, count: 2).downcase} yet.", action_text: "Add your first #{term(:client).downcase}", action_path: new_client_path %>
+  <%= ui :empty, description: "No #{term(:client, count: 2).downcase} yet.", action: ui(:button, href: new_client_path, variant: :outline, size: :sm, content: "Add your first #{term(:client).downcase}") %>
 <% end %>

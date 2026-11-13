@@ -2,7 +2,7 @@
 /* (its behaviour is Runwell's: popups with their keys, the index toolbar, the data table, bulk
 /* actions, index cards). Unlayered, so these win over rune's components.
 /*
-/* 1 Popups   2 Index toolbar and filters   3 Data table   4 Bulk bar   5 Index cards
+/* 1 Popups   2 Index toolbar and filters   3 Lists   4 Bulk bar   5 Index cards
 /* 6 Small pieces   7 Form widgets */
 
 /* ======================================================================= 1 Popups */
@@ -50,27 +50,26 @@
 .popup input:is([type="search"], [type="text"]) { flex: none; height: var(--control-h-sm); margin-bottom: 4px; }
 .popup .popup__list { flex: none; }
 
-/* rune popover menus: a checkbox that isn't a menu item (the Columns menu: it stays open). */
-.menu__check { display: flex; align-items: center; gap: var(--s-2); min-height: var(--control-h); padding: 0 var(--s-3); border-radius: calc(5px * var(--radius-scale)); cursor: pointer; }
-.menu__check:hover { background: var(--layer-2); }
-
 /* ======================================================================= 2 Index toolbar and filters */
 
-/* An index's top row: its filter pills, and across from them the view toggle and New. */
-.index-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: var(--control-h); }
-.index-toolbar__filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); min-width: 0; }
+/* An index's top row: its filters (ui :filter pills in ui :filter_bar), and across from them the
+/* view toggle and New. */
+.index-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-3); min-height: var(--control-h); }
+.index-toolbar__filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); min-width: 0; min-height: var(--control-h); }
 .index-toolbar__end { display: flex; align-items: center; gap: var(--s-3); flex: 0 0 auto; }
+/* The row of filters as plugins' pages write it by hand. */
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
-
-/* A quick filter: its pill and popup. Hidden when it has nothing to filter by. */
-.quick-filter { position: relative; display: inline-flex; }
-.quick-filter:not(:has(.popup__item)) { display: none !important; }
-.filters:not(.filters--expanded) .quick-filter:not([data-filter-show="true"]) { display: none; }
+.view-toggle .icon { width: 1rem; height: 1rem; }
+/* On a phone the filters take a row of their own under the view toggle and New. */
+@media (max-width: 640px) {
+  .index-toolbar { flex-wrap: wrap; justify-content: flex-end; }
+  .index-toolbar__filters { order: 2; flex: 1 1 100%; }
+}
 
 /* New: the page's primary action, with its key. On a phone, just the icon. */
 .new-link kbd { height: 1.125rem; min-width: 1.125rem; border-color: color-mix(in srgb, var(--panel) 25%, transparent); background: transparent; color: inherit; opacity: .7; }
 @media (max-width: 640px) {
-  .new-link { width: var(--control-h); padding: 0; }
+  .ui-button.new-link { width: var(--control-h); padding: 0; }
   .new-link :is(.new-link__text, .new-link__key) { display: none; }
 }
 
@@ -83,95 +82,76 @@
 :is(tr, li, .sheet-link, .side-panel__context):hover .page-link, .page-link:focus-visible { opacity: 1; }
 .page-link:hover { background: var(--hover); color: var(--accent); }
 
-/* ======================================================================= 3 Data table */
+/* ======================================================================= 3 Lists */
 
-/* ui/_data_table on rune's .table: sortable headers, a checkbox column, edit and delete at each
-/* row's end, a Columns menu, and pages underneath. */
-.data-table-wrap { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
-.data-table-wrap__toolbar { display: flex; align-items: center; justify-content: flex-end; gap: var(--s-2); }
-.data-table-wrap__toolbar:empty { display: none; }
-.data-table td strong { font-weight: var(--weight-strong); }
-.data-table td a:not([class]) { color: var(--text); font-weight: var(--weight-strong); text-decoration: none; }
-.data-table td a:not([class]):hover { color: var(--accent); }
-.data-table .data-table__number { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.data-table .data-table__center { text-align: center; }
-/* A fitted column's text (a custom field): one line, cut short rather than broken over two. */
-.data-table .data-table__fit { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.data-table [data-column][hidden] { display: none; }
-@media (max-width: 640px) { .data-table td { white-space: nowrap; } }
+/* An index's table (layouts/shared/_list_table): runeui's ui :table in a bordered panel, with its
+/* pages underneath. runeui sizes the columns (each as wide as what it holds, the one marked
+/* data-grow taking the rest and cutting a long name short) and scrolls the table sideways in its
+/* container when a window is too narrow for them. What's here is Runwell's own: the panel, the
+/* links and pickers in the cells, the row the keys are on, and the row's edit and delete. */
+.list-table { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.list-table [data-slot="table-scroll"] { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+.list-table { --ui-table-truncate: 14rem; }
+/* Tasks has the most columns: its work and client give the task's title the room. */
+#tasks_list { --ui-table-truncate: 10rem; }
+.list-table [data-slot="table"] :is(th, td):first-child { padding-inline-start: var(--s-3); }
+.list-table [data-slot="table"] :is(th, td):last-child { padding-inline-end: var(--s-3); }
+.list-table [data-slot="table"] th { color: var(--text-muted); font-size: var(--text-meta); }
+.list-table [data-slot="table"] td { height: var(--row-h); }
+.list-table [data-slot="table"] :is(th, td)[data-slot="table-select"] { padding-inline: var(--s-3) 0; }
+/* Runwell's markup in a cell reads --accent and --ring as the brand colour and the focus shadow
+/* (runwell.css, 2); runeui's parts inside set their own again. */
+[data-slot="table"] td, [data-slot="bulk-bar"] form { --accent: var(--rune-accent); --ring: var(--rune-ring); }
+.list-table td strong { font-weight: var(--weight-strong); }
+.list-table td a:not([class]), .list-table td a.row-link { color: var(--text); font-weight: var(--weight-strong); text-decoration: none; }
+.list-table td a:not([class]):hover, .list-table td a.row-link:hover { color: var(--accent); }
+/* The growing column's link cuts short with it (a sheet-link is a flex row: its link shrinks). */
+.list-table td:is([data-grow], [data-truncate]) > a { display: block; overflow: hidden; text-overflow: ellipsis; }
+.list-table td:is([data-grow], [data-truncate]) .sheet-link { display: flex; }
+/* A task's title wraps to two lines rather than being cut at one (data-grow="wrap"). */
+.list-table td[data-grow="wrap"] .sheet-link { align-items: flex-start; }
+.list-table td[data-grow="wrap"] .sheet-link > a:first-child { display: -webkit-box; white-space: normal; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+/* A cell whose text runs over lines instead of being cut (the audit log's details). */
+.list-table td.list-table__wrap { white-space: normal; overflow-wrap: anywhere; }
+.list-table__corner { width: 1%; }
+.list-table__corner [data-slot="menu"] { display: inline-flex; margin-block: -0.25rem; font-weight: var(--weight); }
 
-/* Widths that hold still (ui_data_table_colgroup: a width on each <col>, as a class, since views
-/* carry no style attributes): sorting or turning a page moves nothing; narrower than 48rem it
-/* scrolls. */
-.data-table--fixed { min-width: 48rem; table-layout: fixed; }
-/* The least width a fixed table needs (ui_data_table_min_width_class): its fitted columns and room
-/* for the one that grows; narrower, it scrolls sideways inside its .table-wrap. */
-.data-table--min-w40 { min-width: 40ch; } .data-table--min-w50 { min-width: 50ch; } .data-table--min-w60 { min-width: 60ch; } .data-table--min-w70 { min-width: 70ch; } .data-table--min-w80 { min-width: 80ch; } .data-table--min-w90 { min-width: 90ch; } .data-table--min-w100 { min-width: 100ch; } .data-table--min-w110 { min-width: 110ch; } .data-table--min-w120 { min-width: 120ch; } .data-table--min-w130 { min-width: 130ch; } .data-table--min-w140 { min-width: 140ch; } .data-table--min-w150 { min-width: 150ch; } .data-table--min-w160 { min-width: 160ch; } .data-table--min-w170 { min-width: 170ch; } .data-table--min-w180 { min-width: 180ch; } .data-table--min-w190 { min-width: 190ch; } .data-table--min-w200 { min-width: 200ch; } .data-table--min-w210 { min-width: 210ch; } .data-table--min-w220 { min-width: 220ch; } .data-table--min-w230 { min-width: 230ch; } .data-table--min-w240 { min-width: 240ch; }
-.data-table--fixed td { overflow-wrap: anywhere; }
-/* The widths are in characters, tuned when the body was 13px: the table and its <col>s keep that
-/* measure and the cells take the body's size, so the same columns fit the same page at 14px. */
-.data-table--fixed { font-size: .8125rem; }
-.data-table--fixed td { font-size: var(--text-ui); }
-/* rune_ui's column convention (ui_data_table_colgroup): the identifying column takes the leftover
-/* width; every other column is as wide as its content, in characters (plus the cell's padding). */
-.data-table__col--grow { width: auto; }
-.data-table__col--w3 { width: calc(3ch + 2 * var(--s-3)); } .data-table__col--w4 { width: calc(4ch + 2 * var(--s-3)); } .data-table__col--w5 { width: calc(5ch + 2 * var(--s-3)); } .data-table__col--w6 { width: calc(6ch + 2 * var(--s-3)); } .data-table__col--w7 { width: calc(7ch + 2 * var(--s-3)); } .data-table__col--w8 { width: calc(8ch + 2 * var(--s-3)); } .data-table__col--w9 { width: calc(9ch + 2 * var(--s-3)); } .data-table__col--w10 { width: calc(10ch + 2 * var(--s-3)); } .data-table__col--w11 { width: calc(11ch + 2 * var(--s-3)); } .data-table__col--w12 { width: calc(12ch + 2 * var(--s-3)); } .data-table__col--w13 { width: calc(13ch + 2 * var(--s-3)); } .data-table__col--w14 { width: calc(14ch + 2 * var(--s-3)); } .data-table__col--w15 { width: calc(15ch + 2 * var(--s-3)); } .data-table__col--w16 { width: calc(16ch + 2 * var(--s-3)); } .data-table__col--w17 { width: calc(17ch + 2 * var(--s-3)); } .data-table__col--w18 { width: calc(18ch + 2 * var(--s-3)); } .data-table__col--w19 { width: calc(19ch + 2 * var(--s-3)); } .data-table__col--w20 { width: calc(20ch + 2 * var(--s-3)); } .data-table__col--w21 { width: calc(21ch + 2 * var(--s-3)); } .data-table__col--w22 { width: calc(22ch + 2 * var(--s-3)); } .data-table__col--w23 { width: calc(23ch + 2 * var(--s-3)); } .data-table__col--w24 { width: calc(24ch + 2 * var(--s-3)); } .data-table__col--w25 { width: calc(25ch + 2 * var(--s-3)); } .data-table__col--w26 { width: calc(26ch + 2 * var(--s-3)); } .data-table__col--w27 { width: calc(27ch + 2 * var(--s-3)); } .data-table__col--w28 { width: calc(28ch + 2 * var(--s-3)); } .data-table__col--w29 { width: calc(29ch + 2 * var(--s-3)); } .data-table__col--w30 { width: calc(30ch + 2 * var(--s-3)); } .data-table__col--w31 { width: calc(31ch + 2 * var(--s-3)); } .data-table__col--w32 { width: calc(32ch + 2 * var(--s-3)); } .data-table__col--w33 { width: calc(33ch + 2 * var(--s-3)); } .data-table__col--w34 { width: calc(34ch + 2 * var(--s-3)); } .data-table__col--w35 { width: calc(35ch + 2 * var(--s-3)); } .data-table__col--w36 { width: calc(36ch + 2 * var(--s-3)); } .data-table__col--w37 { width: calc(37ch + 2 * var(--s-3)); } .data-table__col--w38 { width: calc(38ch + 2 * var(--s-3)); } .data-table__col--w39 { width: calc(39ch + 2 * var(--s-3)); } .data-table__col--w40 { width: calc(40ch + 2 * var(--s-3)); } .data-table__col--w41 { width: calc(41ch + 2 * var(--s-3)); } .data-table__col--w42 { width: calc(42ch + 2 * var(--s-3)); } .data-table__col--w43 { width: calc(43ch + 2 * var(--s-3)); } .data-table__col--w44 { width: calc(44ch + 2 * var(--s-3)); } .data-table__col--w45 { width: calc(45ch + 2 * var(--s-3)); } .data-table__col--w46 { width: calc(46ch + 2 * var(--s-3)); } .data-table__col--w47 { width: calc(47ch + 2 * var(--s-3)); } .data-table__col--w48 { width: calc(48ch + 2 * var(--s-3)); }
+/* The row j / k landed on. */
+[data-slot="table"] tbody tr:focus-visible { outline: none; box-shadow: none; }
 
-/* The row j / k landed on, and the rows picked for a bulk action. */
-.data-table tbody tr:focus-visible { outline: none; box-shadow: none; }
-.data-table tbody tr:focus-visible td { background: var(--hover); }
-.data-table tbody tr:focus-visible td:first-child { box-shadow: inset 0 0 0 1px var(--accent); }
-.data-table tr[data-picked] td { background: var(--accent-soft); }
-
-/* A sortable header: its label a small ghost button, an arrow beside it on hover and on the sorted column. */
-.data-table th.data-table__sortable { padding-block: 0; padding-left: calc(var(--s-3) - var(--s-2)); }
-.data-table__sort { display: inline-flex; align-items: center; gap: 6px; height: var(--control-h-sm); padding: 0 var(--s-2); border-radius: var(--radius-control); color: inherit; text-decoration: none; }
-.data-table__sort:hover { background: var(--hover); color: var(--text); }
-.data-table__sort--active { color: var(--text); }
-.data-table__center > .data-table__sort { justify-content: center; }
-.data-table__sort-arrow { width: 0; height: 0; border-bottom: .3em solid currentColor; border-inline: .27em solid transparent; opacity: 0; transition: opacity 80ms, rotate 120ms; }
-.data-table__sort:hover .data-table__sort-arrow { opacity: .4; }
-.data-table__sort--active .data-table__sort-arrow { opacity: 1; }
-.data-table__sort-arrow--desc { rotate: 180deg; }
-
-/* The checkbox column: header and rows the same width, so the boxes stack. Its width is a share of
-/* the table, which differs from table to table, so the box keeps to the column's left edge: it sits
-/* in the same place on every index, never shifting between pages. */
-.data-table :is(th, td).data-table__select { width: 1%; padding-right: var(--s-1); text-align: left; }
-.data-table__checkbox { display: block; margin: 0; cursor: pointer; }
-
-/* Edit and delete, quiet until the row is hovered. */
-.data-table__actions, .data-table__actions-header { width: 1%; white-space: nowrap; text-align: right; }
-.data-table__actions-row { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
-.data-table__actions dialog { white-space: normal; text-align: left; }
+/* Edit and delete at a row's end, quiet until the row is hovered. */
+.row-actions { width: 1%; }
+.row-actions__row { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
 .row-action { opacity: .6; }
 tr:hover .row-action, .row-action:focus-visible { opacity: 1; }
-.data-table__columns { font-weight: var(--weight); }
 
-/* "Load more" and the pages under a table. */
+/* "Load more" for lists that load their next page as you scroll (PaginationHelper), and the pages
+/* under a table (table_pagination: which rows are showing, then ui :pagination). */
 .pagination-link { display: block; flex: 1; min-height: 1.5rem; pointer-events: none; text-decoration: none; }
 .pagination-link.pagination-link--active-when-observed { width: 0; height: 0; overflow: hidden; visibility: hidden; }
 turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagination-link--active-when-observed { display: none; }
 .pagination-list { display: contents; }
 .pagination-link.pagination-link--manual { flex: none; margin: 0 auto; pointer-events: auto; }
-.data-table .pagination-row td { height: 0; padding: 0; border: 0; }
-.table-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
-.table-pagination__summary { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.table-pagination__pages { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1); }
-.table-pagination__gap { padding: 0 var(--s-1); color: var(--text-faint); }
+.table .pagination-row td { height: 0; padding: 0; border: 0; }
+.list-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.list-pagination__summary { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.list-pagination [data-slot="pagination"] { width: auto; }
 
 /* ======================================================================= 4 Bulk bar */
 
-/* While rows are picked (data-bulk-active on <main>) the bar takes the index toolbar's row: its
-/* pills where the filters were, Delete where the view toggle and New were. */
+/* While rows are picked, the table's bulk bar (ui :bulk_bar, in the table's container) takes the
+/* index toolbar's row: the toolbar steps aside and the bar is as tall as it was, so the table
+/* doesn't move. Each action is a form of its own (BulkHelper). */
+#main:has(.list-table [data-slot="bulk-bar"]:not([hidden])) .index-toolbar { display: none; }
+.list-table [data-slot="bulk-bar"] { margin-bottom: var(--s-4); flex-wrap: wrap; }
+[data-slot="bulk-bar"] .bulk-form { display: inline-flex; flex-direction: row; align-items: center; gap: var(--s-2); margin: 0; }
+[data-slot="bulk-bar"] [data-slot="bulk-actions"] { flex-wrap: wrap; align-items: center; }
+/* A plugin page's bar, in the index toolbar (content_for :index_bulk): it takes the filters' place. */
 #main[data-bulk-active] :is(.index-toolbar__filter-pills, .index-toolbar__end) { display: none !important; }
 #main[data-bulk-active] .index-toolbar__filters { flex: 1 1 auto; }
-.bulk-bar { display: contents; }
-.bulk-bar[hidden] { display: none; }
-.bulk-bar__actions { justify-content: flex-start; }
-.bulk-bar__count { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--text); }
-.bulk-bar__count:hover { background: var(--accent-soft); }
-.bulk-bar__end { margin-left: auto; }
+.index-toolbar [data-slot="bulk-bar"] { flex: 1; margin: 0; }
+/* A plugin's table with the native checkboxes (bulk_select_cell). */
+:is(th, td)[data-slot="table-select"] > input[type="checkbox"] { display: block; margin: 0; cursor: pointer; }
 
 /* ======================================================================= 5 Cards */
 
@@ -414,13 +394,13 @@ input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
 .popup .popup__btn:is(:hover, :focus-visible), .popup__item[aria-selected] { background: var(--brand-tint); }
 .popup .popup__btn:is(:hover, :focus-visible) .icon:not(.checked) { color: var(--accent); }
 .popup__item[aria-checked="true"] .popup__btn .icon.checked { color: var(--accent); }
-.data-table tbody tr:focus-visible td, .data-table tbody tr[data-keyboard-current] td { background: var(--brand-tint); }
+[data-slot="table"] tbody tr:focus-visible, [data-slot="table"] tbody tr[data-keyboard-current] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] { background: var(--brand-tint); }
 .settings-nav__link[aria-current="page"] .icon { color: var(--accent); }
 .record-list__row[data-keyboard-current], .list-row[data-keyboard-current] { background: var(--brand-tint); }
 
 /* A person in a table's cell (person_cell): the owner column's avatar, then the name. */
-.person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.person-cell { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; max-width: 100%; vertical-align: middle; }
 .person-cell > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* A switch beside its label (switch_field without a hint, .field--inline): a centred row with a

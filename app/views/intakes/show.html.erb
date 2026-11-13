@@ -2,36 +2,31 @@
 <%= turbo_stream_from :tasks %>
 
 <% content_for :index_filters do %>
-  <%= render "layouts/shared/quick_filter", title: "Source…", param: :source, current: @source,
+  <%= ui :filter, param: :source, label: "Source", value: @source, any: false,
         options: [ [ "Any source", "any" ], [ term(:client, count: 2), "clients" ], [ "AI", "agents" ], [ "The team", "team" ] ] %>
-  <%= render "layouts/shared/quick_filter", title: "Needs…", param: :needs, current: @needs,
+  <%= ui :filter, param: :needs, label: "Needs", value: @needs, any: false,
         options: [ [ "Anything", "any" ], [ "Someone on it", "owner" ], [ "A " + term(:work).downcase, "work" ] ] %>
-  <%= link_to agent_activity_path(whose: "any"), class: "btn btn--ghost btn--sm" do %>
-    <%= icon_tag "ai" %> <span>AI activity</span>
-  <% end %>
-  <%= link_to intake_shifts_path, class: "btn btn--ghost btn--sm", title: "Who hears what comes in, and when" do %>
-    <%= icon_tag "calendar" %> <span>Schedule</span>
-  <% end %>
+  <%= ui :button, href: agent_activity_path(whose: "any"), variant: :ghost, size: :sm, content: safe_join([ icon_tag("ai"), "AI activity" ]) %>
+  <%= ui :button, href: intake_shifts_path, variant: :ghost, size: :sm, title: "Who hears what comes in, and when", content: safe_join([ icon_tag("calendar"), "Schedule" ]) %>
 <% end %>
-<% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
-    <%= bulk_menu bulk_tasks_acceptance_path, method: :post, name: "owner_id", label: "Accept for…", choices: [ [ "You", "me" ] ] + task_owner_options.reject { |_, id| id == Current.user.person.id } %>
-    <%= bulk_text bulk_tasks_decline_path, method: :post, name: "note", label: "Decline", placeholder: "Why? (optional, internal)", submit: "Decline" %>
-  <% end %>
+<% bar = bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
+  <%= bulk_menu bulk_tasks_acceptance_path, method: :post, name: "owner_id", label: "Accept for…", choices: [ [ "You", "me" ] ] + task_owner_options.reject { |_, id| id == Current.user.person.id } %>
+  <%= bulk_text bulk_tasks_decline_path, method: :post, name: "note", label: "Decline", placeholder: "Why? (optional, internal)", submit: "Decline" %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view %>
 
-<% columns = [ ui_column(:source, "Source", width: [ 10, "Source" ]),
-               ui_column(:title, term(:task), sort: :title, width: [ [ @column_widths[:title].to_i, 26 ].min, term(:task) ], hideable: false),
-               ui_column(:home, "For", sort: :work, width: [ [ [ @column_widths[:work].to_i, @column_widths[:client].to_i ].max + 4, 24 ].min, "For" ]),
-               ui_column(:owner, "Owner", width: :avatar),
-               ui_column(:came_in, "Came in", sort: :came_in, width: [ 9, "Came in" ]),
-               ui_column(:decide, "Decide", width: [ 16, "Decide" ], hideable: false) ] %>
+<% columns = [ ui_column(:source, "Source"),
+               ui_column(:title, term(:task), sort: :title, hideable: false),
+               ui_column(:home, "For", sort: :work),
+               ui_column(:owner, "Owner"),
+               ui_column(:came_in, "Came in", sort: :came_in),
+               ui_column(:decide, "Decide", hideable: false) ] %>
 <%# The empty state is always there and shows by CSS once no row is left (.intake:has), so a row
     leaving by stream needs no reload to say so. %>
 <div class="intake">
-  <%= render "ui/data_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page, selectable: true %>
+  <%= render "layouts/shared/list_table", id: "intake", columns: columns, rows: @tasks, row: "intakes/row", as: :task, page: @page,
+        selectable: true, noun: term(:task).downcase, bulk: bar %>
   <div class="intake__empty">
-    <%= render "layouts/shared/empty", text: "Nothing waiting. Everything that came in has been accepted or declined." %>
+    <%= ui :empty, description: "Nothing waiting. Everything that came in has been accepted or declined." %>
   </div>
 </div>

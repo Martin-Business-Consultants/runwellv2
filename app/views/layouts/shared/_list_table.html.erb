@@ -1,0 +1,44 @@
+<%# locals: (id:, columns:, rows:, row:, as:, row_locals: nil, page: nil, selectable: nil, actions: nil, bulk: nil, noun: nil) %>
+<%# An index's table, on runeui's (ui :table): headers that sort (ui :sort_header, through
+    TableSorting's params), a checkbox column and the bulk bar while rows are picked (selectable:,
+    bulk: a bulk_bar, noun: what it counts), a Columns menu in the header's corner (ui :columns_menu:
+    this browser remembers which are hidden), and pages underneath (ui :pagination).
+
+      columns = [ ui_column(:name, "Name", sort: :name, hideable: false), ui_column(:status, "Status", sort: :status) ]
+      render "layouts/shared/list_table", id: "clients", columns: columns, rows: @clients, row: "clients/row", as: :client,
+        page: @page, selectable: true, noun: "client", bulk: bulk_bar { … }, actions: true
+
+    row is a partial rendering one <tr data-filter-target="item">: ui :select_cell first when
+    selectable, then a <td data-column="key"> per column in order (data-grow on the one that names
+    the row: it takes the leftover width and cuts a long name short), then
+    layouts/shared/row_actions when actions (without actions, an empty <td> under the header's corner
+    when it holds the Columns menu). row_locals go to every row (what all rows share, so
+    it's read once). %>
+<% hideable = columns.select(&:hideable) %>
+<% grow = list_table_grow(columns) %>
+<div class="list-table" id="<%= id %>_list"<% if actions %> data-controller="row-delete"<% end %>>
+  <%= ui :table, id: "#{id}_table", selectable: selectable, noun: noun, bulk: bulk, columns: (id if hideable.size > 1) do %>
+    <thead>
+      <tr>
+        <% if selectable %>
+          <%= ui :select_cell, all: true, label: "Select every row on this page" %>
+        <% end %>
+        <% columns.each do |column| %>
+          <%# herb:key column.key %>
+          <%= list_table_th column, grow: column.equal?(grow) %>
+        <% end %>
+        <% if hideable.size > 1 %>
+          <th data-align="end" class="list-table__corner"><%= ui :columns_menu, columns: hideable.map { [ it.label, it.key ] } %></th>
+        <% elsif actions %>
+          <th class="list-table__corner"><span class="visually-hidden">Actions</span></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody id="<%= page ? pagination_frame_id_for("#{id}_rows", page.number) : "#{id}_rows" %>">
+      <%= render partial: row, collection: rows, as: as, locals: row_locals || {} %>
+    </tbody>
+  <% end %>
+  <% if page %>
+    <%= table_pagination page %>
+  <% end %>
+</div>

@@ -2,31 +2,29 @@
 <% manage = can?(:manage_people) %>
 
 <% content_for :index_filters do %>
-  <%= render "layouts/shared/quick_filter", title: "Who…", param: :who, current: @who,
+  <%= ui :filter, param: :who, label: "Who", value: @who, any: false,
         options: [ [ "Everyone", "everyone" ], [ "The team", "team" ], [ "#{term(:client, count: 2)}’ people", "clients" ] ] %>
-  <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
+  <%= ui :filter, param: :status, label: "Show", value: @status, any: false,
         options: [ [ "Active (#{@counts["active"]})", "active" ], [ "Deactivated (#{@counts["deactivated"]})", "deactivated" ], [ "All (#{@counts.values.sum})", "all" ] ] %>
 <% end %>
-<% if @view == "table" && manage %>
-  <% content_for :index_bulk do %>
-    <%= bulk_bar do %>
-      <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] }, params: { list_status: @status } %>
-      <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ], params: { list_status: @status } %>
-    <% end %>
+<% if manage %>
+  <% bar = bulk_bar do %>
+    <%= bulk_menu bulk_users_path, method: :patch, name: "user[role]", label: "Role", choices: User::ROLES.map { [ it.capitalize, it ] }, params: { list_status: @status } %>
+    <%= bulk_menu bulk_users_path, method: :patch, name: "user[status]", label: "Status", choices: [ [ "Active", "active" ], [ "Deactivated", "deactivated" ] ], params: { list_status: @status } %>
   <% end %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", view: @view, new_text: ("Invite someone" if manage), new_path: (new_user_invitation_path if manage), new_modal: true %>
 
 <% if @people.any? %>
-  <% columns = [ ui_column(:name, "Name", sort: :name, width: [ @column_widths[:name], "Name" ], hideable: false),
-                 ui_column(:email, "Email address", sort: :email, width: [ @column_widths[:email], "Email address" ]),
-                 ui_column(:role, "Role", sort: :role, width: :pill),
-                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
-                 ui_column(:status, "Status", width: :status) ] %>
-  <%= render "ui/data_table", id: "users", columns: columns, rows: @people, row: "users/row", as: :person,
-        row_locals: { manage: manage }, page: @page, selectable: manage, actions: true %>
+  <% columns = [ ui_column(:name, "Name", sort: :name, hideable: false),
+                 ui_column(:email, "Email address", sort: :email),
+                 ui_column(:role, "Role", sort: :role),
+                 ui_column(:client, term(:client), sort: :client),
+                 ui_column(:status, "Status") ] %>
+  <%= render "layouts/shared/list_table", id: "users", columns: columns, rows: @people, row: "users/row", as: :person,
+        row_locals: { manage: manage }, page: @page, selectable: manage, noun: "person", bulk: bar, actions: true %>
 <% else %>
-  <%= render "layouts/shared/empty", text: "No #{@status} users.", action_text: "Show all", action_path: users_path(status: "all", who: "everyone", view: params[:view]) %>
+  <%= ui :empty, description: "No #{@status} users.", action: ui(:button, href: users_path(status: "all", who: "everyone", view: params[:view]), variant: :outline, size: :sm, content: "Show all") %>
 <% end %>
 
 <% if manage && @invitations.any? %>

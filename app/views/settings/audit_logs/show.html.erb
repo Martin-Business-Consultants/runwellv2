@@ -8,20 +8,18 @@
       <h2>Audit log</h2>
       <p class="settings-section__description">Everything that happened, newest first: sign-ins (and failed ones), two-factor and role changes, settings, and every change of consequence to <%= term(:client, count: 2).downcase %>, <%= term(:work, count: 2).downcase %> and <%= term(:task, count: 2).downcase %>. Nothing here can be edited or deleted.</p>
     </header>
-    <div class="filters">
-      <%= render "layouts/shared/quick_filter", title: "Area…", param: :area, current: @area, options: Settings::AuditLogsController::AREAS.keys.map { |key| [ Settings::AuditLogsController.area_label(key), key ] } %>
-      <%= render "layouts/shared/quick_filter", title: "When…", param: :days, current: @days, options: Settings::AuditLogsController::PERIODS.map { |key, label| [ label, key ] } %>
-      <%= render "layouts/shared/quick_filter", title: "Who…", param: :person, current: @person&.id&.to_s, options: [ [ "Anyone", "" ] ] + User.people.ordered.map { [ it.display_name, it.id.to_s ] } %>
-      <%= link_to settings_audit_log_path(filters.merge(format: :csv)), class: "btn btn--secondary btn--sm settings-end", data: { turbo: false } do %>
-        <%= icon_tag "share" %> <span>Download CSV</span>
-      <% end %>
-    </div>
+    <%= ui :filter_bar, clear: false do %>
+      <%= ui :filter, param: :area, label: "Area", value: @area, any: false, options: Settings::AuditLogsController::AREAS.keys.map { |key| [ Settings::AuditLogsController.area_label(key), key ] } %>
+      <%= ui :filter, param: :days, label: "When", value: @days, any: false, options: Settings::AuditLogsController::PERIODS.map { |key, label| [ label, key ] } %>
+      <%= ui :filter, param: :person, label: "Who", any: "Anyone", search: true, options: User.people.ordered.map { [ it.display_name, it.id.to_s ] } %>
+      <%= ui :button, href: settings_audit_log_path(filters.merge(format: :csv)), variant: :outline, size: :sm, class: "settings-end", data: { turbo: false }, content: safe_join([ icon_tag("share"), "Download CSV" ]) %>
+    <% end %>
 
     <% if @events.any? %>
       <% columns = [ ui_column(:when, "When", hideable: false), ui_column(:what, "What", hideable: false), ui_column(:who, "Who", hideable: false), ui_column(:on, "On", hideable: false), ui_column(:details, "Details", hideable: false, grow: true) ] %>
-      <%= render "ui/data_table", id: "audit", columns: columns, rows: @events, row: "settings/audit_logs/row", as: :event, page: @page, fixed: false %>
+      <%= render "layouts/shared/list_table", id: "audit", columns: columns, rows: @events, row: "settings/audit_logs/row", as: :event, page: @page %>
     <% else %>
-      <%= render "layouts/shared/empty", text: "Nothing in this area and period." %>
+      <%= ui :empty, description: "Nothing in this area and period." %>
     <% end %>
   </section>
 </div>

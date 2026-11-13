@@ -5,26 +5,24 @@
 
 <% content_for :index_filters do %>
   <% unless @view == "board" %>
-    <%= render "layouts/shared/quick_filter", title: "Show…", param: :status, current: @status,
+    <%= ui :filter, param: :status, label: "Show", value: @status, any: false,
           options: [ [ "Open " + term(:task, count: 2).downcase, "open" ], [ "All " + term(:task, count: 2).downcase, "all" ] ] + Task::STATUSES.without("done").map { [ it.humanize, it ] } %>
   <% end %>
-  <%= render "layouts/shared/quick_filter", title: "Due…", param: :due, current: @due,
+  <%= ui :filter, param: :due, label: "Due", value: @due, any: false,
         options: [ [ "Any time", "any" ], [ "Overdue", "overdue" ], [ "Due today", "today" ], [ "This week", "week" ] ] %>
-  <%= render "layouts/shared/quick_filter", title: "Owner…", param: :owner, current: @owner,
+  <%= ui :filter, param: :owner, label: "Owner", value: @owner, any: false, search: true,
         options: [ [ "You", "me" ], [ "Anyone", "any" ], [ "Unassigned", "none" ] ] + task_owner_options.map { |name, id| [ name, id.to_s ] } %>
-  <%= render "layouts/shared/quick_filter", title: "Made by…", param: :made_by, current: @made_by,
+  <%= ui :filter, param: :made_by, label: "Made by", value: @made_by, any: false,
         options: [ [ "Anyone", "any" ], [ "People", "people" ], [ "AI", "agents" ] ] %>
-  <%= render "layouts/shared/quick_filter", title: term(:work) + "…", param: :work, current: @work_filter,
+  <%= ui :filter, param: :work, label: term(:work), value: @work_filter, any: false, search: true,
         options: [ [ "All " + term(:work, count: 2).downcase, "all" ] ] + task_work_filter_options(@work_filter) %>
 <% end %>
 <% if @view == "table" %>
-  <% content_for :index_bulk do %>
-  <%= bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
+  <% bar = bulk_bar delete: (can?(:delete_records) ? bulk_delete(bulk_tasks_path, noun: term(:task, count: 2).downcase) : nil) do %>
     <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[status]", label: "Status", choices: Task::STATUSES.map { [ it.humanize, it ] } %>
     <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[owner_id]", label: "Owner", choices: [ [ "Unassigned", "none" ] ] + task_owner_options %>
     <%= bulk_menu bulk_tasks_path, method: :patch, name: "task[client_visible]", label: "Visibility", choices: [ [ "Shown to the #{term(:client).downcase}", "1" ], [ "Internal", "0" ] ] %>
     <%= bulk_date bulk_tasks_path, method: :patch, name: "task[due_on]", label: "Due date" %>
-  <% end %>
   <% end %>
 <% end %>
 <%# New task opens the quick action's task form (it picks the work or client it goes on), as g t n does. %>
@@ -34,17 +32,17 @@
 <% if @view == "board" %>
   <%= render "tasks/board/columns", board: @board %>
 <% else %>
-  <% columns = [ ui_column(:owner, "Owner", sort: :owner, width: :avatar),
-                 ui_column(:title, term(:task), sort: :title, width: [ @column_widths[:title], term(:task) ], hideable: false),
-                 ui_column(:work, term(:work), sort: :work, width: [ @column_widths[:work], term(:work) ]),
-                 ui_column(:client, term(:client), sort: :client, width: [ @column_widths[:client], term(:client) ]),
-                 ui_column(:due, "Due", sort: :due, width: [ 28, "Due" ]),
-                 ui_column(:status, "Status", sort: :status, width: :status, align: :center),
+  <% columns = [ ui_column(:owner, "Owner", sort: :owner),
+                 ui_column(:title, term(:task), sort: :title, hideable: false),
+                 ui_column(:work, term(:work), sort: :work),
+                 ui_column(:client, term(:client), sort: :client),
+                 ui_column(:due, "Due", sort: :due),
+                 ui_column(:status, "Status", sort: :status, align: :center),
                  *custom_field_columns(listed) ] %>
   <%# The list and its filter, for a status changed in a row (Tasks::StatusesController). %>
   <div class="task-list" data-task-list="index" data-task-list-state="<%= @status %>" data-task-list-keeps="<%= task_list_keeps(@status) %>">
-    <%= render "ui/data_table", id: "tasks", columns: columns, rows: @tasks, row: "tasks/row", as: :task,
-          row_locals: { listed: listed }, page: @page, selectable: true, actions: true %>
+    <%= render "layouts/shared/list_table", id: "tasks", columns: columns, rows: @tasks, row: "tasks/row", as: :task,
+          row_locals: { listed: listed }, page: @page, selectable: true, noun: term(:task).downcase, bulk: bar, actions: true %>
   </div>
   <% if @tasks.none? %>
     <%= render "tasks/blank" %>

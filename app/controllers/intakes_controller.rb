@@ -24,7 +24,6 @@ class IntakesController < ApplicationController
     scope = scope.where(owner_id: nil) if @needs == "owner"
     scope = scope.where(work_id: nil) if @needs == "work"
     scope = scope.includes(:owner, :client, :work, :contact, :custom_values, { assignments: :user }, created_by: :agent_owner).order(created_at: :desc, id: :desc)
-    @column_widths = column_widths(scope, :title, :client, :work) if request.format.html?
     @tasks = paginate sorted(scope)
   end
 end
