@@ -1,12 +1,18 @@
-<%# locals: (task:) %>
-<%# A task's due date on the Tasks table, changed in place: a date field that saves on change
-    (inline=panel, answered by tasks/update.turbo_stream, which redraws the task wherever it shows),
-    with Overdue while it's late and not done, and a mark when it repeats. Replaced on its own when the status changes in place. %>
-<span class="task-due" id="<%= dom_id(task, :due) %>">
-  <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :row_due), class: "task-due__form", data: { controller: "form" } do |form| %>
-    <%= hidden_field_tag :inline, "panel", id: nil %>
-    <%= date_input form, :due_on, placeholder: "No date", aria: { label: "Due" }, data: { action: "change->form#submit" } %>
-  <% end %>
+<%# locals: (task:, options_on_page: nil) %>
+<%# A task's due date on the Tasks table, changed in place: a button saying the date, opening the
+    page's one calendar beside it (task_picker_menus); a pick shows at once (picker) and saves
+    (inline=panel, answered by tasks/update.turbo_stream, which redraws the task wherever it
+    shows), with Overdue while it's late and not done, and a mark when it repeats. Replaced on its
+    own when the status changes in place. %>
+<% unless options_on_page %>
+  <%= task_picker_menus %>
+<% end %>
+<span class="task-due" id="<%= dom_id(task, :due) %>" data-controller="picker" data-picker-kind-value="due"
+  data-picker-current-value="<%= task.due_on&.iso8601 %>" data-picker-menu-value="task-due-menu" data-picker-form-value="task-due-form" data-picker-url-value="<%= task_path(task) %>">
+  <button type="button" class="task-due__button" id="<%= dom_id(task, :due_button) %>" aria-haspopup="dialog" data-runeui-open="task-due-menu" data-action="click->picker#open"<% unless task.due_on %> data-empty<% end %>>
+    <span data-picker-target="display"><%= task.due_on ? l(task.due_on, format: "%b %-d, %Y") : "No date" %></span>
+    <span class="visually-hidden">Due date of <%= task.title %>. Change it</span>
+  </button>
   <% if task.repeats? %>
     <span class="task-due__repeat" title="Repeats <%= task.repeat_name.downcase %>" aria-label="Repeats <%= task.repeat_name.downcase %>"><%= icon_tag "refresh" %></span>
   <% end %>

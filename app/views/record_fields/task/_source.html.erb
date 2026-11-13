@@ -1,9 +1,8 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Came in by</span>
+  <%= form.ui :field, :source, label: "Came in by", class: "field" do %>
     <%= form.text_field :source, required: true, autocomplete: "off", placeholder: "app, email, phone…", form: form_id %>
-  </label>
+  <% end %>
 <% else %>
   <dt>Came in</dt><dd><%= record.source.humanize %>, <%= l record.created_at.to_date, format: :short %></dd>
 <% end %>

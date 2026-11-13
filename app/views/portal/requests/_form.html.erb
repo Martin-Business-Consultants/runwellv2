@@ -23,7 +23,7 @@
     <% if works.any? %>
       <div class="field">
         <%= form.label :work, "About", class: "field__label" %>
-        <%= form.select :work, works, { include_blank: "Nothing in particular", selected: request_record.work&.ref } %>
+        <%= form.select :work, works, { include_blank: "Nothing in particular", selected: request_record.work&.ref }, search: true %>
       </div>
     <% end %>
     <div class="field">

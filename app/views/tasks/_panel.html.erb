@@ -65,7 +65,7 @@
         <dd>
           <%= form_with model: task, url: task_path(task), method: :patch, namespace: dom_id(task, :panel_work), class: "task-panel__field", data: { controller: "form" } do |form| %>
             <%= hidden_field_tag :inline, "panel", id: nil %>
-            <%= form.select :work_id, task_work_options(task), { include_blank: "None yet" }, aria: { label: term(:work) }, data: { action: "change->form#submit" } %>
+            <%= form.select :work_id, task_work_options(task), { include_blank: "None yet" }, aria: { label: term(:work) }, search: true, data: { action: "change->form#submit" } %>
           <% end %>
         </dd>
         <% if task.work %>
@@ -101,4 +101,7 @@
   </div>
 
   <%= render "notes/section", subject: task, permanent: false, deferred: true %>
+  <%# The pickers' menus, when an answer redraws the panel (TasksHelper#page_template): a panel
+      opened over a page without task rows has no others. %>
+  <%= task_picker_menus(panel: true) %>
 </section>

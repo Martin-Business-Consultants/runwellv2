@@ -26,8 +26,8 @@
         <div class="field">
           <span class="field__label"><%= t("terms.#{key}.one") %></span>
           <div class="field-row">
-            <%= text_field_tag field + "[one]", @setting.terminology.dig(key, "one"), id: "terminology_#{key}_one", placeholder: t("terms.#{key}.one"), autocomplete: "off", aria: { label: t("terms.#{key}.one") + ", singular" } %>
-            <%= text_field_tag field + "[other]", @setting.terminology.dig(key, "other"), id: "terminology_#{key}_other", placeholder: t("terms.#{key}.other"), autocomplete: "off", aria: { label: t("terms.#{key}.one") + ", plural" } %>
+            <%= ui :input, name: field + "[one]", value: @setting.terminology.dig(key, "one"), id: "terminology_#{key}_one", placeholder: t("terms.#{key}.one"), autocomplete: "off", aria: { label: t("terms.#{key}.one") + ", singular" } %>
+            <%= ui :input, name: field + "[other]", value: @setting.terminology.dig(key, "other"), id: "terminology_#{key}_other", placeholder: t("terms.#{key}.other"), autocomplete: "off", aria: { label: t("terms.#{key}.one") + ", plural" } %>
           </div>
         </div>
       <% end %>

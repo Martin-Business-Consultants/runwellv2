@@ -1,7 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Also on it</span>
+  <%= form.ui :field, :other_owner_ids, label: "Also on it", class: "field" do %>
     <%= form.select :other_owner_ids, task_people.map { [ it.display_name, it.id ] }, { include_blank: "Nobody else", selected: record.other_owners.map(&:id) }, multiple: true, form: form_id %>
-  </label>
+  <% end %>
 <% end %>

@@ -1,8 +1,7 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <%# Set when it starts (blank: as its type says), fixed after. On show it's in the line under the title. %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Runs as</span>
+  <%= form.ui :field, :shape, label: "Runs as", class: "field" do %>
     <%= form.select :shape, WorkType::SHAPES.invert.to_a, { include_blank: (record.new_record? ? "As its type says" : nil) }, disabled: record.persisted?, form: form_id %>
-  </label>
+  <% end %>
 <% end %>

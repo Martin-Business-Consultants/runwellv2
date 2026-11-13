@@ -20,7 +20,7 @@
     </ul>
     <% if can?(:manage_intake) %>
       <%= form_with model: IntakeShift.new, url: intake_shifts_path, scope: :intake_shift, namespace: "new_intake_shift", class: "intake-schedule__add" do |form| %>
-        <%= form.select :user_id, people, { include_blank: "Someone on the team…" }, required: true, aria: { label: "Who" } %>
+        <%= form.select :user_id, people, { include_blank: "Someone on the team…" }, required: true, search: true, aria: { label: "Who" } %>
         <%= form.button class: "btn btn--secondary btn--sm" do %>
           <%= icon_tag "add" %> <span>Add to the schedule</span>
         <% end %>

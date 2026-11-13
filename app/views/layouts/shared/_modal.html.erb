@@ -5,7 +5,7 @@
     the list you're on (a stream that also closes this), or for a record whose next step is on its
     own page (new work), you go there. Esc or Cancel closes it. %>
 <turbo-frame id="modal">
-  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
+  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#closeOnEscape">
     <dialog class="dialog dialog--lg record-modal" aria-label="<%= title %>" data-dialog-target="dialog">
       <div class="dialog__box">
         <%= yield %>

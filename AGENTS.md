@@ -195,22 +195,26 @@ event); every event has a source.
 - A snippet to read or copy (a command, a request body) is `code_block code, language: "bash"`
   (or `"json"`, `"ruby"`, any Prism name Lexxy carries), never a bare `<pre>`: Lexxy's
   highlighter colours it as it does code blocks in rich text (`runwell/components.css`)
-- Every select is a combobox, Fizzy's, and every combobox has a box to search its choices: a button
-  opening the app's popup of choices (`combobox` or, for `multiple`, `multi-selection-combobox`, with
-  `dialog`, `navigable-list` and the filter box, `popup-filter`), writing hidden fields. It's the one
-  way to pick in a form (an index's filters are runeui's `ui :filter`, below).
-  The default form builder (`ComboboxFormBuilder`) renders `form.select`, `time_zone_select`,
-  `collection_select` and `grouped_collection_select` as usual and `combobox_tag` (`ComboboxHelper`)
-  rebuilds that `<select>` as the combobox, so include_blank (sent as ""), selected, disabled and
-  optgroups behave as in a select; a `select_tag` goes in `combobox_tag { … }`, and
-  `combobox: false` keeps a plain `<select>`. The hidden fields and the chosen item come from the
-  server, so a morph keeps them. A pick fires `change` on its field, and the select's `data-action`
-  moves to the wrapper, so save-on-change forms (`change->form#submit`) work
-- Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): a calendar
-  (vanillajs-datepicker, vendored in `vendor/javascript`, through the `date-field` controller) on a
-  read-only field showing "Oct 20, 2026", beside a hidden field holding YYYY-MM-DD, which is what's
-  sent. Both come from the server, so a morph can't undo it. `t` today, `+`/`-` a day, Delete
-  clears. Never a text field for a date, and no other date picker
+- Every select is a runeui control, and every long one has a box to search its choices. The default
+  form builder (`RunwellFormBuilder`) renders `form.select`, `time_zone_select`, `collection_select`
+  and `grouped_collection_select` as Rails does, and `select_control` (`SelectHelper`) rebuilds that
+  `<select>` as `ui :select` (a short list) or `ui :combobox, trigger: true` (more than
+  `SEARCH_OVER` choices, `multiple`, or `search: true`: a button like a select's, the search box in
+  its popup), so include_blank (a choice of its own, sent as ""), selected, disabled and optgroups
+  behave as in a select; a `select_tag` goes in `select_control(…)`, and `combobox: false` keeps a
+  plain `<select>`. The control is form-associated (it joins a form it sits outside of by `form:`)
+  and its value comes from the server (`default-value`), so a morph keeps an unsaved pick. A pick
+  fires `change` on the control, and the select's `data-action` stays on it, so save-on-change
+  forms (`change->form#submit`) work. The builder's text fields are `ui :input`, `text_area`
+  `ui :textarea`, `check_box` `ui :checkbox` (`native: true` or `role: "switch"` keeps a native
+  one), and `form.ui :component, :attr` reaches any other runeui control. An index's filters are
+  `ui :filter` (below)
+- Every date is `date_input form, :due_on` (or `date_input_tag` without a form builder): `ui :date_picker`,
+  a field to type a date into ("10/20/2026", "Oct 20") with a calendar in its popup, sending
+  YYYY-MM-DD under the form's name, and fires `change` once per change (typed, picked or cleared).
+  Its value comes from the server, so a morph keeps a pick. `t` picks today (the `date-keys`
+  controller, the install's today); a date that isn't required has a button that clears it. Never
+  a text field for a date, and no other date picker
 - Never inline CSS: no `style` attributes and no `<style>` tags in views. All
   styling lives in `app/assets/stylesheets`. The one exception is email, which can't load
   stylesheets: `layouts/mailer.html.erb` carries its own `<style>` (phones and dark mode only): the logo or
@@ -370,11 +374,14 @@ which the server finds in the action's own template: they work only there, never
 a loop, and pay off only when the block is slow (measure; the History timeline isn't).
 
 Shared pieces, so the same markup is never written twice (all helpers, so they work inside
-`form_with`): a menu a pill or badge opens is `popup_menu label:, title:, fixed: do … end`
-(`PopupHelper`; `fixed: true` for one in a scrolling row, with the `fixed-popup` controller); an
-on/off switch is `switch_field form, :attr, label:, hint:, submit_on_change:` (with a hint, the
-settings row; without, the switch beside its label), or `switch_tag(title:, screen_reader_label:) { check_box_tag … }`
-around a checkbox with no form method; an empty list is
+`form_with`): a menu is `ui :menu` (one on the page that many buttons open, `data-runeui-open`,
+as the task pickers do), or `popup_menu label:, title: do … end` (`PopupHelper`, Fizzy's popup,
+left for the quick-actions tray and plugins); an on/off switch is
+`switch_field form, :attr, label:, hint:, submit_on_change:` (`ui :switch`, sending "0" when off;
+with a hint, the settings row; without, the switch beside its label), or `ui :switch, name:` with
+no form builder (`switch_tag { check_box_tag … }`, the old native one, stays for plugins); a
+field with its label, hint and the record's errors is `form.ui :field, :attr, label:,
+description: do … end` (`record_fields/*`); an empty list is
 `ui :empty, description:, action:` (where its records come from; `layouts/shared/empty` is the
 same under the name plugins render).
 A list of the same partial is `render partial:, collection:, as:` (herb lint's
@@ -513,9 +520,15 @@ in place with `render "tasks/owner_picker", task:`, a menu where each click puts
 takes them off (`Tasks::AssignmentsController`); the first on leads, and taking off the lead hands
 it on. Setting `owner_id` directly replaces the lead and keeps the rest; `other_owner_ids` sets the
 rest. Show them with `task_owners_tag task` (preload `assignments: :user`). A task's status
-changes in place with `tasks/status_dot`. Both pickers show a choice before the server answers
-(`picker` controller): the avatars redraw from each person's avatar template, a row a new status
-takes out of its list fades, and a save that fails outright is put back.
+changes in place with `tasks/status_dot`, and its due date in a row with `tasks/due`. A row carries
+only their buttons: the menus are on the page once (`task_picker_menus`: a `ui :menu` of the
+statuses, a `ui :combobox` of the team with no trigger of its own, a `ui :popover` holding a
+`ui :calendar` with Today and No date), each opened beside the button that names it
+(`data-runeui-open`), and the `picker` controller takes the menu over for its task as it opens. The
+side panel carries its own copy (`task_picker_menus(panel: true)`), for a page without task rows.
+The pickers show a choice before the server answers: the avatars redraw from each person's avatar
+template, a row a new status takes out of its list fades, and a save that fails outright is put
+back. The clients table's status badge works the same way (`client_status_menu`).
 
 Filters on an index page sit above the list, not inside the card: a row of
 `ui :filter, param:, label:, value:, any: false, options:` in
@@ -569,10 +582,9 @@ development. Build new markup with it:
   `grid-2`, `button-row`, `separator`, `<kbd>`, `muted`, `faint`, `small`, `visually-hidden`.
   Bare inputs, selects and textareas need no class; every `<form>` is a flex column with a gap
   (`form.button_to` is inline), so an inline form gets its own layout class
-- Runwell's popups stay Runwell's (Fizzy's behaviour, drawn as a rune menu): `popup_menu`, quick
-  filters, the status and owner pickers and bulk menus are a `<dialog class="popup">` with
-  `popup__list` / `popup__item` / `popup__btn` under the `dialog`, `picker`, `fixed-popup` or
-  `combobox` controllers. A new menu with no such behaviour is `popover_menu`
+- Menus and pickers are runeui's (`ui :menu`, `ui :combobox`, `ui :popover`, `ui :select`). Fizzy's
+  popup (`<dialog class="popup">`, `popup_menu`, the `dialog` and `combobox` controllers) is left
+  only in the quick-actions tray (its record picker) and for plugins
 - Native elements over JavaScript: `<dialog>` (opened by `rune-dialog`, or the `dialog`
   controller for popups), runeui's `ui :popover` and `ui :menu`, `<details>`, real
   checkboxes and radios. CSS uses descendant or class selectors, not child ones: in development
@@ -644,9 +656,8 @@ ReActionView rules:
   rebuilt from the templates each time (half of a page's render). `lib/rails_ext/herb_slot_envelope_cache.rb`
   keeps each page's map until a view changes, beside its cache of Herb's per-file analysis
   (`herb_analysis_cache.rb`). Rich text renders once per distinct HTML (`RichTextHelper::RICH_TEXT_CACHE`,
-  in memory). A row's status and owner menus are a button and an empty `<dialog>`: their insides
-  are page templates (`task_status_popup_template`, `task_owner_popup_template`) the picker copies in
-  on first open
+  in memory). A row's status, owner and due pickers are buttons: their menus are on the page once
+  (`task_picker_menus`, at the foot through `page_template`), never one per row
 - Reactive features are experimental in 0.6. When something breaks, check the
   response of the `application/vnd.herb.slots+json` request the page makes
 - Don't pass an interpolated string to `turbo_frame_tag`

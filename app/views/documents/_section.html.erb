@@ -25,7 +25,7 @@
 
             <span class="list-row__actions">
               <%= form_with model: document, namespace: dom_id(document), class: "document-row__visible", data: { controller: "form" } do |form| %>
-                <%= switch_tag(title: "Visible to the #{term(:client).downcase}", screen_reader_label: "Visible to the #{term(:client).downcase}") { form.check_box :client_visible, role: "switch", data: { action: "change->form#submit" } } %>
+                <%= form.ui :switch, :client_visible, title: "Visible to the #{term(:client).downcase}", aria: { label: "Visible to the #{term(:client).downcase}" }, data: { action: "change->form#submit" } %>
               <% end %>
               <% if document.deletable_by?(Current.user) %>
                 <%= render "layouts/shared/delete_dialog", name: document.filename.to_s, path: document_path(document), keys: "d",

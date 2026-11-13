@@ -207,10 +207,13 @@ assets (compiled on boot in production, like its stylesheets), and registers eve
 is `data-controller="my-day--copy-prompt"`. Nothing to register, and no way to name a controller
 outside the plugin's key, so two plugins, or a plugin and the core, can't collide.
 
-A plugin's `form.select` (or `combobox_tag { select_tag … }`) is the core's combobox, like every
-select, and opens with a box to search its choices (5.7.2; before, only past eight choices, or with
-`data: { combobox_filter: "always" }`, which is still accepted and now does nothing).
-`class: "select--sm"` makes it the small kind, as wide as its choice, for a row of filters. The
+A plugin's `form.select` (or `combobox_tag { select_tag … }`) is the core's select, like every
+select: runeui's `ui :select` for a short list, and past seven choices, for several (`multiple`)
+or with `search: true`, a combobox behind a button with a box to search its choices (6.0; from
+5.7.2 to 5.x every select had the box; `data: { combobox_filter: "always" }` still asks for it).
+`class: "select--sm"` makes it the small kind, for a row of filters. The form builder's
+`text_field` and its kin, `text_area` and `check_box` draw runeui's controls too (6.0), and
+`date_input`, `money_field`, `secret_field` and `switch_field` keep their signatures. The
 `quick_filter` partial (same locals as ever) draws that combobox since 5.7.2, in a GET form of its
 own, instead of a pill and menu of links.
 
@@ -222,7 +225,8 @@ the nearest turbo frame), `copy-to-clipboard` (`content` or `url` value, `succes
 `drag-and-drop` and `bulk` (above), `pagination` (a list that loads its next page as you scroll:
 `paginate(records)` in the controller, `with_automatic_pagination` around a cards grid, or
 `pagination_frame_id_for` and `table_next_page_row` with `data-controller="pagination"` on a table,
-as the core's indexes do), `date-field` (through `date_input`), and the keyboard's
+as the core's indexes do), `date_input` (a `ui :date_picker` since 6.0; the `date-field`
+controller is gone), and the keyboard's
 `data-keys` and `data-filter-target="item"` (Keyboard shortcuts in the core's AGENTS.md). Anything
 else of the core's (its other controllers, helpers in `app/javascript/helpers`, `window` globals,
 markup and class names) is not the contract and may change in a minor release.

@@ -31,7 +31,7 @@
         <% elsif key == "lead" %>
           <div class="field">
             <%= form.label :owner_id, "Lead", class: "field__label" %>
-            <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned", selected: me.id } %>
+            <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned", selected: me.id }, search: true %>
           </div>
         <% elsif key == "others" %>
           <div class="field">

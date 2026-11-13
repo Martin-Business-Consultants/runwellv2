@@ -15,7 +15,7 @@
     <p class="card__hint"><%= [ plugin.version, plugin.author, source ].compact.join(" · ") %></p>
     <div class="card__action">
       <%= form_with url: settings_plugin_path(plugin.key), method: :patch, scope: :plugin, class: "plugin-card__switch", data: { controller: "form", turbo_action: "advance" } do |form| %>
-        <%= switch_tag(title: "Switch on or off", screen_reader_label: "Switch #{plugin.name} on or off") { form.hidden_field(:enabled, value: "0", id: "plugin_#{plugin.key}_enabled_off") + check_box_tag("plugin[enabled]", "1", enabled, role: "switch", id: "plugin_#{plugin.key}_enabled", data: { action: "change->form#submit" }) } %>
+        <%= ui :switch, name: "plugin[enabled]", checked: enabled, unchecked_value: "0", id: "plugin_#{plugin.key}_enabled", title: "Switch on or off", aria: { label: "Switch #{plugin.name} on or off" }, data: { action: "change->form#submit" } %>
       <% end %>
     </div>
   </header>

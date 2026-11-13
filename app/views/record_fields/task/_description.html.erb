@@ -1,9 +1,8 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Description</span>
+  <%= form.ui :field, :description, label: "Description", class: "field" do %>
     <%= rich_text_field form, :description, staff: true, form_id: form_id %>
-  </label>
+  <% end %>
 <% else %>
   <dt>Description</dt>
   <dd class="record-fields__prose">

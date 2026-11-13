@@ -29,114 +29,99 @@ module TasksHelper
   # The team for the inline owner picker, loaded once per page however many rows use it.
   def task_people = @task_people ||= User.active.people.ordered.to_a
 
-  # The status picker's choices, on the page once like the owner picker's.
-  # A <template> a row's menu copies from (picker#fill): printed once, at the foot of the page
-  # (yield :page_templates in the layout), never inside a row or a panel, so removing a row (a task
-  # leaving a list) or closing the panel can't take it away from every other menu. A side panel
-  # loaded on its own (its frame) carries its own; a stream answer needs none, the page has them.
-  def page_template(html)
-    return html if turbo_frame_request_id == "side_panel"
-    return if request.format.turbo_stream?
-
-    content_for(:page_templates, html)
-    nil
-  end
-
-  def task_status_options_template
-    return if @task_status_options_rendered
-
-    @task_status_options_rendered = true
-    html = tag.template(id: "task-status-options") do
-      safe_join(Task::STATUSES.map do |status|
-        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { picker_value: status }) do
-          tag.button(type: "submit", name: "task[status]", value: status, class: "popup__btn", data: { action: "picker#choose" }) do
-            safe_join([ tag.span(tag.span(class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true }), class: "status-dot-picker__dot", data: { picker_part: "dot" }),
-              tag.span(status.humanize, class: "popup__label", data: { picker_part: "label" }),
-              icon_tag("check", class: "checked") ])
-          end
-        end
-      end)
+  # What a page has once however many rows use it (the pickers' menus): printed at the foot of the
+  # page (yield :page_templates in the layout), never inside a row, so removing a row (a task
+  # leaving a list) can't take it away from every other row. A side panel loaded on its own (its
+  # frame) carries its own; a stream answer needs none, the page has them, except the panel's own
+  # copy (panel: true) when the answer redraws the panel. Built only when it's printed (the block).
+  def page_template(panel: false, &html)
+    if !request.get? || request.format.turbo_stream?
+      capture(&html) if panel
+    elsif turbo_frame_request_id == "side_panel"
+      capture(&html)
+    else
+      content_for(:page_templates, capture(&html))
+      nil
     end
-    page_template(html)
   end
 
-  # The status and owner menus' insides, on the page once like their choices: a row carries only
-  # its button and an empty <dialog>, and the picker copies this in the first time it opens,
-  # pointing the form at that task (picker controller, url value). Without these each row of a
-  # long table carried two dialogs' worth of forms nobody opened. No per-form token: the form's
-  # address is filled in later, and Turbo sends the page's token with the submission.
-  def task_status_popup_template
-    return if @task_status_popup_rendered
+  # The task pickers' menus (status, who's on it, due), on the page once: a row carries only its
+  # buttons, each opening the one menu beside itself (data-runeui-open) and saying which task it's
+  # for (the picker controller). Without these each row of a long table carried three menus nobody
+  # opened. The forms they send are templates the picker copies and points at its task; no token
+  # in them: Turbo sends the page's with the submission. The side panel asks for them too
+  # (panel: true), so a panel opened over a page with no task rows has its own.
+  def task_picker_menus(panel: false)
+    return if @task_picker_menus_rendered
 
-    @task_status_popup_rendered = true
-    html = tag.template(id: "task-status-popup") do
-      safe_join([ tag.strong("Status", class: "popup__title"),
-        form_with(url: "#", method: :patch, authenticity_token: false, data: { picker_target: "form" }) do
-          tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
-        end ])
+    html = page_template(panel: panel) { safe_join([ task_status_menu, task_owner_menu, task_due_menu ]) }
+    @task_picker_menus_rendered = true if html || (request.get? && !request.format.turbo_stream?)
+    html
+  end
+
+  def task_status_menu
+    items = Task::STATUSES.map do |status|
+      label = safe_join([ tag.span(tag.span(class: "status-dot status-dot--#{status.dasherize}", aria: { hidden: true }), class: "status-dot-picker__dot", data: { picker_part: "dot" }),
+        tag.span(status.humanize, class: "picker-menu__label", data: { picker_part: "label" }), icon_tag("check", class: "picker-menu__check") ])
+      { label: label, value: status, data: { picker_value: status } }
     end
-    page_template(html)
+    ui(:menu, id: "task-status-menu", label: "Status", class: "picker-menu", items: items) +
+      tag.template(id: "task-status-form") do
+        form_with(url: "#", method: :patch, authenticity_token: false, class: "picker-form") { hidden_field_tag("task[status]", nil, id: nil, data: { picker_field: true }) }
+      end
   end
 
-  def task_owner_popup_template
-    return if @task_owner_popup_rendered
-
-    @task_owner_popup_rendered = true
-    html = tag.template(id: "task-owner-popup") do
-      safe_join([
-        tag.input(type: "search", class: "owner-picker__search", placeholder: "Who’s on it…", autocomplete: "off", aria: { label: "Find a person" },
-          data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" }),
-        form_with(url: "#", method: :post, authenticity_token: false, data: { picker_target: "form" }) do
-          tag.ul(class: "popup__list", role: "group", data: { picker_target: "list" })
-        end,
-        tag.p("The first on leads.", class: "owner-picker__hint") ])
-    end
-    page_template(html)
-  end
-
-  # The owners picker's people, on the page once like the others; each click puts that person on
-  # the task or takes them off (Tasks::AssignmentsController). Each carries their avatar as the
-  # trigger draws it (a <template>), so the picker shows who's on at once, before the answer, and
-  # the days they're away in the months around now (Runwell::Plugins.away: time off, holidays), so
-  # the picker marks them Out on the task's due date.
+  # The owners picker's people; each click puts that person on the task or takes them off
+  # (Tasks::AssignmentsController). Each carries their avatar as the trigger draws it (a
+  # <template>), so the picker shows who's on at once, before the answer, and the days they're away
+  # in the months around now (Runwell::Plugins.away: time off, holidays), so the picker marks them
+  # Out on the task's due date.
   AWAY_WINDOW_BACK = 30
   AWAY_WINDOW_AHEAD = 180
 
-  def task_assignee_options_template
-    return if @task_assignee_options_rendered
-
-    @task_assignee_options_rendered = true
+  def task_owner_menu
     away = Runwell::Plugins.away_between((Date.current - AWAY_WINDOW_BACK)..(Date.current + AWAY_WINDOW_AHEAD))
-    html = tag.template(id: "task-assignee-options") do
-      safe_join(task_people.map do |person|
-        days = (away.fetch(person.id, Set.new) | away.fetch(:everyone, Set.new)).map(&:iso8601).sort
-        tag.li(class: "popup__item", role: "checkbox", aria: { checked: false }, data: { filter_target: "item", picker_value: person.id, picker_away: days.join(" ").presence }) do
-          tag.button(type: "submit", name: "assignee_id", value: person.id, class: "popup__btn", data: { action: "picker#choose" }) do
-            safe_join([ avatar_image_tag(person, class: "avatar owner-picker__avatar", alt: ""),
-              tag.span(person.display_name, class: "popup__label"),
-              tag.span("Out", class: "owner-picker__away", title: "Away on the day it’s due"),
-              icon_tag("check", class: "checked") ])
-          end +
-          tag.template(person_tag(person), data: { picker_avatar: true })
-        end
-      end)
-    end
-    page_template(html)
+    people = safe_join(task_people.map do |person|
+      days = (away.fetch(person.id, Set.new) | away.fetch(:everyone, Set.new)).map(&:iso8601).sort
+      ui_tag("ui-combobox-item", { class: "ui-item", value: person.id, label: person.display_name, data: { slot: "combobox-item", picker_value: person.id, picker_away: days.join(" ").presence } }) do
+        safe_join([ person_tag(person),
+          ui_tag("ui-combobox-item-text", { data: { slot: "combobox-item-text" } }, {}, person.display_name),
+          tag.span("Out", class: "owner-picker__away", title: "Away on the day it’s due"),
+          ui_tag("ui-combobox-item-indicator", { data: { slot: "combobox-item-indicator" } }, {}, ui_icon(:check)),
+          tag.template(person_tag(person), data: { picker_avatar: true }) ])
+      end
+    end)
+    ui(:combobox, id: "task-owner-menu", multiple: true, trigger: false, search: "Who’s on it…", empty: "Nobody by that name.", class: "picker-menu owner-menu", aria: { label: "Who’s on it" }) { people + tag.p("The first on leads.", class: "owner-picker__hint") } +
+      tag.template(id: "task-owner-form") do
+        form_with(url: "#", method: :post, authenticity_token: false, class: "picker-form") { hidden_field_tag("assignee_id", nil, id: nil, data: { picker_field: true }) }
+      end +
+      # The avatars as the trigger draws them, for the picker to fill in before the answer.
+      tag.template(ui(:avatar_group, people: [], size: :sm, class: "owner-stack", aria: { hidden: true }) + tag.span(class: "owner-stack__more", data: { slot: "avatar-group-count" }), id: "task-owner-stack")
   end
 
-  # Everyone on a task as overlapping avatars (rune_ui's avatar stack), the lead first and
-  # on top (preload assignments: :user). hidden: inside a control whose own text names them (the
-  # owner picker's trigger), so screen readers don't hear every name twice.
+  # A row's due date: a calendar in a popover, with Today and No date under it.
+  def task_due_menu
+    ui(:popover, id: "task-due-menu", align: :start, class: "picker-menu due-menu", aria: { label: "Due" }) do
+      ui(:calendar, id: "task-due-calendar") +
+        tag.div(class: "due-menu__foot") do
+          ui(:button, content: "Today", variant: :outline, size: :sm, type: :button, data: { picker_set: Date.current.iso8601, picker_today: true }) +
+            ui(:button, content: "No date", variant: :ghost, size: :sm, type: :button, data: { picker_set: "" })
+        end
+    end +
+      tag.template(id: "task-due-form") do
+        form_with(url: "#", method: :patch, authenticity_token: false, class: "picker-form") { hidden_field_tag("task[due_on]", nil, id: nil, data: { picker_field: true }) + hidden_field_tag(:inline, "panel", id: nil) }
+      end
+  end
+
+  # Everyone on a task as overlapping avatars (ui :avatar_group), the lead first and on top
+  # (preload assignments: :user). hidden: inside a control whose own text names them (the owner
+  # picker's trigger), so screen readers don't hear every name twice.
   def task_owners_tag(task, limit: 3, fallback: nil, hidden: false)
     owners = task.owners
     return (fallback ? tag.span(fallback, class: "person__none") : "".html_safe) if owners.empty?
 
-    shown = owners.first(limit)
-    rest = owners.size - shown.size
-    tag.span class: "avatar-stack owner-stack", title: (task_owners_label(task) unless hidden), aria: { hidden: (true if hidden) } do
-      safe_join(shown.map { person_tag(it) } +
-        [ (tag.span("+#{rest}", class: "avatar avatar--md avatar--more", title: owners.drop(limit).map(&:display_name).to_sentence) if rest.positive?) ].compact)
-    end
+    ui :avatar_group, people: owners.map { { name: it.display_name, src: user_avatar_path(it) } }, max: limit, size: :sm, class: "owner-stack",
+      title: (task_owners_label(task) unless hidden), aria: { hidden: (true if hidden) }
   end
 
   def task_owners_label(task)

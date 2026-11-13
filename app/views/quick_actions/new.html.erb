@@ -1,6 +1,6 @@
 <%# The quick action as a modal dialog: a title, where it goes (the picker), the action's own form. %>
 <turbo-frame id="quick_action">
-  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#close:stop">
+  <div data-controller="dialog" data-dialog-modal-value="true" data-dialog-auto-open-value="true" data-action="keydown.esc->dialog#closeOnEscape">
     <dialog class="dialog dialog--lg quick-action" aria-labelledby="quick_action_title" data-dialog-target="dialog">
       <div class="dialog__box">
         <header class="dialog__header quick-action__header">

@@ -1,27 +1,21 @@
 <%# locals: (task:, labelled: nil, options_on_page: nil) %>
-<%# A task's status as a colored circle, in the Work board's colors. Clicking it opens a menu
-    of the statuses (Fizzy's popup, like the quick filters); choosing one shows at once (picker),
-    fading its row if the list it's in won't keep it (task value), and saves it with one form for the menu (Tasks::StatusesController), whose answer redraws the task
-    wherever it shows.
-    The statuses and the menu itself are on the page once (task_status_options_template,
-    task_status_popup_template), copied in when it first opens, so a row carries only its button. %>
+<%# A task's status as a colored circle, in the Work board's colors. Clicking it opens the page's
+    one menu of the statuses beside it (task_picker_menus, a ui :menu opened by data-runeui-open);
+    choosing one shows at once (picker), fading its row if the list it's in won't keep it (task
+    value), and saves it (Tasks::StatusesController), whose answer redraws the task wherever it
+    shows. A row carries only this button. %>
 <% label = task.status.humanize %>
 <% unless options_on_page %>
-  <%= task_status_options_template %>
-  <%= task_status_popup_template %>
+  <%= task_picker_menus %>
 <% end %>
-<div class="row-picker status-dot-picker" id="<%= dom_id(task, labelled ? :status_labelled : :status) %>" data-controller="dialog fixed-popup picker" data-dialog-orient-value="false"
-  data-picker-current-value="<%= task.status %>" data-picker-options-value="task-status-options"
-  data-picker-popup-value="task-status-popup" data-picker-url-value="<%= task_status_path(task) %>" data-picker-task-value="<%= task.id %>"<% if labelled %> data-picker-labelled-value="true"<% end %>
-  data-action="keydown.esc->dialog#close picker:chosen->dialog#close click@document->dialog#closeOnClickOutside dialog:show->picker#fill dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
-  <button type="button" class="status-dot-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
-    <span class="status-dot-picker__dot" data-picker-target="display" data-picker-part="dot"><%= tag.span class: "status-dot status-dot--#{task.status.dasherize}", aria: { hidden: true } %></span>
+<span class="row-picker status-dot-picker" id="<%= dom_id(task, labelled ? :status_labelled : :status) %>" data-controller="picker" data-picker-kind-value="status"
+  data-picker-current-value="<%= task.status %>" data-picker-menu-value="task-status-menu" data-picker-form-value="task-status-form"
+  data-picker-url-value="<%= task_status_path(task) %>" data-picker-task-value="<%= task.id %>"<% if labelled %> data-picker-labelled-value="true"<% end %>>
+  <button type="button" class="status-dot-picker__trigger" id="<%= dom_id(task, labelled ? :status_labelled_button : :status_button) %>" title="<%= label %>: click to change" aria-haspopup="menu" data-runeui-open="task-status-menu" data-action="click->picker#open">
+    <span class="status-dot-picker__dot" data-picker-target="display" data-picker-part="dot"><span class="status-dot status-dot--<%= task.status.dasherize %>" aria-hidden="true"></span></span>
     <% if labelled %>
       <span class="status-dot-picker__label" data-picker-target="display" data-picker-part="label"><%= label %></span>
     <% end %>
     <span class="visually-hidden">Status of <%= task.title %>: <%= label %>. Change it</span>
   </button>
-
-  <%# Its insides come from task_status_popup_template the first time it opens (picker#fill). %>
-  <dialog class="popup" aria-label="Status of <%= task.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup"></dialog>
-</div>
+</span>

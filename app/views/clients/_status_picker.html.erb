@@ -1,30 +1,13 @@
 <%# locals: (client:) %>
-<%# A client's status on the clients table, changed in place: its badge opens a menu of the
-    statuses (Fizzy's popup, like tasks/status_dot); choosing one shows at once (picker) and saves
-    it, answered with just this picker (ClientsController#update). %>
+<%# A client's status on the clients table, changed in place: its badge opens the page's one menu
+    of the statuses beside it (client_status_menu, like tasks/status_dot); choosing one shows at
+    once (picker) and saves it, answered with just this picker (ClientsController#update). %>
 <% label = client.status.humanize %>
-<div class="row-picker status-picker" id="<%= dom_id(client, :status) %>" data-controller="dialog fixed-popup picker" data-dialog-orient-value="false"
-  data-action="keydown.esc->dialog#close picker:chosen->dialog#close click@document->dialog#closeOnClickOutside dialog:show->fixed-popup#place dialog:close->fixed-popup#close">
-  <button type="button" class="status-picker__trigger" title="<%= label %>: click to change" aria-haspopup="true" data-fixed-popup-target="trigger" data-action="click->dialog#toggle:stop">
+<%= client_status_menu %>
+<span class="row-picker status-picker" id="<%= dom_id(client, :status) %>" data-controller="picker" data-picker-kind-value="status"
+  data-picker-current-value="<%= client.status %>" data-picker-menu-value="client-status-menu" data-picker-form-value="client-status-form" data-picker-url-value="<%= client_path(client) %>">
+  <button type="button" class="status-picker__trigger" id="<%= dom_id(client, :status_button) %>" title="<%= label %>: click to change" aria-haspopup="menu" data-runeui-open="client-status-menu" data-action="click->picker#open">
     <span class="status-picker__display" data-picker-target="display" data-picker-part="tag"><%= status_tag client.status, highlight: client.status == "active" %></span>
     <span class="visually-hidden">Status of <%= client.name %>: <%= label %>. Change it</span>
   </button>
-
-  <%= popup_menu label: "Status of #{client.name}", title: "Status", fixed: true do %>
-    <%= form_with url: client_path(client), method: :patch do %>
-      <input type="hidden" name="from_list" value="1">
-      <ul class="popup__list" role="group">
-        <% Client::STATUSES.each do |status| %>
-          <%# herb:key status %>
-          <li class="popup__item" role="checkbox" aria-checked="<%= status == client.status %>">
-            <button type="submit" name="client[status]" value="<%= status %>" class="popup__btn" data-action="picker#choose">
-              <span class="popup__label"><%= status.humanize %></span>
-              <span hidden data-picker-part="tag"><%= status_tag status, highlight: status == "active" %></span>
-              <%= icon_tag "check", class: "checked" %>
-            </button>
-          </li>
-        <% end %>
-      </ul>
-    <% end %>
-  <% end %>
-</div>
+</span>

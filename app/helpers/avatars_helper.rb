@@ -29,16 +29,9 @@ module AvatarsHelper
     end
   end
 
-  # A client's contacts as overlapping circles of initials (rune_ui's avatar_stack): the first `limit`, then "+N" for the
-  # rest. Each name is its tooltip and what a screen reader hears.
+  # A client's contacts as overlapping circles of initials (ui :avatar_group): the first `limit`,
+  # then "+N" for the rest. Each name is its tooltip and what a screen reader hears.
   def contact_stack(contacts, limit: 3)
-    shown = contacts.first(limit)
-    rest = contacts.size - shown.size
-
-    tag.span class: "avatar-stack contact-stack" do
-      circles = shown.map { avatar(it.name, size: :md) }
-      circles << tag.span("+#{rest}", class: "avatar avatar--md avatar--more", title: contacts.drop(limit).map(&:name).to_sentence) if rest.positive?
-      safe_join(circles)
-    end
+    ui :avatar_group, people: contacts.map { { name: it.name } }, max: limit, size: :sm, class: "contact-stack"
   end
 end

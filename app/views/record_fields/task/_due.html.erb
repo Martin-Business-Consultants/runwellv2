@@ -1,9 +1,8 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Due</span>
+  <%= form.ui :field, :due_on, label: "Due", class: "field" do %>
     <%= date_input form, :due_on, form: form_id %>
-  </label>
+  <% end %>
 <% else %>
   <dt>Due</dt>
   <dd>

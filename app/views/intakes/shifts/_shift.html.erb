@@ -9,7 +9,7 @@
     <%= form_with model: shift, url: intake_shift_path(shift), method: :patch, scope: :intake_shift, namespace: dom_id(shift), class: "intake-shift__form", data: { controller: "form" } do |form| %>
       <div class="intake-shift__field">
         <span class="field__label">Who</span>
-        <%= form.select :user_id, people, {}, aria: { label: "Who" }, data: { action: "change->form#submit" } %>
+        <%= form.select :user_id, people, {}, aria: { label: "Who" }, search: true, data: { action: "change->form#submit" } %>
       </div>
       <div class="intake-shift__field">
         <span class="field__label">How</span>

@@ -90,10 +90,13 @@ export default class extends Controller {
   }
 
   keydown(event) {
-    if (event.defaultPrevented || event.isComposing) return
+    if (event.isComposing) return
     const key = describe(event)
 
+    // Before the check below: Lexxy marks every Enter handled, ⌘/Ctrl+Enter too, and that's the
+    // one place it's needed.
     if (key === `${MOD}+enter`) return this.#save(event)
+    if (event.defaultPrevented) return
     if (key === "esc" && this.#cancel(event)) return
     if (event.target.closest?.(TYPING) || event.target.closest?.(OVERLAY) || document.querySelector(MODAL)) return
 

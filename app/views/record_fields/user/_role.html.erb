@@ -1,8 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Role</span>
+  <%= form.ui :field, :role, label: "Role", description: "#{User::ROLE_DESCRIPTIONS[record.role]}", class: "field" do %>
     <%= form.select :role, User::ROLES.map { [ it.capitalize, it ] }, {}, form: form_id %>
-    <span class="field__hint"><%= User::ROLE_DESCRIPTIONS[record.role] %></span>
-  </label>
+  <% end %>
 <% end %>

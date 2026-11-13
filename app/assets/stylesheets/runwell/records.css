@@ -308,6 +308,8 @@ a.task-group__name:hover { color: var(--text); text-decoration: underline; text-
 .record-fields { display: flex; flex-direction: column; gap: var(--s-4); }
 dl.record-fields { display: grid; }
 dl.record-fields .layout-field { display: contents; }
+/* A field that draws two (a task's work and its section) keeps the column's gap between them. */
+.record-fields:not(dl) .layout-field { display: flex; flex-direction: column; gap: var(--s-4); }
 dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
 dl.record-fields--stacked dd { margin-bottom: var(--s-3); }
 .record-fields__prose { overflow-wrap: anywhere; }

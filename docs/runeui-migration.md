@@ -123,6 +123,35 @@ core (plugins go through the compatibility layer).
    `popup_menu` → `ui :select`, `ui :combobox`, `ui :menu`; `date_input` → `ui :date_picker`;
    `switch_field` → `ui :switch`; `money_field` → `ui :number_input` (cents kept);
    `rich_text_field` → `ui :editor`; fields → `form.ui :field`. Custom fields follow.
+   **Done:** the default form builder is `RunwellFormBuilder` (was `ComboboxFormBuilder`):
+   `form.select` and its kin go through `select_control` (`SelectHelper`, was `ComboboxHelper`) to
+   `ui :select`, or past seven choices, for `multiple` or `search: true`, `ui :combobox,
+   trigger: true` (a select-like button, the search box in the popup; include_blank is a choice
+   sent as ""); `text_field` and kin are `ui :input`, `text_area` `ui :textarea`, `check_box`
+   `ui :checkbox`. `date_input` is `ui :date_picker` (`t` is the `date-keys` controller);
+   `switch_field` is `ui :switch` sending "0"; `secret_field` is `ui :password_input`;
+   `money_field` is `ui :input` with Runwell's `money` controller (dollars shown, cents sent);
+   `rich_text_field` is `ui :editor` (Lexxy through `lexxy_rich_textarea_tag`, the `@` prompt,
+   uploads, drafts and Esc-to-revert unchanged). `record_fields/*` and custom fields are
+   `form.ui :field` (per-field errors), every kind a runeui control joining its form by `form:`.
+   The task status, owner and due pickers and the clients table's status are one `ui :menu`,
+   `ui :combobox` (no trigger) and `ui :popover` + `ui :calendar` on the page, opened beside each
+   row's button (`data-runeui-open`), driven by the `picker` controller; avatars are `ui :avatar` /
+   `ui :avatar_group`. Gone: `combobox_helper.rb`, the `multi-selection-combobox`, `popup-filter`,
+   `fixed-popup`, `reveal` and `date-field` controllers, vanillajs-datepicker, and their CSS
+   (datepicker, `.combobox`, secret field). Kept for plugins: `combobox_tag { select_tag … }`,
+   `switch_tag` (the native switch, compat styles), `popup_menu`, `date_input_tag`,
+   `money_field_tag`, `custom_field_inputs`. Added to runeui: `trigger:` / `search:` on
+   `ui :combobox`, `form:` on `ui :switch` and `ui :checkbox`, one menu or combobox serving many
+   buttons (`data-runeui-open` opens it beside its opener, hotwire.js), the date picker firing
+   `change` and controls' inner inputs no longer leaking a second `change` (forms.js),
+   `aria-invalid` following the server on a morph (morph.js), and the combobox button's words
+   kept through a morph. Left: Lexxy keeps `runwell/compat-lexxy.css` (runeui's `runeui/lexxy`
+   skin reads runeui's tokens from `:root`, which only phase 9 puts there); hand-written `.field`
+   wrappers outside `record_fields` (settings, the quick-action form, the portal), the
+   appearance and text-size choice cards (native radios in picture cards), the bulk and
+   oauth checkboxes, the file inputs; the quick-actions tray's record picker (Fizzy's `combobox`
+   and `dialog` controllers, `popup_menu`, `.popup` CSS) is phase 7's.
 5. **Record pages and the sheet**: record page cards and tabs → `ui :card`, `ui :tabs`; the task
    panel and peek → `ui :side_panel` (`?task=`, `?peek=` kept as the address); the in-place
    field forms kept (save-on-change), on runeui controls.

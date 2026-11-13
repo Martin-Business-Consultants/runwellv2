@@ -6,10 +6,14 @@ module CustomFieldsHelper
     safe_join(record.custom_fields.map do |field|
       name = "#{form.object_name}[custom_fields][#{field.key}]"
       id = "#{form.object_name}_custom_#{field.key}".parameterize(separator: "_")
-      tag.label(class: "field") do
-        safe_join([ tag.span(field.label, class: "field__label"), custom_field_input(field, name, id, record.custom_value(field)) ])
-      end
+      ui(:field, label: custom_field_label(field), class: "field") { custom_field_input(field, name, id, record.custom_value(field)) }
     end)
+  end
+
+  # A field's name as its form shows it, with a lock when only some of the team see it.
+  def custom_field_label(field)
+    lock = tag.span(icon_tag("lock"), class: "field-lock", title: "#{field.visible_to_label} see it") unless field.everyone?
+    safe_join([ field.label, lock ].compact, " ")
   end
 
   # One custom field's input, as template mode lays them out one at a time (record_fields/_custom),
@@ -28,9 +32,9 @@ module CustomFieldsHelper
       safe_join([
         tag.legend("Who on the team sees it", class: "field__label"),
         hidden_field_tag(name, "", id: nil),
-        tag.label(class: "checkbox") { check_box_tag(nil, "owner", true, id: nil, disabled: true) + tag.span("Owners") },
+        ui(:checkbox, checked: true, disabled: true, label: "Owners", id: "#{prefix}_owner"),
         *CustomField::RESTRICTABLE_ROLES.map do |role|
-          tag.label(class: "checkbox") { check_box_tag(name, role, field.seen_by_role?(role), id: "#{prefix}_#{role}") + tag.span(role.capitalize.pluralize) }
+          ui(:checkbox, name: name, value: role, checked: field.seen_by_role?(role), id: "#{prefix}_#{role}", label: role.capitalize.pluralize)
         end,
         tag.p("A field only some see is left out for everyone else wherever it shows, and never shown to #{term(:client, count: 2).downcase}.", class: "field__hint")
       ])
@@ -76,22 +80,19 @@ module CustomFieldsHelper
   end
 
   private
-    # Bare inputs: rune_ui styles them with no class.
+    # Each kind's runeui control, joining the form by its id (form:) wherever it sits.
     def custom_field_input(field, name, id, value, form: nil)
       input = { id: id, autocomplete: "off", form: form }
       case field.kind
       when "long_text" then rich_text_field_tag(name, value, id: id, staff: true, form_id: form)
-      when "number" then number_field_tag(name, value, step: "any", **input)
+      when "number" then ui(:input, name: name, value: value, type: :number, step: "any", **input)
       when "money" then money_field_tag(name, value, **input)
       when "date" then date_input_tag(name, value, **input.except(:autocomplete))
       when "boolean"
-        # A span, not switch_tag's label: the field around it is already the label.
-        tag.span(class: "switch") do
-          safe_join([ hidden_field_tag(name, "", id: nil, form: form), check_box_tag(name, "true", value == true, id: id, role: "switch", form: form), tag.span(class: "switch__track", aria: { hidden: true }) ])
-        end
-      when "choice" then combobox_tag { select_tag(name, options_for_select(field.choices, value), include_blank: true, id: id, form: form) }
-      when "link" then url_field_tag(name, value, placeholder: "https://…", **input)
-      else text_field_tag(name, value, **input)
+        ui :switch, name: name, value: "true", checked: value == true, unchecked_value: "", id: id, form: form
+      when "choice" then select_control(select_tag(name, options_for_select(field.choices, value), include_blank: "None", id: id, form: form))
+      when "link" then ui(:input, name: name, value: value, type: :url, placeholder: "https://…", **input)
+      else ui(:input, name: name, value: value, **input)
       end
     end
 end

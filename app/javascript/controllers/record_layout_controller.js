@@ -54,15 +54,16 @@ export default class extends Controller {
     const popover = event.target.closest("[popover]")
     const body = new FormData()
     body.append("inline", "1")
-    popover.querySelectorAll("input[name]").forEach(input => {
-      if (input.type === "hidden" || input.checked) body.append(input.name, input.value)
-    })
+    // The roles' boxes are ui :checkbox (field_visibility_inputs), after a hidden empty one.
+    const boxes = Array.from(popover.querySelectorAll("ui-checkbox[name]"))
+    popover.querySelectorAll("input[type=hidden][name]").forEach(input => body.append(input.name, input.value))
+    boxes.forEach(box => { if (box.checked) body.append(box.getAttribute("name"), box.getAttribute("value")) })
     const token = document.querySelector("meta[name='csrf-token']")?.content
     const response = await fetch(popover.dataset.url, { method: "PATCH", body, headers: { "X-CSRF-Token": token, Accept: "application/json" } })
     if (!response.ok) return alert("Who sees it couldn’t be saved. Try again.")
 
-    const roles = Array.from(popover.querySelectorAll("input[type=checkbox][name]:checked")).map(input => input.value)
-    const all = popover.querySelectorAll("input[type=checkbox][name]").length
+    const roles = boxes.filter(box => box.checked).map(box => box.getAttribute("value"))
+    const all = boxes.length
     const label = roles.length === all ? "Everyone" : roles.length === 0 ? "Owners only" : `Owners and ${roles.map(role => `${role}s`).join(" and ")}`
     popover.closest("[data-layout-control]").querySelector("[data-visibility-label]").textContent = label
     popover.hidePopover()

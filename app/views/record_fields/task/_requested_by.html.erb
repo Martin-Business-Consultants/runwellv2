@@ -1,9 +1,8 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Requested by</span>
-    <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name, { include_blank: "Nobody in particular" }, form: form_id %>
-  </label>
+  <%= form.ui :field, :contact_id, label: "Requested by", class: "field" do %>
+    <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name, { include_blank: "Nobody in particular" }, form: form_id, search: true %>
+  <% end %>
 <% elsif record.requester_name.present? %>
   <dt>Requested by</dt><dd><%= record.requester_name %><% if record.sender_email.present? && record.contact.nil? %> <span class="muted">(<%= record.sender_email %>)</span><% end %></dd>
 <% end %>

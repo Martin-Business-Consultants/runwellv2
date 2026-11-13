@@ -21,11 +21,7 @@
       <%# What they see there (Contact::PortalScope): everything shared, or only chosen work. %>
       <% works = client.works.ordered.map { [ it.title, it.ref ] } %>
       <%= form_with url: contact_portal_scope_path(contact), scope: :scope, method: :patch, class: "contact-portal__scope", namespace: dom_id(contact, :portal_scope) do |form| %>
-        <%= hidden_field_tag "scope[limited]", "0", id: nil %>
-        <label class="checkbox">
-          <%= check_box_tag "scope[limited]", "1", contact.portal_limited?, id: dom_id(contact, :portal_limited) %>
-          <span>Only some of the <%= term(:work).downcase %></span>
-        </label>
+        <%= ui :checkbox, name: "scope[limited]", checked: contact.portal_limited?, unchecked_value: "0", id: dom_id(contact, :portal_limited), label: "Only some of the #{term(:work).downcase}" %>
         <div class="field">
           <%= form.label :works, "Which", class: "field__label" %>
           <%= form.select :works, works, { selected: contact.limited_works.map(&:ref) }, multiple: true %>

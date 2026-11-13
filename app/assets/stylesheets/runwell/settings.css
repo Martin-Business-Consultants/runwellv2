@@ -162,8 +162,8 @@
 .settings-plugins .card__content { flex: 1; color: var(--text-muted); line-height: 1.5; }
 .settings-plugins .card__footer { justify-content: flex-start; }
 .plugin-card__switch { flex-direction: row; align-items: center; }
-.plugin-card:has(.switch input:checked) .plugin-card__dormant,
-.plugin-card:not(:has(.switch input:checked)) .plugin-card__active { display: none; }
+.plugin-card:has(ui-switch:is([data-checked], [default-checked]:not(:defined))) .plugin-card__dormant,
+.plugin-card:not(:has(ui-switch:is([data-checked], [default-checked]:not(:defined)))) .plugin-card__active { display: none; }
 
 /* A change's or an update's log (why it failed). */
 .settings-log { max-height: 16rem; color: var(--danger); font-size: var(--text-meta); }

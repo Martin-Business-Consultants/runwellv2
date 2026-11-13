@@ -7,7 +7,7 @@ module RecordLayoutHelper
 
   # A form builder with no <form> of its own, for fields that join a form by id.
   def record_fields_builder(record, scope: nil)
-    ComboboxFormBuilder.new(scope || record.model_name.param_key, record, self, {})
+    RunwellFormBuilder.new(scope || record.model_name.param_key, record, self, {})
   end
 
   # Fields a record's page draws in its header rather than its columns when they're changed in

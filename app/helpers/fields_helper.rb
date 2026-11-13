@@ -12,8 +12,8 @@ module FieldsHelper
   def money_field_tag(name, cents, **options)
     tag.span(class: "money-field", data: { controller: "money" }) do
       safe_join([
-        text_field_tag(nil, cents.to_i.zero? ? nil : Money.format(cents).delete_prefix("$"), **options,
-          inputmode: "decimal", autocomplete: "off", data: { money_target: "display", action: "input->money#update blur->money#format" }),
+        ui(:input, value: (cents.to_i.zero? ? nil : Money.format(cents).delete_prefix("$")), inputmode: "decimal", autocomplete: "off", **options,
+          data: { money_target: "display", action: "input->money#update blur->money#format" }),
         hidden_field_tag(name, cents.nil? ? "" : cents.to_i, id: nil, form: options[:form], data: { money_target: "cents" })
       ])
     end
@@ -22,20 +22,11 @@ module FieldsHelper
   # A key, token or secret: the saved value (stored encrypted), masked until the eye is clicked.
   # Submitting it unchanged keeps it. A helper, not a partial, so it works inside form_with.
   def secret_field(form, method, placeholder: nil, **options)
-    tag.span class: "secret-field", data: { controller: "reveal" } do
-      safe_join([
-        form.password_field(method, value: form.object.try(method), autocomplete: "off",
-          spellcheck: false, placeholder: placeholder, data: { reveal_target: "input", "1p-ignore": true }, **options),
-        tag.button(type: "button", class: "icon-button secret-field__eye", title: "Show", aria: { pressed: false, label: nil },
-          data: { reveal_target: "button", action: "reveal#toggle" }) do
-          safe_join([ icon_tag("eye", class: "secret-field__show"), icon_tag("eye-off", class: "secret-field__hide"),
-            tag.span("Show or hide", class: "visually-hidden") ])
-        end
-      ])
-    end
+    form.ui :password_input, method, value: form.object.try(method), autocomplete: "off", placeholder: placeholder, class: "secret-field",
+      spellcheck: "false", data: { "1p-ignore": true }, **options
   end
 
-  # An on/off switch for a boolean (rune_ui's switch), in one of two shapes: with a hint, a
+  # An on/off switch for a boolean (ui :switch), in one of two shapes: with a hint, a
   # setting row (label and hint on the left, the switch on the right); without, the switch beside
   # its label. submit_on_change saves it as it's flipped (the form controller on the form). A helper,
   # not a partial, so it works inside form_with.
@@ -54,8 +45,8 @@ module FieldsHelper
 
   def switch_field(form, method, label:, hint: nil, submit_on_change: false, **options)
     # Saving as it flips: the switch shows the change at once, and flips back if the save fails.
-    data = submit_on_change ? { action: "change->form#submit", revert_on_failure: true } : {}
-    switch = switch_tag { form.check_box(method, role: "switch", data: data, **options) }
+    data = (options.delete(:data) || {}).merge(submit_on_change ? { action: "change->form#submit", revert_on_failure: true } : {})
+    switch = form.ui(:switch, method, data: data.presence, **options)
 
     if hint
       tag.div(class: "setting-row setting-row--field") do
@@ -66,22 +57,20 @@ module FieldsHelper
     end
   end
 
-  # The switch itself around any checkbox (check_box_tag, a plain input): its track, and a label
-  # for screen readers when nothing beside it says what it does.
+  # For plugins: the old switch around a native checkbox (check_box_tag, form.check_box … native:
+  # true), drawn by the compatibility styles. The core's own are ui :switch.
   def switch_tag(title: nil, screen_reader_label: nil, &block)
     tag.label(class: "switch", title: title) do
       safe_join([ capture(&block), tag.span(class: "switch__track", aria: { hidden: true }), (tag.span(screen_reader_label, class: "visually-hidden") if screen_reader_label) ])
     end
   end
 
-  # Every date field: a calendar (vanillajs-datepicker, through the date-field controller). The
-  # server renders both halves, so a morph never undoes it: a hidden field with the form's name and
-  # the date as YYYY-MM-DD (what's submitted), and a read-only field showing it ("Oct 20, 2026")
-  # that opens the calendar. Options (class, aria, data, required, autofocus, placeholder) go on the
-  # field people see; value: overrides the record's. t, +, - and Delete work from the keyboard.
-  DATE_FIELD_DATA = { date_field_target: "display", action: "keydown->date-field#shortcut" }.freeze
-  DATE_FIELD_FORMAT = "%b %-d, %Y" # the calendar's "M d, yyyy"
-
+  # Every date field: ui :date_picker, a field to type a date into ("10/20/2026", "Oct 20",
+  # "2026-10-20") with a calendar in its popup, sending YYYY-MM-DD under the form's name. Its value
+  # comes from the server, so a morph keeps a date someone picked unless the server's changed.
+  # Options: form: (the id of a form it sits outside of), placeholder:, required: (else it has a
+  # button that clears it), min:, max:, disabled:, and data: / aria: / class: for the control;
+  # value: overrides the record's. t picks today, in the field or the calendar (date-keys).
   def date_input(form, method, **options)
     value = options.key?(:value) ? options.delete(:value) : form.object.try(method)
     date_picker(form.field_name(method), value, id: options.delete(:id) || form.field_id(method), **options)
@@ -93,13 +82,10 @@ module FieldsHelper
 
   def date_picker(name, value, id:, **options)
     date = value.is_a?(Date) ? value : (Date.iso8601(value.to_s) rescue nil)
-    data = DATE_FIELD_DATA.merge(options.delete(:data) || {}) { |key, ours, theirs| key == :action ? "#{ours} #{theirs}" : theirs }
-    # form: the id of a form it sits outside of (a record page's sidebar), for the value it sends.
-    form = options.delete(:form)
-    tag.span(class: "date-picker", data: { controller: "date-field" }) do
-      hidden_field_tag(name, date&.iso8601, id: nil, form: form, data: { date_field_target: "value" }) +
-        text_field_tag(nil, date&.strftime(DATE_FIELD_FORMAT), id: id, readonly: true, autocomplete: "off",
-          placeholder: options.delete(:placeholder) || "Pick a date", data: data, **options)
-    end
+    data = options.delete(:data) || {}
+    data = data.merge(controller: [ "date-keys", data[:controller] ].compact.join(" "), date_keys_today_value: Date.current.iso8601)
+    required = options.delete(:required)
+    ui :date_picker, name: name, value: date, id: id, required: required, clearable: !required, data: data,
+      **options.slice(:form, :placeholder, :min, :max, :disabled, :aria, :class, :size)
   end
 end

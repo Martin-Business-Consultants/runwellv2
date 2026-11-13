@@ -1,20 +1,14 @@
 <%# locals: (task:, labelled: nil, options_on_page: nil) %>
 <%# Who's on a task, changed in place (Fizzy's assignments): the avatars (or an empty circle) open
-    a menu of the team. Type to narrow it (fuzzy: "sp" finds Sarah Producer); each click puts that
-    person on or takes them off, and the menu stays open. The first on leads (the owner); taking
-    off the lead hands it to whoever came on next. The team's list is on the page once
-    (task_assignee_options_template), as is the menu itself (task_owner_popup_template); both are
-    copied in when it first opens, so a row carries only its avatars. %>
+    the page's one list of the team beside them (task_picker_menus: a ui :combobox with no trigger
+    of its own, opened by data-runeui-open). Type to narrow it; each pick puts that person on or
+    takes them off, and the list stays open. The first on leads (the owner); taking off the lead
+    hands it to whoever came on next. A row carries only its avatars. %>
 <% unless options_on_page %>
-  <%= task_assignee_options_template %>
-  <%= task_owner_popup_template %>
+  <%= task_picker_menus %>
 <% end %>
-<div class="row-picker owner-picker" id="<%= dom_id(task, labelled ? :owner_labelled : :owner) %>" data-controller="dialog fixed-popup filter picker" data-dialog-orient-value="false" data-filter-fuzzy-value="true"
-  data-picker-multiple-value="true" data-picker-current-value="<%= task.owners.map(&:id).join(",") %>" data-picker-options-value="task-assignee-options"
-  data-picker-popup-value="task-owner-popup" data-picker-url-value="<%= task_assignments_path(task) %>" data-picker-due-value="<%= task.due_on&.iso8601 %>"<% if labelled %> data-picker-labelled-value="true"<% end %>
-  data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:show->picker#fill dialog:show->fixed-popup#place dialog:close->fixed-popup#close dialog:close->filter#clearInput">
+<span class="row-picker owner-picker" id="<%= dom_id(task, labelled ? :owner_labelled : :owner) %>" data-controller="picker" data-picker-kind-value="owners"
+  data-picker-current-value="<%= task.owners.map(&:id).join(",") %>" data-picker-menu-value="task-owner-menu" data-picker-form-value="task-owner-form"
+  data-picker-url-value="<%= task_assignments_path(task) %>" data-picker-due-value="<%= task.due_on&.iso8601 %>"<% if labelled %> data-picker-labelled-value="true"<% end %>>
   <%= render "tasks/owners", task: task, labelled: labelled %>
-
-  <%# Its insides come from task_owner_popup_template the first time it opens (picker#fill). %>
-  <dialog class="popup" aria-label="Who’s on <%= task.title %>" data-dialog-target="dialog" data-fixed-popup-target="popup"></dialog>
-</div>
+</span>

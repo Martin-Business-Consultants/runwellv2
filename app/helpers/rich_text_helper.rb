@@ -11,13 +11,7 @@ module RichTextHelper
   end
 
   def rich_text_field_tag(name, value, id:, placeholder: nil, staff: false, form_id: nil)
-    options = { name: name, id: id, value: editor_content(value), placeholder: placeholder, class: "lexxy-content", form: form_id }
-    if staff
-      options[:data] = { direct_upload_url: rails_direct_uploads_url, blob_url_template: rails_service_blob_url(":signed_id", ":filename") }
-    else
-      options[:attachments] = "false"
-    end
-    content_tag("lexxy-editor", options) { global_mentions_prompt if staff }
+    ui(:editor, name: name, value: editor_content(value), id: id, placeholder: placeholder, form: form_id, attachments: staff) { global_mentions_prompt if staff }
   end
 
   def global_mentions_prompt

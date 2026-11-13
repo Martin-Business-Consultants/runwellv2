@@ -70,8 +70,10 @@ export default class extends Controller {
 
   // Esc on a popup inside something else Esc closes (a combobox in a runeui dialog): the popup
   // takes the key only while it's open; closed, the key goes on to what's around it.
+  // Esc in a runeui popup inside it (a select's list, a combobox, a calendar) is the popup's, and
+  // goes on to it: the popup closes, and the next Esc closes this.
   closeOnEscape(event) {
-    if (!this.dialogTarget.open) return
+    if (!this.dialogTarget.open || this.dialogTarget.querySelector(".ui-popup[data-open]")) return
     event.stopPropagation()
     this.close()
   }

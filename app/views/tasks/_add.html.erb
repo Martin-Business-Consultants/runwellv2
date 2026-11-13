@@ -15,7 +15,7 @@
     <% end %>
     <%= form.text_field :title, required: true, autocomplete: "off", placeholder: "What needs doing…", aria: { label: "Title" } %>
     <div class="record-add__fields">
-      <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" }, aria: { label: "Owner" } %>
+      <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" }, aria: { label: "Owner" }, search: true %>
       <%= date_input form, :due_on, aria: { label: "Due" } %>
       <% if scope_item %>
         <%= form.hidden_field :scope_item_id, value: scope_item.id %>

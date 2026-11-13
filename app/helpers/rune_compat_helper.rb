@@ -247,9 +247,8 @@ module RuneCompatHelper
   # ui :avatar with them (phases 3 to 5).
   def avatar(name, url: nil, size: nil, title: name, **options)
     hue = name.to_s.bytes.sum % 8
-    content = url.present? ? image_tag(url, alt: "", loading: "lazy") : initials(name)
-    tag.span content, class: [ "avatar", "letter--#{hue}", ("avatar--#{size}" if size), options.delete(:class) ],
-      title: title, role: "img", aria: { label: title }, **options
+    ui :avatar, src: url, name: title, initials: initials(name), size: { md: :sm, lg: :default }.fetch(size&.to_sym, :sm),
+      class: [ "avatar", "letter--#{hue}", ("avatar--#{size}" if size), ("avatar--xs" unless size), options.delete(:class) ], **options
   end
 
   # Nobody: a dashed circle.
@@ -258,7 +257,7 @@ module RuneCompatHelper
   end
 
   # Overlapping avatars: avatar_stack { safe_join(people.map { avatar(it.name) }) }
-  def avatar_stack(&avatars) = tag.span(capture(&avatars), class: "avatar-stack")
+  def avatar_stack(&avatars) = tag.div(capture(&avatars), class: "avatar-stack", role: "group", data: { slot: "avatar-group", size: "sm" })
 
   def initials(name)
     words = name.to_s.strip.split(/\s+/)

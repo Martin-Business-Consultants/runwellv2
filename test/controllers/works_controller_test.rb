@@ -40,8 +40,8 @@ class WorksControllerTest < ActionDispatch::IntegrationTest
   test "new" do
     get new_work_path(client_id: clients(:acme).id, label: "project")
     assert_response :success
-    assert_select "input[type=hidden][name='work[label]'][value=project]"
-    assert_select "input[type=hidden][name='work[client_id]'][value='#{clients(:acme).id}']"
+    assert_select "[name='work[label]'][default-value=project]"
+    assert_select "[name='work[client_id]'][default-value='#{clients(:acme).id}']"
   end
 
   test "create starts an active work" do

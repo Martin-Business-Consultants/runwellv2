@@ -1,9 +1,8 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Status</span>
+  <%= form.ui :field, :status, label: "Status", class: "field" do %>
     <%= form.select :status, task_status_options, {}, form: form_id %>
-  </label>
+  <% end %>
 <% else %>
   <dt>Status</dt><dd><%= render "tasks/status_dot", task: record, labelled: true %></dd>
 <% end %>

@@ -1,8 +1,7 @@
 <%# locals: (form: nil, form_id: nil, **) %>
 <%# A piece of work's title: the page's heading on show. %>
 <% if form %>
-  <label class="field">
-    <span class="field__label">Title</span>
+  <%= form.ui :field, :title, label: "Title", class: "field" do %>
     <%= form.text_field :title, required: true, autofocus: true, autocomplete: "off", placeholder: "Spring landing page", form: form_id %>
-  </label>
+  <% end %>
 <% end %>

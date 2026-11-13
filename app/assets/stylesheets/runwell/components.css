@@ -8,7 +8,8 @@
 /* ======================================================================= 1 Popups */
 
 /* A <dialog class="popup"> (PopupHelper#popup_menu) opened by the dialog controller below its
-/* trigger, drawn as rune's menu: the pickers, quick filters and bulk menus. Items are
+/* trigger, drawn as rune's menu: left for the quick-actions tray's record picker (phase 7) and
+/* plugins' popup_menu. Items are
 /* .popup__item > .popup__btn; the chosen one carries a check. */
 .popup {
   position: absolute; inset: calc(100% + 4px) auto auto 0; z-index: 40;
@@ -179,19 +180,16 @@ turbo-frame:has(.pagination-link--active-when-observed):has(~ turbo-frame) .pagi
 
 /* People: nobody's placeholder, and "+N" at the end of a stack. */
 .person__none { color: var(--text-faint); font-size: var(--text-meta); }
-.avatar--more { background: var(--layer-3); color: var(--text-muted); }
+/* An avatar (ui :avatar through avatar and person_tag): its initials on its own colour (letter--N),
+/* and the smallest size, which runeui has no name for. */
+.avatar [data-slot="avatar-fallback"] { background: transparent; color: inherit; }
+[data-slot="avatar"].avatar--xs { --avatar-size: 1.125rem; }
+[data-slot="avatar"].avatar--lg { --avatar-size: 1.75rem; }
 
 /* A destructive action on a record's own page (confirm_button, layouts/shared/_confirm): a quiet
 /* red button; the question is asked in the page's confirm dialog. */
 .confirm-button, .confirm-button:hover { color: var(--danger); }
 .confirm-button:hover { background: color-mix(in srgb, var(--danger) 9%, transparent); }
-
-/* A secret (secret_field): the field with an eye to show it. */
-.secret-field { position: relative; display: flex; align-items: center; width: 100%; }
-.secret-field input { padding-right: 2.25rem; }
-.secret-field__eye { position: absolute; right: 2px; }
-.secret-field__hide, .secret-field--shown .secret-field__show { display: none; }
-.secret-field--shown .secret-field__hide { display: block; }
 
 /* The ? sheet (layouts/shared/_shortcuts): groups in two columns, each a list of what a key
 /* does with its keys at the end; the footer turns hint mode on and off. */
@@ -252,51 +250,11 @@ html[data-hints] .hint-legend {
 /* The fields Runwell builds from more than one input (ApplicationHelper's date_input, money_field,
 /* rich_text_field; DocumentsHelper's document_drop_target). Bare inputs inside them are rune's. */
 
-/* A date (date_input): a hidden field with the date sent, and a read-only one showing it that
-/* opens the calendar. The wrapper has no box, so the field people see lays out as any input. */
-.date-picker { display: contents; }
-.date-picker input[readonly][data-date-field-target="display"] { cursor: pointer; }
-
-/* The calendar (vanillajs-datepicker, the date-field controller), drawn as a rune popover: weeks
-/* of small rounded day cells, today tinted, the chosen day in the primary button's colours, the
-/* month's arrows and Today / Clear as small buttons. Its buttons carry the controller's
-/* buttonClass (btn), so they're reset here. */
-dialog:has(.datepicker.active) { overflow: visible; }
-.datepicker { width: min-content; }
-.datepicker:not(.active) { display: none; }
-.datepicker-dropdown { position: absolute; z-index: 60; padding-top: 4px; }
-.datepicker-dropdown.datepicker-orient-top { padding: 0 0 4px; }
-.datepicker-picker { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-2); border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: var(--shadow-popover); font-size: var(--text-ui); }
-.datepicker-controls { display: flex; align-items: center; gap: var(--s-1); }
-.datepicker-controls :is(.button, .btn) {
-  display: inline-flex; align-items: center; justify-content: center; height: var(--control-h-sm); padding: 0 var(--s-2);
-  border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); font: inherit; font-weight: var(--weight); cursor: pointer;
-}
-.datepicker-controls :is(.button, .btn):hover { background: var(--hover); color: var(--text); }
-.datepicker-controls :is(.button, .btn)[disabled] { opacity: .4; cursor: not-allowed; }
-.datepicker-controls .view-switch { flex: auto; font-weight: var(--weight-strong); }
-.datepicker-controls :is(.prev-button, .next-button) { flex: 0 0 var(--control-h-sm); width: var(--control-h-sm); padding: 0; color: var(--text-muted); font-size: 1.125rem; line-height: 1; }
-.datepicker-controls :is(.prev-button, .next-button).disabled { visibility: hidden; }
-.datepicker-footer { padding-top: var(--s-2); border-top: 1px solid var(--line); }
-.datepicker-footer .datepicker-controls > * { flex: 1; }
-.datepicker-footer .datepicker-controls :is(.button, .btn) { border: 1px solid var(--line-strong); background: var(--panel); font-size: var(--text-meta); font-weight: var(--weight-strong); }
-.datepicker-footer .datepicker-controls :is(.button, .btn):hover { background: var(--layer-1); }
-.datepicker-main { flex: auto; }
-.datepicker-view, .datepicker-grid { display: flex; }
-.datepicker-view { align-items: stretch; width: calc(7 * 2rem); }
-.datepicker-grid { flex: auto; flex-wrap: wrap; row-gap: 2px; }
-.datepicker .days { display: flex; flex: auto; flex-direction: column; }
-.datepicker .days-of-week { display: flex; }
-.datepicker span { display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: default; user-select: none; }
-.datepicker .dow { flex-basis: calc(100% / 7); height: 1.75rem; color: var(--text-faint); font-size: var(--text-meta); }
-.datepicker-cell { flex-basis: calc(100% / 7); height: 2rem; font-variant-numeric: tabular-nums; }
-.datepicker-cell:not(.day) { flex-basis: 25%; height: 3rem; }
-.datepicker-cell:not(.disabled):hover { background: var(--hover); cursor: pointer; }
-.datepicker-cell:is(.prev, .next):not(.disabled) { color: var(--text-faint); }
-.datepicker-cell.disabled { color: var(--text-faint); opacity: .5; }
-.datepicker-cell.today:not(.selected) { background: var(--layer-2); font-weight: var(--weight-strong); }
-.datepicker-cell.focused:not(.selected) { background: var(--layer-2); }
-.datepicker-cell.selected, .datepicker-cell.selected:hover { background: var(--text); color: var(--panel); font-weight: var(--weight-strong); }
+/* A form's own controls (selects, a combobox behind its button, a date) fill their field, as its
+/* inputs do: runeui's are as wide as their words, which left a column of fields ragged. */
+.field :is([data-slot="select-trigger"], [data-slot="combobox-trigger"][data-picker], [data-slot="date-picker"]),
+.field ui-combobox:has(> ui-combobox-trigger) { width: 100%; }
+.field [data-slot="date-picker-input"] { flex: 1; }
 
 /* Money (money_field): the dollars people type and the cents sent, laid out as the one field. */
 .money-field { display: contents; }
@@ -351,31 +309,6 @@ form[aria-busy="true"] :is(button[type="submit"], input[type="submit"]) { opacit
 /* turbo_stream_flash), in the bottom right corner, over the side panel, the trays and the search
 /* bar (the bell and the + are in the bar at the top). */
 #runeui-toaster { z-index: calc(var(--z-tray) + 12); }
-
-/* ======================================================================= Comboboxes */
-
-/* Every form select is a combobox (ComboboxHelper, Fizzy's): a trigger drawn as the app's other
-/* fields, opening the app's popup of choices, with a filter box once there are more than a few. */
-.combobox { position: relative; display: flex; width: 100%; min-width: 0; }
-.combobox__trigger {
-  display: flex; align-items: center; gap: var(--s-2); width: 100%; height: var(--control-h); padding: 0 .5rem 0 .625rem;
-  border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--panel); color: var(--text);
-  font: inherit; text-align: start; cursor: pointer; transition: border-color .12s, box-shadow .12s;
-}
-.combobox__trigger:hover { border-color: color-mix(in srgb, var(--text) 30%, var(--line-strong)); }
-.combobox__trigger:focus-visible, .combobox:has(.popup[open]) .combobox__trigger { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong)); box-shadow: var(--ring); }
-.combobox__trigger:disabled { opacity: .6; cursor: not-allowed; }
-.combobox__trigger .icon { flex: none; color: var(--text-muted); }
-.combobox__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* The popup is at least as wide as its field. */
-.combobox__popup { min-width: 100%; max-width: min(28rem, calc(100vw - 1rem)); }
-.popup__group { padding: var(--s-2) var(--s-3) 2px; color: var(--text-faint); font-size: var(--text-xs); font-weight: var(--weight-strong); }
-.popup__group:not(:has(~ .popup__item:not([hidden]))) { display: none; }
-/* A small select (select--sm, the note composer's kind) stays small. */
-.combobox--sm { width: auto; }
-.combobox--sm .combobox__trigger { height: var(--control-h-sm); font-size: var(--text-meta); }
-/* In a row of fields or a compact form, the combobox fills its place as the select did. */
-.task-panel__field .combobox { max-width: 16rem; }
 
 /* ======================================================================= The brand's colour */
 
