@@ -75,6 +75,8 @@
 .settings-inline { display: flex; flex-flow: row wrap; align-items: center; gap: var(--s-2); }
 .settings-inline :is(input, select, .secret-field) { flex: 1 1 14rem; min-width: 0; }
 .settings-inline--fit :is(input, select) { flex: 0 0 auto; }
+/* runeui's fields in the same row (trial): the wrapper element takes the field's share. */
+.settings-inline :is(ui-input, ui-combobox) { flex: 1 1 14rem; width: auto; min-width: 0; }
 
 /* A switch with its hint (switch_field) on a settings page: a setting row in rune's card. */
 .settings-group__card .setting-row--field { min-height: 3.25rem; padding: var(--s-3) var(--s-4); }

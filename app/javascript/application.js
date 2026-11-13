@@ -3,6 +3,8 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import "reactionview"
 import "behaviors"
+// runeui (trial): UI SDK's components, autoloaded by tag, and their Hotwire layer.
+import "runeui"
 import { highlightCode } from "lexxy"
 
 // Staff pages link the manifest: they register the service worker (the offline page, pushed

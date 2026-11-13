@@ -12,6 +12,12 @@ module AppearanceHelper
   def app_stylesheet_tags
     safe_join([
       rune_ui_stylesheet_tags(fonts: false),
+      # runeui (trial), beside rune_ui: its components' sheets only, with no tokens, page styles
+      # or theme switch of its own, and Runwell's confirm dialogs and toasts kept. Then the
+      # bridge, which defines runeui's tokens from rune's on runeui's own parts, so Appearance
+      # reaches them and nothing of runeui's lands on the page. Runwell's sheets still come last.
+      runeui_tags(tokens: false, page: false, theme: false, confirm: false, toasts: false, "data-turbo-track": "reload"),
+      stylesheet_link_tag("runeui/bridges/rune_ui", "data-turbo-track": "reload"),
       stylesheet_link_tag(*RUNWELL_STYLESHEETS, "data-turbo-track": "reload"),
       (stylesheet_link_tag(*Runwell::Plugins.enabled_stylesheets, "data-turbo-track": "reload") if Runwell::Plugins.enabled_stylesheets.any?)
     ].compact, "\n")

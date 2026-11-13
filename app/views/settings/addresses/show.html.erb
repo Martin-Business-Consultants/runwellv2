@@ -10,25 +10,21 @@
         Use the address your team and <%= term(:client, count: 2).downcase %> type to open it.
       </p>
     </header>
+    <%# runeui trial: this page's alert, fields, time zone list and buttons are runeui components
+        (ui :alert, form.ui :field / :input / :combobox, ui :button), themed by Appearance through
+        runeui/bridges/rune_ui. %>
     <% if !Runwell.host_set? %>
-      <div class="alert alert--attention" role="status">
-        <%= icon_tag "globe", class: "alert__icon" %>
-        <p class="alert__title">Not set yet</p>
-        <p class="alert__body">
-          Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.
-        </p>
-      </div>
+      <% not_set = capture do %>Links use <%= Runwell.url %><% if Setting.current.seen_host.blank? %>, which nobody else can open<% else %>, the address you’ve been using<% end %>. Save it below to keep it.<% end %>
+      <%= ui :alert, variant: :warning, icon: :info, title: "Not set yet", description: not_set, role: "status" %>
     <% end %>
 
-    <%= form_with model: @setting, url: settings_address_path, method: :patch, class: "field" do |form| %>
-      <%= form.label :app_url, "Runwell’s address", class: "field__label" %>
-      <div class="settings-inline">
-        <%= form.url_field :app_url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true,
-              autocomplete: "off" %>
-        <button type="submit" class="btn btn--primary">Save</button>
-      </div>
-      <% if ENV["APP_HOST"].present? %>
-        <p class="field__hint">The server’s APP_HOST is <%= ENV["APP_HOST"] %>; the address saved here takes its place.</p>
+    <%= form_with model: @setting, url: settings_address_path, method: :patch do |form| %>
+      <% hint = ENV["APP_HOST"].present? ? "The server’s APP_HOST is #{ENV["APP_HOST"]}; the address saved here takes its place." : nil %>
+      <%= form.ui :field, :app_url, label: "Runwell’s address", description: hint do %>
+        <div class="settings-inline">
+          <%= form.ui :input, :app_url, type: :url, value: (Runwell.url unless Runwell.host == "localhost"), placeholder: "https://#{request.host}", required: true, autocomplete: "off" %>
+          <%= ui :button, content: "Save", type: :submit %>
+        </div>
       <% end %>
     <% end %>
   </section>
@@ -40,14 +36,15 @@
         Times on your pages, in emails and in what agents read are shown here. A <%= term(:client).downcase %> in another zone can have its own; theirs is used in their portal and emails.
       </p>
     </header>
-    <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone", class: "field" do |form| %>
-      <%= form.label :time_zone, "Time zone", class: "field__label" %>
-      <div class="settings-inline">
-        <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: Setting.zone.name } %>
-        <button type="submit" class="btn btn--primary">Save</button>
-      </div>
-      <% if @setting.time_zone.blank? %>
-        <p class="field__hint">Not saved yet: <%= Setting.zone.name %> is the <%= ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default" %>.</p>
+    <%= form_with model: @setting, url: settings_address_path, method: :patch, namespace: "zone" do |form| %>
+      <% us = ActiveSupport::TimeZone.us_zones %>
+      <% zones = { "United States" => us.map { [ it.to_s, it.name ] }, "Everywhere else" => (ActiveSupport::TimeZone.all - us).map { [ it.to_s, it.name ] } } %>
+      <% unsaved = @setting.time_zone.blank? ? "Not saved yet: #{Setting.zone.name} is the #{ENV["TIME_ZONE"].present? ? "server’s TIME_ZONE" : "default"}." : nil %>
+      <%= form.ui :field, :time_zone, label: "Time zone", description: unsaved do %>
+        <div class="settings-inline">
+          <%= form.ui :combobox, :time_zone, options: zones, value: (@setting.time_zone.presence || Setting.zone.name), placeholder: "Search time zones" %>
+          <%= ui :button, content: "Save", type: :submit %>
+        </div>
       <% end %>
     <% end %>
   </section>

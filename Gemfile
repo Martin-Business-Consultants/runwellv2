@@ -20,6 +20,7 @@ gem "prawn"
 gem "propshaft"
 # shadcn/ui in plain CSS, no build step: the ui- components (Runwell UI)
 gem "rune_ui", github: "Martin-Business-Consultants/rune_ui", branch: "main" # the UI kit, shared with Botter (docs/rune-ui-migration.md)
+gem "runeui", path: "../runeui" # trial: components on UI SDK, beside rune_ui (branch runeui-trial)
 gem "puma"
 gem "rails"
 gem "rails-active_search"
