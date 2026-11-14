@@ -1,7 +1,7 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <%# On show it's in the line under the title. %>
 <% if form %>
-  <%= form.ui :field, :label, label: "#{term(:work)} type", class: "field" do %>
+  <%= form.ui :field, :label, label: "#{term(:work)} type" do %>
     <%= form.select :label, label_options(record.label), {}, form: form_id %>
   <% end %>
 <% end %>

@@ -5,6 +5,7 @@
     tasks, people, then the rest, with a last line to see them all there. Enter or a click opens one:
     a task in the side panel, anything else its page. Its button is on the page but out of sight, so
     s (the keyboard controller) can press it; ⌘K is the palette's own. %>
+<%# runeui:allow native-control — out of sight: what the s key presses (the palette has its own ⌘K) %>
 <% trigger = capture do %><button type="button" class="visually-hidden" title="Search (S or ⌘K)" data-keys="s">Search</button><% end %>
 <%= ui :command, id: "search", dialog: true, trigger: trigger, shortcut: "mod+k", title: "Search",
       src: search_path, min: 2,

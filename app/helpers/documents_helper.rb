@@ -18,7 +18,7 @@ module DocumentsHelper
       safe_join [
         icon_tag("attachment"),
         tag.span(data: { upload_target: "status" }) do
-          safe_join [ "Drop files here or ", tag.span("choose…", class: "upload-drop__choose"), tag.span(" · up to #{number_to_human_size(Document::MAX_SIZE)} each", class: "faint") ]
+          safe_join [ "Drop files here or ", tag.span("choose…", class: "upload-drop__choose"), tag.span(" · up to #{number_to_human_size(Document::MAX_SIZE)} each", class: "upload-drop__limit") ]
         end,
         tag.progress(max: 100, value: 0, hidden: true, data: { upload_target: "progress" }),
         form.file_field(:files, name: "document[files][]", multiple: true, id: nil, aria: { label: "Add documents" },

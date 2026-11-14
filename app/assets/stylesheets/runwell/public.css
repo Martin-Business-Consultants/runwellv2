@@ -202,7 +202,7 @@ td a.portal-task-link:hover { text-decoration: underline; }
 .portal-sortable__grip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; border-radius: calc(var(--ui-radius-lg) * 0.4); color: var(--foreground); }
 /* On a touch screen the grip gives way to a pair of buttons, up and down, in a wider gutter. */
 .portal-sortable__moves { display: none; }
-.portal-sortable__move { display: grid; place-items: center; width: 2rem; height: 1.375rem; padding: 0; border: 0; background: none; color: var(--muted-foreground); cursor: pointer; }
+.portal-sortable__move.ui-button { width: 2rem; height: 1.375rem; color: var(--muted-foreground); } /* runeui's ghost icon button, a short one of a stacked pair */
 .portal-sortable__move .icon { width: .875rem; height: .875rem; }
 .portal-sortable__move--down .icon { transform: rotate(180deg); }
 @media (hover: none) and (pointer: coarse) {
@@ -255,6 +255,11 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
 /* The form (layouts/public with a :showcase): no card around it, the install's mark large over a
 /* larger heading, roomy fields and a full-width button with a little lift. The same at any width;
 /* only the showcase waits for a wide screen. */
+.auth-layout--split {
+  /* The mark's and the button's lift off the page. */
+  --auth-lift-mark: 0 1px 2px rgb(0 0 0 / .08), 0 8px 18px -8px rgb(0 0 0 / .4);
+  --auth-lift-button: 0 1px 2px rgb(0 0 0 / .08), 0 6px 14px -6px rgb(0 0 0 / .35);
+}
 .auth-layout--split .auth { gap: 2rem; }
 .auth-layout--split .auth__card[data-slot="card"] { gap: 2rem; padding: 0; border: 0; background: none; box-shadow: none; }
 .auth-layout--split .auth__card > [data-slot] { padding-inline: 0; }
@@ -262,7 +267,7 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
 .auth-layout--split .auth-layout__brand { flex-direction: column; gap: .5rem; color: var(--muted-foreground); font-size: var(--ui-text-xs); }
 .auth-layout--split .auth-layout__brand .auth-layout__logo {
   width: 3rem; height: 3rem; border-radius: calc(var(--ui-radius-lg) * 1.4); font-size: 1.25rem;
-  box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 8px 18px -8px rgb(0 0 0 / .4);
+  box-shadow: var(--auth-lift-mark);
 }
 .auth-layout--split .auth-layout__brand .header__logo-image { max-height: 2.75rem; }
 .auth-layout--split .auth__card > [data-slot="card-header"] { gap: .5rem; }
@@ -270,14 +275,26 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
 .auth-layout--split .auth__form { gap: 1.5rem; }
 .auth-layout--split .auth .ui-input { height: 2.75rem; padding-inline: .875rem; font-size: 1rem; }
 .auth-layout--split .auth .auth__button.ui-button { height: 2.75rem; font-size: .9375rem; }
-.auth-layout--split .auth .auth__button.ui-button[data-variant="default"] { box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 6px 14px -6px rgb(0 0 0 / .35); }
+.auth-layout--split .auth .auth__button.ui-button[data-variant="default"] { box-shadow: var(--auth-lift-button); }
 .auth-layout--split .auth__aside-link, .auth-layout--split .auth__aside-link:hover { color: var(--primary); }
 
 /* The showcase: the right half, a panel in the scheme's colour (--primary, or a dark grey in dark
 /* when no scheme is picked, whose primary is near-white; mixed in oklch, so it
 /* follows any scheme and stays solid where a browser can't mix), grain over it, the theme toggle
 /* in a cut-out corner and frosted cards floating on it. Decorative: the cards are made-up examples. */
-.showcase { --showcase-color: var(--primary); position: sticky; top: 0; width: 100%; height: 100dvh; padding: 1rem; }
+.showcase {
+  --showcase-color: var(--primary);
+  /* Light and glass over the panel's colour, whatever the scheme: white and black, see-through. */
+  --showcase-glow: rgb(255 255 255 / .35);
+  --showcase-edge: rgb(255 255 255 / .45);
+  --showcase-lift: 0 24px 48px -24px rgb(0 0 0 / .45), 0 2px 6px rgb(0 0 0 / .06);
+  --showcase-caption-edge: rgb(255 255 255 / .28);
+  --showcase-caption-fill: rgb(10 12 16 / .22);
+  --showcase-on-colour: #fff;
+  --showcase-on-colour-soft: rgb(255 255 255 / .88);
+  --showcase-dim: linear-gradient(rgb(0 0 0 / .28), rgb(0 0 0 / .42));
+  position: sticky; top: 0; width: 100%; height: 100dvh; padding: 1rem; }
+.dark .showcase { --showcase-edge: rgb(255 255 255 / .12); --showcase-caption-edge: rgb(255 255 255 / .12); }
 .dark[data-scheme="fizzy"] .showcase { --showcase-color: oklch(37.1% 0 0); }
 .showcase__scene {
   --showcase-radius: calc(var(--ui-radius-lg) * 2.8);
@@ -291,12 +308,12 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
     linear-gradient(160deg, oklch(from var(--showcase-color) calc(l + .1) c h), oklch(from var(--showcase-color) calc(l - .14) c h));
 }
 /* A soft light from the top, and fine grain so the colour reads as a surface. */
-.showcase__scene::before { content: ""; position: absolute; inset: 0; z-index: 0; background: radial-gradient(90% 55% at 50% -10%, rgb(255 255 255 / .35), transparent 70%); }
+.showcase__scene::before { content: ""; position: absolute; inset: 0; z-index: 0; background: radial-gradient(90% 55% at 50% -10%, var(--showcase-glow), transparent 70%); }
 .showcase__scene::after {
   content: ""; position: absolute; inset: 0; z-index: 0; opacity: .22; mix-blend-mode: overlay; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.dark .showcase__scene::before { background: linear-gradient(rgb(0 0 0 / .28), rgb(0 0 0 / .42)); }
+.dark .showcase__scene::before { background: var(--showcase-dim); }
 
 /* The cut-out corner: the page's colour over the panel's corner, curving into it on both sides,
 /* holding the theme toggle in a round button. */
@@ -320,19 +337,18 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
 /* hairline of light round the edge. */
 .showcase__card[data-slot="card"], .showcase__caption {
   position: absolute; z-index: 1; display: flex; flex-direction: column; gap: .625rem; padding: 1rem 1.25rem;
-  border: 1px solid rgb(255 255 255 / .45); border-radius: calc(var(--ui-radius-lg) * 1.6);
+  border: 1px solid var(--showcase-edge); border-radius: calc(var(--ui-radius-lg) * 1.6);
   background: color-mix(in oklab, var(--card, var(--background)) 80%, transparent);
   -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
-  box-shadow: 0 24px 48px -24px rgb(0 0 0 / .45), 0 2px 6px rgb(0 0 0 / .06);
+  box-shadow: var(--showcase-lift);
   color: var(--card-foreground, var(--foreground)); font-size: var(--ui-text-xs); line-height: 1.35;
 }
 .showcase__card > [data-slot="card-content"] { display: flex; flex-direction: column; gap: .625rem; padding: 0; }
-.dark :is(.showcase__card[data-slot="card"], .showcase__caption) { border-color: rgb(255 255 255 / .12); }
 .showcase__card--main { top: 40%; left: 12%; width: min(23rem, 64%); }
 .showcase__card--side { top: 15%; right: 7%; width: min(20rem, 58%); }
 .showcase__caption {
   bottom: 1.5rem; left: 1.5rem; width: min(25rem, calc(100% - 3rem)); gap: .5rem;
-  border-color: rgb(255 255 255 / .28); background: rgb(10 12 16 / .22); color: #fff;
+  border-color: var(--showcase-caption-edge); background: var(--showcase-caption-fill); color: var(--showcase-on-colour);
 }
 .showcase__row { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .showcase__title { flex: 1; min-width: 0; font-size: var(--ui-text-sm); font-weight: 500; }
@@ -352,13 +368,13 @@ a.portal-section-filter { color: var(--foreground); text-decoration: none; }
 .showcase__task { flex: 1; min-width: 0; overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .showcase__card--side .showcase__row + .showcase__row { padding-top: .625rem; border-top: 1px solid var(--border); }
 .showcase__avatar[data-slot="avatar"] { flex: none; width: 1.5rem; height: 1.5rem; }
-.showcase__avatar [data-slot="avatar-fallback"] { background: oklch(from var(--showcase-color) calc(l - .05) c calc(h + 40)); color: #fff; font-size: .625rem; font-weight: 700; }
+.showcase__avatar [data-slot="avatar-fallback"] { background: oklch(from var(--showcase-color) calc(l - .05) c calc(h + 40)); color: var(--showcase-on-colour); font-size: .625rem; font-weight: 700; }
 .showcase__avatar--two [data-slot="avatar-fallback"] { background: oklch(from var(--showcase-color) calc(l + .05) c calc(h - 60)); }
 .showcase__who { flex: 1; min-width: 0; font-weight: 500; }
 .showcase__new { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--showcase-color); }
 .showcase__message { margin: 0; font-size: var(--ui-text-sm); }
 .showcase__caption-title { font-size: var(--ui-text-sm); font-weight: 500; }
-.showcase__caption-line { display: flex; align-items: center; gap: .5rem; color: rgb(255 255 255 / .88); }
+.showcase__caption-line { display: flex; align-items: center; gap: .5rem; color: var(--showcase-on-colour-soft); }
 .showcase__caption-line .icon { flex: none; width: .9rem; height: .9rem; }
 
 /* They rise in once, then drift a little, each at its own pace. Still for reduced motion. */

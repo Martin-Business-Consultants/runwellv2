@@ -48,7 +48,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 | `bin/dev` | Rails (`Procfile.dev`); jobs run inside it in development (Active Job's async adapter), so development needs no `bin/jobs` (production can run it beside the web, `docs/install.md`) |
 | `bin/rails test` | Minitest with fixtures |
 | `bin/rubocop` | Lint (omakase) |
-| `bundle exec herb lint app/views` | Lint templates (Herb) |
+| `bundle exec herb lint app/views` | Lint templates (Herb, with runeui's `runeui-native-controls` from `.herb/rules/`) |
+| `bin/rails runeui:lint` | Stylesheets, helpers and JavaScript keep to runeui (`config/runeui.yml`); keeps runeui's Herb rule current |
 | `bin/rails import:unfold_general` | Move tasks off the "General" projects a v1 import made onto their clients (a dry run; `[apply]` does it) |
 | `bin/rails search:reindex` | Rebuild the search index from every searchable record |
 | `bin/rails agent:coverage` | Every staff action with its agent tool, or why it has none |
@@ -570,7 +571,13 @@ ReActionView state: in 0.6 a list stops refetching after the first change.
 
 Styling: components come from **runeui** (`../runeui`, a gem path for now; its README lists every
 component and AGENTS.md how one is built; its gallery is `/runeui` in development). A missing or
-wrong component is fixed in runeui (and its `script/test` run), never worked around here. runeui is
+wrong component is fixed in runeui (and its `script/test` run), never worked around here. CI holds
+the core to it (runeui's README, Keep an app on runeui): `herb lint` flags a native control runeui
+draws (`<button>`, `<input>`, `<select>`, `<dialog>`, `<table>`, `tag.button`, `check_box_tag`,
+`form.radio_button`…) and inline styles, and `bin/rails runeui:lint` an unknown token, a colour
+literal outside a token, a mix not in OKLab, a compatibility class (`deny_classes` in
+`config/runeui.yml`) or a native control built in a helper. A deliberate exception says why where
+it is: `runeui:allow native-control — why` in a comment (the row pickers' bare triggers do). runeui is
 linked as any app links it (`runeui_tags` in `app_stylesheet_tags`, `AppearanceHelper`): its
 tokens on `:root`, its page base, every component's sheet, Lexxy with runeui's skin, its theme
 script (light and dark), its toaster and confirm. Runwell's own CSS is in `app/assets/stylesheets`,

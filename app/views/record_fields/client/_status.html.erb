@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :status, label: "Status", description: "Dormant or former closes its open #{term(:work, count: 2).downcase} as cancelled and marks its open #{term(:task, count: 2).downcase} done.", class: "field" do %>
+  <%= form.ui :field, :status, label: "Status", description: "Dormant or former closes its open #{term(:work, count: 2).downcase} as cancelled and marks its open #{term(:task, count: 2).downcase} done." do %>
     <%= form.select :status, Client::STATUSES.map { |status| [ status.humanize, status ] }, {}, form: form_id %>
   <% end %>
 <% else %>

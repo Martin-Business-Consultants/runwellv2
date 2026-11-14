@@ -4,7 +4,7 @@
     (CustomField#visible_to) carries a lock for those who can; owners set who in template mode
     (record_fields/visibility), beside the field while arranging. %>
 <% if form %>
-  <%= ui :field, label: custom_field_label(field), class: "field" do %>
+  <%= ui :field, label: custom_field_label(field) do %>
     <%= custom_field_input_for(record, field, form_id: form_id) %>
   <% end %>
   <%= render "record_fields/visibility", field: field %>

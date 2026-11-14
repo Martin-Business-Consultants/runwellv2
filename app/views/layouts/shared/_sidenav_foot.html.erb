@@ -21,6 +21,7 @@
   <% theme = capture do %><span class="theme-toggle"><%= icon_tag "moon", class: "theme-toggle__moon" %><%= icon_tag "sun", class: "theme-toggle__sun" %></span> <span>Light or dark</span><% end %>
   <% shortcuts = capture do %><%= icon_tag "lifebuoy" %> <span>Keyboard shortcuts</span> <%= ui :kbd, content: "?" %><% end %>
   <% settings = capture do %><%= icon_tag "settings-outline" %> <span>Settings and help</span> <%= ui :kbd, keys: %w[G S] %><% end %>
+  <%# runeui:allow native-control — the nav's account row (avatar, name, address) opening its menu %>
   <%= ui :menu, trigger: tag.button(account, type: "button", class: "nav-account__button"), side: :top, align: :start, label: "Your menu", class: "nav-account__menu", items: [
         { label: safe_join([ icon_tag("person"), tag.span("Your account") ]), href: settings_account_path },
         { label: settings, href: settings_path, data: { keys: "g s", keys_anywhere: true } },

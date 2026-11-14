@@ -6,7 +6,7 @@ module CustomFieldsHelper
     safe_join(record.custom_fields.map do |field|
       name = "#{form.object_name}[custom_fields][#{field.key}]"
       id = "#{form.object_name}_custom_#{field.key}".parameterize(separator: "_")
-      ui(:field, label: custom_field_label(field), class: "field") { custom_field_input(field, name, id, record.custom_value(field)) }
+      ui(:field, label: custom_field_label(field)) { custom_field_input(field, name, id, record.custom_value(field)) }
     end)
   end
 

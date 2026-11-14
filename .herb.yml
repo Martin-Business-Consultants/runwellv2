@@ -59,6 +59,23 @@ linter:
   # exclude:
   #   - 'app/views/admin/**/*'
 
+  # No inline styles: styling lives in app/assets/stylesheets. Email carries its own (it can't load
+  # a stylesheet), and the compatibility layer's styleguide is left as it is. runeui's own rule,
+  # runeui-native-controls, comes from .herb/rules/ (bin/rails runeui:lint keeps it current).
+  rules:
+    html-no-style-attributes:
+      enabled: true
+      exclude:
+        - 'app/views/layouts/mailer.*'
+        - 'app/views/**/*_mailer/**/*'
+        - 'app/views/ui/**/*'
+    html-no-style-elements:
+      enabled: true
+      exclude:
+        - 'app/views/layouts/mailer.*'
+        - 'app/views/**/*_mailer/**/*'
+        - 'app/views/ui/**/*'
+
   # rules:
   #   # The 'all' pseudo rule sets the default for every rule you don't list.
   #   #   false: start from an empty set and opt back in explicitly

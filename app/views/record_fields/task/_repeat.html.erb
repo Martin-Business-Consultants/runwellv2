@@ -1,7 +1,7 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <%# Marking a repeating task done makes the next one (Task::Repeats). %>
 <% if form %>
-  <%= form.ui :field, :repeat, label: "Repeats", class: "field" do %>
+  <%= form.ui :field, :repeat, label: "Repeats" do %>
     <%= form.select :repeat, Cadence.options, { include_blank: "Never" }, form: form_id %>
   <% end %>
 <% elsif record.repeats? %>

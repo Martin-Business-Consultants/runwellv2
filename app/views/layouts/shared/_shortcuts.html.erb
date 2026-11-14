@@ -3,6 +3,7 @@
     button sits out of sight in the nav's foot, where the keyboard controller can press it; the
     account menu's Keyboard shortcuts presses it too), with hint mode's switch at its foot. %>
 <% trigger = capture do %>
+  <%# runeui:allow native-control — out of sight: what the ? key presses %>
   <button type="button" class="nav-shortcuts-button" title="Help and keyboard shortcuts" data-keys="?">
     <span class="visually-hidden">Keyboard shortcuts</span>
   </button>

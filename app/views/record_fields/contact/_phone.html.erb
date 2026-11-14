@@ -1,6 +1,6 @@
 <%# locals: (form: nil, form_id: nil, **) %>
 <% if form %>
-  <%= form.ui :field, :phone, label: "Phone", class: "field" do %>
+  <%= form.ui :field, :phone, label: "Phone" do %>
     <%= form.telephone_field :phone, autocomplete: "off", form: form_id %>
   <% end %>
 <% end %>

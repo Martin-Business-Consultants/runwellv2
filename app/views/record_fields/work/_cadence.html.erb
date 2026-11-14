@@ -2,7 +2,7 @@
 <%# How often recurring work comes round (blank when it starts: as its type says). On show it's in
     the line under the title. %>
 <% if form %>
-  <%= form.ui :field, :cadence, label: "How often", description: "For recurring work only.", class: "field" do %>
+  <%= form.ui :field, :cadence, label: "How often", description: "For recurring work only." do %>
     <%= form.select :cadence, Cadence.options, { include_blank: (record.new_record? ? "As its type says" : "No set period") }, form: form_id %>
   <% end %>
 <% end %>

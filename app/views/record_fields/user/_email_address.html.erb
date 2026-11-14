@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :email_address, label: "Email address", class: "field" do %>
+  <%= form.ui :field, :email_address, label: "Email address" do %>
     <%= form.email_field :email_address, required: true, autocomplete: "off", form: form_id %>
     <span class="field-note">They sign in with it, and Runwell’s email goes there.<% unless record == Current.user %> Changing it signs them out everywhere.<% end %></span>
   <% end %>

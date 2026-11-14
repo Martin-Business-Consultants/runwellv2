@@ -225,7 +225,7 @@
 .settings-steps > li { padding-left: .25rem; }
 .settings-steps > li::marker { color: var(--muted-foreground); font-weight: 500; }
 .settings-steps__step { display: flex; flex-direction: column; gap: .75rem; }
-.settings-steps__qr { width: fit-content; padding: .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: #fff; }
+.settings-steps__qr { width: fit-content; padding: .75rem; border: 1px solid var(--border); border-radius: var(--ui-radius-xl); background: #fff; } /* runeui:allow hard-coded-colour — a QR code scans on white, in dark too */
 .settings-steps__key { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
 .settings-steps__key > summary { color: var(--muted-foreground); }
 .settings-steps__key code { font-size: var(--ui-text-sm); }
@@ -331,13 +331,15 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
   place-items: center;
 }
 
-/* Each scheme's primary, as it is in the theme on screen. */
-.appearance-swatch--fizzy { background: light-dark(oklch(20.5% 0 0), oklch(92.2% 0 0)); }
-.appearance-swatch--indigo { background: light-dark(oklch(51.1% 0.262 276.966), oklch(67.3% 0.182 276.935)); }
-.appearance-swatch--forest { background: light-dark(oklch(52.7% 0.154 150.069), oklch(72.3% 0.219 149.579)); }
-.appearance-swatch--plum { background: light-dark(oklch(55.8% 0.288 302.321), oklch(71.4% 0.203 305.504)); }
-.appearance-swatch--ocean { background: light-dark(oklch(52% 0.105 223.128), oklch(71.5% 0.143 215.221)); }
-.appearance-swatch--graphite { background: light-dark(oklch(37.2% 0.044 257.287), oklch(86.9% 0.022 252.894)); }
+/* Each scheme's primary, as it is in the theme on screen (appearance.css): every scheme at once,
+   whichever is picked, so each swatch carries its own. */
+.appearance-swatch--fizzy { --swatch: light-dark(oklch(20.5% 0 0), oklch(92.2% 0 0)); }
+.appearance-swatch--indigo { --swatch: light-dark(oklch(51.1% 0.262 276.966), oklch(67.3% 0.182 276.935)); }
+.appearance-swatch--forest { --swatch: light-dark(oklch(52.7% 0.154 150.069), oklch(72.3% 0.219 149.579)); }
+.appearance-swatch--plum { --swatch: light-dark(oklch(55.8% 0.288 302.321), oklch(71.4% 0.203 305.504)); }
+.appearance-swatch--ocean { --swatch: light-dark(oklch(52% 0.105 223.128), oklch(71.5% 0.143 215.221)); }
+.appearance-swatch--graphite { --swatch: light-dark(oklch(37.2% 0.044 257.287), oklch(86.9% 0.022 252.894)); }
+[class*="appearance-swatch--"] { background: var(--swatch); }
 
 [class*="appearance-swatch--"] {
   block-size: 2rem;
@@ -374,9 +376,13 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 /* The theme's preview: a little page of cards, light or dark whatever the page is now, and
 /* System half of each. */
 .theme-mock {
+  /* A page in light and in dark, drawn whatever the theme on screen. */
   --mock-page: oklch(97% 0 0);
   --mock-card: oklch(100% 0 0);
   --mock-line: oklch(90% 0 0);
+  --mock-dark-page: oklch(14.5% 0 0);
+  --mock-dark-card: oklch(26.9% 0 0);
+  --mock-lift: 0 1px 2px oklch(0% 0 0 / 8%);
 
   background: var(--mock-page);
   block-size: 100%;
@@ -389,19 +395,19 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 }
 
 .theme-mock--dark {
-  --mock-page: oklch(14.5% 0 0);
-  --mock-card: oklch(26.9% 0 0);
+  --mock-page: var(--mock-dark-page);
+  --mock-card: var(--mock-dark-card);
   --mock-line: oklch(42% 0 0);
 }
 
 .theme-mock--system {
   --mock-line: oklch(60% 0 0 / 45%);
 
-  background: linear-gradient(90deg, var(--mock-page) 50%, oklch(14.5% 0 0) 50%);
+  background: linear-gradient(90deg, var(--mock-page) 50%, var(--mock-dark-page) 50%);
 
   /* Cards sit evenly inside the page, so their middle is the page's. */
   .theme-mock__card {
-    background: linear-gradient(90deg, var(--mock-card) 50%, oklch(26.9% 0 0) 50%);
+    background: linear-gradient(90deg, var(--mock-card) 50%, var(--mock-dark-card) 50%);
   }
 }
 
@@ -409,7 +415,7 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
   align-items: center;
   background: var(--mock-card);
   border-radius: 0.25rem;
-  box-shadow: 0 1px 2px oklch(0% 0 0 / 8%);
+  box-shadow: var(--mock-lift);
   display: flex;
   gap: 0.25rem;
   padding: 0 0.375rem;

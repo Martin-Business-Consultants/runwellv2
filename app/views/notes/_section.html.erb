@@ -5,6 +5,7 @@
       <%# In the side panel the editor waits until it's wanted: opening a task to read it doesn't
           boot an editor. Clicking the line stamps the composer in its place (deferred-template). %>
       <div class="note-composer-deferred" data-controller="deferred-template">
+        <%# runeui:allow native-control — stands in for the editor until it's clicked (deferred-template) %>
         <button type="button" class="note-composer__trigger" data-deferred-template-target="trigger" data-action="deferred-template#stamp">
           Add a note: what was said or decided… @ to mention someone
         </button>

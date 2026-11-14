@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :status, label: "Status", class: "field" do %>
+  <%= form.ui :field, :status, label: "Status" do %>
     <%= form.select :status, task_status_options, {}, form: form_id %>
   <% end %>
 <% else %>

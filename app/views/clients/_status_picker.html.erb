@@ -6,6 +6,7 @@
 <%= client_status_menu %>
 <span class="row-picker status-picker" id="<%= dom_id(client, :status) %>" data-controller="picker" data-picker-kind-value="status"
   data-picker-current-value="<%= client.status %>" data-picker-menu-value="client-status-menu" data-picker-form-value="client-status-form" data-picker-url-value="<%= client_path(client) %>">
+  <%# runeui:allow native-control — the row's status badge opening client_status_menu, which is on the page once %>
   <button type="button" class="status-picker__trigger" id="<%= dom_id(client, :status_button) %>" title="<%= label %>: click to change" aria-haspopup="menu" data-runeui-open="client-status-menu" data-action="click->picker#open">
     <span class="status-picker__display" data-picker-target="display" data-picker-part="tag"><%= status_tag client.status, highlight: client.status == "active" %></span>
     <span class="visually-hidden">Status of <%= client.name %>: <%= label %>. Change it</span>

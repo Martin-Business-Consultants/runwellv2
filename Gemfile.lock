@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/Martin-Business-Consultants/runeui.git
-  revision: 4ecda3b82dfa9ca7a89067d2b2aa090ae3d8a1dc
+  revision: b7704812e646e3bb00b5ff99f45c26600232ace2
   branch: master
   specs:
     runeui (0.1.0)

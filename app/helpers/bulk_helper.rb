@@ -12,6 +12,7 @@ module BulkHelper
   # For plugins' tables (the core's are ui :select_cell): the header's and a row's checkbox.
   def bulk_select_all_header
     tag.th(data: { slot: "table-select" }) do
+      # runeui:allow native-control — plugins' tables pick rows with native checkboxes until 7.0
       check_box_tag(nil, nil, false, id: nil, aria: { label: "Select every row on this page" },
         data: { bulk_target: "all", action: "bulk#toggleAll" })
     end
@@ -19,6 +20,7 @@ module BulkHelper
 
   def bulk_select_cell(record, label)
     tag.td(data: { slot: "table-select" }) do
+      # runeui:allow native-control — plugins' tables pick rows with native checkboxes until 7.0
       check_box_tag(nil, record.id, false, id: nil, aria: { label: "Select #{label}" },
         data: { bulk_target: "item", action: "bulk#update", keys: "x" })
     end

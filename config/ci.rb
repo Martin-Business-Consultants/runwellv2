@@ -4,6 +4,7 @@ CI.run do
   step "Setup", "bin/setup --skip-server"
 
   step "Style: Ruby", "bin/rubocop"
+  step "Style: runeui", "bin/rails runeui:lint"
   step "Style: Templates", "bundle exec herb lint app/views"
 
   step "Security: Gem audit", "bin/bundler-audit"

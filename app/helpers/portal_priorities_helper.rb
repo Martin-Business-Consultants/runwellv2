@@ -14,8 +14,8 @@ module PortalPrioritiesHelper
       data: { action: "keydown.up->drag-and-drop#moveUp keydown.down->drag-and-drop#moveDown" }
     moves = tag.span class: "portal-sortable__moves" do
       safe_join([
-        tag.button(icon_tag("arrow-up"), type: "button", class: "portal-sortable__move", title: "Move #{name} up", aria: { label: "Move #{name} up" }, data: { action: "drag-and-drop#moveUp" }),
-        tag.button(icon_tag("arrow-up"), type: "button", class: "portal-sortable__move portal-sortable__move--down", title: "Move #{name} down", aria: { label: "Move #{name} down" }, data: { action: "drag-and-drop#moveDown" })
+        ui(:button, variant: :ghost, size: :icon_xs, class: "portal-sortable__move", content: icon_tag("arrow-up"), title: "Move #{name} up", aria: { label: "Move #{name} up" }, data: { action: "drag-and-drop#moveUp" }),
+        ui(:button, variant: :ghost, size: :icon_xs, class: "portal-sortable__move portal-sortable__move--down", content: icon_tag("arrow-up"), title: "Move #{name} down", aria: { label: "Move #{name} down" }, data: { action: "drag-and-drop#moveDown" })
       ])
     end
     grip + moves

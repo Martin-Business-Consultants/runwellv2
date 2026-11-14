@@ -1,7 +1,7 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <%# On show, everyone on it in one picker (the lead first), so "Also on it" draws nothing there. %>
 <% if form %>
-  <%= form.ui :field, :owner_id, label: "Lead", class: "field" do %>
+  <%= form.ui :field, :owner_id, label: "Lead" do %>
     <%= form.select :owner_id, task_owner_options, { include_blank: "Unassigned" }, form: form_id, search: true %>
   <% end %>
 <% else %>

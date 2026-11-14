@@ -1,0 +1,80 @@
+# runeui's checks (bin/rails runeui:lint, and its Herb rule in .herb/rules/ for templates): the app
+# draws with runeui's components and reads its tokens. A deliberate exception says why where it
+# is: runeui:allow <rule> — why (in a comment, on its line or the line above).
+
+# Not checked: the compatibility layer plugins use until 7.0, its styleguide, and email (which
+# can't load stylesheets, so it carries its own styles).
+skip:
+  - app/assets/stylesheets/runwell/compat.css
+  - app/helpers/rune_compat_helper.rb
+  - app/helpers/popup_helper.rb
+  - app/views/ui/**
+  - app/views/layouts/shared/_card.html.erb
+  - app/javascript/controllers/rune_*
+  - app/javascript/controllers/dialog_controller.js
+  - app/views/layouts/mailer.*
+  - app/views/**/*_mailer/**
+  - app/helpers/mailer_helper.rb
+
+# Form builder fields RunwellFormBuilder draws with runeui (app/form_builders/runwell_form_builder.rb).
+form_builder:
+  - select
+  - time_zone_select
+  - collection_select
+  - grouped_collection_select
+  - text_field
+  - email_field
+  - url_field
+  - telephone_field
+  - phone_field
+  - number_field
+  - search_field
+  - password_field
+  - text_area
+  - textarea
+  - check_box
+  - checkbox
+
+# Helpers that turn a native control into runeui's (SelectHelper).
+wrappers:
+  - select_control
+  - combobox_tag
+
+# The compatibility layer's component classes: the core draws with runeui's. (Its utilities muted,
+# button-row, stack, visually-hidden and hide-on-touch stay until 7.0, and select--sm, which
+# SelectHelper reads to draw a small select.)
+deny_classes:
+  - btn
+  - btn--primary
+  - btn--ghost
+  - btn--danger
+  - btn--sm
+  - icon-button
+  - card
+  - card__head
+  - card__body
+  - card__title
+  - card__hint
+  - card__footer
+  - list-row
+  - field
+  - field__label
+  - field__hint
+  - field-row
+  - alert
+  - tabs
+  - tabs__item
+  - count
+  - pill
+  - table
+  - table-wrap
+  - table__grow
+  - crumbs
+  - badge
+  - empty
+  - switch
+  - segmented
+  - faint
+  - small
+  - grid-2
+  - separator

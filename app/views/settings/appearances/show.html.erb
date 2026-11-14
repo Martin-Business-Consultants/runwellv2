@@ -76,6 +76,7 @@
           <label class="settings-upload">
             <%= icon_tag "picture-add" %>
             <span><%= file.attached? ? "Replace" : "Drop an image here or choose…" %></span>
+            <%# runeui:allow native-control — invisible over the dashed drop box it sits in %>
             <%= form.file_field attribute, accept: "image/png, image/svg+xml, image/jpeg, image/webp, image/x-icon", data: { action: "change->form#submit" } %>
           </label>
         <% end %>

@@ -343,7 +343,7 @@ dl.record-fields .layout-field { display: contents; }
 dl.record-fields--stacked { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
 dl.record-fields--stacked dd { margin-bottom: .75rem; }
 .record-fields__prose { overflow-wrap: anywhere; }
-.record-fields-card:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"])) { display: none; }
+.record-fields-card:not(:has(dt, [data-slot="field"], [data-slot="choice"])) { display: none; }
 .record-form__footer { flex-direction: row; justify-content: flex-end; }
 
 /* Arranging (record-layout controller): the page keeps its own look, label beside value, and only
@@ -375,14 +375,14 @@ dl.record-fields--stacked dd { margin-bottom: .75rem; }
 /* row's end. */
 .record-page--arranging .record-fields:not(dl) { gap: 2px; }
 .record-page--arranging .record-fields:not(dl) .layout-field:has(.layout-field__control) { display: flex; align-items: center; gap: .5rem; }
-.record-page--arranging .record-fields:not(dl) .layout-field .field { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: 1.5rem; min-width: 0; }
+.record-page--arranging .record-fields:not(dl) .layout-field [data-slot="field"] { flex: 1; display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; column-gap: 1.5rem; min-width: 0; }
 .record-page--arranging .record-fields:not(dl) :is(.field__hint, [data-slot="field-description"]) { display: none; }
 .record-page--arranging .record-fields:not(dl) .field__label { color: var(--muted-foreground); font-weight: 400; }
 .record-page--arranging .record-fields:not(dl) lexxy-editor { max-height: 2.25rem; min-height: 0; overflow: hidden; }
 .record-page--arranging .record-fields:not(dl) lexxy-editor :is(lexxy-toolbar, .lexxy-editor__toolbar) { display: none; }
 
 .record-page--arranging dd:has(.layout-field__control) { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
-.record-page--arranging .layout-field:not(:has(dt, .field, [data-slot="field"], [data-slot="choice"], .card))::before,
+.record-page--arranging .layout-field:not(:has(dt, [data-slot="field"], [data-slot="choice"], .card))::before,
 .layout-bar__tray .layout-field::before { content: attr(data-layout-label); color: var(--muted-foreground); }
 .layout-field--dragging { opacity: .4; }
 
@@ -465,5 +465,5 @@ form[data-dirty] .rich-text-in-place__actions { display: flex; }
 .record-modal__skeleton { block-size: 2rem; }
 .record-modal__skeleton--title { inline-size: 40%; block-size: 1.25rem; }
 .record-modal__skeleton--short { inline-size: 60%; }
-/* A switch's hint in a record's fields reads as its neighbours' hints do. */
-.record-fields .switch-field [data-slot="field-description"] { color: var(--faint-foreground); font-size: var(--ui-text-xs); line-height: 1rem; }
+/* A field's hint in a record's fields (a switch's too): small and faint, under its control. */
+.record-fields :is(.switch-field, [data-slot="field"]) [data-slot="field-description"] { color: var(--faint-foreground); font-size: var(--ui-text-xs); line-height: 1rem; }

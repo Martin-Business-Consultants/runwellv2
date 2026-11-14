@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :due_on, label: "Due", class: "field" do %>
+  <%= form.ui :field, :due_on, label: "Due" do %>
     <%= date_input form, :due_on, form: form_id %>
   <% end %>
 <% else %>

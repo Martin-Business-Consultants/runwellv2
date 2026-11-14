@@ -39,7 +39,7 @@ module FieldsHelper
 
   def draft_notice
     tag.p(class: "draft-notice", hidden: true, data: { draft_target: "notice" }) do
-      safe_join([ tag.span("Draft restored."), tag.button("Discard", type: "button", class: "draft-notice__discard", data: { action: "draft#discard" }) ], " ")
+      safe_join([ tag.span("Draft restored."), ui(:button, variant: :link, size: :xs, class: "draft-notice__discard", content: "Discard", data: { action: "draft#discard" }) ], " ")
     end
   end
 
@@ -56,6 +56,7 @@ module FieldsHelper
   # For plugins: the old switch around a native checkbox (check_box_tag, form.check_box … native:
   # true), drawn by the compatibility styles. The core's own are ui :switch.
   def switch_tag(title: nil, screen_reader_label: nil, &block)
+    # runeui:allow denied-class — the plugin contract's switch_tag, until 7.0
     tag.label(class: "switch", title: title) do
       safe_join([ capture(&block), tag.span(class: "switch__track", aria: { hidden: true }), (tag.span(screen_reader_label, class: "visually-hidden") if screen_reader_label) ])
     end

@@ -1,7 +1,7 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <%# On show it opens from the info button beside the title, so it draws nothing here. %>
 <% if form %>
-  <%= form.ui :field, :description, label: "Description", class: "field" do %>
+  <%= form.ui :field, :description, label: "Description" do %>
     <%= rich_text_field form, :description, staff: true, form_id: form_id %>
     <% unless record.internal? %>
       <span class="field-note">Shown to the <%= term(:client).downcase %> in the portal.</span>

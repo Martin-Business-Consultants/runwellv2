@@ -3,16 +3,16 @@
     there, or (straight on a client) which client. A new task's home comes from where it's added. %>
 <% if form %>
   <% if record.persisted? %>
-    <%= form.ui :field, :work_id, label: term(:work), class: "field" do %>
+    <%= form.ui :field, :work_id, label: term(:work) do %>
       <%= form.select :work_id, task_work_options(record), { include_blank: "None (straight on the #{term(:client).downcase})" }, form: form_id, search: true %>
     <% end %>
   <% end %>
   <% if record.work %>
-    <%= form.ui :field, :scope_item_id, label: term(:scope_item), class: "field" do %>
+    <%= form.ui :field, :scope_item_id, label: term(:scope_item) do %>
       <%= form.select :scope_item_id, record.work.scope_items.map { |item| [ item.description, item.id ] }, { include_blank: "None" }, form: form_id, search: true %>
     <% end %>
   <% else %>
-    <%= form.ui :field, :client_id, label: term(:client), class: "field" do %>
+    <%= form.ui :field, :client_id, label: term(:client) do %>
       <%= form.select :client_id, Client.ordered.pluck(:name, :id), { include_blank: "None yet" }, form: form_id, search: true %>
     <% end %>
   <% end %>

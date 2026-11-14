@@ -9,6 +9,7 @@
 <% end %>
 <span class="task-due" id="<%= dom_id(task, :due) %>" data-controller="picker" data-picker-kind-value="due"
   data-picker-current-value="<%= task.due_on&.iso8601 %>" data-picker-menu-value="task-due-menu" data-picker-form-value="task-due-form" data-picker-url-value="<%= task_path(task) %>">
+  <%# runeui:allow native-control — a row's bare trigger: its menu is on the page once (task_picker_menus) %>
   <button type="button" class="task-due__button" id="<%= dom_id(task, :due_button) %>" aria-haspopup="dialog" data-runeui-open="task-due-menu" data-action="click->picker#open"<% unless task.due_on %> data-empty<% end %>>
     <span data-picker-target="display"><%= task.due_on ? l(task.due_on, format: "%b %-d, %Y") : "No date" %></span>
     <span class="visually-hidden">Due date of <%= task.title %>. Change it</span>

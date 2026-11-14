@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :contact_id, label: "Requested by", class: "field" do %>
+  <%= form.ui :field, :contact_id, label: "Requested by" do %>
     <%= form.grouped_collection_select :contact_id, Client.ordered.includes(:contacts), :contacts, :name, :id, :name, { include_blank: "Nobody in particular" }, form: form_id, search: true %>
   <% end %>
 <% elsif record.requester_name.present? %>

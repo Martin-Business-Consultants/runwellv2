@@ -9,7 +9,7 @@
       <%= render partial: "tasks/task", collection: tasks.first(12), as: :task %>
     </ul>
     <% if tasks.size > 12 %>
-      <%= link_to "More on its page", path, class: "small", data: { turbo_frame: "_top" } %>
+      <%= link_to "More on its page", path, class: "peek-panel__more", data: { turbo_frame: "_top" } %>
     <% end %>
   <% else %>
     <%= ui :empty, size: :sm, description: "Nothing open." %>

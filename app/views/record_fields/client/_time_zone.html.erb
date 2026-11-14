@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :time_zone, label: "Time zone", description: "Their portal and emails show times in it.", class: "field" do %>
+  <%= form.ui :field, :time_zone, label: "Time zone", description: "Their portal and emails show times in it." do %>
     <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { include_blank: "Same as ours (#{Setting.zone.name})" }, form: form_id %>
   <% end %>
 <% else %>

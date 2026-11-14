@@ -6,6 +6,7 @@
     screen readers, since the button's own text names everyone. %>
 <% owners = task.owners %>
 <% label = task_owners_label(task) %>
+<%# runeui:allow native-control — a row's bare trigger: its menu is on the page once (task_picker_menus) %>
 <button type="button" id="<%= dom_id(task, labelled ? :owners_labelled : :owners) %>" class="owner-picker__trigger" title="<%= label %>: click to change" aria-haspopup="listbox" data-runeui-open="task-owner-menu" data-action="click->picker#open">
   <span class="owner-picker__stack" data-picker-target="stack"><%= task_owners_tag task, hidden: true %></span>
   <span class="owner-picker__empty" aria-hidden="true" data-picker-target="empty"<% if owners.any? %> hidden<% end %>><%= icon_tag "person-add" %></span>

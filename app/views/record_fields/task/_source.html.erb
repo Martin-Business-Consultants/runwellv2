@@ -1,6 +1,6 @@
 <%# locals: (record:, form: nil, form_id: nil) %>
 <% if form %>
-  <%= form.ui :field, :source, label: "Came in by", class: "field" do %>
+  <%= form.ui :field, :source, label: "Came in by" do %>
     <%= form.text_field :source, required: true, autocomplete: "off", placeholder: "app, email, phone…", form: form_id %>
   <% end %>
 <% else %>

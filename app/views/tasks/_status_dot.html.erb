@@ -11,6 +11,7 @@
 <span class="row-picker status-dot-picker" id="<%= dom_id(task, labelled ? :status_labelled : :status) %>" data-controller="picker" data-picker-kind-value="status"
   data-picker-current-value="<%= task.status %>" data-picker-menu-value="task-status-menu" data-picker-form-value="task-status-form"
   data-picker-url-value="<%= task_status_path(task) %>" data-picker-task-value="<%= task.id %>"<% if labelled %> data-picker-labelled-value="true"<% end %>>
+  <%# runeui:allow native-control — a row's bare trigger: its menu is on the page once (task_picker_menus) %>
   <button type="button" class="status-dot-picker__trigger" id="<%= dom_id(task, labelled ? :status_labelled_button : :status_button) %>" title="<%= label %>: click to change" aria-haspopup="menu" data-runeui-open="task-status-menu" data-action="click->picker#open">
     <span class="status-dot-picker__dot" data-picker-target="display" data-picker-part="dot"><span class="status-dot status-dot--<%= task.status.dasherize %>" aria-hidden="true"></span></span>
     <% if labelled %>

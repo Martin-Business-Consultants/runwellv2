@@ -4,6 +4,7 @@
     It's out of sight in the nav until "/" focuses it, and stays a field while it holds text. It hides on pages with nothing to filter (runwell.css). %>
 <label class="nav-filter" title="Filter (/)">
   <kbd class="nav-filter__key" aria-hidden="true">/</kbd>
+  <%# runeui:allow native-control — the nav's filter, out of sight until / focuses it %>
   <input type="search" class="nav-filter__input" placeholder="Filter…" autocomplete="off" autocorrect="off" data-1p-ignore="true" aria-label="Filter"
     data-filter-target="input" data-keys="/" data-keys-focus
     data-action="input->filter#filter keydown.esc->filter#clearInput keydown.esc->filter#filter:stop">

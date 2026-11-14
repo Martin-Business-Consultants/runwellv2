@@ -4,6 +4,7 @@
 <% kind = document_preview_kind(document) %>
 <% if kind == :image %>
   <% trigger = capture do %>
+    <%# runeui:allow native-control — a file's icon and name, opening its preview %>
     <button type="button" class="document-link" title="Preview <%= document.filename %>">
       <%= render "documents/file", document: document, meta: meta %>
     </button>
