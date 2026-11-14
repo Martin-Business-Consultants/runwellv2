@@ -14,7 +14,7 @@
         <%= rich_text_field form, :description, staff: true, placeholder: "What it is, what’s agreed, what done looks like" %>
         <%= draft_notice %>
         <div class="rich-text-in-place__actions">
-          <span class="faint small"><kbd>Esc</kbd> puts it back</span>
+          <span class="rich-text-in-place__hint"><kbd>Esc</kbd> puts it back</span>
           <%= ui :button, type: :submit, size: :sm, content: safe_join([ tag.span("Save"), tag.kbd("⌘↵", class: "hide-on-touch") ], " ") %>
         </div>
       <% end %>

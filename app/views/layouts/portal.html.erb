@@ -53,10 +53,8 @@
             <%# The contact's menu (ui :menu): who they are, their account, requests and connected apps,
                 light or dark, and signing out. %>
             <% you = capture do %>
-              <button type="button" class="portal-user__button" title="Your menu">
-                <%= ui :avatar, name: current_contact.name, initials: initials(current_contact.name), size: :sm %>
-                <span class="visually-hidden">Your menu</span>
-              </button>
+              <%= ui :button, variant: :ghost, size: :icon_sm, class: "portal-user__button", title: "Your menu", aria: { label: "Your menu" },
+                    content: ui(:avatar, name: current_contact.name, initials: initials(current_contact.name), size: :sm) %>
             <% end %>
             <% who = capture do %>
               <span class="portal-user__label">

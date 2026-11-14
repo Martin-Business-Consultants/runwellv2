@@ -10,7 +10,7 @@ module AppearanceHelper
   # Runwell's own stylesheets, after runeui's (unlayered, so these win over every layer): the
   # Inter font, the shell (runwell), the pieces every area shares (runwell/components) and each
   # area's own.
-  RUNWELL_STYLESHEETS = %w[font-face runwell runwell/components runwell/home runwell/tasks runwell/records runwell/settings runwell/public].freeze
+  RUNWELL_STYLESHEETS = %w[font-face runwell runwell/components runwell/trays runwell/tasks runwell/records runwell/settings runwell/public].freeze
 
   # Herb compiles stylesheet_link_tag into a single <link>, so each list is spelled out.
   # runeui comes as an app's does: its tokens on :root, its page base, its components, Lexxy and

@@ -6,7 +6,7 @@
   <div class="person-page__name">
     <h1><%= person.display_name %><%= " (you)" if person == Current.user %></h1>
     <div class="settings-chips">
-      <%= badge person.role.capitalize, tone: :outline %>
+      <%= ui :badge, variant: :outline, content: person.role.capitalize %>
       <% if person.deactivated? %>
         <%= ui :badge, variant: :secondary, content: "Deactivated" %>
       <% else %>

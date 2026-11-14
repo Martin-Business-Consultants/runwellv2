@@ -6,11 +6,7 @@
     the menu's. Permanent, so its loaded list rides along from page to page; the badge controller
     keeps the tab's title and the app's badge to the unread total, and the bell carries a dot while
     anything is unread. %>
-<% trigger = capture do %>
-  <button type="button" class="tray__toggle" aria-label="Notifications" title="Notifications (G N)" data-keys="g n">
-    <span class="tray__toggle-btn"><%= icon_tag "bell" %></span>
-  </button>
-<% end %>
+<% trigger = ui(:button, variant: :outline, size: :icon_sm, class: "tray__toggle", content: icon_tag("bell"), aria: { label: "Notifications" }, title: "Notifications (G N)", data: { keys: "g n" }) %>
 <div class="tray tray--notifications" id="notifications_tray" data-turbo-permanent data-controller="badge" data-action="turbo:frame-render->badge#update">
   <%= ui :menu, id: "notifications-menu", trigger: trigger, side: :bottom, align: :end, label: "Notifications", class: "notifications-menu" do %>
     <ui-menu-group-label data-slot="menu-group-label" class="notifications-menu__title">Notifications</ui-menu-group-label>

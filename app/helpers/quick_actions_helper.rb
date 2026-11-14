@@ -4,11 +4,6 @@ module QuickActionsHelper
     record.is_a?(ScopeItem) ? record.description : record.search_title
   end
 
-  # Which kind of record it is, in this install's words.
-  def record_kind(record)
-    record.is_a?(Work) ? record.label_name : record_type_term(record.class.name)
-  end
-
   def record_type_term(type)
     case type
     when "Client" then term(:client)

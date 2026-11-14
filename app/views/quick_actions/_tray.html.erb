@@ -9,11 +9,7 @@
 <%# g t n opens the task form, on the work or client on screen (or the task's work). %>
 <a href="<%= new_quick_action_path(kind: "task", record: (record && QuickAction.value_for(record))) %>" data-turbo-frame="quick_action" data-keys="g t n" class="visually-hidden">Add <%= term(:task).downcase %></a>
 
-<% trigger = capture do %>
-  <button type="button" class="tray__toggle" aria-label="Quick actions" title="Quick actions (A)" data-keys="a">
-    <span class="tray__toggle-btn"><%= icon_tag "add" %></span>
-  </button>
-<% end %>
+<% trigger = ui(:button, variant: :outline, size: :icon_sm, class: "tray__toggle", content: icon_tag("add"), aria: { label: "Quick actions" }, title: "Quick actions (A)", data: { keys: "a" }) %>
 <%= ui :popover, id: "quick-actions", trigger: trigger, side: :bottom, align: :end, class: "quick-actions" do %>
   <p class="quick-actions__title">Quick actions</p>
   <div class="quick-actions__where">

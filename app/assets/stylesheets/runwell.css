@@ -115,7 +115,7 @@ turbo-frame:not([data-slot]) { display: contents; }
 .nav-filter:hover { background: var(--ui-ghost-hover); }
 #global-container:not(:has([data-filter-target~="item"], [data-filter-remote])) .nav-filter { display: none; }
 .nav-filter:is(:focus-within, :has(.nav-filter__input:not(:placeholder-shown))) { flex: 1; border-color: var(--input); background: var(--background); }
-.nav-filter:focus-within { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
+.nav-filter:focus-within { border-color: color-mix(in oklab, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
 .nav-filter__input { width: 0; height: auto; padding: 0; border: 0; background: none; box-shadow: none; color: inherit; font-size: var(--ui-text-xs); transition: width .15s var(--ui-ease); }
 .nav-filter__input:focus { box-shadow: none; }
 /* Out of sight until "/" focuses it (or it holds text), and the ? button always: both keys still
@@ -186,7 +186,7 @@ turbo-frame:not([data-slot]) { display: contents; }
 .portal-layout > #global-container { display: flex; flex-direction: column; flex: 1 0 auto; }
 .portal-topbar {
   position: sticky; top: 0; z-index: 12; padding-top: env(safe-area-inset-top, 0px);
-  border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--background) 92%, transparent); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border); background: color-mix(in oklab, var(--background) 92%, transparent); backdrop-filter: blur(8px);
 }
 .portal-topbar__inner { display: flex; align-items: center; gap: 0 1.5rem; width: 100%; max-width: var(--portal-width); min-height: 3.5rem; margin: 0 auto; padding: 0 1.5rem; }
 .portal-topbar__brand { display: flex; flex: 0 1 auto; align-items: center; gap: .5rem; min-width: 0; padding: 4px .5rem; border-radius: var(--ui-radius-sm); color: var(--foreground); text-decoration: none; }
@@ -217,8 +217,7 @@ turbo-frame:not([data-slot]) { display: contents; }
 .portal-nav__link[aria-current="page"] { background: var(--muted); color: var(--foreground); }
 
 .portal-topbar__actions { display: flex; align-items: center; gap: .5rem; min-height: 3.5rem; margin-left: auto; }
-.portal-user__button { display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
-.portal-user__button:hover { box-shadow: 0 0 0 3px var(--ui-ghost-hover); }
+.portal-user__button.ui-button { border-radius: var(--ui-radius-full); } /* runeui's ghost icon button, round around the avatar */
 .portal-user__button [data-slot="avatar"] { width: 2rem; height: 2rem; font-size: var(--ui-text-xs); }
 .portal-user__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .portal-user__name { overflow: hidden; color: var(--foreground); font-size: var(--ui-text-sm); font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }

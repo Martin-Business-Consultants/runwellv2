@@ -579,8 +579,9 @@ in order: `appearance` first (its `@layer` statement is the page's order; Runwel
 unlayered so they win, `RUNWELL_STYLESHEETS`: `font-face` (Inter, bundled), `runwell` (the shell:
 the nav's brand and foot, the page filter, settings layout, sign-in and portal layouts),
 `runwell/components` (what every area shares: the index toolbar, what Runwell puts in runeui's
-tables and bulk bar, hint mode, form widgets) and one file per area (`runwell/home`, `tasks`,
-`records`, `settings`, `public`); plugins' sheets come after. Build new markup with it:
+tables and bulk bar, hint mode, form widgets) and one file per area (`runwell/trays` for search,
+notifications and quick actions, `tasks`, `records`, `settings`, `public`); plugins' sheets come
+after. Build new markup with it:
 
 - Tokens are runeui's, which are shadcn's by name and meaning (`docs/theming.md`):
   `--background`, `--foreground`, `--card`, `--popover`, `--primary` (the brand's colour, Settings >
@@ -788,8 +789,8 @@ only on the row you're on, and controls that already show a `<kbd>` get none.
 `layouts/shared/_hint_legend` lists the keys with no control (j/k, Enter, /, s, a, Esc, ?, as
 `ui :kbd`). It's
 remembered per browser (localStorage `keyHints`), off by default, and hidden on touch devices.
-A new `data-keys` gets its hint for free. A new index page's "Add a …" button
-renders `render "layouts/shared/new_button", text: "Add a client", path: new_client_path`.
+A new `data-keys` gets its hint for free. A new index page's New button comes from the index
+toolbar (`new_text:`, `new_path:`), which draws it with `new_link` (`n`).
 
 ## Mentions and notifications
 

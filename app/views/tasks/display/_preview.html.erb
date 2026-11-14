@@ -14,11 +14,11 @@
   <span class="task-card__badges">
     <%= agent_made_tag(task) %>
     <% if task.status == "done" && task.completed_at %>
-      <%= badge "Done #{l task.completed_at.to_date, format: :short}", tone: :ok %>
+      <%= ui :badge, variant: :success, content: "Done #{l task.completed_at.to_date, format: :short}" %>
     <% elsif overdue %>
-      <%= badge "Due #{l task.due_on, format: :short}", tone: :danger, title: "Overdue" %>
+      <%= ui :badge, variant: :destructive, content: "Due #{l task.due_on, format: :short}", title: "Overdue" %>
     <% elsif task.due_on %>
-      <%= badge "Due #{l task.due_on, format: :short}", tone: :outline %>
+      <%= ui :badge, variant: :outline, content: "Due #{l task.due_on, format: :short}" %>
     <% end %>
   </span>
   <% if task.owners.any? %>

@@ -121,8 +121,7 @@ ui-combobox.picker-menu { display: contents; }
 
 /* The Tasks board (tasks/board/*): runeui's board (ui :board), a column per status. runeui draws
 /* the lanes, cards, dragging and folding; what's here is Runwell's own inside it: the lanes' width
-/* and height, the cards' lines, and phones. Runwell's markup in a card reads --accent and --ring as
-/* the brand colour and focus shadow. */
+/* and height, the cards' lines, and phones. */
 .task-board { --ui-board-column-width: 20rem; --ui-board-height: calc(100dvh - 9rem); min-height: 20lh; }
 .task-board [data-slot="board-column-header"] { min-height: var(--ui-h); }
 /* runeui's lane tint over the panel, so nothing under a lane shows through it (a phone's second
@@ -146,7 +145,7 @@ ui-combobox.picker-menu { display: contents; }
 .task-card__ref { flex: none; color: var(--muted-foreground); font-weight: 500; }
 .task-card__client { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .task-card [data-slot="board-card-footer"] { justify-content: space-between; }
-.task-card [data-slot="board-card-footer"]:not(:has(.badge, .avatar, .agent-made, [data-slot="avatar"])) { display: none; }
+.task-card [data-slot="board-card-footer"]:not(:has([data-slot="badge"], .avatar, .agent-made, [data-slot="avatar"])) { display: none; }
 .task-card__badges { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
 .task-card__people [data-slot="avatar"], .task-card__people .avatar { width: 1.375rem; height: 1.375rem; }
 
@@ -318,7 +317,7 @@ a.task-group__name:hover { color: var(--foreground); text-decoration: underline;
 .intake__file:hover { color: var(--primary); }
 
 /* Someone away on the task's due date (picker controller, Runwell::Plugins.away): Out beside them. */
-.owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--ui-radius-full); background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); font-size: var(--ui-text-xs); font-weight: 500; }
+.owner-picker__away { display: none; padding: 0 .35rem; border-radius: var(--ui-radius-full); background: color-mix(in oklab, var(--warning) 18%, transparent); color: var(--warning); font-size: var(--ui-text-xs); font-weight: 500; }
 [data-away-on-due] .owner-picker__away { display: inline-block; }
 
 /* A client, a piece of work or a contact peeked at in the side panel (<type>/_peek): the task

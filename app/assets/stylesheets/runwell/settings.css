@@ -139,7 +139,7 @@
 .settings-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 
 /* The one thing that can't be undone, in a card tinted the danger colour. */
-.settings-danger { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; padding: 1rem 1.5rem; border: 1px solid color-mix(in srgb, var(--destructive) 35%, var(--border)); border-radius: var(--ui-radius-xl); background: color-mix(in srgb, var(--destructive) 4%, var(--background)); }
+.settings-danger { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; padding: 1rem 1.5rem; border: 1px solid color-mix(in oklab, var(--destructive) 35%, var(--border)); border-radius: var(--ui-radius-xl); background: color-mix(in oklab, var(--destructive) 4%, var(--background)); }
 .settings-danger__text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: 2px; min-width: 0; }
 .settings-danger__title { color: var(--destructive); font-size: var(--ui-text-sm); }
 .settings-danger__text p { color: var(--muted-foreground); }

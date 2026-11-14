@@ -40,7 +40,7 @@
 /* Small muted lines under the card (another way in) and in the footer (what Runwell is). */
 .auth__note, .auth-footer { color: var(--muted-foreground); font-size: var(--ui-text-sm); text-align: center; text-wrap: balance; }
 .auth-footer { color: var(--faint-foreground); font-size: var(--ui-text-xs); }
-:is(.auth__note, .auth-footer) a { color: var(--foreground); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+:is(.auth__note, .auth-footer) a { color: var(--foreground); text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 40%, transparent); text-underline-offset: 4px; }
 :is(.auth__note, .auth-footer) a:hover { color: var(--foreground); text-decoration-color: currentColor; }
 
 /* A wrong password (or code, or form) shakes the card once. */
@@ -75,7 +75,7 @@
 /* under a ruled header, the card's padding at the rows' ends. */
 .portal-card__title { font-size: var(--ui-text-sm); font-weight: 600; line-height: 1.3; }
 .portal-card__hint { display: block; }
-.portal-card--highlight[data-slot="card"] { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
+.portal-card--highlight[data-slot="card"] { border-color: color-mix(in oklab, var(--primary) 40%, var(--border)); }
 .portal-card--flush[data-slot="card"] { gap: 0; padding-bottom: 0; overflow: hidden; }
 .portal-card--flush > [data-slot="card-header"] { padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
 .portal-card--flush > [data-slot="card-content"] { padding: 0; }

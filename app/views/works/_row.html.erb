@@ -3,7 +3,7 @@
 <tr id="<%= dom_id(work, :row) %>" data-filter-target="item">
   <%= ui :select_cell, value: work.id, label: work.title, checkbox: { data: { keys: "x" } } %>
   <td data-column="title" data-grow><%= peek_link_to work, work.title, class: "work-row__title" %></td>
-  <td data-column="type"><%= badge work.label_name, tone: :outline %></td>
+  <td data-column="type"><%= ui :badge, variant: :outline, content: work.label_name %></td>
   <td data-column="client" data-truncate><%= peek_link_to work.client, work.client.name, class: "work-row__client" %></td>
   <td data-column="state"><%= status_tag work.state_label, highlight: work.active? %></td>
   <% listed.each do |field| %>

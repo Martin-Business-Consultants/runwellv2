@@ -203,13 +203,4 @@ module TasksHelper
 
   # Its client's name, or that nobody matched (an email from an unknown sender).
   def task_client_name(task) = task.client&.name || "No #{term(:client).downcase} matched"
-
-  # How far a client's request has got, in the portal's words.
-  def portal_request_status(task)
-    if task.declined? then "Declined"
-    elsif task.request? then "Waiting"
-    elsif task.status == "done" then "Done"
-    else "Taken on"
-    end
-  end
 end

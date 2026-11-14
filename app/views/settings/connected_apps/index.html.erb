@@ -91,7 +91,7 @@
           Each can make up to <%= Agent::RateLimit.limit %> calls a minute.
         </p>
         <div class="settings-section__actions">
-          <%= badge @everyone.size.to_s, tone: :outline %>
+          <%= ui :badge, variant: :outline, content: @everyone.size.to_s %>
         </div>
       </header>
       <ul class="settings-list settings-list--scroll">

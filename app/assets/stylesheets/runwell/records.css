@@ -40,7 +40,7 @@
 
 /* Links in a record's text (its description line, facts, notes): the text's colour, underlined,
 /* rather than the brand's colour, so a page of facts doesn't read as a page of links. */
-.record-page a:not([class], [data-slot]) { color: var(--foreground); font-weight: 500; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+.record-page a:not([class], [data-slot]) { color: var(--foreground); font-weight: 500; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 40%, transparent); text-underline-offset: 4px; }
 .record-page a:not([class], [data-slot]):hover { color: var(--foreground); text-decoration-color: currentColor; }
 
 /* Hiding the sidebar (]): the working column takes the width; the toggle in the header turns to
@@ -75,7 +75,6 @@ html[data-sidebar="collapsed"] :is(.record-page__header, .record-header) .sideba
 .record-card > .card__footer:has(.record-add[open]) { align-items: stretch; }
 
 .record-card__stack { display: flex; flex-direction: column; gap: 1rem; }
-.record-card__empty { color: var(--muted-foreground); }
 .record-card__prose { font-size: var(--ui-text-sm); line-height: 1.6; }
 
 /* What comes next, in order, down a sidebar. */
@@ -129,7 +128,7 @@ a.record-list__row:hover { background: var(--ui-ghost-hover); color: var(--foreg
 /* A piece of work in a record's list: its status circle leads, like a task list's checkbox, and
 /* its title underlines under the pointer. */
 .task-item .status-dot-picker__trigger { margin-left: calc(-1 * .25rem); }
-.task-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 4px; }
+.task-item .record-list__main:hover .record-list__title { text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 40%, transparent); text-underline-offset: 4px; }
 
 /* A piece of work's work, grouped by scope item: each group's name, done of total and state over its rows. */
 .task-groups { display: flex; flex-direction: column; }
@@ -197,17 +196,17 @@ a.task-group__name:hover { color: var(--foreground); text-decoration: underline;
 /* The side panel's composer before it's wanted (notes/_section deferred): a line that looks like
 /* the empty editor; clicking it brings the editor in its place. */
 .note-composer__trigger { width: 100%; min-height: 4.5rem; padding: .75rem; border: 1px solid var(--input); border-radius: var(--ui-radius-lg); background: var(--background); color: var(--faint-foreground); font: inherit; font-size: var(--ui-text-sm); text-align: start; cursor: text; }
-.note-composer__trigger:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--input)); }
-.note-composer__trigger:focus-visible { outline: none; border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
+.note-composer__trigger:hover { border-color: color-mix(in oklab, var(--primary) 40%, var(--input)); }
+.note-composer__trigger:focus-visible { outline: none; border-color: color-mix(in oklab, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
 .note-composer { gap: 0; border: 1px solid var(--input); border-radius: var(--ui-radius-lg); background: var(--background); transition: border-color .12s, box-shadow .12s; }
-.note-composer:focus-within { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
+.note-composer:focus-within { border-color: color-mix(in oklab, var(--primary) 60%, var(--input)); box-shadow: var(--ui-focus-ring); }
 .note-composer lexxy-editor, .note-composer lexxy-editor:focus-within { min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .note-composer .lexxy-editor__content { min-height: 3lh; }
 
 .note-composer__footer { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; padding: 6px; border-top: 1px solid var(--border); }
 .note-composer__footer :is(select, input) { border-color: transparent; background-color: transparent; }
 .note-composer__footer :is(select, input):hover { background-color: var(--ui-ghost-hover); }
-.note-composer__footer :is(select, input):focus { border-color: color-mix(in srgb, var(--primary) 60%, var(--input)); }
+.note-composer__footer :is(select, input):focus { border-color: color-mix(in oklab, var(--primary) 60%, var(--input)); }
 .note-composer__kind { flex: 0 0 auto; }
 .note-composer__source { flex: 1 1 10rem; min-width: 0; }
 .note-composer__submit { margin-left: auto; }
@@ -293,7 +292,7 @@ a.task-group__name:hover { color: var(--foreground); text-decoration: underline;
 .work-finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
 .work-reopen { display: contents; }
 .work-finish__danger, .work-finish__danger:hover { color: var(--destructive); }
-.work-finish__danger:hover { background: color-mix(in srgb, var(--destructive) 9%, transparent); }
+.work-finish__danger:hover { background: color-mix(in oklab, var(--destructive) 9%, transparent); }
 
 /* ======================================================================= 11 Indexes */
 
@@ -351,7 +350,7 @@ dl.record-fields--stacked dd { margin-bottom: .75rem; }
 /* hints at what moves: each column a faint dashed outline, each field a hover tint and a grip,
 /* its inputs inert; the bar across the top with the Hidden tray. */
 .record-page--arranging .record-fields-card { display: flex; }
-.record-page--arranging [data-zone] { min-height: 2.5rem; border-radius: var(--ui-radius-lg); outline: 1px dashed color-mix(in srgb, var(--input) 70%, transparent); outline-offset: 6px; }
+.record-page--arranging [data-zone] { min-height: 2.5rem; border-radius: var(--ui-radius-lg); outline: 1px dashed color-mix(in oklab, var(--input) 70%, transparent); outline-offset: 6px; }
 .record-page--arranging .layout-field {
   position: relative; margin-inline: calc(.5rem * -1); padding: .25rem .5rem .25rem 1.5rem;
   border-radius: var(--ui-radius-sm); text-align: start; cursor: grab; transition: background .12s;
@@ -441,7 +440,7 @@ dl.record-fields--stacked dd { margin-bottom: .75rem; }
 .task-group__grip .icon { width: 1rem; height: 1rem; }
 .task-group__grip:hover { color: var(--foreground); }
 .task-group--dragging { opacity: .5; }
-.task-groups--hover { border-radius: var(--ui-radius-md); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 35%, transparent); }
+.task-groups--hover { border-radius: var(--ui-radius-md); box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--primary) 35%, transparent); }
 .task-group:not([open]) .task-group__header { padding-bottom: .75rem; }
 @media (prefers-reduced-motion: reduce) { .task-group__caret { transition: none; } }
 
@@ -459,6 +458,7 @@ dl.record-fields--stacked dd { margin-bottom: .75rem; }
 /* Rich text changed in place (the save-when-dirty behavior): its Save shows once it's been typed in. */
 .rich-text-in-place__actions { display: none; justify-content: flex-end; gap: .5rem; }
 form[data-dirty] .rich-text-in-place__actions { display: flex; }
+.rich-text-in-place__hint { align-self: center; color: var(--faint-foreground); font-size: var(--ui-text-xs); }
 
 /* A New form on its way into the modal (layouts/shared/_modal_placeholder). */
 .record-modal__placeholder { display: flex; flex-direction: column; gap: 1rem; }
