@@ -149,6 +149,7 @@ a.task-group__name:hover { color: var(--foreground); text-decoration: underline;
 .record-add[open] > summary { background: var(--muted); color: var(--foreground); }
 /* Open, the form runs the card's full width: its fields fill the row instead of shrinking to fit. */
 .record-add[open] { align-self: stretch; width: 100%; }
+.record-add[open]::details-content { align-self: stretch; } /* Chrome lays out a details's content as its own box, which align-items would shrink */
 /* Adding work in place (tasks/_add): the title across, then owner, due date and section side by
 /* side as room allows, then Add at the end. */
 .record-add__form { gap: .75rem; width: 100%; }

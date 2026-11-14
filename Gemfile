@@ -19,7 +19,7 @@ gem "matrix" # prawn needs it and doesn't say so; not a default gem since Ruby 3
 gem "prawn"
 gem "propshaft"
 # shadcn/ui in plain CSS, no build step: the ui- components (Runwell UI)
-gem "runeui", path: "../runeui" # the UI kit: components on UI SDK (docs/runeui-migration.md)
+gem "runeui", github: "Martin-Business-Consultants/runeui", branch: "master" # the UI kit: components on UI SDK (docs/runeui-migration.md)
 gem "puma"
 gem "rails"
 gem "rails-active_search"

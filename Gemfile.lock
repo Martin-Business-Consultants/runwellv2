@@ -1,5 +1,7 @@
-PATH
-  remote: ../runeui
+GIT
+  remote: https://github.com/Martin-Business-Consultants/runeui.git
+  revision: 4ecda3b82dfa9ca7a89067d2b2aa090ae3d8a1dc
+  branch: master
   specs:
     runeui (0.1.0)
       actionview (>= 7.2)

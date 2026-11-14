@@ -442,7 +442,17 @@ For plugin authors:
   `alert--attention`, `dialog__body`, `menu__*`, `prose`, `table--even`, `table__cap`,
   `crumbs__sep`, `crumbs__current`).
 10. **Plugins**, one repository at a time, onto runeui's API; then the compatibility layer goes
-    (7.0, as the contract says).
+    (7.0, as the contract says). Each moved plugin's stylesheet starts `/* tokens: runeui */`, so
+    the core serves it unchanged (its `--accent` is shadcn's fill). **Done** (each needs 6.0.0):
+    ads 0.3.0, approvals 0.2.0, brain 0.4.0, calendar 0.7.0, client-dashboard 0.3.0, media 0.6.0,
+    quickbooks 0.3.0 (which also caught up with 5.0's rename: its tables' `engagement_id` became
+    `work_id` and their `contact_id` a user id, by its own migrations). **Left:** google-ads (still
+    on engagements, like quickbooks was), leads, meetings (uncommitted work in its repo) and
+    plugin-template. For 7.0: a select asks to be small with compat's `select--sm` class
+    (`select_control` reads it), which needs a name of its own before compat.css goes. runeui
+    gained, from these: a date picker's input wide enough for its placeholder, and an alert that
+    wraps a long unbroken line. A badge over an image (media's) needs a solid background of the
+    plugin's own; runeui's outline and success badges are see-through.
 
 ## Rules while it's in progress
 
