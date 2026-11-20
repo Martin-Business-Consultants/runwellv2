@@ -1,5 +1,12 @@
-# Mail reaches Runwell only through the inbound service the install names (INBOUND_EMAIL_INGRESS),
-# forwarding the requests address, so everything it hands over is a request or a reply to one.
+# Mail reaches Runwell only through the inbound service a plugin sets up (Runwell::Plugins.receive_mail,
+# 7.0), and that plugin's mailbox processes every message. With no such plugin switched on the
+# ingresses answer 404 (ActionMailboxPluginIngress), and anything already taken in is bounced.
 class ApplicationMailbox < ActionMailbox::Base
-  routing all: :requests
+  def self.route(inbound_email)
+    if (mailbox = Runwell::Plugins.mail_receiver&.dig(:mailbox))
+      mailbox.to_s.constantize.receive(inbound_email)
+    else
+      inbound_email.bounced!
+    end
+  end
 end

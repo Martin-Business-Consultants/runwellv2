@@ -13,8 +13,7 @@
 #   Runwell::Plugins.quick_action :time_tracking, label: "Time", icon: "history", partial: "...", types: %w[Client Work Task]
 #
 # Slots in core views: :nav_actions (no locals; beside the theme toggle), :client_panel (client:),
-# :work_panel (work:), :task_panel (task:), :email_inbound (no locals; Settings > Email,
-# where requests' mail comes in), :client_aside
+# :work_panel (work:), :task_panel (task:), :client_aside
 # (client:), :work_aside (work:, its sidebar), :work_meta (work:, the line under
 # its title: a status badge or a short fact), :task_aside (task:, a piece of work's sidebar),
 # :scope_item_aside (scope_item:), :task_notice (task:, under a task's title on its page and in its
@@ -22,12 +21,14 @@
 # client portal, :portal_home (client:), :portal_dashboard (client:, contact:, beside the work on its
 # first page: a dashboard for the client, which the core doesn't draw), :portal_task (task:,
 # contact:, in a shared task's side sheet, above its files and discussion),
-# :portal_work_panel (work:) and :portal_actions (contact:, the header's buttons). Portal pages come from controllers that inherit
+# :portal_work_panel (work:), :portal_actions (contact:, the header's buttons) and :portal_footer
+# (no locals; inline, after the footer's "Send a request" link). Portal pages come from controllers that inherit
 # Portal::BaseController, so they only ever see the signed-in contact's client.
 #   Runwell::Plugins.portal_nav :google_ads, "Advertising", -> { google_ads_portal_report_path }
 #   Runwell::Plugins.settings :google_ads, "Google Ads", -> { google_ads_settings_path }
 #   Runwell::Plugins.nightly :google_ads, -> { GoogleAds::SyncJob.perform_later }
 #   Runwell::Plugins.stylesheet :google_ads, "google_ads/charts"   # app/assets/stylesheets in the engine
+#   Runwell::Plugins.receive_mail :inbound, mailbox: "Inbound::RequestsMailbox", ingress: -> { :relay }, password: -> { "…" }
 # Models run load hooks (:runwell_client, :runwell_work, :runwell_task, :runwell_user) so a plugin can
 # add associations, and every Event is published as "event.runwell" (event:); a plugin's
 # subscriber should check Runwell::Plugins.enabled?(key).
@@ -46,10 +47,14 @@ module Runwell
     Shortcut = Struct.new(:keys, :description, keyword_init: true)
 
     SLOT_NAMES = { nav_actions: "Nav button", client_panel: "Client panel", work_panel: "Work panel", task_panel: "Work panel",
-      email_inbound: "Settings › Email, requests by email", portal_home: "Portal home", portal_work_panel: "Portal work panel",
+      portal_home: "Portal home", portal_work_panel: "Portal work panel",
       client_aside: "Client sidebar", work_aside: "Work sidebar", work_meta: "Work title line",
       task_aside: "Work sidebar", scope_item_aside: "Section sidebar", note_row: "Notes", portal_actions: "Portal header",
-      task_notice: "Task notice", portal_dashboard: "Portal dashboard", portal_task: "Portal task" }.freeze
+      task_notice: "Task notice", portal_dashboard: "Portal dashboard", portal_task: "Portal task",
+      portal_footer: "Portal footer" }.freeze
+
+    # The services Action Mailbox takes mail from, for a plugin that receives mail (receive_mail).
+    MAIL_INGRESSES = %i[relay postmark sendgrid mailgun mandrill].freeze
 
     # Something dated a plugin offers to calendars (Runwell::Plugins.dates): a meeting, a renewal,
     # a deadline of its own. label says what kind ("Meeting"), path where it opens, people who it's
@@ -76,6 +81,7 @@ module Runwell
     mattr_reader :date_sources, default: {}
     mattr_reader :away_sources, default: {}
     mattr_reader :notice_rules, default: {}
+    mattr_reader :mail_receivers, default: {}
 
     class << self
       # Everything is keyed by the plugin, so registering again on a code reload replaces
@@ -227,6 +233,27 @@ module Runwell
         quick_actions[key] = QuickAction.new(key: key, label: label, title: title, icon: icon, partial: partial, types: types, context: context)
       end
 
+      # Mail sent to this install, handed to a plugin (7.0; the core receives none itself). mailbox:
+      # the name of the plugin's ActionMailbox::Base subclass, which gets every message; ingress: a
+      # lambda answering the service forwarding mail here (MAIL_INGRESSES), or nil while none is set
+      # up; password: a lambda answering the password Postmark, SendGrid or a relay signs in with
+      # (user actionmailbox). Mailgun and Mandrill sign with their own keys from the environment.
+      # Only one plugin receives: the first switched on.
+      def receive_mail(key, mailbox:, ingress:, password: -> { })
+        mail_receivers[key] = { mailbox: mailbox, ingress: ingress, password: password }
+      end
+
+      # The switched-on plugin receiving mail, or nil: { mailbox:, ingress:, password: }.
+      def mail_receiver = mail_receivers.find { |key, _| enabled?(key) }&.last
+
+      # The service the receiving plugin takes mail through (a MAIL_INGRESSES symbol), or nil.
+      def mail_ingress
+        ingress = mail_receiver&.dig(:ingress)&.call.presence&.to_sym
+        ingress if ingress.in?(MAIL_INGRESSES)
+      end
+
+      def mail_ingress_password = mail_receiver&.dig(:password)&.call.presence
+
       def enabled?(key)
         return false unless manifests.key?(key.to_sym)
         # Every plugin starts off, whatever its manifest says, until the owner switches it on.
@@ -260,7 +287,8 @@ module Runwell
           Array(("Nightly sync" if nightly_tasks.key?(key))) +
           Array(("AI brief" if agent_briefs.key?(key))) +
           Array(("Calendar dates" if date_sources.key?(key))) +
-          Array(("Who's away" if away_sources.key?(key)))
+          Array(("Who's away" if away_sources.key?(key))) +
+          Array(("Receives mail" if mail_receivers.key?(key)))
       end
     end
   end

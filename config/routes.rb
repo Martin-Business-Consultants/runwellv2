@@ -98,7 +98,6 @@ Rails.application.routes.draw do
     resources :webhooks, only: %i[index create update destroy]
     resource :email, only: %i[show update] do
       resource :test_message, only: :create, module: :emails
-      resource :inbound, only: :update, module: :emails
       resource :smtp, only: :update, module: :emails
       resource :bot_check, only: :update, module: :emails
     end

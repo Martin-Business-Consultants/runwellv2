@@ -83,14 +83,13 @@
       </main>
     </div>
 
-    <%# Whose portal this is and how else to reach them: a request here, or by email when the
-        install takes requests that way (Settings > Email). %>
+    <%# Whose portal this is and how else to reach them: a request here, and whatever a plugin
+        adds after it (:portal_footer, inline: another way to ask, such as an email address). %>
     <footer id="footer" class="portal-footer">
       <%= yield :footer %>
       <p>
         <%= Setting.current.brand_name %> · Need something?
-        <%= link_to "Send a request", new_portal_request_path, data: { turbo_frame: "modal" } %><% if Setting.current.requests_email.present? %>,
-          or email <%= mail_to Setting.current.requests_email %><% end %>.
+        <%= link_to "Send a request", new_portal_request_path, data: { turbo_frame: "modal" } %><%= plugin_slots(:portal_footer) %>.
       </p>
     </footer>
     <%# New request opens here, over the page (portal/requests/new, layouts/shared/modal), with

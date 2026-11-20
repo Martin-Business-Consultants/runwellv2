@@ -2,7 +2,6 @@
 <% tabs = [
      record_tab("sender", "Sender"),
      record_tab("smtp", "SMTP"),
-     record_tab("receiving", "Receiving"),
      record_tab("bots", "Bot checks")
    ] %>
 <% tab = current_record_tab(tabs, "sender") %>
@@ -103,62 +102,6 @@
             <p class="muted" data-controller="poll" data-poll-interval-value="2">Sending a test email to <%= test["to"] %>…</p>
           <% end %>
         </turbo-frame>
-      </section>
-      <% when "receiving" %>
-      <section class="settings-section" id="requests_by_email">
-        <header class="settings-section__head">
-          <h2><%= term(:client, count: 2) %> email requests</h2>
-          <p class="settings-section__description">
-            Mail sent to this address becomes a request (work nobody has taken on yet): the subject is its title, the message its description (without the quoted mail and signature), and attachments its documents.
-            A known contact gets a short reply saying it came in; their replies to that land on the same request as notes. Automatic replies are ignored.
-          </p>
-        </header>
-
-        <%= form_with model: @setting, url: settings_email_path, method: :patch, namespace: "requests" do |form| %>
-          <%= form.ui :field, :requests_email, label: "Requests address" do %>
-            <div class="settings-inline">
-              <%= form.email_field :requests_email, autocomplete: "off", placeholder: "requests@yourcompany.com" %>
-              <%= ui :button, type: :submit, content: "Save" %>
-            </div>
-          <% end %>
-        <% end %>
-
-        <% ingress = Setting.inbound_ingress %>
-        <% if ingress %>
-          <p>
-            <%= ui :badge, variant: :success, content: "Receiving" %>
-            Mail comes in through <%= inbound_ingress_name(ingress) %>. Forward the requests address there, to:
-          </p>
-          <%= code_block inbound_ingress_url(ingress) %>
-          <p class="muted"><%= inbound_ingress_secret_hint(ingress) %> See <code>docs/install.md</code>.</p>
-        <% else %>
-          <p>
-            <%= ui :badge, variant: :secondary, content: "Off" %>
-            Runwell can’t receive mail on its own: a service (Cloudflare Email Routing, Postmark, SendGrid) or your own mail server forwards the address here.
-            Choose it below, or let a plugin set it up.
-          </p>
-        <% end %>
-
-        <%= plugin_slots(:email_inbound) %>
-
-        <% unless Setting.inbound_from_environment? %>
-          <%= form_with url: settings_email_inbound_path, method: :patch, scope: :inbound do |form| %>
-            <%= form.ui :field, :ingress, label: "Comes in through" do %>
-              <div class="settings-inline">
-                <%= form.select :ingress, [ [ "Nothing yet", "" ], [ "Relay (Cloudflare Email Routing, your mail server)", "relay" ], [ "Postmark", "postmark" ], [ "SendGrid", "sendgrid" ] ], { selected: @setting.inbound_ingress.to_s } %>
-                <%= ui :button, type: :submit, content: "Save" %>
-              </div>
-            <% end %>
-          <% end %>
-          <% if @setting.inbound_password.present? %>
-            <%= form_with model: @setting, url: settings_email_path do |form| %>
-              <%= form.ui :field, :inbound_password, label: "Password" do %>
-                <%= secret_field form, :inbound_password, readonly: true %>
-                <ui-field-description data-slot="field-description">The service signs in with it as <code>actionmailbox</code>. It was made for this install; it isn’t shown anywhere else.</ui-field-description>
-              <% end %>
-            <% end %>
-          <% end %>
-        <% end %>
       </section>
       <% when "bots" %>
       <section class="settings-section">

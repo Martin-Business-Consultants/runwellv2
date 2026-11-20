@@ -30,6 +30,11 @@
   repo: Martin-Business-Consultants/runwell-google-ads
   name: Google Ads
   description: Read-only Google Ads reporting on work, shared with the client in the portal, with alerts when an account stops serving.
+- key: inbound
+  repo: Martin-Business-Consultants/runwell-inbound
+  name: Requests by email
+  description: "Mail to an address of yours becomes a request in Intake: the subject its title, the message its description, attachments its documents; replies land on the same request, and a known contact hears it came in."
+  tables: [ inbound_ ]
 - key: meetings
   repo: Martin-Business-Consultants/runwell-meetings
   name: Meetings
