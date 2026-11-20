@@ -160,7 +160,7 @@ a Cloudflare range (bundled list, refreshed nightly) and marks the request https
 
 `runwell-coding` (Code) is the reference for a plugin that takes webhooks: git repositories
 linked to clients, work and tasks (`Coding::Repository`, a polymorphic `linkable`; a
-task inherits its work's repos and a piece of work its client's). `checkout_work` hands an
+task inherits its work's repos and a piece of work its client's). `checkout_task` hands an
 agent the clone commands, branch (`p-4/58-slug`) and agreed scope; `log_progress`,
 `finish_task` and `flag_out_of_scope` (a request for someone to take on) report back. Connected to GitHub in
 Settings > Code (OAuth), a signed public endpoint (`/code/github/webhooks`) brings in pull
