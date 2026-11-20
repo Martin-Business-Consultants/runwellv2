@@ -89,7 +89,7 @@
       <%= yield :footer %>
       <p>
         <%= Setting.current.brand_name %> · Need something?
-        <%= link_to "Send a request", new_portal_request_path, data: { turbo_frame: "modal" } %><%= plugin_slots(:portal_footer) %>.
+        <%= link_to "Send a request", new_portal_request_path, data: { turbo_frame: "modal" } %><%= plugin_slots(:portal_footer).to_str.strip.html_safe %>.
       </p>
     </footer>
     <%# New request opens here, over the page (portal/requests/new, layouts/shared/modal), with
