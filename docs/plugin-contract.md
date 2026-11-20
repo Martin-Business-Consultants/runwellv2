@@ -62,7 +62,6 @@ Slots, and the locals each partial gets:
 | `:nav_actions` | A button in the nav's foot | none | 2.0 |
 | `:portal_home` | The client portal's home: a card in its sidebar, under any dashboard (below the work until 5.32) | `client:` | 2.0 |
 | `:portal_work_panel` | A piece of work in the portal | `work:` | 2.0 |
-| `:email_inbound` | Settings › Email, how requests' mail comes in | none | 2.5 |
 | `:client_aside` | A client's sidebar, above Details | `client:` | 2.18 |
 | `:work_aside` | A piece of work's sidebar, under its sections and details | `work:` | 3.0 |
 | `:work_meta` | The line under a piece of work's title: a status badge or a short fact (an inline element) | `work:` | 3.0 |
@@ -72,6 +71,7 @@ Slots, and the locals each partial gets:
 | `:portal_actions` | The portal header's buttons | `contact:` | 2.18 |
 | `:portal_dashboard` | The sidebar of the portal's first page, beside the client's work (under it on a narrow screen): a dashboard for the client (what's new, what's coming up). The core draws none; each partial is a card or several, stacked down the sidebar (5.29 to 5.31 drew them above the work; the sidebar since 5.32). `Task.unread_discussion_ids(contact)` gives the shared tasks holding a message the contact hasn't read, `task.client_status` what a client reads for a status, `portal_task_link_to(task)` a link opening it in the portal's side sheet | `client:`, `contact:` | 5.29 |
 | `:portal_task` | A shared task's side sheet in the portal, under its description and above its files and discussion: something for the client to decide or do on it. Redrawn whenever the sheet is (a reply, a live refresh) | `task:`, `contact:` | 5.31 |
+| `:portal_footer` | The portal's footer, inline right after its "Send a request" link (start with a comma: ", or email us") | none | 7.0 |
 | `:task_notice` | Under a task's title, on its page and in its side panel: a short note (render nothing when there's nothing to say) | `task:` | 5.6 |
 
 **Removed in 3.0:** `:request_aside` and `:commitment_row`, with the `Commitment` and `Request`
@@ -543,6 +543,23 @@ shows times inside `client.in_time_zone { … }` (an `around_action`). The porta
 | --- | --- | --- |
 | Mailers inheriting `ApplicationMailer` (the layout, the sender, the install's address in links) | 2.0 | Stable |
 | `MailerHelper`: `mail_heading`, `mail_button`, `mail_quote`, `mail_small`, `content_for :preheader / :reason` | 2.10 | Stable |
+| `Runwell::Plugins.receive_mail key, mailbox:, ingress:, password:` | 7.0 | Experimental |
+| `Task.create!(title:, description:, sender_name:, sender_email:, source:, requested: true)` | 7.0 (documented; works since 3.0) | Stable |
+
+**Mail in.** The core receives no mail of its own. A plugin that does registers its mailbox (the
+name of an `ActionMailbox::Base` subclass of its own, which gets every message), `ingress:` a lambda
+answering the service forwarding mail here (`:relay`, `:postmark`, `:sendgrid`, `:mailgun` or
+`:mandrill`, `Runwell::Plugins::MAIL_INGRESSES`) or nil while none is set up, and `password:` a lambda
+answering the password Postmark, SendGrid or a relay signs in with (user `actionmailbox`); Mailgun and
+Mandrill sign with `MAILGUN_INGRESS_SIGNING_KEY` / `MANDRILL_INGRESS_API_KEY` from the environment.
+Both lambdas run per request, so a change needs no restart. Only the first switched-on receiver gets
+mail; while there's none every ingress answers 404 and anything already in is bounced. The ingress
+URLs are Action Mailbox's own (`main_app.rails_relay_inbound_emails_url` and the rest).
+
+**A request from outside** is a task made with `requested: true`: it comes into Intake, its history
+says `task.requested` credited to whoever asked (`sender_name` / `sender_email`, or a `contact:`),
+and whoever's on Intake hears it came in. Set `source` to how it came (`"email"`). With an unknown
+sender its client is nil until someone picks one.
 
 ## Record layouts
 
@@ -556,6 +573,18 @@ record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners),
 `settings.layout` is a security event (Settings > Audit log).
 
 ## Changes to this contract
+
+**7.0** took requests by email out of the core into the inbound plugin (`runwell-inbound`).
+Removed: the `:email_inbound` slot (the inbound plugin's settings page draws one of the same name,
+for plugins that set up a service, like Cloudflare's), `RequestsMailbox`, `RequestMailer`,
+`Task::EmailBody`, Settings › Email's Receiving tab and its `requests_email` parameter, and
+`Setting.inbound_ingress`, `Setting.inbound_from_environment?`, `Setting.inbound_password` and
+`Setting#receive_mail_through!` (never part of the contract, but the Cloudflare plugin used them:
+it reads the inbound plugin's instead). `INBOUND_EMAIL_INGRESS` no longer configures Action Mailbox
+in the core; the inbound plugin reads it. Added: `Runwell::Plugins.receive_mail` and the
+`:portal_footer` slot (above). The settings columns `requests_email`, `inbound_ingress` and
+`inbound_password` stay, unread, for the plugin to copy from; an install that had them set gets the
+plugin switched on as it updates.
 
 **6.0** moved the core's UI from rune_ui to runeui (`docs/runeui-migration.md`): runeui's tokens
 (shadcn's) on `:root`, its components everywhere in the core, and Settings › Appearance and custom

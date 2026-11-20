@@ -905,20 +905,17 @@ receiving controller reads it with `QuickAction.locate(params[:record], types)`.
 with `data-turbo-frame="_top"` so the page redirects back as usual. Its button is a round + just left of the notification
 bell, at the right of the panel bar; `A` clicks it.
 
-## Requests by email
+## Mail in
 
-Clients email requests rather than signing in (Action Mailbox; `docs/install.md` has the setup).
-An inbound service forwards the address in Settings > Email
-(`Setting#requests_email`): the server's `INBOUND_EMAIL_INGRESS` / `RAILS_INBOUND_EMAIL_PASSWORD`, or else
-the install's own `Setting.inbound_ingress` / `inbound_password` (Settings > Email, or a plugin such as
-Cloudflare via `Setting#receive_mail_through!`; `lib/rails_ext/action_mailbox_settings_ingress.rb` reads them
-per request, no restart). `ApplicationMailbox` routes everything to `RequestsMailbox`: each message
-becomes a request, tasks nobody has taken on (`source` "email"): the subject its title, the message
-its description (`Task::EmailBody` cuts quoted mail and signatures, preferring the text part),
-attachments its documents (internal until shared), and the sender matched to a contact (and so a
-client), or left with no client until someone picks one. A known contact gets
-`RequestMailer#received`, a short acknowledgement with no reply address of its own: anything new
-they send is a request of its own. Automatic replies and our own mail are dropped.
+The core receives no mail of its own since 7.0: requests by email are the inbound plugin's
+(`runwell-inbound`). Action Mailbox stays loaded with its table, and a plugin takes mail with
+`Runwell::Plugins.receive_mail key, mailbox:, ingress:, password:`. `ApplicationMailbox.route` hands
+every message to the switched-on receiver's mailbox (or bounces it when there's none), and
+`lib/rails_ext/action_mailbox_plugin_ingress.rb` opens only the ingress that plugin names, signed with
+its password; every other ingress answers 404. A task made from an email keeps who sent it
+(`sender_name`, `sender_email`, `source` "email") and comes into Intake like any request. The
+settings columns the core used before 7.0 (`requests_email`, `inbound_ingress`, `inbound_password`)
+stay, unread, for the plugin to copy from (`SwitchOnInboundPlugin` switches it on where they were set).
 
 ## Clients and the portal
 
@@ -1006,7 +1003,7 @@ they're signed in, with Sign out everywhere else. A portal session nobody has us
 (`Contact::PORTAL_SESSION_IDLE`, pruned nightly), and a sign-in link carries the page they were
 after (`return_to`), so it lands there on any device. The top bar names the business with the
 client under it, its sections, New request (`ui :button`) and the contact's menu (`ui :menu`); the
-footer says how to ask for something, by email too when the install takes requests that way. Its
+footer says how to ask for something, with whatever plugins add after it (`:portal_footer`). Its
 pages are runeui's pieces in the portal's own frame: cards are `portal_card title:, hint:, action:,
 flush:` (`PortalHelper`, runeui's card), lists `ui :table` or `portal-list` rows, a list's filter
 `layouts/shared/segmented_filter` (`ui :tabs` as links) beside `portal_search` (`ui :input`),

@@ -1,6 +1,0 @@
-<% content_for :preheader, "We have it, and we’ll be in touch." %>
-<% content_for :reason, "You’re getting this because you sent this request." %>
-<%= mail_heading "We have your request" %>
-<p>Thanks<% if @request.contact %>, <%= @request.contact.name.split.first %><% end %>. This came through:</p>
-<%= mail_quote @request.title %>
-<p>We’ll be in touch.</p>
