@@ -5,6 +5,13 @@ module PluginsHelper
     safe_join(Runwell::Plugins.enabled_slots(name).values.map { render(it, **locals) })
   end
 
+  # The same for a slot inside a line of text (:portal_footer): each partial's output without the
+  # whitespace around it, so ", or email us" sits against what's before it. Each was rendered (and
+  # escaped) by its partial; only the surrounding whitespace is taken off.
+  def inline_plugin_slots(name, **locals)
+    safe_join(Runwell::Plugins.enabled_slots(name).values.map { render(it, **locals).to_str.strip.html_safe })
+  end
+
   # The same, leaving out a plugin that had nothing to show (its partial drew only whitespace,
   # comments or empty wrappers), so a box around the slot is drawn only when something's in it.
   def visible_plugin_slots(name, **locals)
