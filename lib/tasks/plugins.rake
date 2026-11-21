@@ -17,6 +17,7 @@ namespace :plugins do
   task migrate: :environment do
     paths = InstalledPlugins.migration_paths
     if paths.any?
+      drop_dangling_foreign_keys
       pool = ActiveRecord::Base.connection_pool
       ActiveRecord::MigrationContext.new(paths, pool.schema_migration, pool.internal_metadata).migrate
     end
@@ -51,6 +52,20 @@ namespace :plugins do
     FileUtils.mkdir_p InstalledPlugins.directory
     File.symlink source, target
     puts "Linked #{source} as #{target.basename}. Restart Runwell and run bin/rails db:migrate."
+  end
+
+  # A plugin's foreign key to a core table the core has since dropped (requests, in 5.17) is
+  # harmless to SQLite until a migration rebuilds the plugin's table (add_reference, rename_column),
+  # when copying its rows back fails: "no such table: main.requests". The core dropped the table, so
+  # it drops those keys before plugins migrate; the columns and their values stay.
+  def drop_dangling_foreign_keys
+    connection = ActiveRecord::Base.connection
+    connection.tables.each do |table|
+      connection.foreign_keys(table).reject { connection.table_exists?(it.to_table) }.each do |key|
+        puts "Dropping #{table}.#{key.column}'s foreign key to #{key.to_table}, which is gone"
+        connection.remove_foreign_key table, column: key.column
+      end
+    end
   end
 
   def finish_plugin_change(change)
