@@ -18,7 +18,7 @@ gem "rails-active_search"
 gem "reactionview"
 gem "rotp"
 gem "rqrcode"
-gem "ruby-vips"
+gem "ruby-vips", require: false # Active Storage requires it for a variant; libvips is the image's
 gem "rubyzip", require: "zip"
 gem "runeui", github: "Martin-Business-Consultants/runeui", branch: "master" # the UI kit: components on UI SDK (docs/runeui-migration.md)
 gem "solid_cable"
