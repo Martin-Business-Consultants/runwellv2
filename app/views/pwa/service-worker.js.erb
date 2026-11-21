@@ -1,9 +1,7 @@
 // Runwell's service worker (served at /service-worker.js, registered on staff pages; versioned by the
 // release, so an update replaces it and its cache). It keeps nothing anyone signed in to see: the
 // only thing cached is the offline page, shown when a page can't load for want of a connection.
-// It shows the notifications the install pushes (PushNotificationJob) and opens one when clicked
-// (notifications#show reads it and goes to its record), and keeps the app's badge to the unread
-// count. The portal is left alone.
+// The portal is left alone.
 const VERSION = "<%= Runwell::VERSION %>"
 const CACHE = `runwell-offline-${VERSION}`
 const OFFLINE = "/offline.html"
@@ -25,21 +23,3 @@ self.addEventListener("fetch", event => {
   event.respondWith(fetch(request).catch(() => caches.match(OFFLINE)))
 })
 
-self.addEventListener("push", event => {
-  const data = event.data ? event.data.json() : {}
-  const badge = typeof data.unread === "number" && self.navigator.setAppBadge ? self.navigator.setAppBadge(data.unread) : Promise.resolve()
-  event.waitUntil(Promise.all([
-    self.registration.showNotification(data.title || "Runwell", { body: data.body, tag: data.tag, icon: "/icon.png", data: { url: data.url || "/" } }),
-    badge
-  ]))
-})
-
-self.addEventListener("notificationclick", event => {
-  event.notification.close()
-  const url = new URL(event.notification.data?.url || "/", self.location.origin).href
-
-  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(windows => {
-    const open = windows.find(client => new URL(client.url).origin === self.location.origin && "navigate" in client)
-    return open ? open.navigate(url).then(client => (client || open).focus()) : self.clients.openWindow(url)
-  }))
-})

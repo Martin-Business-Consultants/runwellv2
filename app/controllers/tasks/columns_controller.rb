@@ -5,7 +5,7 @@ class Tasks::ColumnsController < ApplicationController
 
   def show
     @status = params[:id].presence_in(Task::STATUSES) or raise ActiveRecord::RecordNotFound
-    # A page at a time (geared_pagination), the next loading as the column scrolls.
+    # A page at a time (Pagination), the next loading as the column scrolls.
     set_page_and_extract_portion_from board_tasks.board_column(@status)
     @tasks = @page.records.to_a
     # The board's next page of this column (TasksBoardHelper#task_board_more): just its cards.

@@ -314,8 +314,6 @@ textarea.settings-css { min-height: 14lh; field-sizing: fixed; font-family: var(
 .nav-editor__actions { padding-top: .5rem; border-top: 1px solid var(--border); }
 
 /* Notifications on this device (Settings > Your account, the push controller): why it can't. */
-.push-note { padding: 0 1rem .75rem; }
-.push-note[hidden] { display: none; }
 
 /* A link-like button in a line of text (Stop requiring it). */
 .settings-link.ui-button { height: auto; padding: 0; vertical-align: baseline; }

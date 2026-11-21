@@ -121,10 +121,19 @@ class PluginChange < ApplicationRecord
       raise Failed, "#{name} is already installed. Update or remove it instead." if action == "install" && InstalledPlugins.present.key?(name)
 
       update!(key: name)
+      install_gems(name, unpacked)
       unpacked.join(InstalledPlugins::METADATA).write({ repo: repo, version: to_version, tag: tag, installed_at: Time.current.iso8601 }.to_json)
       FileUtils.rm_rf previous
       File.rename target, previous if target.exist?
       File.rename unpacked, target
+    end
+
+    # The gems its gemspec needs beyond the core's (InstalledPluginGems), before it's put in place,
+    # so a release whose gems can't be had leaves the running one as it is.
+    def install_gems(name, unpacked)
+      InstalledPluginGems.install!(name, unpacked)
+    rescue InstalledPluginGems::Unmet => error
+      raise Failed, "#{name} #{to_version} #{error.message}."
     end
 
     def take_out

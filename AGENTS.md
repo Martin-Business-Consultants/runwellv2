@@ -8,8 +8,8 @@ money, no time tracking; see `docs/future_apps.md` for everything left out.
 ## Stack
 
 - Rails 8.1, Ruby (see `.ruby-version`), SQLite, single tenant
-- Prawn is bundled for plugins' PDFs (plugins load outside Bundler, so they use only the core's
-  gems); the core itself makes none
+- The core makes no PDFs and calls no AI: Prawn and `ruby_llm` left its bundle in 7.1, when plugins
+  began bringing their own gems (Plugins, below)
 - Hotwire (Turbo + Stimulus) over importmap and ERB views; plain CSS in
   `app/assets/stylesheets` served by Propshaft, no build step. Components are runeui (`../runeui`:
   shadcn/ui's look and tokens on UI SDK's web components, `ui :name`) plus Runwell's own pieces in
@@ -131,7 +131,8 @@ migrations moved their rows and history onto tasks (or, for a client's promise, 
 Their tables, with the old sign-in tables (`identities`, `sign_in_providers`), were dropped in 5.17.
 The `contacts` and `portal_sessions` tables from before contacts were users stay, unread
 (`access_tokens`, `oauth_grants` and the agreement tables still name them by foreign key);
-`Client#clear_legacy_rows!` clears a client's before it's deleted. `workspace_links` (5.40's workspace rail, taken out in 5.41) is
+`Client#clear_legacy_rows!` clears a client's before it's deleted. `push_subscriptions` and `settings.push_public_key` / `push_private_key` (web push, taken out in
+7.1) and `workspace_links` (5.40's workspace rail, taken out in 5.41) are
 left, unread, for a later release to drop.
 
 Agreements left the core in 3.0 for the Agreements plugin. Their tables (`agreement_versions`,
@@ -357,11 +358,8 @@ Back, refresh and links work, and there's no client-side router:
 - **Installable**: staff pages link the manifest (`pwa/manifest.json.erb`, the install's name, icon
   and colour) and register the service worker (`pwa/service-worker.js.erb`, versioned by
   `Runwell::VERSION`), which caches nothing signed-in: only `public/offline.html` for a page that
-  can't load. Mentions are pushed to each browser or installed app a person switched on (Settings >
-  Your account, the `push` controller, `Settings::PushSubscriptionsController`, `browser_only`) by
-  `PushNotificationJob` beside `NotificationMailer`, signed with the install's VAPID keys
-  (`Setting::Push`, the private one encrypted); one the push service says is gone is deleted. The
-  app's badge and the tab's title ("(3) Tasks | Lumin", the install's sender name after the page,
+  can't load. Nothing is pushed to browsers (web push went in 7.1; notifications are the tray and
+  email). The app's badge and the tab's title ("(3) Tasks | Lumin", the install's sender name after the page,
   `page_title_tag`, kept current by the `badge` controller from the tray's total) follow the unread count. The portal is left out
 - **Losing the connection**: the `connection` controller on `<body>` shows a quiet line while the
   browser is offline or live updates are down (`layouts/shared/_connection_status`), refreshes the
@@ -472,8 +470,9 @@ each posting to a `Bulk::` controller that runs the record's own verb on each pi
 pick rows the old way until they move (the plugin contract: native checkboxes from
 `bulk_select_all_header` / `bulk_select_cell` or their own `data-bulk-target="item"`, and the bar in
 the toolbar through `content_for :index_bulk`), which the `bulk` controller keeps working. Lists
-page with geared_pagination: the action wraps its records in `paginate` (HTML only; JSON for agents
-stays whole), 13 rows a page, and the table shows which rows are showing and the pages under it
+page with the `Pagination` concern (plain limit and offset, `@page`; it keeps geared_pagination's
+`set_page_and_extract_portion_from` and page answers for plugins): the action wraps its records in
+`paginate` (HTML only; JSON for agents stays whole), 13 rows a page, and the table shows which rows are showing and the pages under it
 (`table_pagination`: `ui :pagination`). A list that loads its next page as you scroll instead
 (plugins' tables, a maximized board column) is Fizzy's way (`PaginationHelper`, the `pagination`
 controller): a table's `<tbody id="<%= pagination_frame_id_for(:name_rows, @page.number) %>">` ends with
@@ -842,8 +841,14 @@ repository of its own, never in this one: the fourteen Runwell publishes are
 server, like a WordPress plugin: an install starts with none, and the only way one arrives is its
 GitHub repository (owner/repo) in Settings > Plugins, which downloads the repository's latest release
 into `RUNWELL_DATA_DIR/plugins/<name>` and restarts (`PluginChange`, `Runwell::Restart`), and
-`config/installed_plugins.rb` loads it at boot, outside Bundler, so it can use only the core's
-gems. Its migrations run after the core's on `db:migrate` / `db:prepare` (`plugins:migrate`), its
+`config/installed_plugins.rb` loads it at boot, outside Bundler (whose lock is frozen in
+production). The gems its gemspec depends on come first (`InstalledPluginGems`): one the core
+bundles must be a version it accepts, or the plugin doesn't load and says why; any other is
+installed from rubygems.org into `RUNWELL_DATA_DIR/plugins/.gems/<ruby>-<platform>` (as the
+plugin is put in place, or on a boot that finds it missing, such as after a new Ruby) and put on
+the load path. The production image has no compiler, so a gem with a native extension must come
+prebuilt for the platform. The core never adds a gem for a plugin's sake. A plugin released before
+7.1 that uses `RubyLLM` or `Prawn` without naming it still gets it (`BUNDLED_UNTIL_7_1`, until 8.0). Its migrations run after the core's on `db:migrate` / `db:prepare` (`plugins:migrate`), its
 tables stay out of `db/schema.rb`, and its stylesheets and JavaScript (`app/javascript/<key>/`, pinned
 by `config/importmap_plugins.rb`, its controllers registered as `<key>--name`) compile as production
 boots. Each plugin
@@ -1160,8 +1165,8 @@ in the core. The core keeps only what the plugin reaches it through: the slots i
 Ask button, home, the client, tasks and section sidebars, each note row, the
 portal's header), `Runwell::Plugins.shortcut` for its `i` key,
 `Runwell::Plugins.ai_prompt` (other plugins' questions for it), and `Agent::Dispatch.run_as`, which
-runs a tool as the person with a one-call `assistant` token. `ruby_llm` stays in the Gemfile, since
-plugins use only the core's gems; its tables (`ruby_llm_*`) are the plugin's (`tables:` in
+runs a tool as the person with a one-call `assistant` token. `ruby_llm` is the plugin's own gem (its
+gemspec, since its 3.2.0); its tables (`ruby_llm_*`) are the plugin's (`tables:` in
 `config/plugins.yml` keeps them out of `schema.rb`). `settings.ai_*` and `clients.ai_excluded` are
 left from the core's AI, read by the plugin's first migrations, and dropped in a later release.
 

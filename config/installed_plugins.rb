@@ -1,11 +1,12 @@
 require "json"
+require_relative "installed_plugin_gems"
 
 # The plugins installed on this server, loaded at boot (config/application.rb). They live in
 # RUNWELL_DATA_DIR/plugins, one directory per plugin, so they outlast deploys and core updates:
 # each is a Rails engine with a gemspec at its root, put there from Settings > Plugins
 # (PluginChange). They aren't bundled, since Bundler freezes the Gemfile in production: a
-# plugin's lib/ goes on the load path and its engine is required by name, so it may depend only
-# on gems the core bundles. Its migrations run after the core's (lib/tasks/plugins.rake) and
+# plugin's lib/ goes on the load path and its engine is required by name, after the gems its
+# gemspec depends on (InstalledPluginGems: the core's where it has them, else installed for it). Its migrations run after the core's (lib/tasks/plugins.rake) and
 # its tables stay out of the core's schema.rb. Not in Zeitwerk's lib/, so it loads once.
 module InstalledPlugins
   extend self
@@ -38,7 +39,9 @@ module InstalledPlugins
   def load!
     return if ENV["RAILS_ENV"] == "test" || ENV["RUNWELL_PLUGINS"] == "off"
 
+    InstalledPluginGems.core
     present.each do |name, path|
+      InstalledPluginGems.activate!(name, path)
       $LOAD_PATH.unshift path.join("lib").to_s
       require name
       loaded[name] = path

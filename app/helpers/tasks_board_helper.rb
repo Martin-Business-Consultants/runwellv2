@@ -20,7 +20,7 @@ module TasksBoardHelper
   # A column's first page of cards, rendered with the board so it doesn't wait on a request of its
   # own (later pages load from Tasks::ColumnsController as the column scrolls, in the same order).
   def task_board_page(board, status)
-    GearedPagination::Recordset.new(board.board_column(status)).page(1)
+    Pagination::Page.new(board.board_column(status))
   end
 
   # The item at the end of a column with more cards to come: a lazy frame that fetches the next

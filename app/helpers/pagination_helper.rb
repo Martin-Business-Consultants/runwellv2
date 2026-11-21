@@ -1,4 +1,4 @@
-# Fizzy's pagination helper: index lists load their next page as you scroll (geared_pagination,
+# Fizzy's pagination helper: index lists load their next page as you scroll (Pagination,
 # the pagination controller and a "Load more…" link that fires when it comes into view).
 module PaginationHelper
   # url_for treats these keys as URL-generation control options rather than
@@ -50,7 +50,7 @@ module PaginationHelper
       **attributes
   end
 
-  # ActiveSearch pages answer next?, geared_pagination's answer before_last?.
+  # ActiveSearch pages answer next?, Pagination's before_last?.
   def more_pages_after?(page)
     page.respond_to?(:next?) ? page.next? : page.before_last?
   end

@@ -40,17 +40,16 @@ module UiHelper
     end
   end
 
-  # Under a list: which rows are showing, and the pages (ui :pagination, over geared_pagination's
-  # page). Nothing for one page.
+  # Under a list: which rows are showing, and the pages (ui :pagination, over Pagination's page).
+  # Nothing for one page.
   def table_pagination(page)
-    count = page.recordset.page_count
+    count = page.page_count
     return if count <= 1
 
-    per_page = page.recordset.ratios[page.number]
-    first_row = (page.number - 1) * per_page + 1
-    last_row = [ page.number * per_page, page.recordset.records_count ].min
+    first_row = (page.number - 1) * page.per_page + 1
+    last_row = [ page.number * page.per_page, page.records_count ].min
     tag.div(class: "list-pagination") do
-      safe_join([ tag.span("#{first_row}–#{last_row} of #{page.recordset.records_count}", class: "list-pagination__summary"),
+      safe_join([ tag.span("#{first_row}–#{last_row} of #{page.records_count}", class: "list-pagination__summary"),
         ui(:pagination, page: page.number, pages: count, label: "Pages") ])
     end
   end

@@ -14,8 +14,14 @@ after the core's, and its stylesheets and JavaScript compile as it boots. A plug
 presses its Update button, which appears when its repository has a newer release; Remove
 deletes its code and keeps its tables.
 
-Plugins aren't bundled (Bundler freezes the Gemfile in production), so a plugin can use only
-the gems the core bundles.
+Plugins aren't bundled (Bundler freezes the Gemfile in production), but a plugin brings the gems
+it needs: name them as runtime dependencies in its gemspec (`spec.add_dependency "kramdown", "~> 2.4"`).
+At boot, before the plugin loads, each is matched against the core's bundle (a gem the core has
+must be a version you accept, or the plugin doesn't load and Settings > Plugins says why) and
+anything else is installed from rubygems.org into `RUNWELL_DATA_DIR/plugins/.gems` and put on the
+load path, with its own dependencies. Keep requirements loose on gems the core has (`rails`,
+`faraday`…), since you don't choose their versions. Installs have no compiler, so a gem with a
+native extension must publish a prebuilt one for the platform (x86_64-linux, aarch64-linux).
 
 Runwell 6.0 moved the core's UI to runeui (shadcn/ui's look and tokens). A plugin built for 4.x
 or 5.x keeps working through the compatibility layer until 7.0, and moves its views to `ui :name`

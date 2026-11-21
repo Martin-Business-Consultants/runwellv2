@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   include Authentication
   include Authorization # after Authentication, so its check runs once the session is loaded
   include AgentTools, AgentResponses
-  include TableSorting
+  include TableSorting, Pagination
   include BotChecked
   include TurboFlash, AnswersInPlace
   include NPlusOneDetection
@@ -86,9 +86,8 @@ class ApplicationController < ActionController::Base
 
   TABLE_PAGE_SIZE = 13
 
-  # One page of an index list, with @page for the view. Cards load more as you scroll, Fizzy's
-  # way (geared_pagination: 15, then 30, 50, 100 a page); a table shows 13 rows a page with
-  # numbered pages under it (table_pagination), so call it after setting @view. Agents reading
+  # One page of an index list, with @page for the view (Pagination): a table shows 13 rows a page
+  # with numbered pages under it (table_pagination), so call it after setting @view. Agents reading
   # JSON get every record, as before. A ReActionView state request (the slots format) renders the
   # same page, so it pages too.
   # A page of the list, filtered first by the page filter's words (?q=, TextFilterable) so "/"

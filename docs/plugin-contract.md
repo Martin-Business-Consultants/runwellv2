@@ -27,7 +27,11 @@ methods, and anything under `Agent::`, `Upgrade`, `PluginChange` or `Setting`'s 
 - Its controllers declare an authorization rule and an agent tool (or `agent_exempt`) per action,
   as the core's do. Its migrations are safe on a live install.
 - Removing it leaves the core working: nothing in the core names a plugin.
-- It uses only the gems the core bundles (it is loaded outside Bundler). Among them for plugins: `ruby_llm` (AI providers) and, since 3.0, `prawn` (PDFs).
+- The gems it needs are runtime dependencies in its gemspec (since 7.1; it is loaded outside
+  Bundler). The core's own are used where it has them, at the versions it runs, and any other is
+  installed for the plugin (`InstalledPluginGems`, docs/plugins.md). The core bundled `ruby_llm`
+  and `prawn` for plugins until 7.1; a release from before then that uses one without naming it is
+  given it until 8.0.
 - Its JavaScript is its own, in `app/javascript/<key>/` (see Plugin JavaScript): it never patches,
   replaces or reaches into the core's controllers, and the core's markup and CSS classes are not
   an API to script against.
@@ -573,6 +577,17 @@ record's slots. Tools: `show_layout`, `arrange_layout`, `reset_layout` (owners),
 `settings.layout` is a security event (Settings > Audit log).
 
 ## Changes to this contract
+
+**7.1** lets a plugin bring its own gems: its gemspec's runtime dependencies are checked against
+the core's bundle and the rest installed for it (above). A plugin whose gemspec asks for a version
+of a core gem the core doesn't run no longer loads. `ruby_llm` and `prawn` left the core's bundle
+(a plugin using either without naming it is given it until 8.0). It also dropped the `geared_pagination` and `web-push` gems, so a plugin that wants
+one names it in its gemspec. The core's own `Pagination` concern keeps the pagination plugins leaned on:
+`paginate(records)`, `set_page_and_extract_portion_from(records, per_page:)` and `@page`
+(`records`, `number`, `first?`, `last?`, `before_last?`, `next_param`, and `recordset.records_count`
+/ `page_count`), every page now the same size (25 unless `per_page:` says). `GearedPagination::*`
+and `recordset.ratios` are gone. Web push went too (`PushSubscription`, `PushNotificationJob`,
+`Setting#push_keys`).
 
 **7.0** took requests by email out of the core into the inbound plugin (`runwell-inbound`).
 Removed: the `:email_inbound` slot (the inbound plugin's settings page draws one of the same name,
