@@ -1,4 +1,5 @@
 require "json"
+require "fileutils"
 require_relative "installed_plugin_gems"
 
 # The plugins installed on this server, loaded at boot (config/application.rb). They live in
@@ -61,6 +62,46 @@ module InstalledPlugins
   end
 
   def migration_paths = loaded.values.map { it.join("db/migrate") }.select(&:directory?).map(&:to_s)
+
+  # A plugin whose migration fails would stop the install starting (db:prepare runs before the
+  # server, bin/docker-entrypoint). plugins:migrate sets it aside instead: the release that failed
+  # goes to .<name>.failed with a note saying why, and the one it replaced comes back if it's
+  # still beside it (.<name>.previous; its migrations already ran, and a plugin's migrations only
+  # add before they remove, so the ones of the failed release that did run don't trouble it).
+  # Without one the plugin is gone until it's installed again; its tables and data stay.
+  # Settings > Plugins shows the note until the plugin is next installed or updated.
+  SET_ASIDE_NOTE = ".runwell-set-aside.json"
+
+  def set_aside!(name, error)
+    path = directory.join(name)
+    failed = directory.join(".#{name}.failed")
+    previous = directory.join(".#{name}.previous")
+    version = metadata(name)["version"]
+    restored = previous.directory? ? JSON.parse(previous.join(METADATA).read)["version"] : nil rescue nil
+
+    FileUtils.rm_rf failed
+    File.rename path, failed
+    File.rename previous, path if previous.directory?
+    error = error.cause while error.cause # Rails wraps it: "An error has occurred, this and all later migrations canceled"
+    note = { version: version, error: "#{error.class}: #{error.message}".truncate(2_000), restored: restored, at: Time.now.utc.iso8601 }
+    failed.join(SET_ASIDE_NOTE).write(note.to_json)
+    warn "[plugins] #{name} #{version} couldn't migrate and was set aside (#{note[:error].lines.first.strip}); " \
+      "#{restored ? "#{restored} is back" : "Runwell starts without it"}"
+    note
+  end
+
+  # Plugins set aside after a failed migration, by name: the release, why, and what came back.
+  def set_aside
+    return {} unless directory.directory?
+
+    directory.glob(".*.failed/#{SET_ASIDE_NOTE}").sort.to_h do |note|
+      [ note.dirname.basename.to_s.delete_prefix(".").delete_suffix(".failed"), JSON.parse(note.read) ]
+    rescue JSON::ParserError
+      [ note.dirname.basename.to_s.delete_prefix(".").delete_suffix(".failed"), {} ]
+    end
+  end
+
+  def clear_set_aside(name) = FileUtils.rm_rf(directory.join(".#{name}.failed"))
 
   # Each loaded plugin's own JavaScript: app/javascript/<key>, by key. Only that folder, so a
   # plugin's modules are named for it ("my_day/…") and its Stimulus controllers too

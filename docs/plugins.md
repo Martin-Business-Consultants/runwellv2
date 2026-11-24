@@ -10,7 +10,9 @@ with releases, installed onto a server from **Settings > Plugins** (or
 `bin/rails "plugins:install[owner/repo]"`). Runwell downloads the latest release into
 `RUNWELL_DATA_DIR/plugins/<name>` (beside the databases, so it outlasts deploys and core
 updates), restarts, and loads it at boot (`config/installed_plugins.rb`). Its migrations run
-after the core's, and its stylesheets and JavaScript compile as it boots. A plugin updates only when someone
+after the core's, one plugin at a time; a release whose migration fails is set aside
+(`.<name>.failed`, shown in Settings > Plugins) and the release it replaced is put back, or the
+install starts without it, so one plugin can't keep Runwell from starting. Its stylesheets and JavaScript compile as it boots. A plugin updates only when someone
 presses its Update button, which appears when its repository has a newer release; Remove
 deletes its code and keeps its tables.
 

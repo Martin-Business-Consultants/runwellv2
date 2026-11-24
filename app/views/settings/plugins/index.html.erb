@@ -42,6 +42,14 @@
         <%# herb:key name %>
         <p class="settings-error"><strong><%= name %></strong> is installed but didn’t load: <%= error %></p>
       <% end %>
+
+      <% InstalledPlugins.set_aside.each do |name, note| %>
+        <%# herb:key "set-aside-#{name}" %>
+        <p class="settings-error">
+          <strong><%= name %> <%= note["version"] %></strong> couldn’t update the database, so it was set aside to keep Runwell running<%= note["restored"] ? "; #{note["restored"]} is back" : "" %>.
+          <%= note["error"].to_s.lines.first %>
+        </p>
+      <% end %>
     </section>
 
     <section class="settings-section">

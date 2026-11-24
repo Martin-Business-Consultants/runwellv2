@@ -126,6 +126,7 @@ class PluginChange < ApplicationRecord
       FileUtils.rm_rf previous
       File.rename target, previous if target.exist?
       File.rename unpacked, target
+      InstalledPlugins.clear_set_aside(name)
     end
 
     # The gems its gemspec needs beyond the core's (InstalledPluginGems), before it's put in place,

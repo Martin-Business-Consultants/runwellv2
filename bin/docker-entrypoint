@@ -20,7 +20,8 @@ fi
 
 # If running the rails server then create or migrate the databases (primary, cache, queue,
 # cable), and installed plugins' tables after them. A database with migrations to run is backed
-# up first (lib/tasks/backup.rake).
+# up first (lib/tasks/backup.rake). A plugin whose migration fails doesn't fail db:prepare: it's
+# set aside and the release it replaced put back (InstalledPlugins.set_aside!).
 #
 # A release the install updated itself to that can't migrate (a failing migration) would stop the
 # install starting at all. It falls back to the image's own version instead: the release is set

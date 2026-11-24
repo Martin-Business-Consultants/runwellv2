@@ -13,13 +13,22 @@ namespace :plugins do
     end
   end
 
+  # One plugin at a time, so one whose migration fails is set aside (InstalledPlugins.set_aside!)
+  # and the install still starts, with the release it replaced or without it. A plugin linked by
+  # hand (plugins:link) is being worked on: its failure is raised, not hidden.
   desc "Run installed plugins' migrations (db:migrate and db:prepare do it too)"
   task migrate: :environment do
-    paths = InstalledPlugins.migration_paths
-    if paths.any?
+    plugins = InstalledPlugins.loaded.select { |_, path| path.join("db/migrate").directory? }
+    if plugins.any?
       drop_dangling_foreign_keys
       pool = ActiveRecord::Base.connection_pool
-      ActiveRecord::MigrationContext.new(paths, pool.schema_migration, pool.internal_metadata).migrate
+      plugins.each do |name, path|
+        ActiveRecord::MigrationContext.new([ path.join("db/migrate").to_s ], pool.schema_migration, pool.internal_metadata).migrate
+      rescue StandardError => error
+        raise if path.symlink?
+
+        InstalledPlugins.set_aside!(name, error)
+      end
     end
   end
 

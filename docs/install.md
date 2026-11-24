@@ -178,5 +178,6 @@ bin/rails "plugins:remove[time_tracking]"                       # its tables sta
 bin/rails plugins:list
 ```
 
-then restart Runwell. `RUNWELL_PLUGINS=off` boots without any of them, should one keep Runwell
-from starting. See `docs/plugins.md` for writing one.
+then restart Runwell. A plugin whose migration fails is set aside as Runwell starts, and the
+release it replaced put back (Settings > Plugins says so). `RUNWELL_PLUGINS=off` boots without any
+of them, should one still keep Runwell from starting. See `docs/plugins.md` for writing one.
